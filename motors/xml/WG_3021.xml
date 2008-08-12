@@ -1,0 +1,30 @@
+<robot name="WG_3021">
+
+  <actuator name="3021_motor">
+  </actuator>
+
+  <joint name="test_joint" type="revolute">
+    <limitMin>-1.48</limitMin>
+    <limitMax>1.48</limitMax>
+    <effortLimit>0.184</effortLimit>
+    <velocityLimit>1256.0</velocityLimit>
+  </joint>
+
+  <transmission type="SimpleTransmission" name="test_transmission">
+    <actuator name="3021_motor" />
+    <joint name="test_joint" />
+    <mechanicalReduction>1</mechanicalReduction>
+    <motorTorqueConstant>-.0603</motorTorqueConstant>
+    <pulsesPerRevolution>1200</pulsesPerRevolution>
+  </transmission>
+
+  <controller name="test_controller" type="JointVelocityControllerNode">
+    <joint name="test_joint">
+      <pGain>0.0006</pGain>
+      <iGain>0.01</iGain>
+      <dGain>0</dGain>
+      <windup>0.007</windup>
+    </joint>
+  </controller>
+
+</robot>
