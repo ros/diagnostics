@@ -35,14 +35,15 @@
 #ifndef HOKUYO_TESTER_H
 #define HOKUYO_TESTER_H
 
-#include "gen_hokuyo_tester.h"
 #include <wx/log.h>
 #include <wx/thread.h>
 #include <wx/glcanvas.h>
 
 #include "ros/node.h"
 #include "std_msgs/LaserScan.h"
-#include "std_srvs/SelfTest.h"
+#include "robot_srvs/SelfTest.h"
+
+#include "gen_hokuyo_tester.h"
 
 class HokuyoTester;
 
@@ -78,8 +79,8 @@ class HokuyoTester : public GenHokuyoTester
   int last_x;
   int last_y;
 
-  std_srvs::SelfTest::request  req;
-  std_srvs::SelfTest::response res;
+  robot_srvs::SelfTest::request  req;
+  robot_srvs::SelfTest::response res;
 
 protected:
 

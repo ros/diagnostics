@@ -32,17 +32,17 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "hokuyo_tester.h"
-#include "urg_laser.h"
-#include <wx/dcclient.h>
 #include <math.h>
-#include <wx/app.h>
+#include <time.h>
+#include <fstream>
+#include <iomanip>
 
+#include <wx/app.h>
+#include <wx/dcclient.h>
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 
-#include <time.h>
-#include <fstream>
+#include "hokuyo_tester.h"
 
 DECLARE_EVENT_TYPE(wxSELF_TEST_DONE,-1)
 DEFINE_EVENT_TYPE(wxSELF_TEST_DONE)
@@ -101,15 +101,50 @@ HokuyoTester::~HokuyoTester()
 
 void* TestThread::Entry()
 {
+  wxMutexGuiEnter();
   wxLogMessage(_T("Conducting self test...\n"));
+  wxMutexGuiLeave();
 
   if (ros::service::call("urglaser/self_test", parent->req, parent->res))
   {
-    wxLogMessage(_T("Self test completed\n") + wxString::FromAscii(parent->res.info.c_str()));
+    wxLogMessage(_T("Self test completed"));
+
+    wxString info = _T("");
+
+    if (parent->res.passed)
+      info += _T("Test passed\n");
+    else
+      info += _T("Test failed\n");
+
+    for (size_t i = 0; i < parent->res.get_status_size(); i++)
+    {
+      wxString level;
+      if (parent->res.status[i].level == 0)
+        level = _T("[OK]");
+      else if (parent->res.status[i].level == 1)
+        level = _T("[WARNING]");
+      else
+        level = _T("[ERROR]");
+
+      wxString number;
+      number << i + 1;
+
+      info += number
+        + _T(") ")
+        + wxString::FromAscii(parent->res.status[i].name.c_str()) + _T("\n")
+        + _T("  ") + level + _T(" ")
+        + wxString::FromAscii(parent->res.status[i].message.c_str()) + _T("\n");
+    }
+
+    wxMutexGuiEnter();
+    wxLogMessage(info);
+    wxMutexGuiLeave();
   }
   else
   {
+    wxMutexGuiEnter();
     wxLogMessage(_T("Could not find hokuyo selftest service.  Ros node must not be running."));
+    wxMutexGuiLeave();
     parent->testButton->Enable();
     return NULL;
   }
@@ -174,18 +209,36 @@ void HokuyoTester::SelfTestDone( wxCommandEvent& event )
   if (res.passed)
   {
     out << "Self test: PASSED" << std::endl;
-    out << "Info:" << std::endl << res.info;
-    out << std::endl << std::endl;
-
-    if (answer == wxYES)
-      out << "Data inspection: PASSED" << std::endl;
-    else
-      out << "Data inspection: FAILED" << std::endl;
   }
   else
   {
     out << "Self test: FAILED" << std::endl;
-    out << "Info:" << std::endl << res.info;
+  }
+  
+  out << "Info:" << std::endl;
+
+  for (size_t i = 0; i < res.get_status_size(); i++)
+  {
+    out << std::setw(2) << i + 1 << ") " << res.status[i].name << std::endl;
+    
+    if (res.status[i].level == 0)
+      out << "     [OK]: ";
+    else if (res.status[i].level == 1)
+      out << "     [WARNING]: ";
+    else
+      out << "     [ERROR]: ";
+    
+    out << res.status[i].message << std::endl << std::endl;
+  }
+  
+  out << std::endl << std::endl;
+
+  if (res.passed)
+  {
+    if (answer == wxYES)
+      out << "Data inspection: PASSED" << std::endl;
+    else
+      out << "Data inspection: FAILED" << std::endl;
   }
   
   testButton->Enable();

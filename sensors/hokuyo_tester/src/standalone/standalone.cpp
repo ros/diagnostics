@@ -33,7 +33,7 @@
 *********************************************************************/
 
 #include "ros/node.h"
-#include "std_srvs/SelfTest.h"
+#include "robot_srvs/SelfTest.h"
 
 #include <string>
 
@@ -46,8 +46,8 @@ public:
 
   bool doTest(std::string name)
   {
-    std_srvs::SelfTest::request  req;
-    std_srvs::SelfTest::response res;
+    robot_srvs::SelfTest::request  req;
+    robot_srvs::SelfTest::response res;
     if (ros::service::call(name + "/self_test", req, res))
     {
       printf("Self test completed:\n");
@@ -55,8 +55,19 @@ public:
         printf("Test passed!\n");
       else
         printf("Test failed!\n");
-      printf("Status code: %d\n", res.status_code);
-      printf("Info:\n%s\n", res.info.c_str());
+
+      for (size_t i = 0; i < res.get_status_size(); i++)
+      {
+        printf("%2d) %s\n", i + 1, res.status[i].name.c_str());
+        if (res.status[i].level == 0)
+          printf("     [OK]: ");
+        else if (res.status[i].level == 1)
+          printf("     [WARNING]: ");
+        else
+          printf("     [ERROR]: ");
+
+        printf("%s\n\n", res.status[i].message.c_str());
+      }
       return true;
     }
     else
