@@ -1,0 +1,16 @@
+<package>
+<description brief='A program to moniter self reported status on the robot'>
+
+This will monitor broadcasts of status of the hardware and report any
+missing parts as well as report failiures.  
+
+</description>
+<author>Tully Foote</author>
+<license>BSD</license>
+<url>http://pr.willowgarage.com/wiki/Diagnostics</url>
+<export>
+<cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
+</export>
+<depend package="roscpp"/>
+<depend package="robot_msgs"/>
+</package>
