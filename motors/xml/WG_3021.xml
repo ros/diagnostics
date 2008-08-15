@@ -18,12 +18,11 @@
     <pulsesPerRevolution>1200</pulsesPerRevolution>
   </transmission>
 
-  <controller name="test_controller" type="JointVelocityControllerNode">
+  <controller name="test_controller" type="RampInputController">
     <joint name="test_joint">
-      <pGain>0.0006</pGain>
-      <iGain>0.01</iGain>
-      <dGain>0</dGain>
-      <windup>0.007</windup>
+      <start>0.0</start>
+      <end>0.1</end>
+      <duration>4</duration>
     </joint>
   </controller>
 
