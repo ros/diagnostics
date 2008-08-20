@@ -1,0 +1,45 @@
+<robot name="WG_03009">
+ 
+  <actuator name="fixture_motor">
+  </actuator>
+  
+  <actuator name="test_motor">
+  </actuator>
+  
+  <joint name="fixture_joint" type="revolute">
+    <limitMin>1</limitMin>
+    <limitMax>1</limitMax>
+    <effortLimit>0.184</effortLimit>
+    <velocityLimit>1256.0</velocityLimit>
+  </joint>
+
+  <joint name="test_joint" type="revolute">
+    <limitMin>1</limitMin>
+    <limitMax>1</limitMax>
+    <effortLimit>0.184</effortLimit>
+    <velocityLimit>1256.0</velocityLimit>
+  </joint>
+
+  <transmission type="SimpleTransmission" name="fixture_transmission">
+    <actuator name="fixture_motor" />
+    <joint name="fixture_joint" />
+    <mechanicalReduction>1</mechanicalReduction>
+    <motorTorqueConstant>-.0603</motorTorqueConstant>
+    <pulsesPerRevolution>1200</pulsesPerRevolution>
+  </transmission>
+
+  <transmission type="SimpleTransmission" name="test_transmission">
+    <actuator name="test_motor" />
+    <joint name="test_joint" />
+    <mechanicalReduction>1</mechanicalReduction>
+    <motorTorqueConstant>-.0603</motorTorqueConstant>
+    <pulsesPerRevolution>1200</pulsesPerRevolution>
+  </transmission>
+
+  <controller name="test_controller" type="JointEffortControllerNode">
+    <joint name="test_joint">
+
+    </joint>
+  </controller>
+
+</robot>

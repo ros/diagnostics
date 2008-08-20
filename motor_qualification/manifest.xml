@@ -1,0 +1,16 @@
+<package>
+  <description brief='Motor Qualification Tests'>
+    Methods for qualifying motors.
+  </description>
+  <author> Melonee Wise</author>
+  <license>BSD</license>
+  <depend package="mechanism_control" />
+  <depend package="generic_controllers" />
+  <depend package="rospy" />
+  <url>http://pr.willowgarage.com</url>
+  <repository>http://pr.willowgarage.com/repos</repository>
+  <export>
+    <cpp cflags='-I${prefix}/include -I${prefix}/msg/cpp -I${prefix}/srv/cpp' lflags='-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lgeneric_controllers'/>
+  </export>
+
+</package>

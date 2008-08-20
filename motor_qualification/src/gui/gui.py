@@ -3,11 +3,12 @@
 
 import rostools
 rostools.update_path('mechanism_control')
+rostools.update_path('generic_controllers')
 
+from mechanism_control.srv import *
+from generic_controllers.srv import *
 import rostools.packspec as packspec
 import rospy, sys
-from mechanism_control.srv import *
-
 import os, signal, popen2
 import time
 import wx
@@ -110,6 +111,10 @@ class RosApp(wx.App):
     frame.Centre()
     return True
 
+def set_controller(controller, command):
+    s = rospy.ServiceProxy(controller + '/set_command', SetCommand)
+    resp = s.call(SetCommandRequest(command))
+
 
 def spawn_controller(args):
   type, name = args[0], args[1]
@@ -129,9 +134,11 @@ def start_test(motor,frame):
   path=path+'/pr2_etherCAT rteth0 ../../xml/'+xmlFile
   sub = popen2.Popen3(path)
   frame.pid =sub.pid
+  time.sleep(2)
   test_routine(motor,frame)
   
 def test_routine(motor,frame):
+  set_controller('test_controller',.02)
   frame.testPassed('motor test 1')
   
 def end_test(pid):
