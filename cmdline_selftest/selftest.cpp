@@ -37,10 +37,10 @@
 
 #include <string>
 
-class TestHokuyo : public ros::node
+class Selftest : public ros::node
 {
 public:
-  TestHokuyo() : ros::node("test_hokuyo")
+  Selftest() : ros::node("tester", ANONYMOUS_NAME)
   {
   }
 
@@ -87,9 +87,9 @@ int main(int argc, char **argv)
     printf("usage: test_hokuyo name\n");
     return 1;
   }
-  TestHokuyo h;
+  Selftest st;
 
-  h.doTest(std::string(argv[1]));
+  st.doTest(std::string(argv[1]));
 
   ros::fini();
   return 0;
