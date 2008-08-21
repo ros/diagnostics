@@ -7,24 +7,20 @@
   </actuator>
   
   <joint name="fixture_joint" type="revolute">
-    <limitMin>1</limitMin>
-    <limitMax>1</limitMax>
-    <effortLimit>0.184</effortLimit>
-    <velocityLimit>1256.0</velocityLimit>
+    <limit min="1" max="1"
+           effort="0.184" velocity="1256.0" />
   </joint>
 
   <joint name="test_joint" type="revolute">
-    <limitMin>1</limitMin>
-    <limitMax>1</limitMax>
-    <effortLimit>0.184</effortLimit>
-    <velocityLimit>1256.0</velocityLimit>
+    <limit min="1" max="1"
+           effort="0.184" velocity="1256.0" />
   </joint>
 
   <transmission type="SimpleTransmission" name="fixture_transmission">
     <actuator name="fixture_motor" />
     <joint name="fixture_joint" />
-    <mechanicalReduction>1</mechanicalReduction>
-    <motorTorqueConstant>-.0603</motorTorqueConstant>
+    <mechanicalReduction>-1</mechanicalReduction>
+    <motorTorqueConstant>.0603</motorTorqueConstant>
     <pulsesPerRevolution>1200</pulsesPerRevolution>
   </transmission>
 
@@ -36,7 +32,7 @@
     <pulsesPerRevolution>1200</pulsesPerRevolution>
   </transmission>
 
-  <controller name="test_controller" type="JointEffortControllerNode">
+  <controller name="test_controller" type="JointEffortControllerNode" topic="test_controller">
     <joint name="test_joint">
 
     </joint>
