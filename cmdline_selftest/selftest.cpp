@@ -50,11 +50,15 @@ public:
     robot_srvs::SelfTest::response res;
     if (ros::service::call(name + "/self_test", req, res))
     {
-      printf("Self test completed:\n");
+      std::string passfail;
+
       if (res.passed)
-        printf("Test passed!\n");
+        passfail = "PASSED";
       else
-        printf("Test failed!\n");
+        passfail = "FAILED";
+
+      printf("Self test %s for device with id: [%s]\n", passfail.c_str(), res.id.c_str());
+
 
       for (size_t i = 0; i < res.get_status_size(); i++)
       {
