@@ -102,64 +102,71 @@ public:
   {
     lock();
 
-    id_ = "";
+    if (node_->ok())
+    {
 
-    printf("Entering self test.  Other operation should be suspended\n");
+      id_ = "";
 
-    if (pretest_ != NULL)
-      (*node_.*pretest_)();
+      printf("Entering self test.  Other operation should be suspended\n");
+
+      if (pretest_ != NULL)
+        (*node_.*pretest_)();
     
-    printf("Completed pretest\n");
+      printf("Completed pretest\n");
 
-    std::vector<robot_msgs::DiagnosticStatus> status_vec;
+      std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-    for (typename std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)>::iterator test_fncs_iter = test_fncs.begin();
+      for (typename std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)>::iterator test_fncs_iter = test_fncs.begin();
            test_fncs_iter != test_fncs.end();
            test_fncs_iter++)
-    {
-      robot_msgs::DiagnosticStatus status;
-
-      status.name = "None";
-      status.level = 2;
-      status.message = "No message was set";
-
-      try {
-
-        (*node_.*(*test_fncs_iter))(status);
-
-      } catch (std::exception& e)
       {
+        robot_msgs::DiagnosticStatus status;
+
+        status.name = "None";
         status.level = 2;
-        status.message = std::string("Uncaught exception: ") + e.what();
+        status.message = "No message was set";
+
+        try {
+
+          (*node_.*(*test_fncs_iter))(status);
+
+        } catch (std::exception& e)
+        {
+          status.level = 2;
+          status.message = std::string("Uncaught exception: ") + e.what();
+        }
+
+        status_vec.push_back(status);
       }
 
-      status_vec.push_back(status);
-    }
+      //One of the test calls should use setID
+      res.id = id_;
 
-    //One of the test calls should use setID
-    res.id = id_;
-
-    res.passed = true;
-    for (std::vector<robot_msgs::DiagnosticStatus>::iterator status_iter = status_vec.begin();
-         status_iter != status_vec.end();
-         status_iter++)
-    {
-      if (status_iter->level >= 2)
+      res.passed = true;
+      for (std::vector<robot_msgs::DiagnosticStatus>::iterator status_iter = status_vec.begin();
+           status_iter != status_vec.end();
+           status_iter++)
       {
-        res.passed = false;
+        if (status_iter->level >= 2)
+        {
+          res.passed = false;
+        }
       }
+
+      res.set_status_vec(status_vec);
+
+      if (posttest_ != NULL)
+        (*node_.*posttest_)();
+
+      printf("Self test completed\n");
+
+      unlock();
+
+      return true;
+
+    } else {
+      return false;
     }
-
-    res.set_status_vec(status_vec);
-
-    if (posttest_ != NULL)
-      (*node_.*posttest_)();
-
-    printf("Self test completed\n");
-
-    unlock();
-
-    return true;
   }
 };
 
