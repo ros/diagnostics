@@ -34,9 +34,11 @@ class RosFrame(wx.Frame):
     text1 = wx.StaticText(panel, -1, test.plot_title)
     sizer.Add(text1, (0, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
 
-    self.client = plot.PlotCanvas(panel,-1)
-    self.drawPlot()
-    sizer.Add(self.client, (1, 0), (5, 3), wx.EXPAND | wx.LEFT | wx.RIGHT, 5)                
+
+
+    self.test_panel = plot.PlotCanvas(panel,-1)
+    test.drawPanel(self)
+    sizer.Add(self.test_panel, (1, 0), (5, 3), wx.EXPAND | wx.LEFT | wx.RIGHT, 5)                
 
     text2 = wx.StaticText(panel, -1, 'Test Status')
     sizer.Add(text2, (6, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
@@ -61,16 +63,11 @@ class RosFrame(wx.Frame):
     self.Bind(wx.EVT_IDLE, self.onIdle)
     self.Centre()
   
-  def drawPlot(self):
-    #markers = plot.PolyMarker(self.data, legend='', colour='blue', marker='circle', size=1)
-    markers = plot.PolyLine(self.data)
-    markers2 = plot.PolyLine(self.data2, colour='blue')
-    gc = plot.PlotGraphics([markers,markers2], 'Motor Data', 'Time', 'Velocity')
-    self.client.Draw(gc)
      
   def onIdle(self, event):
     event.RequestMore(True)
-    self.drawPlot()
+    test.drawPanel(self)
+    #self.drawPlot()
     
   def start(self, event):
     if self.testing == 0:
@@ -128,8 +125,6 @@ class RosApp(wx.App):
     return True
 
 
-
- 
 if __name__ == '__main__':
   sub = popen2.Popen3('botherder')
   time.sleep(2)

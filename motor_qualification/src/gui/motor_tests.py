@@ -8,12 +8,12 @@ import rostools.packspec as packspec
 
 #Testing utils
 import error_codes as error
-import commands
+import roscommands
 
 #python utils
 import time, datetime
 import os, signal, popen2
-import wx
+import wx.lib.plot as plot
 
 
 plot_title='Motor Response'
@@ -35,7 +35,6 @@ def mechanism_callback(mechanism_state, frame):
 
 def scan_check(frame,value):
   if check_motor(value):
-    frame.text.SetDefaultStyle(wx.TextAttr(wx.BLACK))
     frame.text.AppendText('Starting Motor Test for : %s \n' % value)
     frame.testing = 1
     time=datetime.datetime.now()
@@ -49,6 +48,17 @@ def check_motor(motor):
       return 1
     else:
       return 0 
+      
+def test_panel(frame):
+  frame.client = plot.PlotCanvas(panel,-1)
+  drawPlot(frame)
+  
+def drawPanel(frame):
+    #markers = plot.PolyMarker(self.data, legend='', colour='blue', marker='circle', size=1)
+    markers = plot.PolyLine(frame.data)
+    markers2 = plot.PolyLine(frame.data2, colour='blue')
+    gc = plot.PlotGraphics([markers,markers2], 'Motor Data', 'Time', 'Velocity')
+    frame.test_panel.Draw(gc)
 
 def start_test(motor,frame):
   frame.motor=motor
@@ -65,6 +75,9 @@ def test_routine(frame):
   frame.file.write("Time  EncF  EncT\n")
   frame.output=1
   test1(frame)
+  roscommands.kill_controller('test_controller')
+  frame.file.write("TEST2\n")
+  test2(frame)
   #test2(motor,frame)
   
   frame.testDone()
@@ -74,9 +87,9 @@ def test1(frame):
   if(frame.mechanism_state):
     fixt_start = frame.mechanism_state.joint_states[0].position
     test_start = frame.mechanism_state.joint_states[1].position
-    commands.set_controller('test_controller',0.01)
+    roscommands.set_controller('test_controller',0.01)
     time.sleep(0.5)
-    commands.set_controller('test_controller',0.0)
+    roscommands.set_controller('test_controller',0.0)
     time.sleep(0.5)
     fixt_end = frame.mechanism_state.joint_states[0].position
     test_end = frame.mechanism_state.joint_states[1].position
@@ -103,3 +116,16 @@ def test1(frame):
     error.error(frame,'NO_HERD')
     frame.testError()
   return
+  
+def test2(frame):
+  xmlFile ='../../xml/WG_'+frame.motor[2:7]+'_test2.xml'
+  xmlFile=str(xmlFile)
+  if(frame.mechanism_state):
+    roscommands.spawn_controller(xmlFile)
+    frame.testPassed('motor test 2')
+    frame.file.write("PASSED TEST2\n")
+  else:
+    error.error(frame,'NO_HERD')
+    frame.testError()
+  return
+  
