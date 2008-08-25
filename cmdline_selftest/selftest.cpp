@@ -70,7 +70,12 @@ public:
         else
           printf("     [ERROR]: ");
 
-        printf("%s\n\n", res.status[i].message.c_str());
+        printf("%s\n", res.status[i].message.c_str());
+
+        for (size_t j = 0; j < res.status[i].get_values_size(); j++)
+          printf("      [%s] %f\n", res.status[i].values[j].value_label.c_str(), res.status[i].values[j].value);
+
+        printf("\n");
       }
       return true;
     }
