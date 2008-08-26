@@ -44,12 +44,13 @@ from robot_msgs.msg import *
 NAME = 'runtime_monitor'
 
 def callback(message):
-    print "New Message at %d"%message.header.stamp.sec
+    print "New Message at %.1f"%message.header.stamp.to_time()
     for s in message.status:
         ## @TODO process byte level
         print "Name: %s Message: %s"%(s.name, s.message)
-        for v in values:
-            print "Value: %d Label: %s"%(v.value, v.value_label)
+        for v in s.values:
+            print "value present"
+            print "Value: %.2f Label: %s"%(v.value, v.value_label)
     
 def listener():
     rospy.ready(NAME, anonymous=True)
