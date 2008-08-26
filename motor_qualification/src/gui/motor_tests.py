@@ -3,17 +3,22 @@
 # ROS stuff
 import rospy,rostools
 rostools.update_path('mechanism_control')
+rostools.update_path('generic_controllers')
+
 from mechanism_control.msg import *
+from mechanism_control.mech import * 
+from generic_controllers.controllers import *
 import rostools.packspec as packspec
 
 #Testing utils
 import error_codes as error
-import roscommands
+
 
 #python utils
 import time, datetime
 import os, signal, popen2
 import wx.lib.plot as plot
+
 
 
 plot_title='Motor Response'
@@ -60,12 +65,18 @@ def drawPanel(frame):
     gc = plot.PlotGraphics([markers,markers2], 'Motor Data', 'Time', 'Velocity')
     frame.test_panel.Draw(gc)
 
+def end_test():
+  shutdown()
+  return
+
+
 def start_test(motor,frame):
   frame.motor=motor
   xmlFile ='WG_'+motor[2:7]+'.xml'
   path=str(packspec.get_pkg_dir('pr2_etherCAT'))
   path=path+'/pr2_etherCAT rteth0 ../../xml/'+xmlFile
-  sub = popen2.Popen3(path)
+  child_stdout, child_stdin, child_stderr = popen2.popen3(path, mode="r")
+
   time.sleep(2)
   test_routine(frame)
   
@@ -75,7 +86,7 @@ def test_routine(frame):
   frame.file.write("Time  EncF  EncT\n")
   frame.output=1
   test1(frame)
-  roscommands.kill_controller('test_controller')
+  kill_controller('test_controller')
   frame.file.write("TEST2\n")
   test2(frame)
   #test2(motor,frame)
@@ -87,10 +98,10 @@ def test1(frame):
   if(frame.mechanism_state):
     fixt_start = frame.mechanism_state.joint_states[0].position
     test_start = frame.mechanism_state.joint_states[1].position
-    roscommands.set_controller('test_controller',0.01)
-    time.sleep(0.5)
-    roscommands.set_controller('test_controller',0.0)
-    time.sleep(0.5)
+    set_controller('test_controller',0.01)
+    time.sleep(1)
+    set_controller('test_controller',0.0)
+    time.sleep(1)
     fixt_end = frame.mechanism_state.joint_states[0].position
     test_end = frame.mechanism_state.joint_states[1].position
     if fixt_end-fixt_start==0 and test_end-test_start==0:
@@ -120,8 +131,12 @@ def test1(frame):
 def test2(frame):
   xmlFile ='../../xml/WG_'+frame.motor[2:7]+'_test2.xml'
   xmlFile=str(xmlFile)
+  f = open(xmlFile)
+  xml = f.read()
+  f.close()
   if(frame.mechanism_state):
-    roscommands.spawn_controller(xmlFile)
+    spawn_controller(xml)
+    time.sleep(16)
     frame.testPassed('motor test 2')
     frame.file.write("PASSED TEST2\n")
   else:

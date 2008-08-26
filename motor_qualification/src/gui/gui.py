@@ -7,7 +7,7 @@ rostools.update_path('std_srvs')
 
 from mechanism_control.srv import *
 from mechanism_control.msg import *
-
+from mechanism_control.mech import *
 
 import rospy, sys
 import os, signal, popen2
@@ -15,8 +15,10 @@ import time
 import wx
 import wx.lib.plot as plot
 import motor_tests as test
-import roscommands
+
 import error_codes as error
+import thread
+
 
 class RosFrame(wx.Frame):
   def __init__(self, parent, id):
@@ -35,17 +37,14 @@ class RosFrame(wx.Frame):
     sizer.Add(text1, (0, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
 
 
-
     self.test_panel = plot.PlotCanvas(panel,-1)
     test.drawPanel(self)
     sizer.Add(self.test_panel, (1, 0), (5, 3), wx.EXPAND | wx.LEFT | wx.RIGHT, 5)                
 
     text2 = wx.StaticText(panel, -1, 'Test Status')
-    sizer.Add(text2, (6, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)
-    
+    sizer.Add(text2, (6, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=5)   
     self.text = wx.TextCtrl(panel, -1, style=wx.TE_MULTILINE)
     sizer.Add(self.text, (7, 0), (3, 3), wx.EXPAND | wx.LEFT | wx.RIGHT, 5)
-
 
     buttonStart = wx.Button(panel, 106, "Start", size=(90, 28))
     buttonStop = wx.Button(panel, 107, "Stop", size=(90, 28))
@@ -67,14 +66,13 @@ class RosFrame(wx.Frame):
   def onIdle(self, event):
     event.RequestMore(True)
     test.drawPanel(self)
-    #self.drawPlot()
     
   def start(self, event):
     if self.testing == 0:
       dlg = wx.TextEntryDialog(self, 'Scan the part','Part SN:')
       if dlg.ShowModal() == wx.ID_OK:
         self.text.SetDefaultStyle(wx.TextAttr(wx.BLACK))
-        test.scan_check(self,dlg.GetValue())
+        thread.start_new_thread(test.scan_check,(self,dlg.GetValue()))
     else:
       dlg = wx.MessageDialog(self, 'Test already in Progress','Error', wx.OK|wx.ICON_ERROR)
       dlg.ShowModal()
@@ -82,7 +80,7 @@ class RosFrame(wx.Frame):
 
   def stop(self, event):
     if(self.testing):
-      roscommands.end_test()
+      test.end_test()
       dlg = wx.MessageDialog(self, 'Ending Test','User Hault', wx.OK|wx.ICON_HAND)
       self.testing=0
       dlg.ShowModal()
@@ -92,14 +90,14 @@ class RosFrame(wx.Frame):
    
   def testError(self):
     self.file.write("TEST FAILED\n")
-    roscommands.end_test()
+    test.end_test()
     dlg = wx.MessageDialog(self, 'TEST ERROR:Ending Test','ERROR', wx.OK|wx.ICON_EXCLAMATION)
     self.testing=0
     dlg.ShowModal()
     
   def testDone(self):
     self.file.write("TEST COMPLETE\n")
-    roscommands.end_test()
+    test.end_test()
     dlg = wx.MessageDialog(self, 'TEST COMPLETE:Ending Test','Done', wx.OK)
     self.testing=0
     dlg.ShowModal()
