@@ -1,0 +1,8 @@
+<package>
+  <description brief='Qualification testing package'>
+  </description>
+  <author>Jeremy Leibs</author>
+  <license>BSD</license>
+  <depend package="rospy" />
+  <url></url>
+</package>
