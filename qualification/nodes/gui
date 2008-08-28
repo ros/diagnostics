@@ -40,15 +40,14 @@ import wx
 from wx import xrc
 
 import qualification
-from qualification import NestPanel
-from qualification import BaseTest
+from qualification import *
 from qualification.tests import *
 
 
 class ScanPanel(BaseTest):
   def __init__(self, parent, func = None):
     self.parent = parent
-    self.res = xrc.XmlResource('gui.xrc')
+    self.res = xrc.XmlResource(execution_path('gui.xrc'))
     self.panel = self.res.LoadPanel(self.parent, 'scan_panel')
     BaseTest.__init__(self, self.parent, self.panel, func)
     self.panel.Bind(wx.EVT_BUTTON, self.OnTest, id=xrc.XRCID('test_button'))
@@ -61,7 +60,7 @@ class ScanPanel(BaseTest):
 
 class QualificationApp(wx.App):
   def OnInit(self):
-    self.res = xrc.XmlResource('gui.xrc')
+    self.res = xrc.XmlResource(execution_path('gui.xrc'))
 
     self.frame = self.res.LoadFrame(None, 'frame');
 

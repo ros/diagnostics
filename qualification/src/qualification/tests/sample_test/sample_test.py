@@ -42,8 +42,8 @@ from qualification import *
 class SampleTest(BaseTest):
   def __init__(self, parent, func):
     self.parent = parent
-    self.res = xrc.XmlResource('gui.xrc')
-    self.panel = self.res.LoadPanel(self.parent, 'simple_test_panel')
+    self.res = xrc.XmlResource(execution_path('sample_test.xrc'))
+    self.panel = self.res.LoadPanel(self.parent, 'sample_test')
     BaseTest.__init__(self, parent, self.panel, func)
 
     self.plot_panel = xrc.XRCCTRL(self.panel, 'plot_panel')
