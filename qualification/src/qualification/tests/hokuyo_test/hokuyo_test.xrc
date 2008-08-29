@@ -27,4 +27,27 @@
 			</object>
 		</object>
 	</object>
+	<object class="wxPanel" name="instruct_panel">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,300</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticText" name="m_staticText2">
+					<label>You are testing the Hokuyo TOP URG.\n\nPlease place it on a flat surface, pointed at a smooth wall, then hit Continue.</label>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticBitmap" name="m_bitmap1">
+					<bitmap>Hokuyo.jpg</bitmap>
+				</object>
+			</object>
+		</object>
+	</object>
 </resource>

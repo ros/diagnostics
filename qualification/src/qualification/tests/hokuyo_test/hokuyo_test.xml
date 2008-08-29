@@ -1,0 +1,4 @@
+<launch>
+  <param name="urglaser/autostart" value="False" type="bool"/>
+  <node pkg="hokuyourg_player" type="hokuyourg_player" />
+</launch>

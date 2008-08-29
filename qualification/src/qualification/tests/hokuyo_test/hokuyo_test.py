@@ -29,17 +29,33 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-#! /usr/bin/env python
 
 import wx
 from wx import xrc
 
-import time
+
+from threading import Thread
 
 from qualification import *
+
 from robot_msgs.msg import *
-from threading import *
+from robot_srvs.srv import *
+import rospy
+import roslaunch
+
+class HokuyoTest(BaseTest):
+  def __init__(self, parent, func):
+
+    res = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
+
+    instruct_panel = res.LoadPanel(parent, 'instruct_panel')
+    test_panel = res.LoadPanel(parent, 'hokuyo_test')
+
+    BaseTest.__init__(self, parent, instruct_panel, test_panel, func)
+
+  # This is what runs once the instructions are read
+  def Run(self):
+    worker = HokuyoThread(self)
 
 class HokuyoThread(Thread):
   def __init__(self, test):
@@ -48,21 +64,40 @@ class HokuyoThread(Thread):
     self.start()
 
   def run(self):
-    for i in range(10):
-      time.sleep(1)
 
-    out_stat = []
-    out_stat.append(DiagnosticStatus(0, 'Stat 1', 'Something passed', []))
-    out_stat.append(DiagnosticStatus(1, 'Stat 2', 'Something else warned', [DiagnosticValue(42.1, 'foo')]))
-    out = DiagnosticMessage(None, out_stat)
-    wx.CallAfter(self.test.Done, out)
+    # Create a roslauncher
+    rl = roslaunch.ROSLauncher()
+    loader = roslaunch.XmlLoader()
 
+    # Try loading the XML file
+    try:
+        loader.load(execution_path('hokuyo_test.xml'), rl)
+    except roslaunch.XmlParseException, e:
+      wx.CallAfter(self.test.Done, 'Could not load XML file')
+      return
 
-class HokuyoTest(BaseTest):
-  def __init__(self, parent, func):
-    self.parent = parent
-    self.res = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
-    self.panel = self.res.LoadPanel(self.parent, 'hokuyo_test')
-    BaseTest.__init__(self, parent, self.panel, func)
+    # Make sure we get a fresh master
+    rl.master.auto = rl.master.AUTO_RESTART
 
-    worker = HokuyoThread(self)
+    # Bring up the nodes
+    rl.prelaunch_check()
+    rl.load_parameters()
+    rl.launch_nodes()
+
+    # Wait for our self-test service to come up
+    rospy.wait_for_service('urglaser/self_test')
+
+    # Try to query the self_test service on the hokuyo
+    try:
+        s = rospy.ServiceProxy('urglaser/self_test', SelfTest)
+        resp = s()
+    except rospy.ServiceException, e:
+      wx.CallAfter(self.test.Done, 'Could not contact node via ROS')
+      return
+
+    # Bring down the nodes
+    rl.stop()
+
+    # When the thread is done, raise our response
+    wx.CallAfter(self.test.Done, resp)
+

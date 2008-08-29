@@ -43,18 +43,26 @@ from wx import xrc
 import qualification
 from qualification import *
 
-class ScanPanel(BaseTest):
+class ScanPanel():
   def __init__(self, parent, func = None):
     self.parent = parent
     self.res = xrc.XmlResource(execution_path('gui.xrc'))
     self.panel = self.res.LoadPanel(self.parent, 'scan_panel')
     self.serial = xrc.XRCCTRL(self.panel, 'serial_ctl')
-    BaseTest.__init__(self, self.parent, self.panel, func)
+
+    NestPanel(self.parent, self.panel)
 
     self.panel.Bind(wx.EVT_BUTTON, self.OnTest, id=xrc.XRCID('test_button'))
     self.panel.GetTopLevelParent().Bind(wx.EVT_CHAR, self.OnChar)
     self.serial.Bind(wx.EVT_TEXT_ENTER, self.OnTest)
     self.panel.SetFocus()
+
+  def Log(self, msg):
+    try:
+      if self.parent.GetTopLevelParent().log:
+        self.parent.GetTopLevelParent().log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
+    except AttributeError:
+      pass
 
   def OnChar(self, evt):
     if (evt.GetKeyCode() == 347):
@@ -66,7 +74,7 @@ class ScanPanel(BaseTest):
     if (value[0:2] == '68'):
       subvalue = value[2:7]
       if (tests.test_list.has_key(subvalue)):
-        BaseTest.Log(self,'Testing component with ID: ' + value)
+        self.Log('Testing component with ID: ' + value)
         test = tests.test_list[subvalue](self.parent, self.OnResult)
       else:
         dlg = wx.MessageDialog(self.panel, 'No test defined for that serial Number','Error', wx.OK|wx.ICON_ERROR)
@@ -82,7 +90,7 @@ class ScanPanel(BaseTest):
         res += stat.name + ' ' + stat.message + '\n'
         for val in stat.values:
           res += val.value_label + ' ' + str(val.value) + '\n'
-      BaseTest.Log(self, res)
+      self.Log(res)
     self.serial.Clear()
       
       
@@ -104,13 +112,14 @@ class QualificationApp(wx.App):
     #This seems like a bad way to put something in a "deterministic" location
     self.frame.log = xrc.XRCCTRL(self.frame, 'log')
     
-    test = ScanPanel(self.test_panel)
+    self.scan_panel = ScanPanel(self.test_panel)
 
     sizer2 = self.frame.GetSizer()
     sizer2.SetSizeHints(self.frame)
     self.frame.SetSize(wx.Size(800,800))
     self.frame.Layout()
     self.frame.Show(True)
+
 #   self.frame.Centre()
     return True
 
