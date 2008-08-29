@@ -4,5 +4,6 @@
   <author>Jeremy Leibs</author>
   <license>BSD</license>
   <depend package="rospy" />
+  <depend package="robot_msgs" />
   <url></url>
 </package>

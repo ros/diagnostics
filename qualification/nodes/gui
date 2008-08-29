@@ -35,28 +35,56 @@
 import rostools
 rostools.update_path('qualification')
 
-import rospy, sys
+#import rospy, sys
+import sys
 import wx
 from wx import xrc
 
 import qualification
 from qualification import *
-from qualification.tests import *
-
 
 class ScanPanel(BaseTest):
   def __init__(self, parent, func = None):
     self.parent = parent
     self.res = xrc.XmlResource(execution_path('gui.xrc'))
     self.panel = self.res.LoadPanel(self.parent, 'scan_panel')
+    self.serial = xrc.XRCCTRL(self.panel, 'serial_ctl')
     BaseTest.__init__(self, self.parent, self.panel, func)
-    self.panel.Bind(wx.EVT_BUTTON, self.OnTest, id=xrc.XRCID('test_button'))
 
-  def OnTest(self, evt):    
-    test = SampleTest(self.parent, self.OnResult)
+    self.panel.Bind(wx.EVT_BUTTON, self.OnTest, id=xrc.XRCID('test_button'))
+    self.panel.GetTopLevelParent().Bind(wx.EVT_CHAR, self.OnChar)
+    self.serial.Bind(wx.EVT_TEXT_ENTER, self.OnTest)
+    self.panel.SetFocus()
+
+  def OnChar(self, evt):
+    if (evt.GetKeyCode() == 347):
+      self.serial.Clear()
+      self.serial.SetFocus()
+
+  def OnTest(self, evt):
+    value = self.serial.GetValue()
+    if (value[0:2] == '68'):
+      subvalue = value[2:7]
+      if (tests.test_list.has_key(subvalue)):
+        BaseTest.Log(self,'Testing component with ID: ' + value)
+        test = tests.test_list[subvalue](self.parent, self.OnResult)
+      else:
+        dlg = wx.MessageDialog(self.panel, 'No test defined for that serial Number','Error', wx.OK|wx.ICON_ERROR)
+        dlg.ShowModal()
+    else:
+      dlg = wx.MessageDialog(self.panel, 'Not a valid WG ID number','Error', wx.OK|wx.ICON_ERROR)
+      dlg.ShowModal()
 
   def OnResult(self, results):
-    print 'Got my results' + str(results)
+    res = str('Got results:\n')
+    for stat in results.status:
+      res += stat.name + ' ' + stat.message + '\n'
+      for val in stat.values:
+        res += val.value_label + ' ' + str(val.value) + '\n'
+    BaseTest.Log(self, res)
+    self.serial.Clear()
+      
+      
 
 class QualificationApp(wx.App):
   def OnInit(self):
@@ -64,10 +92,16 @@ class QualificationApp(wx.App):
 
     self.frame = self.res.LoadFrame(None, 'frame');
 
-    self.test_panel = xrc.XRCCTRL(self.frame, 'test_panel')
+    self.split_panel = xrc.XRCCTRL(self.frame, 'split_panel')
+    self.split_panel.SetSashGravity(0.8)
+
+    self.test_panel = xrc.XRCCTRL(self.split_panel, 'test_panel')
     self.test_panel_sizer = wx.BoxSizer()
     self.test_panel.SetSizer(self.test_panel_sizer)
     self.test_panel_sizer.SetSizeHints(self.test_panel)
+
+    #This seems like a bad way to put something in a "deterministic" location
+    self.frame.log = xrc.XRCCTRL(self.frame, 'log')
     
     test = ScanPanel(self.test_panel)
 
@@ -75,11 +109,9 @@ class QualificationApp(wx.App):
     sizer2.SetSizeHints(self.frame)
     self.frame.SetSize(wx.Size(800,800))
     self.frame.Layout()
-    
     self.frame.Show(True)
 #   self.frame.Centre()
     return True
-
 
 if __name__ == '__main__':
   try:
@@ -89,4 +121,4 @@ if __name__ == '__main__':
     print e
     
   print 'quit'
-  rospy.signal_shutdown('GUI shutdown')
+#  rospy.signal_shutdown('GUI shutdown')

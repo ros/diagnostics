@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import wx
-import os, sys
+import os, sys, time, datetime
 
 def execution_path(filename):
       return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
@@ -44,7 +44,7 @@ def NestPanel(top_panel, sub_panel):
   sizer.Clear(True)
   sizer.Add(sub_panel,1,wx.EXPAND)
   sizer.SetSizeHints(top_panel)
-  top_panel.GetParent().Layout()
+  top_panel.GetTopLevelParent().Layout()
 
 class BaseTest(object):
   def __init__(self, parent, panel, func):
@@ -53,13 +53,25 @@ class BaseTest(object):
     self.func = func
     self.prev = parent.GetSizer()
     for child in self.prev.GetChildren():
+      child.GetWindow().Disable()
       child.GetWindow().Hide()
     parent.SetSizer(None,False)
     NestPanel(self.parent, self.panel)
+  def Log(self, msg):
+    print 'Trying to log!'
+    try:
+      if self.parent.GetTopLevelParent().log:
+        self.parent.GetTopLevelParent().log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
+    except AttributeError:
+      print 'Got attribute error!'
+
   def Done(self, results):
     self.parent.GetSizer().Clear(True)
     self.parent.SetSizer(self.prev)
     for child in self.prev.GetChildren():
+      child.GetWindow().Enable()
       child.GetWindow().Show()
     if self.func:
       self.func(results)
+    self.parent.GetTopLevelParent().Layout()
+    self.parent.SetFocus()

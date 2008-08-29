@@ -39,12 +39,16 @@ import math
 
 from qualification import *
 
+from robot_msgs.msg import *
+
 class SampleTest(BaseTest):
   def __init__(self, parent, func):
     self.parent = parent
     self.res = xrc.XmlResource(execution_path('sample_test.xrc'))
     self.panel = self.res.LoadPanel(self.parent, 'sample_test')
     BaseTest.__init__(self, parent, self.panel, func)
+
+    BaseTest.Log(self,'Starting test of device: \'Sample Test\'680102401010!')
 
     self.plot_panel = xrc.XRCCTRL(self.panel, 'plot_panel')
     self.plot = plot.PlotCanvas(self.panel,-1)
@@ -55,8 +59,13 @@ class SampleTest(BaseTest):
     self.panel.Bind(wx.EVT_BUTTON, self.OnStop, id=xrc.XRCID('stop_button'))
     self.panel.Bind(wx.EVT_IDLE, self.OnIdle)
 
-  def OnStop(self, evt):    
-    BaseTest.Done(self, 42)
+  def OnStop(self, evt):
+    BaseTest.Log(self,'Test completed!')
+    out_stat = []
+    out_stat.append(DiagnosticStatus(0, 'Stat 1', 'Something passed', []))
+    out_stat.append(DiagnosticStatus(1, 'Stat 2', 'Something else warned', [DiagnosticValue(42.1, 'foo')]))
+    out = DiagnosticMessage(None, out_stat)
+    BaseTest.Done(self, out)
     
   def OnIdle(self, evt):
     markers = plot.PolyLine(map(lambda x: (x + self.i, math.sin(x + self.i)), range(0,100)))
