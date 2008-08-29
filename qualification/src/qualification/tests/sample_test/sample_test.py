@@ -48,7 +48,7 @@ class SampleTest(BaseTest):
     self.panel = self.res.LoadPanel(self.parent, 'sample_test')
     BaseTest.__init__(self, parent, self.panel, func)
 
-    BaseTest.Log(self,'Starting test of device: \'Sample Test\'680102401010!')
+    BaseTest.Log(self,'Starting test of device: \'Sample Test\'')
 
     self.plot_panel = xrc.XRCCTRL(self.panel, 'plot_panel')
     self.plot = plot.PlotCanvas(self.panel,-1)
@@ -58,6 +58,7 @@ class SampleTest(BaseTest):
 
     self.panel.Bind(wx.EVT_BUTTON, self.OnStop, id=xrc.XRCID('stop_button'))
     self.panel.Bind(wx.EVT_IDLE, self.OnIdle)
+
 
   def OnStop(self, evt):
     BaseTest.Log(self,'Test completed!')

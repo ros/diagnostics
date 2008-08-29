@@ -29,51 +29,40 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
+#! /usr/bin/env python
 
 import wx
-import os, sys, time, datetime
+from wx import xrc
 
-def execution_path(filename):
-      return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
+import time
 
-def NestPanel(top_panel, sub_panel):
-  sizer = top_panel.GetSizer()
-  if (sizer == None):
-    sizer = wx.BoxSizer();
-    top_panel.SetSizer(sizer)
-  sizer.Clear(True)
-  sizer.Add(sub_panel,1,wx.EXPAND)
-  sizer.SetSizeHints(top_panel)
-  top_panel.GetTopLevelParent().Layout()
+from qualification import *
+from robot_msgs.msg import *
+from threading import *
 
-class BaseTest(object):
-  def __init__(self, parent, panel, func):
+class HokuyoThread(Thread):
+  def __init__(self, test):
+    Thread.__init__(self)
+    self.test = test
+    self.start()
+
+  def run(self):
+    for i in range(10):
+      time.sleep(1)
+
+    out_stat = []
+    out_stat.append(DiagnosticStatus(0, 'Stat 1', 'Something passed', []))
+    out_stat.append(DiagnosticStatus(1, 'Stat 2', 'Something else warned', [DiagnosticValue(42.1, 'foo')]))
+    out = DiagnosticMessage(None, out_stat)
+    wx.CallAfter(self.test.Done, out)
+
+
+class HokuyoTest(BaseTest):
+  def __init__(self, parent, func):
     self.parent = parent
-    self.panel = panel
-    self.func = func
-    self.prev = parent.GetSizer()
-    for child in self.prev.GetChildren():
-      child.GetWindow().Disable()
-      child.GetWindow().Hide()
-    parent.SetSizer(None,False)
-    NestPanel(self.parent, self.panel)
-  def Log(self, msg):
-    try:
-      if self.parent.GetTopLevelParent().log:
-        self.parent.GetTopLevelParent().log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
-    except AttributeError:
-      pass
+    self.res = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
+    self.panel = self.res.LoadPanel(self.parent, 'hokuyo_test')
+    BaseTest.__init__(self, parent, self.panel, func)
 
-  def Done(self, results):
-    if self.func:
-      self.func(results)
-
-    self.parent.GetSizer().Clear(True)
-    self.parent.SetSizer(self.prev)
-
-    for child in self.prev.GetChildren():
-      child.GetWindow().Enable()
-      child.GetWindow().Show()
-
-    self.parent.GetTopLevelParent().Layout()
-    self.parent.SetFocus()
+    worker = HokuyoThread(self)

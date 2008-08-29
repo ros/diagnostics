@@ -76,12 +76,13 @@ class ScanPanel(BaseTest):
       dlg.ShowModal()
 
   def OnResult(self, results):
-    res = str('Got results:\n')
-    for stat in results.status:
-      res += stat.name + ' ' + stat.message + '\n'
-      for val in stat.values:
-        res += val.value_label + ' ' + str(val.value) + '\n'
-    BaseTest.Log(self, res)
+    if (results != None):
+      res = str('Got results:\n')
+      for stat in results.status:
+        res += stat.name + ' ' + stat.message + '\n'
+        for val in stat.values:
+          res += val.value_label + ' ' + str(val.value) + '\n'
+      BaseTest.Log(self, res)
     self.serial.Clear()
       
       
