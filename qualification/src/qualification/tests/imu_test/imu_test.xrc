@@ -37,7 +37,7 @@
 				<flag>wxALL</flag>
 				<border>5</border>
 				<object class="wxStaticText" name="m_staticText2">
-					<label>You are testing the Hokuyo TOP URG.\n\nPlease place it on a flat surface, pointed at a smooth wall, then hit Continue.</label>
+					<label>You are testing the Microstrain 3DM-GX2\n\nPlease place it on a flat surface and hit Continue.</label>
 				</object>
 			</object>
 			<object class="sizeritem">
@@ -45,7 +45,7 @@
 				<flag>wxALL</flag>
 				<border>5</border>
 				<object class="wxStaticBitmap" name="m_bitmap1">
-					<bitmap>Hokuyo.jpg</bitmap>
+					<bitmap>Imu.jpg</bitmap>
 				</object>
 			</object>
 		</object>

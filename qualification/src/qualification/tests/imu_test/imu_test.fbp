@@ -7,11 +7,11 @@
         <property name="disconnect_events">1</property>
         <property name="encoding">UTF-8</property>
         <property name="event_generation">connect</property>
-        <property name="file">hokuyo_test</property>
+        <property name="file">imu_test</property>
         <property name="first_id">1000</property>
         <property name="help_provider">none</property>
         <property name="internationalize">0</property>
-        <property name="name">HokuyoTest</property>
+        <property name="name">ImuTest</property>
         <property name="namespace"></property>
         <property name="path">.</property>
         <property name="precompiled_header"></property>
@@ -197,7 +197,7 @@
                         <property name="font"></property>
                         <property name="hidden">0</property>
                         <property name="id">wxID_ANY</property>
-                        <property name="label">You are testing the Hokuyo TOP URG.&#x0A;&#x0A;Please place it on a flat surface, pointed at a smooth wall, then hit Continue.</property>
+                        <property name="label">You are testing the Microstrain 3DM-GX2&#x0A;&#x0A;Please place it on a flat surface and hit Continue.</property>
                         <property name="maximum_size"></property>
                         <property name="minimum_size"></property>
                         <property name="name">m_staticText2</property>
@@ -242,7 +242,7 @@
                     <property name="proportion">0</property>
                     <object class="wxStaticBitmap" expanded="1">
                         <property name="bg"></property>
-                        <property name="bitmap">Hokuyo.jpg; Load From File</property>
+                        <property name="bitmap">Imu.jpg; Load From File</property>
                         <property name="context_help"></property>
                         <property name="enabled">1</property>
                         <property name="fg"></property>

@@ -43,11 +43,11 @@ from robot_srvs.srv import *
 import rospy
 import roslaunch
 
-class HokuyoTest(BaseTest):
+class ImuTest(BaseTest):
   def __init__(self, parent, func):
 
     # Load the XRC resource
-    res = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
+    res = xrc.XmlResource(execution_path('imu_test.xrc'))
 
     # Load the instruction and test panels from the XRC resource
     instruct_panel = res.LoadPanel(parent, 'instruct_panel')
@@ -58,9 +58,9 @@ class HokuyoTest(BaseTest):
 
   # This is what runs once the instructions are read
   def Run(self):
-    worker = HokuyoThread(self)
+    worker = ImuThread(self)
 
-class HokuyoThread(Thread):
+class ImuThread(Thread):
   def __init__(self, test):
     Thread.__init__(self)
     self.test = test
@@ -74,7 +74,7 @@ class HokuyoThread(Thread):
 
     # Try loading the XML file
     try:
-        loader.load(execution_path('hokuyo_test.xml'), rl)
+        loader.load(execution_path('imu_test.xml'), rl)
     except roslaunch.XmlParseException, e:
       wx.CallAfter(self.test.Done, 'Could not load XML file')
       return
@@ -88,14 +88,16 @@ class HokuyoThread(Thread):
     rl.launch_nodes()
 
     # Wait for our self-test service to come up
-    rospy.wait_for_service('urglaser/self_test', 5)
+    rospy.wait_for_service('imu/self_test', 5)
 
-    # Try to query the self_test service on the hokuyo
+    # Try to query the self_test service on the imu
     try:
-        s = rospy.ServiceProxy('urglaser/self_test', SelfTest)
+        s = rospy.ServiceProxy('imu/self_test', SelfTest)
         resp = s.call(SelfTestRequest(),60)
     except rospy.ServiceException, e:
+      print e
       wx.CallAfter(self.test.Done, 'Could not contact node via ROS')
+      rl.stop()
       return
 
     # Bring down the nodes
