@@ -85,10 +85,10 @@ class ScanPanel():
     value = self.serial.GetValue()[0:7]
 
     if (tests.test_list.has_key(value)):
-      self.Log('Testing component with ID: ' + value)
+      self.Log('Testing component with ID: ' + self.serial.GetValue())
 
       # Use the test_list to run the correct test
-      test = tests.test_list[value](self.parent, self.OnResult)
+      test = tests.test_list[value](self.parent, self.serial.GetValue(), self.OnResult)
     else:
       dlg = wx.MessageDialog(self.panel, 'No test defined for that serial Number','Error', wx.OK|wx.ICON_ERROR)
       dlg.ShowModal()
@@ -97,24 +97,7 @@ class ScanPanel():
     # If the result is just a string, print it
     if (isinstance(result,str)):
       self.Log(result)
-
-
-    statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
-
-    # If the result has an attribute called 'status', it is probably an array of DiagnosticStatus's
-    if (hasattr(result, 'status')):
-      i = 1
-      res = str('Got results:\n')
-      for stat in result.status:
-        res += 'Test ' + str(i) + ') ' + stat.name + '\n'
-        res += ' [' + statdict[stat.level] + '] ' + stat.message + '\n'
-        for val in stat.values:
-          res += val.value_label + ' ' + str(val.value) + '\n'
-        i += 1
-      self.Log(res)
     self.serial.Clear()
-      
-      
 
 class QualificationApp(wx.App):
   def OnInit(self):

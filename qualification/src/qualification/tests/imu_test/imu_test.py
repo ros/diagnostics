@@ -44,7 +44,7 @@ import rospy
 import roslaunch
 
 class ImuTest(BaseTest):
-  def __init__(self, parent, func):
+  def __init__(self, parent, serial, func):
 
     # Load the XRC resource
     res = xrc.XmlResource(execution_path('imu_test.xrc'))
@@ -54,7 +54,7 @@ class ImuTest(BaseTest):
     test_panel = res.LoadPanel(parent, 'test_panel')
 
     # Initialize the BaseTest with these parts
-    BaseTest.__init__(self, parent, instruct_panel, test_panel, func)
+    BaseTest.__init__(self, parent, instruct_panel, test_panel, serial, func, 'Inertia-Link 3DM-GX2')
 
   # This is what runs once the instructions are read
   def Run(self):

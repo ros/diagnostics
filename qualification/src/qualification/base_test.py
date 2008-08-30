@@ -70,12 +70,16 @@ def NestPanel(top_panel, sub_panel):
 
 
 class BaseTest(object):
-  def __init__(self, parent, instruct_panel, test_panel, func):
+  def __init__(self, parent, instruct_panel, test_panel, serial, func, desc):
     # Store variables
     self.parent = parent
     self.instruct_panel = instruct_panel
     self.test_panel = test_panel
+    self.serial = serial
     self.func = func
+    self.desc = desc
+
+    self.date = datetime.datetime.now()
 
     # Save previous panel state and hide it
     self.prev = parent.GetSizer()
@@ -86,14 +90,14 @@ class BaseTest(object):
     # Set sizer to None non-destructively to avoid blowing away with NestPanel in the future
     parent.SetSizer(None,False)
 
-    # Load instruction wrapper panel
+    # Load panels
     self.res = xrc.XmlResource(execution_path('base_test.xrc'))
     self.instruct_wrapper = self.res.LoadPanel(self.parent, 'instruct_wrapper')
     self.instruct_wrapper_panel = xrc.XRCCTRL(self.instruct_wrapper, 'instruct_wrapper_panel')
 
     # Bind the continue/cancel buttons
-    self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnContinue, id=xrc.XRCID('continue_button'))
-    self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnCancel, id=xrc.XRCID('cancel_button'))
+    self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnContinue, id=xrc.XRCID('ins_continue_button'))
+    self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnCancel, id=xrc.XRCID('ins_cancel_button'))
 
     # The instruction panel needs to be reparented inside of the wrapper so it displays correctly
     self.instruct_panel.Reparent(self.instruct_wrapper_panel)
@@ -111,10 +115,10 @@ class BaseTest(object):
     self.Run()
 
   def OnCancel(self, evt):
-    self.Done('Self test was canceled')
+    self.Cancel('Self test was canceled')
 
   def Run(self):
-    self.Done('The invoked test had no Run defined')
+    self.Cancel('The invoked test had no Run defined')
 
   def Log(self, msg):
     try:
@@ -124,10 +128,13 @@ class BaseTest(object):
     except AttributeError:
       pass
 
-  def Done(self, results):
+  def Cancel(self, msg):
+    self.Finish(msg)
+
+  def Finish(self, msg):
     # Invoke the callback with the results, if defined
     if self.func:
-      self.func(results)
+      self.func(msg)
 
     # Cache the original size
     start_size = self.parent.GetTopLevelParent().GetSize()
@@ -156,4 +163,55 @@ class BaseTest(object):
     self.parent.GetTopLevelParent().Layout()
 
     # Give parent focus
-    self.parent.SetFocus()
+    self.parent.SetFocus()    
+
+  def Done(self, results):
+    self.results_panel = self.res.LoadPanel(self.parent, 'results_panel')
+    self.result_ctrl = xrc.XRCCTRL(self.results_panel, 'result_ctrl')
+
+    self.results_panel.Bind(wx.EVT_BUTTON, self.OnSubmit, id=xrc.XRCID('res_submit_button'))
+    self.results_panel.Bind(wx.EVT_BUTTON, self.OnResCancel, id=xrc.XRCID('res_cancel_button'))
+
+    NestPanel(self.parent, self.results_panel)
+
+    statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
+
+    passfail = 'FAIL'
+
+    res = ''
+
+    # If the result has an attribute called 'status', it is probably an array of DiagnosticStatus's
+    if (hasattr(results, 'status')):
+      passfail = 'PASS'
+      i = 1
+      for stat in results.status:
+        if (stat.level != 0):
+          passfail = 'FAIL'
+        res += 'Test %2d) %s\n' % (i, stat.name)
+        res += '  [%s]: %s\n' % (statdict[stat.level], stat.message)
+        for val in stat.values:
+          res += '   [%s] = %f\n' % (val.value_label, val.value)
+        i += 1
+
+    head = '----------------------------------------\n'
+    head += 'Serial: %s\n' % (self.serial)
+    head += 'Desc: %s\n' % (self.desc)
+    head += 'Date: %s\n' % (self.date.strftime("%m/%d/%Y %I:%M:%S"))
+    head += 'Result: %s\n' % (passfail)
+    head += '----------------------------------------\n'
+
+    self.result_ctrl.SetValue(head + res)
+
+  def OnResCancel(self, evt):
+    self.Cancel('Self test was run but not submitted')
+
+  def OnSubmit(self, evt):
+    ###
+    ### ADD CODE HERE TO actually submit log!
+    ###
+    fname = '%s_%s.test' % (self.serial, self.date.strftime("%Y_%m_%d_%I_%M_%S"))
+    f = open(fname, 'w')
+    f.write(self.result_ctrl.GetValue())
+    f.close()
+        
+    self.Finish('Self test completed')
