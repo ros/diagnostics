@@ -76,7 +76,7 @@ class ImuThread(Thread):
     try:
         loader.load(execution_path('imu_test.xml'), rl)
     except roslaunch.XmlParseException, e:
-      wx.CallAfter(self.test.Done, 'Could not load XML file')
+      wx.CallAfter(self.test.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
       return
 
     # Make sure we get a fresh master
@@ -96,7 +96,7 @@ class ImuThread(Thread):
         resp = s.call(SelfTestRequest(),60)
     except rospy.ServiceException, e:
       print e
-      wx.CallAfter(self.test.Done, 'Could not contact node via ROS')
+      wx.CallAfter(self.test.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))
       rl.stop()
       return
 

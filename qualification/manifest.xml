@@ -7,5 +7,7 @@
   <depend package="robot_msgs" />
   <depend package="robot_srvs" />
   <depend package="roslaunch" />
+  <depend package="hokuyourg_player" />
+  <depend package="imu_node" />
   <url></url>
 </package>
