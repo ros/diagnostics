@@ -40,10 +40,12 @@
 #include <string>
 
 #include "ros/node.h"
-#include "rosthread/mutex.h"
+#include "rosthread/condition.h"
 
 #include "robot_msgs/DiagnosticStatus.h"
 #include "robot_srvs/SelfTest.h"
+
+
 
 template <class T>
 class SelfTest
@@ -51,7 +53,8 @@ class SelfTest
 private:
 
   T* node_;
-  ros::thread::mutex testing_mutex;
+  ros::thread::condition testing_condition;
+  ros::thread::condition done_testing_condition;
 
   std::string id_;
 
@@ -60,11 +63,21 @@ private:
   void (T::*pretest_)();
   void (T::*posttest_)();
 
+  int count;
+
+  bool waiting;
+  bool ready;
+  bool done;
+
 public:
 
   SelfTest(T* node) : node_(node), pretest_(NULL), posttest_(NULL)
   {
     node_->advertise_service("~self_test", &SelfTest::doTest, this);
+    count = 0;
+    waiting = false;
+    ready   = false;
+    done    = false;
   }
 
   void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
@@ -82,14 +95,24 @@ public:
     posttest_ = f;
   }
 
-  void lock()
+  void checkTest()
   {
-    testing_mutex.lock();
-  }
+    testing_condition.lock();
+    if (waiting)
+    {
+      ready = true;
+      testing_condition.signal();
+      testing_condition.unlock();
 
-  void unlock()
-  {
-    testing_mutex.unlock();
+      done_testing_condition.lock();
+      done = false;
+      while (!done)
+        done_testing_condition.wait();
+      done_testing_condition.unlock();
+    } else {
+      testing_condition.unlock();
+    }
+    sched_yield();
   }
 
   void setID(std::string id)
@@ -100,7 +123,27 @@ public:
   bool doTest(robot_srvs::SelfTest::request &req,
                 robot_srvs::SelfTest::response &res)
   {
-    lock();
+    testing_condition.lock();
+
+    waiting = true;
+    ready   = false;
+
+    while (!ready)
+    {
+      if (!testing_condition.timed_wait(5))
+      {
+        printf("Timed out waiting to run self test.\n");
+        waiting = false;
+        testing_condition.unlock();
+        return false;
+      }
+    }
+
+    testing_condition.unlock();
+
+    bool retval = false;
+
+    printf("Begining test.\n");
 
     if (node_->ok())
     {
@@ -139,6 +182,9 @@ public:
         status_vec.push_back(status);
       }
 
+      waiting = false;
+      testing_condition.unlock();
+
       //One of the test calls should use setID
       res.id = id_;
 
@@ -160,13 +206,17 @@ public:
 
       printf("Self test completed\n");
 
-      unlock();
+      retval = true;
 
-      return true;
-
-    } else {
-      return false;
     }
+
+    done_testing_condition.lock();
+    done = true;
+    done_testing_condition.signal();
+    done_testing_condition.unlock();
+
+    return retval;
+
   }
 };
 
