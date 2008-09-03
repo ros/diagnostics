@@ -37,25 +37,48 @@
 import rostools
 rostools.update_path('runtime_monitor')
 
-import sys
+import sys, time 
 import rospy
 from robot_msgs.msg import *
 
-NAME = 'runtime_monitor'
+NAME = 'test_runtime_broadcaster'
 
-def callback(message):
-    print""
-    print "New Message at %.1f"%message.header.stamp.to_time()
-    for s in message.status:
-        ## @TODO process byte level
-        print "Name: %s \nMessage: %s"%(s.name, s.message)
-        for v in s.values:
-            print "   Value: %.2f Label: %s"%(v.value, v.value_label)
+
+
+def loop(pub):
+        stat = []
+        for c in range(0,2):
+            sval = []
+            sval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
+            sval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
+            sval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
+            sval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
+            stat.append(DiagnosticStatus(0, "IBPS %d"%c, "All good", sval))
+            ## @todo make the status string represent errors etc
+
+            for b in range(0,2):
+                bval = []
+                bval.append(DiagnosticValue(c+b+.1, "present (0,1)"))
+                bval.append(DiagnosticValue(c+b+.2, "charging (0,1)"))
+                bval.append(DiagnosticValue(c+b+.3, "supplying power (0,1)"))
+                stat.append(DiagnosticStatus(0, "Smart Battery %d.%d"%(c,b), "All good", bval))
+                ## @todo make the status string represent errors etc
+                            
+
+            
+        out = DiagnosticMessage(None, stat)
+        pub.publish(out)
+        print "Published"
+
+
+
     
 def listener():
-    rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
+    pub = rospy.TopicPub("/diagnostics", DiagnosticMessage)
     rospy.ready(NAME, anonymous=True)
-    rospy.spin()
+    while not rospy.is_shutdown():
+        loop(pub)
+        time.sleep(1)
         
 if __name__ == '__main__':
     try:
