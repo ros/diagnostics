@@ -99,6 +99,9 @@ class MainWindow(wx.Frame):
                 
 
         def callback(self, message):
+                wx.CallAfter(self.cbInGuiThread, message)
+
+        def cbInGuiThread(self, message):
                 self.lock.acquire(1)
                 print""
                 print "New Message at %.1f"%message.header.stamp.to_time()
@@ -109,16 +112,19 @@ class MainWindow(wx.Frame):
                                 print "   Value: %.2f Label: %s"%(v.value, v.value_label)
                 self.SetTitle("New Message at %.1f"%message.header.stamp.to_time())
 
-                self.sizer2.Remove(self.buttons[0])
-                self.buttons.pop(0)
+#                self.sizer2.Remove(self.buttons[0])
+                self.sizer2.Remove(0)
+                self.buttons.pop(0).Destroy()
                 self.buttons.append(wx.Button( self, id=-1, label="Test %d"%self.counter))
                 self.sizer2.Add(self.buttons[-1])
                 print "added button"
                 self.counter = self.counter + 1
         
                 self.sizer2.RecalcSizes()
+                self.Layout()
                 self.lock.release()
                 self.Show()
+                
     
 def listener():
         app = wx.PySimpleApp()
