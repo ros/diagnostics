@@ -115,8 +115,6 @@ class MainWindow(wx.Frame):
                         print "Name: %s \nMessage: %s"%(s.name, s.message)
                         for v in s.values:
                                 print "   Value: %.2f Label: %s"%(v.value, v.value_label)
-#                        if self.sizers_dict.has_key(s.name):
-#                                self.sizers_dict[s.name].Clear(1)
                         if not self.button_dict.has_key(s.name):
                                 self.button_dict[s.name] = wx.Button( self, id=-1, label="%s"%s.name)
 
@@ -138,10 +136,9 @@ class MainWindow(wx.Frame):
                 self.SetTitle("New Message at %.1f"%message.header.stamp.to_time())
                 self.counter = self.counter + 1
         
-                self.sizer2.RecalcSizes()
                 self.Layout()
                 self.lock.release()
-                self.Show()
+                self.Fit()
                 
     
 def listener():
