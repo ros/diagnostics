@@ -42,7 +42,7 @@ import rospy
 from robot_msgs.msg import *
 
 import wx
-import threading
+import threading, time
 
 NAME = 'runtime_monitor'
 
@@ -77,6 +77,9 @@ class MainWindow(wx.Frame):
 
                 #internal storage of recieved components
                 self.components = {}
+                self.button_dict = {}
+                self.sizer_dict = {}
+                self.text_dict = {}
 
                 #self.sizer2.Add(self.control,0,wx.EXPAND)
 
@@ -91,7 +94,10 @@ class MainWindow(wx.Frame):
                 self.counter = 1
 
                 self.lock = threading.Lock()
-                
+
+                time.sleep(1)
+                self.sizer2.Clear(1)
+
         def OnAbout(self, e):
                 d = wx.MessageDialog(self, "A sample editor","About ", wx.OK)
                 d.ShowModal()
@@ -103,30 +109,45 @@ class MainWindow(wx.Frame):
 
         def callback(self, message):
                 self.lock.acquire(1)
-                print ""
-                print "New Message at %.1f"%message.header.stamp.to_time()
+                #print ""
+                #print "New Message at %.1f"%message.header.stamp.to_time()
                 for s in message.status:
-                        print "Name: %s \nMessage: %s"%(s.name, s.message)
+                #        print "Name: %s \nMessage: %s"%(s.name, s.message)
                         self.components[s.name] = s
                 self.lock.release()
                 wx.CallAfter(self.cbInGuiThread)
+
+        def OnClick(self, e):
+                d = wx.MessageDialog(self, "Clicked","Close me ", wx.OK)
+                d.ShowModal()
+                d.Destroy()
 
         def cbInGuiThread(self):
                 self.lock.acquire(1)
 #                print self.components
                 #internal storage for GUI elements
-                self.sizer2.Clear(1)
-                self.button_dict = {}
-                self.sizer_dict = {}
-                self.text_dict = {}
-                
-                for s in self.components:
-                        self.button_dict[self.components[s].name] = wx.Button( self, id=-1, label="%s"%self.components[s].name)
-                        
-                        self.sizer_dict[self.components[s].name] = wx.BoxSizer(wx.HORIZONTAL)
-                        self.sizer_dict[self.components[s].name].Add(self.button_dict[self.components[s].name])
+                #self.sizer2.Clear(0)
 
-                        self.text_dict[self.components[s].name] = wx.StaticText(self, -1, label="%s"%self.components[s].message)
+
+                names = self.components.keys()
+                names.sort()
+                for s in names:
+                        first_run = True
+                        if self.sizer_dict.has_key(self.components[s].name):
+                                first_run = False
+                                
+                        if first_run: #create sizer to hold button and text
+
+                                self.sizer_dict[self.components[s].name] = wx.BoxSizer(wx.HORIZONTAL)
+                        else:        
+                                self.sizer_dict[self.components[s].name].Remove(self.text_dict[self.components[s].name])
+                                self.text_dict[self.components[s].name].Destroy()
+
+                        # create the button
+                        self.button_dict[self.components[s].name] = wx.Button( self, id=-1, label="%s"%self.components[s].name)
+                        self.button_dict[self.components[s].name].Bind(wx.EVT_BUTTON, self.OnClick) 
+                        self.button_dict[self.components[s].name].SetToolTip(wx.ToolTip("Click for Details")) 
+                        # color button
                         if self.components[s].level == 0:
                                 self.button_dict[self.components[s].name].SetBackgroundColour("LightGreen")
                         else:
@@ -134,10 +155,18 @@ class MainWindow(wx.Frame):
                                         self.button_dict[self.components[s].name].SetBackgroundColour((255,165,0))
                                 else:
                                         self.button_dict[self.components[s].name].SetBackgroundColour((255,0,0))
-                                
+
+                        #create text field
+                        self.text_dict[self.components[s].name] = wx.StaticText(self, -1, label="%s"%self.components[s].message)
+                        # add button
+                        if first_run:
+                                self.sizer_dict[self.components[s].name].Add(self.button_dict[self.components[s].name])
+                        # add text
                         self.sizer_dict[self.components[s].name].Add(self.text_dict[self.components[s].name])
 
-                        self.sizer2.Add(self.sizer_dict[self.components[s].name])
+                        #add small sizer to full sizer
+                        if first_run:
+                                self.sizer2.Add(self.sizer_dict[self.components[s].name])
         
                 self.Layout()
                 self.Fit()
