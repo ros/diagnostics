@@ -74,10 +74,13 @@ class MainWindow(wx.Frame):
                 for b in self.buttons:
                         self.sizer2.Add(b,0,wx.EXPAND)
 
+
+                #internal storage of recieved components
+                self.components = {}
+
                 #self.sizer2.Add(self.control,0,wx.EXPAND)
 
                 self.sizer = wx.BoxSizer(wx.VERTICAL)
-                self.components = []
                 self.sizer2.Add(self.sizer, 2, wx.EXPAND)
                 
                 self.SetSizer(self.sizer2)
@@ -99,47 +102,47 @@ class MainWindow(wx.Frame):
                 
 
         def callback(self, message):
-                wx.CallAfter(self.cbInGuiThread, message)
-
-        def cbInGuiThread(self, message):
                 self.lock.acquire(1)
-                #clean everything out
-                self.sizer2.Clear()
+                print ""
+                print "New Message at %.1f"%message.header.stamp.to_time()
+                for s in message.status:
+                        print "Name: %s \nMessage: %s"%(s.name, s.message)
+                        self.components[s.name] = s
+                self.lock.release()
+                wx.CallAfter(self.cbInGuiThread)
+
+        def cbInGuiThread(self):
+                self.lock.acquire(1)
+#                print self.components
+                #internal storage for GUI elements
+                self.sizer2.Clear(1)
                 self.button_dict = {}
                 self.sizer_dict = {}
                 self.text_dict = {}
-                print""
-                print "New Message at %.1f"%message.header.stamp.to_time()
-                for s in message.status:
-        ## @TODO process byte level
-                        print "Name: %s \nMessage: %s"%(s.name, s.message)
-                        for v in s.values:
-                                print "   Value: %.2f Label: %s"%(v.value, v.value_label)
-                        if not self.button_dict.has_key(s.name):
-                                self.button_dict[s.name] = wx.Button( self, id=-1, label="%s"%s.name)
+                
+                for s in self.components:
+                        self.button_dict[self.components[s].name] = wx.Button( self, id=-1, label="%s"%self.components[s].name)
+                        
+                        self.sizer_dict[self.components[s].name] = wx.BoxSizer(wx.HORIZONTAL)
+                        self.sizer_dict[self.components[s].name].Add(self.button_dict[self.components[s].name])
 
-                                self.sizer_dict[s.name] = wx.BoxSizer(wx.HORIZONTAL)
-                                self.sizer_dict[s.name].Add(self.button_dict[s.name])
-
-                        self.text_dict[s.name] = wx.StaticText(self, -1, label="%s"%s.message)
-                        if s.level == 0:
-                                self.button_dict[s.name].SetBackgroundColour("LightGreen")
+                        self.text_dict[self.components[s].name] = wx.StaticText(self, -1, label="%s"%self.components[s].message)
+                        if self.components[s].level == 0:
+                                self.button_dict[self.components[s].name].SetBackgroundColour("LightGreen")
                         else:
-                                if s.level == 1:
-                                        self.button_dict[s.name].SetBackgroundColour((255,165,0))
+                                if self.components[s].level == 1:
+                                        self.button_dict[self.components[s].name].SetBackgroundColour((255,165,0))
                                 else:
-                                        self.button_dict[s.name].SetBackgroundColour((255,0,0))
+                                        self.button_dict[self.components[s].name].SetBackgroundColour((255,0,0))
                                 
-                        self.sizer_dict[s.name].Add(self.text_dict[s.name])
+                        self.sizer_dict[self.components[s].name].Add(self.text_dict[self.components[s].name])
 
-                        self.sizer2.Add(self.sizer_dict[s.name])
-                self.SetTitle("New Message at %.1f"%message.header.stamp.to_time())
-                self.counter = self.counter + 1
+                        self.sizer2.Add(self.sizer_dict[self.components[s].name])
         
                 self.Layout()
-                self.lock.release()
                 self.Fit()
-                
+
+                self.lock.release()
     
 def listener():
         app = wx.PySimpleApp()

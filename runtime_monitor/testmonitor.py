@@ -58,9 +58,9 @@ def loop(pub):
 
             for b in range(0,4):
                 bval = []
-                bval.append(DiagnosticValue(c+b+.1, "present (0,1)"))
-                bval.append(DiagnosticValue(c+b+.2, "charging (0,1)"))
-                bval.append(DiagnosticValue(c+b+.3, "supplying power (0,1)"))
+                bval.append(DiagnosticValue(c+b*.01+.1, "present (0,1)"))
+                bval.append(DiagnosticValue(c+b*.01+.2, "charging (0,1)"))
+                bval.append(DiagnosticValue(c+b*.01+.3, "supplying power (0,1)"))
                 stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval))
                 ## @todo make the status string represent errors etc
                             
