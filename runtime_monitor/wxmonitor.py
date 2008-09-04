@@ -100,7 +100,7 @@ class MainWindow(wx.Frame):
                 self.sizer2.Clear(1)
 
         def OnAbout(self, e):
-                d = wx.MessageDialog(self, "A sample editor","About ", wx.OK)
+                d = wx.MessageDialog(self, "A Diagnostic Message Viewer","About ", wx.OK)
                 d.ShowModal()
                 d.Destroy()
 
@@ -130,10 +130,6 @@ class MainWindow(wx.Frame):
 
         def cbInGuiThread(self):
                 self.lock.acquire(1)
-#                print self.components
-                #internal storage for GUI elements
-                #self.sizer2.Clear(0)
-
 
                 names = self.components.keys()
                 names.sort()
@@ -148,11 +144,12 @@ class MainWindow(wx.Frame):
                                 self.sizer_dict[self.components[s].name].Remove(self.text_dict[self.components[s].name])
                                 self.text_dict[self.components[s].name].Destroy()
 
-                        # create the button
-                        self.button_dict[self.components[s].name] = wx.Button( self, id=wx.ID_ANY, label="%s"%self.components[s].name)
-                        self.button_id_dict[self.button_dict[self.components[s].name].GetId()] = self.components[s].name
-                        self.button_dict[self.components[s].name].Bind(wx.EVT_BUTTON, self.OnClick) 
-                        self.button_dict[self.components[s].name].SetToolTip(wx.ToolTip("Click for Details")) 
+                        if first_run:
+                                # create the button
+                                self.button_dict[self.components[s].name] = wx.Button( self, id=wx.ID_ANY, label="%s"%self.components[s].name)
+                                self.button_id_dict[self.button_dict[self.components[s].name].GetId()] = self.components[s].name
+                                self.button_dict[self.components[s].name].Bind(wx.EVT_BUTTON, self.OnClick) 
+                                self.button_dict[self.components[s].name].SetToolTip(wx.ToolTip("Click for Details")) 
                         # color button
                         if self.components[s].level == 0:
                                 self.button_dict[self.components[s].name].SetBackgroundColour("LightGreen")
