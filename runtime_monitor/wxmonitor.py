@@ -78,6 +78,7 @@ class MainWindow(wx.Frame):
                 #internal storage of recieved components
                 self.components = {}
                 self.button_dict = {}
+                self.button_id_dict = {}
                 self.sizer_dict = {}
                 self.text_dict = {}
 
@@ -118,7 +119,12 @@ class MainWindow(wx.Frame):
                 wx.CallAfter(self.cbInGuiThread)
 
         def OnClick(self, e):
-                d = wx.MessageDialog(self, "Clicked","Close me ", wx.OK)
+                values_str = ""
+                for v in self.components[self.button_id_dict[e.GetId()]].values:
+                        values_str = values_str + "Value: %.2f Label: %s\n"%(v.value, v.value_label)
+
+                d = wx.MessageDialog(self, "%s\n%s\n%s"%(self.components[self.button_id_dict[e.GetId()]].name, self.components[self.button_id_dict[e.GetId()]].message, values_str),"%s"%self.components[self.button_id_dict[e.GetId()]].name, wx.OK)
+                
                 d.ShowModal()
                 d.Destroy()
 
@@ -137,14 +143,14 @@ class MainWindow(wx.Frame):
                                 first_run = False
                                 
                         if first_run: #create sizer to hold button and text
-
                                 self.sizer_dict[self.components[s].name] = wx.BoxSizer(wx.HORIZONTAL)
                         else:        
                                 self.sizer_dict[self.components[s].name].Remove(self.text_dict[self.components[s].name])
                                 self.text_dict[self.components[s].name].Destroy()
 
                         # create the button
-                        self.button_dict[self.components[s].name] = wx.Button( self, id=-1, label="%s"%self.components[s].name)
+                        self.button_dict[self.components[s].name] = wx.Button( self, id=wx.ID_ANY, label="%s"%self.components[s].name)
+                        self.button_id_dict[self.button_dict[self.components[s].name].GetId()] = self.components[s].name
                         self.button_dict[self.components[s].name].Bind(wx.EVT_BUTTON, self.OnClick) 
                         self.button_dict[self.components[s].name].SetToolTip(wx.ToolTip("Click for Details")) 
                         # color button
