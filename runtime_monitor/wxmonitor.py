@@ -55,7 +55,7 @@ class MainWindow(wx.Frame):
         def __init__(self, parent, id, title):
                 self.dirname=''
                 wx.Frame.__init__(self, parent, wx.ID_ANY, title)
-                self.SetBackgroundColour("BLUE")
+                self.SetBackgroundColour("White")
                 #self.control = wx.TextCtrl(self, 1, style=wx.TE_MULTILINE)
                 self.CreateStatusBar()
                 self.filemenu = wx.Menu()
@@ -67,7 +67,7 @@ class MainWindow(wx.Frame):
                 self.SetMenuBar(self.menubar)
                 wx.EVT_MENU(self, ID_ABOUT, self.OnAbout)
                 wx.EVT_MENU(self, ID_EXIT, self.OnExit)
-                self.sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+                self.sizer2 = wx.BoxSizer(wx.VERTICAL)
                 self.buttons = [wx.Button(self, id=-1, label='Button')]
                 self.buttons.append(wx.Button(self, id=-1, label='Button1'))
                 self.buttons.append(wx.Button(self, id=-1, label='Button2'))
@@ -103,6 +103,11 @@ class MainWindow(wx.Frame):
 
         def cbInGuiThread(self, message):
                 self.lock.acquire(1)
+                #clean everything out
+                self.sizer2.Clear()
+                self.button_dict = {}
+                self.sizer_dict = {}
+                self.text_dict = {}
                 print""
                 print "New Message at %.1f"%message.header.stamp.to_time()
                 for s in message.status:
@@ -110,14 +115,22 @@ class MainWindow(wx.Frame):
                         print "Name: %s \nMessage: %s"%(s.name, s.message)
                         for v in s.values:
                                 print "   Value: %.2f Label: %s"%(v.value, v.value_label)
-                self.SetTitle("New Message at %.1f"%message.header.stamp.to_time())
+#                        if self.sizers_dict.has_key(s.name):
+#                                self.sizers_dict[s.name].Clear(1)
+                        if self.button_dict.has_key(s.name):
+                                self.button_dict[s.name].Clear()
+                        self.button_dict[s.name] = wx.Button( self, id=-1, label="%s"%s.name)
 
-#                self.sizer2.Remove(self.buttons[0])
-                self.sizer2.Remove(0)
-                self.buttons.pop(0).Destroy()
-                self.buttons.append(wx.Button( self, id=-1, label="Test %d"%self.counter))
-                self.sizer2.Add(self.buttons[-1])
-                print "added button"
+                        self.sizer_dict[s.name] = wx.BoxSizer(wx.HORIZONTAL)
+                        self.sizer_dict[s.name].Add(self.button_dict[s.name])
+
+                        self.text_dict[s.name] = wx.StaticText(self, -1, label="%s"%s.message)
+                        self.text_dict[s.name].SetBackgroundColour("White")
+
+                        self.sizer_dict[s.name].Add(self.text_dict[s.name])
+
+                        self.sizer2.Add(self.sizer_dict[s.name])
+                self.SetTitle("New Message at %.1f"%message.header.stamp.to_time())
                 self.counter = self.counter + 1
         
                 self.sizer2.RecalcSizes()
