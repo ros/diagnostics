@@ -117,16 +117,21 @@ class MainWindow(wx.Frame):
                                 print "   Value: %.2f Label: %s"%(v.value, v.value_label)
 #                        if self.sizers_dict.has_key(s.name):
 #                                self.sizers_dict[s.name].Clear(1)
-                        if self.button_dict.has_key(s.name):
-                                self.button_dict[s.name].Clear()
-                        self.button_dict[s.name] = wx.Button( self, id=-1, label="%s"%s.name)
+                        if not self.button_dict.has_key(s.name):
+                                self.button_dict[s.name] = wx.Button( self, id=-1, label="%s"%s.name)
 
-                        self.sizer_dict[s.name] = wx.BoxSizer(wx.HORIZONTAL)
-                        self.sizer_dict[s.name].Add(self.button_dict[s.name])
+                                self.sizer_dict[s.name] = wx.BoxSizer(wx.HORIZONTAL)
+                                self.sizer_dict[s.name].Add(self.button_dict[s.name])
 
                         self.text_dict[s.name] = wx.StaticText(self, -1, label="%s"%s.message)
-                        self.text_dict[s.name].SetBackgroundColour("White")
-
+                        if s.level == 0:
+                                self.button_dict[s.name].SetBackgroundColour("LightGreen")
+                        else:
+                                if s.level == 1:
+                                        self.button_dict[s.name].SetBackgroundColour((255,165,0))
+                                else:
+                                        self.button_dict[s.name].SetBackgroundColour((255,0,0))
+                                
                         self.sizer_dict[s.name].Add(self.text_dict[s.name])
 
                         self.sizer2.Add(self.sizer_dict[s.name])

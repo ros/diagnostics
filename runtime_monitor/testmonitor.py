@@ -47,21 +47,21 @@ NAME = 'test_runtime_broadcaster'
 
 def loop(pub):
         stat = []
-        for c in range(0,2):
+        for c in range(0,4):
             sval = []
             sval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
             sval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
             sval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
             sval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
-            stat.append(DiagnosticStatus(0, "IBPS %d"%c, "All good", sval))
+            stat.append(DiagnosticStatus(c, "IBPS %d"%c, "All good", sval))
             ## @todo make the status string represent errors etc
 
-            for b in range(0,2):
+            for b in range(0,4):
                 bval = []
                 bval.append(DiagnosticValue(c+b+.1, "present (0,1)"))
                 bval.append(DiagnosticValue(c+b+.2, "charging (0,1)"))
                 bval.append(DiagnosticValue(c+b+.3, "supplying power (0,1)"))
-                stat.append(DiagnosticStatus(0, "Smart Battery %d.%d"%(c,b), "All good", bval))
+                stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval))
                 ## @todo make the status string represent errors etc
                             
 
