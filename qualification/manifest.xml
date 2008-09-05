@@ -10,4 +10,8 @@
   <depend package="hokuyourg_player" />
   <depend package="imu_node" />
   <url></url>
+  <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
+  <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
+  <sysdepend os="ubuntu" version="7.04-feisty" package="libwxgtk2.8-dev"/>
+  <sysdepend os="ubuntu" version="8.04-hardy" package="libwxgtk2.8-dev"/>
 </package>
