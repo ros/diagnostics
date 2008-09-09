@@ -119,10 +119,11 @@ class HokuyoTest(BaseTest):
       self.rl.stop()
       return
 
-    self.Log("Beginning stage 2 of test")
-
-    # Bring down the nodes
-    wx.CallAfter(self.MakePlot)
+    if self.resp.passed:
+      wx.CallAfter(self.MakePlot)
+    else:
+      self.rl.stop()
+      wx.CallAfter(self.Done, self.resp)  
 
   def MakePlot(self):
     vis_panel = self.res2.LoadPanel(self.parent, 'vis_panel')
@@ -136,14 +137,29 @@ class HokuyoTest(BaseTest):
     self.plot.set_zoom(False)
     NestPanel(plot_panel, self.plot)
 
-    vis_panel.Bind(wx.EVT_BUTTON, self.OnFail, id=xrc.XRCID('fail_button'))
+    vis_panel.Bind(wx.EVT_BUTTON, self.WallFail, id=xrc.XRCID('fail_button'))
     vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
 
     self.data = None
     self.good_count = 0
 
     self.t = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
-    
+
+  def OnLaserScan(self, data):
+    self.data = data
+
+  def WallFail(self, evt):
+    self.resp.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
+    self.WallDone()
+
+  def WallSucceed(self):
+    self.resp.status.append(DiagnosticStatus(0, 'Flat wall test', 'Wall measured approximately flat', [],[]))
+    self.WallDone()
+
+  def WallDone(self):
+    self.t.unregister()
+    self.rl.stop()
+    wx.CallAfter(self.Done, self.resp)  
 
   def OnIdle(self, evt):
     if self.data:
@@ -161,7 +177,7 @@ class HokuyoTest(BaseTest):
         self.good_count += 1
         color = 'g.'
         if (self.good_count > 40):
-          pass
+          self.WallSucceed()
       else:
         good_count = 0
         color = 'r.'
@@ -183,15 +199,3 @@ class HokuyoTest(BaseTest):
       self.data = None
 
     evt.RequestMore(True)
-
-  def OnLaserScan(self, data):
-    self.data = data
-
-  def OnFail(self, evt):
-    self.resp.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
-
-    self.t.unregister()
-
-    self.rl.stop()
-    
-    wx.CallAfter(self.Done, self.resp)
