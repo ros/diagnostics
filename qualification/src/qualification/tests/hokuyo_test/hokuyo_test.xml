@@ -1,4 +1,6 @@
 <launch>
-  <param name="urglaser/autostart" value="False" type="bool"/>
-  <node pkg="hokuyourg_player" type="hokuyourg_player" />
+  <param name="urglaser/calibrate_time" value="False" type="bool"/>
+  <param name="urglaser/min_ang" value="-10.0" type="double"/>
+  <param name="urglaser/max_ang" value="10.0" type="double"/>
+  <node pkg="hokuyourg_player" type="hokuyourg_player"/>
 </launch>

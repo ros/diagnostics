@@ -43,6 +43,8 @@ from wx import xrc
 import qualification
 from qualification import *
 
+import rospy
+
 class ScanPanel():
   def __init__(self, parent, func = None):
     self.parent = parent
@@ -101,6 +103,8 @@ class ScanPanel():
 
 class QualificationApp(wx.App):
   def OnInit(self):
+    rospy.ready("Qualifier", anonymous=True)
+    
     # Load the gui xrc file
     self.res = xrc.XmlResource(execution_path('gui.xrc'))
 

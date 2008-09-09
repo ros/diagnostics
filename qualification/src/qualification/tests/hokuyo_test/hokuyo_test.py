@@ -33,6 +33,8 @@
 import wx
 from wx import xrc
 
+import wx.lib.plot as plot
+import math
 
 from threading import Thread
 
@@ -43,50 +45,67 @@ from robot_srvs.srv import *
 import rospy
 import roslaunch
 
+from std_msgs.msg import LaserScan
+
+import numpy
+import wxmpl
+import matplotlib
+
+import time
+
+class ThreadHelper(Thread):
+  def __init__(self, func):
+    Thread.__init__(self)
+    self.func = func
+    self.start()
+
+  def __del__(self):
+    print 'Thread helper is destructing'
+
+  def run(self):
+    self.func()
+
+
 class HokuyoTest(BaseTest):
   def __init__(self, parent, serial, func):
 
     # Load the XRC resource
-    res = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
+    self.res2 = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
 
     # Load the instruction and test panels from the XRC resource
-    instruct_panel = res.LoadPanel(parent, 'instruct_panel')
-    test_panel = res.LoadPanel(parent, 'test_panel')
+    instruct_panel = self.res2.LoadPanel(parent, 'instruct_panel')
+    test_panel = self.res2.LoadPanel(parent, 'test_panel')
 
     # Initialize the BaseTest with these parts
     BaseTest.__init__(self, parent, instruct_panel, test_panel, serial, func, 'Hokuyo Top URG')
 
+    self.rl = None
+    self.t = None
+    self.resp = None
+
   # This is what runs once the instructions are read
   def Run(self):
-    worker = HokuyoThread(self)
+    worker = ThreadHelper(self.RunThread)
 
-
-class HokuyoThread(Thread):
-  def __init__(self, test):
-    Thread.__init__(self)
-    self.test = test
-    self.start()
-
-  def run(self):
-
+  def RunThread(self):
     # Create a roslauncher
-    rl = roslaunch.ROSLauncher()
+    self.rl = roslaunch.ROSLauncher()
     loader = roslaunch.XmlLoader()
 
     # Try loading the XML file
     try:
-        loader.load(execution_path('hokuyo_test.xml'), rl)
+        loader.load(execution_path('hokuyo_test.xml'), self.rl)
     except roslaunch.XmlParseException, e:
-      wx.CallAfter(self.test.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
+      wx.CallAfter(self.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
       return
 
     # Make sure we get a fresh master
-    rl.master.auto = rl.master.AUTO_RESTART
+    self.rl.master.auto = self.rl.master.AUTO_RESTART
 
     # Bring up the nodes
-    rl.prelaunch_check()
-    rl.load_parameters()
-    rl.launch_nodes()
+    self.rl.prelaunch_check()
+    self.rl.load_parameters()
+    self.rl.launch_nodes()
 
     # Wait for our self-test service to come up
     rospy.wait_for_service('urglaser/self_test', 5)
@@ -94,14 +113,85 @@ class HokuyoThread(Thread):
     # Try to query the self_test service on the hokuyo
     try:
         s = rospy.ServiceProxy('urglaser/self_test', SelfTest)
-        resp = s.call(SelfTestRequest(),60)
+        self.resp = s.call(SelfTestRequest(),60)
     except rospy.ServiceException, e:
-      wx.CallAfter(self.test.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))
-      rl.stop()
+      wx.CallAfter(self.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))
+      self.rl.stop()
       return
 
-    # Bring down the nodes
-    rl.stop()
+    self.Log("Beginning stage 2 of test")
 
-    # When the thread is done, raise our response
-    wx.CallAfter(self.test.Done, resp)
+    # Bring down the nodes
+    wx.CallAfter(self.MakePlot)
+
+  def MakePlot(self):
+    vis_panel = self.res2.LoadPanel(self.parent, 'vis_panel')
+    plot_panel = xrc.XRCCTRL(vis_panel, 'plot_panel')
+
+    NestPanel(self.parent, vis_panel)
+    
+    self.plot = wxmpl.PlotPanel(plot_panel,-1)
+    self.plot.set_crosshairs(False)
+    self.plot.set_selection(False)
+    self.plot.set_zoom(False)
+    NestPanel(plot_panel, self.plot)
+
+    vis_panel.Bind(wx.EVT_BUTTON, self.OnFail, id=xrc.XRCID('fail_button'))
+    vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
+
+    self.data = None
+    self.good_count = 0
+
+    self.t = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
+    
+
+  def OnIdle(self, evt):
+    if self.data:
+      angles = numpy.arange(self.data.angle_min, self.data.angle_max, self.data.angle_increment);
+      ranges = numpy.array(self.data.ranges)
+      xvals = -numpy.sin(angles)*ranges
+      yvals = numpy.cos(angles)*ranges
+
+      (a,b) = numpy.polyfit(xvals, yvals, 1)
+
+      err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, xvals, yvals))/ ranges.size)
+      print err
+
+      if (err < .005):
+        self.good_count += 1
+        color = 'g.'
+        if (self.good_count > 40):
+          pass
+      else:
+        good_count = 0
+        color = 'r.'
+
+      axes = self.plot.get_figure().gca()
+      axes.clear()
+      axes.plot(xvals, yvals, color)
+      axes.plot([-2, 2], [-2 * a + b, 2 * a + b], 'b-')
+
+      sz = self.plot.GetSize()
+      xrng = 0.5
+      yrng = 2.0*float(sz[1])/sz[0] * xrng;
+      axes.axis([-xrng,xrng,0,yrng])
+      axes.grid()
+      
+      self.plot.draw()
+      self.plot.Show()
+      
+      self.data = None
+
+    evt.RequestMore(True)
+
+  def OnLaserScan(self, data):
+    self.data = data
+
+  def OnFail(self, evt):
+    self.resp.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
+
+    self.t.unregister()
+
+    self.rl.stop()
+    
+    wx.CallAfter(self.Done, self.resp)
