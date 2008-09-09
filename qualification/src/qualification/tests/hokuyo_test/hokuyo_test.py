@@ -33,37 +33,18 @@
 import wx
 from wx import xrc
 
-import wx.lib.plot as plot
-import math
+import numpy
+import wxmpl
+import matplotlib
 
-from threading import Thread
+import rospy
+import roslaunch
 
 from qualification import *
 
 from robot_msgs.msg import *
 from robot_srvs.srv import *
-import rospy
-import roslaunch
-
 from std_msgs.msg import LaserScan
-
-import numpy
-import wxmpl
-import matplotlib
-
-import time
-
-class ThreadHelper(Thread):
-  def __init__(self, func):
-    Thread.__init__(self)
-    self.func = func
-    self.start()
-
-  def __del__(self):
-    print 'Thread helper is destructing'
-
-  def run(self):
-    self.func()
 
 
 class HokuyoTest(BaseTest):
@@ -79,9 +60,9 @@ class HokuyoTest(BaseTest):
     # Initialize the BaseTest with these parts
     BaseTest.__init__(self, parent, instruct_panel, test_panel, serial, func, 'Hokuyo Top URG')
 
-    self.rl = None
-    self.t = None
-    self.resp = None
+    self.roslaunch = None
+    self.topic = None
+    self.response = None
 
   # This is what runs once the instructions are read
   def Run(self):
@@ -89,23 +70,23 @@ class HokuyoTest(BaseTest):
 
   def RunThread(self):
     # Create a roslauncher
-    self.rl = roslaunch.ROSLauncher()
+    self.roslaunch = roslaunch.ROSLauncher()
     loader = roslaunch.XmlLoader()
 
     # Try loading the XML file
     try:
-        loader.load(execution_path('hokuyo_test.xml'), self.rl)
+        loader.load(execution_path('hokuyo_test.xml'), self.roslaunch)
     except roslaunch.XmlParseException, e:
       wx.CallAfter(self.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
       return
 
     # Make sure we get a fresh master
-    self.rl.master.auto = self.rl.master.AUTO_RESTART
+    self.roslaunch.master.auto = self.roslaunch.master.AUTO_RESTART
 
     # Bring up the nodes
-    self.rl.prelaunch_check()
-    self.rl.load_parameters()
-    self.rl.launch_nodes()
+    self.roslaunch.prelaunch_check()
+    self.roslaunch.load_parameters()
+    self.roslaunch.launch_nodes()
 
     # Wait for our self-test service to come up
     rospy.wait_for_service('urglaser/self_test', 5)
@@ -113,80 +94,106 @@ class HokuyoTest(BaseTest):
     # Try to query the self_test service on the hokuyo
     try:
         s = rospy.ServiceProxy('urglaser/self_test', SelfTest)
-        self.resp = s.call(SelfTestRequest(),60)
+        self.response = s.call(SelfTestRequest(),60)
     except rospy.ServiceException, e:
       wx.CallAfter(self.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))
-      self.rl.stop()
+      self.roslaunch.stop()
       return
 
-    if self.resp.passed:
+    # If the self test passed, make the wall plot
+    if self.response.passed:
       wx.CallAfter(self.MakePlot)
     else:
-      self.rl.stop()
-      wx.CallAfter(self.Done, self.resp)  
+      # We are done.  Clean up roslaunch and finish
+      self.roslaunch.stop()
+      wx.CallAfter(self.Done, self.response)  
+
 
   def MakePlot(self):
+
+    # Load the visualization panel
     vis_panel = self.res2.LoadPanel(self.parent, 'vis_panel')
     plot_panel = xrc.XRCCTRL(vis_panel, 'plot_panel')
 
+    # Nest the visualization panel, removing the current panel
     NestPanel(self.parent, vis_panel)
-    
+
+    # Configure the plot panel
     self.plot = wxmpl.PlotPanel(plot_panel,-1)
     self.plot.set_crosshairs(False)
     self.plot.set_selection(False)
     self.plot.set_zoom(False)
     NestPanel(plot_panel, self.plot)
 
+    # Bind the fail button and on idle events
     vis_panel.Bind(wx.EVT_BUTTON, self.WallFail, id=xrc.XRCID('fail_button'))
     vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
 
+    # Initialize data and count
     self.data = None
     self.good_count = 0
 
-    self.t = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
+    # Subscribe to the scan topic
+    self.topic = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
+
 
   def OnLaserScan(self, data):
+    # Just copy data to a local variable for processing during OnIdle
     self.data = data
 
   def WallFail(self, evt):
-    self.resp.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
+    # Append failure to our diagnostic status
+    self.response.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
     self.WallDone()
 
   def WallSucceed(self):
-    self.resp.status.append(DiagnosticStatus(0, 'Flat wall test', 'Wall measured approximately flat', [],[]))
+    # Append success to our diagnostic status
+    self.response.status.append(DiagnosticStatus(0, 'Flat wall test', 'Wall measured approximately flat', [],[]))
     self.WallDone()
 
   def WallDone(self):
-    self.t.unregister()
-    self.rl.stop()
-    wx.CallAfter(self.Done, self.resp)  
+    # Clean up the topic and the roslaunch
+    self.topic.unregister()
+    self.roslaunch.stop()
+    wx.CallAfter(self.Done, self.response)  
 
   def OnIdle(self, evt):
+    # If there is new data:
     if self.data:
+      # Create the angle and range arrays
       angles = numpy.arange(self.data.angle_min, self.data.angle_max, self.data.angle_increment);
       ranges = numpy.array(self.data.ranges)
+
+      # Convert to cartesian
       xvals = -numpy.sin(angles)*ranges
       yvals = numpy.cos(angles)*ranges
 
+      # Find the linear best fit
       (a,b) = numpy.polyfit(xvals, yvals, 1)
 
+      # Compute the error
       err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, xvals, yvals))/ ranges.size)
-      print err
+
 
       if (err < .005):
+        # If std is < 1/2 cm increment good counter
         self.good_count += 1
         color = 'g.'
         if (self.good_count > 40):
+          # If good for 40 iterations, declare success
           self.WallSucceed()
       else:
+        # Reset counter
         good_count = 0
         color = 'r.'
 
+      # Plot the values and line of best fit
       axes = self.plot.get_figure().gca()
       axes.clear()
       axes.plot(xvals, yvals, color)
       axes.plot([-2, 2], [-2 * a + b, 2 * a + b], 'b-')
 
+      # Adjust the size of the axes using size of the window (this is somewhat hackish)
       sz = self.plot.GetSize()
       xrng = 0.5
       yrng = 2.0*float(sz[1])/sz[0] * xrng;
@@ -195,7 +202,9 @@ class HokuyoTest(BaseTest):
       
       self.plot.draw()
       self.plot.Show()
-      
+
+      # Clear local data
       self.data = None
 
+    # Request more idle time
     evt.RequestMore(True)
