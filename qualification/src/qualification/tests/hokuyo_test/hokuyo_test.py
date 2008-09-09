@@ -115,15 +115,15 @@ class HokuyoTest(BaseTest):
     vis_panel = self.res2.LoadPanel(self.parent, 'vis_panel')
     plot_panel = xrc.XRCCTRL(vis_panel, 'plot_panel')
 
-    # Nest the visualization panel, removing the current panel
-    NestPanel(self.parent, vis_panel)
-
     # Configure the plot panel
     self.plot = wxmpl.PlotPanel(plot_panel,-1)
     self.plot.set_crosshairs(False)
     self.plot.set_selection(False)
     self.plot.set_zoom(False)
     NestPanel(plot_panel, self.plot)
+
+    # Nest the visualization panel, removing the current panel
+    NestPanel(self.parent, vis_panel)
 
     # Bind the fail button and on idle events
     vis_panel.Bind(wx.EVT_BUTTON, self.WallFail, id=xrc.XRCID('fail_button'))
@@ -195,7 +195,7 @@ class HokuyoTest(BaseTest):
 
       # Adjust the size of the axes using size of the window (this is somewhat hackish)
       sz = self.plot.GetSize()
-      xrng = 0.5
+      xrng = 1.0
       yrng = 2.0*float(sz[1])/sz[0] * xrng;
       axes.axis([-xrng,xrng,0,yrng])
       axes.grid()
