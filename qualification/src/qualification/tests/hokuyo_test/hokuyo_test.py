@@ -130,16 +130,31 @@ class HokuyoTest(BaseTest):
     vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
 
     # Initialize data and count
-    self.data = None
-    self.good_count = 0
+    self.all_xvals   = []
+    self.all_yvals   = []
+    self.val_count  = 0
+    self.xvals = numpy.array([])
+    self.yvals = numpy.array([])
 
     # Subscribe to the scan topic
     self.topic = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
 
 
   def OnLaserScan(self, data):
-    # Just copy data to a local variable for processing during OnIdle
-    self.data = data
+    # Create the angle and range arrays
+    angles = numpy.arange(data.angle_min, data.angle_max, data.angle_increment);
+    ranges = numpy.array(data.ranges)
+
+    # Convert to cartesian
+    self.xvals = -numpy.sin(angles)*ranges
+    self.yvals = numpy.cos(angles)*ranges
+
+    if (val_count < 40):
+      self.all_xvals.append(self.xvals)
+      self.all_yvals.append(self.yvals)
+    else:
+      self.all_xvals[val_count % 40] = self.xvals
+      self.all_xvals[val_count % 40] = self.yvals
 
   def WallFail(self, evt):
     # Append failure to our diagnostic status
@@ -158,53 +173,52 @@ class HokuyoTest(BaseTest):
     wx.CallAfter(self.Done, self.response)  
 
   def OnIdle(self, evt):
-    # If there is new data:
-    if self.data:
-      # Create the angle and range arrays
-      angles = numpy.arange(self.data.angle_min, self.data.angle_max, self.data.angle_increment);
-      ranges = numpy.array(self.data.ranges)
 
-      # Convert to cartesian
-      xvals = -numpy.sin(angles)*ranges
-      yvals = numpy.cos(angles)*ranges
+    all_xvals = reduce(numpy.append, self.all_xvals)
+    all_yvals = reduce(numpy.append, self.all_yvals)
 
-      # Find the linear best fit
-      (a,b) = numpy.polyfit(xvals, yvals, 1)
+    # Find the linear best fit
+    (a,b) = numpy.polyfit(all_xvals, all_yvals, 1)
 
-      # Compute the error
-      err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, xvals, yvals))/ ranges.size)
+    # Compute the error
+    err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, all_xvals, all_yvals))/ all_xvals.size)
 
+    ok_err = .005;
+    tgt_a  = 0
+    ok_a   = .05
+    tgt_b  = .8
+    ok_b   = .005
 
-      if (err < .005):
-        # If std is < 1/2 cm increment good counter
-        self.good_count += 1
-        color = 'g.'
-        if (self.good_count > 40):
-          # If good for 40 iterations, declare success
-          self.WallSucceed()
-      else:
-        # Reset counter
-        good_count = 0
-        color = 'r.'
+    print "A: %f B: %f err: %f" % (a, b, err)
+    
+    if (self.val_count > 40 & err < .005 & abs(tgt_a - a) < ok_a & abs(tgt_b - b) < ok_b):
+      self.WallSucceed()
 
-      # Plot the values and line of best fit
-      axes = self.plot.get_figure().gca()
-      axes.clear()
-      axes.plot(xvals, yvals, color)
-      axes.plot([-2, 2], [-2 * a + b, 2 * a + b], 'b-')
+    last_err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, self.xvals, self.yvals))/ all_xvals.size)
 
-      # Adjust the size of the axes using size of the window (this is somewhat hackish)
-      sz = self.plot.GetSize()
-      xrng = 1.0
-      yrng = 2.0*float(sz[1])/sz[0] * xrng;
-      axes.axis([-xrng,xrng,0,yrng])
-      axes.grid()
+    if (last_err < ok_err):
+      color = 'g.'
+    else:
+      color = 'r.'
       
-      self.plot.draw()
-      self.plot.Show()
+    # Plot the values and line of best fit
+    axes = self.plot.get_figure().gca()
+    axes.clear()
+    axes.plot(self.xvals, self.yvals, color)
+    axes.plot([-2, 2], [-2 * a + b, 2 * a + b], 'b-')
 
-      # Clear local data
-      self.data = None
-
+    # Adjust the size of the axes using size of the window (this is somewhat hackish)
+    sz = self.plot.GetSize()
+    xrng = 1.0
+    yrng = 2.0*float(sz[1])/sz[0] * xrng;
+    axes.axis([-xrng,xrng,0,yrng])
+    axes.grid()
+    
+    self.plot.draw()
+    self.plot.Show()
+    
+    # Clear local data
+    self.data = None
+    
     # Request more idle time
     evt.RequestMore(True)
