@@ -31,7 +31,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os, sys, time, datetime
-from threading import Thread
 
 import wx
 from wx import xrc
@@ -68,22 +67,6 @@ def NestPanel(top_panel, sub_panel):
   # Reset size to our cached size, and then layout
   top_panel.GetTopLevelParent().SetSize(start_size)
   top_panel.GetTopLevelParent().Layout()
-
-
-# This is a probably inappropriate helper class to
-# change the semantics for convenience of thread spawning
-class ThreadHelper(Thread):
-  def __init__(self, func):
-    Thread.__init__(self)
-    self.func = func
-    self.start()
-
-  def __del__(self):
-    print 'Thread helper is destructing'
-
-  def run(self):
-    self.func()
-
 
 class BaseTest(object):
   def __init__(self, parent, instruct_panel, test_panel, serial, func, desc):

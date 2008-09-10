@@ -46,6 +46,13 @@ from robot_msgs.msg import *
 from robot_srvs.srv import *
 from std_msgs.msg import LaserScan
 
+import thread
+
+ok_err = .005;
+tgt_a  = 0
+ok_a   = .01
+tgt_b  = .73
+ok_b   = .01
 
 class HokuyoTest(BaseTest):
   def __init__(self, parent, serial, func):
@@ -66,9 +73,9 @@ class HokuyoTest(BaseTest):
 
   # This is what runs once the instructions are read
   def Run(self):
-    worker = ThreadHelper(self.RunThread)
+    thread.start_new_thread(self.RunThread, (None,))
 
-  def RunThread(self):
+  def RunThread(self, arg):
     # Create a roslauncher
     self.roslaunch = roslaunch.ROSLauncher()
     loader = roslaunch.XmlLoader()
@@ -125,17 +132,18 @@ class HokuyoTest(BaseTest):
     # Nest the visualization panel, removing the current panel
     NestPanel(self.parent, vis_panel)
 
-    # Bind the fail button and on idle events
-    vis_panel.Bind(wx.EVT_BUTTON, self.WallFail, id=xrc.XRCID('fail_button'))
-    vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
-
     # Initialize data and count
     self.all_xvals   = []
     self.all_yvals   = []
     self.val_count  = 0
     self.xvals = numpy.array([])
     self.yvals = numpy.array([])
+    self.val_lock = thread.allocate_lock()
 
+    # Bind the fail button and on idle events
+    vis_panel.Bind(wx.EVT_BUTTON, self.WallDone, id=xrc.XRCID('done_button'))
+    vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
+    
     # Subscribe to the scan topic
     self.topic = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
 
@@ -146,24 +154,37 @@ class HokuyoTest(BaseTest):
     ranges = numpy.array(data.ranges)
 
     # Convert to cartesian
+
+    self.val_lock.acquire()
     self.xvals = -numpy.sin(angles)*ranges
     self.yvals = numpy.cos(angles)*ranges
-
-    if (val_count < 40):
+    
+    if (self.val_count < 120):
       self.all_xvals.append(self.xvals)
       self.all_yvals.append(self.yvals)
     else:
-      self.all_xvals[val_count % 40] = self.xvals
-      self.all_xvals[val_count % 40] = self.yvals
+      self.all_xvals[self.val_count % 120] = self.xvals
+      self.all_yvals[self.val_count % 120] = self.yvals
+      
+    self.val_count += 1
+    self.val_lock.release()
 
-  def WallFail(self, evt):
+  def WallDone(self, evt):
     # Append failure to our diagnostic status
     self.response.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
     self.WallDone()
 
-  def WallSucceed(self):
+  def WallSucceed(self, a, b):
     # Append success to our diagnostic status
-    self.response.status.append(DiagnosticStatus(0, 'Flat wall test', 'Wall measured approximately flat', [],[]))
+
+    values = [DiagnosticValue(a, 'slope'), DiagnosticValue(b, 'distance')]
+
+    if ((abs(tgt_a - a) < ok_a) & (abs(tgt_b - b) < ok_b)):
+      stat = DiagnosticStatus(0, 'Wall Measurement', 'Wall was measured within reasonable error bounds', values , [])
+    else:
+      stat = DiagnosticStatus(1, 'Wall Measurement', 'Wall measured as flat, but slope or distance is outside of normal range', values , [])
+
+    self.response.status.append(stat)
     self.WallDone()
 
   def WallDone(self):
@@ -174,51 +195,50 @@ class HokuyoTest(BaseTest):
 
   def OnIdle(self, evt):
 
-    all_xvals = reduce(numpy.append, self.all_xvals)
-    all_yvals = reduce(numpy.append, self.all_yvals)
+    self.val_lock.acquire()
+    if (self.val_count > 0):
+      all_xvals = reduce(numpy.append, self.all_xvals)
+      all_yvals = reduce(numpy.append, self.all_yvals)
 
-    # Find the linear best fit
-    (a,b) = numpy.polyfit(all_xvals, all_yvals, 1)
+      # Find the linear best fit
+      (a,b) = numpy.polyfit(all_xvals, all_yvals, 1)
 
-    # Compute the error
-    err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, all_xvals, all_yvals))/ all_xvals.size)
-
-    ok_err = .005;
-    tgt_a  = 0
-    ok_a   = .05
-    tgt_b  = .8
-    ok_b   = .005
-
-    print "A: %f B: %f err: %f" % (a, b, err)
-    
-    if (self.val_count > 40 & err < .005 & abs(tgt_a - a) < ok_a & abs(tgt_b - b) < ok_b):
-      self.WallSucceed()
-
-    last_err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, self.xvals, self.yvals))/ all_xvals.size)
-
-    if (last_err < ok_err):
-      color = 'g.'
-    else:
-      color = 'r.'
+      # Compute the error
+      err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, all_xvals, all_yvals))/ all_xvals.size)
       
-    # Plot the values and line of best fit
-    axes = self.plot.get_figure().gca()
-    axes.clear()
-    axes.plot(self.xvals, self.yvals, color)
-    axes.plot([-2, 2], [-2 * a + b, 2 * a + b], 'b-')
+      print "A: %f B: %f err: %f" % (a, b, err)
+      
+      if ( (self.val_count > 120) & (err < .005)):
+        self.WallSucceed(a, b)
 
-    # Adjust the size of the axes using size of the window (this is somewhat hackish)
-    sz = self.plot.GetSize()
-    xrng = 1.0
-    yrng = 2.0*float(sz[1])/sz[0] * xrng;
-    axes.axis([-xrng,xrng,0,yrng])
-    axes.grid()
-    
-    self.plot.draw()
-    self.plot.Show()
-    
-    # Clear local data
-    self.data = None
+      last_err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, self.xvals, self.yvals))/ all_xvals.size)
+      
+      if (last_err < ok_err):
+        laser_color = 'g.'
+      else:
+        laser_color = 'r.'
+      
+      if ( (abs(tgt_a - a) < ok_a) & (abs(tgt_b - b) < ok_b) ):
+        line_color = 'b-'
+      else:
+        line_color = 'r-'
+
+      # Plot the values and line of best fit
+      axes = self.plot.get_figure().gca()
+      axes.clear()
+      axes.plot(self.xvals, self.yvals, laser_color)
+      axes.plot([-2, 2], [-2 * a + b, 2 * a + b], line_color)
+        
+      # Adjust the size of the axes using size of the window (this is somewhat hackish)
+      sz = self.plot.GetSize()
+      xrng = 1.0
+      yrng = 2.0*float(sz[1])/sz[0] * xrng;
+      axes.axis([-xrng,xrng,0,yrng])
+      axes.grid()
+      
+      self.plot.draw()
+      self.plot.Show()
     
     # Request more idle time
+    self.val_lock.release()
     evt.RequestMore(True)
