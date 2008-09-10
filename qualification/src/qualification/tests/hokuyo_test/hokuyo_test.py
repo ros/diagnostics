@@ -52,7 +52,7 @@ class HokuyoTest(BaseTest):
 
     # Load the XRC resource
     self.res2 = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
-
+    
     # Load the instruction and test panels from the XRC resource
     instruct_panel = self.res2.LoadPanel(parent, 'instruct_panel')
     test_panel = self.res2.LoadPanel(parent, 'test_panel')
