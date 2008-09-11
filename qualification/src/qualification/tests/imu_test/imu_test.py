@@ -43,30 +43,28 @@ from robot_srvs.srv import *
 import rospy
 import roslaunch
 
+import thread
+
 class ImuTest(BaseTest):
   def __init__(self, parent, serial, func):
 
     # Load the XRC resource
-    res = xrc.XmlResource(execution_path('imu_test.xrc'))
-
-    # Load the instruction and test panels from the XRC resource
-    instruct_panel = res.LoadPanel(parent, 'instruct_panel')
-    test_panel = res.LoadPanel(parent, 'test_panel')
+    self.res2 = xrc.XmlResource(execution_path('imu_test.xrc'))
 
     # Initialize the BaseTest with these parts
-    BaseTest.__init__(self, parent, instruct_panel, test_panel, serial, func, 'Inertia-Link 3DM-GX2')
+    BaseTest.__init__(self, parent, serial, func, 'Inertia-Link 3DM-GX2')
+
+  def instruct_panel_gen(self, parent):
+    return self.res2.LoadPanel(parent, 'instruct_panel')
+
+  def test_panel_gen(self, parent):
+    return self.res2.LoadPanel(parent, 'test_panel')
 
   # This is what runs once the instructions are read
   def Run(self):
-    worker = ImuThread(self)
+    thread.start_new_thread(self.RunThread, (None,))
 
-class ImuThread(Thread):
-  def __init__(self, test):
-    Thread.__init__(self)
-    self.test = test
-    self.start()
-
-  def run(self):
+  def RunThread(self, arg):
 
     # Create a roslauncher
     rl = roslaunch.ROSLauncher()
@@ -104,4 +102,4 @@ class ImuThread(Thread):
     rl.stop()
 
     # When the thread is done, raise our response
-    wx.CallAfter(self.test.Done, resp)
+    wx.CallAfter(self.Done, resp)
