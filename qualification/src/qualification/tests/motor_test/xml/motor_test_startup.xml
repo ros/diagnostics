@@ -31,11 +31,5 @@
     <motorTorqueConstant>-.0603</motorTorqueConstant>
     <pulsesPerRevolution>1200</pulsesPerRevolution>
   </transmission>
-  
-  <controller name="test_controller" type="MotorTest1Node" topic="test_controller">
-    <joint name="test_joint">
-    <controller_defaults duration=5 fixture_name="fixture_joint" />
-    </joint>
-  </controller>
 
 </robot>

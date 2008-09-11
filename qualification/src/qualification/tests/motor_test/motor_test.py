@@ -44,11 +44,17 @@ from qualification import *
 
 from robot_msgs.msg import *
 from robot_srvs.srv import *
-
+from mechanism_control.msg import *
+from mechanism_control import mechanism
+from generic_controllers.controllers import * 
 
 class MotorTest(BaseTest):
   def __init__(self, parent, serial, func):
-
+    self.ready=False
+    self.serial = serial[0:7]
+    self.count = 1
+    self.finished=False
+    self.testcount=1
     # Load the XRC resource
     self.res2 = xrc.XmlResource(execution_path('motor_test.xrc'))
     
@@ -62,7 +68,7 @@ class MotorTest(BaseTest):
 
     self.roslaunch = None
     self.topic = None
-    self.response = None
+    self.response = DiagnosticMessage(None,[])
 
   # This is what runs once the instructions are read
   def Run(self):
@@ -87,7 +93,9 @@ class MotorTest(BaseTest):
     self.roslaunch.prelaunch_check()
     self.roslaunch.load_parameters()
     self.roslaunch.launch_nodes()
-    time.sleep(10)
+    
+    self.topic = rospy.TopicSub("/diagnostics", DiagnosticMessage, self.OnMsg)
+    
     # Wait for our self-test service to come up
     #rospy.wait_for_service('urglaser/self_test', 5)
 
@@ -101,14 +109,51 @@ class MotorTest(BaseTest):
     #  return
 
     # If the self test passed, make the wall plot
-   # if self.response.passed:
-      #wx.CallAfter(self.MakePlot)
-   # else:
-      # We are done.  Clean up roslaunch and finish
-      #self.roslaunch.stop()
-      #wx.CallAfter(self.Done, self.response)  
-    print("don")
-
+    
+    
+  def OnMsg(self, msg):
+    
+    for i in range(len(msg.status)):
+      if(msg.status[i].name=='MotorTest'):
+          if(msg.status[i].level==0):
+            self.Log(msg.status[i].message) 
+            self.response.status.append(msg.status[i])
+            if(self.count<self.testcount):
+              mechanism.kill_controller('test_controller')
+              self.OpenXml()
+              self.Log("Starting Motor Test %s" % (count))
+              mechanism.spawn_controller(self.xml)
+              self.count=self.count+1
+            else:
+              self.finished=True
+          else:
+            self.Log(msg.status[i].message)
+            self.response.status.append(msg.status[i])
+            self.finished=True
+      elif(msg.status[i].name=='EtherCAT Master' and self.ready==False):
+        self.ready=True
+        self.OpenXml()
+        self.Log("Starting Motor Test 1")
+        mechanism.spawn_controller(self.xml)
+        self.count=self.count+1
+    if self.finished:
+      mechanism.shutdown()
+      self.topic.unregister()
+      self.roslaunch.stop()
+      wx.CallAfter(self.Done, self.response)   
+  
+  def OpenXml(self):
+    count = str(self.count)
+    try:
+      xmlFile =execution_path(str('xml/'+self.serial+'_test'+count+'.xml'))
+      f = open(xmlFile)
+      self.xml = f.read()
+      f.close()
+    except IOError:
+      wx.CallAfter(self.Cancel, "Counld not open a test file: %s.\n" % (f))
+      return 
+  
+      
   def MakePlot(self):
 
     # Load the visualization panel
