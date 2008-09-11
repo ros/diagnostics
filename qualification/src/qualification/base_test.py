@@ -69,11 +69,9 @@ def NestPanel(top_panel, sub_panel):
   top_panel.GetTopLevelParent().Layout()
 
 class BaseTest(object):
-  def __init__(self, parent, instruct_panel, test_panel, serial, func, desc):
+  def __init__(self, parent, serial, func, desc):
     # Store variables
     self.parent = parent
-    self.instruct_panel = instruct_panel
-    self.test_panel = test_panel
     self.serial = serial
     self.func = func
     self.desc = desc
@@ -89,6 +87,9 @@ class BaseTest(object):
     # Set sizer to None non-destructively to avoid blowing away with NestPanel in the future
     parent.SetSizer(None,False)
 
+    self.DoInstruct()
+
+  def DoInstruct(self):
     # Load panels
     self.res = xrc.XmlResource(execution_path('base_test.xrc'))
     self.instruct_wrapper = self.res.LoadPanel(self.parent, 'instruct_wrapper')
@@ -98,16 +99,18 @@ class BaseTest(object):
     self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnContinue, id=xrc.XRCID('ins_continue_button'))
     self.instruct_wrapper.Bind(wx.EVT_BUTTON, self.OnCancel, id=xrc.XRCID('ins_cancel_button'))
 
-    # The instruction panel needs to be reparented inside of the wrapper so it displays correctly
-    self.instruct_panel.Reparent(self.instruct_wrapper_panel)
+    # Create the instruction panel using the child classes generator
+    self.instruct_panel = self.instruct_panel_gen(self.instruct_wrapper_panel)
 
     # Place the instruction panel inside the wrapper
     NestPanel(self.instruct_wrapper_panel, self.instruct_panel)
 
     # Place the wrapper inside the parent
     NestPanel(self.parent, self.instruct_wrapper)
+        
 
   def OnContinue(self, evt):
+    self.test_panel     = self.test_panel_gen(self.parent)
     # Destructively replace the contents of parent with the test panel
     NestPanel(self.parent, self.test_panel)
     # Run the test
@@ -169,7 +172,7 @@ class BaseTest(object):
     self.result_ctrl = xrc.XRCCTRL(self.results_panel, 'result_ctrl')
 
     self.results_panel.Bind(wx.EVT_BUTTON, self.OnSubmit, id=xrc.XRCID('res_submit_button'))
-    self.results_panel.Bind(wx.EVT_BUTTON, self.OnResCancel, id=xrc.XRCID('res_cancel_button'))
+    self.results_panel.Bind(wx.EVT_BUTTON, self.OnDiscard, id=xrc.XRCID('res_discard_button'))
 
     NestPanel(self.parent, self.results_panel)
 
@@ -201,8 +204,8 @@ class BaseTest(object):
 
     self.result_ctrl.SetValue(head + res)
 
-  def OnResCancel(self, evt):
-    self.Cancel('Self test was run but not submitted')
+  def OnDiscard(self, evt):
+    self.DoInstruct()
 
   def OnSubmit(self, evt):
     ###

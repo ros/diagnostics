@@ -51,7 +51,7 @@ import thread
 ok_err = .005;
 tgt_a  = 0
 ok_a   = .01
-tgt_b  = .73
+tgt_b  = .71
 ok_b   = .01
 
 class HokuyoTest(BaseTest):
@@ -60,16 +60,19 @@ class HokuyoTest(BaseTest):
     # Load the XRC resource
     self.res2 = xrc.XmlResource(execution_path('hokuyo_test.xrc'))
     
-    # Load the instruction and test panels from the XRC resource
-    instruct_panel = self.res2.LoadPanel(parent, 'instruct_panel')
-    test_panel = self.res2.LoadPanel(parent, 'test_panel')
-
     # Initialize the BaseTest with these parts
-    BaseTest.__init__(self, parent, instruct_panel, test_panel, serial, func, 'Hokuyo Top URG')
+    BaseTest.__init__(self, parent, serial, func, 'Hokuyo Top URG')
 
     self.roslaunch = None
     self.topic = None
     self.response = None
+
+  # Load the instruction and test panels from the XRC resource
+  def instruct_panel_gen(self, parent):
+    return self.res2.LoadPanel(parent, 'instruct_panel')
+
+  def test_panel_gen(self, parent):
+    return self.res2.LoadPanel(parent, 'test_panel')
 
   # This is what runs once the instructions are read
   def Run(self):
@@ -109,14 +112,50 @@ class HokuyoTest(BaseTest):
 
     # If the self test passed, make the wall plot
     if self.response.passed:
-      wx.CallAfter(self.MakePlot)
+      wx.CallAfter(self.SetupWallTest)
     else:
       # We are done.  Clean up roslaunch and finish
       self.roslaunch.stop()
       wx.CallAfter(self.Done, self.response)  
 
+  def SetupWallTest(self):
+    self.test_panel2     = self.test_panel_gen(self.parent)
+    # Destructively replace the contents of parent with the test panel
+    NestPanel(self.parent, self.test_panel2)
+    
+    # Initialize data and count
+    self.all_xvals   = []
+    self.all_yvals   = []
+    self.val_count  = 0
+    self.xvals = numpy.array([])
+    self.yvals = numpy.array([])
 
-  def MakePlot(self):
+    self.topic = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
+
+    self.wall_flat = None
+    self.wall_fit = None
+
+  def OnLaserScan(self, data):
+    # Create the angle and range arrays
+    angles = numpy.arange(data.angle_min, data.angle_max, data.angle_increment);
+    ranges = numpy.array(data.ranges)
+
+    # Convert to cartesian
+
+    self.xvals = -numpy.sin(angles)*ranges
+    self.yvals = numpy.cos(angles)*ranges
+    
+    if (self.val_count < 120):
+      self.all_xvals.append(self.xvals)
+      self.all_yvals.append(self.yvals)
+      self.val_count += 1
+    elif (self.val_count == 120):
+      wx.CallAfter(self.FinishWallTest)
+
+  def FinishWallTest(self):
+
+    # Probably don't need topic anymore in short term
+    self.topic.unregister()
 
     # Load the visualization panel
     vis_panel = self.res2.LoadPanel(self.parent, 'vis_panel')
@@ -132,113 +171,69 @@ class HokuyoTest(BaseTest):
     # Nest the visualization panel, removing the current panel
     NestPanel(self.parent, vis_panel)
 
-    # Initialize data and count
-    self.all_xvals   = []
-    self.all_yvals   = []
-    self.val_count  = 0
-    self.xvals = numpy.array([])
-    self.yvals = numpy.array([])
-    self.val_lock = thread.allocate_lock()
-
     # Bind the fail button and on idle events
     vis_panel.Bind(wx.EVT_BUTTON, self.WallDone, id=xrc.XRCID('done_button'))
-    vis_panel.Bind(wx.EVT_IDLE, self.OnIdle)
+    vis_panel.Bind(wx.EVT_BUTTON, self.WallRecheck, id=xrc.XRCID('recheck_button'))
+
+    all_xvals = reduce(numpy.append, self.all_xvals)
+    all_yvals = reduce(numpy.append, self.all_yvals)
+
+    # Find the linear best fit
+    (a,b) = numpy.polyfit(all_xvals, all_yvals, 1)
     
-    # Subscribe to the scan topic
-    self.topic = rospy.TopicSub("scan", LaserScan, self.OnLaserScan)
-
-
-  def OnLaserScan(self, data):
-    # Create the angle and range arrays
-    angles = numpy.arange(data.angle_min, data.angle_max, data.angle_increment);
-    ranges = numpy.array(data.ranges)
-
-    # Convert to cartesian
-
-    self.val_lock.acquire()
-    self.xvals = -numpy.sin(angles)*ranges
-    self.yvals = numpy.cos(angles)*ranges
+    # Compute the error
+    err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, all_xvals, all_yvals))/ all_xvals.size)
     
-    if (self.val_count < 120):
-      self.all_xvals.append(self.xvals)
-      self.all_yvals.append(self.yvals)
+    print "A: %f B: %f err: %f" % (a, b, err)
+
+    self.wall_flat = DiagnosticStatus(2, 'Flat wall test', 'Measured std of wall is too high', [DiagnosticValue(err, 'std_dev')],[])
+
+    if ( err < ok_err ):
+      self.wall_flat.level = 0
+      self.wall_flat.message = 'Wall measured as flat'
+      self.Log('Wall measured as flat')
+      laser_color = 'g.'
     else:
-      self.all_xvals[self.val_count % 120] = self.xvals
-      self.all_yvals[self.val_count % 120] = self.yvals
+      self.Log('Measured std of wall is too high')
+      laser_color = 'r.'
       
-    self.val_count += 1
-    self.val_lock.release()
+    values = [DiagnosticValue(a, 'slope'), DiagnosticValue(b, 'distance')]
+    self.wall_fit = DiagnosticStatus(1, 'Wall Measurement', 'Measured wall has incorrect slope or distance', values , []);
+    if ((abs(tgt_a - a) < ok_a) & (abs(tgt_b - b) < ok_b)):
+      self.wall_fit.level = 0
+      self.wall_fit.message = 'Wall detected with correct slope and distance'
+      self.Log('Wall detected with correct slope and distance')
+      line_color = 'b-'
+    else:
+      self.Log('Measured wall has incorrect slope or distance')
+      line_color = 'r-'      
+
+    # Plot the values and line of best fit
+    axes = self.plot.get_figure().gca()
+    axes.clear()
+    axes.plot(self.xvals, self.yvals, laser_color)
+    axes.plot([-2, 2], [-2 * a + b, 2 * a + b], line_color)
+    axes.plot([-2, 2], [tgt_b, tgt_b], 'b--')
+    
+    # Adjust the size of the axes using size of the window (this is somewhat hackish)
+    sz = self.plot.GetSize()
+    xrng = 1.0
+    yrng = 2.0*float(sz[1])/sz[0] * xrng;
+    axes.axis([-xrng,xrng,0,yrng])
+    axes.grid()
+    
+    self.plot.draw()
+    self.plot.Show()
 
   def WallDone(self, evt):
     # Append failure to our diagnostic status
-    self.response.status.append(DiagnosticStatus(2, 'Flat wall test', 'Test aborted without flat wall found', [],[]))
-    self.WallDone()
+    self.response.status.append(self.wall_flat)
+    self.response.status.append(self.wall_fit)
 
-  def WallSucceed(self, a, b):
-    # Append success to our diagnostic status
-
-    values = [DiagnosticValue(a, 'slope'), DiagnosticValue(b, 'distance')]
-
-    if ((abs(tgt_a - a) < ok_a) & (abs(tgt_b - b) < ok_b)):
-      stat = DiagnosticStatus(0, 'Wall Measurement', 'Wall was measured within reasonable error bounds', values , [])
-    else:
-      stat = DiagnosticStatus(1, 'Wall Measurement', 'Wall measured as flat, but slope or distance is outside of normal range', values , [])
-
-    self.response.status.append(stat)
-    self.WallDone()
-
-  def WallDone(self):
-    # Clean up the topic and the roslaunch
-    self.topic.unregister()
     self.roslaunch.stop()
-    wx.CallAfter(self.Done, self.response)  
 
-  def OnIdle(self, evt):
+    wx.CallAfter(self.Done, self.response)
 
-    self.val_lock.acquire()
-    if (self.val_count > 0):
-      all_xvals = reduce(numpy.append, self.all_xvals)
-      all_yvals = reduce(numpy.append, self.all_yvals)
-
-      # Find the linear best fit
-      (a,b) = numpy.polyfit(all_xvals, all_yvals, 1)
-
-      # Compute the error
-      err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, all_xvals, all_yvals))/ all_xvals.size)
-      
-      print "A: %f B: %f err: %f" % (a, b, err)
-      
-      if ( (self.val_count > 120) & (err < .005)):
-        self.WallSucceed(a, b)
-
-      last_err = numpy.sqrt(sum(map(lambda x,y: (y-(a*x+b))**2, self.xvals, self.yvals))/ all_xvals.size)
-      
-      if (last_err < ok_err):
-        laser_color = 'g.'
-      else:
-        laser_color = 'r.'
-      
-      if ( (abs(tgt_a - a) < ok_a) & (abs(tgt_b - b) < ok_b) ):
-        line_color = 'b-'
-      else:
-        line_color = 'r-'
-
-      # Plot the values and line of best fit
-      axes = self.plot.get_figure().gca()
-      axes.clear()
-      axes.plot(self.xvals, self.yvals, laser_color)
-      axes.plot([-2, 2], [-2 * a + b, 2 * a + b], line_color)
-        
-      # Adjust the size of the axes using size of the window (this is somewhat hackish)
-      sz = self.plot.GetSize()
-      xrng = 1.0
-      yrng = 2.0*float(sz[1])/sz[0] * xrng;
-      axes.axis([-xrng,xrng,0,yrng])
-      axes.grid()
-      
-      self.plot.draw()
-      self.plot.Show()
-    
-    # Request more idle time
-    self.val_lock.release()
-    evt.RequestMore(True)
+  def WallRecheck(self, evt):
+    # Append failure to our diagnostic status
+    self.SetupWallTest()
