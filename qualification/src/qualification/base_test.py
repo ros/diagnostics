@@ -187,7 +187,7 @@ class BaseTest(object):
       passfail = 'PASS'
       i = 1
       for stat in results.status:
-        if (stat.level != 0):
+        if (stat.level > 1):
           passfail = 'FAIL'
         res += 'Test %2d) %s\n' % (i, stat.name)
         res += '  [%s]: %s\n' % (statdict[stat.level], stat.message)
