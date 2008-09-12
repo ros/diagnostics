@@ -70,10 +70,8 @@ def self_test(req):
                 if (speed > 900):
                     out_stat.append(DiagnosticStatus(0, '%s cable test' % (eth), 'Gigabit', vals, []))
                 elif (speed > 90):
-                    pass
                     out_stat.append(DiagnosticStatus(0, '%s cable test' % (eth), '100 Megabit', vals, []))
                 else:
-                    pass
                     out_stat.append(DiagnosticStatus(1, '%s cable test' % (eth), '< 10 Megabit', vals, []))
             else:
                 vals.append(DiagnosticValue(0.0, 'speed'))
