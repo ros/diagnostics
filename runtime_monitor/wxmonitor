@@ -120,8 +120,10 @@ class MainWindow(wx.Frame):
 
         def OnClick(self, e):
                 values_str = ""
+                for v in self.components[self.button_id_dict[e.GetId()]].strings:
+                        values_str = values_str + "%s: %s\n"%(v.label, v.value)
                 for v in self.components[self.button_id_dict[e.GetId()]].values:
-                        values_str = values_str + "Value: %.2f Label: %s\n"%(v.value, v.value_label)
+                        values_str = values_str + "%s: %f\n"%(v.value_label, v.value)
 
                 d = wx.MessageDialog(self, "%s\n%s\n%s"%(self.components[self.button_id_dict[e.GetId()]].name, self.components[self.button_id_dict[e.GetId()]].message, values_str),"%s"%self.components[self.button_id_dict[e.GetId()]].name, wx.OK)
                 
