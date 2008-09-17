@@ -123,7 +123,7 @@ class MainWindow(wx.Frame):
                 for v in self.components[self.button_id_dict[e.GetId()]].strings:
                         values_str = values_str + "%s: %s\n"%(v.label, v.value)
                 for v in self.components[self.button_id_dict[e.GetId()]].values:
-                        values_str = values_str + "%s: %f\n"%(v.value_label, v.value)
+                        values_str = values_str + "%s: %f\n"%(v.label, v.value)
 
                 d = wx.MessageDialog(self, "%s\n%s\n%s"%(self.components[self.button_id_dict[e.GetId()]].name, self.components[self.button_id_dict[e.GetId()]].message, values_str),"%s"%self.components[self.button_id_dict[e.GetId()]].name, wx.OK)
                 

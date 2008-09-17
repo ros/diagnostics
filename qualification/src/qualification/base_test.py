@@ -194,7 +194,7 @@ class BaseTest(object):
         res += 'Test %2d) %s\n' % (i, stat.name)
         res += '  [%s]: %s\n' % (statdict[stat.level], stat.message)
         for val in stat.values:
-          res += '   [%s] = %f\n' % (val.value_label, val.value)
+          res += '   [%s] = %f\n' % (val.label, val.value)
         i += 1
 
     head = '----------------------------------------\n'
