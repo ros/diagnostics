@@ -167,7 +167,9 @@ class BaseTest(object):
     # Give parent focus
     self.parent.SetFocus()    
 
-  def Done(self, results):
+  def Done(self, results, data=None):
+    self.data = data
+
     self.results_panel = self.res.LoadPanel(self.parent, 'results_panel')
     self.result_ctrl = xrc.XRCCTRL(self.results_panel, 'result_ctrl')
 
@@ -202,6 +204,7 @@ class BaseTest(object):
     head += 'Result: %s\n' % (passfail)
     head += '----------------------------------------\n'
 
+
     self.result_ctrl.SetValue(head + res)
 
   def OnDiscard(self, evt):
@@ -214,6 +217,15 @@ class BaseTest(object):
     fname = '%s_%s.test' % (self.serial, self.date.strftime("%Y_%m_%d_%I_%M_%S"))
     f = open(fname, 'w')
     f.write(self.result_ctrl.GetValue())
+    
+    if (self.data != None):
+      f.write('----------------------------------------\n')
+      for d in self.data:
+        f.write('%s = ' % (d))
+        for v in self.data[d]:
+          f.write('%f, ' % (v))
+        f.write('\n')
+
     f.close()
         
     self.Finish('Self test completed')
