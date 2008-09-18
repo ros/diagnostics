@@ -49,8 +49,8 @@ def callback(message):
     for s in message.status:
         ## @TODO process byte level
         print "Name: %s \nMessage: %s"%(s.name, s.message)
-        for v in s.values:
-            print "   Value: %.2f Label: %s"%(v.value, v.label)
+        for v in s.strings + s.values:
+            print "   %s: %s" % (v.label, v.value)
     
 def listener():
     rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
