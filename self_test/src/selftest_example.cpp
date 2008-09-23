@@ -134,6 +134,9 @@ public:
     // Do something that changes the state of the node
     some_val += 41.0;
 
+    status.set_values_size(1);
+    status.values[0].value = some_val;
+    status.values[0].label = "some value";
 
     status.level = 0;
     status.message = "We successfully changed the value.";
