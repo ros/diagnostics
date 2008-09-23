@@ -99,11 +99,11 @@ class HokuyoTest(BaseTest):
     self.roslaunch.launch_nodes()
 
     # Wait for our self-test service to come up
-    rospy.wait_for_service('hokuyo_utm/self_test', 5)
+    rospy.wait_for_service('hokuyo/self_test', 5)
 
     # Try to query the self_test service on the hokuyo
     try:
-        s = rospy.ServiceProxy('hokuyo_utm/self_test', SelfTest)
+        s = rospy.ServiceProxy('hokuyo/self_test', SelfTest)
         self.response = s.call(SelfTestRequest(),60)
     except rospy.ServiceException, e:
       wx.CallAfter(self.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))
