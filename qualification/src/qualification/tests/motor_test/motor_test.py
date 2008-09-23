@@ -52,10 +52,10 @@ from mechanism_control import mechanism
 class MotorTest(BaseTest):
   def __init__(self, parent, serial, func):
     self.ready=False
-    self.serial = serial[0:7]
+    self.serial1 = serial[0:7]
     self.count = 1
     self.finished=False
-    self.testcount=3
+    self.testcount=4
     # Load the XRC resource
     self.res2 = xrc.XmlResource(execution_path('motor_test.xrc'))
     
@@ -69,7 +69,7 @@ class MotorTest(BaseTest):
   
   def instruct_panel_gen(self, parent):
     # Load the instruction and test panels from the XRC resource
-    panel = 'instruct_panel_'+self.serial
+    panel = 'instruct_panel_'+self.serial1
     return self.res2.LoadPanel(parent, panel )
   
   def test_panel_gen(self, parent):
@@ -84,10 +84,14 @@ class MotorTest(BaseTest):
     #Create a roslauncher
     self.roslaunch = roslaunch.ROSLauncher()
     loader = roslaunch.XmlLoader()
+    self.count = 1
+    self.finished=False
+    self.testcount=4
+    self.ready=False
 
     # Try loading the test XML file
     try:
-        xmlFile =execution_path(str('xml/'+self.serial+'/'+self.serial+'_motor_test.xml'))
+        xmlFile =execution_path(str('xml/'+self.serial1+'/'+self.serial1+'_motor_test.xml'))
         loader.load(xmlFile, self.roslaunch)
     except roslaunch.XmlParseException, e:
         wx.CallAfter(self.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
@@ -138,7 +142,7 @@ class MotorTest(BaseTest):
   def OpenXml(self):
     count = str(self.count)
     try:
-      xmlFile =execution_path(str('xml/'+self.serial+'/'+self.serial+'_test'+count+'.xml'))
+      xmlFile =execution_path(str('xml/'+self.serial1+'/'+self.serial1+'_test'+count+'.xml'))
       f = open(xmlFile)
       self.xml = f.read()
       f.close()

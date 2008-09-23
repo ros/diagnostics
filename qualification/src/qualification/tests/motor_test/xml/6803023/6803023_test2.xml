@@ -1,6 +1,8 @@
 <controller name="test_controller" type="MotorTest2Node" topic="test_controller">
   <joint name="test_joint">
-  <controller_defaults speed_constant=14.24 torque =.04 fixture_name="fixture_joint" />
+  <controller_defaults speed_constant="21.67" resistance="7.17" torque =".04" fixture_name="fixture_joint" />
   </joint>
 </controller>
+
+
 
