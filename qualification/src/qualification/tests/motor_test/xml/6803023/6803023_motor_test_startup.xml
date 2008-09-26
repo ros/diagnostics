@@ -29,7 +29,7 @@
   <transmission type="SimpleTransmission" name="fixture_transmission">
     <actuator name="fixture_motor" />
     <joint name="fixture_joint" />
-    <mechanicalReduction>0.055</mechanicalReduction>
+    <mechanicalReduction>35/624</mechanicalReduction>
   </transmission>
 
   <transmission type="SimpleTransmission" name="test_transmission">
