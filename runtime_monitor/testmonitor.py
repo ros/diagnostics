@@ -48,20 +48,24 @@ NAME = 'test_runtime_broadcaster'
 def loop(pub):
         stat = []
         for c in range(0,4):
-            sval = []
-            sval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
-            sval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
-            sval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
-            sval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
-            stat.append(DiagnosticStatus(c, "IBPS %d"%c, "All good", sval))
+            floatval = []
+            strval = []
+            floatval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
+            floatval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
+            floatval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
+            floatval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
+            strval.append(DiagnosticString("String Value","Controller, String Label"))
+            stat.append(DiagnosticStatus(c, "IBPS %d"%c, "All good", floatval,strval))
             ## @todo make the status string represent errors etc
 
             for b in range(0,4):
                 bval = []
+                bstrval = []
                 bval.append(DiagnosticValue(c+b*.01+.1, "present (0,1)"))
                 bval.append(DiagnosticValue(c+b*.01+.2, "charging (0,1)"))
                 bval.append(DiagnosticValue(c+b*.01+.3, "supplying power (0,1)"))
-                stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval))
+                bstrval.append(DiagnosticString("String Value","Controller, String Label"))
+                stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval, bstrval))
                 ## @todo make the status string represent errors etc
                             
 
