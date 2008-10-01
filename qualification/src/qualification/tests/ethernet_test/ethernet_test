@@ -86,7 +86,6 @@ def self_test(req):
 def ethernet_test():
     rospy.ready(NAME)
     s = rospy.Service('~self_test', SelfTest, self_test)
-    s.register()
     rospy.spin()
 
 if __name__ == "__main__":
