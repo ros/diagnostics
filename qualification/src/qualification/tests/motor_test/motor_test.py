@@ -82,8 +82,7 @@ class MotorTest(BaseTest):
 
   def RunThread(self,arg):
     #Create a roslauncher
-    self.roslaunch = roslaunch.ROSLauncher()
-    loader = roslaunch.XmlLoader()
+    config = roslaunch.ROSLaunchConfig()
     self.count = 1
     self.finished=False
     self.testcount=4
@@ -91,19 +90,19 @@ class MotorTest(BaseTest):
 
     # Try loading the test XML file
     try:
-        xmlFile =execution_path(str('xml/'+self.serial1+'/'+self.serial1+'_motor_test.xml'))
-        loader.load(xmlFile, self.roslaunch)
+        xmlFile = execution_path(str('xml/'+self.serial1+'/'+self.serial1+'_motor_test.xml'))
+        loader = roslaunch.XmlLoader()
+        loader.load(xmlFile, config)
     except roslaunch.XmlParseException, e:
         wx.CallAfter(self.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
         return
 
     # Make sure we get a fresh master
-    self.roslaunch.master.auto = self.roslaunch.master.AUTO_RESTART
+    config.master.auto = config.master.AUTO_RESTART
 
     # Bring up the nodes
-    self.roslaunch.prelaunch_check()
-    self.roslaunch.load_parameters()
-    self.roslaunch.launch_nodes()
+    self.roslaunch = roslaunch.ROSLaunchRunner()
+    self.roslaunch.launch()
     
     self.topic = rospy.TopicSub("/diagnostics", DiagnosticMessage, self.OnMsg)
     self.test_panel.Bind(wx.EVT_BUTTON, self.EStop, id=xrc.XRCID('ESTOP_button'))

@@ -67,23 +67,22 @@ class ImuTest(BaseTest):
   def RunThread(self, arg):
 
     # Create a roslauncher
-    rl = roslaunch.ROSLauncher()
-    loader = roslaunch.XmlLoader()
+    config = roslaunch.ROSLaunchConfig()
 
     # Try loading the XML file
     try:
-        loader.load(execution_path('imu_test.xml'), rl)
+      loader = roslaunch.XmlLoader()
+      loader.load(execution_path('imu_test.xml'), config)
     except roslaunch.XmlParseException, e:
       wx.CallAfter(self.test.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
       return
 
     # Make sure we get a fresh master
-    rl.master.auto = rl.master.AUTO_RESTART
+    config.master.auto = config.master.AUTO_RESTART
 
     # Bring up the nodes
-    rl.prelaunch_check()
-    rl.load_parameters()
-    rl.launch_nodes()
+    rl = roslaunch.ROSLaunchRunner(config)
+    rl.launch()
 
     # Wait for our self-test service to come up
     rospy.wait_for_service('imu/self_test', 5)
