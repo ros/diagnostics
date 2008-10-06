@@ -81,8 +81,6 @@ public:
       return;
     }
 
-    printf("Begining test.\n");
-
     msg_.set_status_size(status_fncs_.size());
 
     if (node_->ok())
