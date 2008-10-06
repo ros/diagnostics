@@ -63,7 +63,7 @@ public:
 
   DiagnosticUpdater(T* node) : node_(node)
   {
-    node_->advertise("/diagnostics",msg_,1);
+    ((ros::node*)(node_))->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
 
     node_->param("~diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now() + ros::Duration(period_);
