@@ -51,6 +51,7 @@ def callback(message):
         print "Name: %s \nMessage: %s"%(s.name, s.message)
         for v in s.strings + s.values:
             print "   %s: %s" % (v.label, v.value)
+    sys.stdout.flush()
     
 def listener():
     rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
