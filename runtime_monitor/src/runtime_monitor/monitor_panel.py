@@ -118,6 +118,8 @@ class MonitorPanel(wx.Panel):
         
         if (had_errors and self._new_errors_callback != None):
             self._new_errors_callback()
+            
+        self.Refresh()
         
     def create_item(self, status, select, expand_if_error):
         if (status.level == 0):
@@ -177,6 +179,7 @@ class MonitorPanel(wx.Panel):
             del self._name_to_id[name]
             
         self.update_root_labels()
+        self.Refresh()
         
     def set_new_errors_callback(self, callback):
         self._new_errors_callback = callback
