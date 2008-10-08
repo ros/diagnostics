@@ -85,10 +85,12 @@ class MonitorPanel(wx.Panel):
         
         rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
         
+        self._messages = []
+        
     def diagnostics_callback(self, message):
         self._mutex.acquire()
         
-        self._message = message
+        self._messages.append(message)
         
         self._mutex.release()
         
@@ -99,20 +101,23 @@ class MonitorPanel(wx.Panel):
         
         had_errors = False
         
-        for status in self._message.status:
-            was_selected = False
-            had_item = False
-            if (self._name_to_id.has_key(status.name)):
-                id = self._name_to_id[status.name]
-                had_item = True
-                if (self._tree_control.GetSelection() == id):
-                    was_selected = True
+        for message in self._messages:
+            for status in message.status:
+                was_selected = False
+                had_item = False
+                if (self._name_to_id.has_key(status.name)):
+                    id = self._name_to_id[status.name]
+                    had_item = True
+                    if (self._tree_control.GetSelection() == id):
+                        was_selected = True
+                    
+                    self._tree_control.Delete(id)
                 
-                self._tree_control.Delete(id)
-            
-            self.create_item(status, was_selected, had_item == False)
-            if (status.level == 2 and (not had_item)):
-                had_errors = True
+                self.create_item(status, was_selected, had_item == False)
+                if (status.level == 2 and (not had_item)):
+                    had_errors = True
+        
+        self._messages = []
         
         self._mutex.release()
         
