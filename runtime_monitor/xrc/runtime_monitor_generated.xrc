@@ -2,7 +2,7 @@
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxPanel" name="RuntimeMonitorInnerPanel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>513,359</size>
+		<size>709,443</size>
 		<object class="wxBoxSizer">
 			<orient>wxHORIZONTAL</orient>
 			<object class="sizeritem">
@@ -11,7 +11,7 @@
 				<border>5</border>
 				<object class="wxSplitterWindow" name="m_splitter1">
 					<style>wxSP_3D</style>
-					<sashpos>210</sashpos>
+					<sashpos>345</sashpos>
 					<gravity>0</gravity>
 					<minsize>0</minsize>
 					<orientation>vertical</orientation>

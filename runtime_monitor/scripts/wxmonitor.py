@@ -62,7 +62,7 @@ class MainWindow(wx.Frame):
         panel = MonitorPanel(self)
         panel.set_new_errors_callback(self.on_error)
         
-        self.SetSize(wx.Size(520,360))
+        self.SetSize(wx.Size(750,450))
 
 
     def on_exit(self, e):
