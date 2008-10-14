@@ -45,7 +45,6 @@ from qualification import *
 
 from robot_msgs.msg import *
 from robot_srvs.srv import *
-from mechanism_control.msg import *
 from mechanism_control import mechanism
 
 

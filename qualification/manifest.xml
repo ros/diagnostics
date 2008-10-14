@@ -10,7 +10,6 @@
   <depend package="hokuyo_node" />
   <depend package="imu_node" />
   <depend package="wxmpl" />
-  <depend package="mechanism_control" />
   <depend package="robot_mechanism_controllers" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
