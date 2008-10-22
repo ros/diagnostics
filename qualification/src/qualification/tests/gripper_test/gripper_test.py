@@ -46,7 +46,7 @@ from qualification import *
 from robot_msgs.msg import *
 from std_msgs.msg import *
 from robot_srvs.srv import *
-from mechanism_control.msg import *
+
 from mechanism_control import mechanism
 
 import time
@@ -54,7 +54,8 @@ import time
 class GripperTest(BaseTest):
   def __init__(self, parent, serial, func):
     self.ready=False
-    self.serial = serial[0:7]
+    self.serial1 = serial[0:7]
+    print self.serial1
     self.count = 1
     self.finished=False
     self.testcount=1
@@ -73,7 +74,8 @@ class GripperTest(BaseTest):
   
   def instruct_panel_gen(self, parent):
     # Load the instruction and test panels from the XRC resource
-    panel = 'instruct_panel_'+self.serial
+    panel = 'instruct_panel_'+self.serial1
+    print panel
     return self.res2.LoadPanel(parent, panel )
   
   def test_panel_gen(self, parent):
@@ -86,24 +88,30 @@ class GripperTest(BaseTest):
 
   def RunThread(self,arg):
     #Create a roslauncher
-    self.roslaunch = roslaunch.ROSLauncher()
-    loader = roslaunch.XmlLoader()
+    config = roslaunch.ROSLaunchConfig()
+    self.count = 1
+    self.finished=False
+    self.testcount=1
+    self.ready=False
+
+    
 
     # Try loading the test XML file
     try:
-        xmlFile =execution_path(str('xml/'+self.serial+'_gripper_test.xml'))
-        loader.load(xmlFile, self.roslaunch)
+        xmlFile =execution_path(str('xml/'+self.serial1+'_gripper_test.xml'))
+        loader = roslaunch.XmlLoader()
+        
+        loader.load(xmlFile, config)
     except roslaunch.XmlParseException, e:
         wx.CallAfter(self.Cancel, 'Could not load back-end XML to launch necessary nodes.  Make sure the GUI is up to date.')
         return
 
     # Make sure we get a fresh master
-    self.roslaunch.master.auto = self.roslaunch.master.AUTO_RESTART
+    config.master.auto = config.master.AUTO_RESTART
 
     # Bring up the nodes
-    self.roslaunch.prelaunch_check()
-    self.roslaunch.load_parameters()
-    self.roslaunch.launch_nodes()
+    self.roslaunch = roslaunch.ROSLaunchRunner(config)
+    self.roslaunch.launch()
     
     self.topic = rospy.TopicSub("/diagnostics", DiagnosticMessage, self.OnMsg)
     self.data_topic = rospy.TopicSub("/gripper_test_data", ChannelFloat32, self.OnData)
@@ -192,7 +200,7 @@ class GripperTest(BaseTest):
   def OpenXml(self):
     count = str(self.count)
     try:
-      xmlFile =execution_path(str('xml/'+self.serial+'_test'+count+'.xml'))
+      xmlFile =execution_path(str('xml/'+self.serial1+'_test'+count+'.xml'))
       f = open(xmlFile)
       self.xml = f.read()
       f.close()

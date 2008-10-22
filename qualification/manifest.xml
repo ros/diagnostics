@@ -11,6 +11,7 @@
   <depend package="imu_node" />
   <depend package="wxmpl" />
   <depend package="robot_mechanism_controllers" />
+  <depend package="mechanism_control" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
   <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>

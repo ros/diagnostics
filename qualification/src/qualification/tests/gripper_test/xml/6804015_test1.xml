@@ -1,6 +1,6 @@
 <controller name="test_controller" type="GripperTest1Node" topic="test_controller">
   <joint name="test_joint">
-    <pid p=".0002" d="0" i=".006" iClamp="0" />
-    <controller_defaults velocity="600" max_effort =".01" />   
+    <pid p=".0004" d="0" i=".006" iClamp="0" />
+    <controller_defaults velocity="300" max_effort =".0" />   
   </joint>
 </controller>

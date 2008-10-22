@@ -1,8 +1,8 @@
 <robot name="6804015_test">
- 
-  <actuator name="gripper">
+   <actuator name="gripper_left_motor">
+
   </actuator>
-  
+
 
   <joint name="test_joint" type="revolute">
     <axis xyz=" 0 1 0 " /> 
@@ -11,15 +11,10 @@
   </joint>
 
   <transmission type="SimpleTransmission" name="test_transmission">
-    <actuator name="gripper" />
+    <actuator name="gripper_left_motor" />
     <joint name="test_joint" />
     <mechanicalReduction>1</mechanicalReduction>
   </transmission>
-  
-<controller name="test_controller" type="JointEffortControllerNode" topic="test_controller">
-  <joint name="test_joint">
-
-  </joint>
-</controller>
+ 
 
 </robot>
