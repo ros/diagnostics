@@ -13,7 +13,7 @@
   <transmission type="SimpleTransmission" name="test_transmission">
     <actuator name="gripper_left_motor" />
     <joint name="test_joint" />
-    <mechanicalReduction>1</mechanicalReduction>
+    <mechanicalReduction>-1</mechanicalReduction>
   </transmission>
  
 
