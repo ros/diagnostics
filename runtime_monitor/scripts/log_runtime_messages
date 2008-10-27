@@ -34,6 +34,7 @@
 
 ## A basic node to listen to and display incoming diagnostic messages
 
+import getopt
 import rostools
 rostools.update_path('runtime_monitor')
 
@@ -43,7 +44,19 @@ from robot_msgs.msg import *
 
 NAME = 'runtime_monitor_logging'
 
-f = open('diagnostic.log', 'a');
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "f:", ["file"])
+except getopt.GetoptError, err:
+    print str(err)
+    exit
+
+for o, a in opts:
+    if o == "-f":
+        print "Opening %s"%a
+        f = open(a, 'a');
+    else:
+        print "Opening default"
+        f = open('diagnostic.log', 'a');
 
 
 def callback(message):
