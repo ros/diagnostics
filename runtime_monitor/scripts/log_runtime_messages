@@ -37,56 +37,35 @@
 import rostools
 rostools.update_path('runtime_monitor')
 
-import sys, time 
+import sys
 import rospy
 from robot_msgs.msg import *
 
-NAME = 'test_runtime_broadcaster'
+NAME = 'runtime_monitor_logging'
+
+f = open('diagnostic.log', 'a');
 
 
-
-def loop(pub):
-        stat = []
-        for c in range(0,4):
-            floatval = []
-            strval = []
-            floatval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
-            strval.append(DiagnosticString("String Value","Controller String Label"))
-            stat.append(DiagnosticStatus(c, "IBPS %d"%c, "All good", floatval,strval))
-            ## @todo make the status string represent errors etc
-
-            for b in range(0,4):
-                bval = []
-                bstrval = []
-                bval.append(DiagnosticValue(c+b*.01+.1, "present (0,1)"))
-                bval.append(DiagnosticValue(c+b*.01+.2, "charging (0,1)"))
-                bval.append(DiagnosticValue(c+b*.01+.3, "supplying power (0,1)"))
-                bstrval.append(DiagnosticString("String Value","Controller, String Label"))
-                stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval, bstrval))
-                ## @todo make the status string represent errors etc
-                            
-
-            
-        out = DiagnosticMessage(None, stat)
-        pub.publish(out)
-        print "Published"
-
-
-
+def callback(message):
+##    global f
+    f.write("@%.1f "%message.header.stamp.to_time())
+    for s in message.status:
+        ## @TODO process byte level
+        f.write( "$C %s: %s "%(s.name, s.message))
+        for v in s.strings + s.values:
+            f.write( "$V %s : %s " % (v.label, v.value))
+    f.write("\n")
     
 def listener():
-    pub = rospy.TopicPub("/diagnostics", DiagnosticMessage)
+    
+    rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
     rospy.ready(NAME, anonymous=True)
-    while not rospy.is_shutdown():
-        loop(pub)
-        time.sleep(1)
+    rospy.spin()
         
 if __name__ == '__main__':
     try:
         listener()
     except KeyboardInterrupt, e:
         pass
+    f.close()
     print "exiting"
