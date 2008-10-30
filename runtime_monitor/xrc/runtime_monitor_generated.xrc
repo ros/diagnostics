@@ -37,10 +37,8 @@
 								<option>1</option>
 								<flag>wxALL|wxEXPAND</flag>
 								<border>5</border>
-								<object class="wxTextCtrl" name="_text_control">
-									<style>wxTE_MULTILINE|wxTE_READONLY</style>
-									<value></value>
-									<maxlength>0</maxlength>
+								<object class="wxHtmlWindow" name="_html_control">
+									<style>wxHW_SCROLLBAR_AUTO</style>
 								</object>
 							</object>
 						</object>

@@ -65,6 +65,9 @@ def loop(pub):
                 bval.append(DiagnosticValue(c+b*.01+.2, "charging (0,1)"))
                 bval.append(DiagnosticValue(c+b*.01+.3, "supplying power (0,1)"))
                 bstrval.append(DiagnosticString("String Value","Controller, String Label"))
+		
+		for a in range(0,100):
+			bstrval.append(DiagnosticString("Lots of reeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaallllllllllllllllllllllllllllllllllllllyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy long string values!", "Test"))
                 stat.append(DiagnosticStatus(b, "Smart Battery %d.%d"%(c,b), "All good", bval, bstrval))
                 ## @todo make the status string represent errors etc
                             

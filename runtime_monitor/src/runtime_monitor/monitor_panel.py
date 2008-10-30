@@ -43,8 +43,10 @@ from robot_msgs.msg import *
 
 import wx
 from wx import xrc
+from wx import html
 
 import threading, time
+import StringIO
 
 class MonitorPanel(wx.Panel):
     def __init__(self, parent):
@@ -61,7 +63,7 @@ class MonitorPanel(wx.Panel):
         self.SetSizer(sizer)
 
         self._tree_control = xrc.XRCCTRL(self._real_panel, "_tree_control")
-        self._text_control = xrc.XRCCTRL(self._real_panel, "_text_control")
+        self._html_control = xrc.XRCCTRL(self._real_panel, "_html_control")
         
         image_list = wx.ImageList(16,16)
         self._error_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_ERROR, wx.ART_OTHER, wx.Size(16,16)))
@@ -86,6 +88,7 @@ class MonitorPanel(wx.Panel):
         rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
         
         self._messages = []
+        self._used_items = 0
         
     def diagnostics_callback(self, message):
         self._mutex.acquire()
@@ -156,15 +159,26 @@ class MonitorPanel(wx.Panel):
         if (status == None):
             return
         
-        self._text_control.Clear()
+        self._html_control.Freeze()
+        s = StringIO.StringIO()
         
-        self._text_control.AppendText("Component: %s\n"%(status.name))
-        self._text_control.AppendText("Message: %s\n\n"%(status.message))
+        s.write("<html><body>")
+        s.write("<b>Component</b>: %s<br>\n"%(status.name))
+        s.write("<b>Message</b>: %s<br><br>\n\n"%(status.message))
         
+        s.write('<table border="1">')
         for value in status.strings:
-            self._text_control.AppendText("%s: %s\n" %(value.label, value.value))
+            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
         for value in status.values:
-            self._text_control.AppendText("%s: %s\n" %(value.label, value.value))
+            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
+            
+        s.write("</table></body></html>")
+            
+        (x, y) = self._html_control.GetViewStart()
+        self._html_control.SetPage(s.getvalue())
+        self._html_control.Scroll(x, y)
+            
+        self._html_control.Thaw()
             
     def on_item_selected(self, event):
         self.fillout_info(event.GetItem())
