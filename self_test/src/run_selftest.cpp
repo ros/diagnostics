@@ -93,7 +93,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv);
   if (argc != 2)
   {
-    printf("usage: test_hokuyo name\n");
+    printf("usage: run_selftest name\n");
     return 1;
   }
   Selftest st;
