@@ -1,0 +1,4 @@
+<launch>
+ 
+  <node pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x $(find qualification)/src/qualification/tests/forearm_test/xml/6804213_forearm_test_startup.xml" />
+</launch>
