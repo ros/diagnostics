@@ -3,6 +3,7 @@
   </description>
   <author>Jeremy Leibs</author>
   <license>BSD</license>
+  <review status="unreviewed" notes=""/>
   <depend package="rospy" />
   <depend package="robot_msgs" />
   <depend package="robot_srvs" />

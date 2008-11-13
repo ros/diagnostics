@@ -2,6 +2,7 @@
   <description>A package containing a class for easily updating diagnostics.</description>
   <author>Jeremy Leibs</author>
   <license>BSD</license>
+  <review status="unreviewed" notes="proposal (Jeremy)"/>
   <depend package="roscpp" />
   <depend package="rosthread" />
   <depend package="robot_srvs" />
