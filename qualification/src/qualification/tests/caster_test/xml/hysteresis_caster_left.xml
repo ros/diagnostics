@@ -1,0 +1,6 @@
+<controller name="test_controller" type="HysteresisControllerNode" topic="test_controller">
+  <joint name="wheel_front_left_l_joint">
+    <pid p="2.0" d="0" i="0.01" iClamp="0.4" />
+    <controller_defaults velocity="0.75" max_effort="2.0" expected_effort="0.75" min_pos="-2.70" max_pos="2.70"/>   
+  </joint>
+</controller>

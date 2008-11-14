@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="test_caster">
+  <include filename="../../../../../../../robot_descriptions/wg_robot_description/pr2_robot_defs/base_defs.xml" />
+
+<pr2_caster suffix="front_left" parent="world">
+      <origin xyz="1 0 0" rpy="0 0 0" />
+</pr2_caster>
+
+</robot>
