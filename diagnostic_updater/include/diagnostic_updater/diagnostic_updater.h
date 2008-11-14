@@ -99,7 +99,11 @@ public:
 
         (*node_.*(*status_fncs_iter))(status);
 
-        status_vec.push_back(status);
+        if (status.name != "None")
+        {
+          status.name = node_->get_name() + std::string(": ") + status.name;
+          status_vec.push_back(status);
+        }
       }
 
       msg_.set_status_vec(status_vec);
