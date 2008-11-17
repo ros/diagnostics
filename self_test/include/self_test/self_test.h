@@ -130,7 +130,7 @@ public:
 
     while (!ready)
     {
-      if (!testing_condition.timed_wait(5))
+      if (!testing_condition.timed_wait(ros::Duration(5.0)))
       {
         printf("Timed out waiting to run self test.\n");
         waiting = false;
