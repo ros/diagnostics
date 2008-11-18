@@ -1,6 +1,6 @@
 <launch>
 
-  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py 'caster.xml'" />
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '../caster.xml'" />
 
   <machine name="xenomai_root" user="root" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_REALTIME_PATH)" default="never"/>   
 
