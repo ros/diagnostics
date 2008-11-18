@@ -5,7 +5,6 @@
    <actuator name="left_wrist_r_motor">
    </actuator>
 
-  <robot name="wrist_trans">
     <joint name="left_wrist_flex_joint" type="revolute">
       <limit min="-0.157" max="2.409" effort="5" velocity="5" />
       <axis xyz="0 0 1" />
@@ -22,6 +21,6 @@
       <flexJoint name="left_wrist_flex_joint" mechanicalReduction="60.17"/>
       <rollJoint name="left_wrist_roll_joint" mechanicalReduction="60.17"/>
     </transmission>
-  </robot>
+
  
 </robot>

@@ -51,7 +51,7 @@ from mechanism_control import mechanism
 
 import time
 
-class forearmTest(BaseTest):
+class ForearmTest(BaseTest):
   def __init__(self, parent, serial, func):
     self.ready=False
     self.serial1 = serial[0:7]
@@ -61,7 +61,6 @@ class forearmTest(BaseTest):
     self.testcount=1
     # Load the XRC resource
     self.res2 = xrc.XmlResource(execution_path('forearm_test.xrc'))
-    
 
     # Initialize the BaseTest with these parts
     BaseTest.__init__(self, parent, serial, func, 'forearm Test')
@@ -79,7 +78,8 @@ class forearmTest(BaseTest):
     return self.res2.LoadPanel(parent, panel )
   
   def test_panel_gen(self, parent):
-    self.test_panel =self.res2.LoadPanel(parent, 'test_panel')
+    test_panel =self.res2.LoadPanel(parent, 'test_panel')
+    test_panel.Bind(wx.EVT_BUTTON, self.EStop, id=xrc.XRCID('ESTOP_button'))
     return self.res2.LoadPanel(parent, 'test_panel')
   
   # This is what runs once the instructions are read
@@ -93,7 +93,6 @@ class forearmTest(BaseTest):
     self.finished=False
     self.testcount=1
     self.ready=False
-
     
 
     # Try loading the test XML file
@@ -114,12 +113,11 @@ class forearmTest(BaseTest):
     self.roslaunch.launch()
     
     self.topic = rospy.TopicSub("/diagnostics", DiagnosticMessage, self.OnMsg)
-    self.data_topic = rospy.TopicSub("/hysteresis_test_data", ChannelFloat32, self.OnData)
-    self.test_panel.Bind(wx.EVT_BUTTON, self.EStop, id=xrc.XRCID('ESTOP_button'))
+    self.data_topic = rospy.TopicSub("/hysteresis_data", ChannelFloat32, self.OnData)
     
   def OnMsg(self, msg):
     for i in range(len(msg.status)):
-      if(msg.status[i].name=='forearmTest'):
+      if(msg.status[i].name=='HysteresisTest'):
           if(msg.status[i].level==0):
             self.Log(msg.status[i].message) 
             self.response.status.append(msg.status[i])
@@ -130,6 +128,7 @@ class forearmTest(BaseTest):
               mechanism.spawn_controller(self.xml)
               self.count=self.count+1
             else:
+              print "done"
               self.finished=True
           else:
             self.Log(msg.status[i].message)
@@ -165,6 +164,7 @@ class forearmTest(BaseTest):
 
     # Configure the plot panel
     self.plot = wxmpl.PlotPanel(plot_panel,-1)
+    assert(self.plot.director)
     self.plot.set_crosshairs(False)
     self.plot.set_selection(False)
     self.plot.set_zoom(False)
@@ -192,7 +192,9 @@ class forearmTest(BaseTest):
     #axes.axis([-xrng,xrng,0,yrng])
     #axes.grid()
     
+    print 'About to draw'
     self.plot.draw()
+    print 'About to show'
     self.plot.Show()
   
   
@@ -220,5 +222,4 @@ class forearmTest(BaseTest):
       
 
   def OnIdle(self, evt):
-  
     evt.RequestMore(True)
