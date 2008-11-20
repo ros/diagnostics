@@ -1,8 +1,8 @@
-<root>
-<startup>startup.launch</startup>
-<shutdown>shutdown.launch</shutdown>
-<instructions>instructions.html</instructions>
-<subtest post="post_test1.launch">test1.launch</subtest>
-<subtest>test2.launch</subtest>
-<subtest>test3.launch</subtest>
-</root>
+<test>
+  <startup>startup.launch</startup>
+  <shutdown>shutdown.launch</shutdown>
+  <instructions>instructions.html</instructions>
+  <subtest post="post_test1.launch">test1.launch</subtest>
+  <subtest>test2.launch</subtest>
+  <subtest>test3.launch</subtest>
+</test>
