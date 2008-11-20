@@ -97,7 +97,7 @@ class App:
     r.plots.append(p)
     p.instructions = s
     p.image = image
-    p.image_type = "png"
+    p.image_format = "png"
     result_service.call(r)
     
   def SineSweepPlot(self):
@@ -144,7 +144,7 @@ class App:
     r.plots.append(p)
     p.instructions = s
     p.image = image
-    p.image_type = "png"
+    p.image_format = "png"
     result_service.call(r)
 
   def HysteresisAnalysis(self):

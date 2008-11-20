@@ -82,7 +82,7 @@ else:
     r.plots.append(p)
     p.instructions = "This plot shows the correlation between # of pirates and # of ninjas. Does this data make sense?"
     p.image = image
-    p.image_type = "png"
+    p.image_format = "png"
     
 # block until the test_result service is available
 rospy.wait_for_service('test_result')

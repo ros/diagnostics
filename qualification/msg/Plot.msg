@@ -1,3 +1,3 @@
 string instructions
 byte[] image
-string image_type
+string image_format
