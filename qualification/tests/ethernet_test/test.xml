@@ -1,0 +1,5 @@
+<test>
+  <subtest>eth1.launch</subtest>
+  <subtest>eth2.launch</subtest>
+  <subtest>eth3.launch</subtest>
+</test>

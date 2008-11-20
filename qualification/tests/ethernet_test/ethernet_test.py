@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -33,58 +32,72 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rostools
-import rostools.packspec
 rostools.update_path('qualification')
 
-import sys
-import rospy
-from std_srvs.srv import *
+from robot_msgs.msg import *
+from robot_srvs.srv import *
+from qualification.msg import *
 from qualification.srv import *
-import qualification.msg
-import std_msgs
-import time
 
-import matplotlib.pyplot as plt
+import rospy 
+
+NAME = 'ethernet'
+
+import os
+import sys
 from StringIO import StringIO
 
-if (len(sys.argv) <= 1):
-  print >> sys.stderr, 'Must specify one of pass/fail/human'
-
-rospy.init_node("test_analyzer", anonymous=True)
-test_service = rospy.ServiceProxy('self_test', Empty)
-result_service = rospy.ServiceProxy('test_result', TestResult)
-
-rospy.wait_for_service('self_test')
-test_service()
-
-sys.stderr.write("Got response, sending test result")
-r = TestResultRequest()
-r.plots = []
-if (sys.argv[1] == "pass"):
-  r.text_result = "Test succeeded"
-  r.result = TestResultRequest.RESULT_PASS
-elif (sys.argv[1] == "fail"):
-  r.text_result = "Test failed"
-  r.result = TestResultRequest.RESULT_FAIL
-else:
-  r.text_result = "Human input required"
-  r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
-  
-  plt.plot([1,2,3,4],[16, 9, 4, 1], 'ro')
-  plt.xlabel("Pirates")
-  plt.ylabel("Ninjas")
-  stream = StringIO()
-  plt.savefig(stream, format="png")
-  image = stream.getvalue()
-  
-  for j in range(0, 10):
-    p = qualification.msg.Plot()
-    r.plots.append(p)
-    p.text = "This plot shows the correlation between # of pirates and # of ninjas. Does this data make sense?"
-    p.image = image
-    p.image_format = "png"
+def ethernet_test():
+    rospy.init_node(NAME)
     
-# block until the test_result service is available
-rospy.wait_for_service('test_result')
-result_service.call(r)
+    name = sys.argv[1]
+    ip = sys.argv[2]
+    
+    res = os.popen('ping -f -q -w 1 -s 32768 %s' % (ips[eth])).readlines()
 
+    r = TestResultRequest()
+    p = Plot()
+    r.plots = [p]
+    
+    s = StringIO()
+
+    if (len(res) > 1):
+        tran = float(res[3].split()[0])
+        recv = float(res[3].split()[3])
+
+        print >> s, 'Transmitted: %f'%(tran)
+        print >> s, 'Received: %f'%(recv)
+
+        if ((tran - recv) <= 2):
+          res = os.popen('netperf -H %s -t UDP_STREAM -l 1' % (ips[eth])).readlines()
+
+          speed = float(res[6].split()[3])
+          speed_str = ''
+          
+          r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+          
+          if (speed > 900):
+            r.result = TestResultRequest.RESULT_PASS
+            speed_str = 'Gigabit'
+          elif (speed > 90):
+            speed_str = '100 Megabit'
+          else:
+            speed_str = '< 10 Megabit'
+          
+          r.text_result = speed_str
+          print >> s, 'Speed: %f (%s)'%(speed, speed_str)
+        else:
+          r.text_result = 'Too many packets lost'
+          r.result = TestResultRequest.RESULT_FAIL
+    else:
+      r.text_result = 'Running ping failed'
+        
+    p.text = s.getvalue()
+    
+    # block until the test_result service is available
+    rospy.wait_for_service('test_result')
+    result_service = rospy.ServiceProxy('test_result', TestResult)
+    result_service.call(r)
+
+if __name__ == "__main__":
+    ethernet_test()

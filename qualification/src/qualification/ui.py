@@ -235,7 +235,7 @@ class PlotsPanel(wx.Panel):
       plot = ImagePanel(self._scrolled_window, wx.ID_ANY, p.image)
       sizer.Add(plot, 1, wx.EXPAND)
       
-      textbox = wx.TextCtrl(self._scrolled_window, wx.ID_ANY, p.instructions, wx.DefaultPosition, wx.Size(-1, 100), wx.TE_MULTILINE|wx.TE_READONLY)
+      textbox = wx.TextCtrl(self._scrolled_window, wx.ID_ANY, p.text, wx.DefaultPosition, wx.Size(-1, 100), wx.TE_MULTILINE|wx.TE_READONLY)
       sizer.Add(textbox, 0, wx.EXPAND)
       self._scrolled_sizer.Add(sizer, 1, wx.EXPAND)
     
@@ -330,6 +330,8 @@ class QualificationFrame(wx.Frame):
 
   def log(self, msg):
     self._log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
+    self._log.Refresh()
+    self._log.Update()
     
   def set_top_panel(self, panel):
     self._current_panel = panel
@@ -509,10 +511,7 @@ class QualificationFrame(wx.Frame):
     try:
       loader = roslaunch.XmlLoader()
       loader.load(script, config)
-    except roslaunch.XmlParseException, e:
-      self.log('Failed to launch roslaunch file %s: %s'%(script, e))
-      return None
-    except roslaunch.XmlLoadException, e:
+    except roslaunch.RLException, e:
       self.log('Failed to launch roslaunch file %s: %s'%(script, e))
       return None
 

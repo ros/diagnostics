@@ -1,4 +1,9 @@
 <test>
   <startup>caster.launch</startup>
+  <subtest>hysteresis_caster_left.launch</subtest>
+  <subtest>hysteresis_caster_right.launch</subtest>
+  <subtest>hysteresis_caster_turret.launch</subtest>
+  <subtest>sinesweep_caster_left.launch</subtest>
+  <subtest>sinesweep_caster_right.launch</subtest>
   <subtest>sinesweep_caster_turret.launch</subtest>
 </test>

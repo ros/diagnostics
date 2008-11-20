@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/caster_test/sinesweep_caster_right.xml" />
+  <node pkg="joint_qualification_controllers" type="test_plot.py" />
+</launch>

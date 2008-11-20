@@ -95,7 +95,7 @@ class App:
     
     p = qualification.msg.Plot()
     r.plots.append(p)
-    p.instructions = s
+    p.text = s
     p.image = image
     p.image_format = "png"
     result_service.call(r)
@@ -142,7 +142,7 @@ class App:
     
     p = qualification.msg.Plot()
     r.plots.append(p)
-    p.instructions = s
+    p.text = s
     p.image = image
     p.image_format = "png"
     result_service.call(r)

@@ -1,4 +1,5 @@
 <tests>
 <test serial="simple_" name="simple_example"/>
 <test serial="caster0" name="caster_test"/>
+<test serial="etherne" name="ethernet_test"/>
 </tests>
