@@ -32,17 +32,59 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rostools
-rostools.update_path('qualification')
+import os
+from xml.dom import minidom
 
-import wx
+class NotADirectoryError(Exception): pass
+class TestDoesNotExistError(Exception): pass
+class FailedLoadError(Exception): pass
 
-import qualification.ui
-
-if __name__ == '__main__':
-  try:
-    app = qualification.ui.QualificationApp(0)
-    app.MainLoop()
-  except Exception, e:
-    print e
+class Test:
+  _startup_script = None
+  _shutdown_script = None
+  _instructions_file = None
+  tests = []
+  
+  def load(self, dir):
+    if (not os.path.isdir(dir)):
+      raise NotADirectoryError
     
+    self._test_dir = dir
+    self._test_file = os.path.join(dir, 'test.xml')
+    if (not os.path.isfile(self._test_file)):
+      raise TestDoesNotExistError
+    
+    try:
+      self._doc = minidom.parse(self._test_file)
+    except IOError:
+      raise FailedLoadError
+    
+    doc = self._doc
+    
+    elems = doc.getElementsByTagName('startup')
+    if (elems != None and len(elems) > 0):
+      self._startup_script = elems[0].childNodes[0].nodeValue
+    
+    elems = doc.getElementsByTagName('shutdown')
+    if (elems != None and len(elems) > 0):
+      self._shutdown_script = elems[0].childNodes[0].nodeValue
+      
+    elems = doc.getElementsByTagName('instructions')
+    if (elems != None and len(elems) > 0):
+      self._instructions_file = elems[0].childNodes[0].nodeValue
+    
+    tests = doc.getElementsByTagName('test')
+    if (tests != None and len(tests) > 0):
+      self.tests = [test.childNodes[0].nodeValue for test in tests]
+
+  def getStartupScript(self):
+    return self._startup_script
+  
+  def getShutdownScript(self):
+    return self._shutdown_script
+  
+  def getInstructionsFile(self):
+    return self._instructions_file
+  
+  def getDir(self):
+    return self._test_dir

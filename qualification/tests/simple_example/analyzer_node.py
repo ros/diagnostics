@@ -33,16 +33,58 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rostools
+import rostools.packspec
 rostools.update_path('qualification')
 
-import wx
+import sys
+import rospy
+from std_srvs.srv import *
+from qualification.srv import *
+import qualification.msg
+import std_msgs
+import time
 
-import qualification.ui
+import matplotlib.pyplot as plt
+from StringIO import StringIO
 
-if __name__ == '__main__':
-  try:
-    app = qualification.ui.QualificationApp(0)
-    app.MainLoop()
-  except Exception, e:
-    print e
+if (len(sys.argv) <= 1):
+  print >> sys.stderr, 'Must specify one of pass/fail/human'
+
+rospy.init_node("test_analyzer", anonymous=True)
+test_service = rospy.ServiceProxy('self_test', Empty)
+result_service = rospy.ServiceProxy('test_result', TestResult)
+
+rospy.wait_for_service('self_test')
+test_service()
+
+sys.stderr.write("Got response, sending test result")
+r = TestResultRequest()
+r.plots = []
+if (sys.argv[1] == "pass"):
+  r.text_result = "Test succeeded"
+  r.result = TestResultRequest.RESULT_PASS
+elif (sys.argv[1] == "fail"):
+  r.text_result = "Test failed"
+  r.result = TestResultRequest.RESULT_FAIL
+else:
+  r.text_result = "Human input required"
+  r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+  
+  plt.plot([1,2,3,4],[16, 9, 4, 1], 'ro')
+  plt.xlabel("Pirates")
+  plt.ylabel("Ninjas")
+  stream = StringIO()
+  plt.savefig(stream, format="png")
+  image = stream.getvalue()
+  
+  for j in range(0, 10):
+    p = qualification.msg.Plot()
+    r.plots.append(p)
+    p.instructions = "This plot shows the correlation between # of pirates and # of ninjas. Does this data make sense?"
+    p.image = image
+    p.image_type = "png"
     
+# block until the test_result service is available
+rospy.wait_for_service('test_result')
+result_service.call(r)
+

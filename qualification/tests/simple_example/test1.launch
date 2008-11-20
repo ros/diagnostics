@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="qualification" type="analyzer_node.py" args="pass"/>
+</launch>

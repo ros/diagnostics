@@ -33,16 +33,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rostools
+import rostools.packspec
 rostools.update_path('qualification')
 
-import wx
+import rospy
+from std_srvs.srv import *
 
-import qualification.ui
+rospy.init_node("test_node", anonymous=True)
 
-if __name__ == '__main__':
-  try:
-    app = qualification.ui.QualificationApp(0)
-    app.MainLoop()
-  except Exception, e:
-    print e
-    
+def callback(msg):
+  print("Got msg")
+  return EmptyResponse()
+
+rospy.Service('self_test', Empty, callback)
+print("Test Spinning...")
+rospy.spin()

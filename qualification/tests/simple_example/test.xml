@@ -1,0 +1,8 @@
+<root>
+<startup>startup.launch</startup>
+<shutdown>shutdown.launch</shutdown>
+<instructions>instructions.html</instructions>
+<test>test1.launch</test>
+<test>test2.launch</test>
+<test>test3.launch</test>
+</root>

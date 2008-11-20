@@ -5,12 +5,13 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <depend package="rospy" />
+  <depend package="std_msgs" />
   <depend package="robot_msgs" />
   <depend package="robot_srvs" />
   <depend package="roslaunch" />
   <depend package="hokuyo_node" />
   <depend package="imu_node" />
-  <depend package="wxmpl" />
+  <depend package="matplotlib" />
   <depend package="robot_mechanism_controllers" />
   <depend package="joint_qualification_controllers" />
   <depend package="gripper_qualification_controllers" />
