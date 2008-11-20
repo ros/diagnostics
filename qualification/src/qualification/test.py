@@ -43,7 +43,8 @@ class Test:
   _startup_script = None
   _shutdown_script = None
   _instructions_file = None
-  tests = []
+  subtests = []
+  post_subtests = {}
   
   def load(self, dir):
     if (not os.path.isdir(dir)):
@@ -73,9 +74,13 @@ class Test:
     if (elems != None and len(elems) > 0):
       self._instructions_file = elems[0].childNodes[0].nodeValue
     
-    tests = doc.getElementsByTagName('test')
-    if (tests != None and len(tests) > 0):
-      self.tests = [test.childNodes[0].nodeValue for test in tests]
+    subtests = doc.getElementsByTagName('subtest')
+    if (subtests != None and len(subtests) > 0):
+      for subtest in subtests:
+        name = subtest.childNodes[0].nodeValue
+        self.subtests.append(name)
+        if (subtest.attributes.has_key('post')):
+          self.post_subtests[name] = subtest.attributes['post'].value
 
   def getStartupScript(self):
     return self._startup_script

@@ -359,7 +359,7 @@ class QualificationFrame(wx.Frame):
     
     self._results = []
     
-    if (len(self._current_test.tests) == 0):
+    if (len(self._current_test.subtests) == 0):
       wx.MessageBox('Test %s has no subtests defined'%(self._tests[short_serial]), 'No tests', wx.OK|wx.ICON_ERROR, self)
       return
     
@@ -385,7 +385,7 @@ class QualificationFrame(wx.Frame):
     
   def start_subtest(self, index):
     self._subtest_index = index
-    self._subtest = self._current_test.tests[index]
+    self._subtest = self._current_test.subtests[index]
     
     self.set_top_panel(WaitingPanel(self._top_panel, self._res, self, self._subtest))
     
@@ -421,7 +421,7 @@ class QualificationFrame(wx.Frame):
     self.reset()
     
   def next_subtest(self):
-    if (self._subtest_index + 1 >= len(self._current_test.tests)):
+    if (self._subtest_index + 1 >= len(self._current_test.subtests)):
       self.test_finished()
       self.show_results()
     else:
@@ -433,6 +433,20 @@ class QualificationFrame(wx.Frame):
     
     panel.show_plots(msg)
   
+  def launch_post_subtest(self):
+    if (self._subtest == None):
+      return
+    
+    if (self._current_test.post_subtests.has_key(self._subtest)):
+      script = os.path.join(self._current_test.getDir(), self._current_test.post_subtests[self._subtest])
+      post_launcher = self.launch_script(script)
+      if (post_launcher == None):
+        s = 'Could not load post-subtest roslaunch script "%s"'%(script)
+        wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+        self.cancel(s)
+      else:
+        post_launcher.spin()
+  
   def subtest_result(self, msg, str_result):
     self.log('Subtest "%s" result: %s'%(self._subtest, str_result))
     r = {}
@@ -441,6 +455,9 @@ class QualificationFrame(wx.Frame):
     r['text'] = msg.text_result
     r['msg'] = msg
     self._results.append(r)
+    
+    self.launch_post_subtest()
+    
     self.next_subtest()
     
   def subtest_passed(self, msg):
@@ -493,6 +510,10 @@ class QualificationFrame(wx.Frame):
       loader = roslaunch.XmlLoader()
       loader.load(script, config)
     except roslaunch.XmlParseException, e:
+      self.log('Failed to launch roslaunch file %s: %s'%(script, e))
+      return None
+    except roslaunch.XmlLoadException, e:
+      self.log('Failed to launch roslaunch file %s: %s'%(script, e))
       return None
 
     # Bring up the nodes
@@ -533,6 +554,8 @@ class QualificationFrame(wx.Frame):
     self._subtest_launch = None
     
   def test_finished(self):
+    self.launch_post_subtest()
+    
     if (self._current_test.getShutdownScript() != None):
       self.log('Running shutdown script...')
       self._shutdown_launch = self.launch_script(os.path.join(self._current_test.getDir(), self._current_test.getShutdownScript()))

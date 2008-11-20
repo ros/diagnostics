@@ -1,3 +1,4 @@
 <tests>
 <test serial="simple_" name="simple_example"/>
+<test serial="caster0" name="caster_test"/>
 </tests>
