@@ -1,0 +1,6 @@
+<launch>
+
+  <param name="robotdesc/pr2"
+         command="$(find xacro)/xacro.py '$(find caster_life_test)/caster.xml'" />
+
+</launch>
