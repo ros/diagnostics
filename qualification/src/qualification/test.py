@@ -40,13 +40,13 @@ class TestDoesNotExistError(Exception): pass
 class FailedLoadError(Exception): pass
 
 class Test:
-  _startup_script = None
-  _shutdown_script = None
-  _instructions_file = None
-  subtests = []
-  post_subtests = {}
-  
   def load(self, dir):
+    self._startup_script = None
+    self._shutdown_script = None
+    self._instructions_file = None
+    self.subtests = []
+    self.post_subtests = {}
+
     if (not os.path.isdir(dir)):
       raise NotADirectoryError
     

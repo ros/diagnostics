@@ -85,12 +85,12 @@ class EthernetTest(BaseTest):
     rl.launch()
 
     # Wait for our self-test service to come up
-    rospy.wait_for_service('ethernet/self_test', 5)
+    rospy.wait_for_service('ethernet/self_test', 20)
     
     # Try to query the self_test service on the imu
     try:
         s = rospy.ServiceProxy('ethernet/self_test', SelfTest)
-        resp = s.call(SelfTestRequest(),60)
+        resp = s.call(SelfTestRequest(),120)
     except rospy.ServiceException, e:
       print e
       wx.CallAfter(self.Cancel, "Could not contact node via ROS.\nError was: %s\nMake sure GUI is built correctly: rosmake qualification" % (e))

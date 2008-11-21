@@ -232,8 +232,9 @@ class PlotsPanel(wx.Panel):
       sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
       i += 1
       
-      plot = ImagePanel(self._scrolled_window, wx.ID_ANY, p.image)
-      sizer.Add(plot, 1, wx.EXPAND)
+      if (len(p.image) > 0):
+        plot = ImagePanel(self._scrolled_window, wx.ID_ANY, p.image)
+        sizer.Add(plot, 1, wx.EXPAND)
       
       textbox = wx.TextCtrl(self._scrolled_window, wx.ID_ANY, p.text, wx.DefaultPosition, wx.Size(-1, 100), wx.TE_MULTILINE|wx.TE_READONLY)
       sizer.Add(textbox, 0, wx.EXPAND)
@@ -360,7 +361,10 @@ class QualificationFrame(wx.Frame):
     self._current_test.load(test_dir)
     
     self._results = []
+    self._subtest = None
     
+    print self._current_test.subtests
+
     if (len(self._current_test.subtests) == 0):
       wx.MessageBox('Test %s has no subtests defined'%(self._tests[short_serial]), 'No tests', wx.OK|wx.ICON_ERROR, self)
       return

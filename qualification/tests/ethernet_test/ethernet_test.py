@@ -53,10 +53,12 @@ def ethernet_test():
     name = sys.argv[1]
     ip = sys.argv[2]
     
-    res = os.popen('ping -f -q -w 1 -s 32768 %s' % (ips[eth])).readlines()
+    res = os.popen('ping -f -q -w 1 -s 32768 %s' % (ip)).readlines()
 
     r = TestResultRequest()
     p = Plot()
+    p.image = ""
+    p.image_format = ""
     r.plots = [p]
     
     s = StringIO()
@@ -69,17 +71,18 @@ def ethernet_test():
         print >> s, 'Received: %f'%(recv)
 
         if ((tran - recv) <= 2):
-          res = os.popen('netperf -H %s -t UDP_STREAM -l 1' % (ips[eth])).readlines()
+          res = os.popen('netperf -H %s -t UDP_STREAM -l 1' % (ip)).readlines()
 
           speed = float(res[6].split()[3])
           speed_str = ''
           
-          r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+          r.result = TestResultRequest.RESULT_FAIL
           
           if (speed > 900):
             r.result = TestResultRequest.RESULT_PASS
             speed_str = 'Gigabit'
           elif (speed > 90):
+            r.result = TestResultRequest.RESULT_PASS
             speed_str = '100 Megabit'
           else:
             speed_str = '< 10 Megabit'
