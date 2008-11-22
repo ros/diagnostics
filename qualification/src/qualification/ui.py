@@ -472,7 +472,7 @@ class QualificationFrame(wx.Frame):
   
   def subtest_result(self, msg, failure_reason):
     str_result = "PASS"
-    if (msg.result == TestResultRequest.RESULT_FAIL):
+    if (msg.result == TestResultRequest.RESULT_FAIL or len(failure_reason) != 0):
       str_result = "FAIL"
     
     self.log('Subtest "%s" result: %s'%(self._subtest, str_result))
@@ -481,13 +481,15 @@ class QualificationFrame(wx.Frame):
     r['result'] = str_result
     r['text'] = msg.text_result
     r['msg'] = msg
+    failed = False
     if (len(failure_reason) != 0):
       r['failure_reason'] = failure_reason
+      failed = True
     self._results.append(r)
     
     self.launch_post_subtest()
     
-    if (msg.result == TestResultRequest.RESULT_FAIL):
+    if (failed):
       self.test_finished()
       self.show_results()
     else:

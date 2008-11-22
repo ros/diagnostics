@@ -69,35 +69,34 @@ class App:
       print 'this test message cannot be analyzed'
       
   def HysteresisPlot(self):
-    print >> sys.stderr, "Running analysis"
-    s = self.HysteresisAnalysis()
-    print >> sys.stderr, "plotting hysteresis"
+    s,tr = self.HysteresisAnalysis()
+
     #create the figure
     fig=plot.figure(1)
     axes1 = fig.add_subplot(211)
-#    axes1.clear()
     axes2 = fig.add_subplot(212)
-#    axes2.clear()
     axes1.set_xlabel('Position')
     axes1.set_ylabel('Effort')
     axes2.set_xlabel('Position')
     axes2.set_ylabel('Velocity')
-    print >> sys.stderr, "starting plot 1"
+    #plot the effort hysteresis
     axes1.plot(numpy.array(self.data.position), numpy.array(self.data.effort), 'r--')
     #show the average effort lines 
     axes1.axhline(y=self.data.arg_value[1],color='b')
     axes1.axhline(y=0,color='k')
     axes1.axhline(y=self.data.arg_value[0],color='b')
     #show that a constant velocity was achieved
-    print >> sys.stderr, "starting plot 2"
     axes2.plot(numpy.array(self.data.position), numpy.array(self.data.velocity), 'b--')
-    print >> sys.stderr, "plot finished, saving image"
     
+    #pass along results
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
     r.text_result = ""
     r.plots = []
-    r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+    if tr==True:
+      r.result =TestResultRequest.RESULT_PASS
+    else:
+      r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
     stream = StringIO()
     plot.savefig(stream, format="png")
@@ -140,19 +139,21 @@ class App:
     max_value=max(pxx[cutoff:pxx.size])
     axes2.plot([f[index]],[pxx[index]],'r.', markersize=10);
     self.first_mode = f[index]
-    s = self.SineSweepAnalysis()
+    s,tr = self.SineSweepAnalysis()
     axes2.axvline(x=self.data.arg_value[0],color='r')
     axes2.set_xlim(0, 100)
     axes2.set_ylim(0, max_value+10)
     axes2.set_xlabel('Velocity PSD')
-    #axes2.set_ylabel('Velocity')
-    self.count=0
+
 
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
     r.text_result = ""
     r.plots = []
-    r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+    if tr==True:
+      r.result =TestResultRequest.RESULT_PASS
+    else:
+      r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
     stream = StringIO()
     plot.savefig(stream, format="png")
@@ -180,33 +181,39 @@ class App:
     #compute the averages to display
     self.min_avg = min(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
     self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
-    #check to see we went the full distance
-    #if min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]:
-    #  print "mechanism is binding and not traveling the complete distace"
-    #  print "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
-    #  print "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
-    #check to see we didn't use too much force
     s = StringIO()
-    if abs(self.min_avg-self.data.arg_value[0])/self.data.arg_value[0]>0.1 or abs(self.max_avg-self.data.arg_value[1])/self.data.arg_value[1]>0.1:
+    #check to see we went the full distance
+    if min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]:
+      print "mechanism is binding and not traveling the complete distace"
+      print "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
+      print "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
+      tr=False
+    #check to see we didn't use too much force
+    if abs(self.min_avg-self.data.arg_value[0])/self.data.arg_value[0]>0.15 or abs(self.max_avg-self.data.arg_value[1])/self.data.arg_value[1]>0.15:
       print >> s, "the mechanism average effort is too high"
       print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
       print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
+      tr=False
     #data looks okay see what the user thinks
     else:
       print >> s, "data reasonable"
-    
-    return s.getvalue()
+      print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
+      print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
+      tr=True
+    return (s.getvalue(),tr)
     
   def SineSweepAnalysis(self):   
     s = StringIO()
     if abs(self.first_mode-self.data.arg_value[0])/self.data.arg_value[0]>self.data.arg_value[2]:
       print >> s, "the first mode is incorrect, the mechanism is damaged"
       print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
+      tr=False
     #data looks okay see what the user thinks  
     else:
       print >> s, "data reasonable"
-
-    return s.getvalue()
+      print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
+      tr=True
+    return (s.getvalue(),tr)
     
 if __name__ == "__main__":
   try:
