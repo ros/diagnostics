@@ -453,7 +453,11 @@ class QualificationFrame(wx.Frame):
       else:
         post_launcher.spin()
   
-  def subtest_result(self, msg, str_result):
+  def subtest_result(self, msg):
+    str_result = "PASS"
+    if (msg.result == TestResultRequest.RESULT_FAIL):
+      str_result = "FAIL"
+    
     self.log('Subtest "%s" result: %s'%(self._subtest, str_result))
     r = {}
     r['test_name'] = self._subtest
@@ -464,13 +468,17 @@ class QualificationFrame(wx.Frame):
     
     self.launch_post_subtest()
     
-    self.next_subtest()
+    if (msg.result == TestResultRequest.RESULT_FAIL):
+      self.test_finished()
+      self.show_results()
+    else:
+      self.next_subtest()
     
   def subtest_passed(self, msg):
-    self.subtest_result(msg, "PASS")
+    self.subtest_result(msg)
     
   def subtest_failed(self, msg):
-    self.subtest_result(msg, "FAIL")
+    self.subtest_result(msg)
     
   def subtest_finished(self, msg):
     self.log('Subtest "%s" finished'%(self._subtest))
@@ -515,13 +523,13 @@ class QualificationFrame(wx.Frame):
     try:
       loader = roslaunch.XmlLoader()
       loader.load(script, config)
+      
+      # Bring up the nodes
+      launcher = roslaunch.ROSLaunchRunner(config)
+      launcher.launch()
     except roslaunch.RLException, e:
       self.log('Failed to launch roslaunch file %s: %s'%(script, e))
       return None
-
-    # Bring up the nodes
-    launcher = roslaunch.ROSLaunchRunner(config)
-    launcher.launch()
     
     return launcher
     

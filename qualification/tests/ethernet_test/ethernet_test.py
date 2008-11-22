@@ -76,13 +76,11 @@ def ethernet_test():
           speed = float(res[6].split()[3])
           speed_str = ''
           
-          r.result = TestResultRequest.RESULT_FAIL
+          r.result = TestResultRequest.RESULT_PASS
           
           if (speed > 900):
-            r.result = TestResultRequest.RESULT_PASS
             speed_str = 'Gigabit'
           elif (speed > 90):
-            r.result = TestResultRequest.RESULT_PASS
             speed_str = '100 Megabit'
           else:
             speed_str = '< 10 Megabit'
@@ -91,7 +89,6 @@ def ethernet_test():
           print >> s, 'Speed: %f (%s)'%(speed, speed_str)
         else:
           r.text_result = 'Too many packets lost'
-          r.result = TestResultRequest.RESULT_FAIL
     else:
       r.text_result = 'Running ping failed'
         
