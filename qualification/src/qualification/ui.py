@@ -245,7 +245,8 @@ class PlotsPanel(wx.Panel):
     self._manager.subtest_passed(self._msg)
   
   def on_fail(self, event):
-    self._manager.subtest_failed(self._msg)
+    failure_reason = wx.GetTextFromUser("Input the reason for failure:", "Input failure reason", "", self)
+    self._manager.subtest_failed(self._msg, failure_reason)
   
   def on_retry(self, event):
     self._manager.retry_subtest()
@@ -289,7 +290,13 @@ class ResultsPanel(wx.Panel):
         text += 'Plot %d:\n'%(i)
         text += p.text
         i += 1
-      self._textbox.AppendText("Subtest '%s':\nResult: %s\nText: %s\n"%(r['test_name'], r['result'], text))
+      
+      
+      self._textbox.AppendText("Subtest '%s':\n"%(r['test_name']))
+      self._textbox.AppendText("Result: %s\n"%(r['result']))
+      if (r.has_key('failure_reason')):
+        self._textbox.AppendText("Failure reason: %s\n"%(r['failure_reason']))
+      self._textbox.AppendText("Text: %s\n"%(text))
     
   def on_submit(self, event):
     wx.CallAfter(self._manager.submit_results, self._textbox.GetValue())
@@ -463,7 +470,7 @@ class QualificationFrame(wx.Frame):
       else:
         post_launcher.spin()
   
-  def subtest_result(self, msg):
+  def subtest_result(self, msg, failure_reason):
     str_result = "PASS"
     if (msg.result == TestResultRequest.RESULT_FAIL):
       str_result = "FAIL"
@@ -474,6 +481,8 @@ class QualificationFrame(wx.Frame):
     r['result'] = str_result
     r['text'] = msg.text_result
     r['msg'] = msg
+    if (len(failure_reason) != 0):
+      r['failure_reason'] = failure_reason
     self._results.append(r)
     
     self.launch_post_subtest()
@@ -485,10 +494,10 @@ class QualificationFrame(wx.Frame):
       self.next_subtest()
     
   def subtest_passed(self, msg):
-    self.subtest_result(msg)
+    self.subtest_result(msg, "")
     
-  def subtest_failed(self, msg):
-    self.subtest_result(msg)
+  def subtest_failed(self, msg, failure_reason):
+    self.subtest_result(msg, failure_reason)
     
   def subtest_finished(self, msg):
     self.log('Subtest "%s" finished'%(self._subtest))
@@ -498,7 +507,7 @@ class QualificationFrame(wx.Frame):
     if (msg.result == TestResultRequest.RESULT_PASS):
       self.subtest_passed(msg)
     elif (msg.result == TestResultRequest.RESULT_FAIL):
-      self.subtest_failed(msg)
+      self.subtest_failed(msg, "Automated failure")
     elif (msg.result == TestResultRequest.RESULT_HUMAN_REQUIRED):
       self.log('Subtest "%s" needs human response'%(self._subtest))
       self.show_plots(msg)
