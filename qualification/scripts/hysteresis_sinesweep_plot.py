@@ -28,7 +28,7 @@
 
 # Author: Melonee Wise
 
-PKG = "joint_qualification_controllers"
+PKG = "qualification"
 
 import rostools; rostools.update_path(PKG)
 
@@ -45,13 +45,18 @@ from time import sleep
 
 import rospy
 
+import matplotlib
+matplotlib.use('WXAgg')
 import matplotlib.pyplot as plot
 from StringIO import StringIO
 
+from qualification.msg import *
+from qualification.srv import *
+
 class App:
   def __init__(self):
+    rospy.init_node("TestPlotter", anonymous=True)
     self.data_topic = rospy.TopicSub("/test_data", TestData, self.OnData)
-    return True
     
   def OnData(self,msg):
     print 'Got data named %s' % (msg.test_name)
@@ -64,33 +69,38 @@ class App:
       print 'this test message cannot be analyzed'
       
   def HysteresisPlot(self):
+    print >> sys.stderr, "Running analysis"
     s = self.HysteresisAnalysis()
-    print "plotting hysteresis"
+    print >> sys.stderr, "plotting hysteresis"
     #create the figure
     fig=plot.figure(1)
     axes1 = fig.add_subplot(211)
-    axes1.clear()
+#    axes1.clear()
     axes2 = fig.add_subplot(212)
-    axes2.clear()
-    axes1.plot(numpy.array(self.data.position), numpy.array(self.data.effort), 'r--')
-    #show the average effort lines 
-    axes1.axhline(y=self.min_avg,color='b')
-    axes1.axhline(y=0,color='k')
-    axes1.axhline(y=self.max_avg,color='g')
+#    axes2.clear()
     axes1.set_xlabel('Position')
     axes1.set_ylabel('Effort')
-    #show that a constant velocity was achieved
-    axes2.plot(numpy.array(self.data.position), numpy.array(self.data.velocity), 'b--')
     axes2.set_xlabel('Position')
     axes2.set_ylabel('Velocity')
+    print >> sys.stderr, "starting plot 1"
+    axes1.plot(numpy.array(self.data.position), numpy.array(self.data.effort), 'r--')
+    #show the average effort lines 
+    axes1.axhline(y=self.data.arg_value[1],color='b')
+    axes1.axhline(y=0,color='k')
+    axes1.axhline(y=self.data.arg_value[0],color='b')
+    #show that a constant velocity was achieved
+    print >> sys.stderr, "starting plot 2"
+    axes2.plot(numpy.array(self.data.position), numpy.array(self.data.velocity), 'b--')
+    print >> sys.stderr, "plot finished, saving image"
     
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
+    r.text_result = ""
     r.plots = []
     r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
     stream = StringIO()
-    plt.savefig(stream, format="png")
+    plot.savefig(stream, format="png")
     image = stream.getvalue()
     
     p = qualification.msg.Plot()
@@ -99,6 +109,7 @@ class App:
     p.image = image
     p.image_format = "png"
     result_service.call(r)
+    
     
   def SineSweepPlot(self):
     print "plotting sinesweep"
@@ -118,26 +129,33 @@ class App:
     #plot in power
     pxx, f = axes2.psd(numpy.array(self.data.velocity), NFFT=next_pow_two, Fs=1000, Fc=0)
     axes2.clear()
+    for i in f:
+      if f[i]>4:
+        cutoff=i
+        break
     axes2.plot(f,pxx)
     #find the peak
-    index = numpy.argmax(pxx)
-    max_value=max(pxx)
+    index = numpy.argmax(pxx[cutoff:pxx.size])
+    index=index+cutoff
+    max_value=max(pxx[cutoff:pxx.size])
     axes2.plot([f[index]],[pxx[index]],'r.', markersize=10);
     self.first_mode = f[index]
     s = self.SineSweepAnalysis()
     axes2.axvline(x=self.data.arg_value[0],color='r')
     axes2.set_xlim(0, 100)
+    axes2.set_ylim(0, max_value+10)
     axes2.set_xlabel('Velocity PSD')
     #axes2.set_ylabel('Velocity')
     self.count=0
-    
+
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
+    r.text_result = ""
     r.plots = []
     r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
     stream = StringIO()
-    plt.savefig(stream, format="png")
+    plot.savefig(stream, format="png")
     image = stream.getvalue()
     
     p = qualification.msg.Plot()
@@ -153,51 +171,48 @@ class App:
     max_encoder=max(numpy.array(self.data.position))
     #find the index to do the average over
     index1 = numpy.argmax(numpy.array(self.data.position))
-    index1= numpy.argmin(numpy.array(self.data.position))
-    index=min(index1,index2)
+    index2 = numpy.argmin(numpy.array(self.data.position))
     end =numpy.array(self.data.position).size
+    if (abs(end/2-index1)<abs(end/2-index2)):
+      index=index1
+    else:
+      index=index2
     #compute the averages to display
     self.min_avg = min(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
     self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
-    
-    s = StringIO()
-    
     #check to see we went the full distance
-    if min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]:
-      print >> s, "mechanism is binding and not traveling the complete distace"
-      print >> s, "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
-      print >> s, "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
+    #if min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]:
+    #  print "mechanism is binding and not traveling the complete distace"
+    #  print "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
+    #  print "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
     #check to see we didn't use too much force
-    elif abs(self.min_avg-self.data.arg_value[0])/self.data.arg_value[0]>0.1 or abs(self.max_avg-self.data.arg_value[1])/self.data.arg_value[1]>0.1:
+    s = StringIO()
+    if abs(self.min_avg-self.data.arg_value[0])/self.data.arg_value[0]>0.1 or abs(self.max_avg-self.data.arg_value[1])/self.data.arg_value[1]>0.1:
       print >> s, "the mechanism average effort is too high"
       print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
       print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
     #data looks okay see what the user thinks
     else:
       print >> s, "data reasonable"
-      
-    return s.getvalue()
     
+    return s.getvalue()
     
   def SineSweepAnalysis(self):   
     s = StringIO()
-    
     if abs(self.first_mode-self.data.arg_value[0])/self.data.arg_value[0]>self.data.arg_value[2]:
-      print >> s, "mechanism is binding and not traveling the complete distace"
+      print >> s, "the first mode is incorrect, the mechanism is damaged"
       print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
     #data looks okay see what the user thinks  
     else:
       print >> s, "data reasonable"
-      
+
     return s.getvalue()
     
 if __name__ == "__main__":
   try:
-    rospy.init_node("TestPlotter", anonymous=True)
     app = App()
     rospy.spin()
   except Exception, e:
     print e
     
-  app.data_topic.unregister()
   print 'quit'
