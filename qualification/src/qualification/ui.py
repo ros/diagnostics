@@ -232,12 +232,13 @@ class PlotsPanel(wx.Panel):
       sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
       i += 1
       
+      textbox = wx.TextCtrl(self._scrolled_window, wx.ID_ANY, p.text, wx.DefaultPosition, wx.Size(-1, 100), wx.TE_MULTILINE|wx.TE_READONLY)
+      sizer.Add(textbox, 0, wx.EXPAND)
+      
       if (len(p.image) > 0):
         plot = ImagePanel(self._scrolled_window, wx.ID_ANY, p.image)
         sizer.Add(plot, 1, wx.EXPAND)
       
-      textbox = wx.TextCtrl(self._scrolled_window, wx.ID_ANY, p.text, wx.DefaultPosition, wx.Size(-1, 100), wx.TE_MULTILINE|wx.TE_READONLY)
-      sizer.Add(textbox, 0, wx.EXPAND)
       self._scrolled_sizer.Add(sizer, 1, wx.EXPAND)
     
   def on_pass(self, event):
@@ -279,7 +280,16 @@ class ResultsPanel(wx.Panel):
     self._textbox.Clear()
     for r in results:
       self._textbox.AppendText("------------------------------------------------\n")
-      self._textbox.AppendText("Subtest '%s':\nResult: %s\nText: %s\n"%(r['test_name'], r['result'], r['text']))
+      
+      text = r['text']
+      msg = r['msg']
+      i = 1
+      for p in msg.plots:
+        text += '\n------\n'
+        text += 'Plot %d:\n'%(i)
+        text += p.text
+        i += 1
+      self._textbox.AppendText("Subtest '%s':\nResult: %s\nText: %s\n"%(r['test_name'], r['result'], text))
     
   def on_submit(self, event):
     wx.CallAfter(self._manager.submit_results, self._textbox.GetValue())
