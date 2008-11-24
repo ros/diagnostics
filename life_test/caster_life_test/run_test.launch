@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find caster_life_test)/init.launch" />
+  <node pkg="caster_life_test" type="periodic_drive.py" />
+</launch>

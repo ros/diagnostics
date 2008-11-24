@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <controllers>
   <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/base_defs.xml" />
-  <caster_calibrator suffix="front_left" />
+  <caster_calibrator suffix="fl" />
 </controllers>
