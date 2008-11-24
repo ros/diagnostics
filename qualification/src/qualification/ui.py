@@ -348,6 +348,9 @@ class QualificationFrame(wx.Frame):
     self._spin_timer = wx.Timer(self, wx.ID_ANY)
     self.Bind(wx.EVT_TIMER, self.on_spin, self._spin_timer)
     self._spin_timer.Start(100)
+    
+    self._username = None
+    self._password = None
 
   def log(self, msg):
     self._log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
@@ -430,6 +433,14 @@ class QualificationFrame(wx.Frame):
     panel.set_results(self._results)
     
   def get_inventory_object(self):
+    if (self._username != None and self._password != None):
+      invent = Invent(self._username, self._password)
+      if (invent.login() == False):
+        self._username = None
+        self._password = None
+      else:
+        return invent
+    
     dialog = self._res.LoadDialog(self, 'username_password_dialog')
     xrc.XRCCTRL(dialog, 'text').Wrap(300)
     dialog.Layout()
