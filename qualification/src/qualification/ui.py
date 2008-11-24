@@ -53,7 +53,10 @@ from xml.dom import minidom
 from srv import *
 from test import *
 
-from StringIO import StringIO
+from cStringIO import StringIO
+import struct
+
+from invent_client import Invent
 
 TESTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'tests')
 RESULTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'results')
@@ -426,16 +429,57 @@ class QualificationFrame(wx.Frame):
     
     panel.set_results(self._results)
     
+  def get_inventory_object(self):
+    dialog = self._res.LoadDialog(self, 'username_password_dialog')
+    xrc.XRCCTRL(dialog, 'text').Wrap(300)
+    dialog.Layout()
+    dialog.Fit()
+    username_ctrl = xrc.XRCCTRL(dialog, 'username')
+    password_ctrl = xrc.XRCCTRL(dialog, 'password')
+    username_ctrl.SetFocus()
+    
+    # These values don't come through in the xrc file
+    username_ctrl.SetMinSize(wx.Size(200, -1))
+    password_ctrl.SetMinSize(wx.Size(200, -1))
+    if (dialog.ShowModal() == wx.ID_OK):
+      username = username_ctrl.GetValue()
+      password = password_ctrl.GetValue()
+
+      invent = Invent(username, password)
+      if (invent.login() == False):
+        return self.get_inventory_object()
+      
+      self._username = username
+      self._password = password
+      
+      return invent
+    
+    return None
+    
   def submit_results(self, summary):
-    ###
-    ### ADD CODE HERE TO actually submit log!
-    ###
-    fname = os.path.join(RESULTS_DIR, '%s_%s.test' % (self._current_serial, self._tests_start_date.strftime("%Y_%m_%d_%I_%M_%S")))
+    start_time_string = self._tests_start_date.strftime("%Y_%m_%d_%I_%M_%S")
+    
+    invent = self.get_inventory_object()
+    if (invent != None):
+      prefix = start_time_string + "/"
+      invent.add_attachment(self._current_serial, prefix + "summary", "text/plain", summary)
+      
+      i = 1
+      for r in self._results:
+        msg = r['msg']
+        for p in msg.plots:
+          if (len(p.image) > 0):
+            invent.add_attachment(self._current_serial, prefix + "image%d"%(i), "image/" + p.image_format, p.image)
+            i += 1
+            
+      self.log('Results submitted')
+    
+    fname = os.path.join(RESULTS_DIR, '%s_%s.test' % (self._current_serial, start_time_string))
     f = open(fname, 'w')
     f.write(summary)
     f.close()
     
-    self.log('Results submitted')
+    self.log('Results logged to %s'%(fname))
     
     self.reset()
 
