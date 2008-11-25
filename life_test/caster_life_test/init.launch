@@ -1,5 +1,5 @@
 <launch>
-  <include file="init.machine" />
+  <include file="$(find caster_life_test)/init.machine" />
   <include file="$(find caster_life_test)/send_description.launch" />
 
   <!-- pr2_etherCAT -->
