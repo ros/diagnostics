@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- Controllers -->
+  <node pkg="mechanism_control" type="spawner.py"
+        args="$(find arm_life_test)/controllers.xml" />
+
+  <!-- Test script -->
+  <node pkg="arm_life_test" type="random_positions.py" />
+
+</launch>
