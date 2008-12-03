@@ -1,0 +1,5 @@
+<controller name="test_controller" type="SineSweepControllerNode">
+  <joint name="head_tilt_joint">
+    <controller_defaults start_freq="10" end_freq="100" amplitude="7.0" duration="10" />   
+  </joint>
+</controller>

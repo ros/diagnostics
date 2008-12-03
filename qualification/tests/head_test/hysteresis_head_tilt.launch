@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/head_test/hysteresis_head_tilt.xml" />
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+</launch>

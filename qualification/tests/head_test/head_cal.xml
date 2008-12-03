@@ -1,0 +1,4 @@
+<controllers>
+  <include filename="../../../../robot_descriptions/wg_robot_description/pr2_robot_defs/head_defs.xml" />
+  <head_calibrator />
+</controllers>
