@@ -1,6 +1,6 @@
 <tests>
 <test serial="simple_" name="simple_example"/>
-<test serial="caster0" name="caster_test"/>
 <test serial="6804108" name="caster_test"/>
+<test serial="6804213" name="wrist_test"/>
 <test serial="etherne" name="ethernet_test"/>
 </tests>
