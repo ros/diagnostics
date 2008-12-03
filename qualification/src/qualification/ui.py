@@ -472,6 +472,9 @@ class QualificationFrame(wx.Frame):
     
     invent = self.get_inventory_object()
     if (invent != None):
+      status_str = self._results[len(self._results)-1]['result']    
+      invent.setKV(self._current_serial, "Test Status", status_str)
+      
       prefix = start_time_string + "/"
       invent.add_attachment(self._current_serial, prefix + "summary", "text/plain", summary)
       
@@ -481,6 +484,7 @@ class QualificationFrame(wx.Frame):
         for p in msg.plots:
           if (len(p.image) > 0):
             invent.add_attachment(self._current_serial, prefix + "image%d"%(i), "image/" + p.image_format, p.image)
+            
             i += 1
             
       self.log('Results submitted')
