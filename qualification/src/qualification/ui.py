@@ -353,7 +353,7 @@ class QualificationFrame(wx.Frame):
     self._password = None
 
   def log(self, msg):
-    self._log.AppendText(datetime.datetime.now().strftime("%Y-%m-%d_%I:%M:%S: ") + msg + '\n')
+    self._log.AppendText(datetime.datetime.now().strftime("%Y%m%d_%I%M%S:") + msg + '\n')
     self._log.Refresh()
     self._log.Update()
     
@@ -468,12 +468,13 @@ class QualificationFrame(wx.Frame):
     return None
     
   def submit_results(self, summary):
-    start_time_string = self._tests_start_date.strftime("%Y_%m_%d_%I_%M_%S")
+    start_time_string = self._tests_start_date.strftime("%Y%m%d_%I%M%S")
     
     invent = self.get_inventory_object()
     if (invent != None):
       status_str = self._results[len(self._results)-1]['result']    
       invent.setKV(self._current_serial, "Test Status", status_str)
+      invent.setNote(self._current_serial, "Test run on %s, status: %s"%(start_time_string, status_str))
       
       prefix = start_time_string + "/"
       invent.add_attachment(self._current_serial, prefix + "summary", "text/plain", summary)
