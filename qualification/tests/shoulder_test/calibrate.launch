@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find qualification)/tests/shoulder_test/shoulder_cal.xml" />
+</launch>

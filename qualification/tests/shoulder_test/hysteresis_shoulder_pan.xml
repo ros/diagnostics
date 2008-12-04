@@ -1,0 +1,6 @@
+<controller name="test_controller" type="HysteresisControllerNode">
+  <joint name="r_shoulder_pan_joint">
+     <pid p="7" i="0.5" d="0" iClamp="1.0" />
+    <controller_defaults velocity="2.0" max_effort="1.0" max_expected_effort="0.15" min_expected_effort="-0.14" min_pos="-1.56" max_pos="1.56"/>   
+  </joint>
+</controller>

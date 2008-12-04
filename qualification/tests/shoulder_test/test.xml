@@ -1,0 +1,7 @@
+<test>
+  <startup>shoulder.launch</startup>
+  <subtest>sinesweep_shoulder_pan.launch</subtest>
+  <subtest>hysteresis_shoulder_pan.launch</subtest>
+  <subtest>sinesweep_upper_arm_roll.launch</subtest>
+  <subtest>hysteresis_upper_arm_roll.launch</subtest>
+</test>

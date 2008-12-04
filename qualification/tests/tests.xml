@@ -3,6 +3,8 @@
 <test serial="6804108" name="caster_test"/>
 <test serial="6804213" name="wrist_test"/>
 <test serial="6804040" name="head_test"/>
+<test serial="6804015" name="gripper_test"/>
+<test serial="6804204" name="gripper_test"/>
 <test serial="6801024" name="hokuyo_test"/>
 <test serial="6801050" name="imu_test"/>
 <test serial="etherne" name="ethernet_test"/>

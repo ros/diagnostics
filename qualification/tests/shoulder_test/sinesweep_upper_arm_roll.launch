@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/shoulder_test/sinesweep_upper_arm_roll.xml" />
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+</launch>

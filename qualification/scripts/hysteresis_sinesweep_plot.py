@@ -183,13 +183,13 @@ class App:
     self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
     s = StringIO()
     #check to see we went the full distance
-    if min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]:
-      print "mechanism is binding and not traveling the complete distace"
-      print "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
-      print "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
+    if (min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]) and (self.data.arg_value[3]!=0 and self.data.arg_value[2]!=0):
+      print >> s, "mechanism is binding and not traveling the complete distace"
+      print >> s, "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
+      print >> s, "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
       tr=False
     #check to see we didn't use too much force
-    if abs(self.min_avg-self.data.arg_value[0])/self.data.arg_value[0]>0.15 or abs(self.max_avg-self.data.arg_value[1])/self.data.arg_value[1]>0.15:
+    elif abs((self.min_avg-self.data.arg_value[0])/self.data.arg_value[0])>0.20 or abs((self.max_avg-self.data.arg_value[1])/self.data.arg_value[1])>0.20:
       print >> s, "the mechanism average effort is too high"
       print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
       print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
