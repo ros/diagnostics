@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo">
+        <param name="calibrate_time" value="False" type="bool"/>
+        <param name="min_ang_degrees" value="-15.0" type="double"/>
+        <param name="max_ang_degrees" value="15.0" type="double"/>
+  </node>
+</launch>
