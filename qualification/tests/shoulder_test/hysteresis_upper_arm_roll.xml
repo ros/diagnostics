@@ -1,6 +1,6 @@
 <controller name="test_controller" type="HysteresisControllerNode">
   <joint name="r_upper_arm_roll_joint">
-     <pid p="6" i="0.2" d="0" iClamp="2.0" />
-    <controller_defaults velocity="1.5" max_effort="1.0" max_expected_effort="0.15" min_expected_effort="-0.14" min_pos="-2.30" max_pos="2.30"/>   
+     <pid p="1.0" i="70.5" d="0" iClamp="1.2" />
+    <controller_defaults velocity="1.5" max_effort="1.0" max_expected_effort="0.45" min_expected_effort="-0.55" min_pos="-3.4" max_pos=".60"/>   
   </joint>
 </controller>
