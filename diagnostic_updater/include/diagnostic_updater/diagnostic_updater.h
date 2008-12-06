@@ -66,7 +66,7 @@ public:
     ((ros::node*)(node_))->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
 
     node_->param("~diagnostic_period", period_, 1.0);
-    next_time_ = ros::Time::now() + ros::Duration(period_);
+    next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
   }
 
   void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
@@ -112,7 +112,7 @@ public:
     }
 
     node_->param("~diagnostic_period", period_, 1.0);
-    next_time_ = ros::Time::now() + ros::Duration(period_);
+    next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
   }
 
   double getPeriod()
