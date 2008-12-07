@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<controllers>
+ <controller name="r_elbow_flex" topic="cal_r_elbow_flex"
+	type = "JointCalibrationControllerNode">
+  <calibrate joint="r_elbow_flex_joint"
+	actuator="r_elbow_flex_motor"
+	transmission="r_elbow_flex_trans"
+	velocity="1.0" />
+  <pid p="6" i="0.1" d="0" iClamp="1.0" />
+ </controller>
+</controllers>

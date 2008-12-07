@@ -1,0 +1,13 @@
+<package>
+
+  <description brief="Code and configuration for performing life testing on an elbow">
+  </description>
+  <author>Stuart Glaser</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+
+  <depend package="pr2_etherCAT" />
+  <depend package="pr2_power_board"/>
+  <depend package="rosrecord"/>
+
+</package>
