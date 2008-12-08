@@ -1,0 +1,48 @@
+<controllers>
+
+
+<!--hold everything else in place-->
+
+<controller name="shoulder_pan_controller" type="JointPositionControllerNode">
+  <joint name="r_shoulder_pan_joint">
+     <pid p="70" i="20.0" d="11.0" iClamp="4.0" />
+  </joint>
+</controller>
+
+<controller name="shoulder_lift_controller" type="JointPositionControllerNode">
+  <joint name="r_shoulder_lift_joint">
+     <pid p="60" i="10.0" d="5.0" iClamp="4.0" />
+  </joint>
+</controller>
+
+<controller name="upper_arm_controller" type="JointPositionControllerNode">
+  <joint name="r_upper_arm_roll_joint">
+     <pid p="25" i="2.0" d=".5" iClamp="1.0" />
+  </joint>
+</controller>
+
+<controller name="elbow_flex_controller" type="JointPositionControllerNode">
+  <joint name="r_elbow_flex_joint">
+     <pid p="100" i="20.0" d="10.0" iClamp="2.0" />
+  </joint>
+</controller>
+
+<controller name="forearm_roll_controller" type="JointPositionControllerNode">
+  <joint name="r_forearm_roll_joint">
+     <pid p="20" i="1.0" d=".2" iClamp="1.0" />
+  </joint>
+</controller>
+
+<controller name="wrist_flex_controller" type="JointPositionControllerNode">
+  <joint name="r_wrist_flex_joint">
+     <pid p="4" i="0.5" d="0" iClamp="1.0" />
+  </joint>
+</controller>
+
+<controller name="wrist_roll_controller" type="JointPositionControllerNode">
+  <joint name="r_wrist_roll_joint">
+     <pid p="4" i="0.5" d="0" iClamp="1.0" />
+  </joint>
+</controller>
+
+</controllers>

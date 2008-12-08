@@ -2,7 +2,7 @@
 
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/caster_test/caster.xml'" />
 
-  <machine name="xenomai_root" user="root" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
 
 
 <!-- pr2_etherCAT -->
