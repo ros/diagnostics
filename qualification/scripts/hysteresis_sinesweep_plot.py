@@ -65,6 +65,8 @@ class App:
       self.HysteresisPlot()
     elif self.data.test_name=="sinesweep":
       self.SineSweepPlot()
+    elif self.data.test_name=="backlash":
+      self.BacklashPlot()
     else:
       print 'this test message cannot be analyzed'
       
@@ -108,8 +110,7 @@ class App:
     p.image = image
     p.image_format = "png"
     result_service.call(r)
-    
-    
+ 
   def SineSweepPlot(self):
     print "plotting sinesweep"
     # Plot the values and line of best fit
@@ -166,6 +167,50 @@ class App:
     p.image_format = "png"
     result_service.call(r)
 
+  def BacklashPlot(self):
+    s,tr = self.BacklashAnalysis()
+
+    #create the figure
+    fig=plot.figure(1)
+    axes1 = fig.add_subplot(211)
+    axes2 = fig.add_subplot(212)
+    #axes3 = fig.add_subplot(313)
+    axes1.set_xlabel('Effort')
+    axes1.set_ylabel('Position')
+    axes2.set_xlabel('Time')
+    axes2.set_ylabel('Position')
+    #plot the effort hysteresis
+    axes1.plot(numpy.array(self.data.effort), numpy.array(self.data.position), 'r')
+    #show the average effort lines 
+    #axes1.axhline(y=self.data.arg_value[1],color='b')
+    #axes1.axhline(y=0,color='k')
+    #axes1.axhline(y=self.data.arg_value[0],color='b')
+    #show that a constant velocity was achieved
+    axes2.plot(numpy.array(self.data.position), 'b')
+    #axes3.plot(numpy.array(self.data.effort), 'g')
+    #axes3.plot(numpy.array(self.data.velocity),numpy.array(self.data.position), 'r')
+    #pass along results
+    result_service = rospy.ServiceProxy('test_result', TestResult)
+    r = TestResultRequest()
+    r.text_result = ""
+    r.plots = []
+    if tr==True:
+      r.result =TestResultRequest.RESULT_PASS
+    else:
+      r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
+    
+    stream = StringIO()
+    plot.savefig(stream, format="png")
+    image = stream.getvalue()
+    
+    p = qualification.msg.Plot()
+    r.plots.append(p)
+    p.text = s
+    p.image = image
+    p.image_format = "png"
+    result_service.call(r)
+
+
   def HysteresisAnalysis(self):
     #compute the encoder travel
     min_encoder=min(numpy.array(self.data.position))
@@ -213,6 +258,13 @@ class App:
       print >> s, "data reasonable"
       print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
       tr=True
+    return (s.getvalue(),tr)
+
+  def BacklashAnalysis(self):
+    #compute the encoder travel
+    s = StringIO()
+    print >> s, "look at the data"
+    tr=False
     return (s.getvalue(),tr)
     
 if __name__ == "__main__":
