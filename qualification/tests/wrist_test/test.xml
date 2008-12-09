@@ -1,4 +1,5 @@
 <test>
+  <instructions>instructions.html</instructions>
   <startup>wrist.launch</startup>
   <subtest>sinesweep_wrist_flex.launch</subtest>
   <subtest>hysteresis_wrist_flex.launch</subtest>

@@ -1,12 +1,12 @@
 <test>
   <startup>full_arm.launch</startup>
-  <subtest>hysteresis_shoulder_lift.launch</subtest>
+  <!--subtest>hysteresis_shoulder_lift.launch</subtest>
   <subtest>hysteresis_shoulder_pan.launch</subtest>
   <subtest>hysteresis_upper_arm_roll.launch</subtest>
   <subtest>hysteresis_elbow_flex.launch</subtest>
  <subtest>hysteresis_forearm_roll.launch</subtest>
   <subtest>hysteresis_wrist_flex.launch</subtest>
  <subtest>hysteresis_wrist_roll.launch</subtest>
- <!--shutdown>shutdown.launch</shutdown>
+ <shutdown>shutdown.launch</shutdown-->
   
 </test>

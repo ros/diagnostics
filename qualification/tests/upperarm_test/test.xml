@@ -1,0 +1,8 @@
+<test>
+  <instructions>instructions.html</instructions>
+  <startup>upperarm.launch</startup>
+  <subtest>sinesweep_elbow_flex.launch</subtest>
+  <subtest>hysteresis_elbow_flex.launch</subtest>
+  <subtest>sinesweep_forearm_roll.launch</subtest>
+  <subtest>hysteresis_forearm_roll.launch</subtest>
+</test>

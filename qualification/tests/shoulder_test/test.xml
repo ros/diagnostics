@@ -1,6 +1,7 @@
 <test>
+  <instructions>instructions.html</instructions>
   <startup>shoulder.launch</startup>
-  <shutdown>shutdown.launch</shutdown>
+  <!--shutdown>shutdown.launch</shutdown-->
   <subtest>sinesweep_shoulder_pan.launch</subtest>
   <subtest>hysteresis_shoulder_pan.launch</subtest>
   <subtest>hysteresis_shoulder_lift.launch</subtest>
