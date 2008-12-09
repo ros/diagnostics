@@ -45,6 +45,7 @@ class Test:
     self._shutdown_script = None
     self._instructions_file = None
     self.subtests = []
+    self.pre_subtests = {}
     self.post_subtests = {}
 
     if (not os.path.isdir(dir)):
@@ -81,6 +82,8 @@ class Test:
         self.subtests.append(name)
         if (subtest.attributes.has_key('post')):
           self.post_subtests[name] = subtest.attributes['post'].value
+        if (subtest.attributes.has_key('pre')):
+          self.pre_subtests[name] = subtest.attributes['pre'].value
 
   def getStartupScript(self):
     return self._startup_script

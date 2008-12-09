@@ -418,6 +418,8 @@ class QualificationFrame(wx.Frame):
     
     self.set_top_panel(WaitingPanel(self._top_panel, self._res, self, self._subtest))
     
+    self.launch_pre_subtest()
+
     script = os.path.join(self._current_test.getDir(), self._subtest)
     self._subtest_launch = self.launch_script(script)
     if (self._subtest_launch == None):
@@ -516,6 +518,20 @@ class QualificationFrame(wx.Frame):
     
     panel.show_plots(msg)
   
+  def launch_pre_subtest(self):
+    if (self._subtest == None):
+      return
+    
+    if (self._current_test.pre_subtests.has_key(self._subtest)):
+      script = os.path.join(self._current_test.getDir(), self._current_test.pre_subtests[self._subtest])
+      pre_launcher = self.launch_script(script)
+      if (pre_launcher == None):
+        s = 'Could not load post-subtest roslaunch script "%s"'%(script)
+        wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+        self.cancel(s)
+      else:
+        pre_launcher.spin()
+
   def launch_post_subtest(self):
     if (self._subtest == None):
       return
