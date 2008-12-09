@@ -1,0 +1,12 @@
+<launch>
+
+<!-- Joystick -->
+  <node pkg="spacenav_node" type="spacenav_node" />
+
+<!-- Arm twist controller -->
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_twist.xml" />
+
+<!-- Gripper controller -->
+  <node pkg="teleop_joint_effort" type="teleop_joint_effort_button.py" />
+
+</launch>
