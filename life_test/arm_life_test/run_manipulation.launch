@@ -1,7 +1,7 @@
 <launch>
 
 <!-- Joystick -->
-  <node pkg="spacenav_node" type="spacenav_node" />
+  <node pkg="spacenav_node" type="spacenav_node" /> 
 
 <!-- Arm twist controller -->
   <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_twist.xml" />
