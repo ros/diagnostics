@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (c) 2008, Willow Garage, Inc.
 # All rights reserved.
 # 
@@ -25,8 +26,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-PKG = 'qualification'
-NAME = 'waiter'
+PKG = "qualification"
+NAME = "waiter"
 
 import rostools; rostools.update_path(PKG)
 
@@ -35,14 +36,18 @@ import time
 import rospy
 from robot_msgs.msg import *
 
+from optparse import OptionParser
 
-
+done = False
 
 def callback(msg, name):
+    global done
+##    print "Looking for ", name
     for joint in msg.joint_states:
         if joint.name == name:
-            if abs(joint.velocity) < 0.1):
-                exit(0)
+            if abs(joint.velocity) < 0.1:
+##                print "DONE"
+                done = True
 
 
 
@@ -61,7 +66,9 @@ if __name__ == '__main__':
         exit(-1)
     else:
         if options.wait:
-            sleep(options.wait)
-        rospy.Subscriber("mechanism_state", MechanismState, callback, options.joint)
+            time.sleep(options.wait)
+        rospy.Subscriber("/mechanism_state", MechanismState, callback, options.joint)
         rospy.init_node(NAME, anonymous=True)
-        rospy.spin()
+        global done
+        while not done:
+            time.sleep(0.5)

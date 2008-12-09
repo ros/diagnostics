@@ -224,8 +224,8 @@ class App:
     else:
       index=index2
     #compute the averages to display
-    self.min_avg = min(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
-    self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index]),numpy.average(numpy.array(self.data.effort)[index:end]))
+    self.min_avg = min(numpy.average(numpy.array(self.data.effort)[0:index-15]),numpy.average(numpy.array(self.data.effort)[index+15:end]))
+    self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index-15]),numpy.average(numpy.array(self.data.effort)[index+15:end]))
     s = StringIO()
     #check to see we went the full distance
     if (min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]) and (self.data.arg_value[3]!=0 and self.data.arg_value[2]!=0):
