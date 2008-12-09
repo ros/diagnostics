@@ -1,0 +1,5 @@
+<test>
+  <startup>gripper.launch</startup>
+  <subtest>hysteresis_gripper.launch</subtest>
+  <subtest>backlash_gripper.launch</subtest>
+</test>

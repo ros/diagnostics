@@ -1,0 +1,5 @@
+<controller name="test_controller" type="JointVelocityControllerNode">
+  <joint name="r_gripper_joint"> 
+    <pid p=".00015" d="0" i=".0006" iClamp=".00001" />
+  </joint>
+</controller>

@@ -1,0 +1,5 @@
+<controller name="test_controller" type="BacklashControllerNode">
+  <joint name="r_gripper_joint">
+    <controller_defaults freq="1" amplitude=".1" duration="10" error_tolerance="0.1" />   
+  </joint>
+</controller>
