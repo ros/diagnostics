@@ -43,12 +43,16 @@ from optparse import OptionParser
 
 def callback(msg, name):
 ##    print "Looking for ", name
+    names = name.split()
+    total = len(names)
     for joint in msg.joint_states:
-        if joint.name == name:
+        if joint.name in names:
             if abs(joint.velocity) < 0.1:
 ##                print "DONE"
-                global ISDONE
-                ISDONE = True
+                total = total -1
+    if total == 0:        
+        global ISDONE
+        ISDONE = True
 
 
 
