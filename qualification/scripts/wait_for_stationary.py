@@ -29,6 +29,8 @@
 PKG = "qualification"
 NAME = "waiter"
 
+ISDONE = False
+
 import rostools; rostools.update_path(PKG)
 
 import sys
@@ -38,16 +40,15 @@ from robot_msgs.msg import *
 
 from optparse import OptionParser
 
-done = False
 
 def callback(msg, name):
-    global done
 ##    print "Looking for ", name
     for joint in msg.joint_states:
         if joint.name == name:
             if abs(joint.velocity) < 0.1:
 ##                print "DONE"
-                done = True
+                global ISDONE
+                ISDONE = True
 
 
 
@@ -69,6 +70,6 @@ if __name__ == '__main__':
             time.sleep(options.wait)
         rospy.Subscriber("/mechanism_state", MechanismState, callback, options.joint)
         rospy.init_node(NAME, anonymous=True)
-        global done
-        while not done:
+        while not ISDONE:
+##            print ISDONE
             time.sleep(0.5)
