@@ -1,0 +1,19 @@
+<launch>
+
+<!-- Arm twist controller -->
+  <param name="arm_twist/joystick_max_trans" value="3.0" />
+  <param name="arm_twist/joystick_max_rot" value="15" />
+  <node pkg="mechanism_control" type="spawner.py" args="controllers_twist.xml" />
+
+
+<!-- Gripper controller -->
+  <param name="joint" value="r_gripper_l_finger_joint"/>
+  <param name="max_effort" value="10"/>
+  <param name="joy_axis" value="2"/>
+  <param name="joy_dead_zone" value="0.2"/>
+  <param name="joy_button_positive" value="0"/>
+  <param name="joy_button_negative" value="1"/>
+  <node pkg="teleop_joint_effort" type="teleop_joint_effort_button.py" output="screen">
+  <remap from="joy" to="spacenav/joy"/>
+</node>
+</launch>
