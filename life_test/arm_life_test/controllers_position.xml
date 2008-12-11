@@ -1,6 +1,6 @@
 <controllers>
   <controller type="CartesianPositionControllerNode" name="arm_position">
-    <chain root="torso_lift_link" tip="r_wrist_roll_link" offset="0.3 0 0" />
+    <chain root="torso_link" tip="r_wrist_roll_link" offset="0.3 0 0" />
     <pid p="25" i="0.2" d="0.2" iClamp="2" />
   </controller>
 </controllers>

@@ -26,35 +26,58 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# This script brings up an effort controller on your joint of choice
+# and allows you to type in the desired efforts.
+#
+# Author: Eric Berger
 
-import rostools; rostools.update_path('pr2_mechanism_controllers')
-rostools.update_path('std_msgs')
-rostools.update_path('rospy')
+import random
+CONTROLLER_NAME = "quick_thrash_effort_controller_%08d" % random.randint(0,10**8-1)
 
-import random, time
+import sys
+
+import rostools
+rostools.update_path('thrash_joint')
 import rospy
 from std_msgs.msg import *
-from robot_msgs.msg import *
+from mechanism_control import mechanism
+from robot_srvs.srv import SpawnController, KillController
+import time
 
-pub = rospy.Publisher('/arm_position/set_command', PointStamped)
+def xml_for(joint):
+    return "\
+<controller name=\"%s\" type=\"JointEffortControllerNode\">\
+<joint name=\"%s\" />\
+</controller>" % (CONTROLLER_NAME, joint)
 
-def p(x, y, z):
-  m = PointStamped()
-  m.header.frame_id = 'torso_link'
-  m.point.x = x
-  m.point.y = y
-  m.point.z = z
-  pub.publish(m)
+def main():
+    if len(sys.argv) < 2:
+        print "Usage:  effect.py <joint>"
+        sys.exit(1)
+    joint = sys.argv[1]
 
-rospy.init_node('pub', anonymous=True)
+    rospy.init_node('thrash_joint', anonymous=True)
+    rospy.wait_for_service('spawn_controller')
+    spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
+    kill_controller = rospy.ServiceProxy('kill_controller', KillController)
 
-POINTS = [
-  (0.9, -0.1, 1.5),
-  (0.9, -0.1, 2),
-  (1.3, -0.2, 1.3),
-  (0.8, -0.7, 1.3)
-]
+    resp = spawn_controller(xml_for(joint))
+    if len(resp.ok) < 1: 
+        print "Failed to spawn effort controller"
+        sys.exit(1)
 
-while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.5, 1.5))
-  p(*POINTS[random.randint(0, len(POINTS)-1)])
+    pub = rospy.Publisher("/%s/set_command" % CONTROLLER_NAME, Float64)
+
+    effort = 1000 #Relies entirely on safety code
+
+    try:
+      while not rospy.is_shutdown():
+        time.sleep(random.random())
+        effort = -effort
+        pub.publish(Float64(effort))
+
+    finally:
+        kill_controller(CONTROLLER_NAME)
+
+if __name__ == '__main__':
+    main()
