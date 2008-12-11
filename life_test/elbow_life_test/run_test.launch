@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find elbow_life_test)/init.launch" />
+  <node pkg="elbow_life_test" type="cycle_elbow.py" />
+</launch>

@@ -67,10 +67,10 @@ def main():
 
     try:
         while not rospy.is_shutdown():
-            sleep(1)
+            sleep(0.5)
 	    effort = -1;
             pub.publish(Float64(effort))
-	    sleep(1)
+	    sleep(0.5)
             effort = 1;
             pub.publish(Float64(effort))
     finally:
