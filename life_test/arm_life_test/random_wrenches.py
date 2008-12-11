@@ -33,6 +33,7 @@ rostools.update_path('rospy')
 
 import random, time
 import rospy
+import sys
 from std_msgs.msg import *
 from robot_msgs.msg import *
 
@@ -49,17 +50,31 @@ def p(fx, fy, fz, tx, ty, tz):
   pub.publish(m)
 rospy.init_node('pub', anonymous=True)
 
-POINTS = [
-  ( 10.0,  10.0,  10.0, 0.0, 0.0, 0.0),
-  (-10.0,  10.0,  10.0, 0.0, 0.0, 0.0),
-  ( 10.0,  10.0,  10.0, 0.0, 0.0, 0.0),
-  (-10.0,  10.0,  10.0, 0.0, 0.0, 0.0),
-  ( 10.0, -10.0, -10.0, 0.0, 0.0, 0.0),
-  (-10.0, -10.0, -10.0, 0.0, 0.0, 0.0),
-  ( 10.0, -10.0, -10.0, 0.0, 0.0, 0.0),
-  (-10.0, -10.0, -10.0, 0.0, 0.0, 0.0),
-]
 
-while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.5, 1.5))
-  p(*POINTS[random.randint(0, len(POINTS)-1)])
+def main():
+    if len(sys.argv) < 2:
+        print "Usage:  random_wrenches.py <magnitude [N]>"
+        sys.exit(1)
+    if not sys.argv[1].isdigit():
+        print "give integer as paramter"
+        sys.exit(1)
+    mag = int(sys.argv[1])
+    print "magnitude %f"%mag
+    off = 0.0
+    POINTS = [
+      ( (mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
+      (-(mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
+      ( (mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
+      (-(mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
+      ( (mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
+      (-(mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
+      ( (mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
+      (-(mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
+    ]
+
+    while not rospy.is_shutdown():
+      time.sleep(random.uniform(0.1, 0.4))
+      p(*POINTS[random.randint(0, len(POINTS)-1)])
+
+if __name__ == '__main__':
+    main()
