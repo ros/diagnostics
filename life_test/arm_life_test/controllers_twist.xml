@@ -1,7 +1,7 @@
 <controllers>
   <controller type="EndeffectorTwistControllerNode" name="arm_twist" topic="arm_twist">
-    <pid_trans p="8.0" d="0.0" i="0.5" iClamp="6.0" />    
-    <pid_rot   p="2.0"  d="0.0" i="0.2" iClamp="0.5" />    
+    <pid_trans p="20.0" d="0.0" i="0.5" iClamp="1.0" />    
+    <pid_rot   p="0.5"  d="0.0" i="0.1" iClamp="0.2" />    
     <chain root="torso_lift_link" tip="r_wrist_roll_link" offset="0.3 0 0" />
   </controller>
 </controllers>
