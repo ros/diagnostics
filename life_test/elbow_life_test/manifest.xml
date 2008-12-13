@@ -4,7 +4,7 @@
   </description>
   <author>Stuart Glaser</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="na" notes=""/>
 
   <depend package="pr2_etherCAT" />
   <depend package="pr2_power_board"/>
