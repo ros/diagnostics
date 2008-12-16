@@ -40,7 +40,14 @@ pub = rospy.Publisher('/gripper_controller/set_command', Float64)
 
 rospy.init_node('pub', anonymous=True)
 
+eff = 5.0
+
 while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.5, 5.5))
-  m = Float64(random.randint(-5, 5))
+  time.sleep(random.uniform(0.5, 2.5))
+  cmd = random.randint(0, 1)
+  if cmd == 1:
+    m = Float64(eff)
+  else:
+    m = Float64(-eff)
+#  m = Float64(random.randint(-5, 5))
   pub.publish(m)
