@@ -1,0 +1,15 @@
+<launch>
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py gripper.xml" />
+  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+
+<!-- pr2_etherCAT -->
+  <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x /robotdesc/pr2"/>
+
+<!-- gripper joint controller-->
+  <param name="joint" type="string" value="r_gripper_joint" />
+  <param name="max_effort" value="2.0" />
+  <node pkg="gripper_life_test" type="effort_controller.py" output="screen"/>
+
+<!-- gripper effort generator-->
+  <node pkg="gripper_life_test" type="random_efforts.py" output="screen"/>
+</launch>

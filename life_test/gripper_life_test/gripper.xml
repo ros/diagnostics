@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot name="test_gripper">
+
+<joint name = "r_gripper_joint" type="revolute">
+  <axis xyz="0 1 0"/>
+  <limit min="-10000000" max="10000000" effort="0.2" velocity="10000.0" k_velocity="10000.0" k_position="10000000" safety_length_min="0.15" safety_length_max="0.15" />
+ 
+  <joint_properties damping=".1" />
+</joint>
+
+<transmission type="SimpleTransmission" name="r_gripper_trans">
+      <actuator name="r_gripper_motor" />
+      <joint name="r_gripper_joint" />
+      <mechanicalReduction>1.0</mechanicalReduction>
+</transmission>
+ 
+
+</robot>

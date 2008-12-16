@@ -1,0 +1,14 @@
+<package>
+
+  <description brief="Code and configuration for performing life testing on a gripper">
+  </description>
+  <author>Wim Meeussen</author>
+  <license>BSD</license>
+  <review status="na" notes=""/>
+
+  <depend package="pr2_etherCAT" />
+  <depend package="pr2_power_board"/>
+  <depend package="rosrecord"/>
+  <depend package="robot_mechanism_controllers"/>  
+
+</package>
