@@ -1,4 +1,0 @@
-<launch>
-  <param name="imu/autostart" value="False" type="bool"/>
-  <node pkg="imu_node" type="imu_node" />
-</launch>

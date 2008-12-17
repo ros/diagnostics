@@ -1,6 +1,0 @@
-<controller name="test_controller" type="MotorTest3Node" topic="test_controller">
-  <joint name="test_joint">
-  <controller_defaults amplitude ="0.0115" fixture_name="fixture_joint" />
-  </joint>
-</controller>
-

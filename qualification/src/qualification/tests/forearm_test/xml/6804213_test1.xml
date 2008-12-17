@@ -1,6 +1,0 @@
-<controller name="test_controller" type="HysteresisControllerNode" topic="test_controller">
-  <joint name="left_wrist_flex_joint">
-    <pid p="0.6" i="20.0" d="0.0" iClamp="0.1" />
-    <controller_defaults velocity="0.75" max_effort =".3" />   
-  </joint>
-</controller>

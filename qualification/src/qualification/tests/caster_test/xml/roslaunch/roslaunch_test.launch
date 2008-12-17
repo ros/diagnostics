@@ -1,3 +1,0 @@
-<launch> 
-    <node pkg="mechanism_control" type="spawner.py" args="../hysteresis_caster_left.xml" />
-</launch>

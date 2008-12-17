@@ -1,5 +1,0 @@
-<launch>
-  <master auto="start"/>
-  <machine name="aopen2.local0" address="aopen2.local" user="root" password="willow" default="true" ros-root="/u/mwise/pr_project/ros/" ros-package-path="/u/mwise/pr_project/ros-pkg/"/>
-  <node pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x $(find qualification)/src/qualification/tests/motor_test/xml/motor_test_startup.xml -a" machine="aopen2.local0"/>
-</launch>

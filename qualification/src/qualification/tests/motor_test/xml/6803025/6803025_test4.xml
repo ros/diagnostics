@@ -1,6 +1,0 @@
-<controller name="test_controller" type="MotorTest1Node" topic="test_controller">
-  <joint name="test_joint">
-  <controller_defaults duration="2" torque ="0.0122" fixture_name="fixture_joint" />
-  </joint>
-</controller>
-

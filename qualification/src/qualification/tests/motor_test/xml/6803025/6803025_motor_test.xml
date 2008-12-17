@@ -1,4 +1,0 @@
-<launch>
-  <master auto="start"/>
-  <node pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x $(find qualification)/src/qualification/tests/motor_test/xml/6803025/6803025_motor_test_startup.xml -a"/>
-</launch>
