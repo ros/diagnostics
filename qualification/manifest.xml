@@ -8,7 +8,6 @@
   <depend package="std_msgs" />
   <depend package="robot_msgs" />
   <depend package="robot_srvs" />
-  <depend package="roslaunch" />
   <depend package="hokuyo_node" />
   <depend package="imu_node" />
   <depend package="matplotlib" />
