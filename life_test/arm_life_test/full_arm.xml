@@ -2,6 +2,7 @@
 <robot name="test_arm">
 
   <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/arm_defs.xml" />
+  <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/gripper_defs.xml" />
   <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/body_defs.xml" />
   <include filename="./groups_arm.xml" />
 

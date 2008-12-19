@@ -11,6 +11,7 @@
   <depend package="rosrecord"/>
   <depend package="spacenav_node"/>
   <depend package="teleop_spacenav"/>
+  <depend package="teleop_joint_effort"/>  
   <depend package="robot_mechanism_controllers"/>  
 
 </package>
