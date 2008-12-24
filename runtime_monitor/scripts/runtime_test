@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+# Software License Agreement (BSD License)
+#
+# Copyright (c) 2008, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of the Willow Garage nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+
+## A basic node to monitor diagnostics for expected status
+
+import rostools
+rostools.update_path('runtime_monitor')
+
+import sys
+import rospy
+from robot_msgs.msg import *
+
+from optparse import OptionParser
+
+
+NAME = 'runtime_test'
+
+latest_messages = {}
+test_name = ''
+
+def statusToMap(status):
+    str_map = {}
+    for string in status.strings:
+        str_map[string.label] = string.value;
+    for val in status.values:
+        str_map[val.label] = val.value;
+    str_map["name"]= status.name
+    str_map["message"] = status.message
+    return str_map
+    
+
+def analyze(test_name):
+    #print('from runtime_monitor import %s'%test_name)
+    exec('from runtime_monitor import %s'%test_name)
+
+    #print("params = rospy.get_param(\"/runtime/%s\")"%test_name)
+    exec("params = rospy.get_param(\"/runtime/%s\")"%test_name)
+
+    #print("%s.test(latest_messages, params)"%test_name)
+    exec("%s.test(latest_messages, params)"%test_name)
+
+
+def callback(message):
+    print""
+    print "New Message at %.1f"%message.header.stamp.to_time()
+    for s in message.status:
+        latest_messages[s.name] = statusToMap(s)
+        #print "Name: %s \nMessage: %s"%(s.name, s.message)
+        #for v in s.strings + s.values:
+        #    print "   %s: %s" % (v.label, v.value)
+    sys.stdout.flush()
+
+    analyze(test_name)
+    #print latest_messages
+    
+def listener():
+    rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
+    rospy.ready(NAME, anonymous=True)
+    rospy.spin()
+        
+if __name__ == '__main__': 
+    parser = OptionParser(usage="usage: %prog [options]", prog='runtime_test')
+    parser.add_option("--test", metavar="TEST_NAME",
+                      dest="test_name", default='', 
+                      type="string", help="test name")
+    options, args = parser.parse_args()
+
+    if options.test_name:
+        test_name = options.test_name 
+    else:
+        print "you must give me a test to run"
+        exit(-1)
+    
+    try:
+        listener()
+    except KeyboardInterrupt, e:
+        pass
+    print "exiting"

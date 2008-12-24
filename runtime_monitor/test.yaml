@@ -1,0 +1,5 @@
+test_test: { 
+expected_present: ['EtherCAT Device #19 (fl_caster_rotation_motor)', 
+   'EtherCAT Device #18 (fl_caster_r_wheel_motor)',
+   'EtherCAT Device #17 (fl_caster_l_wheel_motor)'] 
+}
