@@ -1,4 +1,3 @@
-expected: { 
 expected_present: [
    'EtherCAT Device #19 (fl_caster_rotation_motor)', 
    'EtherCAT Device #18 (fl_caster_r_wheel_motor)',
@@ -13,6 +12,7 @@ expected_present: [
    'EtherCAT Device #07 (bl_caster_rotation_motor)',
    'EtherCAT Device #06 (bl_caster_r_wheel_motor)',
    'EtherCAT Device #05 (bl_caster_l_wheel_motor)',
-   'EtherCAT Device #04 (br_caster_rotation_motor)'] ,
+   'EtherCAT Device #04 (br_caster_rotation_motor)'] 
+
 desired_present: ['Realtime Control Loop']
-}
+

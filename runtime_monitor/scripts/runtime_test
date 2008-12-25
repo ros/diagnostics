@@ -49,7 +49,6 @@ NAME = 'runtime_test'
 latest_messages = {}
 test_name = 'uninitialized'
 package = 'uninitialized'
-test_id = 'uninitialized'
 
 def statusToMap(status):
     str_map = {}
@@ -62,13 +61,13 @@ def statusToMap(status):
     return str_map
     
 
-def analyze(package, test_name, test_id):
+def analyze(package, test_name):
     # import the test script
     exec('from %s import %s'%(package, test_name))
 
     # get it's parameters
-    exec("params = rospy.get_param(\"/runtime/%s\")"%(test_id))
-
+    exec("params = rospy.get_param(\"~\")")
+    
     # run the test
     exec("results = %s.test(latest_messages, params)"%test_name)
 
@@ -91,7 +90,7 @@ def callback(message):
         #    print "   %s: %s" % (v.label, v.value)
     sys.stdout.flush()
 
-    results = analyze(package, test_name, test_id)
+    results = analyze(package, test_name)
     #print "results:" , results
 
     if 'error' in results:
@@ -115,9 +114,6 @@ if __name__ == '__main__':
     parser.add_option("--package", metavar="ROS_PACKAGE",
                       dest="package", default='runtime_monitor', 
                       type="string", help="package test is in")
-    parser.add_option("--id", metavar="test_id",
-                      dest="test_id", default='', 
-                      type="string", help="test id on param server")
 
     options, args = parser.parse_args()
 
@@ -129,10 +125,6 @@ if __name__ == '__main__':
     else:
         print "you must give me a test to run"
         exit(-1)
-    if options.test_id:
-        test_id = options.test_id
-    else:
-        test_id = test_name
 
     try:
         listener()
