@@ -63,11 +63,12 @@ def statusToMap(status):
 
 def analyze(package, test_name):
     # import the test script
+    exec("rostools.update_path('%s')"%package)
     exec('from %s import %s'%(package, test_name))
 
     # get it's parameters
     exec("params = rospy.get_param(\"~\")")
-    
+        
     # run the test
     exec("results = %s.test(latest_messages, params)"%test_name)
 
