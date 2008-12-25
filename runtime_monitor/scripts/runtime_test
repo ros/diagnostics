@@ -47,7 +47,9 @@ from optparse import OptionParser
 NAME = 'runtime_test'
 
 latest_messages = {}
-test_name = ''
+test_name = 'uninitialized'
+package = 'uninitialized'
+test_id = 'uninitialized'
 
 def statusToMap(status):
     str_map = {}
@@ -60,15 +62,23 @@ def statusToMap(status):
     return str_map
     
 
-def analyze(test_name):
-    #print('from runtime_monitor import %s'%test_name)
-    exec('from runtime_monitor import %s'%test_name)
+def analyze(package, test_name, test_id):
+    # import the test script
+    exec('from %s import %s'%(package, test_name))
 
-    #print("params = rospy.get_param(\"/runtime/%s\")"%test_name)
-    exec("params = rospy.get_param(\"/runtime/%s\")"%test_name)
+    # get it's parameters
+    exec("params = rospy.get_param(\"/runtime/%s\")"%(test_id))
 
-    #print("%s.test(latest_messages, params)"%test_name)
-    exec("%s.test(latest_messages, params)"%test_name)
+    # run the test
+    exec("results = %s.test(latest_messages, params)"%test_name)
+
+    return results
+
+def error_response(error):
+    rospy.logerr( "Error: %s"% error)
+
+def warning_response(warning):
+    rospy.logwarn("Warning: %s"% warning)
 
 
 def callback(message):
@@ -81,8 +91,16 @@ def callback(message):
         #    print "   %s: %s" % (v.label, v.value)
     sys.stdout.flush()
 
-    analyze(test_name)
-    #print latest_messages
+    results = analyze(package, test_name, test_id)
+    #print "results:" , results
+
+    if 'error' in results:
+        for err in results['error']:
+            error_response(err)
+    
+    if 'warn' in results:
+        for warn in results['warn']:
+            warning_response(warn)
     
 def listener():
     rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
@@ -94,14 +112,28 @@ if __name__ == '__main__':
     parser.add_option("--test", metavar="TEST_NAME",
                       dest="test_name", default='', 
                       type="string", help="test name")
+    parser.add_option("--package", metavar="ROS_PACKAGE",
+                      dest="package", default='runtime_monitor', 
+                      type="string", help="package test is in")
+    parser.add_option("--id", metavar="test_id",
+                      dest="test_id", default='', 
+                      type="string", help="test id on param server")
+
     options, args = parser.parse_args()
 
+    # expected or default
+    package = options.package 
+    
     if options.test_name:
         test_name = options.test_name 
     else:
         print "you must give me a test to run"
         exit(-1)
-    
+    if options.test_id:
+        test_id = options.test_id
+    else:
+        test_id = test_name
+
     try:
         listener()
     except KeyboardInterrupt, e:
