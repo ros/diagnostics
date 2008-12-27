@@ -3,7 +3,7 @@
 <!-- Arm twist controller -->
   <param name="arm_twist/joystick_max_trans" value="3.0" />
   <param name="arm_twist/joystick_max_rot" value="4.0" />
-  <node pkg="mechanism_control" type="spawner.py" args="controllers_twist.xml" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_twist.xml" />
 
 
 <!-- Gripper controller -->
