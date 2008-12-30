@@ -4,7 +4,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes="proposal (Jeremy)"/>
   <depend package="roscpp" />
-  <depend package="rosthread" />
   <depend package="robot_srvs" />
   <export>
     <cpp cflags="-I${prefix}/include"/>
