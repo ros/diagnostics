@@ -12,4 +12,7 @@
 <!-- spacenav -->
   <node pkg="spacenav_node" type="spacenav_node" />
 
+<!-- Runtime Diagnostics Logging -->
+  <node pkg="rosrecord" type="rosrecord" args="-f /hwlog/tc5_runtime_automatic /diagnostics" />
+
 </launch>
