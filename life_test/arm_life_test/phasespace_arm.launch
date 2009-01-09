@@ -1,0 +1,8 @@
+<launch>
+
+<!-- Arm pose controller -->
+  <param name="arm_pose/joystick_max_trans" value="3.0" />
+  <param name="arm_pose/joystick_max_rot" value="4.0" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_pose.xml" />
+
+</launch>

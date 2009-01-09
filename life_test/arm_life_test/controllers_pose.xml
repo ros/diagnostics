@@ -1,0 +1,8 @@
+<controllers>
+  <controller type="EndeffectorPoseControllerNode" name="arm_pose" topic="arm_pose">
+    <pid_trans p="20.0" d="0.0" i="0.5" iClamp="1.0" />    
+    <pid_rot   p="1.5"  d="0.0" i="0.1" iClamp="0.2" />    
+    <pid_pose  p="20.0"  d="0.0" i="0.1" iClamp="0.5" />    
+    <chain root="torso_lift_link" tip="r_wrist_roll_link" offset="0.3 0 0" />
+  </controller>
+</controllers>
