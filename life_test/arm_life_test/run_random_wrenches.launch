@@ -4,6 +4,6 @@
   <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_wrench.xml" />
 
 <!-- Test script -->
-  <node pkg="arm_life_test" type="random_wrenches.py" args="50" />
+  <node pkg="arm_life_test" type="random_wrenches.py" args="30 1" />
 
 </launch>

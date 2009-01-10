@@ -52,24 +52,28 @@ rospy.init_node('pub', anonymous=True)
 
 
 def main():
-    if len(sys.argv) < 2:
-        print "Usage:  random_wrenches.py <magnitude [N]>"
+    if len(sys.argv) < 3:
+        print "Usage:  random_wrenches.py <magnitude [N]> <magnitude [Nm]>"
         sys.exit(1)
     if not sys.argv[1].isdigit():
         print "give integer as paramter"
         sys.exit(1)
-    mag = int(sys.argv[1])
-    print "magnitude %f"%mag
-    off = 0.0
+    if not sys.argv[2].isdigit():
+        print "give integer as paramter"
+        sys.exit(1)
+    force  = int(sys.argv[1])
+    torque = int(sys.argv[2])
+    print "magnitude force %f"%force
+    print "magnitude torque %f"%torque
     POINTS = [
-      ( (mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
-      (-(mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
-      ( (mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
-      (-(mag+off),  (mag+off),  (mag+off), 0.0, 0.0, 0.0),
-      ( (mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
-      (-(mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
-      ( (mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
-      (-(mag+off), -(mag+off), -(mag+off), 0.0, 0.0, 0.0),
+      ( (force),  (force),  (force),  -(torque),  -(torque),  -(torque)),
+      (-(force),  (force),  (force),   (torque),  -(torque),  -(torque)),
+      ( (force),  (force),  (force),  -(torque),   (torque),  -(torque)),
+      (-(force),  (force),  (force),   (torque),   (torque),  -(torque)),
+      ( (force), -(force), -(force),  -(torque),  -(torque),   (torque)),
+      (-(force), -(force), -(force),   (torque),  -(torque),   (torque)),
+      ( (force), -(force), -(force),  -(torque),   (torque),   (torque)),
+      (-(force), -(force), -(force),   (torque),   (torque),   (torque))
     ]
 
     while not rospy.is_shutdown():
