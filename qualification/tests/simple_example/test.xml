@@ -1,4 +1,6 @@
 <test>
+  <pre_startup>post_test1.launch</pre_startup>
+  <pre_startup>post_test1.launch</pre_startup>
   <startup>startup.launch</startup>
   <shutdown>shutdown.launch</shutdown>
   <instructions>instructions.html</instructions>

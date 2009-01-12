@@ -44,6 +44,7 @@ class Test:
     self._startup_script = None
     self._shutdown_script = None
     self._instructions_file = None
+    self.pre_startup_scripts = []
     self.subtests = []
     self.pre_subtests = {}
     self.post_subtests = {}
@@ -63,6 +64,12 @@ class Test:
     
     doc = self._doc
     
+    startups = doc.getElementsByTagName('pre_startup')
+    if (startups != None and len(startups) > 0):
+      for startup in startups:
+        name = startup.childNodes[0].nodeValue
+        self.pre_startup_scripts.append(name)
+        
     elems = doc.getElementsByTagName('startup')
     if (elems != None and len(elems) > 0):
       self._startup_script = elems[0].childNodes[0].nodeValue
@@ -84,7 +91,7 @@ class Test:
           self.post_subtests[name] = subtest.attributes['post'].value
         if (subtest.attributes.has_key('pre')):
           self.pre_subtests[name] = subtest.attributes['pre'].value
-
+  
   def getStartupScript(self):
     return self._startup_script
   

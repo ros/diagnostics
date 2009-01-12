@@ -14,6 +14,7 @@
   <depend package="robot_mechanism_controllers" />
   <depend package="joint_qualification_controllers" />
   <depend package="pr2_etherCAT" />
+  <depend package="roslaunch" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
   <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>

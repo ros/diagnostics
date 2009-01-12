@@ -33,6 +33,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import wx
+import sys
 
 app = wx.PySimpleApp()
-wx.MessageBox("Hello!")
+ret = wx.MessageBox("Hello!", "Hi!", wx.OK|wx.CANCEL)
+if (ret == wx.CANCEL):
+    sys.exit(1)
+
+sys.exit(0)

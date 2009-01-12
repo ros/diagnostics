@@ -38,6 +38,7 @@ rostools.update_path('qualification')
 
 import rospy
 import roslaunch
+import roslaunch.pmon
 
 import os
 import sys
@@ -307,6 +308,16 @@ class ResultsPanel(wx.Panel):
   def on_discard(self, event):
     wx.CallAfter(self._manager.discard_results)
 
+class RoslaunchProcessListener(roslaunch.pmon.ProcessListener):
+  def __init__(self):
+    self._died_badly = False
+    
+  def has_any_process_died_badly(self):
+    return self._died_badly
+  def process_died(self, process_name, exit_code):
+    if exit_code != 0:
+      self._died_badly = True
+
 class QualificationFrame(wx.Frame):
   def __init__(self, parent):
     wx.Frame.__init__(self, parent, wx.ID_ANY, "Qualification")
@@ -396,9 +407,34 @@ class QualificationFrame(wx.Frame):
     
     rospy.Service('test_result', TestResult, self.subtest_callback)
     
+    # Run any pre_startup scripts synchronously
+    if (len(self._current_test.pre_startup_scripts) > 0):
+      for script in self._current_test.pre_startup_scripts:
+        self.log('Running pre_startup script [%s]...'%(script))
+        
+        listener = RoslaunchProcessListener()
+        
+        launch = self.launch_script(os.path.join(test_dir, script), listener)
+        if (launch == None):
+          s = 'Could not load roslaunch script "%s"'%(script)
+          wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+          self.cancel(s)
+          return
+        
+        launch.spin();
+        
+        if (listener.has_any_process_died_badly()):
+          s = 'pre_startup script %s died badly'%(script)
+          wx.MessageBox(s, 'pre_startup failed', wx.OK|wx.ICON_ERROR, self)
+          self.cancel(s)
+          return
+    else:
+      self.log('No pre_startup scripts')
+      
+    # Run the startup script if we have one
     if (self._current_test.getStartupScript() != None):
       self.log('Running startup script...')
-      self._startup_launch = self.launch_script(os.path.join(test_dir, self._current_test.getStartupScript()))
+      self._startup_launch = self.launch_script(os.path.join(test_dir, self._current_test.getStartupScript()), None)
       if (self._startup_launch == None):
         s = 'Could not load roslaunch script "%s"'%(self._current_test.getStartupScript())
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
@@ -421,7 +457,7 @@ class QualificationFrame(wx.Frame):
     self.launch_pre_subtest()
 
     script = os.path.join(self._current_test.getDir(), self._subtest)
-    self._subtest_launch = self.launch_script(script)
+    self._subtest_launch = self.launch_script(script, None)
     if (self._subtest_launch == None):
       s = 'Could not load roslaunch script "%s"'%(script)
       wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
@@ -524,7 +560,7 @@ class QualificationFrame(wx.Frame):
     
     if (self._current_test.pre_subtests.has_key(self._subtest)):
       script = os.path.join(self._current_test.getDir(), self._current_test.pre_subtests[self._subtest])
-      pre_launcher = self.launch_script(script)
+      pre_launcher = self.launch_script(script, None)
       if (pre_launcher == None):
         s = 'Could not load post-subtest roslaunch script "%s"'%(script)
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
@@ -538,7 +574,7 @@ class QualificationFrame(wx.Frame):
     
     if (self._current_test.post_subtests.has_key(self._subtest)):
       script = os.path.join(self._current_test.getDir(), self._current_test.post_subtests[self._subtest])
-      post_launcher = self.launch_script(script)
+      post_launcher = self.launch_script(script, None)
       if (post_launcher == None):
         s = 'Could not load post-subtest roslaunch script "%s"'%(script)
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
@@ -610,7 +646,7 @@ class QualificationFrame(wx.Frame):
     
     return launcher
     
-  def launch_script(self, script):
+  def launch_script(self, script, process_listener_object):
     self.log('Launching roslaunch file %s'%(script))
     
     # Create a roslauncher
@@ -623,6 +659,9 @@ class QualificationFrame(wx.Frame):
       
       # Bring up the nodes
       launcher = roslaunch.ROSLaunchRunner(config)
+      if (process_listener_object != None):
+        launcher.pm.add_process_listener(process_listener_object)
+        
       launcher.launch()
     except roslaunch.RLException, e:
       self.log('Failed to launch roslaunch file %s: %s'%(script, e))
@@ -666,7 +705,7 @@ class QualificationFrame(wx.Frame):
     
     if (self._current_test.getShutdownScript() != None):
       self.log('Running shutdown script...')
-      self._shutdown_launch = self.launch_script(os.path.join(self._current_test.getDir(), self._current_test.getShutdownScript()))
+      self._shutdown_launch = self.launch_script(os.path.join(self._current_test.getDir(), self._current_test.getShutdownScript()), None)
       if (self._shutdown_launch == None):
         s = 'Could not load roslaunch script "%s"'%(self._current_test.getShutdownScript())
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
