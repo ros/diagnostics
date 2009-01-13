@@ -41,36 +41,54 @@ from optparse import OptionParser
 
 from std_srvs.srv import * 
 
-rospy.init_node("mcb_configurer")
+print "Starting"
+
+rospy.init_node("mcb_programmer")
 # block until the add_two_ints service is available
+print "Waiting"
 rospy.wait_for_service('mcb_conf_results')
 
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
 parser = OptionParser()
-parser.add_option("--motor=", type="string", dest="mcbs", action="append")
+parser.add_option("--wg005=", type="string", dest="wg005", action="append")
+parser.add_option("--wg006=", type="string", dest="wg006", action="append")
 
 
 options, args = parser.parse_args()
 
-mcbs = []
-for args in options.mcbs:
-  mcbs.append(args.split(","))
+path = rostools.packspec.get_pkg_dir("qualification", True) + "/fwprog"
 
-
-path = rostools.packspec.get_pkg_dir("ethercat_hardware", True)
-actuator_path = path + "/actuators.conf"
 success = True
 
-for name, num in mcbs:
-  action = StringStringResponse('retry')
+all = []
+if options.wg005:
+  if options.wg006:
+    all = options.wg005 + options.wg006
+  else:
+    all = options.wg005
+else:
+  all = options.wg006
 
+for num in all:
+  action = StringStringResponse('retry')
+  print "Doing something with %s"%num
   try:
       while(action.str == "retry"):
-        retcode = subprocess.call(path + "/motorconf" + " -i rteth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
+        filename = path + "/hecat-408.bit"
+        if num in options.wg005:
+          filename = path + "/gripper-303.bit"
+
+
+        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "fwprog" + " -i rteth0 -p %s %s"%(num, filename)
+        action = result_proxy("Confirm Programming %s: \n%s"%(num,cmd))
+        if action.str == "fail":
+          break
+        retcode = 0          
+        retcode = subprocess.call(cmd, shell=True)
         if retcode != 0:
-            action = result_proxy("Programming MCB confiuration failed for %s!"%name)
+            action = result_proxy("Programming MCB firmware failed for %s!"%num)
             if action.str == "fail":
-              print "Programming MCB confiuration failed for %s!"%name
+              print "Programming MCB firmware failed for %s!"%num
               success = False
               break
 
@@ -78,11 +96,11 @@ for name, num in mcbs:
           print retcode
           action.str ="pass"
   except OSError, e:
-      action = result_proxy("The MCB configuration program failed to execute.")
+      action = result_proxy("The MCB firmware programing failed to execute.")
       success = False
 
 if success:
-    print "Programming MCB confiuration finished"
+    print "Programming MCB firmware finished"
     action = result_proxy("done")
  
 #return success

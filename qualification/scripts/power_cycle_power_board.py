@@ -40,9 +40,9 @@ import subprocess
 from optparse import OptionParser
 
 
-#rospy.init_node("mcb_programmer")
-# block until the add_two_ints service is available
-#rospy.wait_for_service('mcb_conf_results')
+#rospy.init_node("power_cycler")
+# block until the service is available
+#rospy.wait_for_service('power_board_control')
 
 parser = OptionParser()
 parser.add_option("--time=", type="int", dest="seconds", action="store", default="10")
@@ -91,6 +91,11 @@ try:
     print "Power Cycle command failed"
 
   retcode = subprocess.call(path + "/scripts/send_command 2 start", shell=True)
+  if retcode != 0:
+    print "Power Cycle command failed"
+
+
+  retcode = subprocess.call(path + "/scripts/send_command 2 terrible_hack_shutdown", shell=True)
   if retcode != 0:
     print "Power Cycle command failed"
 

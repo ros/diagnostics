@@ -1,0 +1,5 @@
+<launch>
+<node pkg="pr2_power_board" type="power_node" />
+<node pkg="qualification" type="power_cycle_power_board.py" />
+
+</launch>

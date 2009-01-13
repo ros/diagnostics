@@ -1,0 +1,12 @@
+<launch>
+<node pkg="pr2_power_board" type="power_node" />
+<!-- Reset from disable if in disable -->
+<node pkg="pr2_power_board" type="send_command 0 reset" />
+<node pkg="pr2_power_board" type="send_command 1 reset" />
+<node pkg="pr2_power_board" type="send_command 2 reset" />
+<!-- Drop to standby if in run -->
+<node pkg="pr2_power_board" type="send_command 0 standby" />
+<node pkg="pr2_power_board" type="send_command 1 standby" />
+<node pkg="pr2_power_board" type="send_command 2 standby" />
+
+</launch>

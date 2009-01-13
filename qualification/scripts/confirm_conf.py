@@ -38,7 +38,8 @@
 PKG = 'qualification' # this package name
 NAME = 'mcb_conf_verification'
 
-import rostools; rostools.update_path(PKG) 
+import rostools
+rostools.update_path(PKG) 
 import wx 
 from std_srvs.srv import *
 import rospy 
