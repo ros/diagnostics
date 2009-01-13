@@ -5,7 +5,7 @@
         args="$(find arm_life_test)/controllers_position.xml" />
 
   <!-- Test script -->
-  <!--node pkg="arm_life_test" type="random_positions_breaker.py" /-->
-  <node pkg="arm_life_test" type="random_positions.py" />
+  <!--node pkg="arm_life_test" type="random_positions_fast.py" /-->
+  <node pkg="arm_life_test" type="random_positions_slow.py" />
 
 </launch>
