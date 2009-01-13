@@ -1,7 +1,7 @@
 <package>
   <description brief='Qualification testing package'>
   </description>
-  <author>Jeremy Leibs</author>
+  <author>Josh Faust (jfaust@willowgarage.com)</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <depend package="rospy" />
@@ -16,6 +16,7 @@
   <depend package="joint_qualification_controllers" />
   <depend package="pr2_etherCAT" />
   <depend package="roslaunch" />
+  <depend package="ogre_visualizer" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
   <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
