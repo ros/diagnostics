@@ -44,26 +44,58 @@ from std_srvs.srv import *
 import rospy 
 import time
 
+app = wx.PySimpleApp()
 process_done = False
+prompt_done = False
+prompt_click ="no"
+frame=wx.Frame(None)
 
+def msg_prompt(msg):
+  print "msg_prompt running"
+  dlg=wx.MessageBox(msg,"", wx.YES_NO)
+  print "a",dlg, wx.YES
+  global prompt_done, prompt_click
+  if (dlg == wx.YES ):
+    prompt_click="yes"
+  else:
+    prompt_click="no"
+  print "b"
+  prompt_done=True
+
+  print "msg_prompt done"
+  
+  
 def check_w_user(req):
-    print "Result: %s"%req.str
-    if req.str == "done":
-      global process_done
-      process_done = True
-      wx.MessageBox("MCB configuration complete")
-      return StringStringResponse("na")
-    #wx.MessageBox(req.str)  
+  print "Result: %s"%req.str
+  if req.str == "done":
+    wx.CallAfter(frame.Close)
+    return StringStringResponse("na")
+  global prompt_done
+  prompt_done=False
+  print "about to call call after" 
+  wx.CallAfter(msg_prompt,req.str)
+  print "called call after"
+  while(not prompt_done):
+    print "waiting for prompt . . ."
+    time.sleep(1) 
+  print prompt_click
+  
+  if prompt_click =="yes":
+    return StringStringResponse("retry")
+  else:
+    wx.CallAfter(frame.Close)      
     return StringStringResponse("fail")
+  
+    
 
-def confirm_conf():  
-    rospy.init_node(NAME)
-    s = rospy.Service('mcb_conf_results', StringString, check_w_user)
-    while(not process_done):
-      time.sleep(1)
-    time.sleep(2)
+def confirm_conf():
+  rospy.init_node(NAME)
+  s = rospy.Service('mcb_conf_results', StringString, check_w_user)  
+  app.MainLoop()
+  time.sleep(1)
+  
 
-if __name__ == "__main__":
-    app = wx.PySimpleApp()
 
-    confirm_conf()
+
+if __name__ == "__main__":  
+  confirm_conf()

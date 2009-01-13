@@ -65,19 +65,18 @@ for name, num in mcbs:
   action = StringStringResponse('retry')
 
   try:
-      while(action == "retry"):
+      while(action.str == "retry"):
         retcode = subprocess.call(path + "/motorconf" + " -i rteth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
         if retcode != 0:
             action = result_proxy("Programming MCB confiuration failed for %s!"%name)
-            if action == "fail":
+            if action.str == "fail":
               print "Programming MCB confiuration failed for %s!"%name
-              #wx.MessageBox("Programming MCB confiuration failed for %s!"%name)
-            elif action =="fail":
               success = False
               break
 
         else:
-          action = "pass"
+          print retcode
+          action.str ="pass"
   except OSError, e:
       action = result_proxy("The MCB configuration program failed to execute.")
       success = False
