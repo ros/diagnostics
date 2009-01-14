@@ -127,7 +127,7 @@ class InstructionsPanel(wx.Panel):
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
     
   def on_continue(self, event):
-    self._manager.start_subtest(0)
+    self._manager.test_startup()
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
@@ -154,6 +154,23 @@ class WaitingPanel(wx.Panel):
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
+    
+class PrestartupPanel(wx.Panel):
+  def __init__(self, parent, resource, qualification_frame):
+    wx.Panel.__init__(self, parent)
+    
+    self._manager = qualification_frame
+    
+    self._panel = resource.LoadPanel(self, 'prestartup_panel')
+    self._sizer = wx.BoxSizer(wx.HORIZONTAL)
+    
+    self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
+    self._progress_label.SetLabel("Running pre_startup scripts...")
+    
+    self._sizer.Add(self._panel, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
+    self.SetSizer(self._sizer)
+    self.Layout()
+    self.Fit()
     
 class ImagePanel(wx.Panel):
   def __init__(self, parent, id, image_data):
@@ -389,6 +406,7 @@ class QualificationFrame(wx.Frame):
   def start_tests(self, serial):
     short_serial = serial[0:7]
     test_dir = os.path.join(TESTS_DIR, self._tests[short_serial])
+    self._test_dir = test_dir
     self.log('Starting test %s'%(self._tests[short_serial]))
     
     self._tests_start_date = datetime.datetime.now()
@@ -414,6 +432,17 @@ class QualificationFrame(wx.Frame):
 
     self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
     
+    if (self._current_test.getInstructionsFile() != None):
+      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(test_dir, self._current_test.getInstructionsFile())))
+    else:
+      self.test_startup()
+      
+  def test_startup(self):
+    self.set_top_panel(PrestartupPanel(self._top_panel, self._res, self))
+    wx.CallAfter(self.test_startup_real)
+    
+  def test_startup_real(self):
+    test_dir = self._test_dir
     # Run any pre_startup scripts synchronously
     if (len(self._current_test.pre_startup_scripts) > 0):
       for script in self._current_test.pre_startup_scripts:
@@ -449,11 +478,8 @@ class QualificationFrame(wx.Frame):
         return
     else:
       self.log('No startup script')
-    
-    if (self._current_test.getInstructionsFile() != None):
-      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(test_dir, self._current_test.getInstructionsFile())))
-    else:
-      self.start_subtest(0)
+      
+    self.start_subtest(0)
     
   def start_subtest(self, index):
     self._subtest_index = index
