@@ -315,12 +315,15 @@ class RoslaunchProcessListener(roslaunch.pmon.ProcessListener):
   def has_any_process_died_badly(self):
     return self._died_badly
   def process_died(self, process_name, exit_code):
-    if exit_code != 0:
+    print "%s died with exit code %s"%(process_name, exit_code)
+    if exit_code != None and exit_code != 0:
       self._died_badly = True
 
 class QualificationFrame(wx.Frame):
   def __init__(self, parent):
     wx.Frame.__init__(self, parent, wx.ID_ANY, "Qualification")
+
+    self._result_service = None
     
     tests_xml_path = os.path.join(TESTS_DIR, 'tests.xml')
     self._tests = {}
@@ -405,7 +408,11 @@ class QualificationFrame(wx.Frame):
     
     self._core_launch = self.launch_core()
     
-    rospy.Service('test_result', TestResult, self.subtest_callback)
+    if (self._result_service != None):
+      self._result_service.shutdown()
+      self._result_service = None
+
+    self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
     
     # Run any pre_startup scripts synchronously
     if (len(self._current_test.pre_startup_scripts) > 0):

@@ -16,6 +16,7 @@ import wx
 import rostools
 import rostools.packspec
 rostools.update_path('qualification')
+import rospy
 
 from optparse import OptionParser
 
@@ -24,6 +25,7 @@ import glob
 import ogre_visualizer
 import ogre_tools
 
+from qualification.srv import *
 
 class VisualizerFrame(wx.Frame):
   def __init__(self, parent, id=wx.ID_ANY, title='Standalone Visualizer', pos=wx.DefaultPosition, size=(800, 600), style=wx.DEFAULT_FRAME_STYLE):
@@ -85,10 +87,23 @@ class VisualizerFrame(wx.Frame):
     self.Destroy()
     
   def on_pass(self, event):
-    sys.exit(0)
+    result_service = rospy.ServiceProxy('test_result', TestResult)
+    r = TestResultRequest()
+    r.plots = []
+    r.text_result = "Visual Verification Succeeded"
+    r.result = TestResultRequest.RESULT_PASS
+    rospy.wait_for_service('test_result')
+    result_service.call(r)
+    
     
   def on_fail(self, event):
-    sys.exit(1)
+    result_service = rospy.ServiceProxy('test_result', TestResult)
+    r = TestResultRequest()
+    r.plots = []
+    r.text_result = "Visual Verification Failed"
+    r.result = TestResultRequest.RESULT_FAIL
+    rospy.wait_for_service('test_result')
+    result_service.call(r)
       
   def load_config_from_path(self, path):
     manager = self._visualizer_panel.getManager()
