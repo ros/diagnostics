@@ -46,8 +46,13 @@ from wx import xrc
 from wx import html
 
 import threading, time
-import StringIO
+import cStringIO
 
+class StatusWrapper(object):
+    def __init__(self, status):
+        self.status = status
+        self.mark = False
+        
 class MonitorPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
@@ -89,6 +94,8 @@ class MonitorPanel(wx.Panel):
         
         self._messages = []
         self._used_items = 0
+        
+        self._marked_items = {}
         
     def diagnostics_callback(self, message):
         self._mutex.acquire()
@@ -138,7 +145,8 @@ class MonitorPanel(wx.Panel):
             parent_id = self._errors_id
         
         id = self._tree_control.AppendItem(parent_id, status.name + ": " + status.message)
-        self._tree_control.SetPyData(id, status)
+        status_wrapper = StatusWrapper(status)
+        self._tree_control.SetPyData(id, status_wrapper)
         
         self._name_to_id[status.name] = id
         
@@ -152,15 +160,15 @@ class MonitorPanel(wx.Panel):
             
         self.update_root_labels()
         
-        status.mark = True
+        status_wrapper.mark = True
             
     def fillout_info(self, id):
-        status = self._tree_control.GetPyData(id)
+        status = self._tree_control.GetPyData(id).status
         if (status == None):
             return
         
         self._html_control.Freeze()
-        s = StringIO.StringIO()
+        s = cStringIO.StringIO()
         
         s.write("<html><body>")
         s.write("<b>Component</b>: %s<br>\n"%(status.name))
@@ -186,13 +194,13 @@ class MonitorPanel(wx.Panel):
     def on_timer(self, event):
         to_delete = []
         for name,id in self._name_to_id.iteritems():
-            status = self._tree_control.GetPyData(id)
-            if (status != None):
-                if (not status.mark):
+            status_wrapper = self._tree_control.GetPyData(id)
+            if (status_wrapper != None):
+                if (not status_wrapper.mark):
                     self._tree_control.Delete(id)
                     to_delete.append(name)
                     
-                status.mark = False
+                status_wrapper.mark = False
         
         for name in to_delete:
             del self._name_to_id[name]
