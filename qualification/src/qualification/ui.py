@@ -744,6 +744,8 @@ class QualificationFrame(wx.Frame):
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
         self.cancel(s)
         return
+
+      self._shutdown_launch.spin()
     else:
       self.log('No shutdown script')
         
