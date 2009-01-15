@@ -75,18 +75,18 @@ for num in all:
   try:
       while(action.str == "retry"):
         filename = path + "/hecat-408.bit"
-        if num in options.wg005:
-          filename = path + "/gripper-303.bit"
+        if options.wg006:
+          if num in options.wg006:
+            filename = path + "/gripper-303.bit"
 
 
-        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "fwprog" + " -i rteth0 -p %s %s"%(num, filename)
+        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i rteth0 -p %s %s"%(num, filename)
         action = result_proxy("Confirm Programming %s: \n%s"%(num,cmd))
         if action.str == "fail":
           break
-        retcode = 0          
         retcode = subprocess.call(cmd, shell=True)
         if retcode != 0:
-            action = result_proxy("Programming MCB firmware failed for %s!"%num)
+            action = result_proxy("Programming MCB firmware failed for %s with error %d!"%(num, retcode))
             if action.str == "fail":
               print "Programming MCB firmware failed for %s!"%num
               success = False
@@ -103,4 +103,4 @@ if success:
     print "Programming MCB firmware finished"
     action = result_proxy("done")
  
-#return success
+sys.exit(0)

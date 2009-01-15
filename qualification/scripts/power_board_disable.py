@@ -35,57 +35,42 @@
 
 import rostools
 rostools.update_path('qualification')
-import rospy, sys, time
+import rospy, sys,time
 import subprocess
 from optparse import OptionParser
 
-from std_srvs.srv import * 
 
-rospy.init_node("mcb_configurer")
-# block until the add_two_ints service is available
-rospy.wait_for_service('mcb_conf_results')
+#rospy.init_node("power_cycler")
+# block until the service is available
+#rospy.wait_for_service('power_board_control')
 
-result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
 parser = OptionParser()
-parser.add_option("--motor=", type="string", dest="mcbs", action="append")
+parser.add_option("--time=", type="int", dest="seconds", action="store", default="10")
 
 
 options, args = parser.parse_args()
 
-mcbs = []
-for args in options.mcbs:
-  mcbs.append(args.split(","))
+print "Shutting down Power Board"
+path = rostools.packspec.get_pkg_dir("pr2_power_board", True)
+try:
+  retcode = subprocess.call(path + "/scripts/send_command 0 disable", shell=True)
+  if retcode != 0:
+    print "Power Cycle command failed"
+
+  retcode = subprocess.call(path + "/scripts/send_command 1 disable", shell=True)
+  if retcode != 0:
+    print "Power Cycle command failed"
+
+  retcode = subprocess.call(path + "/scripts/send_command 2 disable", shell=True)
+  if retcode != 0:
+    print "Power Cycle command failed"
+
+  time.sleep(1)
+  retcode = subprocess.call(path + "/scripts/send_command 2 terrible_hack_shutdown", shell=True)
+  if retcode != 0:
+    print "Power Cycle command failed"
 
 
-path = rostools.packspec.get_pkg_dir("ethercat_hardware", True)
-actuator_path = path + "/actuators.conf"
-success = True
 
-#wait for MCB's to initialize after being turned on
-time.sleep(5)
-
-for name, num in mcbs:
-  action = StringStringResponse('retry')
-
-  try:
-      while(action.str == "retry"):
-        retcode = subprocess.call(path + "/motorconf" + " -i rteth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
-        if retcode != 0:
-            action = result_proxy("Programming MCB confiuration failed for %s!"%name)
-            if action.str == "fail":
-              print "Programming MCB confiuration failed for %s!"%name
-              success = False
-              break
-
-        else:
-          print retcode
-          action.str ="pass"
-  except OSError, e:
-      action = result_proxy("The MCB configuration program failed to execute.")
-      success = False
-
-if success:
-    print "Programming MCB confiuration finished"
-    action = result_proxy("done")
- 
-#return success
+except OSError, e:
+  print "OSError"
