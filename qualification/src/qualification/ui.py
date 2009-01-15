@@ -432,6 +432,11 @@ class QualificationFrame(wx.Frame):
 
     self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
     
+    rework_reason = wx.GetTextFromUser("If this hardware has previously been qualified, and has been reworked in some way, please enter the reason for the re-work", "Rework?", "", self)
+    if (len(rework_reason) > 0):
+      invent = get_inventory_client()
+      invent.setNote(self._current_serial, "Hardware rework, reason given: %s"%(rework_reason))
+    
     if (self._current_test.getInstructionsFile() != None):
       self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(test_dir, self._current_test.getInstructionsFile())))
     else:
