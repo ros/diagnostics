@@ -63,7 +63,7 @@ public:
 
   DiagnosticUpdater(T* node) : node_(node)
   {
-    ((ros::node*)(node_))->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+    ((ros::Node*)(node_))->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
 
     node_->param("~diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
@@ -101,7 +101,7 @@ public:
 
         if (status.name != "None")
         {
-          status.name = node_->get_name() + std::string(": ") + status.name;
+          status.name = node_->getName() + std::string(": ") + status.name;
           status_vec.push_back(status);
         }
       }

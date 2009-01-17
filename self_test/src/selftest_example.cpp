@@ -38,7 +38,7 @@
 
 using namespace std;
 
-class MyNode: public ros::node
+class MyNode: public ros::Node
 {
 public:
 
@@ -49,7 +49,7 @@ public:
   double some_val;
 
   // During construction, the self_test_ takes a pointer to your node
-  MyNode() : ros::node("my_node"), self_test_(this)
+  MyNode() : ros::Node("my_node"), self_test_(this)
   {
     // A pretest can be added which will run before all other tests.
     // NOTE: It is only run once for the entire test sequence

@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -40,7 +40,7 @@
 #include <string>
 
 #include "ros/node.h"
-#include "rosthread/condition.h"
+#include <boost/thread.hpp>
 
 #include "robot_msgs/DiagnosticStatus.h"
 #include "robot_srvs/SelfTest.h"
@@ -53,8 +53,10 @@ class SelfTest
 private:
 
   T* node_;
-  ros::thread::condition testing_condition;
-  ros::thread::condition done_testing_condition;
+  boost::mutex testing_mutex;
+  boost::condition_variable testing_condition;
+  boost::mutex done_testing_mutex;
+  boost::condition_variable done_testing_condition;
 
   std::string id_;
 
@@ -73,7 +75,7 @@ public:
 
   SelfTest(T* node) : node_(node), pretest_(NULL), posttest_(NULL)
   {
-    node_->advertise_service("~self_test", &SelfTest::doTest, this);
+    node_->advertiseService("~self_test", &SelfTest::doTest, this);
     count = 0;
     waiting = false;
     ready   = false;
@@ -97,22 +99,27 @@ public:
 
   void checkTest()
   {
-    testing_condition.lock();
-    if (waiting)
+    bool local_waiting = false;
     {
+      boost::mutex::scoped_lock lock(testing_mutex);
+      local_waiting = waiting;
       ready = true;
-      testing_condition.signal();
-      testing_condition.unlock();
 
-      done_testing_condition.lock();
+      testing_condition.notify_all();
+    }
+
+    if (local_waiting)
+    {
+      boost::mutex::scoped_lock lock(done_testing_mutex);
+
       done = false;
       while (!done)
-        done_testing_condition.wait();
-      done_testing_condition.unlock();
-    } else {
-      testing_condition.unlock();
+      {
+        done_testing_condition.wait(lock);
+      }
     }
-    sched_yield();
+
+    boost::this_thread::yield();
   }
 
   void setID(std::string id)
@@ -123,23 +130,22 @@ public:
   bool doTest(robot_srvs::SelfTest::request &req,
                 robot_srvs::SelfTest::response &res)
   {
-    testing_condition.lock();
-
-    waiting = true;
-    ready   = false;
-
-    while (!ready)
     {
-      if (!testing_condition.timed_wait(ros::Duration().fromSec(5.0)))
+      boost::mutex::scoped_lock lock(testing_mutex);
+
+      waiting = true;
+      ready   = false;
+
+      while (!ready)
       {
-        printf("Timed out waiting to run self test.\n");
-        waiting = false;
-        testing_condition.unlock();
-        return false;
+        if (!testing_condition.timed_wait(lock, boost::get_system_time() + boost::posix_time::seconds(5)))
+        {
+          printf("Timed out waiting to run self test.\n");
+          waiting = false;
+          return false;
+        }
       }
     }
-
-    testing_condition.unlock();
 
     bool retval = false;
 
@@ -153,8 +159,10 @@ public:
       printf("Entering self test.  Other operation should be suspended\n");
 
       if (pretest_ != NULL)
+      {
         (*node_.*pretest_)();
-    
+      }
+
       printf("Completed pretest\n");
 
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
@@ -182,8 +190,10 @@ public:
         status_vec.push_back(status);
       }
 
-      waiting = false;
-      testing_condition.unlock();
+      {
+        boost::mutex::scoped_lock lock(testing_mutex);
+        waiting = false;
+      }
 
       //One of the test calls should use setID
       res.id = id_;
@@ -210,10 +220,12 @@ public:
 
     }
 
-    done_testing_condition.lock();
-    done = true;
-    done_testing_condition.signal();
-    done_testing_condition.unlock();
+    {
+      boost::mutex::scoped_lock lock(done_testing_mutex);
+      done = true;
+
+      done_testing_condition.notify_all();
+    }
 
     return retval;
 

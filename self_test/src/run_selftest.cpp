@@ -37,10 +37,10 @@
 
 #include <string>
 
-class Selftest : public ros::node
+class Selftest : public ros::Node
 {
 public:
-  Selftest() : ros::node("tester", ANONYMOUS_NAME)
+  Selftest() : ros::Node("tester", ANONYMOUS_NAME)
   {
   }
 
