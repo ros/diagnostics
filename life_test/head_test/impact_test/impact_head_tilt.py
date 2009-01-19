@@ -49,7 +49,7 @@ def xml_for(joint):
     return "\
 <controller name=\"%s\" type=\"JointEffortControllerNode\">\
 <joint name=\"%s\" />\
-</controller>" % (CONTROLLER_NAME, joint)
+</controller>" % ("head_tilt_effort", joint) # Call controller by name
 
 def main():
     joint = "head_tilt" # Should it say pr2_... ?
