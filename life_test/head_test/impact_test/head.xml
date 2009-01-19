@@ -2,7 +2,7 @@
 <robot>
 
  <!-- Use file without safety limits on tilt -->
- <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/head_defs_without_safety_limits.xml" />
+ <include filename="head_defs_without_safety_limits.xml" />
 
  <!-- Change to head stuff -->
  <pr2_head parent="world" reflect="1">

@@ -26,8 +26,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# This script brings up an effort controller runs a 500x life test on the head tilt 
-# joint. Safety effort limits need to be removed. 
+# This script brings up an effort controller runs a 500x life test on the 
+# head tilt joint.  
 #
 # Author: Kevin Watts
 
@@ -52,7 +52,7 @@ def xml_for(joint):
 </controller>" % (CONTROLLER_NAME, joint)
 
 def main():
-    joint = "head_tilt_joint" # Should it say pr2_... ?
+    joint = "head_tilt" # Should it say pr2_... ?
 
     rospy.init_node('impact_head', anonymous=True)
     rospy.wait_for_service('spawn_controller')

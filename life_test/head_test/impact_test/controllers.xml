@@ -1,5 +1,5 @@
 <controllers>
-  <controller name="head" type="JointEffortController">
+  <controller name="head_tilt_effort" type="JointEffortControllerNode">
     <joint name="head_tilt">
     </joint>
   </controller>
