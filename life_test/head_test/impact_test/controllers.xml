@@ -1,0 +1,6 @@
+<controllers>
+  <controller name="head" type="JointEffortController">
+    <joint name="head_tilt">
+    </joint>
+  </controller>
+</controllers>

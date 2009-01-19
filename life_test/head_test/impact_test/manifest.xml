@@ -1,0 +1,13 @@
+<package>
+
+  <description brief="Code and configuration for performing life testing on head tilt">
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="na" notes=""/>
+
+  <depend package="pr2_etherCAT" />
+  <depend package="pr2_power_board"/>
+  <depend package="rosrecord"/>
+
+</package>
