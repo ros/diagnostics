@@ -1,5 +1,5 @@
 <controllers>
-  <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/arm_defs.xml" />
+  <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
   <upper_arm_calibrator side="r" />
   <forearm_calibrator side="r"/>
   <gripper_calibrator side="r"/>

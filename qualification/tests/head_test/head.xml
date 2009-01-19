@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot name="test_head">
-  <include filename="../../../../robot_descriptions/wg_robot_description/pr2_robot_defs/head_defs.xml" />
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
 
 <pr2_head_pan name="head_pan" parent="world">
   <origin xyz="0 0 0.3815" rpy="0 0 0" />

@@ -40,7 +40,7 @@ pub = rospy.Publisher('/arm_position/set_command', PointStamped)
 
 def p(x, y, z):
   m = PointStamped()
-  m.header.frame_id = 'torso_link'
+  m.header.frame_id = 'torso_lift_link'
   m.point.x = x
   m.point.y = y
   m.point.z = z

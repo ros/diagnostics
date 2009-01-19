@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot>
 
- <include filename="../../../robot_descriptions/wg_robot_description/pr2_robot_defs/arm_defs.xml" />
+ <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
 
  <pr2_upper_arm side="r" parent="world" reflect="1">
    <origin xyz="0 0 0" rpy="0 0 0" />
