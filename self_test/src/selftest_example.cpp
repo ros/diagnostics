@@ -38,7 +38,7 @@
 
 using namespace std;
 
-class MyNode: public ros::Node
+class MyNode : public ros::Node
 {
 public:
 
