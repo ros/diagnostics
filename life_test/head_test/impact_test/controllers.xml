@@ -1,6 +1,16 @@
 <controllers>
+<controller>
   <controller name="head_tilt_effort" type="JointEffortControllerNode">
-    <joint name="head_tilt">
+    <joint name="head_tilt_joint">
     </joint>
   </controller>
+  <controller name="head_pan_effort" type="JointEffortControllerNode">
+    <joint name="head_pan_joint">
+    </joint>
+  </controller>
+</controller>
+  <controller name="laser_tilt_effort" type="JointEffortControllerNode">
+    <joint name="laser_tilt_mount_joint">
+      </joint>
+    </controller>
 </controllers>

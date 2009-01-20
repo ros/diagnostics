@@ -27,18 +27,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # This script brings up an effort controller runs a 500x life test on the 
-# head tilt joint.  
+# laser tilt joint.  
 #
 # Author: Kevin Watts
 
-CONTROLLER_NAME = "head_tilt_effort"
-# Old controller name
-# "impact_head_tilt_controller_%08d" % random.randint(0,10**8-1)
+CONTROLLER_NAME = "laser_tilt_effort"
 
 import sys
 
 import rostools
-rostools.update_path('head_tilt_life_test')
+rostools.update_path('impact_laser_tilt_life_test') # Is this right path?
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
@@ -50,12 +48,12 @@ def xml_for(joint):
     return "\
 <controller name=\"%s\" type=\"JointEffortControllerNode\">\
 <joint name=\"%s\" />\
-</controller>" % (CONTROLLER_NAME, joint) 
+</controller>" % (CONTROLLER_NAME, joint) # Call controller by name
 
 def main():
-    joint = "head_tilt_joint" # Should it say pr2_... ?
+    joint = "tilting_laser" # Should it say pr2_... ?
 
-    rospy.init_node('impact_head', anonymous=True)
+    rospy.init_node('impact_laser_tilt', anonymous=True)
     rospy.wait_for_service('spawn_controller')
     spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
     kill_controller = rospy.ServiceProxy('kill_controller', KillController)
