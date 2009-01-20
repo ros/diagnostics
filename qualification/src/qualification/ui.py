@@ -775,7 +775,7 @@ class QualificationFrame(wx.Frame):
 
 class QualificationApp(wx.App):
   def OnInit(self):
-    rospy.init_node("Qualifier", anonymous=True)
+    rospy.init_node("Qualifier", anonymous=True, disable_rostime=True)
     
     self._frame = QualificationFrame(None)
     self._frame.SetSize(wx.Size(800,800))
