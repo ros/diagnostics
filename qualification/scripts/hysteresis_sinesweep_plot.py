@@ -56,9 +56,11 @@ from qualification.srv import *
 class App:
   def __init__(self):
     rospy.init_node("TestPlotter", anonymous=True)
-    self.data_topic = rospy.TopicSub("/test_data", TestData, self.OnData)
+    self.data_topic = rospy.Service("/test_data", TestData, self.OnData)
+    rospy.spin()
     
-  def OnData(self,msg):
+    
+  def OnData(self,req):
     print 'Got data named %s' % (msg.test_name)
     self.data = msg
     if self.data.test_name=="hysteresis":
@@ -69,6 +71,7 @@ class App:
       self.BacklashPlot()
     else:
       print 'this test message cannot be analyzed'
+    return TestDataResponse(1)
       
   def HysteresisPlot(self):
     s,tr = self.HysteresisAnalysis()
