@@ -27,16 +27,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # This script brings up an effort controller runs a 500x life test on the 
-# laser tilt joint.  
+# head tilt joint, pan joint and laser tilt joint.  
 #
 # Author: Kevin Watts
 
-CONTROLLER_NAME = "laser_tilt_effort"
+CONTROLLER_NAMES = {"head_tilt_effort", "head_pan_effort", "laser_tilt_effort"}
+JOINT_NAMES = {"head_tilt_joint", "head_pan_joint", "tilting_laser"}
 
 import sys
 
 import rostools
-rostools.update_path('impact_laser_tilt_life_test') # Is this right path?
+rostools.update_path('impact_test') # Rename to head_impact_test
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
@@ -44,41 +45,45 @@ from robot_srvs.srv import SpawnController, KillController
 from time import sleep
 
 # Use effort controller for back & forth motion
-def xml_for(joint):
+def xml_for(controller, joint):
     return "\
 <controller name=\"%s\" type=\"JointEffortControllerNode\">\
 <joint name=\"%s\" />\
-</controller>" % (CONTROLLER_NAME, joint) # Call controller by name
+</controller>" % (controller, joint) 
 
 def main():
-    joint = "tilting_laser" # Should it say pr2_... ?
-
-    rospy.init_node('impact_laser_tilt', anonymous=True)
-    rospy.wait_for_service('spawn_controller')
-    spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
-    kill_controller = rospy.ServiceProxy('kill_controller', KillController)
+    for i in 1:3:
+        joint = JOINT_NAMES[i]
+        controller = CONTROLLER_NAMES[i]
+        
+        rospy.init_node('impact_head', anonymous=True)
+        rospy.wait_for_service('spawn_controller')
+        spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
+        kill_controller = rospy.ServiceProxy('kill_controller', KillController)
     
-    resp = spawn_controller(xml_for(joint))
-    if len(resp.ok) < 1 or not ord(resp.ok[0]):
-        print "Failed to spawn effort controller"
-        sys.exit(1)
+        resp = spawn_controller(xml_for(controller, joint))
+        if len(resp.ok) < 1 or not ord(resp.ok[0]):
+            print "Failed to spawn effort controller"
+            sys.exit(1)
 
-    pub = rospy.Publisher("/%s/set_command" % CONTROLLER_NAME, Float64)
+        pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
-    try:
-        for i in range(1,500):
-            if rospy.is_shutdown():
-                break
-            
-            # Need to disable safety limits on effort!
-            sleep(0.5)
-            effort = -100; # Min effort
+        try:
+            for i in range(1,500):
+                if rospy.is_shutdown():
+                    break
+
+            # Back and forth
+            sleep(1.5)
+            effort = -1000; # Min effort
             pub.publish(Float64(effort))
-            sleep(0.5)
-            effort = 100; # Max effort
+            sleep(1.5)
+            effort = 1000; # Max effort
             pub.publish(Float64(effort))
-    finally:
-        kill_controller(CONTROLLER_NAME)
+        finally:
+            kill_controller(controller)
+            sleep(5)
+
     
 if __name__ == '__main__':
     main()
