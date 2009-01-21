@@ -10,7 +10,7 @@
   <origin xyz="0.058 0 0" rpy="0 0 0" />
 </pr2_head_tilt>
 
-  <pr2_tilting_laser_mount name="tilting_laser" parent="world">
+  <pr2_tilting_laser_mount name="tilting_laser_mount" parent="world">
     <origin xyz="0 0 0.03" rpy="0 0 0" />
   </pr2_tilting_laser_mount>
 
