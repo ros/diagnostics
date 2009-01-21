@@ -1,13 +1,13 @@
 <launch>
-  <include file="$(find head_test/impact_test)/init.machine" />
-  <include file="$(find head_test/impact_test)/send_description.launch" />
+  <include file="$(find impact_test)/init.machine" />
+  <include file="$(find impact_test)/send_description.launch" />
 
   <!-- pr2_etherCAT -->
   <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x /robotdesc/pr2"/>
 
   <!-- Calibration -->
   <node pkg="mechanism_bringup" type="calibrate.py"
-        args="$(find head_test/impact_test)/cal.xml"
+        args="$(find impact_test)/cal.xml"
         output="screen" />
 
   <!-- Power board -->
@@ -17,8 +17,6 @@
   <node pkg="rosrecord" type="rosrecord"
         args="-f ~/elbow_test.bag /diagnostics" />
 
-  <!-- Controllers -->
-  <node pkg="mechanism_control" type="spawner.py"
-        args="$(find head_test/impact_test)/controllers.xml" />
+<!-- Controllers not brought up here, called in impact_head_test.py -->
 
 </launch>

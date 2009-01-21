@@ -1,4 +1,4 @@
-launch>
-  <include file="$(find head_tes/impact_test)/init.launch" />
-  <node pkg="head_impact_test" type="impact_head_tilt.py" />
+<launch>
+  <include file="$(find impact_test)/init.launch" />
+  <node pkg="head_impact_test" type="impact_head_test.py" />
 </launch>

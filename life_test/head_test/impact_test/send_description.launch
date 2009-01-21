@@ -1,6 +1,6 @@
 launch>
 
   <param name="robotdesc/pr2"
-         command="$(find xacro)/xacro.py '$(find head_test/impact_test)/head.xml'" />
+         command="$(find xacro)/xacro.py '$(find impact_test)/head.xml'" />
 
 </launch>

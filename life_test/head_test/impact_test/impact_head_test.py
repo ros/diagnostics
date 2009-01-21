@@ -31,6 +31,21 @@
 #
 # Author: Kevin Watts
 
+##@package impact_test
+#
+# @mainpage
+# @htmlinclude manifest.xml
+#
+# @section usage Usage
+# @verbatim $ run_test.launch @endverbatim
+#
+# @par Description
+# @verbatim
+# This program runs a impact life test on the head tilt, pan and laser tilt. 500 cycles, with effort safety removed.
+# @endverbatim
+ 
+
+
 CONTROLLER_NAMES = {"head_tilt_effort", "head_pan_effort", "laser_tilt_effort"}
 JOINT_NAMES = {"head_tilt_joint", "head_pan_joint", "tilting_laser"}
 
@@ -44,7 +59,7 @@ from mechanism_control import mechanism
 from robot_srvs.srv import SpawnController, KillController
 from time import sleep
 
-# Use effort controller for back & forth motion
+## Create XML code for controller on the fly
 def xml_for(controller, joint):
     return "\
 <controller name=\"%s\" type=\"JointEffortControllerNode\">\
@@ -56,7 +71,7 @@ def main():
         joint = JOINT_NAMES[i]
         controller = CONTROLLER_NAMES[i]
         
-        rospy.init_node('impact_head', anonymous=True)
+        rospy.init_node('impact_head_test', anonymous=True)
         rospy.wait_for_service('spawn_controller')
         spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
         kill_controller = rospy.ServiceProxy('kill_controller', KillController)
