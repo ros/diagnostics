@@ -41,11 +41,8 @@ from optparse import OptionParser
 
 from std_srvs.srv import * 
 
-print "Starting"
-
 rospy.init_node("mcb_programmer")
 # block until the add_two_ints service is available
-print "Waiting"
 rospy.wait_for_service('mcb_conf_results')
 
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
@@ -81,12 +78,9 @@ for num in all:
 
 
         cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i rteth0 -p %s %s"%(num, filename)
-        action = result_proxy("Confirm Programming %s: \n%s"%(num,cmd))
-        if action.str == "fail":
-          break
         retcode = subprocess.call(cmd, shell=True)
         if retcode != 0:
-            action = result_proxy("Programming MCB firmware failed for %s with error %d!"%(num, retcode))
+            action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))
             if action.str == "fail":
               print "Programming MCB firmware failed for %s!"%num
               success = False

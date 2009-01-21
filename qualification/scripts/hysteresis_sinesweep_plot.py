@@ -61,8 +61,8 @@ class App:
     
     
   def OnData(self,req):
-    print 'Got data named %s' % (msg.test_name)
-    self.data = msg
+    print 'Got data named %s' % (req.test_name)
+    self.data = req
     if self.data.test_name=="hysteresis":
       self.HysteresisPlot()
     elif self.data.test_name=="sinesweep":
