@@ -84,7 +84,7 @@ def main():
         pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
         try:
-            for i in range(1,500):
+            for i in range(1,2):
                 if rospy.is_shutdown():
                     break
 
