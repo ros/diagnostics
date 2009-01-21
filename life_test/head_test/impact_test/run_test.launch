@@ -1,4 +1,4 @@
 <launch>
   <include file="$(find impact_test)/init.launch" />
-  <node pkg="head_impact_test" type="impact_head_test.py" />
+  <node pkg="impact_test" type="impact_head_test.py" />
 </launch>

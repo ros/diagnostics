@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
-<robot>
+<robot name="test_head">
+  <include filename="head_defs_without_limits.xml" />
 
- <!-- Use file without safety limits on tilt -->
- <include filename="head_defs_without_safety_limits.xml" />
+<pr2_head_pan name="head_pan" parent="world">
+  <origin xyz="0 0 0.3815" rpy="0 0 0" />
+</pr2_head_pan>
 
- <!-- Change to head stuff -->
- <pr2_head parent="world" reflect="1">
-   <origin xyz="0 0 0" rpy="0 0 0" />
- </pr2_head>
+<pr2_head_tilt name="head_tilt" parent="head_pan">
+  <origin xyz="0.058 0 0" rpy="0 0 0" />
+</pr2_head_tilt>
 
 </robot>

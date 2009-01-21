@@ -46,8 +46,8 @@
  
 
 
-CONTROLLER_NAMES = {"head_tilt_effort", "head_pan_effort", "laser_tilt_effort"}
-JOINT_NAMES = {"head_tilt_joint", "head_pan_joint", "tilting_laser"}
+CONTROLLER_NAMES = ["head_tilt_effort", "head_pan_effort", "laser_tilt_effort"]
+JOINT_NAMES = ["head_tilt_joint", "head_pan_joint", "tilting_laser"]
 
 import sys
 
@@ -67,7 +67,7 @@ def xml_for(controller, joint):
 </controller>" % (controller, joint) 
 
 def main():
-    for i in 1:3:
+    for i in range(1,3):
         joint = JOINT_NAMES[i]
         controller = CONTROLLER_NAMES[i]
         
