@@ -61,19 +61,19 @@ from time import sleep
 
 ## Create XML code for controller on the fly
 def xml_for(controller, joint):
-    return "\
-<controllers>
-  <controller name=\"%s\" type=\"JointEffortController\">\
-    <joint name=\"%s\">\
-    </joint>\
-  </controller>\
-</controllers>" % (controller, joint) 
+    return  "\
+<controller name=\"%s\" type=\"JointEffortControllerNode\">\
+<joint name=\"%s\" />\
+</controller>" % (controller, joint) 
 
 def main():
-    for i in range(1,3):
+    for i in range(0,2):
         joint = JOINT_NAMES[i]
+        print joint
         controller = CONTROLLER_NAMES[i]
-        
+        print controller
+        print xml_for(controller,joint)
+
         rospy.init_node('impact_head_test', anonymous=True)
         rospy.wait_for_service('spawn_controller')
         spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
@@ -83,6 +83,9 @@ def main():
         if len(resp.ok) < 1 or not ord(resp.ok[0]):
             print "Failed to spawn effort controller"
             sys.exit(1)
+        else:
+            print "Spawned controller successfully"
+        
 
         pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
