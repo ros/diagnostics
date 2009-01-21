@@ -266,7 +266,8 @@
     <joint name="${name}_joint" type="revolute">
       <axis xyz="0 1 0" />
       <!-- Safety limits on max, min removed -->
-      <limit effort="12.21" velocity="100"
+      <limit effort="12.21"
+             velocity="100" k_velocity="1.5"
              safety_length_min="0.1" safety_length_max="0.1" k_position="100" />
       <calibration reference_position="-0.195" values="0 0" />
       <joint_properties damping="1.0" />
