@@ -62,9 +62,12 @@ from time import sleep
 ## Create XML code for controller on the fly
 def xml_for(controller, joint):
     return "\
-<controller name=\"%s\" type=\"JointEffortControllerNode\">\
-<joint name=\"%s\" />\
-</controller>" % (controller, joint) 
+<controllers>
+  <controller name=\"%s\" type=\"JointEffortController\">\
+    <joint name=\"%s\">\
+    </joint>\
+  </controller>\
+</controllers>" % (controller, joint) 
 
 def main():
     for i in range(1,3):
