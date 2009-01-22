@@ -1,6 +1,6 @@
 <launch>
 <!--
-  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/upperarm_test/upperarm.xml'" />
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/upperarm_flex_only_test/upperarm.xml'" />
 
   <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
   <machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true"/>   
@@ -9,6 +9,6 @@
 <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x /robotdesc/pr2" />
  -->
 
-<node pkg="qualification" type="visual_verifier.py" args="$(find qualification)/tests/upperarm_test/view.vcg 'Move the links and confirm they look right.'" />
+<node pkg="qualification" type="visual_verifier.py" args="$(find qualification)/tests/upperarm_flex_only_test/view.vcg 'Move the links and confirm they look right.'" />
 
 </launch>
