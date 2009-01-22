@@ -1,0 +1,14 @@
+<launch>
+
+<machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+
+<machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true"/> 
+
+<!-- configure_mcbs -->
+<!-- No roll wrist MCB -->
+<node machine="xenomai_root" pkg="qualification" type="configure_mcbs.py" args="--motor=r_elbow_flex_motor,0" />
+
+<!-- service -->
+<node pkg="qualification" type="confirm_conf.py" output="screen"/>
+
+</launch>
