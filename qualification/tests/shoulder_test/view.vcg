@@ -1,0 +1,25 @@
+Background\ ColorR=0
+Background\ ColorG=0
+Background\ ColorB=0
+Fixed\ Frame=base_link
+Target\ Frame=base_link
+Robot\:\ Shoulder\ Link\ base_linkShow\ Axes=0
+Robot\:\ Shoulder\ Link\ base_linkShow\ Trail=0
+Robot\:\ Shoulder\ Link\ r_shoulder_lift_linkShow\ Axes=0
+Robot\:\ Shoulder\ Link\ r_shoulder_lift_linkShow\ Trail=0
+Robot\:\ Shoulder\ Link\ r_shoulder_pan_linkShow\ Axes=0
+Robot\:\ Shoulder\ Link\ r_shoulder_pan_linkShow\ Trail=0
+Robot\:\ Shoulder\ Link\ r_upper_arm_roll_linkShow\ Axes=0
+Robot\:\ Shoulder\ Link\ r_upper_arm_roll_linkShow\ Trail=0
+Shoulder.Collision\ Enabled=0
+Shoulder.Enabled=1
+Shoulder.Mechanism\ Topic=mechanism_state
+Shoulder.Robot\ Description=robotdesc/pr2
+Shoulder.Update\ Rate=0.1
+Shoulder.Visual\ Enabled=1
+Property\ Grid\ State=selection=;expanded=.Global Options,.Time,Robot: Shoulder Link r_shoulder_pan_linkr_shoulder_pan_link,Robot: Shoulder Link r_upper_arm_roll_linkr_upper_arm_roll_link;scrollpos=0,0;splitterpos=146,292;ispageselected=1
+Camera\ Type=Orbit
+Camera\ Config=1.4408 4.0808 1.3 0.00140038 -0.15671 -0.00712316
+[Display0]
+Type=Robot Model
+Name=Shoulder

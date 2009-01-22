@@ -1,0 +1,13 @@
+<launch>
+
+<machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+
+<machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true"/> 
+
+<!-- configure_mcbs -->
+<node machine="xenomai_root" pkg="qualification" type="program_mcb.py" args="--wg005=1 --wg005=2 --wg005=3" />
+
+<!-- service -->
+<node pkg="qualification" type="confirm_conf.py" output="screen"/>
+
+</launch>
