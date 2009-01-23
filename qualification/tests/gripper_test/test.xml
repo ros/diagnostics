@@ -1,5 +1,11 @@
 <test>
+  <instructions>instructions.html</instructions>
+  <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
+  <pre_startup>gripper_prog.launch</pre_startup>
+  <pre_startup>../../scripts/power_cycle.launch</pre_startup>
+  <pre_startup>gripper_conf.launch</pre_startup>
   <startup>gripper.launch</startup>
+  <shutdown>../../scripts/power_board_disable.launch</shutdown>
   <subtest>hysteresis_gripper.launch</subtest>
   <subtest>backlash_gripper.launch</subtest>
 </test>
