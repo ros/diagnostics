@@ -1,5 +1,5 @@
 <controllers>
-  <controller type="CartesianPoseControllerNode" name="arm_pose" topic="arm_pose">
+  <controller type="CartesianTrajectoryControllerNode" name="arm_trajectory" topic="arm_trajectory">
     <pid_trans p="20.0" d="0.0" i="0.5" iClamp="1.0" />    
     <pid_rot   p="1.5"  d="0.0" i="0.1" iClamp="0.2" />    
     <pid_pose  p="20.0"  d="0.0" i="0.1" iClamp="0.5" />    

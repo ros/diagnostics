@@ -1,0 +1,11 @@
+<launch>
+
+<!-- Arm trajectory controller -->
+  <param name="arm_trajectory/max_vel_trans" value="1.0" />
+  <param name="arm_trajectory/max_vel_rot" value="1.0" />
+  <param name="arm_trajectory/max_acc_trans" value="0.1" />
+  <param name="arm_trajectory/max_acc_rot" value="0.1" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/controllers_trajectory.xml" />
+
+</launch>
