@@ -47,12 +47,16 @@
 
 
 CONTROLLER_NAMES = ["head_tilt_effort", "head_pan_effort", "laser_tilt_effort"]
-JOINT_NAMES = ["head_tilt_joint", "head_pan_joint", "tilting_laser_mount_joint"]
+JOINT_NAMES = ["head_tilt_joint", "head_pan_joint", "laser_tilt_mount_joint"]
 
 import sys
 
 import rostools
-rostools.load_manifest('impact_test') # Rename to head_impact_test
+#<<<<<<< .mine
+rostools.update_path('impact_test') # Rename to path head_impact_test
+#=======
+#rostools.load_manifest('impact_test') # Rename to head_impact_test
+#>>>>>>> .r10290
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
@@ -68,7 +72,7 @@ def xml_for(controller, joint):
 
 def main():
     rospy.init_node('impact_head_test', anonymous=True)
-    for i in range(0,3):
+    for i in range(0,3): 
         joint = JOINT_NAMES[i]
         controller = CONTROLLER_NAMES[i]
         print xml_for(controller,joint)
@@ -86,7 +90,7 @@ def main():
             pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
             try:
-                for i in range(1,5):
+                for i in range(0,3):
                     if rospy.is_shutdown():
                         break
                     # Back and forth
