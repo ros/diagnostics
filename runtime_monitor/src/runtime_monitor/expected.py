@@ -33,7 +33,7 @@
 #
 
 #import rostools
-#rostools.update_path(PKG)
+#rostools.load_manifest(PKG)
 
 import sys
 import rospy

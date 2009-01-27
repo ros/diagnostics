@@ -37,7 +37,7 @@ CONTROLLER_NAME = "quick_effort_controller_%08d" % random.randint(0,10**8-1)
 import sys
 
 import rostools
-rostools.update_path('elbow_life_test')
+rostools.load_manifest('elbow_life_test')
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism

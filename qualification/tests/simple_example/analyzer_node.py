@@ -33,8 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rostools
-import rostools.packspec
-rostools.update_path('qualification')
+rostools.load_manifest('qualification')
 
 import sys
 import rospy

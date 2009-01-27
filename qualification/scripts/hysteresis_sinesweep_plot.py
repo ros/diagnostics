@@ -30,7 +30,7 @@
 
 PKG = "qualification"
 
-import rostools; rostools.update_path(PKG)
+import rostools; rostools.load_manifest(PKG)
 
 import numpy
 import math

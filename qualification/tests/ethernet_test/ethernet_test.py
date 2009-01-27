@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import rostools
-rostools.update_path('qualification')
+rostools.load_manifest('qualification')
 
 from robot_msgs.msg import *
 from robot_srvs.srv import *

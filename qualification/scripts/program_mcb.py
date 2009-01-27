@@ -34,7 +34,7 @@
 
 
 import rostools
-rostools.update_path('qualification')
+rostools.load_manifest('qualification')
 import rospy, sys
 import subprocess
 from optparse import OptionParser

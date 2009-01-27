@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+bin/#!/usr/env python
 # Copyright (c) 2008, Willow Garage, Inc.
 # All rights reserved.
 # 
@@ -31,7 +31,7 @@ NAME = "waiter"
 
 ISDONE = False
 
-import rostools; rostools.update_path(PKG)
+import rostools; rostools.load_manifest(PKG)
 
 import sys
 import time

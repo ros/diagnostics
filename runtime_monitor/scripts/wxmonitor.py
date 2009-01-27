@@ -35,7 +35,7 @@
 ## A basic node to listen to and display incoming diagnostic messages using wx
 
 import rostools
-rostools.update_path('runtime_monitor')
+rostools.load_manifest('runtime_monitor')
 
 import sys
 import rospy
@@ -71,7 +71,7 @@ class MainWindow(wx.Frame):
     def on_error(self):
         self.Raise()
     
-def listener():
+def wxmonitor():
     app = wx.PySimpleApp()
     rospy.ready(NAME, anonymous=True)
     
@@ -83,7 +83,7 @@ def listener():
         
 if __name__ == '__main__':
     try:
-        listener()
+        wxmonitor()
     except KeyboardInterrupt, e:
         pass
     print "exiting"

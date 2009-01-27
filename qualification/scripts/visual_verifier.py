@@ -14,14 +14,15 @@ else:
 import wx
 
 import rostools
-import rostools.packspec
-rostools.update_path('qualification')
-import rospy
+rostools.load_manifest('qualification')
 
 from optparse import OptionParser
-
 import shutil
 import glob
+
+import rostools.packspec
+import rospy
+
 import ogre_visualizer
 import ogre_tools
 
