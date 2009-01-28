@@ -36,7 +36,7 @@
 
 import getopt
 import rostools
-rostools.update_path('runtime_monitor')
+rostools.load_manifest('runtime_monitor')
 
 import sys
 import rospy

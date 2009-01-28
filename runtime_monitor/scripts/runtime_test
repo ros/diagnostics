@@ -35,7 +35,7 @@
 ## A basic node to monitor diagnostics for expected status
 
 import rostools
-rostools.update_path('runtime_monitor')
+rostools.load_manifest('runtime_monitor')
 
 import sys
 import rospy
@@ -63,7 +63,7 @@ def statusToMap(status):
 
 def analyze(package, test_name):
     # import the test script
-    exec("rostools.update_path('%s')"%package)
+    exec("rostools.load_manifest('%s')"%package)
     exec('from %s import %s'%(package, test_name))
 
     # get it's parameters
