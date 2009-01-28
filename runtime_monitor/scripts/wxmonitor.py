@@ -73,7 +73,7 @@ class MainWindow(wx.Frame):
     
 def wxmonitor():
     app = wx.PySimpleApp()
-    rospy.ready(NAME, anonymous=True)
+    rospy.init_node(NAME, anonymous=True)
     
     frame = MainWindow(None, -1, "Runtime Monitor")
     frame.Show()
