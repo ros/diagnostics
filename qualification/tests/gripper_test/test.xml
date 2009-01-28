@@ -7,5 +7,5 @@
   <startup>gripper.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
   <subtest>hysteresis_gripper.launch</subtest>
-  <subtest>backlash_gripper.launch</subtest>
+  <!--subtest>backlash_gripper.launch</subtest-->
 </test>
