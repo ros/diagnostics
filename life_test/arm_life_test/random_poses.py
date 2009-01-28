@@ -41,7 +41,7 @@ pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
 
 def p(x, y, z, rx, ry, rz, w):
   m = PoseStamped()
-  m.header.frame_id = 'base_link'
+  m.header.frame_id = 'odom'
   m.header.stamp = rospy.get_rostime()
   m.pose.position.x = x
   m.pose.position.y = y
@@ -54,12 +54,12 @@ def p(x, y, z, rx, ry, rz, w):
 rospy.init_node('pub', anonymous=True)
 
 POINTS = [
-  (0.4, -0.6, 1.0, 0.0, 0.0, 0.0, 1.0),
-#  (0.9, -0.1, 2,   0.0, 0.0, 1.0, 0.0),
-#  (1.3, -0.2, 1.3, 0.0, 0.0, 1.0, 0.0),
-#  (0.8, -0.7, 1.3, 0.0, 0.0, 1.0, 0.0),
+  (0.5,  -0.5, 0.8, 0.0, 0.0, 0.0, 1.0),
+  (0.9, -0.1, 2,   0.0, 0.0, 1.0, 0.0),
+  (1.3, -0.2, 1.3, 0.0, 0.0, 1.0, 0.0),
+  (0.8, -0.7, 1.3, 0.0, 0.0, 1.0, 0.0),
 ]
 
 while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.5, 0.5))
+  time.sleep(random.uniform(0.1, 1.0))
   p(*POINTS[random.randint(0, len(POINTS)-1)])
