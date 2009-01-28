@@ -35,7 +35,9 @@ import rospy
 from std_msgs.msg import *
 from robot_msgs.msg import *
 
-pub = rospy.Publisher('/arm_trajectory/command', PoseStamped)
+pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
+#pub = rospy.Publisher('/cartesian_trajectory/command', PoseStamped)
+
 
 def p(x, y, z, rx, ry, rz, w):
   m = PoseStamped()
@@ -52,7 +54,7 @@ def p(x, y, z, rx, ry, rz, w):
 rospy.init_node('pub', anonymous=True)
 
 POINTS = [
-  (0.4, -0.2, 1.0, 1.0, 0.0, -1.0, 0.0),
+  (0.4, -0.6, 1.0, 0.0, 0.0, 0.0, 1.0),
 #  (0.9, -0.1, 2,   0.0, 0.0, 1.0, 0.0),
 #  (1.3, -0.2, 1.3, 0.0, 0.0, 1.0, 0.0),
 #  (0.8, -0.7, 1.3, 0.0, 0.0, 1.0, 0.0),

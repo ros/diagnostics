@@ -1,0 +1,9 @@
+<launch>
+
+<!-- Cartesian wrench controller -->
+  <!-- parameters for wrench controller -->
+  <param name="cartesian_wrench/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_wrench/tip_name" type="string" value="r_wrist_roll_link" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_wrench.xml" />
+</launch>
