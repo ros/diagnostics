@@ -52,11 +52,7 @@ JOINT_NAMES = ["head_tilt_joint", "head_pan_joint", "laser_tilt_mount_joint"]
 import sys
 
 import rostools
-#<<<<<<< .mine
-rostools.update_path('impact_test') # Rename to path head_impact_test
-#=======
-#rostools.load_manifest('impact_test') # Rename to head_impact_test
-#>>>>>>> .r10290
+rostools.load_manifest('impact_test') # Rename to path head_impact_test
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
