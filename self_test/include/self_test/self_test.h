@@ -127,8 +127,8 @@ public:
     id_ = id;
   }
 
-  bool doTest(robot_srvs::SelfTest::request &req,
-                robot_srvs::SelfTest::response &res)
+  bool doTest(robot_srvs::SelfTest::Request &req,
+                robot_srvs::SelfTest::Response &res)
   {
     {
       boost::mutex::scoped_lock lock(testing_mutex);

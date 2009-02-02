@@ -46,8 +46,8 @@ public:
 
   bool doTest(std::string name)
   {
-    robot_srvs::SelfTest::request  req;
-    robot_srvs::SelfTest::response res;
+    robot_srvs::SelfTest::Request  req;
+    robot_srvs::SelfTest::Response res;
     if (ros::service::call(name + "/self_test", req, res))
     {
       std::string passfail;
