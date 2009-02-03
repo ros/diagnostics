@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 
   st.doTest(std::string(argv[1]));
 
-  ros::fini();
+  
   return 0;
 }
 

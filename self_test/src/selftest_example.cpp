@@ -190,7 +190,7 @@ main(int argc, char** argv)
 
   n.spin();
 
-  ros::fini();
+  
 
   return(0);
 }
