@@ -7,7 +7,7 @@
 <!-- pr2_etherCAT -->
 <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x /robotdesc/pr2"/>
 
-<!-- Shoulder Calibration -->
+<!-- Upperarm Calibration -->
 <include file="$(find qualification)/tests/upperarm_test/calibrate.launch" />
 
 </launch>
