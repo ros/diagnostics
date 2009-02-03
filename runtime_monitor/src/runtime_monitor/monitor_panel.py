@@ -76,6 +76,7 @@ class MonitorPanel(wx.Panel):
         self._ok_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16,16)))
         self._tree_control.AssignImageList(image_list)
         self._root_id = self._tree_control.AddRoot("Root")
+        self._stale_id = self._tree_control.AppendItem(self._root_id, "Stale (0)", self._error_image_id)
         self._errors_id = self._tree_control.AppendItem(self._root_id, "Errors (0)", self._error_image_id)
         self._warnings_id = self._tree_control.AppendItem(self._root_id, "Warnings (0)", self._warning_image_id)
         self._ok_id = self._tree_control.AppendItem(self._root_id, "Ok (0)", self._ok_image_id)
@@ -88,7 +89,7 @@ class MonitorPanel(wx.Panel):
         
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.on_timer)
-        self._timer.Start(10000)
+        self._timer.Start(5000)
         
         rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
         
@@ -141,6 +142,8 @@ class MonitorPanel(wx.Panel):
             parent_id = self._ok_id
         elif (status.level == 1):
             parent_id = self._warnings_id
+        elif (status.level == -1):
+            parent_id = self._stale_id
         else:
             parent_id = self._errors_id
         
@@ -155,17 +158,21 @@ class MonitorPanel(wx.Panel):
         if (select):
             self._tree_control.SelectItem(id)
             
-        if (expand_if_error and parent_id == self._errors_id):
+        if (expand_if_error and (status.level > 1 or status.level == -1)):
             self._tree_control.Expand(parent_id )
             
         self.update_root_labels()
         
         status_wrapper.mark = True
+        
+        return status_wrapper
             
     def fillout_info(self, id):
-        status = self._tree_control.GetPyData(id).status
-        if (status == None):
+        wrapper = self._tree_control.GetPyData(id)
+        if (wrapper == None):
             return
+          
+        status = wrapper.status
         
         self._html_control.Freeze()
         s = cStringIO.StringIO()
@@ -174,8 +181,9 @@ class MonitorPanel(wx.Panel):
         s.write("<b>Component</b>: %s<br>\n"%(status.name))
         s.write("<b>Message</b>: %s<br><br>\n\n"%(status.message))
         
-        s.write('<table border="1">')
-        for value in status.strings:
+        s.write('<table border="1" cellpadding="2" cellspacing="0">')
+        for value in status.strings: 
+            value.value = value.value.replace("\n", "<br>")
             s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
         for value in status.values:
             s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
@@ -192,18 +200,22 @@ class MonitorPanel(wx.Panel):
         self.fillout_info(event.GetItem())
         
     def on_timer(self, event):
-        to_delete = []
         for name,id in self._name_to_id.iteritems():
             status_wrapper = self._tree_control.GetPyData(id)
             if (status_wrapper != None):
                 if (not status_wrapper.mark):
+                    was_selected = False
+                    if (self._tree_control.GetSelection() == id):
+                        was_selected = True
+                    
                     self._tree_control.Delete(id)
-                    to_delete.append(name)
+                    
+                    old_level = status_wrapper.status.level
+                    status_wrapper.status.level = -1
+                    status_wrapper = self.create_item(status_wrapper.status, was_selected, old_level != -1)
                     
                 status_wrapper.mark = False
         
-        for name in to_delete:
-            del self._name_to_id[name]
             
         self.update_root_labels()
         self.Refresh()
@@ -215,3 +227,4 @@ class MonitorPanel(wx.Panel):
         self._tree_control.SetItemText(self._ok_id, "Ok (%s)"%( self._tree_control.GetChildrenCount(self._ok_id, False)))
         self._tree_control.SetItemText(self._warnings_id, "Warnings (%s)"%( self._tree_control.GetChildrenCount(self._warnings_id, False)))
         self._tree_control.SetItemText(self._errors_id, "Errors (%s)"%( self._tree_control.GetChildrenCount(self._errors_id, False)))
+        self._tree_control.SetItemText(self._stale_id, "Stale (%s)"%( self._tree_control.GetChildrenCount(self._stale_id, False)))
