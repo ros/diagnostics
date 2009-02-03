@@ -36,8 +36,8 @@ CONTROLLER_NAME = "gripper_controller"
 
 import sys
 
-import rostools
-rostools.load_manifest('gripper_life_test')
+import roslib
+roslib.load_manifest('gripper_life_test')
 import rospy
 from std_msgs.msg import *
 from joy.msg import Joy

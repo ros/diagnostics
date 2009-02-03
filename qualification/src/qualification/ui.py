@@ -32,9 +32,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rostools
-import rostools.packspec
-rostools.load_manifest('qualification')
+import roslib
+import roslib.packages
+roslib.load_manifest('qualification')
 
 import rospy
 import roslaunch
@@ -59,8 +59,8 @@ import struct
 
 from invent_client import Invent
 
-TESTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'tests')
-RESULTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'results')
+TESTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'tests')
+RESULTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results')
 
 class SerialPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame):
@@ -355,7 +355,7 @@ class QualificationFrame(wx.Frame):
       self._tests[test.attributes['serial'].value] = test.attributes['name'].value
     
     # Load the XRC resource
-    xrc_path = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'xrc/gui.xrc')
+    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
     self._res = xrc.XmlResource(xrc_path)
 
     # Load the main panel

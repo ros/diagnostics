@@ -34,8 +34,8 @@
 
 ## A basic node to listen to and display incoming diagnostic messages using wx
 
-import rostools
-rostools.load_manifest('runtime_monitor')
+import roslib
+roslib.load_manifest('runtime_monitor')
 
 import sys
 import rospy

@@ -33,8 +33,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import rostools
-rostools.load_manifest('qualification')
+import roslib
+roslib.load_manifest('qualification')
 import rospy, sys, time
 import subprocess
 from optparse import OptionParser
@@ -57,7 +57,7 @@ for args in options.mcbs:
   mcbs.append(args.split(","))
 
 
-path = rostools.packspec.get_pkg_dir("ethercat_hardware", True)
+path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
 actuator_path = path + "/actuators.conf"
 success = True
 

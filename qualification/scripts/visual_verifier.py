@@ -13,14 +13,14 @@ else:
 
 import wx
 
-import rostools
-rostools.load_manifest('qualification')
+import roslib
+roslib.load_manifest('qualification')
 
 from optparse import OptionParser
 import shutil
 import glob
 
-import rostools.packspec
+import roslib.packages
 import rospy
 
 import ogre_visualizer
@@ -36,12 +36,12 @@ class VisualizerFrame(wx.Frame):
     
     visualizer_panel = ogre_visualizer.VisualizationPanel(self)
     
-    self._package_path = rostools.packspec.get_pkg_dir('ogre_visualizer')
+    self._package_path = roslib.packages.get_pkg_dir('ogre_visualizer')
     self._global_config_path = os.path.join(self._package_path, "configs")
     
     self._visualizer_panel = visualizer_panel
     
-    media_path = rostools.packspec.get_pkg_dir( "gazebo_robot_description" )
+    media_path = roslib.packages.get_pkg_dir( "gazebo_robot_description" )
     media_path += "/world/Media/";
     
     media_paths = [media_path]

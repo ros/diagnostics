@@ -28,8 +28,8 @@
 
 # Author: Stuart Glaser
 
-import rostools
-rostools.load_manifest('caster_life_test')
+import roslib
+roslib.load_manifest('caster_life_test')
 import rospy
 from std_msgs.msg import Float64
 from robot_msgs.msg import MechanismState

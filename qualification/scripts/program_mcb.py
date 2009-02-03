@@ -33,8 +33,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import rostools
-rostools.load_manifest('qualification')
+import roslib
+roslib.load_manifest('qualification')
 import rospy, sys
 import subprocess
 from optparse import OptionParser
@@ -53,7 +53,7 @@ parser.add_option("--wg006=", type="string", dest="wg006", action="append")
 
 options, args = parser.parse_args()
 
-path = rostools.packspec.get_pkg_dir("qualification", True) + "/fwprog"
+path = roslib.packages.get_pkg_dir("qualification", True) + "/fwprog"
 
 success = True
 

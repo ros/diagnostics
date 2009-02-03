@@ -31,7 +31,7 @@ NAME = "waiter"
 
 ISDONE = False
 
-import rostools; rostools.load_manifest(PKG)
+import roslib; roslib.load_manifest(PKG)
 
 import sys
 import time

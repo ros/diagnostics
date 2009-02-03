@@ -36,8 +36,8 @@ CONTROLLER_NAME = "quick_thrash_effort_controller_%08d" % random.randint(0,10**8
 
 import sys
 
-import rostools
-rostools.load_manifest('thrash_joint')
+import roslib
+roslib.load_manifest('thrash_joint')
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism

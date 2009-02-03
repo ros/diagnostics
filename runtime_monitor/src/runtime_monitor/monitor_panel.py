@@ -34,8 +34,8 @@
 
 PKG = 'runtime_monitor'
 
-import rostools
-rostools.load_manifest(PKG)
+import roslib
+roslib.load_manifest(PKG)
 
 import sys
 import rospy
@@ -59,7 +59,7 @@ class MonitorPanel(wx.Panel):
         
         self._mutex = threading.Lock()
         
-        xrc_path = rostools.packspec.get_pkg_dir(PKG) + '/xrc/runtime_monitor_generated.xrc'
+        xrc_path = roslib.packages.get_pkg_dir(PKG) + '/xrc/runtime_monitor_generated.xrc'
         
         self._xrc = xrc.XmlResource(xrc_path)
         self._real_panel = self._xrc.LoadPanel(self, 'RuntimeMonitorInnerPanel')

@@ -27,8 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import rostools; rostools.load_manifest('pr2_mechanism_controllers')
-rostools.load_manifest('rospy')
+import roslib; roslib.load_manifest('pr2_mechanism_controllers')
+roslib.load_manifest('rospy')
 
 import random, time
 import rospy

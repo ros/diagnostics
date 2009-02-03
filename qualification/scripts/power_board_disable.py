@@ -33,8 +33,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import rostools
-rostools.load_manifest('qualification')
+import roslib
+roslib.load_manifest('qualification')
 import rospy, sys,time
 import subprocess
 from optparse import OptionParser
@@ -51,7 +51,7 @@ parser.add_option("--time=", type="int", dest="seconds", action="store", default
 options, args = parser.parse_args()
 
 print "Shutting down Power Board"
-path = rostools.packspec.get_pkg_dir("pr2_power_board", True)
+path = roslib.packages.get_pkg_dir("pr2_power_board", True)
 try:
   retcode = subprocess.call(path + "/scripts/send_command 0 disable", shell=True)
   if retcode != 0:
