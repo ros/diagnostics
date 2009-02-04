@@ -6,9 +6,9 @@
   <pre_startup>wrist_conf.launch</pre_startup>
   <startup>wrist.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
-<subtest>wrist_visualization.launch</subtest>
-  <subtest>sinesweep_wrist_flex.launch</subtest>
+  <subtest>wrist_visualization.launch</subtest>
   <subtest>hysteresis_wrist_flex.launch</subtest>
+  <subtest>sinesweep_wrist_flex.launch</subtest>
   <subtest>sinesweep_wrist_roll.launch</subtest>
   <subtest>hysteresis_wrist_roll.launch</subtest>
 </test>

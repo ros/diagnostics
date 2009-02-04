@@ -1,4 +1,5 @@
 <launch> 
-  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/wrist_test/hysteresis_wrist_flex.xml" />
+<!-- Moved qualification node up so plotting function can be ready to recieve -->
   <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/wrist_test/hysteresis_wrist_flex.xml" />
 </launch>
