@@ -49,6 +49,12 @@
   <joint name="r_wrist_roll_joint">
      <pid p="4" i="0.5" d="0" iClamp="1.0" />
   </joint>
-</controller--
+</controller-->
+
+<controller name="gripper_controller" type="JointPositionControllerNode">
+  <joint name="r_gripper_joint">
+    <pid p="0.00050" d="0" i=".0006" iClamp="0.0001" />
+  </joint>
+</controller>
 
 </controllers>

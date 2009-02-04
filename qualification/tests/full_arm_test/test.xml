@@ -1,12 +1,21 @@
 <test>
+  <instructions>instructions.html</instructions>
+  <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
+  <pre_startup>full_arm_prog.launch</pre_startup>
+  <pre_startup>../../scripts/power_cycle.launch</pre_startup>
+  <pre_startup>full_arm_conf.launch</pre_startup>
   <startup>full_arm.launch</startup>
-  <!--subtest>hysteresis_shoulder_lift.launch</subtest>
-  <subtest>hysteresis_shoulder_pan.launch</subtest>
-  <subtest>hysteresis_upper_arm_roll.launch</subtest>
-  <subtest>hysteresis_elbow_flex.launch</subtest>
- <subtest>hysteresis_forearm_roll.launch</subtest>
+  <subtest>hysteresis_gripper.launch</subtest>
+  <subtest>hysteresis_wrist_roll.launch</subtest>
+<!--subtest>sinesweep_wrist_roll.launch</subtest-->
   <subtest>hysteresis_wrist_flex.launch</subtest>
- <subtest>hysteresis_wrist_roll.launch</subtest>
- <shutdown>shutdown.launch</shutdown-->
-  
+<!--subtest>sinesweep_wrist_flex.launch</subtest-->
+  <subtest>hysteresis_forearm_roll.launch</subtest>
+<!--subtest>sinesweep_forearm_roll.launch</subtest-->
+  <subtest>hysteresis_elbow_flex.launch</subtest>
+<!--subtest>sinesweep_elbow_flex.launch</subtest-->
+  <subtest>hysteresis_upper_arm_roll.launch</subtest>
+  <subtest>hysteresis_shoulder_lift.launch</subtest>
+  <subtest>hysteresis_shoulder_pan.launch</subtest>
+  <shutdown>shutdown.launch</shutdown>
 </test>
