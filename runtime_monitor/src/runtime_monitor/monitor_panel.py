@@ -70,10 +70,10 @@ class MonitorPanel(wx.Panel):
         self._tree_control = xrc.XRCCTRL(self._real_panel, "_tree_control")
         self._html_control = xrc.XRCCTRL(self._real_panel, "_html_control")
         
-        image_list = wx.ImageList(16,16)
-        self._error_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_ERROR, wx.ART_OTHER, wx.Size(16,16)))
-        self._warning_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_WARNING, wx.ART_OTHER, wx.Size(16,16)))
-        self._ok_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16,16)))
+        image_list = wx.ImageList(16, 16)
+        self._error_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_ERROR, wx.ART_OTHER, wx.Size(16, 16)))
+        self._warning_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_WARNING, wx.ART_OTHER, wx.Size(16, 16)))
+        self._ok_image_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16, 16)))
         self._tree_control.AssignImageList(image_list)
         self._root_id = self._tree_control.AddRoot("Root")
         self._stale_id = self._tree_control.AppendItem(self._root_id, "Stale (0)", self._error_image_id)
@@ -82,6 +82,7 @@ class MonitorPanel(wx.Panel):
         self._ok_id = self._tree_control.AppendItem(self._root_id, "Ok (0)", self._ok_image_id)
         
         self._tree_control.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_item_selected)
+        self._tree_control.Bind(wx.EVT_TREE_KEY_DOWN, self.on_item_key_down)
         
         self._name_to_id = {}
         
@@ -142,7 +143,7 @@ class MonitorPanel(wx.Panel):
             parent_id = self._ok_id
         elif (status.level == 1):
             parent_id = self._warnings_id
-        elif (status.level == -1):
+        elif (status.level == - 1):
             parent_id = self._stale_id
         else:
             parent_id = self._errors_id
@@ -158,8 +159,8 @@ class MonitorPanel(wx.Panel):
         if (select):
             self._tree_control.SelectItem(id)
             
-        if (expand_if_error and (status.level > 1 or status.level == -1)):
-            self._tree_control.Expand(parent_id )
+        if (expand_if_error and (status.level > 1 or status.level == - 1)):
+            self._tree_control.Expand(parent_id)
             
         self.update_root_labels()
         
@@ -178,15 +179,15 @@ class MonitorPanel(wx.Panel):
         s = cStringIO.StringIO()
         
         s.write("<html><body>")
-        s.write("<b>Component</b>: %s<br>\n"%(status.name))
-        s.write("<b>Message</b>: %s<br><br>\n\n"%(status.message))
+        s.write("<b>Component</b>: %s<br>\n" % (status.name))
+        s.write("<b>Message</b>: %s<br><br>\n\n" % (status.message))
         
         s.write('<table border="1" cellpadding="2" cellspacing="0">')
         for value in status.strings: 
             value.value = value.value.replace("\n", "<br>")
-            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
+            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.label, value.value))
         for value in status.values:
-            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" %(value.label, value.value))
+            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.label, value.value))
             
         s.write("</table></body></html>")
             
@@ -199,8 +200,28 @@ class MonitorPanel(wx.Panel):
     def on_item_selected(self, event):
         self.fillout_info(event.GetItem())
         
+    def on_item_key_down(self, event):
+        id = self._tree_control.GetSelection()
+        if (id == None):
+          event.Skip()
+          return
+        
+        key = event.GetKeyCode()
+        
+        if (key == wx.WXK_DELETE):
+          wrapper = self._tree_control.GetPyData(id)
+          if (wrapper != None):
+              self._tree_control.Delete(id)
+              del self._name_to_id[wrapper.status.name]
+        else:
+          event.Skip()
+          
+        self.update_root_labels()
+        self.Refresh()
+        
+        
     def on_timer(self, event):
-        for name,id in self._name_to_id.iteritems():
+        for name, id in self._name_to_id.iteritems():
             status_wrapper = self._tree_control.GetPyData(id)
             if (status_wrapper != None):
                 if (not status_wrapper.mark):
@@ -211,8 +232,8 @@ class MonitorPanel(wx.Panel):
                     self._tree_control.Delete(id)
                     
                     old_level = status_wrapper.status.level
-                    status_wrapper.status.level = -1
-                    status_wrapper = self.create_item(status_wrapper.status, was_selected, old_level != -1)
+                    status_wrapper.status.level = - 1
+                    status_wrapper = self.create_item(status_wrapper.status, was_selected, old_level != - 1)
                     
                 status_wrapper.mark = False
         
@@ -224,7 +245,7 @@ class MonitorPanel(wx.Panel):
         self._new_errors_callback = callback
 
     def update_root_labels(self):
-        self._tree_control.SetItemText(self._ok_id, "Ok (%s)"%( self._tree_control.GetChildrenCount(self._ok_id, False)))
-        self._tree_control.SetItemText(self._warnings_id, "Warnings (%s)"%( self._tree_control.GetChildrenCount(self._warnings_id, False)))
-        self._tree_control.SetItemText(self._errors_id, "Errors (%s)"%( self._tree_control.GetChildrenCount(self._errors_id, False)))
-        self._tree_control.SetItemText(self._stale_id, "Stale (%s)"%( self._tree_control.GetChildrenCount(self._stale_id, False)))
+        self._tree_control.SetItemText(self._ok_id, "Ok (%s)" % (self._tree_control.GetChildrenCount(self._ok_id, False)))
+        self._tree_control.SetItemText(self._warnings_id, "Warnings (%s)" % (self._tree_control.GetChildrenCount(self._warnings_id, False)))
+        self._tree_control.SetItemText(self._errors_id, "Errors (%s)" % (self._tree_control.GetChildrenCount(self._errors_id, False)))
+        self._tree_control.SetItemText(self._stale_id, "Stale (%s)" % (self._tree_control.GetChildrenCount(self._stale_id, False)))
