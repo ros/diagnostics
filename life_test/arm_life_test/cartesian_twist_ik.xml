@@ -1,0 +1,3 @@
+<controllers>
+  <controller type="CartesianTwistControllerIkNode" name="arm_twist" topic="arm_twist" />
+</controllers>

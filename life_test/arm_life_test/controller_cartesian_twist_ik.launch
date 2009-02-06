@@ -1,0 +1,13 @@
+<launch>
+
+<!-- Cartesian ik twist controller -->
+
+  <!-- parameters for twist controller -->
+  <param name="cartesian_twist_ik/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_twist_ik/tip_name" type="string" value="r_wrist_roll_link" />
+
+  <param name="cartesian_twist_ik/joystick_max_trans" value="2.0" />
+  <param name="cartesian_twist_ik/joystick_max_rot" value="0.5" />	
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_twist_ik.xml" output="screen" />
+</launch>
