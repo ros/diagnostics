@@ -60,7 +60,6 @@ def msg_prompt(msg):
     prompt_click="yes"
   else:
     prompt_click="no"
-  print "b"
   prompt_done=True
 
   print "msg_prompt done"

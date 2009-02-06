@@ -77,7 +77,7 @@ for num in all:
             filename = path + "/gripper-303.bit"
 
 
-        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i rteth0 -p %s %s"%(num, filename)
+        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
         retcode = subprocess.call(cmd, shell=True)
         if retcode != 0:
             action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))

@@ -56,7 +56,9 @@ from qualification.srv import *
 class App:
   def __init__(self):
     rospy.init_node("TestPlotter", anonymous=True)
+    rospy.logerr('Initing hysteresis sinesweep plot node')
     self.data_topic = rospy.Service("/test_data", TestData, self.OnData)
+    rospy.logerr('Ready to receive test data')
     rospy.spin()
     
     

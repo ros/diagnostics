@@ -678,7 +678,7 @@ class QualificationFrame(wx.Frame):
     
     # Create a roslauncher
     config = roslaunch.ROSLaunchConfig()
-    config.master.auto = config.master.AUTO_RESTART
+    config.master.auto = config.master.AUTO_START
     
     launcher = roslaunch.ROSLaunchRunner(config)
     launcher.launch()

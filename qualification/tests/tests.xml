@@ -7,6 +7,7 @@
 <test serial="6804178" name="full_arm_test"/>
 <test serial="6804204" name="shoulder_test"/>
 <test serial="6804139" name="upperarm_test"/>
+<test serial="upperfl" name="upperarm_flex_only_test"/>
 <test serial="6801024" name="hokuyo_test"/>
 <test serial="6801050" name="imu_test"/>
 <test serial="etherne" name="ethernet_test"/>

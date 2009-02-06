@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="test_shoulder">
+<robot name="test_upperarm">
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
 
   <pr2_upper_arm side="r" reflect="1" parent="world_link" />

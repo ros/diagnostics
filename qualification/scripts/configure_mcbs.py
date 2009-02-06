@@ -69,7 +69,7 @@ for name, num in mcbs:
 
   try:
       while(action.str == "retry"):
-        retcode = subprocess.call(path + "/motorconf" + " -i rteth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
+        retcode = subprocess.call(path + "/motorconf" + " -i eth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
         if retcode != 0:
             action = result_proxy("Programming MCB confiuration failed for %s!"%name)
             if action.str == "fail":
