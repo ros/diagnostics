@@ -32,9 +32,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib
-import roslib.packages
-roslib.load_manifest('qualification')
+import rostools
+import rostools.packspec
+rostools.update_path('qualification')
 
 import rospy
 import roslaunch
@@ -59,8 +59,8 @@ import struct
 
 from invent_client import Invent
 
-TESTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'tests')
-RESULTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results')
+TESTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'tests')
+RESULTS_DIR = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'results')
 
 class SerialPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame):
@@ -129,7 +129,6 @@ class InstructionsPanel(wx.Panel):
   def on_continue(self, event):
     self._manager.test_startup()
     
-  # Should it exit program here?
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
     
@@ -141,6 +140,8 @@ class WaitingPanel(wx.Panel):
     
     self._panel = resource.LoadPanel(self, 'waiting_panel')
     self._sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+    self._name = name
     
     self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
     self._progress_label.SetLabel("Test '%s' in progress..."%(name))
@@ -152,9 +153,15 @@ class WaitingPanel(wx.Panel):
     
     self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+    self._skip_button = xrc.XRCCTRL(self._panel, 'skip_button')
+    self._skip_button.Bind(wx.EVT_BUTTON, self.on_skip)
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
+
+  def on_skip(self, event):
+    self._manager.skip("Skip button pressed on test %s"%(self._name))
     
 class PrestartupPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame):
@@ -358,7 +365,7 @@ class QualificationFrame(wx.Frame):
       self._tests[test.attributes['serial'].value] = test.attributes['name'].value
     
     # Load the XRC resource
-    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
+    xrc_path = os.path.join(rostools.packspec.get_pkg_dir('qualification'), 'xrc/gui_test.xrc')
     self._res = xrc.XmlResource(xrc_path)
 
     # Load the main panel
@@ -682,7 +689,7 @@ class QualificationFrame(wx.Frame):
     
     # Create a roslauncher
     config = roslaunch.ROSLaunchConfig()
-    config.master.auto = config.master.AUTO_START
+    config.master.auto = config.master.AUTO_RESTART
     
     launcher = roslaunch.ROSLaunchRunner(config)
     launcher.launch()

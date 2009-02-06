@@ -80,6 +80,8 @@ class App:
 
     #create the figure
     fig=plot.figure(1)
+
+
     axes1 = fig.add_subplot(211)
     axes2 = fig.add_subplot(212)
     axes1.set_xlabel('Position')
@@ -94,6 +96,9 @@ class App:
     axes1.axhline(y=self.data.arg_value[0],color='b')
     #show that a constant velocity was achieved
     axes2.plot(numpy.array(self.data.position), numpy.array(self.data.velocity), 'b--')
+
+    # Title from testdata
+    fig.text(.4, .95, 'Hysteresis')
     
     #pass along results
     result_service = rospy.ServiceProxy('test_result', TestResult)

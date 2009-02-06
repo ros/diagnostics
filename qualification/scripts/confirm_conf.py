@@ -33,7 +33,8 @@
 #
 # Revision $Id: gossipbot.py 1013 2008-05-21 01:08:56Z sfkwc $
 
-## Simple demo of a rospy service that add two integers
+## Prompts the user with a Y/N message if MCB's aren't configured
+# Called from program_mcb.py through the mcb_conf_results service
 
 PKG = 'qualification' # this package name
 NAME = 'mcb_conf_verification'
@@ -72,12 +73,10 @@ def check_w_user(req):
     return StringStringResponse("na")
   global prompt_done
   prompt_done=False
-  print "about to call call after" 
   wx.CallAfter(msg_prompt,req.str)
-  print "called call after"
   while(not prompt_done):
     print "waiting for prompt . . ."
-    time.sleep(1) 
+    time.sleep(5) 
   print prompt_click
   
   if prompt_click =="yes":

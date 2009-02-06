@@ -37,7 +37,7 @@ roslib.load_manifest('qualification')
 
 import wx
 
-import qualification.ui
+import qualification.ui_test
 
 if __name__ == '__main__':
   try:
