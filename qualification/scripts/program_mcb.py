@@ -71,10 +71,10 @@ for num in all:
   print "Doing something with %s"%num
   try:
       while(action.str == "retry"):
-        filename = path + "/hecatB.bit"
-        if options.wg006:
+        filename = path + "/*.bit" # was hecatB.bit"
+        if options.wg006: # Don't actually need to check if wg005 here, check just in case
           if num in options.wg006:
-            filename = path + "/gripperA.bit"
+            filename = path + "/*.bit" # gripperA.bit
 
 
         cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
