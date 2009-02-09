@@ -9,7 +9,7 @@
 
 <!--hold everything else in place-->
 
-<controller name="shoulder_pan_controller" type="JointPositionControllerNode">
+<!--controller name="shoulder_pan_controller" type="JointPositionControllerNode">
   <joint name="r_shoulder_pan_joint">
      <pid p="70" i="20.0" d="11.0" iClamp="4.0" />
   </joint>
@@ -43,7 +43,7 @@
   <joint name="r_wrist_flex_joint">
      <pid p="4" i="0.5" d="0" iClamp="1.0" />
   </joint>
-</controller>
+</controller-->
 
 <!--controller name="wrist_roll_controller" type="JointPositionControllerNode">
   <joint name="r_wrist_roll_joint">
@@ -51,10 +51,10 @@
   </joint>
 </controller-->
 
-<controller name="gripper_controller" type="JointPositionControllerNode">
+<!--controller name="gripper_controller" type="JointPositionControllerNode">
   <joint name="r_gripper_joint">
     <pid p="0.00050" d="0" i=".0006" iClamp="0.0001" />
   </joint>
-</controller>
+</controller-->
 
 </controllers>

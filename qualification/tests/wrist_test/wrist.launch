@@ -2,7 +2,6 @@
 
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/wrist_test/wrist.xml'" />
 
-<!-- This is also in wrist_conf.launch -->
   <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
 
 

@@ -1,6 +1,6 @@
 <!-- calibrate_arm.py is called by full_arm.launch -->
 <!--controllers>
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
-  <upper_arm_calibrator side="r" />
+  <!-- upperarm calibrator called by calibrate_arm.py -->
   <forearm_calibrator side="r"/>
 </controllers-->
