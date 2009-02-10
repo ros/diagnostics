@@ -42,7 +42,7 @@ NAME = 'mcb_conf_verification'
 import roslib
 roslib.load_manifest(PKG) 
 import wx 
-from std_srvs.srv import *
+from deprecated_srvs.srv import *
 import rospy 
 import time
 

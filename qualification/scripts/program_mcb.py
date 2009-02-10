@@ -39,7 +39,7 @@ import rospy, sys
 import subprocess
 from optparse import OptionParser
 
-from std_srvs.srv import * 
+from deprecated_srvs.srv import * 
 
 rospy.init_node("mcb_programmer")
 # block until the add_two_ints service is available
