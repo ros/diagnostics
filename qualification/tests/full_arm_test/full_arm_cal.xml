@@ -1,6 +1,8 @@
-<!-- calibrate_arm.py is called by full_arm.launch -->
-<!--controllers>
+<!-- calibrate_arm.py is called by calibrate.launch -->
+<controllers>
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
+  <include filename="$(find pr2_defs)/defs/gripper_defs.xml" />
   <!-- upperarm calibrator called by calibrate_arm.py -->
   <forearm_calibrator side="r"/>
-</controllers-->
+  <gripper_calibrator side="r"/>
+</controllers>

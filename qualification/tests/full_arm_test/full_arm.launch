@@ -7,7 +7,7 @@
 <!-- pr2_etherCAT Needs to be rteth0 if operating in realtime-->
 <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
 
-<!-- Full Arm Calibration -->
+<!-- Full Arm Calibration uses sequential arm calibrator -->
 <include file="$(find qualification)/tests/full_arm_test/calibrate.launch" />
 
 <!--node pkg="pr2_power_board" type="power_node" />

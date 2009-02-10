@@ -5,7 +5,7 @@
 <machine name="localhost" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true"/> 
 
 <!-- program_mcbs. MCB's for shoulder, upperarm, forearm, gripper -->
-<node machine="xenomai_root" pkg="qualification" type="program_mcb.py" args="--wg005=1 --wg005=2 --wg005=3 --wg005=4 --wg005=5 --wg005=6 --wg005=7"  /> 
+<node machine="xenomai_root" pkg="qualification" type="program_mcb.py" args="--wg005=1 --wg005=2 --wg005=3 --wg005=4 --wg005=5 --wg005=6 --wg005=7 --wg006=8"  /> 
 
 <!-- service -->
 <node pkg="qualification" type="confirm_conf.py" output="screen"/>
