@@ -35,13 +35,13 @@ import rospy
 from std_msgs.msg import *
 from robot_msgs.msg import *
 
-pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
-#pub = rospy.Publisher('/cartesian_trajectory/command', PoseStamped)
+#pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
+pub = rospy.Publisher('/cartesian_trajectory/command', PoseStamped)
 
 
 def p(x, y, z, rx, ry, rz, w):
   m = PoseStamped()
-  m.header.frame_id = 'odom'
+  m.header.frame_id = 'base_link'
   m.header.stamp = rospy.get_rostime()
   m.pose.position.x = x
   m.pose.position.y = y
