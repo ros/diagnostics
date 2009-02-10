@@ -36,7 +36,7 @@ from std_msgs.msg import *
 from robot_msgs.msg import *
 
 #pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
-pub = rospy.Publisher('/cartesian_trajectory/command', PoseStamped)
+pub = rospy.Publisher('/cartesian_trajectory_right/command', PoseStamped)
 
 
 def p(x, y, z, rx, ry, rz, w):
@@ -54,12 +54,14 @@ def p(x, y, z, rx, ry, rz, w):
 rospy.init_node('pub', anonymous=True)
 
 POINTS = [
-  (0.5,  -0.5, 0.8, 0.0, 0.0, 0.0, 1.0),
-  (0.9, -0.1, 2,   0.0, 0.0, 1.0, 0.0),
-  (1.3, -0.2, 1.3, 0.0, 0.0, 1.0, 0.0),
-  (0.8, -0.7, 1.3, 0.0, 0.0, 1.0, 0.0),
+  (0.5, -0.5, 0.8, 0.5, 0.0, 0.0, 0.5),
+  (0.6, -0.2, 0.4, 0.0, 0.0, 0.5, 0.5),
+  (0.2, -0.8, 0.4, 0.0, 0.5, 0.0, 0.5),
+  (0.5, -0.5, 1.2, 0.5, 0.0, 0.0, 0.5),
+  (0.6, -0.2, 1.2, 0.0, 0.0, 0.5, 0.5),
+  (0.2, -0.8, 1.2, 0.0, 0.5, 0.0, 0.5),
 ]
 
 while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.1, 1.0))
+  time.sleep(random.uniform(0.1, 0.1))
   p(*POINTS[random.randint(0, len(POINTS)-1)])
