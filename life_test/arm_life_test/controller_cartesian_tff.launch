@@ -1,0 +1,34 @@
+<launch>
+
+<!-- Cartesian tff controller -->
+
+  <!-- parameters for tff controller -->
+  <param name="cartesian_tff/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_tff/tip_name" type="string" value="r_wrist_roll_link" />
+
+  <param name="cartesian_tff/twist_to_wrench_trans" value="10.0" />
+  <param name="cartesian_tff/twist_to_wrench_rot" value="1.0" />
+
+  <param name="cartesian_tff/vel_trans_p" value="20.0" />
+  <param name="cartesian_tff/vel_trans_i" value="0.5" />
+  <param name="cartesian_tff/vel_trans_d" value="0.0" />
+  <param name="cartesian_tff/vel_trans_i_clamp" value="1.0" />
+
+  <param name="cartesian_tff/vel_rot_p" value="0.5" />
+  <param name="cartesian_tff/vel_rot_i" value="0.1" />
+  <param name="cartesian_tff/vel_rot_d" value="0.0" />
+  <param name="cartesian_tff/vel_rot_i_clamp" value="0.2" />
+
+
+  <param name="cartesian_tff/pos_trans_p" value="20.0" />
+  <param name="cartesian_tff/pos_trans_i" value="0.5" />
+  <param name="cartesian_tff/pos_trans_d" value="0.0" />
+  <param name="cartesian_tff/pos_trans_i_clamp" value="1.0" />
+
+  <param name="cartesian_tff/pos_rot_p" value="0.5" />
+  <param name="cartesian_tff/pos_rot_i" value="0.1" />
+  <param name="cartesian_tff/pos_rot_d" value="0.0" />
+  <param name="cartesian_tff/pos_rot_i_clamp" value="0.2" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_tff.xml" />
+</launch>

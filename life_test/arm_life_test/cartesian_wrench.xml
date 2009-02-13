@@ -1,5 +1,3 @@
 <controllers>
-  <controller type="CartesianWrenchControllerNode" name="arm_wrench" topic="arm_wrench">
-    <chain root="torso_lift_link" tip="r_wrist_roll_link" offset="0.3 0 0" />
-  </controller>
+  <controller type="CartesianWrenchControllerNode" name="cartesian_wrench" topic="cartesian_wrench" />
 </controllers>

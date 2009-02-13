@@ -1,1 +1,1 @@
-<controller type="CartesianPoseControllerNode" name="noname" topic="noname"/>
+<controller type="CartesianPoseControllerNode" name="cartesian_pose" topic="cartesian_pose"/>
