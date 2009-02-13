@@ -42,7 +42,6 @@ from optparse import OptionParser
 from deprecated_srvs.srv import * 
 
 rospy.init_node("mcb_configurer")
-# block until the add_two_ints service is available
 rospy.wait_for_service('mcb_conf_results')
 
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
@@ -71,9 +70,9 @@ for name, num in mcbs:
       while(action.str == "retry"):
         retcode = subprocess.call(path + "/motorconf" + " -i eth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
         if retcode != 0:
-            action = result_proxy("Programming MCB confiuration failed for %s!"%name)
+            action = result_proxy("Programming MCB configuration failed for %s! Retry?"%name)
             if action.str == "fail":
-              print "Programming MCB confiuration failed for %s!"%name
+              print "Programming MCB configuration failed for %s! Shutting down test!"%name
               success = False
               break
 
