@@ -61,7 +61,6 @@ class App:
     rospy.logerr('Ready to receive test data')
     rospy.spin()
     
-    
   def OnData(self,req):
     print 'Got data named %s' % (req.test_name)
     self.data = req
@@ -98,25 +97,26 @@ class App:
     axes2.plot(numpy.array(self.data.position), numpy.array(self.data.velocity), 'b--')
 
     # Title from testdata
-    fig.text(.4, .95, 'Hysteresis')
+    fig.text(.35, .95, self.data.joint_name + ' Hysteresis Test')
     
     #pass along results
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
     r.text_result = ""
     r.plots = []
-    if tr==True:
-      r.result =TestResultRequest.RESULT_PASS
+    if tr == True:
+      r.result = TestResultRequest.RESULT_PASS
     else:
       r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
     stream = StringIO()
-    plot.savefig(stream, format="png")
+    plot.savefig(stream, format = "png")
     image = stream.getvalue()
     
     p = qualification.msg.Plot()
     r.plots.append(p)
     p.text = s
+    p.title = self.data.joint_name + "_hysteresis"
     p.image = image
     p.image_format = "png"
     result_service.call(r)
@@ -156,6 +156,8 @@ class App:
     axes2.set_ylim(0, max_value+10)
     axes2.set_xlabel('Velocity PSD')
 
+    # Title from testdata
+    fig.text(.35, .95, self.data.joint_name + ' SineSweep Test')
 
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
@@ -173,6 +175,7 @@ class App:
     p = qualification.msg.Plot()
     r.plots.append(p)
     p.text = s
+    p.title = self.data.joint_name + "_sine_sweep"
     p.image = image
     p.image_format = "png"
     result_service.call(r)
@@ -216,6 +219,7 @@ class App:
     p = qualification.msg.Plot()
     r.plots.append(p)
     p.text = s
+    p.title = self.data.joint_name + "_backlash"
     p.image = image
     p.image_format = "png"
     result_service.call(r)

@@ -32,6 +32,8 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+### Author: Kevin Watts
+
 import roslib
 import roslib.packages
 roslib.load_manifest('qualification')
@@ -45,6 +47,7 @@ import sys
 import datetime
 import glob
 import wx
+import time
 from wx import xrc
 from wx import html
 
@@ -78,10 +81,10 @@ class SerialPanel(wx.Panel):
     
     self._test_button = xrc.XRCCTRL(self._panel, 'test_button')
     self._serial_text = xrc.XRCCTRL(self._panel, 'serial_text')
+    self._rework_reason = xrc.XRCCTRL(self._panel, 'rework_reason')
     
     self._test_button.Bind(wx.EVT_BUTTON, self.on_test)
-    self._serial_text.Bind(wx.EVT_TEXT_ENTER, self.on_test)
-    
+        
     self._panel.Bind(wx.EVT_CHAR, self.on_char)
     self._panel.SetFocus()
     
@@ -90,10 +93,15 @@ class SerialPanel(wx.Panel):
     # Get the first 7 characters of the serial
     serial = self._serial_text.GetValue()
     
+    rework = self._rework_reason.GetValue()
+
     if (self._manager.has_test(serial)):
-      wx.CallAfter(self._manager.start_tests, serial)
+      if (len(rework) > 5):
+        wx.CallAfter(self._manager.start_tests, serial, rework)
+      else:
+        wx.CallAfter(self._manager.start_tests, serial)
     else:
-      wx.MessageBox('No test defined for that serial number','Error', wx.OK|wx.ICON_ERROR, self)
+      wx.MessageBox('No test defined for that serial number.','Error - Invalid serial number', wx.OK|wx.ICON_ERROR, self)
   
   def on_char(self, event):
     # 347 is the keycode sent at the beginning of a barcode
@@ -129,7 +137,6 @@ class InstructionsPanel(wx.Panel):
   def on_continue(self, event):
     self._manager.test_startup()
     
-  # Should it exit program here?
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
     
@@ -141,6 +148,8 @@ class WaitingPanel(wx.Panel):
     
     self._panel = resource.LoadPanel(self, 'waiting_panel')
     self._sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+    self._name = name
     
     self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
     self._progress_label.SetLabel("Test '%s' in progress..."%(name))
@@ -152,9 +161,9 @@ class WaitingPanel(wx.Panel):
     
     self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
-    
+
   def on_cancel(self, event):
-    self._manager.cancel("Cancel button pressed")
+    self._manager.cancel("Cancel button pressed during test %s" % (self._name))
     
 class PrestartupPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame):
@@ -166,12 +175,23 @@ class PrestartupPanel(wx.Panel):
     self._sizer = wx.BoxSizer(wx.HORIZONTAL)
     
     self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
-    self._progress_label.SetLabel("Running pre_startup scripts...")
+    self.set_progress_label('Running') # pre_startup scripts...')
     
     self._sizer.Add(self._panel, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
     self.SetSizer(self._sizer)
     self.Layout()
     self.Fit()
+    
+    # Cancel button added to prestartup panel
+    # Cancel function must work if called
+    self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
+    self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+  def set_progress_label(self, label):
+    self._progress_label.SetLabel(label)
+
+  def on_cancel(self, event):
+    self._manager.cancel("Cancel button pressed on startup")
     
 class ImagePanel(wx.Panel):
   def __init__(self, parent, id, image_data):
@@ -195,7 +215,7 @@ class ImagePanel(wx.Panel):
     size = self.GetSize()
     image = self._image.Scale(size.GetWidth(), size.GetHeight())
     self._bitmap = wx.BitmapFromImage(image)
-    
+
   def on_size(self, event):
     event.Skip()
     self._needs_scale = True
@@ -267,7 +287,7 @@ class PlotsPanel(wx.Panel):
     self._manager.subtest_passed(self._msg)
   
   def on_fail(self, event):
-    failure_reason = wx.GetTextFromUser("Input the reason for failure:", "Input failure reason", "", self)
+    failure_reason = wx.GetTextFromUser("Record the reason for failure:", "Failure Reason", "", self)
     self._manager.subtest_failed(self._msg, failure_reason)
   
   def on_retry(self, event):
@@ -291,12 +311,10 @@ class ResultsPanel(wx.Panel):
     self.Fit()
     
     self._submit_button = xrc.XRCCTRL(self._panel, 'submit_button')
-    self._discard_button = xrc.XRCCTRL(self._panel, 'discard_button')
     self._textbox = xrc.XRCCTRL(self._panel, 'results_text')
-    
+
+    self._notesbox = xrc.XRCCTRL(self._panel, 'notes_text')
     self._submit_button.Bind(wx.EVT_BUTTON, self.on_submit)
-    self._discard_button.Bind(wx.EVT_BUTTON, self.on_discard)
-    
     self._submit_button.SetFocus()
     
   def set_results(self, results):
@@ -321,10 +339,7 @@ class ResultsPanel(wx.Panel):
       self._textbox.AppendText("Text: %s\n"%(text))
     
   def on_submit(self, event):
-    wx.CallAfter(self._manager.submit_results, self._textbox.GetValue())
-    
-  def on_discard(self, event):
-    wx.CallAfter(self._manager.discard_results)
+      wx.CallAfter(self._manager.submit_results, self._textbox.GetValue(), self._notesbox.GetValue())
 
 class RoslaunchProcessListener(roslaunch.pmon.ProcessListener):
   def __init__(self):
@@ -333,7 +348,11 @@ class RoslaunchProcessListener(roslaunch.pmon.ProcessListener):
   def has_any_process_died_badly(self):
     return self._died_badly
   def process_died(self, process_name, exit_code):
-    print "%s died with exit code %s"%(process_name, exit_code)
+    status = 'Failed!'
+    if exit_code == 0 or exit_code == None:
+      status = 'OK'
+
+    print "Process %s died with exit code %s. %s" % (process_name, exit_code, status)
     if exit_code != None and exit_code != 0:
       self._died_badly = True
 
@@ -358,7 +377,7 @@ class QualificationFrame(wx.Frame):
       self._tests[test.attributes['serial'].value] = test.attributes['name'].value
     
     # Load the XRC resource
-    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
+    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui_test.xrc')
     self._res = xrc.XmlResource(xrc_path)
 
     # Load the main panel
@@ -407,7 +426,7 @@ class QualificationFrame(wx.Frame):
     launcher.spin()
     
   # Launches program, queries for rework reason  
-  def start_tests(self, serial):
+  def start_tests(self, serial, rework_reason = ''):
     short_serial = serial[0:7]
     test_dir = os.path.join(TESTS_DIR, self._tests[short_serial])
     self._test_dir = test_dir
@@ -436,7 +455,6 @@ class QualificationFrame(wx.Frame):
 
     self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
     
-    rework_reason = wx.GetTextFromUser("If this hardware has previously been qualified, and has been reworked in some way, please enter the reason for the re-work", "Rework?", "", self)
     if (len(rework_reason) > 0):
       invent = self.get_inventory_object()
       if (invent != None):
@@ -448,31 +466,42 @@ class QualificationFrame(wx.Frame):
       self.test_startup()
       
   def test_startup(self):
-    self.set_top_panel(PrestartupPanel(self._top_panel, self._res, self))
-    wx.CallAfter(self.test_startup_real)
+    panel = PrestartupPanel(self._top_panel, self._res, self)
+    self.set_top_panel(panel)
+    panel.set_progress_label('Initializing pre-startup sequence')
+    time.sleep(3)
+    wx.CallAfter(self.test_startup_real(panel))
     
-  def test_startup_real(self):
+  # Called from InstructionsPanel, runs through prestartup scripts
+  def test_startup_real(self, panel):
     test_dir = self._test_dir
     # Run any pre_startup scripts synchronously
     if (len(self._current_test.pre_startup_scripts) > 0):
       for script in self._current_test.pre_startup_scripts:
-        self.log('Running pre_startup script [%s]...'%(script))
+        # Set script label in waiting panel
+        log_message = 'Running pre_startup script [%s]...'%(script)
+        self.log(log_message)
+        panel.set_progress_label(log_message)
         
+        # If cancel button pressed in pre-startup, cancel all tests
+        # Cancel button called to cancel()...should work
+
         listener = RoslaunchProcessListener()
         
         launch = self.launch_script(os.path.join(test_dir, script), listener)
         if (launch == None):
-          s = 'Could not load roslaunch script "%s"'%(script)
+          s = 'Could not load roslaunch script "%s"! Press OK to cancel test.' % (script)
           wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
           self.cancel(s)
           return
         
-        launch.spin();
+        launch.spin(); # Spin until it finishes
         
         if (listener.has_any_process_died_badly()):
-          s = 'pre_startup script %s died badly'%(script)
-          wx.MessageBox(s, 'pre_startup failed', wx.OK|wx.ICON_ERROR, self)
-          self.cancel(s)
+          s = 'Pre_startup script %s died badly! Press OK to cancel test.' % (script)
+          wx.MessageBox(s, 'Pre_startup Failed', wx.OK|wx.ICON_ERROR, self)
+          # Record that pre-startup failed 
+          self.prestartup_failed(script)
           return
     else:
       self.log('No pre_startup scripts')
@@ -480,10 +509,11 @@ class QualificationFrame(wx.Frame):
     # Run the startup script if we have one
     if (self._current_test.getStartupScript() != None):
       self.log('Running startup script...')
+      panel.set_progress_label('Running startup script')
       self._startup_launch = self.launch_script(os.path.join(test_dir, self._current_test.getStartupScript()), None)
       if (self._startup_launch == None):
         s = 'Could not load roslaunch script "%s"'%(self._current_test.getStartupScript())
-        wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+        wx.MessageBox(s, 'Invalid roslaunch file. Press OK to cancel.', wx.OK|wx.ICON_ERROR, self)
         self.cancel(s)
         return
     else:
@@ -503,10 +533,23 @@ class QualificationFrame(wx.Frame):
     self._subtest_launch = self.launch_script(script, None)
     if (self._subtest_launch == None):
       s = 'Could not load roslaunch script "%s"'%(script)
-      wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+      wx.MessageBox(s, 'Invalid roslaunch file. Press OK to cancel.', wx.OK|wx.ICON_ERROR, self)
       self.cancel(s)
       return
     
+  def prestartup_failed(self, script):
+    # Adds "result" of prestartup failure, allows user to log it
+    r = {}
+    r['test_name'] = "Prestartup failure"
+    r['result'] = "FAIL"
+    r['text'] = "Qualification prestartup script %s failed! Hardware cannot be qualified" % (script)
+    r['msg'] = None
+    r['failure_reason'] = script
+
+    self._results.append(r)
+
+    self.show_results()
+
   def show_results(self):
     panel = ResultsPanel(self._top_panel, self._res, self)
     self.set_top_panel(panel)
@@ -548,26 +591,35 @@ class QualificationFrame(wx.Frame):
     
     return None
     
-  def submit_results(self, summary):
-    start_time_string = self._tests_start_date.strftime("%Y%m%d_%I%M%S")
+  def submit_results(self, summary, notes=''):
+    start_time_string = self._tests_start_date.strftime("%Y%m%d_%I%M") # Seconds removed
     
+    date_string = self._tests_start_date.strftime("%m/%d/%Y")
+    time_string = self._tests_start_date.strftime("%I:%m")
+
     invent = self.get_inventory_object()
     if (invent != None):
       status_str = self._results[len(self._results)-1]['result']    
       invent.setKV(self._current_serial, "Test Status", status_str)
-      invent.setNote(self._current_serial, "Test run on %s, status: %s"%(start_time_string, status_str))
+      test_log = "Test run on %s at %s, status: %s."%(date_string, time_string, status_str)
+      invent.setNote(self._current_serial, test_log)
       
-      prefix = start_time_string + "/"
+      if notes != '':
+        summary = summary + "\n Notes: %s" % notes
+
+      prefix = start_time_string + "/" # Put prefix first so images sorted by date
       invent.add_attachment(self._current_serial, prefix + "summary", "text/plain", summary)
       
+      # Change so it records type of plot with image 
+      # Not just image1, etc
       i = 1
       for r in self._results:
         msg = r['msg']
-        for p in msg.plots:
-          if (len(p.image) > 0):
-            invent.add_attachment(self._current_serial, prefix + "image%d"%(i), "image/" + p.image_format, p.image)
-            
-            i += 1
+        if msg is not None:
+          for p in msg.plots:
+            if (len(p.image) > 0):
+              invent.add_attachment(self._current_serial, prefix + p.title, "image/" + p.image_format, p.image)
+              i += 1
             
       self.log('Results submitted')
     
@@ -682,7 +734,7 @@ class QualificationFrame(wx.Frame):
     
     # Create a roslauncher
     config = roslaunch.ROSLaunchConfig()
-    config.master.auto = config.master.AUTO_START
+    config.master.auto = config.master.AUTO_RESTART
     
     launcher = roslaunch.ROSLaunchRunner(config)
     launcher.launch()
@@ -752,7 +804,9 @@ class QualificationFrame(wx.Frame):
       if (self._shutdown_launch == None):
         s = 'Could not load roslaunch script "%s"'%(self._current_test.getShutdownScript())
         wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
-        self.cancel(s)
+        self.log('No shutdown script: %s' % (s))
+        self.log('SHUT DOWN POWER BOARD MANUALLY')
+        self.reset()
         return
 
       self._shutdown_launch.spin()

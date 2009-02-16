@@ -70,32 +70,27 @@ for num in all:
   action = StringStringResponse('retry')
   print "Doing something with %s"%num
   try:
-      while(action.str == "retry"):
-        filename = path + "/*.bit" # was hecatB.bit"
-        #        if options.wg006: 
-        # Don't actually need to check if wg005 here, check just in case
-        #         if num in options.wg006:
-        #          filename = path + "/*.bit" # gripperA.bit
+    while(action.str == "retry"):
+      filename = path + "/*.bit" 
 
-
-        cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
-        retcode = subprocess.call(cmd, shell=True)
-        if retcode != 0:
-            action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))
-            if action.str == "fail":
-              print "Programming MCB firmware failed for %s!"%num
-              success = False
-              break
-
+      cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
+      retcode = subprocess.call(cmd, shell=True)
+      if retcode != 0:
+        action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))
+        if action.str == "fail":
+          print "Programming MCB firmware failed for %s!"%num
+          success = False
+          break
+        
         else:
           print retcode
           action.str ="pass"
   except OSError, e:
-      action = result_proxy("The MCB firmware programing failed to execute.")
-      success = False
+    action = result_proxy("The MCB firmware programing failed to execute.")
+    success = False
 
 if success:
-    print "Programming MCB firmware finished"
-    action = result_proxy("done")
+  print "Programming MCB firmware finished"
+  action = result_proxy("done")
  
 sys.exit(0)

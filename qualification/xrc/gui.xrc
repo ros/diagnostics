@@ -40,7 +40,7 @@
 	</object>
 	<object class="wxPanel" name="serial_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
+		<size>658,650</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -54,6 +54,14 @@
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="serial_label">
+							<font>
+								<size>12</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<label>Serial Number:</label>
 						</object>
 					</object>
@@ -63,14 +71,63 @@
 						<border>5</border>
 						<object class="wxTextCtrl" name="serial_text">
 							<style>wxTE_PROCESS_ENTER</style>
-							<size>200,-1</size>
+							<size>250,-1</size>
+							<font>
+								<size>12</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>normal</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>
 					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
 						<option>0</option>
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="m_staticText12">
+							<label>                          If hardware reworked, enter reason here:</label>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="rework_reason">
+							<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
+							<size>600,-1</size>
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALIGN_BOTTOM|wxALL|wxBOTTOM|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="spacer">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<size>0,0</size>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM</flag>
 						<border>5</border>
 						<object class="wxButton" name="test_button">
 							<label>Test</label>
@@ -144,6 +201,14 @@
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="progress_label">
+							<font>
+								<size>14</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>normal</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<label></label>
 						</object>
 					</object>
@@ -176,9 +241,26 @@
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="progress_label">
-							<label></label>
+							<font>
+								<size>14</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>normal</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
+							<label>Progress</label>
 						</object>
 					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxALL|wxALIGN_BOTTOM</flag>
+				<border>5</border>
+				<object class="wxButton" name="cancel_button">
+					<label>Cancel</label>
+					<default>0</default>
 				</object>
 			</object>
 		</object>
@@ -208,10 +290,12 @@
 									<border>5</border>
 									<object class="wxStaticText" name="test_label">
 										<font>
-											<family>default</family>
+											<size>12</size>
+											<family>swiss</family>
 											<style>normal</style>
 											<weight>bold</weight>
 											<underlined>0</underlined>
+											<face>Sans</face>
 										</font>
 										<label></label>
 									</object>
@@ -291,13 +375,47 @@
 				<flag>wxEXPAND</flag>
 				<border>5</border>
 				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="m_staticText81">
+							<font>
+								<size>10</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
+							<label>Test results</label>
+						</object>
+					</object>
 					<object class="sizeritem">
 						<option>1</option>
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
 						<object class="wxTextCtrl" name="results_text">
 							<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="m_staticText8">
+							<label>Add testing notes and observations</label>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="notes_text">
+							<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>
@@ -316,15 +434,6 @@
 						<border>5</border>
 						<object class="wxButton" name="submit_button">
 							<label>Submit</label>
-							<default>0</default>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="discard_button">
-							<label>Discard</label>
 							<default>0</default>
 						</object>
 					</object>

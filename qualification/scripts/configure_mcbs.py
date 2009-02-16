@@ -55,7 +55,6 @@ mcbs = []
 for args in options.mcbs:
   mcbs.append(args.split(","))
 
-
 path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
 actuator_path = path + "/actuators.conf"
 success = True
@@ -70,7 +69,7 @@ for name, num in mcbs:
       while(action.str == "retry"):
         retcode = subprocess.call(path + "/motorconf" + " -i eth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
         if retcode != 0:
-            action = result_proxy("Programming MCB configuration failed for %s! Retry?"%name)
+            action = result_proxy("Programming MCB configuration failed for %s with return code %s! Retry?" % (name, retcode))
             if action.str == "fail":
               print "Programming MCB configuration failed for %s! Shutting down test!"%name
               success = False
@@ -87,4 +86,3 @@ if success:
     print "Programming MCB confiuration finished"
     action = result_proxy("done")
  
-#return success
