@@ -16,7 +16,7 @@
   <depend package="joint_qualification_controllers" />
   <depend package="pr2_etherCAT" />
   <depend package="roslaunch" />
-  <depend package="ogre_visualizer" />
+  <depend package="rviz" />
   <depend package="pr2_power_board" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>

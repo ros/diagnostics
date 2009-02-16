@@ -23,7 +23,7 @@ import glob
 import roslib.packages
 import rospy
 
-import ogre_visualizer
+import rviz
 import ogre_tools
 
 from qualification.srv import *
@@ -34,28 +34,9 @@ class VisualizerFrame(wx.Frame):
     
     ogre_tools.initializeOgre()
     
-    visualizer_panel = ogre_visualizer.VisualizationPanel(self)
-    
-    self._package_path = roslib.packages.get_pkg_dir('ogre_visualizer')
-    self._global_config_path = os.path.join(self._package_path, "configs")
+    visualizer_panel = rviz.VisualizationPanel(self)
     
     self._visualizer_panel = visualizer_panel
-    
-    media_path = roslib.packages.get_pkg_dir( "gazebo_robot_description" )
-    media_path += "/world/Media/";
-    
-    media_paths = [media_path]
-    media_paths.append( media_path )
-    media_paths.append( media_path + "fonts" )
-    media_paths.append( media_path + "materials" )
-    media_paths.append( media_path + "materials/scripts" )
-    media_paths.append( media_path + "materials/programs" )
-    media_paths.append( media_path + "materials/textures" )
-    media_paths.append( media_path + "models" )
-    media_paths.append( media_path + "models/pr2" )
-    
-    ogre_tools.initializeResources( media_paths )
-    
     manager = visualizer_panel.getManager()
     
     self.Bind(wx.EVT_CLOSE, self.on_close)
