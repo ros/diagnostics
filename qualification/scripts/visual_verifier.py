@@ -110,7 +110,8 @@ class VisualizerFrame(wx.Frame):
     manager = self._visualizer_panel.getManager()
     manager.removeAllDisplays()
     config = wx.FileConfig(localFilename=path)
-    manager.loadConfig(config)
+    manager.loadGeneralConfig(config)
+    manager.loadDisplayConfig(config)
     
   def set_instructions(self, instructions):
     self._instructions_ctrl.SetValue(instructions)
