@@ -377,7 +377,7 @@ class QualificationFrame(wx.Frame):
       self._tests[test.attributes['serial'].value] = test.attributes['name'].value
     
     # Load the XRC resource
-    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui_test.xrc')
+    xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
     self._res = xrc.XmlResource(xrc_path)
 
     # Load the main panel
@@ -850,5 +850,5 @@ if __name__ == '__main__':
   except Exception, e:
     print e
     
-  print 'quit'
+  print 'Quitting qualification app'
 

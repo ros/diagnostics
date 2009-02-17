@@ -44,5 +44,6 @@ if __name__ == '__main__':
     app = qualification.ui.QualificationApp(0)
     app.MainLoop()
   except Exception, e:
+    print "Caught exception in Qualification App Main Loop"
     print e
     
