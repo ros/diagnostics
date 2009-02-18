@@ -19,14 +19,14 @@
   <!-- parameters for twist controller -->
   <param name="cartesian_trajectory_right/pose/twist/ff_trans" value="20.0" />
   <param name="cartesian_trajectory_right/pose/twist/ff_rot" value="5.0" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_trans_p" value="20.0" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_trans_i" value="0.5" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_trans_d" value="0.0" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_trans_i_clamp" value="1.0" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_rot_p" value="1.5" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_rot_i" value="0.1" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_rot_d" value="0.0" />
-  <param name="cartesian_trajectory_right/pose/twist/fb_rot_i_clamp" value="0.2" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_trans/p" value="20.0" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_trans/i" value="0.5" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_trans/d" value="0.0" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_trans/i_clamp" value="1.0" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_rot/p" value="1.5" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_rot/i" value="0.1" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_rot/d" value="0.0" />
+  <param name="cartesian_trajectory_right/pose/twist/fb_rot/i_clamp" value="0.2" />
 
   <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_trajectory_right.xml" />
 </launch>

@@ -9,10 +9,10 @@
   <param name="cartesian_twist_ik/joystick_max_trans" value="2.5" />
   <param name="cartesian_twist_ik/joystick_max_rot" value="4.5" />	
 
-  <param name="cartesian_twist_ik/joint_p" value="5.0" />
-  <param name="cartesian_twist_ik/joint_i" value="2.0" />
-  <param name="cartesian_twist_ik/joint_d" value="0.0" />
-  <param name="cartesian_twist_ik/joint_i_clamp" value="2.0" />
+  <param name="cartesian_twist_ik/joint/p" value="5.0" />
+  <param name="cartesian_twist_ik/joint/i" value="2.0" />
+  <param name="cartesian_twist_ik/joint/d" value="0.0" />
+  <param name="cartesian_twist_ik/joint/i_clamp" value="2.0" />
 
   <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_twist_ik.xml" output="screen" />
 </launch>
