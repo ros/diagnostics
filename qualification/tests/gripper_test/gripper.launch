@@ -4,9 +4,8 @@
 
   <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
 
-
 <!-- pr2_etherCAT Needs to be rteth0 if operating in realtime -->
-<node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
+<node machine="xenomai_root" pkg="pr2_etherCAT" type="launch" args="-i eth0 -x /robotdesc/pr2"/>
 
 <!-- Gripper Calibration -->
 <include file="$(find qualification)/tests/upperarm_test/calibrate.launch" />

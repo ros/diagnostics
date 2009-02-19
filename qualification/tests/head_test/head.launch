@@ -6,7 +6,7 @@
 
 
 <!-- pr2_etherCAT Needs to be rteth0 if operating in realtime-->
-<node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
+<node machine="xenomai_root" pkg="pr2_etherCAT" type="launch" args="-i eth0 -x /robotdesc/pr2"/>
 
 <!-- Head Calibration -->
 <include file="$(find qualification)/tests/head_test/calibrate.launch" />
