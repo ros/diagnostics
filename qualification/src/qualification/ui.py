@@ -325,13 +325,13 @@ class ResultsPanel(wx.Panel):
       text = r['text']
       msg = r['msg']
       i = 1
-      for p in msg.plots:
-        text += '\n------\n'
-        text += 'Plot %d:\n'%(i)
-        text += p.text
-        i += 1
-      
-      
+      if msg is not None:
+        for p in msg.plots:
+          text += '\n------\n'
+          text += 'Plot %d:\n'%(i)
+          text += p.text
+          i += 1
+            
       self._textbox.AppendText("Subtest '%s':\n"%(r['test_name']))
       self._textbox.AppendText("Result: %s\n"%(r['result']))
       if (r.has_key('failure_reason')):
@@ -502,6 +502,7 @@ class QualificationFrame(wx.Frame):
           wx.MessageBox(s, 'Pre_startup Failed', wx.OK|wx.ICON_ERROR, self)
           # Record that pre-startup failed 
           self.prestartup_failed(script)
+          
           return
     else:
       self.log('No pre_startup scripts')
@@ -542,11 +543,13 @@ class QualificationFrame(wx.Frame):
     r = {}
     r['test_name'] = "Prestartup failure"
     r['result'] = "FAIL"
-    r['text'] = "Qualification prestartup script %s failed! Hardware cannot be qualified" % (script)
+    r['text'] = "Qualification prestartup script %s failed! Hardware cannot be qualified." % (script)
     r['msg'] = None
     r['failure_reason'] = script
 
     self._results.append(r)
+
+    self.test_finished()
 
     self.show_results()
 
@@ -802,8 +805,8 @@ class QualificationFrame(wx.Frame):
       self.log('Running shutdown script...')
       self._shutdown_launch = self.launch_script(os.path.join(self._current_test.getDir(), self._current_test.getShutdownScript()), None)
       if (self._shutdown_launch == None):
-        s = 'Could not load roslaunch script "%s"'%(self._current_test.getShutdownScript())
-        wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+        s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
+        wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
         self.log('No shutdown script: %s' % (s))
         self.log('SHUT DOWN POWER BOARD MANUALLY')
         self.reset()
