@@ -66,6 +66,11 @@ if options.wg005:
 else:
   all = options.wg006
 
+
+#count_cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/eccount" + " -i eth0"
+#count = subprocess.call(count_cmd, shell=True)
+# Check if count != max num
+
 for num in all:
   action = StringStringResponse('retry')
   print "Doing something with %s"%num
@@ -75,6 +80,7 @@ for num in all:
 
       cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
       retcode = subprocess.call(cmd, shell=True)
+      print "Attempted to program MCB %s" % num
       if retcode != 0:
         action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))
         if action.str == "fail":
@@ -82,9 +88,9 @@ for num in all:
           success = False
           break
         
-        else:
-          print retcode
-          action.str ="pass"
+      else: # retcode = 0 -> success
+        print "Programmed MCB %s" % num
+        action.str = "pass"
   except OSError, e:
     action = result_proxy("The MCB firmware programing failed to execute.")
     success = False

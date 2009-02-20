@@ -76,7 +76,7 @@ for name, num in mcbs:
               break
 
         else:
-          print retcode
+          #print retcode
           action.str ="pass"
   except OSError, e:
       action = result_proxy("The MCB configuration program failed to execute.")
