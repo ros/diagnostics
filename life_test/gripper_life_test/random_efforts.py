@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import roslib; roslib.load_manifest('pr2_mechanism_controllers')
+import roslib; roslib.load_manifest('gripper_life_test')
 roslib.load_manifest('rospy')
 
 import random, time
