@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import roslib
-roslib.load_manifest('ntp_monitor')
+roslib.load_manifest('runtime_monitor')
 
 from robot_msgs.msg import *
 import sys
