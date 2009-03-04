@@ -1,6 +1,6 @@
 <package>
 
-  <description brief="The scripts to run the PR2 hot box test" />
+  <description brief="The scripts to run the PR2 hot box test" >
 
   This package runs the hot box test including:
   base_shuffle controller (pr2_experimental)
