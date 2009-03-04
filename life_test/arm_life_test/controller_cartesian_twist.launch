@@ -9,8 +9,9 @@
   <param name="cartesian_twist/joystick_max_trans" value="0.5" />
   <param name="cartesian_twist/joystick_max_rot" value="1.0" />	
 
-  <param name="cartesian_twist/ff_trans" value="200.0" />
-  <param name="cartesian_twist/ff_rot" value="5.0" />
+  <!-- Jacked up values for teleop test. Defaults: trans=200, rot=5 -->
+  <param name="cartesian_twist/ff_trans" value="500.0" />
+  <param name="cartesian_twist/ff_rot" value="15.0" />
 
   <param name="cartesian_twist/fb_trans/p" value="20.0" />
   <param name="cartesian_twist/fb_trans/i" value="0.5" />
