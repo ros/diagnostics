@@ -198,15 +198,20 @@ class App:
     else:
       test_msg = "PASS"
 
+    # Standard deviations in percents
+    sd_min_percent = abs(self.min_sd / self.min_avg)
+    sd_max_percent = abs(self.max_sd / self.max_avg)
+
     s = StringIO() 
     print >> s, "Test result: %s" % test_msg
     print >> s, "Efforts."
-    print >> s, "Positive. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.max_avg, self.max_sd, max_effort_param, positive_msg)  
-    print >> s, "Negative. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.min_avg, self.min_sd, min_effort_param, negative_msg)  
+    print >> s, "Positive. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.max_avg, sd_max_avg, max_effort_param, positive_msg)  
+    print >> s, "Negative. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.min_avg, sd_min_avg, min_effort_param, negative_msg)  
     print >> s, "Joint limits"
     print >> s, "Max measured: %f, expected: %f. Min measured: %f, expected: %f: Status: %s" % (max_encoder, max_range_param, min_encoder, min_range_param, range_msg)
     
     if not tr:
+      print >> s, "\n"   
       print >> s, "Test failure data:"
       print >> s, error_reason
 

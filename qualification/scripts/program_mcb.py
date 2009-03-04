@@ -77,15 +77,15 @@ try:
       print "Found %s MCB's, programming" % count
       action.str = "pass"
     else:
-      action = result_proxy("MCB counts don't match. Found %s, expected %s" % (count, expected))
+      action = result_proxy("MCB counts don't match. Found %s, expected %s. Retry?" % (count, expected))
       if action.str == "fail":
         print "Programming MCB's failed, counts don't match!"
         success = False
-        sys.exit(0)
+        sys.exit(-1)
 except OSError, e:
   action = result_proxy("Failed to count MCB's, cannot program.")
   success = False
-  sys.exit(0)
+  sys.exit(-1)
 
 
 for num in all:
@@ -103,6 +103,7 @@ for num in all:
         if action.str == "fail":
           print "Programming MCB firmware failed for %s!"%num
           success = False
+          sys.exit(1)
           break
         
       else: # retcode = 0 -> success
@@ -111,6 +112,7 @@ for num in all:
   except OSError, e:
     action = result_proxy("The MCB firmware programing failed to execute.")
     success = False
+    sys.exit(1)
 
 if success:
   print "Programming MCB firmware finished"

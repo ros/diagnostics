@@ -74,11 +74,11 @@ try:
       if action.str == "fail":
         print "Programming MCB's failed, counts don't match!"
         success = False
-        sys.exit(0)
+        sys.exit(-1)
 except OSError, e:
   action = result_proxy("Failed to count MCB's, cannot program.")
   success = False
-  sys.exit(0)
+  sys.exit(-1)
 
 # Configure MCB's
 path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
@@ -98,6 +98,7 @@ for name, num in mcbs:
             if action.str == "fail":
               print "Programming MCB configuration failed for %s! Shutting down test!"%name
               success = False
+              sys.exit(1)
               break
 
         else:
@@ -106,8 +107,11 @@ for name, num in mcbs:
   except OSError, e:
       action = result_proxy("The MCB configuration program failed to execute.")
       success = False
-
+      sys.exit(1)
+      
 if success:
     print "Programming MCB confiuration finished"
     action = result_proxy("done")
- 
+    sys.exit(0)
+
+sys.exit(1)
