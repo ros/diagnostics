@@ -55,9 +55,34 @@ mcbs = []
 for args in options.mcbs:
   mcbs.append(args.split(","))
 
+success = True
+
+count_path = roslib.packages.get_pkg_dir("qualification", True) + "/fwprog"
+
+# Count MCB's and make sure we have the right number.
+action = StringStringResponse('retry')
+count_cmd = "LD_LIBRARY_PATH=" + count_path + " " + count_path + "/eccount" + " -i eth0"
+expected = len(mcbs)
+try:
+  while (action.str == "retry"):
+    count = subprocess.call(count_cmd, shell=True)
+    if count == expected:
+      print "Found %s MCB's, programming" % count
+      action.str = "pass"
+    else:
+      action = result_proxy("MCB counts don't match. Found %s, expected %s" % (count, expected))
+      if action.str == "fail":
+        print "Programming MCB's failed, counts don't match!"
+        success = False
+        sys.exit(0)
+except OSError, e:
+  action = result_proxy("Failed to count MCB's, cannot program.")
+  success = False
+  sys.exit(0)
+
+# Configure MCB's
 path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
 actuator_path = path + "/actuators.conf"
-success = True
 
 #wait for MCB's to initialize after being turned on
 time.sleep(5)

@@ -56,9 +56,7 @@ from qualification.srv import *
 class App:
   def __init__(self):
     rospy.init_node("TestPlotter", anonymous=True)
-    rospy.logerr('Initing hysteresis sinesweep plot node')
     self.data_topic = rospy.Service("/test_data", TestData, self.OnData)
-    rospy.logerr('Ready to receive test data')
     rospy.spin()
     
   def OnData(self,req):
@@ -121,42 +119,140 @@ class App:
     p.image_format = "png"
     result_service.call(r)
  
+  def HysteresisAnalysis(self):
+    # Expected values
+    min_effort_param = self.data.arg_value[0]
+    max_effort_param = self.data.arg_value[1]
+    min_range_param  = self.data.arg_value[2]
+    max_range_param  = self.data.arg_value[3]
+    
+    # Compute the encoder travel
+    min_encoder = min(numpy.array(self.data.position))
+    max_encoder = max(numpy.array(self.data.position))
+
+    # Find the index to do the average over
+    # Data set starts close to one end of hysteresis
+    # Find endpoint of travel closest to midpoint of data
+    index_max = numpy.argmax(numpy.array(self.data.position))
+    index_min = numpy.argmin(numpy.array(self.data.position))
+    end = numpy.array(self.data.position).size
+    if (abs(end/2-index_max) < abs(end/2-index_min)):
+      index = index_max
+    else:
+      index = index_min
+
+    #compute the average efforts with std deviations to display
+    effort1 = numpy.average(numpy.array(self.data.effort)[0:index-15])
+    effort2 = numpy.average(numpy.array(self.data.effort)[index+15:end])
+
+    effort1_sd = numpy.std(numpy.array(self.data.effort)[0:index-15])
+    effort2_sd = numpy.std(numpy.array(self.data.effort)[index+15:end])
+
+    if effort1 < effort2:
+      self.min_avg = effort1
+      self.min_sd  = effort1_sd
+      self.max_avg = effort2
+      self.max_sd  = effort2_sd
+    else:
+      self.max_avg = effort1
+      self.max_sd  = effort1_sd
+      self.min_avg = effort2
+      self.min_sd  = effort2_sd
+    
+    #self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index-15]),numpy.average(numpy.array(self.data.effort)[index+15:end]))
+
+    tr = True
+    range_msg    = "OK"
+    negative_msg = "OK"
+    positive_msg = "OK"
+    error_reason = ""
+    
+    # Check to range against expected values
+    if (min_encoder > min_range_param or max_encoder < max_range_param) and (min_range_param != 0 and max_range_param != 0):
+      error_reason = error_reason + "Mechanism is not traveling the complete distance!\n"
+      range_msg = "FAIL"
+      tr = False
+
+    # Check effort limits (within 15% of expected)
+    if abs((self.min_avg - min_effort_param)/min_effort_param) > 0.15:
+      error_reason = error_reason +  "The mechanism average effort in the negative direction is out of bounds!\n"
+      negative_msg = "FAIL"
+      tr = False
+    if abs((self.max_avg - max_effort_param)/max_effort_param) > 0.15:
+      error_reason = error_reason +  "The mechanism average effort in the positive direction is out of bounds!\n"
+      positive_MSG = "FAIL"
+      tr = False
+
+    # Check that effort is even (<20% standard deviation)
+    if abs(self.min_sd / self.min_avg) > 0.20:
+      error_reason = error_reason + "Effort is uneven in negative direction\n"
+      negative_msg = "FAIL with uneven effort!"
+      tr = False
+    if abs(self.max_sd / self.max_avg) > 0.20:
+      error_reason = error_reason + "Effort is uneven in positive direction\n"
+      positive_msg = "FAIL with uneven effort!"
+      tr = False
+
+    if tr:
+      test_msg = "FAIL"
+    else:
+      test_msg = "PASS"
+
+    s = StringIO() 
+    print >> s, "Test result: %s" % test_msg
+    print >> s, "Efforts."
+    print >> s, "Positive. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.max_avg, self.max_sd, max_effort_param, positive_msg)  
+    print >> s, "Negative. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.min_avg, self.min_sd, min_effort_param, negative_msg)  
+    print >> s, "Joint limits"
+    print >> s, "Max measured: %f, expected: %f. Min measured: %f, expected: %f: Status: %s" % (max_encoder, max_range_param, min_encoder, min_range_param, range_msg)
+    
+    if not tr:
+      print >> s, "Test failure data:"
+      print >> s, error_reason
+
+    return (s.getvalue(),tr)
+
   def SineSweepPlot(self):
-    print "plotting sinesweep"
     # Plot the values and line of best fit
-    fig=plot.figure(1)
+    fig = plot.figure(1)
     axes1 = fig.add_subplot(211)
     axes1.clear()
     axes2 = fig.add_subplot(212)
     axes2.clear()
+    # Find the next power of two above our number of data points
     next_pow_two=int(2**math.ceil(math.log(numpy.array(self.data.position).size,2)))
     #plot in decibels
     axes1.psd(numpy.array(self.data.effort), NFFT=next_pow_two, Fs=1000, Fc=0, color='r')
     axes1.psd(numpy.array(self.data.position), NFFT=next_pow_two, Fs=1000, Fc=0)
     axes1.set_xlim(0, 100)
-    axes1.set_xlabel('Position PSD')
+    axes1.set_xlabel('Frequency')
+    axes1.set_title('Position PSD')
     
-    #plot in power
+    #plot in power (pxx - power, f - freqs)
     pxx, f = axes2.psd(numpy.array(self.data.velocity), NFFT=next_pow_two, Fs=1000, Fc=0)
     axes2.clear()
     for i in f:
       if f[i]>4:
-        cutoff=i
+        cutoff=i # Set cutoff to avoid finding first mode at extremely low freqs
         break
     axes2.plot(f,pxx)
+
     #find the peak
     index = numpy.argmax(pxx[cutoff:pxx.size])
-    index=index+cutoff
-    max_value=max(pxx[cutoff:pxx.size])
+    index = index + cutoff
+    max_value = max(pxx[cutoff:pxx.size])
     axes2.plot([f[index]],[pxx[index]],'r.', markersize=10);
     self.first_mode = f[index]
+
     s,tr = self.SineSweepAnalysis()
-    axes2.axvline(x=self.data.arg_value[0],color='r')
+    axes2.axvline(x=self.data.arg_value[0], color='r') # Line at first mode
     axes2.set_xlim(0, 100)
     axes2.set_ylim(0, max_value+10)
-    axes2.set_xlabel('Velocity PSD')
+    axes2.set_xlabel('Frequency')
+    axes2.set_ylabel('Power')
+    axes2.set_title('Velocity PSD')
 
-    # Title from testdata
+    # Title
     fig.text(.35, .95, self.data.joint_name + ' SineSweep Test')
 
     result_service = rospy.ServiceProxy('test_result', TestResult)
@@ -164,7 +260,7 @@ class App:
     r.text_result = ""
     r.plots = []
     if tr==True:
-      r.result =TestResultRequest.RESULT_PASS
+      r.result = TestResultRequest.RESULT_PASS
     else:
       r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
     
@@ -180,6 +276,25 @@ class App:
     p.image_format = "png"
     result_service.call(r)
 
+  def SineSweepAnalysis(self):   
+    # Parameters
+    first_mode_param = self.data.arg_value[0]
+    mode_error_param = self.data.arg_value[2]
+
+    s = StringIO()
+    if abs(self.first_mode - first_mode_param)/first_mode_param > mode_error_param:
+      print >> s, "Test Result: FAIL"
+      print >> s, "The first mode is incorrect: FAIL"
+      tr=False
+    else:
+      print >> s, "Test Result: PASS"
+      print >> s, "First mode within tolerance: OK"
+      tr=True
+    print >> s, "First mode measured: %f, expected: %f" % (self.first_mode, first_mode_param)
+
+    return (s.getvalue(),tr)
+
+  # Not implemented, doesn't have controller or data
   def BacklashPlot(self):
     s,tr = self.BacklashAnalysis()
 
@@ -224,55 +339,6 @@ class App:
     p.image_format = "png"
     result_service.call(r)
 
-
-  def HysteresisAnalysis(self):
-    #compute the encoder travel
-    min_encoder=min(numpy.array(self.data.position))
-    max_encoder=max(numpy.array(self.data.position))
-    #find the index to do the average over
-    index1 = numpy.argmax(numpy.array(self.data.position))
-    index2 = numpy.argmin(numpy.array(self.data.position))
-    end =numpy.array(self.data.position).size
-    if (abs(end/2-index1)<abs(end/2-index2)):
-      index=index1
-    else:
-      index=index2
-    #compute the averages to display
-    self.min_avg = min(numpy.average(numpy.array(self.data.effort)[0:index-15]),numpy.average(numpy.array(self.data.effort)[index+15:end]))
-    self.max_avg = max(numpy.average(numpy.array(self.data.effort)[0:index-15]),numpy.average(numpy.array(self.data.effort)[index+15:end]))
-    s = StringIO()
-    #check to see we went the full distance
-    if (min_encoder > self.data.arg_value[2] or max_encoder < self.data.arg_value[3]) and (self.data.arg_value[3]!=0 and self.data.arg_value[2]!=0):
-      print >> s, "mechanism is binding and not traveling the complete distace"
-      print >> s, "min expected: %f  measured: %f" % (self.data.arg_value[2],min_encoder)
-      print >> s, "max expected: %f  measured: %f" % (self.data.arg_value[3],max_encoder)
-      tr=False
-    #check to see we didn't use too much force
-    elif abs((self.min_avg-self.data.arg_value[0])/self.data.arg_value[0])>0.20 or abs((self.max_avg-self.data.arg_value[1])/self.data.arg_value[1])>0.20:
-      print >> s, "the mechanism average effort is too high"
-      print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
-      print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
-      tr=False
-    #data looks okay see what the user thinks
-    else:
-      print >> s, "data reasonable"
-      print >> s, "min_expected: %f  min_measured : %f" % (self.data.arg_value[0],self.min_avg)
-      print >> s, "max_expected: %f  max_measured : %f" % (self.data.arg_value[1],self.max_avg)
-      tr=True
-    return (s.getvalue(),tr)
-    
-  def SineSweepAnalysis(self):   
-    s = StringIO()
-    if abs(self.first_mode-self.data.arg_value[0])/self.data.arg_value[0]>self.data.arg_value[2]:
-      print >> s, "the first mode is incorrect, the mechanism is damaged"
-      print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
-      tr=False
-    #data looks okay see what the user thinks  
-    else:
-      print >> s, "data reasonable"
-      print >> s, "first mode expected: %f  measured: %f" % (self.data.arg_value[0],self.first_mode)
-      tr=True
-    return (s.getvalue(),tr)
 
   def BacklashAnalysis(self):
     #compute the encoder travel

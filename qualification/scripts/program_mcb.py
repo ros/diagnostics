@@ -66,10 +66,27 @@ if options.wg005:
 else:
   all = options.wg006
 
+# Count MCB's and make sure we have the right number.
+action = StringStringResponse('retry')
+count_cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/eccount" + " -i eth0"
+expected = len(all)
+try:
+  while (action.str == "retry"):
+    count = subprocess.call(count_cmd, shell=True)
+    if count == expected:
+      print "Found %s MCB's, programming" % count
+      action.str = "pass"
+    else:
+      action = result_proxy("MCB counts don't match. Found %s, expected %s" % (count, expected))
+      if action.str == "fail":
+        print "Programming MCB's failed, counts don't match!"
+        success = False
+        sys.exit(0)
+except OSError, e:
+  action = result_proxy("Failed to count MCB's, cannot program.")
+  success = False
+  sys.exit(0)
 
-#count_cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/eccount" + " -i eth0"
-#count = subprocess.call(count_cmd, shell=True)
-# Check if count != max num
 
 for num in all:
   action = StringStringResponse('retry')
@@ -82,7 +99,7 @@ for num in all:
       retcode = subprocess.call(cmd, shell=True)
       print "Attempted to program MCB %s" % num
       if retcode != 0:
-        action = result_proxy("Programming MCB firmware failed for %s with error %d!. Would you like to retry?"%(num, retcode))
+        action = result_proxy("Programming MCB firmware failed for MCB #%s with error %d! Would you like to retry?"%(num, retcode))
         if action.str == "fail":
           print "Programming MCB firmware failed for %s!"%num
           success = False
