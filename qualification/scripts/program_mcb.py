@@ -81,11 +81,11 @@ try:
       if action.str == "fail":
         print "Programming MCB's failed, counts don't match!"
         success = False
-        sys.exit(-1)
+        sys.exit(2)
 except OSError, e:
   action = result_proxy("Failed to count MCB's, cannot program.")
   success = False
-  sys.exit(-1)
+  sys.exit(2)
 
 
 for num in all:
