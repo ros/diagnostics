@@ -1,0 +1,27 @@
+<package>
+  <description brief='Dynamic Verification package'>
+  </description>
+  <author>Kevin Watts (watts@willowgarage.com)</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="rospy" />
+  <depend package="std_msgs" />
+  <depend package="robot_msgs" />
+  <depend package="deprecated_srvs" />
+  <depend package="robot_srvs" />
+  <depend package="hokuyo_node" />
+  <depend package="imu_node" />
+  <depend package="matplotlib" />
+  <depend package="robot_mechanism_controllers" />
+  <depend package="dynamic_verification_controllers" />
+  <depend package="joint_qualification_controllers" />
+  <depend package="pr2_etherCAT" />
+  <depend package="roslaunch" />
+  <depend package="rviz" />
+  <depend package="pr2_power_board" />
+  <url></url>
+  <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
+  <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
+  <sysdepend os="ubuntu" version="7.04-feisty" package="libwxgtk2.8-dev"/>
+  <sysdepend os="ubuntu" version="8.04-hardy" package="libwxgtk2.8-dev"/>
+</package>

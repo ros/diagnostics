@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="dynamic_verification" type="dynamic_verify_joint.py" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find dynamic_verification)/tests/freq_resp/wrist_flex_freq_resp.xml" />
+</launch>

@@ -1,0 +1,5 @@
+<controller type="ConstantTorqueControllerNode" name="r_wrist_flex_torque_controller">
+  <joint name="r_wrist_flex_joint">
+    <controller_defaults effort="0.1" duration="0.5" />
+  </joint>
+</controller>
