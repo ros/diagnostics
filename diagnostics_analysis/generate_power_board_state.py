@@ -32,37 +32,56 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Author: Kevin Watts
+# Author: Eric Berger
 
-import roslib
-import pylab
-import pickle
+PKG = 'diagnostics_analysis'
+import roslib; roslib.load_manifest(PKG)
+import rosrecord
+import std_msgs.msg
 import sys
 
-stats = pickle.load(file('stats.out'))
+def init():
+  print "Starting to gather statistics"
+  stats = {}
+  return stats
 
-def plot_key(label, stats):
+def update(stats, topic, msg):
+  if(not (topic == '/diagnostics')):
+    print "discarding message on topic " + topic
+    return
+  for status in msg.status:
+    name = status.name
+    if(name.startswith('Power board')):
+      for value in status.strings:
+        if not value.label in stats:
+          stats[value.label] = []
+        stats[value.label].append(value.value)
+      for value in status.values:
+        if not value.label in stats:
+          stats[value.label] = []
+        stats[value.label].append(value.value)
 
-  boards = [b for b in stats.keys()] # if b.count('motor') > 0]
+def output(stats):
+  import pickle
+  pickle.dump(stats, file('power_board_stats.out', 'w'))
+  print "Wrote file 'power_board_stats.out'"
 
-  for index, board in enumerate(boards):
-    print board
+def process_bag(stats, update, bagfile):
+  for (topic, msg, t) in rosrecord.logplayer(bagfile, raw=False):
+    update(stats, topic, msg)
 
-    pylab.subplot(6, 6, index + 1)
-    pylab.hist(stats[board][label], 20)
-    pylab.title(board)
-    pylab.xlabel(label)
-    pylab.ylabel('# Observations')
-
-  pylab.show()
-
-#keys = stats['tracked_values']
-keys = stats.keys()
-while(1):
-  print "available keys:" + str(keys)
-  print "\n"
-  key = input("What value would you like to plot?")
-  if key in keys:
-    plot_key(key, stats)
-  else:
-    print "Error, key not found"
+if __name__ == '__main__':
+  if len(sys.argv) < 2:
+    print 'generate_power_board_state.py <pr2_log_file_name.bag>'
+    print 'Returns parsed file as \'power_board_stats.out\' with all '
+    print 'data that starts with \'Power board\' in the bag file.'
+    sys.exit(1)
+  
+  stats = init()
+  for i, f in enumerate(sys.argv[1:]): 
+    print "(%d) processing file: %s" %(i, f) 
+    try:
+      process_bag(stats, update, f)
+    except:
+      print "Failed to process bag " + f
+  output(stats)

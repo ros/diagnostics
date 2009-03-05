@@ -32,37 +32,18 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Author: Kevin Watts
+# Author: Eric Berger
 
-import roslib
 import pylab
 import pickle
-import sys
 
 stats = pickle.load(file('stats.out'))
 
-def plot_key(label, stats):
+boards = [b for b in stats.keys() if b.count('motor') > 0]
+for board in boards:
+  pylab.plot(stats[board]['Bridge temperature'])
 
-  boards = [b for b in stats.keys()] # if b.count('motor') > 0]
 
-  for index, board in enumerate(boards):
-    print board
-
-    pylab.subplot(6, 6, index + 1)
-    pylab.hist(stats[board][label], 20)
-    pylab.title(board)
-    pylab.xlabel(label)
-    pylab.ylabel('# Observations')
-
-  pylab.show()
-
-#keys = stats['tracked_values']
-keys = stats.keys()
-while(1):
-  print "available keys:" + str(keys)
-  print "\n"
-  key = input("What value would you like to plot?")
-  if key in keys:
-    plot_key(key, stats)
-  else:
-    print "Error, key not found"
+pylab.xlabel('Time (s)')
+pylab.ylabel('Temperature (C)')
+pylab.show()

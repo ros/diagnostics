@@ -34,35 +34,35 @@
 
 # Author: Kevin Watts
 
-import roslib
 import pylab
 import pickle
 import sys
+import roslib
 
-stats = pickle.load(file('stats.out'))
 
 def plot_key(label, stats):
+    boards = [b for b in stats.keys() if b.count('motor') > 0]
+    for board in boards:
+        pylab.plot(stats[board][label])
+        pylab.title(board)
+        pylab.xlabel('Time (s)')
+        pylab.ylabel(label)
 
-  boards = [b for b in stats.keys()] # if b.count('motor') > 0]
+    pylab.show()
 
-  for index, board in enumerate(boards):
-    print board
+def main():
+    if len(sys.argv) < 2:
+        print 'plot_timeseries_data.py <stats.out file>'
+        print 'Plots data from given file for chosen key'
+        sys.exit(1)
 
-    pylab.subplot(6, 6, index + 1)
-    pylab.hist(stats[board][label], 20)
-    pylab.title(board)
-    pylab.xlabel(label)
-    pylab.ylabel('# Observations')
+    stats = pickle.load(file(sys.argv[1]))
 
-  pylab.show()
-
-#keys = stats['tracked_values']
-keys = stats.keys()
-while(1):
-  print "available keys:" + str(keys)
-  print "\n"
-  key = input("What value would you like to plot?")
-  if key in keys:
-    plot_key(key, stats)
-  else:
-    print "Error, key not found"
+    keys = stats['tracked_values']
+    while(1):
+        print "Available keys:" + str(keys)
+        key = input("What  value would you like to plot?")
+        if key in keys:
+            plot_key(key, stats)
+        else:
+            print "Error, key not found"
