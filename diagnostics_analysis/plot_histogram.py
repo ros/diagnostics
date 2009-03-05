@@ -34,12 +34,15 @@
 
 # Author: Kevin Watts
 
+import sys, getopt
 import roslib
 import pylab
 import cPickle
 
+plotLines = False
 
 def plot_key(label, stats):
+  global plotLines
 
   # create a list of keys
   #boards = [b for b in stats.keys() if b.count('Smart') > 0]
@@ -49,17 +52,31 @@ def plot_key(label, stats):
   n = len(boards)
   #print "n=%d" %( n)
 
-  if n == 1:
-    for index, board in enumerate(boards):
+  if plotLines == True:
+    if n == 1:
+      pylab.plot(stats[boards[0]][label], label=boards[0])
+    else:
+      for index, board in enumerate(boards):
+        print board
+
+        #pylab.subplot(4, 4, index + 1)
+        pylab.plot(stats[board][label], label=board)
+        #pylab.title(board)
+  else:
+    if n == 1:
       pylab.hist(stats[boards[0]][label], 100)
 
-  else:
-    for index, board in enumerate(boards):
-      print board
+    else:
+      for index, board in enumerate(boards):
+        print board
 
-      pylab.subplot(4, 4, index + 1)
-      pylab.hist(stats[board][label], 100)
-      pylab.title(board)
+        pylab.subplot(4, 4, index + 1)
+        pylab.hist(stats[board][label], 100)
+        pylab.title(board)
+
+  legend_location = 1, 0 
+  if plotLines == True:
+    pylab.legend(loc= legend_location)
 
   pylab.show()
 
@@ -77,9 +94,31 @@ def readFile(my_file):
     except:
       return
 
+def usage():
+  print ""
+  print "Usage: %s [OPTIONS] input_file" %(sys.argv[0])
+  print ""
+  print "options"
+  print "-l   : Plot as lines"
+  print "-h   : Print this help information"
+
 if __name__ == '__main__':
-  import sys
-  inputFile = sys.argv[1] 
+  if( len(sys.argv) < 2 ):
+    usage()
+    exit(-1)
+
+  optlist, args = getopt.getopt( sys.argv[1:], 'lh' )
+
+  inputFile = args[0] 
+  for o, a in optlist:
+    if o == "-l":
+      plotLines = True
+      print "Plotting as lines"
+    elif o == "-h":
+      print usage()
+    else:
+      print usage()
+ 
   print "processing file: %s" %(inputFile) 
   my_file = file(inputFile, 'rb')
   readFile(my_file)
