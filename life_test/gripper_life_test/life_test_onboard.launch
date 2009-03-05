@@ -1,0 +1,12 @@
+<launch>
+<!-- gripper joint controller-->
+  <!--param name="joint" type="string" value="r_gripper_joint" /-->
+  <param name="max_effort" value="2.0" />
+  <node pkg="gripper_life_test" type="effort_controller_onboard.py" args="l_gripper_joint" output="screen"/>
+
+  <node pkg="gripper_life_test" type="effort_controller_onboard.py" args="r_gripper_joint" output="screen"/>
+
+<!-- gripper effort generator-->
+  <node pkg="gripper_life_test" type="random_efforts_onboard.py" args="r_gripper_joint_controller" output="screen"/>
+  <node pkg="gripper_life_test" type="random_efforts_onboard.py" args="l_gripper_joint_controller" output="screen"/>
+</launch>
