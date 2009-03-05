@@ -36,33 +36,51 @@
 
 import roslib
 import pylab
-import pickle
-import sys
+import cPickle
 
-stats = pickle.load(file('stats.out'))
 
 def plot_key(label, stats):
 
-  boards = [b for b in stats.keys()] # if b.count('motor') > 0]
+  # create a list of keys
+  #boards = [b for b in stats.keys() if b.count('Smart') > 0]
+  boards = [b for b in stats.keys() if b != 'tracked_values']
+  boards.sort()
 
-  for index, board in enumerate(boards):
-    print board
+  n = len(boards)
+  #print "n=%d" %( n)
 
-    pylab.subplot(6, 6, index + 1)
-    pylab.hist(stats[board][label], 20)
-    pylab.title(board)
-    pylab.xlabel(label)
-    pylab.ylabel('# Observations')
+  if n == 1:
+    for index, board in enumerate(boards):
+      pylab.hist(stats[boards[0]][label], 100)
+
+  else:
+    for index, board in enumerate(boards):
+      print board
+
+      pylab.subplot(4, 4, index + 1)
+      pylab.hist(stats[board][label], 100)
+      pylab.title(board)
 
   pylab.show()
 
-#keys = stats['tracked_values']
-keys = stats.keys()
-while(1):
-  print "available keys:" + str(keys)
-  print "\n"
-  key = input("What value would you like to plot?")
-  if key in keys:
-    plot_key(key, stats)
-  else:
-    print "Error, key not found"
+def readFile(my_file):
+  stats = cPickle.load(my_file)
+  keys = stats['tracked_values']
+  while(1):
+    print "available keys:" + str(keys)
+    try:
+      key = input("what value would you like to plot?")
+      if key in keys:
+        plot_key(key, stats)
+      else:
+        print "Error, key not found"
+    except:
+      return
+
+if __name__ == '__main__':
+  import sys
+  inputFile = sys.argv[1] 
+  print "processing file: %s" %(inputFile) 
+  my_file = file(inputFile, 'rb')
+  readFile(my_file)
+  my_file.close()
