@@ -1,4 +1,4 @@
-launch>
+<launch>
   <node pkg="mechanism_bringup" type="calibrate.py"
         args="$(find qualification)/tests/gripper_test/gripper_cal.xml" />
 </launch>

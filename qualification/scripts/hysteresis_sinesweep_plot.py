@@ -230,7 +230,7 @@ class App:
     axes1.psd(numpy.array(self.data.effort), NFFT=next_pow_two, Fs=1000, Fc=0, color='r')
     axes1.psd(numpy.array(self.data.position), NFFT=next_pow_two, Fs=1000, Fc=0)
     axes1.set_xlim(0, 100)
-    axes1.set_xlabel('Frequency')
+    #axes1.set_xlabel('Frequency')
     axes1.set_title('Position PSD')
     
     #plot in power (pxx - power, f - freqs)
