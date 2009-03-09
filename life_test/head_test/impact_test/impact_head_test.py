@@ -71,7 +71,7 @@ def main():
     for i in range(0,3): 
         joint = JOINT_NAMES[i]
         controller = CONTROLLER_NAMES[i]
-        print xml_for(controller,joint)
+        #print xml_for(controller,joint)
 
         rospy.wait_for_service('spawn_controller')
         spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
