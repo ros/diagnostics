@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/tests/hokuyo_test/sinesweep_hokuyo.xml" />
+</launch>

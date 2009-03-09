@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<robot name="test_hokuyo">
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
+
+</robot>
