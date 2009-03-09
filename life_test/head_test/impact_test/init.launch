@@ -3,7 +3,7 @@
   <include file="$(find impact_test)/send_description.launch" />
 
   <!-- pr2_etherCAT -->
-  <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
+  <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i rteth0 -x /robotdesc/pr2"/>
 
   <!-- Calibration -->
   <!--node pkg="mechanism_bringup" type="calibrate.py"
