@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find qualification)/tests/laser_tilt_test/laser_tilt_cal.xml" />
+</launch>

@@ -11,4 +11,5 @@
 <test serial="6801024" name="hokuyo_test"/>
 <test serial="6801050" name="imu_test"/>
 <test serial="etherne" name="ethernet_test"/>
+<test serial="6804001" name="laser_tilt_test" />
 </tests>
