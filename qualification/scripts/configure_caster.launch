@@ -10,7 +10,7 @@
 
 <!-- configure_mcbs -->
 <!-- CHANGE 'fl' TO THE NAME OF CASTER YOU WANT TO CONFIGURE -->
-<node machine="xenomai_root" pkg="qualification" type="configure_mcbs.py" args="--motor=fl_caster_l_motor,0 --motor=fl_caster_r_wheel_motor,1 --motor=fl_caster_rotation_motor,2" />
+<node machine="xenomai_root" pkg="qualification" type="configure_mcbs.py" args="--motor=fl_caster_l_wheel_motor,0 --motor=fl_caster_r_wheel_motor,1 --motor=fl_caster_rotation_motor,2" />
 
 <!-- service -->
 <node pkg="qualification" type="confirm_conf.py" output="screen"/>
