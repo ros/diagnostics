@@ -1,13 +1,13 @@
 <launch>
-  <include file="$(find impact_test)/init.machine" />
-  <include file="$(find impact_test)/send_description.launch" />
+  <include file="$(find head_impact_test)/init.machine" />
+  <include file="$(find head_impact_test)/send_description.launch" />
 
   <!-- pr2_etherCAT -->
   <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
 
   <!-- Calibration -->
   <!--node pkg="mechanism_bringup" type="calibrate.py"
-        args="$(find impact_test)/cal.xml"
+        args="$(find head_impact_test)/cal.xml"
         output="screen" /-->
 
   <!-- Power board -->

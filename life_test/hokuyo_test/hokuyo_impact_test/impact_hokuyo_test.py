@@ -44,15 +44,10 @@
 # This program runs a impact life test on the head tilt, pan and laser tilt. 500 cycles, with effort safety removed.
 # @endverbatim
  
-
-
-CONTROLLER_NAMES = ["head_tilt_effort", "head_pan_effort", "laser_tilt_effort"]
-JOINT_NAMES = ["head_tilt_joint", "head_pan_joint", "laser_tilt_mount_joint"]
-
 import sys
 
-import roslib
-roslib.load_manifest('impact_test') # Rename to path head_impact_test
+import rostools
+rostools.update_path('hokuyo_impact_test')
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
@@ -67,39 +62,38 @@ def xml_for(controller, joint):
 </controller>''' % (controller, joint) 
 
 def main():
-    rospy.init_node('impact_head_test', anonymous=True)
-    for i in range(0,3): 
-        joint = JOINT_NAMES[i]
-        controller = CONTROLLER_NAMES[i]
-        #print xml_for(controller,joint)
+    rospy.init_node('hokuyo_impact_test', anonymous=True)
+    joint = "laser_tilt_mount_joint"
+    controller = "laser_tilt_effort"
+    print xml_for(controller,joint)
 
-        rospy.wait_for_service('spawn_controller')
-        spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
-        kill_controller = rospy.ServiceProxy('kill_controller', KillController)
+    rospy.wait_for_service('spawn_controller')
+    spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
+    kill_controller = rospy.ServiceProxy('kill_controller', KillController)
     
-        resp = spawn_controller(xml_for(controller, joint))
-        if len(resp.ok) < 1 or not ord(resp.ok[0]):
-            print "Failed to spawn effort controller"
-        else:
-            print "Spawned controller %s successfully" % controller
+    resp = spawn_controller(xml_for(controller, joint))
+    if len(resp.ok) < 1 or not ord(resp.ok[0]):
+        print "Failed to spawn effort controller"
+    else:
+        print "Spawned controller %s successfully" % controller
 
-            pub = rospy.Publisher("/%s/set_command" % controller, Float64)
+        pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
-            try:
-                for i in range(0,3):
-                    if rospy.is_shutdown():
-                        break
-                    # Back and forth
-                    sleep(1.5)
-                    effort = -1000; # Min effort
-                    pub.publish(Float64(effort))
-                    sleep(1.5)
-                    effort = 1000; # Max effort
-                    pub.publish(Float64(effort))
-            finally:
-                kill_controller(controller)
-                sleep(5)
-
+        try:
+            for i in range(1,5):
+                if rospy.is_shutdown():
+                    break
+                # Back and forth
+                sleep(1.5)
+                effort = -1000; # Min effort
+                pub.publish(Float64(effort))
+                sleep(1.5)
+                effort = 1000; # Max effort
+                pub.publish(Float64(effort))
+        finally:
+            kill_controller(controller)
+            sleep(5)
+            sys.exit(0)
     
 if __name__ == '__main__':
     main()

@@ -36,7 +36,7 @@
 
 #include <stdexcept>
 
-using namespace std;
+//  using namespace std;
 
 class MyNode : public ros::Node
 {
