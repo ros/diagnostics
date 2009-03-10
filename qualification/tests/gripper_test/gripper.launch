@@ -6,6 +6,5 @@
 
   <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
 
-  <!-- Gripper Calibration -->
-  <include file="$(find qualification)/tests/gripper_test/calibrate.launch" />
+  <!-- Gripper Calibration not needed for hysteresis -->
 </launch>
