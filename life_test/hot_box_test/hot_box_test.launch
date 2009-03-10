@@ -7,5 +7,5 @@
 <include file="$(find gripper_life_test)/life_test_onboard.launch" />
 
 <!-- Send emails when batteries low -->
-<node pkg="ocean_batter_driver" type="battery_notify.py" args="watts@willowgarage.com,eitan@willowgarage.com,stanford@willowgarage.com,meeussen@willowgarage.com" />
+<node pkg="ocean_battery_driver" type="battery_notifier.py" args="watts@willowgarage.com,eitan@willowgarage.com,stanford@willowgarage.com,meeussen@willowgarage.com" />
 </launch>
