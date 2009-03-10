@@ -23,4 +23,5 @@
   <depend package="torso_lift_test" />
   <depend package="pr2_mechanism_controllers"/>
   <depend package="rosrecord"/>
+  <depend package="ocean_battery_driver" />
 </package>
