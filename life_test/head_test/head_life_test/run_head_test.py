@@ -63,7 +63,7 @@ if __name__ == "__main__":
    
    rospy.wait_for_service('laser_controller/set_profile')
    s = rospy.ServiceProxy('laser_controller/set_profile', SetProfile)
-   resp = s.call(SetProfileRequest(0.0, 0.0, 0.0, 0.0, 4, 0.25, 0.95, 0.25))
+   resp = s.call(SetProfileRequest(0.0, 0.0, 0.0, 0.0, 4, 1.25, 0.95, 0.25))
 
    head_angles = rospy.Publisher('head_controller/set_command_array', JointCmd)
    rospy.init_node('head_commander', anonymous=True)
