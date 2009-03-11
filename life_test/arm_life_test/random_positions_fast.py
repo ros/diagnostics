@@ -50,10 +50,13 @@ rospy.init_node('pub', anonymous=True)
 POINTS = [
   (0.9, -0.7, 1.5),
   (0.9, -0.7, 2),
-  (1.3,  0.7, 1.3),
-  (0.8,  0.7, 1.3)
+  (1.3,  0.7, 0.8),
+  (1.8,  -0.7, 0.4),
+  (0.8,  -0.7, 1.0),
+  (1.8,  0.7, 1.0),
+  (0.8,  0.7, 0.4)
 ]
 
 while not rospy.is_shutdown():
-  time.sleep(random.uniform(0.1, 0.5))
+  time.sleep(random.uniform(0.1, 0.3))
   p(*POINTS[random.randint(0, len(POINTS)-1)])

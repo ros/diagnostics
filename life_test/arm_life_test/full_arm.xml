@@ -4,7 +4,7 @@
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
   <include filename="$(find pr2_defs)/defs/gripper_defs.xml" />
   <include filename="$(find pr2_defs)/defs/body_defs.xml" />
-  <include filename="./groups_arm.xml" />
+  <include filename="$(find arm_life_test)/groups_arm.xml" />
 
 <pr2_torso name="base" parent="world"> 
     <origin xyz="0 0 0" rpy="0 0 0" />

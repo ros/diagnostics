@@ -6,7 +6,12 @@
   <param name="cartesian_wrench/autostart" type="bool" value="true" />
 
   <param name="cartesian_wrench/root_name" type="string" value="torso_lift_link" />
-  <param name="cartesian_wrench/tip_name" type="string" value="r_wrist_roll_link" />
+  <!--param name="cartesian_wrench/tip_name" type="string" value="r_shoulder_lift_link" /-->
+  <!--param name="cartesian_wrench/tip_name" type="string" value="r_upper_arm_roll_link" /-->
+  <!--param name="cartesian_wrench/tip_name" type="string" value="r_elbow_flex_link" /-->
+  <param name="cartesian_wrench/tip_name" type="string" value="r_forearm_roll_link" />
+  <!--param name="cartesian_wrench/tip_name" type="string" value="r_wrist_flex_link" /-->
+  <!--param name="cartesian_wrench/tip_name" type="string" value="r_wrist_roll_link" /-->
 
   <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_wrench.xml" />
 </launch>
