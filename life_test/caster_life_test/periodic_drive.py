@@ -37,8 +37,8 @@ from robot_msgs.msg import MechanismState
 
 STRAIGHT = 0.82
 ROTATION_JOINT = 'fl_caster_rotation_joint'
-SPEED = 100.0
-PERIOD = 12.0
+SPEED = 1000.0
+PERIOD = 30.0
 
 
 class LastMessage():
