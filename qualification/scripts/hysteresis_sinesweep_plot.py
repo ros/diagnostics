@@ -34,9 +34,9 @@ import roslib; roslib.load_manifest(PKG)
 
 import numpy
 import math
-#from robot_msgs.msg import *
-#from std_msgs.msg import *
-#from robot_srvs.srv import *
+from robot_msgs.msg import *
+from std_msgs.msg import *
+from robot_srvs.srv import *
 
 import sys
 import os
@@ -50,7 +50,7 @@ matplotlib.use('WXAgg')
 import matplotlib.pyplot as plot
 from StringIO import StringIO
 
-from qualification.msg import *
+from qualification.msg import Plot
 from qualification.srv import *
 
 from joint_qualification_controllers.srv import *
