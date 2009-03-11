@@ -27,7 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Author: Stuart Glaser
-
+import time
+import random
 import roslib
 roslib.load_manifest('caster_life_test')
 import rospy
@@ -36,7 +37,7 @@ from robot_msgs.msg import MechanismState
 
 STRAIGHT = 0.82
 ROTATION_JOINT = 'fl_caster_rotation_joint'
-SPEED = 3.0
+SPEED = 100.0
 PERIOD = 12.0
 
 
@@ -52,6 +53,7 @@ class LastMessage():
         self.msg = msg
 
 def main():
+    angle = STRAIGHT
     speed = -SPEED
     last_time = 0
     rospy.init_node('periodic_drive', anonymous=True)
@@ -76,6 +78,7 @@ def main():
         # Steers the caster to be straight
         pub_steer.publish(Float64(6.0 * (angle - rotation_state.position)))
 
+
         # Drive
         if abs(rotation_state.position - angle) < 0.05:
             pub_drive.publish(Float64(speed))
@@ -83,15 +86,16 @@ def main():
             pub_drive.publish(Float64(0.0))
 
         if mech_state.time - last_time > (PERIOD / 2):
-          # Rotates every other time
-          if(random.random() > 0.5):
             speed *= -1
-          else:
-            if angle > 3.314:
-                angle -= 3.314
-            else:
-                angle += 3.314
-          last_time = mech_state.time
+            if(random.random() > 0.5):
+                pub_drive.publish(Float64(speed))
+                time.sleep(0.75)
+                speed *= -1                
+                if angle > 3.314:
+                    angle -= 3.314
+                else:
+                    angle += 3.314
+            last_time = mech_state.time
 
 
 if __name__ == '__main__':
