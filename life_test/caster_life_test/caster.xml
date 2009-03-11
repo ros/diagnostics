@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot>
 
-  <include filename="$(find pr2_defs)/defs/base_defs.xml" />
+  <include filename="base_defs.xml" />
 
   <pr2_caster suffix="fl" parent="world">
     <origin xyz="0 0 0" rpy="0 0 0" />

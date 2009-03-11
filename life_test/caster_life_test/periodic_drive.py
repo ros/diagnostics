@@ -57,12 +57,13 @@ def main():
     rospy.init_node('periodic_drive', anonymous=True)
     last_state = LastMessage('/mechanism_state', MechanismState)
     pub_steer = rospy.Publisher("/caster/steer_velocity", Float64)
-    pub_drive = rospy.Publisher("/caster/drive_velocity", Float64)
+    pub_drive = rospy.Publisher("/caster/drive_effort", Float64)
     pub_steer.publish(Float64(0.0))
     pub_drive.publish(Float64(0.0))
     print "Waiting for a mechanism_state message..."
     while not last_state.msg: pass
     while not rospy.is_shutdown():
+        time.sleep(0.01)
         mech_state = last_state.last()
         rotation_state = None
         for joint_state in mech_state.joint_states:
@@ -73,16 +74,24 @@ def main():
             print "The %s joint was not found in the mechanism state" % ROTATION_JOINT
 
         # Steers the caster to be straight
-        pub_steer.publish(Float64(6.0 * (STRAIGHT - rotation_state.position)))
+        pub_steer.publish(Float64(6.0 * (angle - rotation_state.position)))
 
         # Drive
-        if abs(rotation_state.position - STRAIGHT) < 0.05:
-            if mech_state.time - last_time > (PERIOD / 2):
-                speed *= -1
-                last_time = mech_state.time
+        if abs(rotation_state.position - angle) < 0.05:
             pub_drive.publish(Float64(speed))
         else:
             pub_drive.publish(Float64(0.0))
+
+        if mech_state.time - last_time > (PERIOD / 2):
+          # Rotates every other time
+          if(random.random() > 0.5):
+            speed *= -1
+          else:
+            if angle > 3.314:
+                angle -= 3.314
+            else:
+                angle += 3.314
+          last_time = mech_state.time
 
 
 if __name__ == '__main__':
