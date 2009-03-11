@@ -1,5 +1,6 @@
 <launch>
 
+  <!-- Robot desc changed to this folder for new calibration ref positions -->
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/head_test/head.xml'" />
 
   <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
