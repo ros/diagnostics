@@ -87,7 +87,7 @@ def main():
 
         if mech_state.time - last_time > (PERIOD / 2):
             speed *= -1
-            if(random.random() > 0.5):
+            if(random.random() > 0.05):
                 pub_drive.publish(Float64(speed))
                 time.sleep(0.75)
                 speed *= -1                
