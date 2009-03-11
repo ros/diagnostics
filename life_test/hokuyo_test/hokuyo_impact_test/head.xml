@@ -2,14 +2,6 @@
 <robot name="test_head">
   <include filename="head_defs_without_limits.xml" />
 
-<pr2_head_pan name="head_pan" parent="world">
-  <origin xyz="0 0 0.3815" rpy="0 0 0" />
-</pr2_head_pan>
-
-<pr2_head_tilt name="head_tilt" parent="head_pan">
-  <origin xyz="0.058 0 0" rpy="0 0 0" />
-</pr2_head_tilt>
-
 <pr2_tilting_laser name="laser_tilt" parent="world">
   <origin xyz="0 0 0.03" rpy="0 0 0" />
 </pr2_tilting_laser>

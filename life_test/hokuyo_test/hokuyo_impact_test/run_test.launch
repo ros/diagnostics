@@ -1,4 +1,4 @@
 <launch>
   <include file="$(find hokuyo_impact_test)/init.launch" />
-  <node pkg="impact_test" type="impact_hokuyo_test.py" />
+  <node pkg="hokuyo_impact_test" type="impact_hokuyo_test.py" />
 </launch>

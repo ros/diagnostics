@@ -31,7 +31,7 @@
 #
 # Author: Kevin Watts
 
-##@package impact_test
+##@package hokuyo_impact_test
 #
 # @mainpage
 # @htmlinclude manifest.xml
@@ -46,8 +46,8 @@
  
 import sys
 
-import rostools
-rostools.update_path('hokuyo_impact_test')
+import roslib
+roslib.load_manifest('hokuyo_impact_test')
 import rospy
 from std_msgs.msg import *
 from mechanism_control import mechanism
@@ -62,7 +62,7 @@ def xml_for(controller, joint):
 </controller>''' % (controller, joint) 
 
 def main():
-    rospy.init_node('hokuyo_impact_test', anonymous=True)
+    rospy.init_node('impact_hokuyo_test', anonymous=True)
     joint = "laser_tilt_mount_joint"
     controller = "laser_tilt_effort"
     print xml_for(controller,joint)
@@ -80,14 +80,14 @@ def main():
         pub = rospy.Publisher("/%s/set_command" % controller, Float64)
 
         try:
-            for i in range(1,5):
+            for i in range(1,500):
                 if rospy.is_shutdown():
                     break
                 # Back and forth
-                sleep(1.5)
+                sleep(1)
                 effort = -1000; # Min effort
                 pub.publish(Float64(effort))
-                sleep(1.5)
+                sleep(1)
                 effort = 1000; # Max effort
                 pub.publish(Float64(effort))
         finally:
