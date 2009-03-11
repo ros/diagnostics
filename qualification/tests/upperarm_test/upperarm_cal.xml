@@ -1,5 +1,30 @@
 <controllers>
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
+
+<!--
   <upper_arm_calibrator side="r" />
   <forearm_calibrator side="r" />
+-->
+
+
+<!-- Hack. Only use iff no cal flags on upperarm -->
+    <controller name="cal_r_elbow_flex" topic="cal_r_elbow_flex"
+                type="JointLimitCalibrationControllerNode">
+      <calibrate joint="r_elbow_flex_joint"
+                 actuator="r_elbow_flex_motor"
+                 transmission="r_elbow_flex_trans"
+                 velocity="1.0" />
+      <pid p="6" i="0.2" d="0" iClamp="1.0" />
+    </controller>
+
+    <controller name="cal_r_forearm_roll" topic="cal_r_forearm_roll"
+		type="JointLimitCalibrationControllerNode">
+      <calibrate joint="r_forearm_roll_joint"
+                 actuator="r_forearm_roll_motor"
+                 transmission="r_forearm_roll_trans"
+                 velocity="-1.2" />
+      <pid p="5.0" i="0" d="0" iClamp="0" />
+    </controller>
+
+
 </controllers>
