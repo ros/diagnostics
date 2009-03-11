@@ -58,7 +58,7 @@ if __name__ == "__main__":
    
    rospy.wait_for_service('laser_controller/set_profile')
    s = rospy.ServiceProxy('laser_controller/set_profile', SetProfile)
-   resp = s.call(SetProfileRequest(0.0, 0.0, 0.0, 0.0, 4, 0.25, 0.95, 0.25))
+   resp = s.call(SetProfileRequest(0.0, 0.0, 0.0, 0.0, 4, 0.25, 1.25, 0.25))
 
    rospy.init_node('hokuyo_commander', anonymous=True)
    sleep(1)
