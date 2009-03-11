@@ -34,15 +34,11 @@
 
 ## A basic node to monitor diagnostics for expected status
 
-import roslib
-roslib.load_manifest('runtime_monitor')
+import roslib; roslib.load_manifest('runtime_monitor')
 
 import sys
 import rospy
-from robot_msgs.msg import *
-
-from optparse import OptionParser
-
+from robot_msgs.msg import DiagnosticMessage
 
 NAME = 'runtime_test'
 
@@ -50,29 +46,19 @@ latest_messages = {}
 test_name = 'uninitialized'
 package = 'uninitialized'
 
-def statusToMap(status):
+def status_to_map(status):
     str_map = {}
-    for string in status.strings:
-        str_map[string.label] = string.value;
+    for s in status.strings:
+        str_map[s.label] = s.value;
     for val in status.values:
         str_map[val.label] = val.value;
     str_map["name"]= status.name
     str_map["message"] = status.message
     return str_map
     
-
-def analyze(package, test_name):
-    # import the test script
-    exec("roslib.load_manifest('%s')"%package)
-    exec('from %s import %s'%(package, test_name))
-
-    # get it's parameters
-    exec("params = rospy.get_param(\"~\")")
-        
+def analyze(package, test_impl, params)
     # run the test
-    exec("results = %s.test(latest_messages, params)"%test_name)
-
-    return results
+    return test_impl.test(latest_messages, params)
 
 def error_response(error):
     rospy.logerr( "Error: %s"% error)
@@ -81,17 +67,17 @@ def warning_response(warning):
     rospy.logwarn("Warning: %s"% warning)
 
 
-def callback(message):
-    print""
-    print "New Message at %.1f"%message.header.stamp.to_time()
+def callback(message, args):
+    print "\nNew Message at %.1f"%message.header.stamp.to_time()
     for s in message.status:
-        latest_messages[s.name] = statusToMap(s)
+        latest_messages[s.name] = status_to_map(s)
         #print "Name: %s \nMessage: %s"%(s.name, s.message)
         #for v in s.strings + s.values:
         #    print "   %s: %s" % (v.label, v.value)
     sys.stdout.flush()
 
-    results = analyze(package, test_name)
+    test_impl, params = args
+    results = analyze(package, test_impl, params)
     #print "results:" , results
 
     if 'error' in results:
@@ -102,12 +88,26 @@ def callback(message):
         for warn in results['warn']:
             warning_response(warn)
     
-def listener():
-    rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
+def runtime_test(package, test_name):
+    # retrieve the test implementation
+    roslib.load_manifest(package)
+    __import__("%s.%s"%(package, test_name))
+    try:
+        pypkg = sys.modules[package]
+    except KeyError:
+        print >> sys.stderr, "ERROR: cannot locate test package %s"%package
+        rospy.logerr("cannot locate test package %s"%package)
+        sys.exit(1)
+    test_impl = getattr(pypkg, test_name)    
+    # get it's parameters
+    params = rospy.get_param("~")
+    
+    rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
     rospy.init_node(NAME, anonymous=True)
     rospy.spin()
         
 if __name__ == '__main__': 
+    from optparse import OptionParser
     parser = OptionParser(usage="usage: %prog [options]", prog='runtime_test')
     parser.add_option("--test", metavar="TEST_NAME",
                       dest="test_name", default='', 
@@ -124,11 +124,10 @@ if __name__ == '__main__':
     if options.test_name:
         test_name = options.test_name 
     else:
-        print "you must give me a test to run"
-        exit(-1)
+        parser.error("you must give me a test to run")
 
     try:
-        listener()
+        runtime_test(package, options.test_name)
     except KeyboardInterrupt, e:
         pass
     print "exiting"
