@@ -10,7 +10,6 @@
   <depend package="pr2_power_board"/>
   <depend package="pr2_alpha"/>
   <depend package="rosrecord"/>
-  <depend package="pr2_alpha"/>
 
 
 </package>
