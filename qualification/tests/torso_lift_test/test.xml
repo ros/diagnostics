@@ -1,5 +1,14 @@
 <test> 
   <instructions>instructions.html</instructions>
+
+  <!-- Disable the prestartup and shutdown scripts if can't hook in to MCB -->
+  <!-- power connection. Qual cart cannot I/F with robot power board -->
+  <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
+  <pre_startup>torso_prog.launch</pre_startup>
+  <pre_startup>../../scripts/power_cycle.launch</pre_startup>
+  <pre_startup>torso_conf.launch</pre_startup>
+  <shutdown>../../scripts/power_board_disable.launch</shutdown>
+
   <startup>torso.launch</startup>
   <subtest>hysteresis_torso_lift.launch</subtest>
 </test>
