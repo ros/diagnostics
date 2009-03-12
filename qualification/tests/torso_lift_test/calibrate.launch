@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find qualification)/tests/torso_lift_test/torso_cal.xml" />
+</launch>

@@ -1,0 +1,7 @@
+  <controller name="test_controller" type="HysteresisControllerNode">
+    <joint name="torso_lift_joint">
+      <pid p="20000.0" d="0" i="25" iClamp="1000" />
+      <controller_defaults velocity="2.0" max_effort="10000" max_expected_effort="5000" min_expected_effort="-50000" min_pos="0.0" max_pos="0.32"/>   
+    </joint>
+  </controller>
+

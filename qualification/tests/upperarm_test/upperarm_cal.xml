@@ -8,6 +8,9 @@
 
 
 <!-- Hack. Only use iff no cal flags on upperarm -->
+<!-- Uses limit controllers to calibrate at end of travel -->
+<!-- Doesn't really work for roll, because doesn't have an end -->
+<!-- Stop roll joint manually (grab it) to calibrate -->
     <controller name="cal_r_elbow_flex" topic="cal_r_elbow_flex"
                 type="JointLimitCalibrationControllerNode">
       <calibrate joint="r_elbow_flex_joint"
