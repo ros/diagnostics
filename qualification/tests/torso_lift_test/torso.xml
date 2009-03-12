@@ -1,42 +1,7 @@
 <?xml version="1.0"?>
-<robot name="test_wrist">
-  <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
+<robot name="test_torso">
+  <include filename="$(find pr2_defs)/defs/body_defs.xml" />
 
-<pr2_forearm side="r" reflect="1" parent="base_link"/>
-
-  <!-- Solid Base -->
-  <joint name="base_joint" type="planar" />
-
-  <link name="base_link"><!-- link specifying the base of the robot -->
-    <parent name=" world" />
-    <!-- rotation of a local coordinate frame attached to the link with respect to a global coordinate frame -->
-    <origin xyz=" 0 0 0.002 " rpy=" 0 0 0" /> <!-- position of a local coordinate frame attached to the link with respect to the parent link's coordinate frame -->
-    <joint name="base_joint" />
-    <inertial>
-      <mass value="1000" />
-      <com xyz=" 0 0 0 " /> <!-- position of the center of mass with respect to the link's own anchor in a local coordinate frame -->
-      <inertia ixx="1000"  ixy="0"  ixz="0" iyy="1000" iyz="0" izz="1000" />
-    </inertial> 
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0 " /> <!-- location defined with respect to the link origin in a local coordinate frame -->
-      <!-- All angles always in radians, yaw about Z axis, pitch about the Y axis and roll about the X axis -->
-      <map name="gazebo_material" flag="gazebo">
-        <elem key="material">Gazebo/White</elem>
-      </map>
-      <geometry name="pr2_base_mesh_file">
-        <mesh scale="20 20 0.01" />
-      </geometry>
-    </visual> 
-    <collision>
-      <origin xyz="0 0 0" rpy="0.0 0.0 0.0 " /> <!-- default box is centered at the origin -->
-      <!-- All angles always in radians, yaw about Z axis, pitch about the Y axis and roll about the X axis -->
-      <geometry name="base_collision_geom"> <!-- think about putting mesh here as well -->
-        <box size="20 20 0.01" />
-      </geometry>
-    </collision>
-  </link>
-
-
-
+  <pr2_torso name="torso_lift" />
 
 </robot>
