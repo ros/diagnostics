@@ -11,7 +11,7 @@
   <depend package="robot_srvs" />
   <depend package="hokuyo_node" />
   <depend package="imu_node" />
-  <depend package="matplotlib" />
+  <depend package="numpy" />
   <depend package="robot_mechanism_controllers" />
   <depend package="dynamic_verification_controllers" />
   <depend package="joint_qualification_controllers" />
