@@ -14,6 +14,5 @@
   <depend package="pr2_etherCAT"/>
   <depend package="pr2_power_board"/>
   <depend package="pr2_mechanism_controllers"/>
-  <depend package="rosrecord"/>
 </package>
 

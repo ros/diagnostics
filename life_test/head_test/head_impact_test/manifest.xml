@@ -8,7 +8,6 @@
 
   <depend package="pr2_etherCAT" />
   <depend package="pr2_power_board"/>
-  <depend package="rosrecord"/>
   <depend package="pr2_mechanism_controllers"/>
 
 </package>
