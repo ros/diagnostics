@@ -64,14 +64,16 @@ def main():
     #params['joint'] = rospy.get_param("joint")
     params['max_effort'] = rospy.get_param("max_effort")
 
-    print "Spawning effort controller %s"%joint
-    resp = spawn_controller(xml_for(control_name, joint))
-    if len(resp.ok) < 1 or not resp.ok[0]:
-        print "Failed to spawn effort controller %s"%joint
-        sys.exit(1)
+    try:
+        print "Spawning effort controller %s"%joint
+        resp = spawn_controller(xml_for(control_name, joint))
+        if len(resp.ok) < 1 or not resp.ok[0]:
+            print "Failed to spawn effort controller %s"%joint
+            sys.exit(1)
 
-    rospy.spin()
-    kill_controller(control_name)
+        rospy.spin()
+    finally:
+        kill_controller(control_name)
 
 if __name__ == '__main__':
     main()

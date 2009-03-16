@@ -28,6 +28,8 @@
 
 # Author: Kevin Watts
 
+# Set random efforts to designated gripper effort controller
+
 import roslib; roslib.load_manifest('gripper_life_test')
 roslib.load_manifest('rospy')
 
@@ -47,7 +49,7 @@ def main():
   
   rospy.init_node('pub', anonymous=True)
   
-  eff = 5.0
+  eff = 10.0
   
   while not rospy.is_shutdown():
     time.sleep(random.uniform(0.5, 2.5))
