@@ -1,7 +1,9 @@
+#!/usr/bin/python
 PKG = 'diagnostics_analysis'
 import roslib; roslib.load_manifest(PKG)
 import rosrecord
 import std_msgs.msg
+import time
 
 def init():
   print "Starting to gather statistics"
@@ -12,6 +14,8 @@ def update(stats, topic, msg):
   if(not (topic == '/diagnostics')):
     print "discarding message on topic " + topic
     return
+  t = time.localtime(float(str(msg.header.stamp)) / 1000000000.0)
+   
   for status in msg.status:
     name = status.name
     if(not stats.has_key(name)):
@@ -19,14 +23,16 @@ def update(stats, topic, msg):
       stats[name]['string_fields'] = [s.label for s in status.strings]
       stats[name]['float_fields'] = [s.label for s in status.values]
       stats[name]['file'] = file('output/' + status.name + '.csv', 'w')
-      stats[name]['file'].write(', '.join(stats[name]['string_fields'] + stats[name]['float_fields']) + '\n')
+      fields = stats[name]['string_fields'] + stats[name]['float_fields'];
+      stats[name]['file'].write(', '.join(['timestamp'] + [f.replace(',','') for f in fields]) + '\n')
+    
     if (not [s.label for s in status.strings] == stats[name]['string_fields']):
       print "ERROR, mismatched field names in component %s" %(name)
       return stats
     if (not [s.label for s in status.values] == stats[name]['float_fields']):
       print "ERROR, mismatched field names in component %s" %(name)
       return stats
-    stats[name]['file'].write(', '.join([s.value.replace('\n', ' ') for s in status.strings] + [str(s.value) for s in status.values]) + '\n')
+    stats[name]['file'].write(', '.join([time.asctime(t)] + [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + [str(s.value) for s in status.values]) + '\n')
 
 
 def output(stats):
