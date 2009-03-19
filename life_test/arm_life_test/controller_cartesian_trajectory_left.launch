@@ -5,10 +5,9 @@
   <!-- parameters for trajectory controller -->
   <param name="cartesian_trajectory_left/autostart" type="bool" value="true" />
 
-  <param name="cartesian_trajectory_left/autostart" type="bool" value="true" />
   <param name="cartesian_trajectory_left/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_trajectory_left/tip_name" type="string" value="l_gripper_tool_frame" />
 
-  <param name="cartesian_trajectory_left/tip_name" type="string" value="l_wrist_roll_link" />
   <param name="cartesian_trajectory_left/max_vel_trans" value="1.0" />
   <param name="cartesian_trajectory_left/max_vel_rot" value="1.0" />
   <param name="cartesian_trajectory_left/max_acc_trans" value="0.5" />
