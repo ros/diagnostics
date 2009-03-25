@@ -46,4 +46,4 @@ if __name__ == '__main__':
   except Exception, e:
     print "Caught exception in Qualification App Main Loop"
     print e
-    
+    e
