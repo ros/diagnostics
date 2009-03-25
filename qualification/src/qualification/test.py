@@ -39,8 +39,25 @@ class NotADirectoryError(Exception): pass
 class TestDoesNotExistError(Exception): pass
 class FailedLoadError(Exception): pass
 
+class SubTest:
+  def __init__(self, subtest, pre_test, post_test):
+    self._test_script = subtest
+    self._pre_script = pre_test
+    self._post_script = post_test
+
+  def get_key(self):
+    key = self._subtest
+    if self._pre_script is not None:
+      key = key + self._pre_script 
+    if self._post_script is not None:
+      key = key + self._post_script
+    return key
+
+  def get_name(self):
+    return self._test_script
+      
 class Test:
-  def load(self, dir):
+  def load(self, test_str):
     self._startup_script = None
     self._shutdown_script = None
     self._instructions_file = None
@@ -49,16 +66,16 @@ class Test:
     self.pre_subtests = {}
     self.post_subtests = {}
 
-    if (not os.path.isdir(dir)):
-      raise NotADirectoryError
+    #if (not os.path.isdir(dir)):
+    #  raise NotADirectoryError
     
-    self._test_dir = dir
-    self._test_file = os.path.join(dir, 'test.xml')
-    if (not os.path.isfile(self._test_file)):
-      raise TestDoesNotExistError
+    #self._test_dir = dir
+    #self._test_file = os.path.join(dir, 'test.xml')
+    #if (not os.path.isfile(self._test_file)):
+    #  raise TestDoesNotExistError
     
     try:
-      self._doc = minidom.parse(self._test_file)
+      self._doc = minidom.parseString(test_str)
     except IOError:
       raise FailedLoadError
     
@@ -84,13 +101,28 @@ class Test:
     
     subtests = doc.getElementsByTagName('subtest')
     if (subtests != None and len(subtests) > 0):
-      for subtest in subtests:
-        name = subtest.childNodes[0].nodeValue
-        self.subtests.append(name)
-        if (subtest.attributes.has_key('post')):
-          self.post_subtests[name] = subtest.attributes['post'].value
-        if (subtest.attributes.has_key('pre')):
-          self.pre_subtests[name] = subtest.attributes['pre'].value
+      for st in subtests:
+        pre = None
+        post = None
+        name = st.childNodes[0].nodeValue
+        if (st.attributes.has_key('post')):
+          post = st.attributes['post'].value
+        if (st.attributes.has_key('pre')):
+          pre = st.attributes['pre'].value
+        self.subtests.append(SubTest(name, pre, post))
+          
+        
+
+
+    #subtests = doc.getElementsByTagName('subtest')
+    #if (subtests != None and len(subtests) > 0):
+    #  for subtest in subtests:
+    #    name = subtest.childNodes[0].nodeValue
+    #    self.subtests.append(name)
+    #    if (subtest.attributes.has_key('post')):
+    #      self.post_subtests[name] = subtest.attributes['post'].value
+    #    if (subtest.attributes.has_key('pre')):
+    #      self.pre_subtests[name] = subtest.attributes['pre'].value
   
   def getStartupScript(self):
     return self._startup_script
@@ -101,5 +133,4 @@ class Test:
   def getInstructionsFile(self):
     return self._instructions_file
   
-  def getDir(self):
-    return self._test_dir
+  
