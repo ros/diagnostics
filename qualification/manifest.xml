@@ -17,6 +17,7 @@
   <depend package="roslaunch" />
   <depend package="rviz" />
   <depend package="pr2_power_board" />
+  <depend package="pr2_alpha" />
   <url></url>
   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
   <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
