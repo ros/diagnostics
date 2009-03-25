@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/onboard/laser_tilt_test/hysteresis_laser_tilt.xml" />
+</launch>

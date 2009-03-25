@@ -1,0 +1,6 @@
+<controller name="test_controller" type="HysteresisControllerNode">
+  <joint name="head_tilt_joint">
+    <pid p="5.0" i="0.05" d="0.0" iClamp=".5" />
+    <controller_defaults velocity=".85" max_effort="4.0" max_expected_effort="0.65" min_expected_effort="-0.95" min_pos="-.45" max_pos=".92" />   
+  </joint>
+</controller>

@@ -1,0 +1,127 @@
+<robot_tests>
+  <!-- Builds tree of onboard qualification tests for qualification GUI -->
+  
+  <!-- Each element is organized as follows:
+       <parent_name label="Name as Displayed in GUI" child_name="name_of_any_subnodes">
+	 <child_name label="Other name as Displayed in GUI" pre="pre_subtest_script.launch" test="test_launch_file.launch" />
+       </parent_name>   
+       Labels must be unique for each element. Base folder is qualification/onboard
+       -->
+  
+  <!--robot label="Right Arm" child_name="right_arm" >
+    <right_arm label="Shoulder - Right" child_name="r_shoulder" >
+      <r_shoulder label="R Shoulder Pan Hysteresis"  
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/hysteresis_shoulder_pan.launch" />
+      <r_shoulder label="R Shoulder Lift Hysteresis"  
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/hysteresis_shoulder_lift.launch" />
+      <r_shoulder label="R Upperarm Roll Hysteresis"  
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/upperarm_shoulder_roll.launch" />
+    </right_arm>
+    <right_arm label="Upperarm - Right" child_name="r_upperarm" >
+      <r_upperarm label="R Elbow Flex Hysteresis" 
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/hysteresis_elbow_flex.launch" />
+      <r_upperarm label="R Elbow Flex Sinesweep" 
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/sinesweep_elbow_flex.launch" />
+      <r_upperarm label="R Forearm Roll Hysteresis" 
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/hysteresis_forearm_roll.launch" />
+      <r_upperarm label="R Forearm Roll Sinesweep" 
+		  pre="full_arm_test/right_arm_test.launch" 
+		  test="full_arm_test/sinesweep_forearm_roll.launch" />
+    </right_arm>
+    <right_arm label="Wrist - Right" child_name="r_wrist" >
+      <r_wrist label="R Wrist Flex Hysteresis" 
+	       pre="full_arm_test/right_arm_test.launch" 
+	       test="full_arm_test/hysteresis_wrist_flex.launch" />
+      <r_wrist label="R Wrist Flex Sinesweep" 
+	       pre="full_arm_test/right_arm_test.launch" 
+	       test="full_arm_test/sinesweep_wrist_flex.launch" />
+      <r_wrist label="R Wrist Roll Hysteresis" 
+	       pre="full_arm_test/right_arm_test.launch" 
+	       test="full_arm_test/hysteresis_wrist_roll.launch" />
+      <r_wrist label="R Wrist Roll Hysteresis" 
+	       pre="full_arm_test/right_arm_test.launch" 
+	       test="full_arm_test/sinesweep_wrist_roll.launch" />
+    </right_arm>
+    <right_arm label="Gripper - Right" child_name="r_gripper" >
+      <r_gripper label="R Gripper Hysteresis" 
+		 pre="full_arm_test/right_arm_test.launch" 
+		 test="full_arm_test/hysteresis_gripper.launch" />
+    </right_arm>
+  </robot>
+  
+  <robot label="Left Arm" child_name="left_arm" >
+    <left_arm label="Shoulder - Left" child_name="l_shoulder" >
+      <l_shoulder label="L Shoulder Pan Hysteresis"  
+		  pre="full_arm_test/left_arm_test.launch" 
+		  test="full_arm_test/hysteresis_shoulder_pan.launch" />
+      <l_shoulder label="L Shoulder Lift Hysteresis"  
+		  pre="full_arm_test/left_arm_test.launch" 
+		  test="full_arm_test/hysteresis_shoulder_lift.launch" />
+      <l_shoulder label="L Upperarm Roll Hysteresis" 
+		  pre="full_arm_test/left_arm_test.launch" 
+		  test="full_arm_test/upperarm_shoulder_roll.launch" />
+    </left_arm>
+    <left_arm label="Upperarm - Left" child_name="l_upperarm" >
+      <l_upperarm label="L Elbow Flex Hysteresis" 
+		  pre="left_arm_test.launch" 
+		  test="full_arm_test/hysteresis_elbow_flex.launch" />
+      <l_upperarm label="L Elbow Flex Sinesweep" 
+		  pre="left_arm_test.launch" 
+		  test="full_arm_test/sinesweep_elbow_flex.launch" />
+      <l_upperarm label="L Forearm Roll Hysteresis" 
+		  pre="left_arm_test.launch" 
+		  test="full_arm_test/hysteresis_forearm_roll.launch" />
+      <l_upperarm label="L Forearm Roll Sinesweep" 
+		  pre="left_arm_test.launch" 
+		  test="full_arm_test/sinesweep_forearm_roll.launch" />
+    </left_arm>
+    <left_arm label="Wrist - Left" child_name="l_wrist" >
+      <l_wrist label="L Wrist Flex Hysteresis" 
+	       pre="full_arm_test/left_arm_test.launch" 
+	       test="full_arm_test/hysteresis_wrist_flex.launch" />
+      <l_wrist label="L Wrist Flex Sinesweep" 
+	       pre="full_arm_test/left_arm_test.launch" 
+	       test="full_arm_test/sinesweep_wrist_flex.launch" />
+      <l_wrist label="L Wrist Roll Hysteresis" 
+	       pre="full_arm_test/left_arm_test.launch" 
+	       test="full_arm_test/hysteresis_wrist_roll.launch" />
+      <l_wrist label="L Wrist Roll Hysteresis" 
+	       pre="full_arm_test/left_arm_test.launch"
+	       test="full_arm_test/sinesweep_wrist_roll.launch" />
+    </left_arm>
+    <left_arm label="Gripper - Left" child_name="l_gripper" >
+      <l_gripper label="L Gripper Hysteresis" 
+		 pre="full_arm_test/left_arm_test.launch" 
+		 test="full_arm_test/hysteresis_gripper.launch" />
+    </left_arm>
+  </robot-->
+  
+  <robot label="Head / Laser Tilt" child_name="head_laser_tests" >
+    <head_laser_tests label="Head" child_name="head" >
+      <head label="Head Tilt Hysteresis" 
+	    test="head_test/hysteresis_head_tilt.launch" />
+      <head label="Head Tilt Sinesweep" 
+	    test="head_test/sinesweep_head_tilt.launch" />
+      <head label="Head Pan Hysteresis" 
+	    test="head_test/hysteresis_head_pan.launch" />
+      <head label="Head Pan Sinesweep" 
+	    test="head_test/sinesweep_head_pan.launch" />
+    </head_laser_tests>
+    <head_laser_tests label="Laser Tilt" child_name="laser_tilt" >
+      <laser_tilt label="Laser Tilt Hysteresis" 
+		  test="laser_tilt_test/hysteresis_laser_tilt.launch" />
+      <laser_tilt label="Laser Tilt Sinesweep"
+		  test="laser_tilt_test/sinesweep_laser_tilt.launch" />
+    </head_laser_tests>
+  </robot>
+  
+  <robot label="Spine Test" 
+	 test="torso_lift_test/hysteresis_torso_lift.launch" />
+  
+</robot_tests>

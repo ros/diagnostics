@@ -1,0 +1,5 @@
+<launch>
+
+<node pkg="qualification" type="visual_verifier.py" args="$(find qualification)/onboard/visualization/view.vcg 'Move the links and confirm they look right.'" />
+
+</launch>

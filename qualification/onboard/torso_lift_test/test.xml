@@ -1,0 +1,5 @@
+<test> 
+  <instructions>instructions.html</instructions>
+  <startup>../robot.launch</startup>
+  <subtest>hysteresis_torso_lift.launch</subtest>
+</test>
