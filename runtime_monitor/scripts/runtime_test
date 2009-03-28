@@ -36,7 +36,7 @@
 
 import roslib; roslib.load_manifest('runtime_monitor')
 
-import sys
+import sys, time
 import rospy
 from robot_msgs.msg import DiagnosticMessage
 
@@ -45,6 +45,7 @@ NAME = 'runtime_test'
 latest_messages = {}
 test_name = 'uninitialized'
 package = 'uninitialized'
+last_runtime = rospy.rostime.get_time()
 
 def status_to_map(status):
     str_map = {}
@@ -75,7 +76,19 @@ def callback(message, args):
         #for v in s.strings + s.values:
         #    print "   %s: %s" % (v.label, v.value)
     sys.stdout.flush()
+    execute_test(args)
 
+def execute_test(args):
+    global last_runtime
+    time_step = rospy.rostime.get_time() - last_runtime
+    if 1.0 /time_step > options.max_freq:
+        #print options.max_freq, " is the max frequency"
+        #print 1.0 /time_step, "is the current frequency"
+        return
+    else:
+        last_runtime = rospy.rostime.get_time()
+    
+    print "\nStarting Test"
     test_impl, params = args
     results = analyze(package, test_impl, params)
     #print "results:" , results
@@ -87,6 +100,8 @@ def callback(message, args):
     if 'warn' in results:
         for warn in results['warn']:
             warning_response(warn)
+    print "\nDone Testing"
+
     
 def runtime_test(package, test_name):
     # retrieve the test implementation
@@ -106,9 +121,14 @@ def runtime_test(package, test_name):
 
     # get it's parameters
     params = rospy.get_param("~")
-    
+
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
-    rospy.spin()
+
+    while not rospy.is_shutdown():
+        if rospy.rostime.get_time() - last_runtime > options.min_freq:
+            time.sleep(0.25/options.min_freq)
+        else:
+            execute_test((test_impl, params))
         
 if __name__ == '__main__': 
     from optparse import OptionParser
@@ -119,9 +139,17 @@ if __name__ == '__main__':
     parser.add_option("--package", metavar="ROS_PACKAGE",
                       dest="package", default='runtime_monitor', 
                       type="string", help="package test is in")
+    parser.add_option("--min_freq", metavar="min_frequency",
+                      dest="min_freq", default='0.5', 
+                      type="float", help="Minimum Execution Frequency(Hz)")
+    parser.add_option("--max_freq", metavar="max_frequency",
+                      dest="max_freq", default='1.0', 
+                      type="float", help="Maximum Execution Frequency(Hz)")
 
     options, args = parser.parse_args()
 
+
+    
     # expected or default
     package = options.package 
     
