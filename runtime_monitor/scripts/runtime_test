@@ -56,7 +56,7 @@ def status_to_map(status):
     str_map["message"] = status.message
     return str_map
     
-def analyze(package, test_impl, params)
+def analyze(package, test_impl, params):
     # run the test
     return test_impl.test(latest_messages, params)
 
@@ -99,11 +99,15 @@ def runtime_test(package, test_name):
         rospy.logerr("cannot locate test package %s"%package)
         sys.exit(1)
     test_impl = getattr(pypkg, test_name)    
+
+    # must be inited before reading parameters
+    rospy.init_node(NAME, anonymous=True)
+
+
     # get it's parameters
     params = rospy.get_param("~")
     
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
-    rospy.init_node(NAME, anonymous=True)
     rospy.spin()
         
 if __name__ == '__main__': 
