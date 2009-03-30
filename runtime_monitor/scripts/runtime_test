@@ -69,12 +69,8 @@ def warning_response(warning):
 
 
 def callback(message, args):
-    print "\nNew Message at %.1f"%message.header.stamp.to_time()
     for s in message.status:
         latest_messages[s.name] = status_to_map(s)
-        #print "Name: %s \nMessage: %s"%(s.name, s.message)
-        #for v in s.strings + s.values:
-        #    print "   %s: %s" % (v.label, v.value)
     sys.stdout.flush()
     execute_test(args)
 
@@ -82,16 +78,12 @@ def execute_test(args):
     global last_runtime
     time_step = rospy.rostime.get_time() - last_runtime
     if 1.0 /time_step > options.max_freq:
-        #print options.max_freq, " is the max frequency"
-        #print 1.0 /time_step, "is the current frequency"
         return
     else:
         last_runtime = rospy.rostime.get_time()
     
-    print "\nStarting Test"
     test_impl, params = args
     results = analyze(package, test_impl, params)
-    #print "results:" , results
 
     if 'error' in results:
         for err in results['error']:
@@ -100,7 +92,6 @@ def execute_test(args):
     if 'warn' in results:
         for warn in results['warn']:
             warning_response(warn)
-    print "\nDone Testing"
 
     
 def runtime_test(package, test_name):
