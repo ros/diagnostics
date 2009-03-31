@@ -116,10 +116,9 @@ def runtime_test(package, test_name):
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
 
     while not rospy.is_shutdown():
-        if rospy.rostime.get_time() - last_runtime > options.min_freq:
-            time.sleep(0.25/options.min_freq)
-        else:
+        if rospy.rostime.get_time() - last_runtime > 1/options.min_freq:
             execute_test((test_impl, params))
+        time.sleep(0.5/options.min_freq)
         
 if __name__ == '__main__': 
     from optparse import OptionParser
