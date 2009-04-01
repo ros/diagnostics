@@ -60,9 +60,7 @@ def main():
     spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
     kill_controller = rospy.ServiceProxy('kill_controller', KillController)
 
-    params = {}
-    #params['joint'] = rospy.get_param("joint")
-    params['max_effort'] = rospy.get_param("max_effort")
+    eff = 100
 
     try:
         print "Spawning effort controller %s"%joint
@@ -71,7 +69,14 @@ def main():
             print "Failed to spawn effort controller %s"%joint
             sys.exit(1)
 
-        rospy.spin()
+        control_topic = '/%s/set_command/' % control_name
+        pub = rospy.Publisher(control_topic, Float64)
+
+        while not rospy.is_shutdown():
+            time.sleep(random.uniform(0.5, 2.5))
+            m = Float64(eff)
+            eff = eff * -1
+            pub.publish(m)
     finally:
         kill_controller(control_name)
 

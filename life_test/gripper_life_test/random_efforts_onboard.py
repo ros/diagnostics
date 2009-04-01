@@ -47,18 +47,15 @@ def main():
   
   pub = rospy.Publisher(control_topic, Float64)
   
-  rospy.init_node('pub', anonymous=True)
+  rospy.init_node('pub_%s' % name, anonymous=True)
   
-  eff = 10.0
+  eff = 100.0
   
   while not rospy.is_shutdown():
     time.sleep(random.uniform(0.5, 2.5))
-    cmd = random.randint(0, 1)
-    if cmd == 1:
-      m = Float64(eff)
-    else:
-      m = Float64(-eff)
-  #  m = Float64(random.randint(-5, 5))
+    m = Float64(eff)
+    eff = eff * -1
+    #  m = Float64(random.randint(-5, 5))
     pub.publish(m)
 
 if __name__ == '__main__':

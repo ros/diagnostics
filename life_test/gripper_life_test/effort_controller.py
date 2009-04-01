@@ -52,7 +52,7 @@ def xml_for(joint):
 </controller>" % (CONTROLLER_NAME, joint)
 
 def main():
-    rospy.init_node('teleop_joint_button', anonymous=True)
+    rospy.init_node('gripper_effort_controller', anonymous=True)
     rospy.wait_for_service('spawn_controller')
     spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
     kill_controller = rospy.ServiceProxy('kill_controller', KillController)
