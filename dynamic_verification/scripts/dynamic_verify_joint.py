@@ -55,6 +55,7 @@ class App:
     def OnData(self, req):
         # Store data 
         self.data = req
+        print "Received data %s" % self.data.test_name
         if self.data.test_name == "constant_torque":
             self.write_const_torque()
         elif self.data.test_name == "frequency_response":
@@ -83,7 +84,12 @@ class App:
 
         # See if there's an easy way to convert to .csv file
         for i in range(0, time.size):
-            data_file.write_row(`time[i]`,`cmd[i]`,`effort[i]`,`position[i]`,`velocity[i])
+            tm = str(time[i])
+            cm = str(cmd[i])
+            ef = str(effort[i])
+            po = str(position[i])
+            ve = str(velocity[i])
+            data_file.write_row(tm, cm, ef, po, ve)
 
             #state_string = `time[i]` + ',' + `cmd[i]` + ',' + `effort[i]` + ',' + `position[i]` + ',' + `velocity[i]` + '\n'
             #datafile += state_string
@@ -114,7 +120,7 @@ class App:
 
         # See if there's an easy way to convert to .csv file
         for i in range(0, time.size):
-            data_file.write_row(`time[i]`,`cmd[i]`,`effort[i]`,`position[i]`,`velocity[i])
+            data_file.write_row(`time[i]`,`cmd[i]`,`effort[i]`,`position[i]`,`velocity[i]`)
 
         print 'Wrote file as results/freq_resp/%s/%s.csv' % (joint_name, time_str)
 

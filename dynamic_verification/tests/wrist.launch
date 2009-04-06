@@ -2,12 +2,10 @@
 <!-- Pulls description from qualification system -->
  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/wrist_test/wrist.xml'" />
 
-  <!-- Machine changed to local, this must be run on xenomai -->
-  <machine name="xenomai" user="root" address="localhost" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never" />
 
 <!-- pr2_etherCAT -->
 <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
-
 
 <!-- Wrist Calibration -->
 <include file="$(find qualification)/tests/wrist_test/calibrate.launch" />
