@@ -13,7 +13,4 @@
     <!-- push robotdesc/pr2 to factory and spawn robot in gazebo -->
     <node pkg="gazebo_plugin" type="urdf2factory" args="robotdesc/pr2" respawn="false" output="screen"/>
 
-<!-- Wrist Calibration -->
-<include file="$(find qualification)/tests/wrist_test/calibrate.launch" />
-
 </launch>
