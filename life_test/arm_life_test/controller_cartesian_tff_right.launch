@@ -1,12 +1,15 @@
 <launch>
 
+<!-- Cartesian wrench controller -->
+  <param name="cartesian_wrench/autostart" type="bool" value="true" />
+  <param name="cartesian_wrench/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_wrench/tip_name" type="string" value="r_gripper_tool_frame" />
+
+
 <!-- Cartesian tff controller -->
-
-  <!-- parameters for tff controller -->
   <param name="cartesian_tff_right/autostart" type="bool" value="true" />
-
   <param name="cartesian_tff_right/root_name" type="string" value="torso_lift_link" />
-  <param name="cartesian_tff_right/tip_name" type="string" value="r_wrist_roll_link" />
+  <param name="cartesian_tff_right/tip_name" type="string" value="r_gripper_tool_frame" />
 
   <param name="cartesian_tff_right/twist_to_wrench_trans" value="10.0" />
   <param name="cartesian_tff_right/twist_to_wrench_rot" value="1.0" />
@@ -32,5 +35,5 @@
   <param name="cartesian_tff_right/pos_rot/d" value="0.0" />
   <param name="cartesian_tff_right/pos_rot/i_clamp" value="0.2" />
 
-  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/cartesian_tff_right.xml" output="screen"/>
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/cartesian_wrench.xml $(find pr2_default_controllers)/cartesian_tff_right.xml" output="screen"/>
 </launch>
