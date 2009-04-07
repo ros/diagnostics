@@ -1,8 +1,6 @@
 <launch>
 
 <!-- Cartesian ik twist controller -->
-
-  <!-- parameters for twist controller -->
   <param name="cartesian_twist_ik/root_name" type="string" value="torso_lift_link" />
   <param name="cartesian_twist_ik/tip_name" type="string" value="r_wrist_roll_link" />
 
@@ -14,5 +12,5 @@
   <param name="cartesian_twist_ik/joint/d" value="0.0" />
   <param name="cartesian_twist_ik/joint/i_clamp" value="2.0" />
 
-  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_twist_ik.xml" output="screen" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/cartesian_twist_ik.xml" output="screen" />
 </launch>

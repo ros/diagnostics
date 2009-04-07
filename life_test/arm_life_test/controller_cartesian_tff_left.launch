@@ -32,5 +32,5 @@
   <param name="cartesian_tff_left/pos_rot/d" value="0.0" />
   <param name="cartesian_tff_left/pos_rot/i_clamp" value="0.2" />
 
-  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_tff_left.xml" output="screen"/>
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/cartesian_tff_left.xml" output="screen"/>
 </launch>
