@@ -1,17 +1,11 @@
 <launch>
-
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/shoulder_test/shoulder.xml'" />
+  
+  <!-- Loads realtime machine and PR2_etherCAT -->
+  <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
 
-  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
-
-<!-- pr2_etherCAT Needs to be rteth0 if real-time -->
-<node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
-
-<!-- Shoulder Calibration -->
-<include file="$(find qualification)/tests/shoulder_test/calibrate.launch" />
-
-<!-- shoulder -->
-<node pkg="pr2_power_board" type="power_node" />
-<node pkg="pr2_power_board" type="send_command.py" args="0 start"/>
-
+  <!-- Shoulder Calibration -->
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find qualification)/tests/shoulder_test/shoulder_cal.xml" />
 </launch>

@@ -32,6 +32,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Author: Kevin Watts
 
 import roslib
 roslib.load_manifest('qualification')
@@ -42,14 +43,12 @@ from optparse import OptionParser
 from deprecated_srvs.srv import * 
 
 rospy.init_node("mcb_programmer")
-# block until the add_two_ints service is available
 rospy.wait_for_service('mcb_conf_results')
 
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
 parser = OptionParser()
 parser.add_option("--wg005=", type="string", dest="wg005", action="append")
 parser.add_option("--wg006=", type="string", dest="wg006", action="append")
-
 
 options, args = parser.parse_args()
 
@@ -66,40 +65,37 @@ if options.wg005:
 else:
   all = options.wg006
 
-# Count MCB's and make sure we have the right number.
-action = StringStringResponse('retry')
-count_cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/eccount" + " -i eth0"
+# Use count_mcbs.py to count
+# Call script from here, returns 0 if correct count
 expected = len(all)
-try:
-  while (action.str == "retry"):
-    count = subprocess.call(count_cmd, shell=True)
-    if count == expected:
-      print "Found %s MCB's, programming" % count
-      action.str = "pass"
-    else:
-      action = result_proxy("MCB counts don't match. Found %s, expected %s. Retry?" % (count, expected))
-      if action.str == "fail":
-        print "Programming MCB's failed, counts don't match!"
-        success = False
-        sys.exit(2)
-except OSError, e:
-  action = result_proxy("Failed to count MCB's, cannot program.")
-  success = False
-  sys.exit(2)
+count_cmd = roslib.packages.get_pkg_dir("qualification", True) + "/scripts/count_mcbs.py %s" % expected
 
+retcode = subprocess.call(count_cmd, shell=True)
+if retcode != 0:
+  print 'Unable to verify MCB count'
+  success = False
+  sys.exit(255)
 
 for num in all:
   action = StringStringResponse('retry')
-  print "Doing something with %s"%num
+  print "Programming MCB %s"%num
+  details = ''
   try:
     while(action.str == "retry"):
       filename = path + "/*.bit" 
-
       cmd = "LD_LIBRARY_PATH=" + path + " " + path + "/fwprog" + " -i eth0 -p %s %s"%(num, filename)
-      retcode = subprocess.call(cmd, shell=True)
-      print "Attempted to program MCB %s" % num
+      
+      p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
+      stdout, stderr = p.communicate()
+      retcode = p.returncode
+
+      details = 'Ran fwprog on MCB %s, returned %s.\n\n' % (num, retcode)
+      details += 'STDOUT:\n' + stdout
+      if len(stderr) > 5:
+        details += '\nSTDERR:\n' + stderr
+            
       if retcode != 0:
-        action = result_proxy("Programming MCB firmware failed for MCB #%s with error %d! Would you like to retry?"%(num, retcode))
+        action = result_proxy("Programming MCB firmware failed for MCB #%s with error %d! Would you like to retry?:::%s"%(num, retcode, details))
         if action.str == "fail":
           print "Programming MCB firmware failed for %s!"%num
           success = False
@@ -110,12 +106,15 @@ for num in all:
         print "Programmed MCB %s" % num
         action.str = "pass"
   except OSError, e:
-    action = result_proxy("The MCB firmware programing failed to execute.")
+    print e
+    action = result_proxy("The MCB firmware programing failed to execute. Click YES or NO to exit.:::%s" % details)
     success = False
-    sys.exit(1)
+    sys.exit(2)
 
 if success:
-  print "Programming MCB firmware finished"
+  print "Programming MCB firmware finished."
   action = result_proxy("done")
- 
-sys.exit(0)
+  sys.exit(0) 
+
+sys.exit(4) 
+

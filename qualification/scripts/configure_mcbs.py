@@ -32,14 +32,17 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Author: Kevin Watts
 
 import roslib
 roslib.load_manifest('qualification')
 import rospy, sys, time
 import subprocess
+
 from optparse import OptionParser
 
 from deprecated_srvs.srv import * 
+
 
 rospy.init_node("mcb_configurer")
 rospy.wait_for_service('mcb_conf_results')
@@ -47,7 +50,6 @@ rospy.wait_for_service('mcb_conf_results')
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
 parser = OptionParser()
 parser.add_option("--motor=", type="string", dest="mcbs", action="append")
-
 
 options, args = parser.parse_args()
 
@@ -57,28 +59,13 @@ for args in options.mcbs:
 
 success = True
 
-count_path = roslib.packages.get_pkg_dir("qualification", True) + "/fwprog"
-
-# Count MCB's and make sure we have the right number.
-action = StringStringResponse('retry')
-count_cmd = "LD_LIBRARY_PATH=" + count_path + " " + count_path + "/eccount" + " -i eth0"
-expected = len(mcbs)
-try:
-  while (action.str == "retry"):
-    count = subprocess.call(count_cmd, shell=True)
-    if count == expected:
-      print "Found %s MCB's, programming" % count
-      action.str = "pass"
-    else:
-      action = result_proxy("MCB counts don't match. Found %s, expected %s" % (count, expected))
-      if action.str == "fail":
-        print "Programming MCB's failed, counts don't match!"
-        success = False
-        sys.exit(2)
-except OSError, e:
-  action = result_proxy("Failed to count MCB's, cannot program.")
+# Call script from here, returns 0 if correct count
+count_cmd = roslib.packages.get_pkg_dir("qualification", True) + "/scripts/count_mcbs.py %s" % len(mcbs)
+retcode = subprocess.call(count_cmd, shell=True)
+if retcode != 0:
+  print 'Unable to verify MCB count'
   success = False
-  sys.exit(2)
+  sys.exit(255)
 
 # Configure MCB's
 path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
@@ -87,31 +74,42 @@ actuator_path = path + "/actuators.conf"
 #wait for MCB's to initialize after being turned on
 time.sleep(5)
 
+details = ''
 for name, num in mcbs:
   action = StringStringResponse('retry')
-
+  
   try:
-      while(action.str == "retry"):
-        retcode = subprocess.call(path + "/motorconf" + " -i eth0 -p -n %s -d %s -a %s"%(name, num, actuator_path), shell=True)
-        if retcode != 0:
-            action = result_proxy("Programming MCB configuration failed for %s with return code %s! Retry?" % (name, retcode))
-            if action.str == "fail":
-              print "Programming MCB configuration failed for %s! Shutting down test!"%name
-              success = False
-              sys.exit(1)
-              break
+    while(action.str == "retry"):
+      cmd = path + "/motorconf" + " -i eth0 -p -n %s -d %s -a %s" % (name, num, actuator_path)
+      
+      p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
+      stdout, stderr = p.communicate()
+      retcode = p.returncode
 
-        else:
-          #print retcode
-          action.str ="pass"
+      details = 'Ran motorconf. Attempted to program MCB %s with actuator name %s. Return code: %s.\n\n' % (num, name, retcode)
+      details += 'STDOUT:\n' + stdout
+      if len(stderr) > 5:
+        details += '\nSTDERR:\n' + stderr
+      
+      if retcode != 0:
+        action = result_proxy("Programming MCB configuration failed for %s with return code %s! Retry?:::%s" % (name, retcode, details))
+        if action.str == "fail":
+          print "Programming MCB configuration failed for %s! Shutting down test!"%name
+          success = False
+          sys.exit(1)
+          break
+      else:
+        print 'Configured MCB %s with actuator %s' % (num, name)
+        action.str = "pass"
   except OSError, e:
-      action = result_proxy("The MCB configuration program failed to execute.")
-      success = False
-      sys.exit(1)
+    print e
+    action = result_proxy("The MCB configuration program failed to execute. Press YES or NO to exit.:::%s" % details)
+    success = False
+    sys.exit(2)
       
 if success:
-    print "Programming MCB confiuration finished"
-    action = result_proxy("done")
-    sys.exit(0)
-
-sys.exit(1)
+  print "MCB configuration finished."
+  action = result_proxy("done")
+  sys.exit(0)
+  
+sys.exit(4)

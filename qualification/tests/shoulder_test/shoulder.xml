@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <robot name="test_shoulder">
+
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
+
 
 <joint name="base_joint" type="planar" />
   <link name="base_link">
@@ -28,6 +31,7 @@
       </geometry>
     </collision>
   </link>
+
 
 <pr2_shoulder side="r" reflect="1" parent="base_link">
   <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />

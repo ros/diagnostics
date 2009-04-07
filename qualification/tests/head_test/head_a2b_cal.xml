@@ -1,0 +1,5 @@
+<controllers>
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
+  <head_calibrator_alpha2b />
+
+</controllers>

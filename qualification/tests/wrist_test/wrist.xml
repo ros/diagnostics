@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <robot name="test_wrist">
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
   <include filename="$(find pr2_defs)/defs/gazebo_defs.xml" />
 
-<pr2_forearm side="r" reflect="1" parent="base_link"/>
+  <pr2_forearm side="r" reflect="1" parent="base_link"/>
 
   <!-- Solid Base -->
   <joint name="base_joint" type="planar" />

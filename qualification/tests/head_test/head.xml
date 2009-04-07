@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <robot name="test_head">
-  <!--include filename="$(find pr2_defs)/defs/head_defs.xml" /-->
-<include filename="head_defs.xml" />
+  
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
 
-<pr2_head_pan name="head_pan" parent="world">
-  <origin xyz="0 0 0.3815" rpy="0 0 0" />
-</pr2_head_pan>
-
-<pr2_head_tilt name="head_tilt" parent="head_pan">
-  <origin xyz="0.058 0 0" rpy="0 0 0" />
-</pr2_head_tilt>
+<!-- Alpha 2.0 head -->
+<pr2_head_alpha2 name="head" parent="torso_lift_link">
+  <!--origin xyz="-0.01 0 0.3815" rpy="0 0 0" /-->
+  <origin xyz="${cal_head_x - 0.01}    ${cal_head_y}     ${0.3915+cal_head_z}"
+          rpy="${cal_head_roll} ${cal_head_pitch} ${cal_head_yaw}" />
+</pr2_head_alpha2>
 
 </robot>

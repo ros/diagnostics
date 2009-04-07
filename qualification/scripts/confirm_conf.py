@@ -34,17 +34,19 @@
 # Revision $Id: gossipbot.py 1013 2008-05-21 01:08:56Z sfkwc $
 
 ## Prompts the user with a Y/N message if MCB's aren't configured
-# Called from program_mcb.py through the mcb_conf_results service
+# Called from configure/program_mcb.py through the mcb_conf_results service
 
-PKG = 'qualification' # this package name
+PKG = 'qualification' 
 NAME = 'mcb_conf_verification'
 
 import roslib
 roslib.load_manifest(PKG) 
 import wx 
+from wx import xrc
 from deprecated_srvs.srv import *
 import rospy 
 import time
+import os
 
 app = wx.PySimpleApp()
 process_done = False
@@ -53,10 +55,18 @@ prompt_click ="no"
 frame=wx.Frame(None)
 
 def msg_prompt(msg):
+  # Parse msg for details
+  msg, sep, details = msg.partition(':::')
+  if len(details) < 5:
+    details = 'No details available.'
+
+  display_msg = msg + '\n\nDetails:\n' + details
+
   print "msg_prompt running"
-  dlg=wx.MessageBox(msg,"", wx.YES_NO)
+  dlg=wx.MessageBox(display_msg,"MCB Prog/Conf Error", wx.YES_NO)
   print "a",dlg, wx.YES
   global prompt_done, prompt_click
+
   if (dlg == wx.YES ):
     prompt_click="yes"
   else:
@@ -65,28 +75,55 @@ def msg_prompt(msg):
 
   print "msg_prompt done"
   
+# Attempted to make prompt that would show details only when requested
+def msg_detail_prompt(msg):
+  # Parse msg for details
+  msg, sep, details = msg.partition(':::')
+  if len(details) < 5:
+    details = 'No details available.'#
+
+  # Load MCB conf dialog box from gui.xrc
+  xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
+  xrc_resource = xrc.XmlResource(xrc_path)
+  dialog = xrc_resource.LoadDialog(None, 'config_dialog')
+  # Set text in message text
+  xrc.XRCCTRL(dialog, 'message_text').SetLabel(msg)
+  xrc.XRCCTRL(dialog, 'message_text').Wrap(300)  
+  xrc.XRCCTRL(dialog, 'detail_text').AppendText(details)
   
+  dialog.Layout()
+  dialog.Fit()
+
+  global prompt_click, prompt_done
+
+  if (dialog.ShowModal() == wx.ID_YES):
+    prompt_click = "yes"
+  else:
+    prompt_click = "no"
+  prompt_done = True
+   
 def check_w_user(req):
-  print "Result: %s"%req.str
+  print "Confirm Conf Result: %s" % req.str
   if req.str == "done":
     wx.CallAfter(frame.Close)
     return StringStringResponse("na")
   global prompt_done
   prompt_done=False
-  wx.CallAfter(msg_prompt,req.str)
+
+  #wx.CallAfter(msg_detail_prompt, req.str)
+  wx.CallAfter(msg_prompt, req.str)
+
   while(not prompt_done):
-    print "waiting for prompt . . ."
+    print "Waiting for retry prompt . . ."
     time.sleep(5) 
-  print prompt_click
+  print "User result: %s" % prompt_click
   
   if prompt_click =="yes":
     return StringStringResponse("retry")
   else:
     wx.CallAfter(frame.Close)      
     return StringStringResponse("fail")
-  
-    
-
+ 
 def confirm_conf():
   rospy.init_node(NAME)
   s = rospy.Service('mcb_conf_results', StringString, check_w_user)  

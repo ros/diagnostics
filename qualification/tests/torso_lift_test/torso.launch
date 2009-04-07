@@ -1,13 +1,17 @@
 <launch>
-
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/torso_lift_test/torso.xml'" />
 
-  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+  <!-- Loads realtime machine and PR2_etherCAT -->
+  <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
 
-<!-- pr2_etherCAT -->
-<node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
+  <!-- Torso Calibration -->
+  <include file="$(find qualification)/tests/torso_test/calibrate.launch" />
 
+<<<<<<< .mine
+=======
 <!-- Torso Calibration -->
 <include file="$(find qualification)/tests/torso_lift_test/calibrate.launch" />
 
+>>>>>>> .r12590
 </launch>

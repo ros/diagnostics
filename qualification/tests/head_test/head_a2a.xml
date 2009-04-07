@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<robot name="test_head">
+  
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
+
+<!-- Alpha 2.0a head, small tilt motor -->
+<pr2_head_alpha2a name="head" parent="torso_lift_link">
+  <!--origin xyz="-0.01 0 0.3815" rpy="0 0 0" /-->
+  <origin xyz="${cal_head_x - 0.01}    ${cal_head_y}     ${0.3915+cal_head_z}"
+          rpy="${cal_head_roll} ${cal_head_pitch} ${cal_head_yaw}" />
+</pr2_head_alpha2a>
+
+</robot>

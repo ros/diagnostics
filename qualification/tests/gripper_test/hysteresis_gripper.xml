@@ -1,6 +1,6 @@
 <controller name="test_controller" type="HysteresisControllerNode">
   <joint name="r_gripper_joint">
-   <pid p=".00015" d="0" i=".0006" iClamp=".0001" />
-    <controller_defaults velocity="600" max_effort=".009" max_expected_effort="0.0015" min_expected_effort="-0.0015" min_pos="-2500" max_pos="0"/>   
+   <pid p="1500" d="0" i="25.0" iClamp="100.0" />
+    <controller_defaults velocity="-0.01" max_effort="2.5" max_expected_effort="0.9" min_expected_effort="-0.9" min_pos="0" max_pos="0.03" timeout="30" />   
   </joint>
 </controller>

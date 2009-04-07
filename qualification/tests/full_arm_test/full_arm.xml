@@ -18,6 +18,7 @@
   <!-- declare the path where all models/textures/materials are stored -->
   <resource location="ros-pkg://pr2_defs/meshes"/>
 
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
   <include filename="$(find pr2_defs)/defs/gripper_defs.xml" />
   <include filename="$(find pr2_defs)/defs/gazebo_defs.xml" />

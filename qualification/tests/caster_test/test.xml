@@ -3,7 +3,7 @@
   <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
   <pre_startup>caster_prog.launch</pre_startup>
   <pre_startup>../../scripts/power_cycle.launch</pre_startup>
-  <pre_startup>caster_conf.launch</pre_startup>
+  <pre_startup>../../config/fl_caster_conf.launch</pre_startup>
   <startup>caster.launch</startup>
   <subtest>hysteresis_caster_turret.launch</subtest>
   <subtest>sinesweep_caster_turret.launch</subtest>

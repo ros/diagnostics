@@ -1,16 +1,23 @@
 <tests>
-<test serial="simple_" name="simple_example"/>
-<test serial="6804108" name="caster_test"/>
-<test serial="6804213" name="wrist_test"/>
-<test serial="6804040" name="head_test"/>
-<test serial="6804015" name="gripper_test"/>
-<test serial="6804178" name="full_arm_test"/>
-<test serial="6804204" name="shoulder_test"/>
-<test serial="6804139" name="upperarm_test"/>
-<test serial="upperfl" name="upperarm_flex_only_test"/>
-<test serial="6801024" name="hokuyo_test"/>
-<test serial="6801050" name="imu_test"/>
-<test serial="etherne" name="ethernet_test"/>
-<test serial="6804001" name="laser_tilt_test" />
-<test serial="torsoli" name="torso_lift_test" />
+  <test serial="simple_" file="simple_example/test.xml" descrip="Simple Example" />
+  <test serial="6804108" file="caster_test/test.xml" descrip="Caster Alpha 1.0"/>
+  <test serial="6804108" file="caster_test/test_a2.xml" descrip="Caster Alpha 2.0" />
+  
+  <test serial="6804213" file="wrist_test/test.xml" descrip="Wrist Test" />
+  <test serial="6804040" file="head_test/test.xml" descrip="Head Alpha 1.0" />
+  <test serial="6804040" file="head_test/test_a2a.xml"  descrip="Head Alpha 2.0a (small tilt motor)" />
+  <test serial="6804040" file="head_test/test.a2b.xml"  descrip="Head Alpha 2.0b (big tilt motor)" />
+  
+  <test serial="6804015" file="gripper_test/test.xml" descrip="Gripper Test" />
+  <test serial="6804178" file="full_arm_test/test.xml" descrip="Full Arm Test" />
+  <test serial="6804204" file="shoulder_test/test.xml" descrip="Shoulder Test" />
+  <test serial="6804139" file="upperarm_test/test.xml" descrip="Upperarm Test" />
+  <test serial="6804139" file="upperarm_flex_only_test/test.xml" descrip="Upperarm Test - Flex Joint Ony" />
+  <!--test serial="upperfl" file="upperarm_flex_only_test/test.xml"/-->
+
+  <test serial="6801024" file="hokuyo_test/test.xml" descrip="Hokuyo Test" />
+  <test serial="6801050" file="imu_test/test.xml" descrip="IMU Test" />
+  <test serial="etherne" file="ethernet_test/test.xml" descrip="Ethernet Test" />
+  <test serial="6804001" file="laser_tilt_test/test.xml" descrip="Laser Tilt Test" />
+  <test serial="torsoli" file="torso_lift_test/test.xml" descrip="Torso Lift Test" />
 </tests>

@@ -1,7 +1,0 @@
-<controller type="WristCalibrationControllerNode" name="cal_wrist">
-      <calibrate transmission="l_wrist_trans"
-                 actuator_l="l_wrist_l_motor" actuator_r="l_wrist_r_motor"
-                 flex_joint="l_wrist_flex_joint" roll_joint="l_wrist_roll_joint"
-                 velocity="1.2" />
-      <pid p="3.0" i="0.2" d="0" iClamp="2.0" />
-</controller>

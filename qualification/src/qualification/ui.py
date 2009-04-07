@@ -54,6 +54,7 @@ from wx import html
 import thread
 from xml.dom import minidom
 
+from qualification.msg import *
 from srv import *
 from test import *
 
@@ -65,6 +66,8 @@ from invent_client import Invent
 TESTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'tests')
 RESULTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results')
 ONBOARD_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'onboard')
+CONFIG_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'config')
+
 
 class SerialPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame):
@@ -93,9 +96,7 @@ class SerialPanel(wx.Panel):
     root_name = self._manager._onboard_root_name
     root = self._tree_ctrl.AddRoot(root_name)
     self._root_node = root
-    #self._tree_item_labels_by_id = {}
-    #self._tree_item_labels_by_id[root] = root_name
-    
+        
     # Onboards are stored as a dictionary tree
     # Nodes with no children have values None for their keys
     self.insert_onboard_test_nodes(root, self._manager._onboards)
@@ -110,10 +111,28 @@ class SerialPanel(wx.Panel):
     self._show_viz_box = xrc.XRCCTRL(self._panel, 'visualizer_checkbox')
     self._show_results_box = xrc.XRCCTRL(self._panel, 'show_results_checkbox')
 
+    # Config tab
+    self._serial_text_conf = xrc.XRCCTRL(self._panel, 'serial_text_conf')
 
+    self._config_button = xrc.XRCCTRL(self._panel, 'config_button')
+    self._config_button.Bind(wx.EVT_BUTTON, self.on_config)
 
     self._panel.Bind(wx.EVT_CHAR, self.on_char)
     self._panel.SetFocus()
+
+  def on_config(self, event):
+    # Get selected launch file
+    #name = self._configs_box.GetStringSelection()
+    serial = self._serial_text_conf.GetValue()
+
+    if not self._manager.has_conf_script(serial):
+      return
+
+    launch_script = self._manager.select_conf_to_load(serial)
+    name = self._manager._config_descrips_by_file[launch_script]
+
+    wx.CallAfter(self._manager.configure_assembly, serial, name, launch_script)
+
 
   # Recursively add onboard test tree to tree control
   def insert_onboard_test_nodes(self, parent_node, branch):
@@ -184,7 +203,8 @@ class SerialPanel(wx.Panel):
     if (event.GetKeyCode() == 347):
       # Clear the old contents and put focus in the serial box so the rest of input goes there
       self._serial_text.Clear()
-      self._serial_text.SetFocus()
+      self._serial_text_conf.Clear()
+      # self._serial_text.SetFocus()
       
 class InstructionsPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame, file):
@@ -450,10 +470,22 @@ class QualificationFrame(wx.Frame):
       print >> sys.stderr, "Could not load tests description from '%s'"%(tests_xml_path)
       sys.exit()
 
+    self._test_descripts_by_file = {}
+
     # Loads tests by serial number of part
     tests = doc.getElementsByTagName('test')
     for test in tests:
-      self._tests[test.attributes['serial'].value] = test.attributes['name'].value
+      serial = test.attributes['serial'].value
+      test_file = test.attributes['file'].value
+      descrip = test.attributes['descrip'].value
+      if self._tests.has_key(serial):
+        self._tests[serial].append(test_file)
+      else:
+        self._tests[serial] = [ test_file ]
+      
+      self._test_descripts_by_file[test_file] = descrip
+
+      #self._tests[test.attributes['serial'].value] = test.attributes['name'].value
 
     # Store robots by name and launch file
     self._robots = { 'PRE' : '<startup>robots/pre_test.launch</startup>\n', 
@@ -474,7 +506,34 @@ class QualificationFrame(wx.Frame):
     self._onboards_by_label[self._onboard_root_name] = []
     
     self.find_onboard_test_nodes_from_xml(self._onboards, doc, 'robot', [self._onboard_root_name])
-        
+
+    # Load part configuration scripts
+    config_xml_path = os.path.join(CONFIG_DIR, 'configs.xml')
+    self._configs = {}
+    try:
+      doc = minidom.parse(config_xml_path)
+    except IOError:
+      print >> sys.stderr, "Could not load configuation scripts from '%s'"%(config_xml_path)
+      sys.exit()
+    
+    self._config_descrips_by_file = {}
+    configs = doc.getElementsByTagName('config')
+    for conf in configs:
+      serial = conf.attributes['serial'].value
+      file = conf.attributes['file'].value
+      descrip = conf.attributes['descrip'].value
+
+      if self._configs.has_key(serial):
+        self._configs[serial].append(file)
+      else:
+        self._configs[serial] = [ file ]
+
+      self._config_descrips_by_file[file] = descrip
+
+      #self._configs[conf.attributes['name'].value] = conf.attributes['launch'].value
+    
+
+
     # Load the XRC resource
     xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
     self._res = xrc.XmlResource(xrc_path)
@@ -503,15 +562,84 @@ class QualificationFrame(wx.Frame):
     self.Bind(wx.EVT_TIMER, self.on_spin, self._spin_timer)
     self._spin_timer.Start(100)
     
-    self._show_results = False
+    self._show_results_always = False
+    self._config_service = None
 
     self._username = None
     self._password = None
 
+  # Configure assembly and listen for response
+  # Load by serial # and log that config occured
+  def configure_assembly(self, serial, name, launch_script):
+    self.log('Configuring subassembly %s as %s' % (serial, name) )
+    
+    self._core_launch = self.launch_core()
+        
+    # Turn on power board?
+    self.log('Turning on power board')
+    power_board_launch = self.launch_script(os.path.join(CONFIG_DIR, '../scripts/power_cycle.launch'), None)
+    if power_board_launch == None:
+      self.log('Unable to cycle power board! Cannot configure MCB!')
+      return
+    
+    power_board_launch.spin()
+        
+    # Launch configuration
+    self.log('Starting configuration')
+    listener = RoslaunchProcessListener()
+    config_launcher = self.launch_script(os.path.join(CONFIG_DIR, launch_script), listener)
+  
+    if config_launcher is None:
+      self.log('Configuration failed, unable to load launch script %s' % launch_script)
+      return
 
-  def generate_subtest_xml_line(self, test, pre=None):
-    if pre is not None:
-      return '<subtest pre=\"%s\">%s</subtest>\n' % (pre, test)
+    config_launcher.spin()
+
+    # Fix so when process dies, this actually reports
+    if (listener.has_any_process_died_badly()):
+      s = 'Configuration failed! Press OK to cancel test.' % (script)
+      wx.MessageBox(s, 'Pre_startup Failed', wx.OK|wx.ICON_ERROR, self)
+      self.log('Configuration of %s failed!' % name)
+      return
+
+    # Disable powerboard?
+    self.log('Shutting down power board')
+    shutdown_launch = self.launch_script(os.path.join(CONFIG_DIR, '../scripts/power_board_disable.launch'), None)
+    if (shutdown_launch == None):
+      s = 'Could not load roslaunch shutdown script. SHUTDOWN POWER BOARD MANUALLY!'
+      wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
+      self.log('No shutdown script')
+      self.log('SHUT DOWN POWER BOARD MANUALLY')
+
+    shutdown_launch.spin()
+    
+    shutdown_launch.stop()
+    config_launcher.stop()
+    power_board_launch.stop()
+
+    self._core_launch.stop()
+
+    self._core_launch = None
+    shutdown_launch = None
+    config_launcher = None
+    power_board_launch = None
+    #self._config_sub = None
+    self.log('Configuration finished')
+    
+    msg = 'Successfully configured part %s as %s.' % (serial, name)
+    wx.MessageBox(msg, 'Configuration complete', wx.OK, self)
+    invent = self.get_inventory_object()
+    if (invent != None):
+      invent.setNote(serial, msg)
+
+
+  def generate_subtest_xml_line(self, test, pre_test=None, post_test=None):
+    if pre_test is not None and post_test is not None:
+      return '<subtest pre=\"%s\" post=\"%s\">%s</subtest>\n' % (pre_test, post_test, test)
+    elif pre_test is not None:
+      return '<subtest pre=\"%s\">%s</subtest>\n' % (pre_test, test)
+    elif post_test is not None:
+      return '<subtest post=\"%s\">%s</subtest>\n' % (post_test, test)
     else:
       return '<subtest>%s</subtest>\n' % test
       
@@ -533,17 +661,20 @@ class QualificationFrame(wx.Frame):
 
       node_keys = node.attributes.keys()
 
-      test = None
-      pre = None
+      test         = None
+      pre_test     = None
+      post_test    = None
       xml_for_test = None
       
       if 'pre' in node_keys:
-        pre = node.attributes['pre'].value
-      # Make string for test XML launch
+        pre_test = node.attributes['pre'].value
       
+      if 'post' in node_keys:
+        post_test = node.attributes['post'].value
+
       if 'test' in node_keys:
         test = node.attributes['test'].value
-        xml_for_test = self.generate_subtest_xml_line(test, pre)
+        xml_for_test = self.generate_subtest_xml_line(test, pre_test, post_test)
         # Add test XML to this test label, and all parent labels
         for lab in test_labels:
           self._onboards_by_label[lab].append(xml_for_test)
@@ -556,9 +687,8 @@ class QualificationFrame(wx.Frame):
       else:
         ob_branch[label] = None # Means no child tests
 
-
   def log(self, msg):
-    self._log.AppendText(datetime.datetime.now().strftime("%Y/%m/%d %I:%M:%S: ") + msg + '\n')
+    self._log.AppendText(datetime.datetime.now().strftime("%m/%d/%Y %I:%M:%S: ") + msg + '\n')
     self._log.Refresh()
     self._log.Update()
     
@@ -571,17 +701,124 @@ class QualificationFrame(wx.Frame):
   def reset(self):
     self.set_top_panel(SerialPanel(self._top_panel, self._res, self))
     
+  def launcher_spin_thread(self, launcher):
+    launcher.spin()
+
+  def has_conf_script(self, serial):
+    return self._configs.has_key(serial[0:7])
+
   def has_test(self, serial):
     return self._tests.has_key(serial[0:7])
     
   def has_test_onboard(self, label):
     return self._onboards.has_key(label)
 
-  def launcher_spin_thread(self, launcher):
-    launcher.spin()
+  def load_onboard_tests(self, test_list, show_viz, show_results):
+    self._test_dir = ONBOARD_DIR
+    self.log('Starting onboard test')
+    self._current_serial = None
+    #self.start_qualification(test_dir)
+
+    self._show_results_always = show_results
+
+    # Make set of all tests
+    tests = set(test_list)
+
+    # Instructions? -> later
+    test_xml = '<test>\n' 
+
+    if show_viz:
+      test_xml = test_xml + '<subtest>visualization/visualization.launch</subtest>\n'
+    for test in tests:
+      test_xml = test_xml + str(test)
+    test_xml = test_xml + '</test>'
+
+    print 'Test XML \n%s' % test_xml
+    self.start_qualification(test_xml)
+
+  # Component qualification
+  def load_tests(self, serial, rework_reason = ''):
+    short_serial = serial[0:7]
+    self.log('Starting test %s'%(self._tests[short_serial]))
+    self._current_serial = serial
+
+    if (len(rework_reason) > 0):
+      invent = self.get_inventory_object()
+      if (invent != None):
+        invent.setNote(self._current_serial, "Hardware rework, reason given: %s"%(rework_reason))
+        
+
+    test_folder_file = self._tests[short_serial][0]
+    if len(self._tests[short_serial]) > 1:
+      # Load select_test_dialog to ask which test
+      test_folder_file = self.select_test_to_load(short_serial)
+
+    if test_folder_file is None:
+      self.on_cancel()
+
+    dir, sep, test_file = test_folder_file.partition('/')
+    
+    self._test_dir = os.path.join(TESTS_DIR, dir)
+    test_str = open(os.path.join(TESTS_DIR, test_folder_file)).read()
+  
+    self.start_qualification(test_str)
+
+  def select_conf_to_load(self, short_serial):
+    # Load select_test_dialog
+    configs_by_descrip = {}
+    for conf in self._configs[short_serial]:
+      configs_by_descrip[self._config_descrips_by_file[conf]] = conf
+      
+    # Load robot selection dialog
+    dialog = self._res.LoadDialog(None, 'select_test_dialog')
+    select_text = xrc.XRCCTRL(dialog, 'select_text')
+    select_text.SetLabel('Select part of robot to configure component.')
+    test_box = xrc.XRCCTRL(dialog, 'test_list_box')
+    test_box.InsertItems(dict.keys(configs_by_descrip), 0)
+    
+    select_text.Wrap(250)
+    
+    dialog.Layout()
+    dialog.Fit()
+
+    # return string of test folder/file to run
+    if (dialog.ShowModal() == wx.ID_OK):
+      desc = test_box.GetStringSelection()
+      
+      return configs_by_descrip[desc]
+    else: # User didn't want to configure, I guess
+      return None
+
+  # If more than one test for that serial, calls up prompt to ask user to select
+  def select_test_to_load(self, short_serial):
+    # Load select_test_dialog
+    tests_by_descrip = {}
+    for test in self._tests[short_serial]:
+      tests_by_descrip[self._test_descripts_by_file[test]] = test
+    
+    # Load robot selection dialog
+    dialog = self._res.LoadDialog(None, 'select_test_dialog')
+    select_text = xrc.XRCCTRL(dialog, 'select_text')
+    select_text.SetLabel('Select component or component type to qualify.')
+    test_box = xrc.XRCCTRL(dialog, 'test_list_box')
+    test_box.InsertItems(dict.keys(tests_by_descrip), 0)
+
+    select_text.Wrap(250)
+    
+    dialog.Layout()
+    dialog.Fit()
+
+    # return string of test folder/file to run
+    if (dialog.ShowModal() == wx.ID_OK):
+      desc = test_box.GetStringSelection()
+      
+      return tests_by_descrip[desc]
+    else: # User didn't want to test
+      return None
+
     
   # Launches program for either onboard or test cart tests
-  def start_test(self, test_str):
+  def start_qualification(self, test_str):
     self._tests_start_date = datetime.datetime.now()
   
     self._current_test = Test()
@@ -590,8 +827,10 @@ class QualificationFrame(wx.Frame):
     self._results = []
     self._subtest = None
     
-    print self._current_test.subtests
-
+    # Print tests
+    for st in self._current_test.subtests:
+      print st.get_name()
+    
     if (len(self._current_test.subtests) == 0):
       wx.MessageBox('Test selected has no subtests defined', 'No tests', wx.OK|wx.ICON_ERROR, self)
       return
@@ -603,58 +842,17 @@ class QualificationFrame(wx.Frame):
       self._result_service = None
 
     self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
-        
+
     if (self._current_test.getInstructionsFile() != None):
-      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(test_dir, self._current_test.getInstructionsFile())))
+      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(self._test_dir, self._current_test.getInstructionsFile())))
     else:
       self.test_startup()
-
-
-  def load_onboard_tests(self, test_list, show_viz, show_results):
-    self._test_dir = ONBOARD_DIR
-    self.log('Starting onboard test')
-    self._current_serial = None
-    #self.start_test(test_dir)
-
-    self._show_results = show_results
-
-    # Make set of all tests
-    tests = set(test_list)
-    # Add startup script, make it a string
-    # Instructions? -> later
-    test_xml = '<test>\n' #<startup>robot.launch</startup>\n'
-    # Maybe if visualization....
-    if show_viz:
-      test_xml = test_xml + '<subtest>visualization/visualization.launch</subtest>\n'
-    for test in tests:
-      test_xml = test_xml + str(test)
-    test_xml = test_xml + '</test>'
-
-    print 'Test XML \n%s' % test_xml
-    self.start_test(test_xml)
-
-  # Launches program
-  def load_tests(self, serial, rework_reason = ''):
-    short_serial = serial[0:7]
-    self.log('Starting test %s'%(self._tests[short_serial]))
-    self._current_serial = serial
-    
-
-    if (len(rework_reason) > 0):
-      invent = self.get_inventory_object()
-      if (invent != None):
-        invent.setNote(self._current_serial, "Hardware rework, reason given: %s"%(rework_reason))
-        
-    self._test_dir = os.path.join(TESTS_DIR, self._tests[short_serial]) 
-    test_str = open(os.path.join(self._test_dir, 'test.xml')).read()
-  
-    self.start_test(test_str)
      
   def test_startup(self):
     panel = PrestartupPanel(self._top_panel, self._res, self)
     self.set_top_panel(panel)
     panel.set_progress_label('Initializing pre-startup sequence')
-    time.sleep(1)
+    time.sleep(2)
     wx.CallAfter(self.test_startup_real(panel))
     
   # Called from InstructionsPanel, runs through prestartup scripts
@@ -926,7 +1124,7 @@ class QualificationFrame(wx.Frame):
     self._subtest_launch.stop()
     self._subtest_launch = None
     
-    if self.show_results:
+    if self._show_results_always:
       self.show_plots(msg)
     else:
       if (msg.result == TestResultRequest.RESULT_PASS):
@@ -1016,7 +1214,7 @@ class QualificationFrame(wx.Frame):
     
     if (self._current_test.getShutdownScript() != None):
       self.log('Running shutdown script...')
-      self._shutdown_launch = self.launch_script(os.path.join(self._current_test.getDir(), self._current_test.getShutdownScript()), None)
+      self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
       if (self._shutdown_launch == None):
         s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
         wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)

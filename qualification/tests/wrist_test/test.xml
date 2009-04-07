@@ -3,7 +3,7 @@
   <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
   <pre_startup>wrist_prog.launch</pre_startup>
   <pre_startup>../../scripts/power_cycle.launch</pre_startup>
-  <pre_startup>wrist_conf.launch</pre_startup>
+  <pre_startup>../../config/r_wrist_conf.launch</pre_startup>
   <startup>wrist.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
   <subtest>wrist_visualization.launch</subtest>

@@ -2,9 +2,12 @@
 
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/gripper_test/gripper.xml'" />
 
-  <machine name="xenomai_root" user="root" address="$(env ROS_TEST_HOST)" ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>   
+  <!-- Loads realtime machine and PR2_etherCAT -->
+  <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
 
-  <node machine="xenomai_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x /robotdesc/pr2"/>
+  <!-- Gripper Calibration -->
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find qualification)/tests/gripper_test/gripper_cal.xml" />
 
-  <!-- Gripper Calibration not needed for hysteresis -->
 </launch>
