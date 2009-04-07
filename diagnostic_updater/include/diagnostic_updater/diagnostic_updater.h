@@ -49,7 +49,8 @@ class DiagnosticUpdater
 {
 private:
 
-  T* node_;
+  T* client_;
+  ros::Node* node_;
 
   std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)> status_fncs_;
 
@@ -61,9 +62,19 @@ private:
 
 public:
 
-  DiagnosticUpdater(T* node) : node_(node)
+  DiagnosticUpdater(T* node) : client_(node), node_(static_cast<ros::Node*>(node))
   {
-    ((ros::Node*)(node_))->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+    setup();
+  }
+  
+  DiagnosticUpdater(T* client, ros::Node* node) : client_(client), node_(node)
+  {
+    setup();
+  }
+
+  void setup()
+  {
+    node_->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
 
     node_->param("~diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
@@ -97,7 +108,7 @@ public:
         status.level = 2;
         status.message = "No message was set";
 
-        (*node_.*(*status_fncs_iter))(status);
+        (client_->*(*status_fncs_iter))(status);
 
         if (status.name != "None")
         {
