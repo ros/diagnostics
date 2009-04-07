@@ -1,3 +1,1 @@
-<controllers>
-  <controller type="CartesianTFFControllerNode" name="cartesian_tff_right" topic="cartesian_tff_right" />
-</controllers>
+<controller type="CartesianTFFController" name="cartesian_tff_right" />

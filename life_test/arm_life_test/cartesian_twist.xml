@@ -1,3 +1,1 @@
-<controllers>
-  <controller type="CartesianTwistControllerNode" name="cartesian_twist" topic="cartesian_twist" />
-</controllers>
+<controller type="CartesianTwistController" name="cartesian_twist" />

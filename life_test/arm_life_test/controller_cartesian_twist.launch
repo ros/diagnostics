@@ -1,17 +1,17 @@
 <launch>
 
+<!-- Cartesian wrench controller -->
+  <param name="cartesian_wrench/autostart" type="bool" value="true" />
+  <param name="cartesian_wrench/root_name" type="string" value="torso_lift_link" />
+  <param name="cartesian_wrench/tip_name" type="string" value="r_gripper_tool_frame" />
+
+
 <!-- Cartesian twist controller -->
-
-  <!-- parameters for twist controller -->
   <param name="cartesian_twist/root_name" type="string" value="torso_lift_link" />
-  <param name="cartesian_twist/tip_name" type="string" value="r_wrist_roll_link" />
+  <param name="cartesian_twist/tip_name" type="string" value="r_gripper_tool_frame" />
 
-  <param name="cartesian_twist/joystick_max_trans" value="0.5" />
-  <param name="cartesian_twist/joystick_max_rot" value="1.0" />	
-
-  <!-- Jacked up values for teleop test. Defaults: trans=200, rot=5 -->
-  <param name="cartesian_twist/ff_trans" value="500.0" />
-  <param name="cartesian_twist/ff_rot" value="15.0" />
+  <param name="cartesian_twist/ff_trans" value="0.0" />
+  <param name="cartesian_twist/ff_rot" value="0.0" />
 
   <param name="cartesian_twist/fb_trans/p" value="20.0" />
   <param name="cartesian_twist/fb_trans/i" value="0.5" />
@@ -23,6 +23,5 @@
   <param name="cartesian_twist/fb_rot/d" value="0.0" />
   <param name="cartesian_twist/fb_rot/i_clamp" value="0.2" />
 
-
-  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_twist.xml" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find arm_life_test)/cartesian_wrench.xml $(find arm_life_test)/cartesian_twist.xml" output="screen" />
 </launch>
