@@ -87,6 +87,9 @@ def hold_joint(name, p, i, d, iClamp, holding):
             print "Failed to spawn holding controller %s on try %d" % (name, i)
     return False
 
+def finished(msg):
+    return msg
+
 def main():
     # Parse sys args
     hold_jnt = str(sys.argv[1])
@@ -110,9 +113,10 @@ def main():
         # Spawn dynamic controller
         mechanism.spawn_controller(xml_for_dy_ver.read())
         # Find creative way to kill controller
+        holding.append("r_wrist_flex_torque_controller")
 
-        while not rospy.is_shutdown():
-            sleep(0.5)
+        rospy.wait_for_service("/dynamic_verification_done")
+        rospy.Service("/dynamic_verification_done",Empty,finished)
 
     finally:
         # Kill all holding controllers
@@ -125,6 +129,8 @@ def main():
                     break # Go to next controller if no exception               
                 except:
                     print "Failed to kill controller %s on try %d" % (name, i)
+        sys.exit(0)
+
         
 if __name__ == '__main__':
     main()

@@ -41,6 +41,8 @@ import os
 import datetime
 import string
 from time import sleep
+from std_msgs import *
+from std_srvs.srv import *
 
 import csv 
 
@@ -63,6 +65,9 @@ class App:
         else:
             print 'Can\'t write data, unknown type: %s' % self.data.test_name
 
+    def dummy(self,req):
+        print "do nothing"
+
     def write_const_torque(self):
         # write to /results/joint_name/date_time file
         time_str = datetime.datetime.now().strftime("%Y%m%d_%I%M")
@@ -83,22 +88,25 @@ class App:
         velocity = numpy.array(self.data.velocity)
 
         # See if there's an easy way to convert to .csv file
+        datafile = ''
         for i in range(0, time.size):
             tm = str(time[i])
             cm = str(cmd[i])
             ef = str(effort[i])
             po = str(position[i])
             ve = str(velocity[i])
-            data_file.write_row(tm, cm, ef, po, ve)
+            #data_file.write_row(tm, cm, ef, po, ve)
 
-            #state_string = `time[i]` + ',' + `cmd[i]` + ',' + `effort[i]` + ',' + `position[i]` + ',' + `velocity[i]` + '\n'
-            #datafile += state_string
+            state_string = `time[i]` + ',' + `cmd[i]` + ',' + `effort[i]` + ',' + `position[i]` + ',' + `velocity[i]` + '\n'
+            datafile += state_string
 
+        f.write(datafile)
 
-            #f.write(data_file)
         print 'Wrote file as results/const_torque/%s/%s.csv' % (joint_name, time_str)
 
-
+        done_service = rospy.ServiceProxy("/dynamic_verification_done",Empty)
+        done_service.call(Empty())
+    
     def write_freq_resp(self):
         # write to /results/joint_name/date_time file
         time_str = datetime.datetime.now().strftime("%Y%m%d_%I%M")
