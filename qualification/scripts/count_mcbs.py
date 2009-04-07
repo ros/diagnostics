@@ -73,7 +73,8 @@ def main():
             if str(count) == str(expected):
                 print "Found %s MCB's, programming" % count
                 action.str = "pass"
-                return 0
+                #return 0
+                sys.exit(0)
             elif count == 0:
                 action = result_proxy("Found no MCB's! Check cables and power. Retry?:::%s" % details)
             elif count > 199:
@@ -83,11 +84,13 @@ def main():
                 
             if action.str == "fail":
                 print "Programming MCB's failed, counts don't match!"
-                return 1
+                #return 1
+                sys.exit(1)
     
     except OSError, e:
         action = result_proxy("Failed to count MCB's, cannot program. Press OK to cancel.:::%s", details)
-        return 2
+        #return 2
+        sys.exit(2)
 
 if __name__ == '__main__':
     main()

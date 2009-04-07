@@ -584,7 +584,7 @@ class QualificationFrame(wx.Frame):
     
     power_board_launch.spin()
         
-    # Launch configuration
+    # Launch configuration script
     self.log('Starting configuration')
     listener = RoslaunchProcessListener()
     config_launcher = self.launch_script(os.path.join(CONFIG_DIR, launch_script), listener)
@@ -595,14 +595,12 @@ class QualificationFrame(wx.Frame):
 
     config_launcher.spin()
 
-    # Fix so when process dies, this actually reports
     if (listener.has_any_process_died_badly()):
       s = 'Configuration failed! Press OK to cancel test.' % (script)
       wx.MessageBox(s, 'Pre_startup Failed', wx.OK|wx.ICON_ERROR, self)
       self.log('Configuration of %s failed!' % name)
       return
 
-    # Disable powerboard?
     self.log('Shutting down power board')
     shutdown_launch = self.launch_script(os.path.join(CONFIG_DIR, '../scripts/power_board_disable.launch'), None)
     if (shutdown_launch == None):
@@ -633,7 +631,7 @@ class QualificationFrame(wx.Frame):
       invent.setNote(serial, msg)
 
 
-  def generate_subtest_xml_line(self, test, pre_test=None, post_test=None):
+  def generate_subtest_xml_line(self, test, pre_test = None, post_test = None):
     if pre_test is not None and post_test is not None:
       return '<subtest pre=\"%s\" post=\"%s\">%s</subtest>\n' % (pre_test, post_test, test)
     elif pre_test is not None:
@@ -763,7 +761,9 @@ class QualificationFrame(wx.Frame):
   
     self.start_qualification(test_str)
 
-  def select_conf_to_load(self, short_serial):
+  def select_conf_to_load(self, serial):
+    short_serial = serial[0:7]
+    
     # Load select_test_dialog
     configs_by_descrip = {}
     for conf in self._configs[short_serial]:

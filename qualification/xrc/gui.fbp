@@ -3708,13 +3708,13 @@
                     <property name="proportion">1</property>
                     <object class="wxStdDialogButtonSizer" expanded="1">
                         <property name="Apply">0</property>
-                        <property name="Cancel">0</property>
+                        <property name="Cancel">1</property>
                         <property name="ContextHelp">0</property>
                         <property name="Help">0</property>
-                        <property name="No">1</property>
-                        <property name="OK">0</property>
+                        <property name="No">0</property>
+                        <property name="OK">1</property>
                         <property name="Save">0</property>
-                        <property name="Yes">1</property>
+                        <property name="Yes">0</property>
                         <property name="minimum_size"></property>
                         <property name="name">conf_dialog_button</property>
                         <property name="permission">protected</property>
@@ -3730,7 +3730,7 @@
                 </object>
             </object>
         </object>
-        <object class="Dialog" expanded="0">
+        <object class="Dialog" expanded="1">
             <property name="bg"></property>
             <property name="center"></property>
             <property name="context_help"></property>

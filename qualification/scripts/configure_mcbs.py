@@ -51,11 +51,14 @@ result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
 parser = OptionParser()
 parser.add_option("--motor=", type="string", dest="mcbs", action="append")
 
+# Add custom actuators.conf file if given
+#parser.add_option("--actuators ", type="string", dest="actuators", default="/acuators.conf", action="store", nargs=1)
+
 options, args = parser.parse_args()
 
 mcbs = []
 for args in options.mcbs:
-  mcbs.append(args.split(","))
+  mcbs.append(args.split(",")) # Split into name, MCB number
 
 success = True
 
@@ -69,6 +72,7 @@ if retcode != 0:
 
 # Configure MCB's
 path = roslib.packages.get_pkg_dir("ethercat_hardware", True)
+# actuator_path = path + options.actuators
 actuator_path = path + "/actuators.conf"
 
 #wait for MCB's to initialize after being turned on
@@ -87,6 +91,7 @@ for name, num in mcbs:
       retcode = p.returncode
 
       details = 'Ran motorconf. Attempted to program MCB %s with actuator name %s. Return code: %s.\n\n' % (num, name, retcode)
+      details += 'CMD:\n' + cmd + '\n'
       details += 'STDOUT:\n' + stdout
       if len(stderr) > 5:
         details += '\nSTDERR:\n' + stderr

@@ -96,7 +96,7 @@ def msg_detail_prompt(msg):
 
   global prompt_click, prompt_done
 
-  if (dialog.ShowModal() == wx.ID_YES):
+  if (dialog.ShowModal() == wx.ID_OK):
     prompt_click = "yes"
   else:
     prompt_click = "no"
@@ -110,8 +110,8 @@ def check_w_user(req):
   global prompt_done
   prompt_done=False
 
-  #wx.CallAfter(msg_detail_prompt, req.str)
-  wx.CallAfter(msg_prompt, req.str)
+  wx.CallAfter(msg_detail_prompt, req.str)
+  #wx.CallAfter(msg_prompt, req.str)
 
   while(not prompt_done):
     print "Waiting for retry prompt . . ."
