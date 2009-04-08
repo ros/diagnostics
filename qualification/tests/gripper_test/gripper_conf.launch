@@ -1,9 +1,0 @@
-<launch>
-  <include file="$(find qualification)/tests/init.machine" />
-
-  <!-- configure_mcbs -->
-  <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=r_gripper_motor,0" />
-
-  <!-- service -->
-  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
-</launch>

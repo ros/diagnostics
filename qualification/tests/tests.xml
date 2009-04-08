@@ -1,23 +1,45 @@
 <tests>
-  <test serial="simple_" file="simple_example/test.xml" descrip="Simple Example" />
-  <test serial="6804108" file="caster_test/test.xml" descrip="Caster Alpha 1.0"/>
-  <test serial="6804108" file="caster_test/test_a2.xml" descrip="Caster Alpha 2.0" />
-  
-  <test serial="6804213" file="wrist_test/test.xml" descrip="Wrist Test" />
-  <test serial="6804040" file="head_test/test.xml" descrip="Head Alpha 1.0" />
-  <test serial="6804040" file="head_test/test_a2a.xml"  descrip="Head Alpha 2.0a (small tilt motor)" />
-  <test serial="6804040" file="head_test/test.a2b.xml"  descrip="Head Alpha 2.0b (big tilt motor)" />
-  
-  <test serial="6804015" file="gripper_test/test.xml" descrip="Gripper Test" />
-  <test serial="6804178" file="full_arm_test/test.xml" descrip="Full Arm Test" />
-  <test serial="6804204" file="shoulder_test/test.xml" descrip="Shoulder Test" />
-  <test serial="6804139" file="upperarm_test/test.xml" descrip="Upperarm Test" />
-  <test serial="6804139" file="upperarm_flex_only_test/test.xml" descrip="Upperarm Test - Flex Joint Ony" />
-  <!--test serial="upperfl" file="upperarm_flex_only_test/test.xml"/-->
+  <!-- Base and Spine -->
+  <test serial="6804108" 
+	file="caster_test/test.xml" descrip="Caster Alpha 1.0"/>
+  <test serial="6804108" 
+	file="caster_test/test_alpha2.xml" descrip="Caster Alpha 2.0" />
+  <test serial="torsoli" 
+	file="torso_lift_test/test.xml" descrip="Torso Lift Test" />  
 
-  <test serial="6801024" file="hokuyo_test/test.xml" descrip="Hokuyo Test" />
-  <test serial="6801050" file="imu_test/test.xml" descrip="IMU Test" />
-  <test serial="etherne" file="ethernet_test/test.xml" descrip="Ethernet Test" />
-  <test serial="6804001" file="laser_tilt_test/test.xml" descrip="Laser Tilt Test" />
-  <test serial="torsoli" file="torso_lift_test/test.xml" descrip="Torso Lift Test" />
+  <!-- Head and Laser Tilt -->
+  <test serial="6804040" 
+	file="head_test/test.xml" descrip="Head Alpha 1.0" />
+  <test serial="6804040" 
+	file="head_test/test_alpha2a.xml"  descrip="Head Alpha 2.0a (small tilt motor)" />
+  <test serial="6804040" 
+	file="head_test/test_alpha2b.xml"  descrip="Head Alpha 2.0b (big tilt motor)" />
+  <test serial="6804001" 
+	file="laser_tilt_test/test.xml" descrip="Laser Tilt Test" />  
+
+  <!-- Arm Tests -->
+  <test serial="6804178" 
+	file="full_arm_test/test.xml" descrip="Full Arm Test" />
+  <test serial="6804204" 
+	file="shoulder_test/test.xml" descrip="Shoulder Test" />
+  <test serial="6804139" 
+	file="upperarm_test/test.xml" descrip="Upperarm Test" />
+  <test serial="6804139" 
+	file="upperarm_flex_only_test/test.xml" descrip="Upperarm Test - Flex Jnt Ony" />
+  <test serial="6804213" 
+	file="wrist_test/test.xml" descrip="Wrist Test" />
+  <test serial="6804015" 
+	file="gripper_test/test.xml" descrip="Gripper Test" />
+  <!--test serial="upperfl" 
+      file="upperarm_flex_only_test/test.xml"/-->
+  
+  <!-- Special tests -->
+  <test serial="simple_" 
+	file="simple_example/test.xml" descrip="Simple Example" />
+  <test serial="6801024" 
+	file="hokuyo_test/test.xml" descrip="Hokuyo Test" />
+  <test serial="6801050" 
+	file="imu_test/test.xml" descrip="IMU Test" />
+  <test serial="etherne" 
+	file="ethernet_test/test.xml" descrip="Ethernet Test" />
 </tests>

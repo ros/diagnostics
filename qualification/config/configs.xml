@@ -11,13 +11,13 @@
   
   <!-- Casters, Alpha 2.0 -->
   <config serial="6804108" 
-	  file="fl_caster_a2_conf.launch" descrip="FL Caster Alpha 2.0"/>
+	  file="fl_caster_alpha2_conf.launch" descrip="FL Caster Alpha 2.0"/>
   <config serial="6804108" 
-	  file="fr_caster_a2_conf.launch" descrip="FR Caster Alpha 2.0"/>
+	  file="fr_caster_alpha2_conf.launch" descrip="FR Caster Alpha 2.0"/>
   <config serial="6804108" 
-	  file="bl_caster_a2_conf.launch" descrip="BL Caster Alpha 2.0"/>
+	  file="bl_caster_alpha2_conf.launch" descrip="BL Caster Alpha 2.0"/>
   <config serial="6804108" 
-	  file="br_caster_a2_conf.launch" descrip="BR Caster Alpha 2.0"/>
+	  file="br_caster_alpha2_conf.launch" descrip="BR Caster Alpha 2.0"/>
   
   <!-- Arms -->
   <config serial="6804204" 
@@ -42,11 +42,11 @@
   
   <!-- Head pan/tilt. Alpha 1.0, 2.0a, 2.0b -->
   <config serial="6804040" 
-	  file="head_pan_tilt_conf.launch" descrip="Head Alpha 1.0" />
+	  file="head_conf.launch" descrip="Head Alpha 1.0" />
   <config serial="6804040" 
-	  file="head_pan_tilt_a2a_conf.launch" descrip="Head Alpha 2.0a (sm. tilt motot)" />
+	  file="head_alpha2a_conf.launch" descrip="Head Alpha 2.0a (sm. tilt motot)" />
   <config serial="6804040" 
-	  file="head_pan_tilt_a2b_conf.launch" descrip="Head Alpha 2.0b (big tilt motor)" />
+	  file="head_alpha2b_conf.launch" descrip="Head Alpha 2.0b (big tilt motor)" />
 
   <!-- Laser tilt -->
   <config serial="6804001" 

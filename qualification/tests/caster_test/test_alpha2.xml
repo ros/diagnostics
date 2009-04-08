@@ -1,10 +1,10 @@
 <test>
-  <instructions>instructions_a2.html</instructions>
+  <instructions>instructions_alpha2.html</instructions>
   <pre_startup>../../scripts/power_board_standby.launch</pre_startup>
   <pre_startup>caster_prog.launch</pre_startup>
   <pre_startup>../../scripts/power_cycle.launch</pre_startup>
-  <pre_startup>../../config/fl_caster_a2_conf.launch</pre_startup>
-  <startup>caster_a2.launch</startup>
+  <pre_startup>../../config/fl_caster_alpha2_conf.launch</pre_startup>
+  <startup>caster_alpha2.launch</startup>
   <subtest>hysteresis_caster_turret.launch</subtest>
   <subtest>sinesweep_caster_turret.launch</subtest>
   <subtest>hysteresis_caster_left.launch</subtest>
