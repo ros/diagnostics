@@ -1,0 +1,16 @@
+<launch>
+
+<!-- Cartesian ik twist controller -->
+  <param name="r_arm_cartesian_twist_ik_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="r_arm_cartesian_twist_ik_controller/tip_name" type="string" value="r_wrist_roll_link" />
+
+  <param name="r_arm_cartesian_twist_ik_controller/joystick_max_trans" value="2.5" />
+  <param name="r_arm_cartesian_twist_ik_controller/joystick_max_rot" value="4.5" />	
+
+  <param name="r_arm_cartesian_twist_ik_controller/joint/p" value="5.0" />
+  <param name="r_arm_cartesian_twist_ik_controller/joint/i" value="2.0" />
+  <param name="r_arm_cartesian_twist_ik_controller/joint/d" value="0.0" />
+  <param name="r_arm_cartesian_twist_ik_controller/joint/i_clamp" value="2.0" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/r_arm_cartesian_twist_ik_controller.xml" output="screen" />
+</launch>

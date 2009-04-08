@@ -35,7 +35,7 @@ import rospy
 from std_msgs.msg import *
 from robot_msgs.msg import *
 
-#pub = rospy.Publisher('/cartesian_pose/command', PoseStamped)
+#pub = rospy.Publisher('/cartesian_pose_right/command', PoseStamped)
 pub = rospy.Publisher('/cartesian_trajectory_right/command', PoseStamped)
 
 
