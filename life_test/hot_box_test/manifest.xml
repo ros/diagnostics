@@ -3,7 +3,7 @@
   <description brief="The scripts to run the PR2 hot box test" >
 
   This package runs the hot box test including:
-  base_shuffle controller (pr2_experimental)
+  base_shuffle controller (hot_box_test)
   torso_lift_controller (torso_lift_test)
   head_controller (head_life_test)
   laser_controller (head_life_test)
@@ -23,4 +23,7 @@
   <depend package="torso_lift_test" />
   <depend package="pr2_mechanism_controllers"/>
   <depend package="ocean_battery_driver" />
+  <depend package="mechanism_bringup" />
+  <depend package="mechanism_control" />
+
 </package>

@@ -1,11 +1,14 @@
 <launch>
-<!-- Launches all files needed for hot box tests -->
-<include file="$(find arm_life_test)/arm_life_test.launch" />
-<node pkg="torso_lift_test" type="run_torso_lift_test.py" />
-<node pkg="head_life_test" type="run_head_test.py" />
-<node pkg="pr2_experimental_controllers" type="base_shuffle.py" args="0.5" />
-<include file="$(find gripper_life_test)/life_test_onboard.launch" />
+  <!-- Launches all files needed for hot box tests -->
+  <include file="$(find arm_life_test)/arm_life_test.launch" />
+  <node pkg="torso_lift_test" type="run_torso_lift_test.py" />
+  <node pkg="head_life_test" type="run_head_test.py" />
+  <include file="$(find gripper_life_test)/life_test_onboard.launch" />
 
-<!-- Send emails when batteries low -->
-<node pkg="ocean_battery_driver" type="battery_notifier.py" args="watts@willowgarage.com,eitan@willowgarage.com,stanford@willowgarage.com,meeussen@willowgarage.com" />
+  <!-- Choose which base controller -->
+  <node pkg="hot_box_test" type="base_shuffle.py" args="0.5" />
+  <!--node pkg="hot_box_test" type="base_swivvel.py" /-->
+  
+  <!-- Send emails when batteries low -->
+  <node pkg="ocean_battery_driver" type="battery_notifier.py" args="watts@willowgarage.com,eitan@willowgarage.com,stanford@willowgarage.com,meeussen@willowgarage.com" />
 </launch>
