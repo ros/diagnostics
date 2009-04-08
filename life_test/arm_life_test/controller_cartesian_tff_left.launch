@@ -1,39 +1,39 @@
 <launch>
 
+
 <!-- Cartesian wrench controller -->
-  <param name="cartesian_wrench/autostart" type="bool" value="true" />
-  <param name="cartesian_wrench/root_name" type="string" value="torso_lift_link" />
-  <param name="cartesian_wrench/tip_name" type="string" value="l_gripper_tool_frame" />
+  <param name="l_arm_cartesian_wrench_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="l_arm_cartesian_wrench_controller/tip_name" type="string" value="l_gripper_tool_frame" />
 
 
 <!-- Cartesian tff controller -->
-  <param name="cartesian_tff_left/autostart" type="bool" value="true" />
-  <param name="cartesian_tff_left/root_name" type="string" value="torso_lift_link" />
-  <param name="cartesian_tff_left/tip_name" type="string" value="l_gripper_tool_frame" />
+  <param name="l_arm_cartesian_tff_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="l_arm_cartesian_tff_controller/tip_name" type="string" value="l_gripper_tool_frame" />
+  <param name="l_arm_cartesian_tff_controller/output" type="string" value="l_arm_cartesian_wrench_controller" />
 
-  <param name="cartesian_tff_left/twist_to_wrench_trans" value="10.0" />
-  <param name="cartesian_tff_left/twist_to_wrench_rot" value="1.0" />
+  <param name="l_arm_cartesian_tff_controller/twist_to_wrench_trans" value="10.0" />
+  <param name="l_arm_cartesian_tff_controller/twist_to_wrench_rot" value="1.0" />
 
-  <param name="cartesian_tff_left/vel_trans/p" value="2.0" />
-  <param name="cartesian_tff_left/vel_trans/i" value="0.5" />
-  <param name="cartesian_tff_left/vel_trans/d" value="0.0" />
-  <param name="cartesian_tff_left/vel_trans/i_clamp" value="1.0" />
+  <param name="l_arm_cartesian_tff_controller/vel_trans/p" value="2.0" />
+  <param name="l_arm_cartesian_tff_controller/vel_trans/i" value="0.5" />
+  <param name="l_arm_cartesian_tff_controller/vel_trans/d" value="0.0" />
+  <param name="l_arm_cartesian_tff_controller/vel_trans/i_clamp" value="1.0" />
 
-  <param name="cartesian_tff_left/vel_rot/p" value="0.3" />
-  <param name="cartesian_tff_left/vel_rot/i" value="0.1" />
-  <param name="cartesian_tff_left/vel_rot/d" value="0.0" />
-  <param name="cartesian_tff_left/vel_rot/i_clamp" value="0.2" />
+  <param name="l_arm_cartesian_tff_controller/vel_rot/p" value="0.3" />
+  <param name="l_arm_cartesian_tff_controller/vel_rot/i" value="0.1" />
+  <param name="l_arm_cartesian_tff_controller/vel_rot/d" value="0.0" />
+  <param name="l_arm_cartesian_tff_controller/vel_rot/i_clamp" value="0.2" />
 
 
-  <param name="cartesian_tff_left/pos_trans/p" value="10.0" />
-  <param name="cartesian_tff_left/pos_trans/i" value="0.5" />
-  <param name="cartesian_tff_left/pos_trans/d" value="0.0" />
-  <param name="cartesian_tff_left/pos_trans/i_clamp" value="1.0" />
+  <param name="l_arm_cartesian_tff_controller/pos_trans/p" value="10.0" />
+  <param name="l_arm_cartesian_tff_controller/pos_trans/i" value="0.5" />
+  <param name="l_arm_cartesian_tff_controller/pos_trans/d" value="0.0" />
+  <param name="l_arm_cartesian_tff_controller/pos_trans/i_clamp" value="1.0" />
 
-  <param name="cartesian_tff_left/pos_rot/p" value="0.5" />
-  <param name="cartesian_tff_left/pos_rot/i" value="0.1" />
-  <param name="cartesian_tff_left/pos_rot/d" value="0.0" />
-  <param name="cartesian_tff_left/pos_rot/i_clamp" value="0.2" />
+  <param name="l_arm_cartesian_tff_controller/pos_rot/p" value="0.5" />
+  <param name="l_arm_cartesian_tff_controller/pos_rot/i" value="0.1" />
+  <param name="l_arm_cartesian_tff_controller/pos_rot/d" value="0.0" />
+  <param name="l_arm_cartesian_tff_controller/pos_rot/i_clamp" value="0.2" />
 
-  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/cartesian_wrench.xml $(find pr2_default_controllers)/cartesian_tff_left.xml" output="screen"/>
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/l_arm_cartesian_wrench_controller.xml $(find pr2_default_controllers)/l_arm_cartesian_tff_controller.xml" output="screen"/>
 </launch>

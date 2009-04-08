@@ -36,7 +36,7 @@ import sys
 from std_msgs.msg import *
 from robot_msgs.msg import *
 
-pub = rospy.Publisher('/cartesian_wrench_right/command', Wrench)
+pub = rospy.Publisher('/r_arm_cartesian_wrench_controller/command', Wrench)
 
 def p(fx, fy, fz, tx, ty, tz):
   m = Wrench()
