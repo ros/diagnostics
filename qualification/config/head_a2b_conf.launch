@@ -3,7 +3,7 @@
   <include file="$(find qualification)/tests/init.machine" />
 
   <!-- configure_mcbs -->
-  <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=head_pan_motor,0 --motor=head_tilt_motor_a2b,1" />
+  <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=head_pan_motor,0 --motor=head_tilt_motor_alpha2b,1" />
 
   <!-- service -->
   <node pkg="qualification" type="confirm_conf.py" output="screen"/>

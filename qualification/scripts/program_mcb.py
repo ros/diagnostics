@@ -90,6 +90,7 @@ for num in all:
       retcode = p.returncode
 
       details = 'Ran fwprog on MCB %s, returned %s.\n\n' % (num, retcode)
+      details += 'CMD:\n' + cmd + '\n'
       details += 'STDOUT:\n' + stdout
       if len(stderr) > 5:
         details += '\nSTDERR:\n' + stderr
