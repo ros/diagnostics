@@ -41,10 +41,10 @@
   <param name="r_arm_cartesian_trajectory_controller/tip_name" type="string" value="r_gripper_tool_frame" />
   <param name="r_arm_cartesian_trajectory_controller/output" type="string" value="r_arm_cartesian_pose_controller" />
 
-  <param name="r_arm_cartesian_trajectory_controller/max_vel_trans" value="0.4" />
-  <param name="r_arm_cartesian_trajectory_controller/max_vel_rot" value="1.0" />
-  <param name="r_arm_cartesian_trajectory_controller/max_acc_trans" value="0.2" />
-  <param name="r_arm_cartesian_trajectory_controller/max_acc_rot" value="0.4" />
+  <param name="r_arm_cartesian_trajectory_controller/max_vel_trans" value="0.6" />
+  <param name="r_arm_cartesian_trajectory_controller/max_vel_rot" value="1.2" />
+  <param name="r_arm_cartesian_trajectory_controller/max_acc_trans" value="0.4" />
+  <param name="r_arm_cartesian_trajectory_controller/max_acc_rot" value="0.6" />
 
   <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/r_arm_cartesian_wrench_controller.xml $(find pr2_default_controllers)/r_arm_cartesian_twist_controller.xml $(find pr2_default_controllers)/r_arm_cartesian_pose_controller.xml $(find pr2_default_controllers)/r_arm_cartesian_trajectory_controller.xml" />
 </launch>
