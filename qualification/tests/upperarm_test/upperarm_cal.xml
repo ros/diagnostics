@@ -1,16 +1,16 @@
 <controllers>
   <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
 
-<!--
+
   <upper_arm_calibrator side="r" />
   <forearm_calibrator side="r" />
--->
 
 
 <!-- Hack. Only use iff no cal flags on upperarm -->
 <!-- Uses limit controllers to calibrate at end of travel -->
 <!-- Doesn't really work for roll, because doesn't have an end -->
 <!-- Stop roll joint manually (grab it) to calibrate -->
+<!--
     <controller name="cal_r_elbow_flex" topic="cal_r_elbow_flex"
                 type="JointLimitCalibrationControllerNode">
       <calibrate joint="r_elbow_flex_joint"
@@ -28,6 +28,6 @@
                  velocity="-1.2" />
       <pid p="5.0" i="0" d="0" iClamp="0" />
     </controller>
-
+-->
 
 </controllers>
