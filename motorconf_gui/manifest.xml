@@ -1,0 +1,19 @@
+<package>
+   <description brief='Motor conf GUI system'>
+   </description>
+   <author>Kevin Watts (watts@wg)</author>
+   <license>BSD</license>
+   <review status="unreviewed" notes="" />
+   <depend package="ethercat_hardware" />
+   <depend package="pr2_etherCAT" />
+   <depend package="robot_srvs" />
+   <depend package="roslaunch" />
+   <depend package="std_msgs" />
+   <depend package="robot_msgs" />
+   <depend package="robot_srvs" />
+   <depend package="mechanism_control" />
+   <depend package="mechanism_bringup" />
+   
+   <sysdepend os="ubuntu" version="7.04-feisty" package="python-wxgtk2.8"/>
+   <sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
+</package>
