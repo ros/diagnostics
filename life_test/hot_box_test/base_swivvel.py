@@ -87,7 +87,7 @@ def main():
             # Set velocity 
             cmd_vel.ang_vel.vz = float(0.4)
             # Extra iteration adds a negative bias in controller
-            for i in range(0, num_publishes + 1): 
+            for i in range(0, num_publishes): 
                 base_vel.publish(cmd_vel)
                 if rospy.is_shutdown():
                     break 

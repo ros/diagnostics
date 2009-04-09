@@ -44,6 +44,8 @@ from joy.msg import Joy
 from mechanism_control import mechanism
 from robot_srvs.srv import SpawnController, KillController
 
+import time
+
 
 def xml_for(control_name, joint):
     return "\
