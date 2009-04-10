@@ -45,7 +45,7 @@ NAME = 'runtime_test'
 latest_messages = {}
 test_name = 'uninitialized'
 package = 'uninitialized'
-last_runtime = rospy.rostime.get_time()
+last_runtime = rospy.get_time()
 
 def status_to_map(status):
     str_map = {}
@@ -76,11 +76,11 @@ def callback(message, args):
 
 def execute_test(args):
     global last_runtime
-    time_step = rospy.rostime.get_time() - last_runtime
+    time_step = rospy.get_time() - last_runtime
     if 1.0 /time_step > options.max_freq:
         return
     else:
-        last_runtime = rospy.rostime.get_time()
+        last_runtime = rospy.get_time()
     
     test_impl, params = args
     results = analyze(package, test_impl, params)
@@ -116,7 +116,7 @@ def runtime_test(package, test_name):
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
 
     while not rospy.is_shutdown():
-        if rospy.rostime.get_time() - last_runtime > 1/options.min_freq:
+        if rospy.get_time() - last_runtime > 1/options.min_freq:
             execute_test((test_impl, params))
         time.sleep(0.5/options.min_freq)
         
