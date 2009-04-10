@@ -78,7 +78,7 @@ def callback(message):
 
     
 def listener():
-    rospy.TopicSub("/diagnostics", DiagnosticMessage, callback)
+    rospy.Subscriber("/diagnostics", DiagnosticMessage, callback)
     rospy.init_node(NAME, anonymous=True)
     rospy.spin()
         

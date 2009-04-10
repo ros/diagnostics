@@ -81,7 +81,7 @@ def loop(pub):
 
     
 def listener():
-    pub = rospy.TopicPub("/diagnostics", DiagnosticMessage)
+    pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
     rospy.init_node(NAME, anonymous=True)
     while not rospy.is_shutdown():
         loop(pub)
