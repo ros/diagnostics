@@ -1,12 +1,13 @@
 <launch>
-	
 
 <!-- Cartesian wrench controller -->
+  <param name="r_arm_cartesian_wrench_controller/autostart" type="bool" value="true" />
   <param name="r_arm_cartesian_wrench_controller/root_name" type="string" value="torso_lift_link" />
   <param name="r_arm_cartesian_wrench_controller/tip_name" type="string" value="r_gripper_tool_frame" />
 
 
 <!-- Cartesian twist controller -->
+  <param name="r_arm_cartesian_twist_controller/autostart" type="bool" value="true" />
   <param name="r_arm_cartesian_twist_controller/root_name" type="string" value="torso_lift_link" />
   <param name="r_arm_cartesian_twist_controller/tip_name" type="string" value="r_gripper_tool_frame" />
   <param name="r_arm_cartesian_twist_controller/output" type="string" value="r_arm_cartesian_wrench_controller" />
@@ -26,6 +27,7 @@
 
 
 <!-- Cartesian pose controller -->
+  <param name="r_arm_cartesian_pose_controller/autostart" type="bool" value="true" />
   <param name="r_arm_cartesian_pose_controller/root_name" type="string" value="torso_lift_link" />
   <param name="r_arm_cartesian_pose_controller/tip_name" type="string" value="r_gripper_tool_frame" />
   <param name="r_arm_cartesian_pose_controller/output" type="string" value="r_arm_cartesian_twist_controller" />
@@ -37,6 +39,7 @@
 
 
 <!-- Cartesian trajectory controller -->
+  <param name="r_arm_cartesian_trajectory_controller/autostart" type="bool" value="true" />
   <param name="r_arm_cartesian_trajectory_controller/root_name" type="string" value="torso_lift_link" />
   <param name="r_arm_cartesian_trajectory_controller/tip_name" type="string" value="r_gripper_tool_frame" />
   <param name="r_arm_cartesian_trajectory_controller/output" type="string" value="r_arm_cartesian_pose_controller" />
