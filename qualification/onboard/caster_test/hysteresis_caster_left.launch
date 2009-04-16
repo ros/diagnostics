@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="qualification" type="caster_test_spawner.py" args="$(find qualification)/onboard/caster_test/hysteresis_caster_left.xml" />
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+</launch>

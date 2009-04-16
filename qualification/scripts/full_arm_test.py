@@ -105,15 +105,15 @@ def hold_arm(side, pan_angle, holding):
     set_controller("%s_shoulder_pan_controller" % side, float(pan_angle))
 
 def main():
-    if len(sys.argv) < 3 and not options.hold:
+    if len(sys.argv) < 3:
         print "Can't load arm, need <joint> <controller_path>"
         sys.exit(1)
     
     # Pull side (l or r) from param server
     side = rospy.get_param("full_arm_test/side")
         
-    joint = side + args[1]
-    controller_file = open(args[2])
+    joint = side + sys.argv[1]
+    controller_file = open(sys.argv[2])
     # Put side in to controller xml string
     controller_xml = controller_file.read() % side 
     

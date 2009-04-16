@@ -123,5 +123,91 @@
   
   <robot label="Spine Test" 
 	 test="torso_lift_test/hysteresis_torso_lift.launch" />
+
+  <robot label="Base Tests" child_name="base_tests" >
+    <base_tests label="FL Caster" child_name="fl_caster" >
+      <fl_caster label="FL Caster Turret Hysteresis"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/hysteresis_caster_turret.launch" />
+      <fl_caster label="FL Caster Turret Sinesweep"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/sinesweep_caster_turret.launch" />
+      <fl_caster label="FL Caster R Wheel Hysteresis"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/hysteresis_caster_right.launch" />
+      <fl_caster label="FL Caster R Wheel Sinesweep"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/sinesweep_caster_right.launch" />
+      <fl_caster label="FL Caster L Wheel Hysteresis"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/hysteresis_caster_left.launch" />
+      <fl_caster label="FL Caster L Wheel Sinesweep"
+		 pre="caster_test/fl_caster.launch"
+		 test="caster_test/sinesweep_caster_left.launch" />
+    </base_tests>
+
+    <base_tests label="FR Caster" child_name="fr_caster" >
+      <fr_caster label="FL Caster Turret Hysteresis"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/hysteresis_caster_turret.launch" />
+      <fr_caster label="FL Caster Turret Sinesweep"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/sinesweep_caster_turret.launch" />
+      <fr_caster label="FL Caster R Wheel Hysteresis"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/hysteresis_caster_right.launch" />
+      <fr_caster label="FL Caster R Wheel Sinesweep"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/sinesweep_caster_right.launch" />
+      <fr_caster label="FL Caster L Wheel Hysteresis"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/hysteresis_caster_left.launch" />
+      <fr_caster label="FL Caster L Wheel Sinesweep"
+		 pre="caster_test/fr_caster.launch"
+		 test="caster_test/sinesweep_caster_left.launch" />
+    </base_tests>
+
+    <base_tests label="BL Caster" child_name="bl_caster" >
+      <bl_caster label="FL Caster Turret Hysteresis"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/hysteresis_caster_turret.launch" />
+      <bl_caster label="FL Caster Turret Sinesweep"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/sinesweep_caster_turret.launch" />
+      <bl_caster label="FL Caster R Wheel Hysteresis"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/hysteresis_caster_right.launch" />
+      <bl_caster label="FL Caster R Wheel Sinesweep"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/sinesweep_caster_right.launch" />
+      <bl_caster label="FL Caster L Wheel Hysteresis"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/hysteresis_caster_left.launch" />
+      <bl_caster label="FL Caster L Wheel Sinesweep"
+		 pre="caster_test/bl_caster.launch"
+		 test="caster_test/sinesweep_caster_left.launch" />
+    </base_tests>
+
+    <base_tests label="BR Caster" child_name="br_caster" >
+      <br_caster label="FL Caster Turret Hysteresis"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/hysteresis_caster_turret.launch" />
+      <br_caster label="FL Caster Turret Sinesweep"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/sinesweep_caster_turret.launch" />
+      <br_caster label="FL Caster R Wheel Hysteresis"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/hysteresis_caster_right.launch" />
+      <br_caster label="FL Caster R Wheel Sinesweep"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/sinesweep_caster_right.launch" />
+      <br_caster label="FL Caster L Wheel Hysteresis"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/hysteresis_caster_left.launch" />
+      <br_caster label="FL Caster L Wheel Sinesweep"
+		 pre="caster_test/br_caster.launch"
+		 test="caster_test/sinesweep_caster_left.launch" />
+    </base_tests>
+</robot>
   
 </robot_tests>
