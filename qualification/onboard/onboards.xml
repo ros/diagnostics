@@ -147,64 +147,64 @@
     </base_tests>
 
     <base_tests label="FR Caster" child_name="fr_caster" >
-      <fr_caster label="FL Caster Turret Hysteresis"
+      <fr_caster label="FR Caster Turret Hysteresis"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/hysteresis_caster_turret.launch" />
-      <fr_caster label="FL Caster Turret Sinesweep"
+      <fr_caster label="FR Caster Turret Sinesweep"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/sinesweep_caster_turret.launch" />
-      <fr_caster label="FL Caster R Wheel Hysteresis"
+      <fr_caster label="FR Caster R Wheel Hysteresis"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/hysteresis_caster_right.launch" />
-      <fr_caster label="FL Caster R Wheel Sinesweep"
+      <fr_caster label="FR Caster R Wheel Sinesweep"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/sinesweep_caster_right.launch" />
-      <fr_caster label="FL Caster L Wheel Hysteresis"
+      <fr_caster label="FR Caster L Wheel Hysteresis"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/hysteresis_caster_left.launch" />
-      <fr_caster label="FL Caster L Wheel Sinesweep"
+      <fr_caster label="FR Caster L Wheel Sinesweep"
 		 pre="caster_test/fr_caster.launch"
 		 test="caster_test/sinesweep_caster_left.launch" />
     </base_tests>
 
     <base_tests label="BL Caster" child_name="bl_caster" >
-      <bl_caster label="FL Caster Turret Hysteresis"
+      <bl_caster label="BL Caster Turret Hysteresis"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/hysteresis_caster_turret.launch" />
-      <bl_caster label="FL Caster Turret Sinesweep"
+      <bl_caster label="BL Caster Turret Sinesweep"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/sinesweep_caster_turret.launch" />
-      <bl_caster label="FL Caster R Wheel Hysteresis"
+      <bl_caster label="BL Caster R Wheel Hysteresis"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/hysteresis_caster_right.launch" />
-      <bl_caster label="FL Caster R Wheel Sinesweep"
+      <bl_caster label="BL Caster R Wheel Sinesweep"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/sinesweep_caster_right.launch" />
-      <bl_caster label="FL Caster L Wheel Hysteresis"
+      <bl_caster label="BL Caster L Wheel Hysteresis"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/hysteresis_caster_left.launch" />
-      <bl_caster label="FL Caster L Wheel Sinesweep"
+      <bl_caster label="BL Caster L Wheel Sinesweep"
 		 pre="caster_test/bl_caster.launch"
 		 test="caster_test/sinesweep_caster_left.launch" />
     </base_tests>
 
     <base_tests label="BR Caster" child_name="br_caster" >
-      <br_caster label="FL Caster Turret Hysteresis"
+      <br_caster label="BR Caster Turret Hysteresis"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/hysteresis_caster_turret.launch" />
-      <br_caster label="FL Caster Turret Sinesweep"
+      <br_caster label="BR Caster Turret Sinesweep"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/sinesweep_caster_turret.launch" />
-      <br_caster label="FL Caster R Wheel Hysteresis"
+      <br_caster label="BR Caster R Wheel Hysteresis"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/hysteresis_caster_right.launch" />
-      <br_caster label="FL Caster R Wheel Sinesweep"
+      <br_caster label="BR Caster R Wheel Sinesweep"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/sinesweep_caster_right.launch" />
-      <br_caster label="FL Caster L Wheel Hysteresis"
+      <br_caster label="BR Caster L Wheel Hysteresis"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/hysteresis_caster_left.launch" />
-      <br_caster label="FL Caster L Wheel Sinesweep"
+      <br_caster label="BR Caster L Wheel Sinesweep"
 		 pre="caster_test/br_caster.launch"
 		 test="caster_test/sinesweep_caster_left.launch" />
     </base_tests>

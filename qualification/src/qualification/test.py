@@ -40,10 +40,11 @@ class TestDoesNotExistError(Exception): pass
 class FailedLoadError(Exception): pass
 
 class SubTest:
-  def __init__(self, subtest, pre_test, post_test):
+  def __init__(self, subtest, pre_test, post_test, name=None):
     self._test_script = subtest
     self._pre_script = pre_test
     self._post_script = post_test
+    self._name = name
 
   def get_key(self):
     key = self._subtest
@@ -54,7 +55,10 @@ class SubTest:
     return key
 
   def get_name(self):
-    return self._test_script
+    if self._name is None:
+      return self._pre_script + ' ' + self._test_script + ' ' + self._post_script
+    else:
+      return self._name
       
 class Test:
   def load(self, test_str):
@@ -102,28 +106,18 @@ class Test:
     subtests = doc.getElementsByTagName('subtest')
     if (subtests != None and len(subtests) > 0):
       for st in subtests:
+        script = st.childNodes[0].nodeValue
         pre = None
         post = None
-        name = st.childNodes[0].nodeValue
+        name = None
         if (st.attributes.has_key('post')):
           post = st.attributes['post'].value
         if (st.attributes.has_key('pre')):
           pre = st.attributes['pre'].value
-        self.subtests.append(SubTest(name, pre, post))
-          
-        
-
-
-    #subtests = doc.getElementsByTagName('subtest')
-    #if (subtests != None and len(subtests) > 0):
-    #  for subtest in subtests:
-    #    name = subtest.childNodes[0].nodeValue
-    #    self.subtests.append(name)
-    #    if (subtest.attributes.has_key('post')):
-    #      self.post_subtests[name] = subtest.attributes['post'].value
-    #    if (subtest.attributes.has_key('pre')):
-    #      self.pre_subtests[name] = subtest.attributes['pre'].value
-  
+        if (st.attributes.has_key('name')):
+          name = st.attributes['name'].value
+        self.subtests.append(SubTest(script, pre, post, name))
+ 
   def getStartupScript(self):
     return self._startup_script
   

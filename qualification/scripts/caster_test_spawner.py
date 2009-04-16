@@ -37,55 +37,50 @@
 import roslib
 roslib.load_manifest('qualification')
 import rospy, sys, time
-import subprocess
-from optparse import OptionParser
 
-from std_msgs.msg import *
-from robot_srvs.srv import *
-from std_srvs.srv import *
+from robot_srvs.srv import SpawnController, KillController
 
-from robot_mechanism_controllers.srv import *
-from robot_mechanism_controllers import controllers
 from mechanism_control import mechanism
-
-spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
-kill_controller = rospy.ServiceProxy('kill_controller', KillController) 
 
 def main():
     if len(sys.argv) < 2:
         print "Can't load test XML file."
         sys.exit(1)
 
-    rospy.init_node('caster_spawner_node')
+    rospy.init_node('caster_test_spawner_node')
 
     side = rospy.get_param("caster_test/side")
 
     try:
-        controller_file = open(sys.argv[2])
-        controller_xml = controller_file.read() % side
-        controller_file.close()
-        
-        rospy.wait_for_service('kill_controller')
         rospy.wait_for_service('spawn_controller')
+        spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
+        kill_controller = rospy.ServiceProxy('kill_controller', KillController) 
+
+        controller_file = open(sys.argv[1])
+        controller_xml = controller_file.read() % side
+
+        controller_file.close()
 
         resp = spawn_controller(controller_xml)
         
         if len(resp.ok) != 1 or resp.ok[0] != chr(1):
-            rospy.logout('Failed to spawn test controller')
-            rospy.logout('Controller XML: %s' % controller_xml)
+            rospy.logerr('Failed to spawn test controller')
+            rospy.logerr('Controller XML: %s' % controller_xml)
+            sys.exit(2)
 
         while not rospy.is_shutdown():
-            sleep(0.5)
+            time.sleep(0.5)
     finally:
         for i in range(3):
             try:
-                rospy.logout("Trying to kill %s" % name)
+                rospy.logout("Trying to kill test_controller")
                 kill_controller('test_controller')
-                rospy.logout("Succeeded in killing %s" % name)
+                rospy.logout("Succeeded in killing test_controller")
                 break
             except rospy.ServiceException:
+                rospy.logerr("ServiceException while killing test_controller")
                 raise
-                rospy.logerr("ServiceException while killing %s" % name)
+
 
 if __name__ == '__main__':
     main()

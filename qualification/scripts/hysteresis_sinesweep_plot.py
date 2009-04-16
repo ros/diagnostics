@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Author: Melonee Wise
+# Author: Kevin Watts
 
 PKG = "qualification"
 
@@ -46,7 +46,7 @@ from time import sleep
 import rospy
 
 import matplotlib
-matplotlib.use('WXAgg')
+#matplotlib.use('WXAgg')
 import matplotlib.pyplot as plot
 from StringIO import StringIO
 

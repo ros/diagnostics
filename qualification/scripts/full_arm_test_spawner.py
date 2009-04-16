@@ -83,51 +83,50 @@ def set_controller(controller, command):
                               SendMessageOnSubscribe(Float64(command)))
 
 def hold_arm(side, pan_angle, holding):
-    hold_joint("%s_gripper_palm" % side, 15, 0, 1, 5, holding)
-    set_controller("%s_gripper_palm_controller" % side, float(0.0))
+    if hold_joint("%s_gripper" % side, 15, 0, 1, 5, holding):
+        set_controller("%s_gripper_palm_controller" % side, float(0.0))
     
-    hold_joint("%s_forearm_roll" % side, 20, 3, 4, 2, holding)
-    set_controller("%s_forearm_roll_controller" % side, float(0.0))
+    if hold_joint("%s_forearm_roll" % side, 20, 3, 4, 2, holding):
+        set_controller("%s_forearm_roll_controller" % side, float(0.0))
+        
+    if hold_joint("%s_wrist_flex" % side, 20, 3, 4, 2, holding):
+        set_controller("%s_wrist_flex_controller" % side, float(3.0))
 
-    hold_joint("%s_wrist_flex" % side, 20, 3, 4, 2, holding)
-    set_controller("%s_wrist_flex_controller" % side, float(3.0))
+    if hold_joint("%s_elbow_flex" % side, 50, 15, 8, 2, holding):
+        set_controller("%s_elbow_flex_controller" % side, float(3.0))
 
-    hold_joint("%s_elbow_flex" % side, 50, 15, 8, 2, holding)
-    set_controller("%s_elbow_flex_controller" % side, float(3.0))
+    if hold_joint("%s_upper_arm_roll" % side, 20, 2, 1.0, 1.0, holding):
+        set_controller("%s_upper_arm_roll_controller" % side, float(0.0))
 
-    hold_joint("%s_upper_arm_roll" % side, 20, 2, 1.0, 1.0, holding)
-    set_controller("%s_upper_arm_roll_controller" % side, float(0.0))
+    if hold_joint("%s_shoulder_lift" % side, 35, 7, 4, 3, holding):
+        set_controller("%s_shoulder_lift_controller" % side, float(3.0))
 
-    hold_joint("%s_shoulder_lift" % side, 35, 7, 4, 3, holding)
-    set_controller("%s_shoulder_lift_controller" % side, float(3.0))
-
-    hold_joint("%s_shoulder_pan" % side, 70, 6, 8, 4, holding)
-    set_controller("%s_shoulder_pan_controller" % side, float(pan_angle))
+    if hold_joint("%s_shoulder_pan" % side, 70, 6, 8, 4, holding):
+        set_controller("%s_shoulder_pan_controller" % side, float(pan_angle))
 
 def main():
     if len(sys.argv) < 3:
         print "Can't load arm, need <joint> <controller_path>"
         sys.exit(1)
-    
+
     # Pull side (l or r) from param server
     side = rospy.get_param("full_arm_test/side")
+
+    rospy.init_node('arm_test_spawner_' + side, anonymous=True)
         
     joint = side + sys.argv[1]
     controller_file = open(sys.argv[2])
     # Put side in to controller xml string
     controller_xml = controller_file.read() % side 
-    
-    rospy.wait_for_service('kill_controller')
+    controller_file.close()
 
-
-    rospy.wait_for_service('spawn_controller')
-    rospy.init_node('arm_test_' + side, anonymous=True)
-    
     holding = []
     try:
+        rospy.wait_for_service('spawn_controller')
+
         # Hold both arms in place
-        hold_side('r', -0.7, holding)
-        hold_side('l', 0.7, holding)
+        hold_arm('r', -0.7, holding)
+        hold_arm('l', 0.7, holding)
         
         # Kill controller for given joint
         kill_controller(joint + '_controller')
@@ -136,7 +135,13 @@ def main():
         sleep(1.5)
         
         # Spawn test controller and run test
-        spawn_controller(controller_xml)
+        resp = spawn_controller(controller_xml)
+        
+        if len(resp.ok) != 1 or resp.ok[0] != chr(1):
+            rospy.logerr('Failed to spawn test controller')
+            rospy.logerr('Controller XML: %s' % controller_xml)
+            sys.exit(2)
+
         holding.append('test_controller') # always called test_controller
         
         while not rospy.is_shutdown():
@@ -145,7 +150,15 @@ def main():
     # Kill everything
     finally:
         for name in holding:
-            kill_controller(holding)
+            for i in range(3):
+                try:
+                    rospy.logout("Trying to kill %s" % name)
+                    kill_controller('test_controller')
+                    rospy.logout("Succeeded in killing %s" % name)
+                    break
+                except rospy.ServiceException:
+                    rospy.logerr("ServiceException while killing %s" % name)
+                    raise
 
 if __name__ == '__main__':
     main()

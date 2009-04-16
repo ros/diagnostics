@@ -631,15 +631,23 @@ class QualificationFrame(wx.Frame):
       invent.setNote(serial, msg)
 
 
-  def generate_subtest_xml_line(self, test, pre_test = None, post_test = None):
-    if pre_test is not None and post_test is not None:
-      return '<subtest pre=\"%s\" post=\"%s\">%s</subtest>\n' % (pre_test, post_test, test)
-    elif pre_test is not None:
-      return '<subtest pre=\"%s\">%s</subtest>\n' % (pre_test, test)
-    elif post_test is not None:
-      return '<subtest post=\"%s\">%s</subtest>\n' % (post_test, test)
-    else:
-      return '<subtest>%s</subtest>\n' % test
+  def generate_subtest_xml_line(self, test, pre_test = None, post_test = None, name = None):
+    details_str = ''
+    if pre_test is not None:
+      details_str += ' pre=\"%s\" ' % pre_test
+    if post_test is not None:
+      details_str += ' post=\"%s\" ' % post_test
+    if name is not None:
+      details_str += ' name=\"%s\" ' % name
+
+    #if pre_test is not None and post_test is not None:
+    #  return '<subtest pre=\"%s\" post=\"%s\">%s</subtest>\n' % (pre_test, post_test, test)
+    #elif pre_test is not None:
+    #  return '<subtest pre=\"%s\">%s</subtest>\n' % (pre_test, test)
+    #elif post_test is not None:
+    #  return '<subtest post=\"%s\">%s</subtest>\n' % (post_test, test)
+    #else:
+      return '<subtest %s>%s</subtest>\n' % (details_str, test)
       
   # Parses through the xml file recursively
   # For each element, finds the subtests associated with it, and makes and XML string for each subtest
@@ -672,7 +680,7 @@ class QualificationFrame(wx.Frame):
 
       if 'test' in node_keys:
         test = node.attributes['test'].value
-        xml_for_test = self.generate_subtest_xml_line(test, pre_test, post_test)
+        xml_for_test = self.generate_subtest_xml_line(test, pre_test, post_test, label)
         # Add test XML to this test label, and all parent labels
         for lab in test_labels:
           self._onboards_by_label[lab].append(xml_for_test)
@@ -909,6 +917,8 @@ class QualificationFrame(wx.Frame):
     self._subtest_index = index
     self._subtest = self._current_test.subtests[index]
     
+    # Give test num/NUM_TESTS on waiting panel
+    # And change label to make it cooler
     self.set_top_panel(WaitingPanel(self._top_panel, self._res, self, self._subtest.get_name()))
     
     self.launch_pre_subtest()
