@@ -51,6 +51,9 @@ def ntp_monitor():
         print "Please pass host as argument"
         return
     else:
+        timeout = 500
+        if len(sys.argv) == 3:
+            timeout = sys.argv[2]
         pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
         rospy.init_node(NAME, anonymous=True)
 
@@ -62,7 +65,7 @@ def ntp_monitor():
             (o,e) = p.communicate()
             if (res == 0):
                 offset = float(re.search("offset (.*),", o).group(1))*1000000
-                if (abs(offset) < 500):
+                if (abs(offset) < timeout):
                     stat = DiagnosticStatus(0,"NTP offset from: "+ hostname + " to: " +sys.argv[1], "Acceptable synchronization", [DiagnosticValue(offset,"offset (us)")],[])
                     print offset
                 else:
