@@ -44,6 +44,8 @@ from std_msgs.msg import *
 from mechanism_control import mechanism
 from robot_srvs.srv import SpawnController
 
+from optparse import OptionParser
+
 def xml_for():
     return "\
 <controller name=\"torso_lift_controller\" type=\"JointPositionControllerNode\">\
@@ -52,8 +54,16 @@ def xml_for():
   </joint>\
 </controller>" 
 
+  
 
 if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-l", "--low", dest="low_only", 
+                      help="Keep in lower end only", action="store_true", 
+                      default=True)
+
+    (options, args) = parser.parse_args()
+
     rospy.init_node('torso_life_test')
     rospy.wait_for_service('spawn_controller')
     spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
@@ -67,12 +77,21 @@ if __name__ == "__main__":
 
     try:
         while not rospy.is_shutdown():
-            position = random.uniform(0.12, 0.31)
-            pub.publish(Float64(position))
-            sleep(1)
+            if options.low_only:
+                pub.publish(Float64(0))
+                sleep(10)
+                pub.publish(Float64(0.12))
+                sleep(10)
+            else:
+                position = random.uniform(0.12, 0.31)
+                pub.publish(Float64(0))
+                sleep(30)
+                pub.publish(Float64(0.32))
+                sleep(30)
     finally:
         for i in range(1,3):
             try:
                 mechanism.kill_controller('torso_lift_controller')
+                break
             except:
-                print 'Failed to kill torso lift controller'
+                pass
