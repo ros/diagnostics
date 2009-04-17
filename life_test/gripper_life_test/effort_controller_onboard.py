@@ -71,7 +71,7 @@ def main():
             print "Failed to spawn effort controller %s"%joint
             sys.exit(1)
 
-        control_topic = '/%s/set_command/' % control_name
+        control_topic = '/%s/command/' % control_name
         pub = rospy.Publisher(control_topic, Float64)
 
         while not rospy.is_shutdown():
