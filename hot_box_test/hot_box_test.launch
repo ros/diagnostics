@@ -1,0 +1,14 @@
+<launch>
+  <!-- Launches all files needed for hot box tests -->
+  <include file="$(find life_test)/arm_life_test/arm_life_test.launch" />
+  <node pkg="life_test" type="run_torso_lift_test.py" args="-l" />
+
+  <include file="$(find life_test)/head_test/life_test/life_test.launch" />
+<include file="$(find life_test)/gripper_test/life_test.launch" />
+  
+  <!-- Choose which base controller -->
+  <node pkg="hot_box_test" type="base_shuffle.py" args="0.5" />
+    
+  <!-- Send emails when batteries low -->
+  <node pkg="ocean_battery_driver" type="battery_notifier.py" args="watts@willowgarage.com,eitan@willowgarage.com,stanford@willowgarage.com,meeussen@willowgarage.com" />
+</launch>

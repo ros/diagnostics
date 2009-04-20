@@ -1,0 +1,29 @@
+<package>
+
+  <description brief="The scripts to run the PR2 hot box test" >
+
+  This package runs the hot box test including:
+  base_shuffle controller (hot_box_test)
+  torso_lift_controller (torso_lift_test)
+  head_controller (head_life_test)
+  laser_controller (head_life_test)
+  arm_life_controller (arm_life_test)
+
+  </description>
+  <author>Kevin Watts</author>
+  <review status="na" notes=""/>
+  <license>BSD</license>
+
+  <depend package="pr2_defs" />
+  <depend package="pr2_default_controllers" />
+  <depend package="pr2_etherCAT"/>
+  <depend package="pr2_power_board"/>
+  <depend package="pr2_experimental_controllers" />
+  <depend package="arm_life_test" />
+  <depend package="torso_lift_test" />
+  <depend package="pr2_mechanism_controllers"/>
+  <depend package="ocean_battery_driver" />
+  <depend package="mechanism_bringup" />
+  <depend package="mechanism_control" />
+
+</package>
