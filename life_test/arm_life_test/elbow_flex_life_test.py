@@ -58,9 +58,11 @@ def xml_for():
     return "\
 <controller name=\"upperarm_life_controller\" type=\"JointPositionControllerNode\">\
   <joint name=\"r_elbow_flex_joint\" >\
-    <pid p=\"50\" i=\"5\" d=\"0\" iClamp=\"1.0\" \>\
+     <pid p=\"50\" i=\"5\" d=\"0\" iClamp=\"1.0\" \>\
   </joint>\
 </controller>"
+
+
 
 def main():
     rospy.wait_for_service('spawn_controller')
@@ -73,9 +75,9 @@ def main():
     try:
         while not rospy.is_shutdown():
             arm_pos.publish(Float64(0.0))
-            sleep(1)
-            arm_pos.publish(Float64(-2.5))
-            sleep(1)
+            sleep(1.5)
+            arm_pos.publish(Float64(2.5))
+            sleep(1.5)
     except Exception, e:
         print "Caught exception!"
         print e

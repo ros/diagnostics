@@ -11,7 +11,7 @@
   <include file="$(find arm_life_test)/calibrate.launch" />
 
 <!-- spacenav -->
-  <node pkg="spacenav_node" type="spacenav_node" />
+  <!--node pkg="spacenav_node" type="spacenav_node" /-->
 
 <!-- Runtime Diagnostics Logging -->
   <node pkg="rosrecord" type="rosrecord" args="-f /hwlog/arm_life_test_runtime_automatic /diagnostics" />
