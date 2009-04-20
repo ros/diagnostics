@@ -1,7 +1,0 @@
-<launch>
-<!-- gripper joint controller-->
-  <node pkg="gripper_life_test" type="effort_controller_onboard.py" args="l_gripper_joint" output="screen"/>
-
-  <node pkg="gripper_life_test" type="effort_controller_onboard.py" args="r_gripper_joint" output="screen"/>
-
-</launch>

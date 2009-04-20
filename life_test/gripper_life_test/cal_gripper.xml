@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<controllers>
+  <include filename="$(find pr2_defs)/defs/gripper_defs.xml" />
+
+  <gripper_calibrator side="r" />
+</controllers>

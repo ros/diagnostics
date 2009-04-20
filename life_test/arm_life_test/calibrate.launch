@@ -1,4 +1,0 @@
-<launch>
-  <node pkg="mechanism_bringup" type="calibrate.py"
-        args="$(find arm_life_test)/full_arm_cal.xml" />
-</launch>

@@ -1,0 +1,31 @@
+<package>
+
+  <description brief="Runs life/impact tests on test carts and robots"
+    
+     This package contains the scripts needed to run a life and impact tests on 
+robots and test carts. 
+
+To launch on test cart, go to {part}_test/ and 'roslaunch test_cart.launch'
+To launch on robot, go to {part}_test and 'roslaunch life_test.launch'
+
+If the part also has an impact test, go to:
+{part}_test/(life or impact)_test/
+and launch the tests as above.
+
+When launching on robot, part must be calibrated with power on.
+    
+  </description>
+  <author>Kevin Watts</author>
+  <review status="na" notes=""/>
+  <license>BSD</license>
+  <url>http://pr.willowgarage.com/wiki/Life_Test</url>
+
+  <depend package="pr2_defs" />
+  <depend package="pr2_default_controllers" />
+  <depend package="pr2_etherCAT"/>
+  <depend package="pr2_power_board"/>
+  <depend package="pr2_mechanism_controllers"/>
+  <depend package="mechanism_control" />
+  <depend package="mechanism_bringup" />
+  <depend package="robot_mechanism_controllers" />
+</package>

@@ -1,0 +1,21 @@
+<launch>
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find life_test)/head_test/impact_test/head.xml'" />
+
+  <include file="$(find life_test)/init.machine" />
+  <include file="$(find life_test)/pr2_etherCAT.launch" />
+
+  <!-- Calibration -->
+  <!--node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find life_test)/head_test/cal_head.xml"
+        output="screen" /-->
+
+  <!-- Power board -->
+  <!--node pkg="pr2_power_board" type="power_node"  respawn="true"/ -->
+
+  <!-- Runtime Diagnostics Logging -->
+  <node pkg="rosrecord" type="rosrecord"
+        args="-f ~/impact_test.bag /diagnostics" />
+ 
+  <include file="$(find life_test)/head_test/impact_test/impact_test.launch" />
+
+</launch>

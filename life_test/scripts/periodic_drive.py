@@ -30,7 +30,7 @@
 import time
 import random
 import roslib
-roslib.load_manifest('caster_life_test')
+roslib.load_manifest('life_test')
 import rospy
 from std_msgs.msg import Float64
 from robot_msgs.msg import MechanismState
@@ -78,7 +78,6 @@ def main():
         # Steers the caster to be straight
         pub_steer.publish(Float64(6.0 * (angle - rotation_state.position)))
 
-
         # Drive
         if abs(rotation_state.position - angle) < 0.05:
             pub_drive.publish(Float64(speed))
@@ -87,14 +86,14 @@ def main():
 
         if mech_state.time - last_time > (PERIOD / 2):
             speed *= -1
-            if(random.random() > 0.05):
+            if(random.random() > 0.05): # Rotate caster
                 pub_drive.publish(Float64(speed))
                 time.sleep(0.75)
                 speed *= -1                
-                if angle > 3.314:
-                    angle -= 3.314
+                if angle > PI:
+                    angle -= PI
                 else:
-                    angle += 3.314
+                    angle += PI
             last_time = mech_state.time
 
 

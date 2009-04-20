@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="mechanism_control" type="spawner.py" args="$(find life_test)/laser_tilt_test/life_test/controllers.xml" />
+
+  <node pkg="life_test" type="run_laser_tilt_test.py" />
+</launch>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<robot name="test_laser_tilt">
+  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
+
+  <pr2_tilting_laser name="laser_tilt" parent="world">
+    <origin xyz="0 0 0.03" rpy="0 0 0" />
+  </pr2_tilting_laser>
+</robot>

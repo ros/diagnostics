@@ -1,0 +1,20 @@
+<launch>
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py gripper.xml" />
+
+  <include file="$(find life_test)/init.machine" />
+  <include file="$(find life_test)/pr2_etherCAT.launch" />
+
+
+  <!-- Runtime Diagnostics Logging -->
+  <node pkg="rosrecord" type="rosrecord"
+        args="-f /u/wgtest/runtime_logs/gripper_test_runtime.bag /diagnostics" />
+
+ <!-- Calibration -->
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find life_test)/gripper_life_test/cal_gripper.xml"
+        output="screen" />
+
+  <include file="$(find life_test)/gripper_life_test/life_test.launch" />
+
+
+</launch>

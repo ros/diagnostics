@@ -1,0 +1,6 @@
+<launch>
+  <machine name="realtime_root" user="root" address="localhost"
+           ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>
+  <machine name="realtime" address="localhost"
+           ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" />
+</launch>

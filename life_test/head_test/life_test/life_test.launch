@@ -1,0 +1,9 @@
+<launch>
+  <!-- Runs the test on or off the test cart. -->
+  <!-- May need to put in to to scripts folder -->
+  <node pkg="life_test" type="run_head_test.py" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find life_test)/head_test/life_test/test_controller.xml" />
+
+  <node pkg="life_test" type="laser_test.bash" />
+</launch>

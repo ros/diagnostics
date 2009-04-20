@@ -1,4 +1,0 @@
-<launch>
-  <include file="$(find hokuyo_life_test)/init.launch" />
-  <node pkg="hokuyo_life_test" type="run_hokuyo_test.py" />
-</launch>
