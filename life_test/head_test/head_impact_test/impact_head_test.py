@@ -68,7 +68,7 @@ def xml_for(controller, joint):
 
 def main():
     rospy.init_node('head_impact_test', anonymous=True)
-    for i in range(0,3): 
+    for i in range(0,2): # Pan/tilt only 
         joint = JOINT_NAMES[i]
         controller = CONTROLLER_NAMES[i]
         #print xml_for(controller,joint)
@@ -83,18 +83,18 @@ def main():
         else:
             print "Spawned controller %s successfully" % controller
 
-            pub = rospy.Publisher("/%s/set_command" % controller, Float64)
+            pub = rospy.Publisher("/%s/command" % controller, Float64)
 
             try:
-                for i in range(0,3):
+                for i in range(0, 500):
                     if rospy.is_shutdown():
                         break
                     # Back and forth
-                    sleep(1.5)
-                    effort = -1000; # Min effort
+                    sleep(2)
+                    effort = -20; # Min effort
                     pub.publish(Float64(effort))
-                    sleep(1.5)
-                    effort = 1000; # Max effort
+                    sleep(2)
+                    effort = 20; # Max effort
                     pub.publish(Float64(effort))
             finally:
                 kill_controller(controller)
