@@ -1,6 +1,6 @@
 <package>
 
-  <description brief="Runs life/impact tests on test carts and robots"
+  <description brief="Runs life/impact tests on test carts and robots">
     
      This package contains the scripts needed to run a life and impact tests on 
 robots and test carts. 
