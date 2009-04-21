@@ -1,0 +1,6 @@
+<controller name="test_controller" type="HysteresisControllerNode">
+  <joint name="%s_shoulder_lift_joint">
+     <pid p="7" i="0.7" d="0" iClamp="1.0" />
+    <controller_defaults velocity="1.5" max_effort="10.0" max_expected_effort="0.87" min_expected_effort="-3.7" min_pos="-0.37" max_pos="1.40" timeout="15"/>   
+  </joint>
+</controller>

@@ -1,0 +1,3 @@
+<launch>
+  <param name="full_arm_test/side" value="r" type="str" />
+</launch>

@@ -1,0 +1,6 @@
+<controller name="test_controller" type="HysteresisControllerNode">
+  <joint name="%s_wrist_roll_joint">
+     <pid p="2" d="0" i="10" iClamp="0.1" />
+    <controller_defaults velocity="2.0" max_effort="1.0" max_expected_effort="0.15" min_expected_effort="-0.14" min_pos="0" max_pos="0" timeout="20" />   
+  </joint>
+</controller>

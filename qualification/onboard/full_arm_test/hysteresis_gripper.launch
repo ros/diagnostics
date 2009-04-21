@@ -1,0 +1,5 @@
+<launch> 
+  <!-- Maybe holding the arm in place for this one is kinda overkill -->
+  <node pkg="qualification" type="full_arm_test_spawner.py" args="_gripper_l_finger $(find qualification)/onboard/full_arm_test/hysteresis_gripper.xml" />
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+</launch>

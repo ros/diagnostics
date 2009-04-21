@@ -1,0 +1,4 @@
+<launch> 
+  <node pkg="qualification" type="full_arm_test_spawner.py" args="_wrist_flex $(find qualification)/onboard/full_arm_test/hysteresis_wrist_flex.xml" />
+  <node pkg="qualification" type="hysteresis_sinesweep_plot.py" />
+</launch>

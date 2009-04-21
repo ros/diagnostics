@@ -1,0 +1,5 @@
+<controller name="test_controller" type="SineSweepControllerNode">
+  <joint name="%s_wrist_flex_joint">
+    <controller_defaults start_freq="5" end_freq="100" amplitude="2.0" duration="10" first_mode="26.0" second_mode="20.0" error_tolerance="0.15" />   
+  </joint>
+</controller>
