@@ -47,7 +47,7 @@ class SubTest:
     self._name = name
 
   def get_key(self):
-    key = self._subtest
+    key = self._test_script
     if self._pre_script is not None:
       key = key + self._pre_script 
     if self._post_script is not None:
@@ -56,7 +56,7 @@ class SubTest:
 
   def get_name(self):
     if self._name is None:
-      return self._pre_script + ' ' + self._test_script + ' ' + self._post_script
+      return self.get_key()
     else:
       return self._name
       

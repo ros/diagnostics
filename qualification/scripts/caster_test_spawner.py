@@ -79,7 +79,6 @@ def main():
                 break
             except rospy.ServiceException:
                 rospy.logerr("ServiceException while killing test_controller")
-                raise
 
 
 if __name__ == '__main__':

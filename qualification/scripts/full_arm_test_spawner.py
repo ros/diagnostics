@@ -58,12 +58,12 @@ class SendMessageOnSubscribe(rospy.SubscribeListener):
 
     def peer_subscribe(self, topic_name, topic_publish, peer_publish):
         peer_publish(self.msg)
-        sleep(0.1)
+        time.sleep(0.1)
 
 
 def xml_for_hold(name, p, i, d, iClamp):
     return """
-<controller name="%s_controller" type="JointPositionControllerNode">
+<controller name="%s_hold" type="JointPositionControllerNode">
   <joint name="%s_joint">
   <pid p="%d" i="%d" d="%d" iClamp="%d" />
 </controller>""" % (name, name, p, i, d, iClamp)
@@ -76,6 +76,7 @@ def hold_joint(name, p, i, d, iClamp, holding):
             return True
     except Exception, e:
         print "Failed to spawn holding controller %s" % name
+        print xml_for_hold(name, p, i, d, iClamp)
     return False
 
 def set_controller(controller, command):
@@ -83,26 +84,29 @@ def set_controller(controller, command):
                               SendMessageOnSubscribe(Float64(command)))
 
 def hold_arm(side, pan_angle, holding):
-    if hold_joint("%s_gripper" % side, 15, 0, 1, 5, holding):
-        set_controller("%s_gripper_palm_controller" % side, float(0.0))
+    if hold_joint("%s_gripper" % side, 15, 0, 1, 1, holding):
+        set_controller("%s_gripper_hold" % side, float(0.0))
     
-    if hold_joint("%s_forearm_roll" % side, 20, 3, 4, 2, holding):
-        set_controller("%s_forearm_roll_controller" % side, float(0.0))
+    if hold_joint("%s_wrist_roll" % side, 12, 3, 1, 1, holding):
+        set_controller("%s_wrist_roll_hold" % side, float(0.0))
         
-    if hold_joint("%s_wrist_flex" % side, 20, 3, 4, 2, holding):
-        set_controller("%s_wrist_flex_controller" % side, float(3.0))
+    if hold_joint("%s_wrist_flex" % side, 12, 3, 1, 1, holding):
+        set_controller("%s_wrist_flex_hold" % side, float(1.0))
 
-    if hold_joint("%s_elbow_flex" % side, 50, 15, 8, 2, holding):
-        set_controller("%s_elbow_flex_controller" % side, float(3.0))
+    if hold_joint("%s_forearm_roll" % side, 20, 5, 2, 2, holding):
+        set_controller("%s_forearm_roll_hold" % side, float(0.0))
+
+    if hold_joint("%s_elbow_flex" % side, 35, 10, 2, 2, holding):
+        set_controller("%s_elbow_flex_hold" % side, float(-0.5))
 
     if hold_joint("%s_upper_arm_roll" % side, 20, 2, 1.0, 1.0, holding):
-        set_controller("%s_upper_arm_roll_controller" % side, float(0.0))
+        set_controller("%s_upper_arm_roll_hold" % side, float(0.0))
 
-    if hold_joint("%s_shoulder_lift" % side, 35, 7, 4, 3, holding):
-        set_controller("%s_shoulder_lift_controller" % side, float(3.0))
+    if hold_joint("%s_shoulder_lift" % side, 40, 7, 2, 4, holding):
+        set_controller("%s_shoulder_lift_hold" % side, float(0.5))
 
-    if hold_joint("%s_shoulder_pan" % side, 70, 6, 8, 4, holding):
-        set_controller("%s_shoulder_pan_controller" % side, float(pan_angle))
+    if hold_joint("%s_shoulder_pan" % side, 50, 6, 8, 4, holding):
+        set_controller("%s_shoulder_pan_hold" % side, float(pan_angle))
 
 def main():
     if len(sys.argv) < 3:
@@ -113,27 +117,35 @@ def main():
     side = rospy.get_param("full_arm_test/side")
 
     rospy.init_node('arm_test_spawner_' + side, anonymous=True)
-        
-    joint = side + sys.argv[1]
-    controller_file = open(sys.argv[2])
-    # Put side in to controller xml string
-    controller_xml = controller_file.read() % side 
-    controller_file.close()
-
-    holding = []
+    
     try:
+        joint = side + sys.argv[1]
+        controller_file = open(sys.argv[2])
+        # Put side in to controller xml string
+        controller_xml = controller_file.read() % side 
+        controller_file.close()
+        
+        holding = []
+    
         rospy.wait_for_service('spawn_controller')
-
+        
+        print 'Holding arms'
         # Hold both arms in place
-        hold_arm('r', -0.7, holding)
-        hold_arm('l', 0.7, holding)
+        hold_arm('r', -1.2, holding)
+        hold_arm('l', 1.2, holding)
         
+        print 'Launching joint controller %s' % joint
         # Kill controller for given joint
-        kill_controller(joint + '_controller')
-        holding.remove(joint + '_controller')
+        kill_controller(joint + '_hold')
+
+        if joint + '_hold' in holding:
+            holding.remove(joint + '_hold')
+        else:
+            print 'Joint %s is not being held' % joint
         
-        sleep(1.5)
+        time.sleep(1.5)
         
+        print 'Spawning test controller'
         # Spawn test controller and run test
         resp = spawn_controller(controller_xml)
         
@@ -142,23 +154,29 @@ def main():
             rospy.logerr('Controller XML: %s' % controller_xml)
             sys.exit(2)
 
-        holding.append('test_controller') # always called test_controller
+        holding.append(resp.name[0])
         
+        print 'Test controller is up, running test'
         while not rospy.is_shutdown():
-            sleep(0.5)
+            time.sleep(0.5)
 
     # Kill everything
     finally:
+        try:
+            # Hack, kill test controller first to make sure next test works
+            kill_controller('test_controller')
+        except:
+            pass
+
         for name in holding:
-            for i in range(3):
+            for i in range(0,5):
                 try:
                     rospy.logout("Trying to kill %s" % name)
-                    kill_controller('test_controller')
+                    kill_controller(name)
                     rospy.logout("Succeeded in killing %s" % name)
                     break
                 except rospy.ServiceException:
                     rospy.logerr("ServiceException while killing %s" % name)
-                    raise
 
 if __name__ == '__main__':
     main()
