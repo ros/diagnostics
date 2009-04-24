@@ -1,0 +1,12 @@
+<launch>
+  <!-- Robot desc changed to this folder for new calibration ref positions -->
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/head_test/head_alpha2.xml'" />
+
+  <!-- Loads realtime machine and PR2_etherCAT -->
+  <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
+
+  <!-- Head Calibration -->
+  <node pkg="mechanism_bringup" type="calibrate.py"
+  	args="$(find qualification)/tests/head_test/head_alpha2_cal.xml" />
+</launch>

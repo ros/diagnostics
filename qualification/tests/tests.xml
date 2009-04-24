@@ -7,15 +7,21 @@
   <test serial="torsoli" 
 	file="torso_lift_test/test.xml" descrip="Torso Lift Test" />  
 
-  <!-- Head and Laser Tilt -->
+  <!-- Head  -->
   <test serial="6804040" 
 	file="head_test/test.xml" descrip="Head Alpha 1.0" />
   <test serial="6804040" 
-	file="head_test/test_alpha2a.xml"  descrip="Head Alpha 2.0a (small tilt motor)" />
+	file="head_test/test_alpha2a.xml"  descrip="Head Alpha 2.0a (small tilt motor, big gearhead)" />
   <test serial="6804040" 
 	file="head_test/test_alpha2b.xml"  descrip="Head Alpha 2.0b (big tilt motor)" />
+  <test serial="6804040" 
+	file="head_test/test_alpha2.xml"  descrip="Head Alpha 2.0 (sm tilt motor, gearhead)" />
+
+  <!-- Laser tilt sled -->
   <test serial="6804001" 
 	file="laser_tilt_test/test.xml" descrip="Laser Tilt Test" />  
+  <test serial="6804001" 
+	file="laser_tilt_test/test_alpha2.xml" descrip="Laser Tilt Alpha2" />  
 
   <!-- Arm Tests -->
   <test serial="6804178" 

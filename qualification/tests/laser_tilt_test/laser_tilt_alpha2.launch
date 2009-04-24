@@ -1,0 +1,11 @@
+<launch>
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/laser_tilt_test/laser_tilt_alpha2.xml'" />
+
+  <!-- Loads realtime machine and PR2_etherCAT -->
+  <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
+
+  <!-- Laser Tilt Calibration -->
+   <node pkg="mechanism_bringup" type="calibrate.py"
+         args="$(find qualification)/tests/laser_tilt_test/laser_tilt_cal.xml" />
+</launch>
