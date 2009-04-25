@@ -76,12 +76,12 @@ if __name__ == "__main__":
     try:
         while not rospy.is_shutdown():
             if options.low_only:
-                pub.publish(Float64(0))
-                sleep(10)
-                pub.publish(Float64(0.12))
-                sleep(10)
+                pub.publish(Float64(0.07))
+                sleep(3)
+                pub.publish(Float64(0.10))
+                sleep(3)
             else:
-                position = random.uniform(0.12, 0.31)
+                # All the way up and down
                 pub.publish(Float64(0))
                 sleep(30)
                 pub.publish(Float64(0.32))
