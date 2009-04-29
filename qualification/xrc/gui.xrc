@@ -57,7 +57,7 @@
 					</font>
 					<object class="notebookpage">
 						<label>Test Cart</label>
-						<selected>1</selected>
+						<selected>0</selected>
 						<object class="wxPanel" name="test_cart_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
@@ -267,8 +267,8 @@
 						</object>
 					</object>
 					<object class="notebookpage">
-						<label>PR2 Qualification</label>
-						<selected>0</selected>
+						<label>PR-2 Qualification</label>
+						<selected>1</selected>
 						<object class="wxPanel" name="robot_qual_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
