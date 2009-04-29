@@ -44,11 +44,12 @@ from time import sleep
 
 rospy.init_node("run_selftest", anonymous=True)
 
-hokuyo_name = 'hokuyo'
-hokuyo_id = 'None found.'
+node_name = 'node'
+node_id = 'NONE'
+
 try:
-    hokuyo_name = rospy.resolve_name('hokuyo_name')
-    selftestname = hokuyo_name + '/self_test'
+    node_name = rospy.resolve_name('node_name')
+    selftestname = node_name + '/self_test'
     rospy.logout('Testing %s' % selftestname)
     
     test_service = rospy.ServiceProxy(selftestname, SelfTest)
@@ -67,16 +68,15 @@ try:
     else:
         r.result = r.RESULT_HUMAN_REQUIRED #RESULT_FAIL
 
-    html = "<p><b>Hokuyo ID: %s, using name %s.</b></p>\n" % (result.id, hokuyo_name)
+    html = "<p><b>Item ID: %s, using node name %s.</b></p>\n" % (node_id, node_name)
 
     passfail = 'PASS'
     i = 1
     
-    hokuyo_id = result.id
+    if result.id is not None and result.id != '':
+        node_id = result.id
 
     statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
-    
-    summary = "<p>Hokuyo: %s.<br>Topic: %s</p>\n" % (hokuyo_id, hokuyo_name)
     
     for stat in result.status:
         if (stat.level > 1):
@@ -106,19 +106,19 @@ try:
 
     r.plots = []
     r.html_result = html
-    r.text_summary = 'Hokuyo ID: %s, name %s. Self test result: %s' % (hokuyo_id, hokuyo_name, passfail)
+    r.text_summary = 'Node ID: %s, node name %s. Self test result: %s' % (node_id, node_name, passfail)
     
     rospy.wait_for_service('test_result')
     result_service.call(r)
 
 except Exception, e:
-    msg = 'Caught exception testing hokuyo %s, %s.</p>\n' % (hokuyo_id, hokuyo_name)
+    msg = 'Caught exception testing device id %s, node name %s.</p>\n' % (node_id, node_name)
     rospy.logerr(msg)
     rospy.logerr(str(e))
     rospy.wait_for_service('test_result', 10)
     r = TestResultRequest()
     r.plots = []
-    r.html_result = '<p>%s</p>' % msg
+    r.html_result = '<p>%s</p><p><b>Exception:</b><br>%s</p>' % (msg, str(e))
     r.text_summary = msg
     r.result = r.RESULT_FAIL
     result_service.call(r)

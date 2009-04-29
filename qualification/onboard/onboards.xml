@@ -17,11 +17,13 @@
        
        -->
 
-  <robot label="Hokuyo" child_name="hokuyo" >
-    <hokuyo label="Base Hokuyo" 
+  <robot label="Sensors" child_name="sensors" >
+    <sensors label="Base Hokuyo" 
 	    test="hokuyo_test/base_selftest.launch" />
-    <hokuyo label="Tilt Hokuyo" 
+    <sensors label="Tilt Hokuyo" 
 	    test="hokuyo_test/tilt_selftest.launch" />
+    <sensors label="IMU" 
+	    test="imu_test/selftest.launch" />
   </robot>
   
   <robot label="Right Arm" child_name="right_arm" >
