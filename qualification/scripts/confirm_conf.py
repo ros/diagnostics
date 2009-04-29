@@ -54,28 +54,7 @@ prompt_done = False
 prompt_click ="no"
 frame=wx.Frame(None)
 
-def msg_prompt(msg):
-  # Parse msg for details
-  msg, sep, details = msg.partition(':::')
-  if len(details) < 5:
-    details = 'No details available.'
-
-  display_msg = msg + '\n\nDetails:\n' + details
-
-  print "msg_prompt running"
-  dlg=wx.MessageBox(display_msg,"MCB Prog/Conf Error", wx.YES_NO)
-  print "a",dlg, wx.YES
-  global prompt_done, prompt_click
-
-  if (dlg == wx.YES ):
-    prompt_click="yes"
-  else:
-    prompt_click="no"
-  prompt_done=True
-
-  print "msg_prompt done"
-  
-# Attempted to make prompt that would show details only when requested
+ 
 def msg_detail_prompt(msg):
   # Parse msg for details
   msg, sep, details = msg.partition(':::')
@@ -85,7 +64,7 @@ def msg_detail_prompt(msg):
   # Load MCB conf dialog box from gui.xrc
   xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
   xrc_resource = xrc.XmlResource(xrc_path)
-  dialog = xrc_resource.LoadDialog(None, 'config_dialog')
+  dialog = xrc_resource.LoadDialog(None, 'confirm_conf_dialog')
   # Set text in message text
   xrc.XRCCTRL(dialog, 'message_text').SetLabel(msg)
   xrc.XRCCTRL(dialog, 'message_text').Wrap(300)  
@@ -111,7 +90,6 @@ def check_w_user(req):
   prompt_done=False
 
   wx.CallAfter(msg_detail_prompt, req.str)
-  #wx.CallAfter(msg_prompt, req.str)
 
   while(not prompt_done):
     print "Waiting for retry prompt . . ."

@@ -40,7 +40,7 @@ class TestDoesNotExistError(Exception): pass
 class FailedLoadError(Exception): pass
 
 class SubTest:
-  def __init__(self, subtest, pre_test, post_test, name=None):
+  def __init__(self, subtest, pre_test=None, post_test=None, name=None):
     self._test_script = subtest
     self._pre_script = pre_test
     self._post_script = post_test
@@ -49,9 +49,9 @@ class SubTest:
   def get_key(self):
     key = self._test_script
     if self._pre_script is not None:
-      key = key + self._pre_script 
+      key = key + '_' + self._pre_script 
     if self._post_script is not None:
-      key = key + self._post_script
+      key = key + '_' + self._post_script
     return key
 
   def get_name(self):
@@ -59,7 +59,9 @@ class SubTest:
       return self.get_key()
     else:
       return self._name
+
       
+# Make this load from list/set of subtests
 class Test:
   def load(self, test_str):
     self._startup_script = None

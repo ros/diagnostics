@@ -72,7 +72,8 @@ class VisualizerFrame(wx.Frame):
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
     r.plots = []
-    r.text_result = "Visual Verification Succeeded"
+    r.text_summary = 'Visual Verification OK.'
+    r.html_result = "<p>Visual Verification Succeeded.</p>"
     r.result = TestResultRequest.RESULT_PASS
     rospy.wait_for_service('test_result')
     result_service.call(r)
@@ -82,7 +83,8 @@ class VisualizerFrame(wx.Frame):
     result_service = rospy.ServiceProxy('test_result', TestResult)
     r = TestResultRequest()
     r.plots = []
-    r.text_result = "Visual Verification Failed"
+    r.text_summary = 'Visual Verification failed.'
+    r.html_result = "<p>Visual Verification Failed.</p>"
     r.result = TestResultRequest.RESULT_FAIL
     rospy.wait_for_service('test_result')
     result_service.call(r)

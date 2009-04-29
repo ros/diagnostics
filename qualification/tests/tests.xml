@@ -24,6 +24,10 @@
 	file="laser_tilt_test/test_alpha2.xml" descrip="Laser Tilt Alpha2" />  
 
   <!-- Arm Tests -->
+  <test serial="shoulde" 
+	file="shoulder_test/test_qual.xml" descrip="Shoulder Test - Qual" />
+
+
   <test serial="6804178" 
 	file="full_arm_test/test.xml" descrip="Full Arm Test" />
   <test serial="6804204" 

@@ -69,23 +69,25 @@ class App:
       self.hysteresis_plot()
     elif self.data.test_name == "sinesweep":
       self.sine_sweep_plot()
-    elif self.data.test_name == "backlash":
-      self.backlash_plot()
     else:
       print 'Recieved test message with name %s, unable to analyze' % s
-      self.test_failed_service_call()
+      self.test_failed_service_call('Unable to analyze result.')
     return TestDataResponse(1)
       
-  def test_failed_service_call(self):
+  def test_failed_service_call(self, except_str = ''):
+    rospy.logerr(except_str)
     r = TestResultRequest()
-    r.text_result = ''
+    r.html_result = except_str
+    r.text_summary = 'Caught exception, automated test failure.'
     r.plots = []
     r.result = TestResultRequest.RESULT_FAIL
     self.result_service.call(r)
 
   def hysteresis_plot(self):
     try:
-      s,tr = self.hysteresis_analysis()
+      image_title = self.data.joint_name + "_hysteresis"
+
+      text, summary, tr = self.hysteresis_analysis(image_title)
       
       # Create the figure 1: Effort vs. Position. 2: Velocity vs. Position
       fig=plot.figure(1)
@@ -117,7 +119,9 @@ class App:
       
       # Pass along results to qual GUI
       r = TestResultRequest()
-      r.text_result = ""
+      r.html_result = text
+      r.text_summary = summary
+
       r.plots = []
       if tr == True:
         r.result = TestResultRequest.RESULT_PASS
@@ -130,16 +134,16 @@ class App:
       
       p = qualification.msg.Plot()
       r.plots.append(p)
-      p.text = s
-      p.title = self.data.joint_name + "_hysteresis"
+      p.title = image_title
       p.image = image
       p.image_format = "png"
       self.result_service.call(r)
-    except:
+    except Exception, e:
       print 'hysteresis_plot caught exception, returning test failure.'
-      self.test_failed_service_call()
+      print e
+      self.test_failed_service_call(str(e))
 
-  def hysteresis_analysis(self):
+  def hysteresis_analysis(self, image_title):
     self.max_avg = 0
     self.min_avg = 0
 
@@ -149,9 +153,9 @@ class App:
     print "Num pts %s." % num_pts
 
     if num_pts < 250: 
-      error_msg = "Not enough data points, hysteresis controller may have malfunctioned. Check controller gains.\nTest status: FAIL."
+      error_msg = "<p>Not enough data points, hysteresis controller may have malfunctioned. Check controller gains.</p><p>Test status: <p>FAIL</b>.</p>"
       print error_msg
-      return (error_msg, False)
+      return (error_msg, "Not enough data points, bad controller.", False)
 
     # Expected values
     min_effort_param = self.data.arg_value[0]
@@ -164,9 +168,9 @@ class App:
     max_encoder = max(numpy.array(self.data.position))
 
     if abs(max_encoder - min_encoder) < 0.0001:
-      error_msg = "No travel of mechanism, hysteresis did not complete. Check controller gains.\nTest status: FAIL."
+      error_msg = "<p>No travel of mechanism, hysteresis did not complete. Check controller gains and encoder.</p><p>Test status: <b>FAIL</b>.</p>"
       print error_msg
-      return (error_msg, False)
+      return (error_msg, "No travel in mechanism.", False)
 
     # Find the index to do the average over
     # Data set starts close to one end of hysteresis
@@ -186,9 +190,9 @@ class App:
 
     # Make sure we have at least some points in both directions
     if effort1_array.size < 20 or effort2_array.size < 20:
-      error_msg = 'Not enough data in one or more directions.\nTest Status: FAIL.'
+      error_msg = '<p>Not enough data in one or more directions.</p><p>Test Status: <b>FAIL</b>.</p>'
       print error_msg
-      return (error_msg, False)
+      return (error_msg, 'No data in one or more directions.', False)
 
     #compute the average efforts with std deviations to display
     effort1 = numpy.average(effort1_array)
@@ -212,33 +216,50 @@ class App:
     range_msg    = "OK"
     negative_msg = "OK"
     positive_msg = "OK"
-    error_reason = ""
+    error_html = ""
+    summary_txt = ""
     
     # Check to range against expected values
     if (min_encoder > min_range_param or max_encoder < max_range_param) and (min_range_param != 0 and max_range_param != 0):
-      error_reason += "Mechanism is not traveling the complete distance!\n"
+      error_html += "Mechanism is not traveling the complete distance!<br>"
       range_msg = "FAIL"
+      summary_txt += "Range: FAIL. "
       tr = False
+    else:
+      summary_txt += "Range: OK. "
 
     # Check effort limits (within 15% of expected)
     if abs((self.min_avg - min_effort_param)/min_effort_param) > 0.15:
-      error_reason += "The mechanism average effort in the negative direction is out of bounds!\n"
+      error_html += "<br>The mechanism average effort in the negative direction is out of bounds!<br>"
       negative_msg = "FAIL"
       tr = False
-    if abs((self.max_avg - max_effort_param)/max_effort_param) > 0.15:
-      error_reason += "The mechanism average effort in the positive direction is out of bounds!\n"
-      positive_MSG = "FAIL"
-      tr = False
+    
+    summary_txt += "Negative Effort: %s" % positive_msg
 
     # Check that effort is even (<20% standard deviation)
     if abs(self.min_sd / self.min_avg) > 0.20:
-      error_reason += "Effort is uneven in negative direction\n"
+      error_html += "Effort is uneven in negative direction.<br>"
       negative_msg += " absolute value, uneven effort!"
       tr = False
+      summary_txt += ", uneven. "
+    else:
+      summary_txt += ". "
+
+    # Positive efforts
+    if abs((self.max_avg - max_effort_param)/max_effort_param) > 0.15:
+      error_html += "The mechanism average effort in the positive direction is out of bounds!<br>"
+      positive_msg = "FAIL"
+      tr = False
+    
+    summary_txt += "Positive Effort: %s" % positive_msg
+
     if abs(self.max_sd / self.max_avg) > 0.20:
-      error_reason += "Effort is uneven in positive direction\n"
+      error_html += "Effort is uneven in positive direction."
       positive_msg += " absolute value, uneven effort!"
       tr = False
+      summary_txt += ", uneven. "
+    else:
+      summary_txt += ". "
 
     if tr:
       test_msg = "FAIL"
@@ -249,23 +270,25 @@ class App:
     sd_min_percent = abs(self.min_sd / self.min_avg) * 100
     sd_max_percent = abs(self.max_sd / self.max_avg) * 100
 
-    s = StringIO() 
-    print >> s, "Test result: %s" % test_msg
-    print >> s, "Efforts."
-    print >> s, "Positive. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.max_avg, sd_max_percent, max_effort_param, positive_msg)  
-    print >> s, "Negative. Average: %f, SD: %f percent. Expected: %f. Status: %s" % (self.min_avg, sd_min_percent, min_effort_param, negative_msg)  
-    print >> s, "Joint limits"
-    print >> s, "Max measured: %f, expected: %f. Min measured: %f, expected: %f: Status: %s" % (max_encoder, max_range_param, min_encoder, min_range_param, range_msg)
+    html_result = '<H6>Efforts</H6>'
+    html_result += "<p>Positive. Average: %f, SD: %f percent. Expected: %f. Status: %s.</p>" % (self.max_avg, sd_max_percent, max_effort_param, positive_msg)  
+    html_result += "<p>Negative. Average: %f, SD: %f percent. Expected: %f. Status: %s.</p>" % (self.min_avg, sd_min_percent, min_effort_param, negative_msg)  
+    html_result += "<H6>Joint limits</H6>"
+    html_result += "<p>Max measured: %f, expected: %f. Min measured: %f, expected: %f: Status: %s.</p>" % (max_encoder, max_range_param, min_encoder, min_range_param, range_msg)
+
+    html_result += '<br><img src=\"IMG_PATH/%s.png\", width = 640, height = 480/><br>' % image_title
+
     
     if not tr:
-      print >> s, "\n"   
-      print >> s, "Test failure data:"
-      print >> s, error_reason
+      html_result += "<H6>Test failure data</H6>"
+      html_result += "<p>%s</p>" % error_html
 
-    return (s.getvalue(),tr)
+    return (html_result, summary_txt, tr)
 
   def sine_sweep_plot(self):
     try:
+      image_title = self.data.joint_name + "_sine_sweep"
+
       # Plot the values and line of best fit
       fig = plot.figure(1)
       axes1 = fig.add_subplot(211)
@@ -299,13 +322,13 @@ class App:
 
       # Find second mode
       # Max after first mode
-      index = numpy.argmax(pxx[index - cutoff: pxx.size])
+      index2 = numpy.argmax(pxx[index - cutoff: pxx.size])
       max_value = max(pxx[index - cutoff: pxx.size])
-      index += cutoff
-      axes2.plot([f[index]], [pxx[index]], 'r.', markersize = 8);
-      self.second_mode = f[index]
+      index2 += cutoff
+      axes2.plot([f[index2]], [pxx[index2]], 'r.', markersize = 8);
+      self.second_mode = f[index2]
       
-      s,tr = self.sine_sweep_analysis()
+      html, summary, tr = self.sine_sweep_analysis(image_title)
       axes2.axvline(x=self.data.arg_value[0], color='r') # Line at first mode
       axes2.set_xlim(0, 100)
       axes2.set_ylim(0, max_value+10)
@@ -317,7 +340,8 @@ class App:
       fig.text(.35, .95, self.data.joint_name + ' SineSweep Test')
 
       r = TestResultRequest()
-      r.text_result = ""
+      r.html_result = html
+      r.text_summary = summary
       r.plots = []
       if tr==True:
         r.result = TestResultRequest.RESULT_PASS
@@ -330,93 +354,47 @@ class App:
       
       p = qualification.msg.Plot()
       r.plots.append(p)
-      p.text = s
-      p.title = self.data.joint_name + "_sine_sweep"
+      p.title = image_title
       p.image = image
       p.image_format = "png"
       self.result_service.call(r)
-    except:
+    except Exception, e:
       print 'sine_sweep_plot caught exception, returning test failure.'
-      self.test_failed_service_call()
+      print e
+      self.test_failed_service_call(str(e))
 
-  def sine_sweep_analysis(self): 
+  def sine_sweep_analysis(self, image_title): 
     # Check data array for mininum number of points
     num_pts = numpy.array(self.data.position).size
 
     if num_pts < 101: 
       tr = False
-      error_msg = "Not enough data points in position array, failure."
-      return (error_msg, tr)
+      error_msg = "<p>Not enough data points in position array. Minimum 101, found %d. Check encoder and amplitude of controller.</p>" % num_pts
+      return (error_msg, "Not enough data points.", tr)
   
     # Parameters
     first_mode_param = self.data.arg_value[0]
+    second_mode_param = self.data.arg_value[1]
     mode_error_param = self.data.arg_value[2]
 
-    s = StringIO()
+    html = ''
+    summary = ''
     if abs(self.first_mode - first_mode_param)/first_mode_param > mode_error_param:
-      print >> s, "Test Result: FAIL"
-      print >> s, "The first mode is incorrect: FAIL"
+      html += "<H6>The first mode is incorrect: <b>FAIL</b>.</H6>"
+      summary += "First mode: <b>FAIL</b>."
       tr=False
     else:
-      print >> s, "Test Result: PASS"
-      print >> s, "First mode within tolerance: OK"
+      html += "<H6>First mode: <b>OK</b>.</H6>"
+      summary += "First mode: OK."
       tr=True
-    print >> s, "First mode measured: %f, expected: %f" % (self.first_mode, first_mode_param)
+    html += "<p>First mode measured: %f, expected: %f.</p>" % (self.first_mode, first_mode_param)
+    html += "<p>Second mode measured: %f, expected %f.</p>" % (self.second_mode, second_mode_param)
 
-    return (s.getvalue(),tr)
+    html += '<br><img src=\"IMG_PATH/%s.png\", width = 640, height = 480/><br>' % image_title
 
-  # Not implemented, doesn't have controller or data
-  def backlash_plot(self):
-    s,tr = self.BacklashAnalysis()
+    return (html, summary, tr)
 
-    #create the figure
-    fig=plot.figure(1)
-    axes1 = fig.add_subplot(211)
-    axes2 = fig.add_subplot(212)
-    #axes3 = fig.add_subplot(313)
-    axes1.set_xlabel('Effort')
-    axes1.set_ylabel('Position')
-    axes2.set_xlabel('Time')
-    axes2.set_ylabel('Position')
-    #plot the effort hysteresis
-    axes1.plot(numpy.array(self.data.effort), numpy.array(self.data.position), 'r')
-    #show the average effort lines 
-    #axes1.axhline(y=self.data.arg_value[1],color='b')
-    #axes1.axhline(y=0,color='k')
-    #axes1.axhline(y=self.data.arg_value[0],color='b')
-    #show that a constant velocity was achieved
-    axes2.plot(numpy.array(self.data.position), 'b')
-    #axes3.plot(numpy.array(self.data.effort), 'g')
-    #axes3.plot(numpy.array(self.data.velocity),numpy.array(self.data.position), 'r')
-    
-    # pass along results
-    r = TestResultRequest()
-    r.text_result = ""
-    r.plots = []
-    if tr==True:
-      r.result =TestResultRequest.RESULT_PASS
-    else:
-      r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
-    
-    stream = StringIO()
-    plot.savefig(stream, format="png")
-    image = stream.getvalue()
-    
-    p = qualification.msg.Plot()
-    r.plots.append(p)
-    p.text = s
-    p.title = self.data.joint_name + "_backlash"
-    p.image = image
-    p.image_format = "png"
-    self.result_service.call(r)
-
-  def backlash_analysis(self):
-    #compute the encoder travel
-    s = StringIO()
-    print >> s, "look at the data"
-    tr=False
-    return (s.getvalue(),tr)
-    
+     
 if __name__ == "__main__":
   try:
     app = App()

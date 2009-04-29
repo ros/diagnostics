@@ -43,6 +43,8 @@ import qualification.msg
 import std_msgs
 import time
 
+import rospy
+
 import matplotlib.pyplot as plt
 from StringIO import StringIO
 
@@ -56,17 +58,19 @@ result_service = rospy.ServiceProxy('test_result', TestResult)
 rospy.wait_for_service('self_test')
 test_service()
 
-sys.stderr.write("Got response, sending test result")
+rospy.logerr("Got response, sending test result")
 r = TestResultRequest()
 r.plots = []
 if (sys.argv[1] == "pass"):
-  r.text_result = "Test succeeded"
+  r.html_result = "<p>Test succeeded.</p>"
+  r.text_summary = "Test passed."
   r.result = TestResultRequest.RESULT_PASS
 elif (sys.argv[1] == "fail"):
-  r.text_result = "Test failed"
+  r.html_result = "<p>Test failed.</p>"
   r.result = TestResultRequest.RESULT_FAIL
+  r.text_summary = "Test Failed."
 else:
-  r.text_result = "Human input required"
+  r.text_summary = "Human input required."
   r.result = TestResultRequest.RESULT_HUMAN_REQUIRED
   
   plt.plot([1,2,3,4],[16, 9, 4, 1], 'ro')
@@ -76,12 +80,13 @@ else:
   plt.savefig(stream, format="png")
   image = stream.getvalue()
   
-  for j in range(0, 10):
-    p = qualification.msg.Plot()
-    r.plots.append(p)
-    p.text = "This plot shows the correlation between # of pirates and # of ninjas. Does this data make sense?"
-    p.image = image
-    p.image_format = "png"
+  r.html_result = "<p>Does the correlation between pirates and ninjas make sense?</p>\n<br><img src=\"IMG_PATH/pirates_and_ninjas.png\", width = 640, height = 480 />"
+  
+  p = qualification.msg.Plot()
+  r.plots.append(p)
+  p.image = image
+  p.image_format = "png"
+  p.title = "pirates_and_ninjas"
     
 # block until the test_result service is available
 rospy.wait_for_service('test_result')

@@ -3,10 +3,26 @@
   
   <!-- Each element is organized as follows:
        <parent_name label="Name as Displayed in GUI" child_name="name_of_any_subnodes">
-	 <child_name label="Child name as Displayed in GUI" pre="pre_subtest_script.launch" test="test_launch_file.launch" />
+	 <child_name label="Child name as Displayed in GUI" 
+		     pre="pre_subtest_script.launch"
+		     test="test_launch_file.launch" />
+	 <child_name label="Other Child name as Displayed in GUI" 
+		     pre="pre_subtest_script.launch" 
+		     test="other_test_launch_file.launch" />
        </parent_name>   
        Labels must be unique for each element. Base folder is qualification/onboard
+
+       Change child_name -> node_name ...
+       Relabel to reduce confusion 
+       
        -->
+
+  <robot label="Hokuyo" child_name="hokuyo" >
+    <hokuyo label="Base Hokuyo" 
+	    test="hokuyo_test/base_selftest.launch" />
+    <hokuyo label="Tilt Hokuyo" 
+	    test="hokuyo_test/tilt_selftest.launch" />
+  </robot>
   
   <robot label="Right Arm" child_name="right_arm" >
     <!-- No sinesweeps for shoulder -->

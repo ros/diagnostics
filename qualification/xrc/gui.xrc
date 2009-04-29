@@ -2,7 +2,7 @@
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxPanel" name="main_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>800,829</size>
+		<size>700,1000</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -10,7 +10,7 @@
 				<flag>wxALIGN_CENTER_HORIZONTAL|wxEXPAND</flag>
 				<border>5</border>
 				<object class="wxSplitterWindow" name="split_panel">
-					<sashpos>551</sashpos>
+					<sashpos>850</sashpos>
 					<gravity>0.5</gravity>
 					<minsize>100</minsize>
 					<orientation>horizontal</orientation>
@@ -27,7 +27,6 @@
 								<border>5</border>
 								<object class="wxTextCtrl" name="log">
 									<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
-									<size>600,120</size>
 									<value></value>
 									<maxlength>0</maxlength>
 								</object>
@@ -40,7 +39,7 @@
 	</object>
 	<object class="wxPanel" name="serial_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>658,650</size>
+		<size>700,840</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -58,7 +57,7 @@
 					</font>
 					<object class="notebookpage">
 						<label>Test Cart</label>
-						<selected>0</selected>
+						<selected>1</selected>
 						<object class="wxPanel" name="test_cart_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
@@ -114,7 +113,7 @@
 										<orient>wxVERTICAL</orient>
 										<object class="sizeritem">
 											<option>0</option>
-											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+											<flag>wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 											<object class="wxStaticText" name="m_staticText12">
 												<font>
@@ -134,7 +133,7 @@
 											<border>5</border>
 											<object class="wxTextCtrl" name="rework_reason">
 												<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
-												<size>600,80</size>
+												<size>450,80</size>
 												<value></value>
 												<maxlength>0</maxlength>
 											</object>
@@ -155,10 +154,18 @@
 										</object>
 										<object class="sizeritem">
 											<option>0</option>
-											<flag>wxALL|wxALIGN_RIGHT|wxALIGN_BOTTOM</flag>
+											<flag>wxALL|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 											<object class="wxButton" name="test_button">
-												<label>Test</label>
+												<font>
+													<size>12</size>
+													<family>swiss</family>
+													<style>normal</style>
+													<weight>bold</weight>
+													<underlined>0</underlined>
+													<face>Sans</face>
+												</font>
+												<label>Start Qualification</label>
 												<default>0</default>
 											</object>
 										</object>
@@ -168,17 +175,104 @@
 						</object>
 					</object>
 					<object class="notebookpage">
-						<label>On Board Qualification</label>
+						<label>Component Configuration</label>
 						<selected>0</selected>
-						<object class="wxPanel" name="on_board_panel">
+						<object class="wxPanel" name="config_panel">
 							<style>wxTAB_TRAVERSAL</style>
-							<object class="wxFlexGridSizer">
-								<rows>3</rows>
-								<cols>1</cols>
-								<vgap>0</vgap>
-								<hgap>0</hgap>
-								<growablecols></growablecols>
-								<growablerows></growablerows>
+							<object class="wxBoxSizer">
+								<orient>wxVERTICAL</orient>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxHORIZONTAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+											<border>5</border>
+											<object class="wxStaticText" name="m_staticText20">
+												<font>
+													<size>12</size>
+													<family>swiss</family>
+													<style>normal</style>
+													<weight>bold</weight>
+													<underlined>0</underlined>
+													<face>Sans</face>
+												</font>
+												<label>Serial Number</label>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+											<border>5</border>
+											<object class="wxTextCtrl" name="serial_text_conf">
+												<style>wxTE_PROCESS_ENTER</style>
+												<size>250,-1</size>
+												<font>
+													<size>12</size>
+													<family>swiss</family>
+													<style>normal</style>
+													<weight>normal</weight>
+													<underlined>0</underlined>
+													<face>Sans</face>
+												</font>
+												<value></value>
+												<maxlength>0</maxlength>
+											</object>
+										</object>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<option>1</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="spacer">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<size>0,0</size>
+										</object>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL</flag>
+											<border>5</border>
+											<object class="wxButton" name="config_button">
+												<font>
+													<size>12</size>
+													<family>swiss</family>
+													<style>normal</style>
+													<weight>bold</weight>
+													<underlined>0</underlined>
+													<face>Sans</face>
+												</font>
+												<label>Configure Component</label>
+												<default>0</default>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="notebookpage">
+						<label>PR2 Qualification</label>
+						<selected>0</selected>
+						<object class="wxPanel" name="robot_qual_panel">
+							<style>wxTAB_TRAVERSAL</style>
+							<object class="wxBoxSizer">
+								<orient>wxVERTICAL</orient>
 								<object class="sizeritem">
 									<option>1</option>
 									<flag>wxEXPAND</flag>
@@ -208,7 +302,7 @@
 															<border>5</border>
 															<object class="wxStaticText" name="m_staticText16">
 																<font>
-																	<size>12</size>
+																	<size>11</size>
 																	<family>swiss</family>
 																	<style>normal</style>
 																	<weight>bold</weight>
@@ -250,7 +344,7 @@
 															<border>5</border>
 															<object class="wxStaticText" name="m_staticText17">
 																<font>
-																	<size>12</size>
+																	<size>11</size>
 																	<family>swiss</family>
 																	<style>normal</style>
 																	<weight>bold</weight>
@@ -316,14 +410,14 @@
 													<border>5</border>
 													<object class="wxStaticText" name="m_staticText14">
 														<font>
-															<size>12</size>
+															<size>11</size>
 															<family>swiss</family>
 															<style>normal</style>
 															<weight>bold</weight>
 															<underlined>0</underlined>
 															<face>Sans</face>
 														</font>
-														<label>On Board Qualification Tests</label>
+														<label>PR2 Qualification Tests</label>
 													</object>
 												</object>
 												<object class="sizeritem">
@@ -349,174 +443,21 @@
 								</object>
 								<object class="sizeritem">
 									<option>1</option>
-									<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
-									<border>5</border>
-									<object class="wxBoxSizer">
-										<orient>wxVERTICAL</orient>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
-											<border>5</border>
-											<object class="wxStaticText" name="m_staticText13">
-												<font>
-													<size>12</size>
-													<family>swiss</family>
-													<style>normal</style>
-													<weight>bold</weight>
-													<underlined>0</underlined>
-													<face>Sans</face>
-												</font>
-												<label>Instructions:</label>
-											</object>
-										</object>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
-											<border>5</border>
-											<object class="wxStaticText" name="m_staticText121">
-												<font>
-													<size>10</size>
-													<family>swiss</family>
-													<style>normal</style>
-													<weight>normal</weight>
-													<underlined>0</underlined>
-													<face>Sans</face>
-												</font>
-												<label>1. Shutdown the roscore and all nodes on the robot\n2. Turn on the power board on the robot\n3. Stand clear of the robot during qualification</label>
-											</object>
-										</object>
-									</object>
-								</object>
-								<object class="sizeritem">
-									<option>1</option>
-									<flag>wxEXPAND</flag>
-									<border>5</border>
-									<object class="wxBoxSizer">
-										<orient>wxHORIZONTAL</orient>
-										<object class="spacer">
-											<option>1</option>
-											<flag>wxEXPAND</flag>
-											<border>5</border>
-											<size>0,0</size>
-										</object>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL</flag>
-											<border>5</border>
-											<object class="wxButton" name="onboard_button">
-												<label>Start Tests</label>
-												<default>0</default>
-											</object>
-										</object>
-									</object>
-								</object>
-							</object>
-						</object>
-					</object>
-					<object class="notebookpage">
-						<label>Component Configuration</label>
-						<selected>1</selected>
-						<object class="wxPanel" name="config_panel">
-							<style>wxTAB_TRAVERSAL</style>
-							<object class="wxFlexGridSizer">
-								<rows>3</rows>
-								<cols>1</cols>
-								<vgap>0</vgap>
-								<hgap>0</hgap>
-								<growablecols></growablecols>
-								<growablerows></growablerows>
-								<object class="sizeritem">
-									<option>1</option>
-									<flag>wxEXPAND</flag>
-									<border>5</border>
-									<object class="wxBoxSizer">
-										<orient>wxVERTICAL</orient>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
-											<border>5</border>
-											<object class="wxStaticText" name="m_staticText18">
-												<font>
-													<size>12</size>
-													<family>swiss</family>
-													<style>normal</style>
-													<weight>bold</weight>
-													<underlined>0</underlined>
-													<face>Sans</face>
-												</font>
-												<label>Instructions:</label>
-											</object>
-										</object>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL</flag>
-											<border>5</border>
-											<object class="wxStaticText" name="m_staticText19">
-												<label>1. Plug the component in to the etherCAT slot on your test cart. \n2. Make sure all other components are unplugged.\n3. Select the component to configure from the list. \n4. Be careful to select the correct side of the robot\n\nRight side and head/torso components are generally configured correctly during qualification.</label>
-											</object>
-										</object>
-									</object>
-								</object>
-								<object class="sizeritem">
-									<option>1</option>
-									<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
-									<border>5</border>
-									<object class="wxBoxSizer">
-										<orient>wxHORIZONTAL</orient>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL</flag>
-											<border>5</border>
-											<object class="wxStaticText" name="m_staticText20">
-												<font>
-													<size>12</size>
-													<family>swiss</family>
-													<style>normal</style>
-													<weight>bold</weight>
-													<underlined>0</underlined>
-													<face>Sans</face>
-												</font>
-												<label>Serial Number</label>
-											</object>
-										</object>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxALL</flag>
-											<border>5</border>
-											<object class="wxTextCtrl" name="serial_text_conf">
-												<style>wxTE_PROCESS_ENTER</style>
-												<size>250,-1</size>
-												<font>
-													<size>12</size>
-													<family>swiss</family>
-													<style>normal</style>
-													<weight>normal</weight>
-													<underlined>0</underlined>
-													<face>Sans</face>
-												</font>
-												<value></value>
-												<maxlength>0</maxlength>
-											</object>
-										</object>
-									</object>
-								</object>
-								<object class="sizeritem">
-									<option>1</option>
-									<flag>wxEXPAND</flag>
+									<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL</flag>
 									<border>5</border>
 									<object class="wxBoxSizer">
 										<orient>wxVERTICAL</orient>
 										<object class="spacer">
 											<option>1</option>
-											<flag>wxEXPAND</flag>
+											<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
 											<size>0,0</size>
 										</object>
 										<object class="sizeritem">
 											<option>0</option>
-											<flag>wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTER_HORIZONTAL</flag>
+											<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
 											<border>5</border>
-											<object class="wxButton" name="config_button">
+											<object class="wxButton" name="robot_qual_button">
 												<font>
 													<size>12</size>
 													<family>swiss</family>
@@ -525,7 +466,7 @@
 													<underlined>0</underlined>
 													<face>Sans</face>
 												</font>
-												<label>Configure \nComponent</label>
+												<label>Start PR2 Qualification</label>
 												<default>0</default>
 											</object>
 										</object>
@@ -540,7 +481,7 @@
 	</object>
 	<object class="wxPanel" name="instructions_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
+		<size>700,850</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -559,7 +500,7 @@
 					<orient>wxHORIZONTAL</orient>
 					<object class="sizeritem">
 						<option>0</option>
-						<flag>wxALL</flag>
+						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxButton" name="cancel_button">
 							<label>Cancel</label>
@@ -577,6 +518,14 @@
 						<flag>wxALL|wxALIGN_RIGHT</flag>
 						<border>5</border>
 						<object class="wxButton" name="continue_button">
+							<font>
+								<size>12</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<label>Continue</label>
 							<default>0</default>
 						</object>
@@ -587,7 +536,7 @@
 	</object>
 	<object class="wxPanel" name="waiting_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
+		<size>700,850</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -602,7 +551,7 @@
 						<border>5</border>
 						<object class="wxStaticText" name="progress_label">
 							<font>
-								<size>14</size>
+								<size>12</size>
 								<family>swiss</family>
 								<style>normal</style>
 								<weight>normal</weight>
@@ -619,46 +568,14 @@
 				<flag>wxALL</flag>
 				<border>5</border>
 				<object class="wxButton" name="cancel_button">
-					<label>Cancel</label>
-					<default>0</default>
-				</object>
-			</object>
-		</object>
-	</object>
-	<object class="wxPanel" name="prestartup_panel">
-		<style>wxTAB_TRAVERSAL</style>
-		<size>500,300</size>
-		<object class="wxBoxSizer">
-			<orient>wxVERTICAL</orient>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxALIGN_CENTER_HORIZONTAL</flag>
-				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="progress_label">
-							<font>
-								<size>14</size>
-								<family>swiss</family>
-								<style>normal</style>
-								<weight>normal</weight>
-								<underlined>0</underlined>
-								<face>Sans</face>
-							</font>
-							<label>Progress</label>
-						</object>
-					</object>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxALL|wxALIGN_BOTTOM</flag>
-				<border>5</border>
-				<object class="wxButton" name="cancel_button">
+					<font>
+						<size>10</size>
+						<family>swiss</family>
+						<style>normal</style>
+						<weight>normal</weight>
+						<underlined>0</underlined>
+						<face>Sans</face>
+					</font>
 					<label>Cancel</label>
 					<default>0</default>
 				</object>
@@ -667,7 +584,7 @@
 	</object>
 	<object class="wxPanel" name="plots_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>658,493</size>
+		<size>700,850</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -685,27 +602,11 @@
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
 								<object class="sizeritem">
-									<option>0</option>
-									<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
-									<border>5</border>
-									<object class="wxStaticText" name="test_label">
-										<font>
-											<size>12</size>
-											<family>swiss</family>
-											<style>normal</style>
-											<weight>bold</weight>
-											<underlined>0</underlined>
-											<face>Sans</face>
-										</font>
-										<label></label>
-									</object>
-								</object>
-								<object class="sizeritem">
 									<option>1</option>
-									<flag>wxEXPAND | wxALL</flag>
+									<flag>wxALL|wxEXPAND</flag>
 									<border>5</border>
-									<object class="wxScrolledWindow" name="scrolled_window">
-										<style>wxHSCROLL|wxVSCROLL</style>
+									<object class="wxHtmlWindow" name="plots_window">
+										<style>wxHW_SCROLLBAR_AUTO</style>
 									</object>
 								</object>
 							</object>
@@ -739,6 +640,14 @@
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxButton" name="pass_button">
+							<font>
+								<size>11</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<label>Pass</label>
 							<default>0</default>
 						</object>
@@ -767,7 +676,7 @@
 	</object>
 	<object class="wxPanel" name="results_panel">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>658,493</size>
+		<size>700,850</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
@@ -778,28 +687,26 @@
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
 						<option>0</option>
-						<flag>wxALL</flag>
+						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText81">
 							<font>
-								<size>10</size>
+								<size>13</size>
 								<family>swiss</family>
 								<style>normal</style>
 								<weight>bold</weight>
 								<underlined>0</underlined>
 								<face>Sans</face>
 							</font>
-							<label>Test results</label>
+							<label>Test Result Summary</label>
 						</object>
 					</object>
 					<object class="sizeritem">
 						<option>1</option>
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
-						<object class="wxTextCtrl" name="results_text">
-							<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
-							<value></value>
-							<maxlength>0</maxlength>
+						<object class="wxHtmlWindow" name="results_window">
+							<style>wxHW_SCROLLBAR_AUTO</style>
 						</object>
 					</object>
 					<object class="sizeritem">
@@ -807,7 +714,15 @@
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="m_staticText8">
-							<label>Add testing notes and observations</label>
+							<font>
+								<size>11</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
+							<label>Operator&apos;s Notes:</label>
 						</object>
 					</object>
 					<object class="sizeritem">
@@ -833,6 +748,14 @@
 						<flag>wxALL</flag>
 						<border>5</border>
 						<object class="wxButton" name="submit_button">
+							<font>
+								<size>12</size>
+								<family>swiss</family>
+								<style>normal</style>
+								<weight>bold</weight>
+								<underlined>0</underlined>
+								<face>Sans</face>
+							</font>
 							<label>Submit</label>
 							<default>0</default>
 						</object>
@@ -851,7 +774,7 @@
 				<flag>wxALL</flag>
 				<border>5</border>
 				<object class="wxStaticText" name="text">
-					<label>Please enter your inventory system username/password, or press Cancel to skip inventory submission</label>
+					<label>Enter your username and password for the inventory system.</label>
 				</object>
 			</object>
 			<object class="sizeritem">
@@ -940,68 +863,6 @@
 			</object>
 		</object>
 	</object>
-	<object class="wxDialog" name="config_dialog">
-		<style>wxDEFAULT_DIALOG_STYLE|wxDIALOG_NO_PARENT|wxSTAY_ON_TOP</style>
-		<size>316,290</size>
-		<title>MCB Programming/Configuration Error</title>
-		<object class="wxFlexGridSizer">
-			<rows>3</rows>
-			<cols>1</cols>
-			<vgap>0</vgap>
-			<hgap>0</hgap>
-			<growablecols></growablecols>
-			<growablerows></growablerows>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxVERTICAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="message_text">
-							<size>300,-1</size>
-							<label>MyLabel</label>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="detail_text">
-							<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
-							<size>300,-1</size>
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxEXPAND|wxALIGN_BOTTOM</flag>
-				<border>5</border>
-				<object class="wxStdDialogButtonSizer">
-					<object class="button">
-						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="wxID_OK">
-							<label>&amp;OK</label>
-						</object>
-					</object>
-					<object class="button">
-						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="wxID_CANCEL">
-							<label>&amp;Cancel</label>
-						</object>
-					</object>
-				</object>
-			</object>
-		</object>
-	</object>
 	<object class="wxDialog" name="select_test_dialog">
 		<style>wxDEFAULT_DIALOG_STYLE</style>
 		<size>269,251</size>
@@ -1034,6 +895,67 @@
 						<object class="wxListBox" name="test_list_box">
 							<size>250,120</size>
 							<content />
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND|wxALIGN_BOTTOM</flag>
+				<border>5</border>
+				<object class="wxStdDialogButtonSizer">
+					<object class="button">
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="wxID_OK">
+							<label>&amp;OK</label>
+						</object>
+					</object>
+					<object class="button">
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="wxID_CANCEL">
+							<label>&amp;Cancel</label>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxDialog" name="confirm_conf_dialog">
+		<style>wxDEFAULT_DIALOG_STYLE</style>
+		<size>320,260</size>
+		<title></title>
+		<object class="wxFlexGridSizer">
+			<rows>2</rows>
+			<cols>1</cols>
+			<vgap>0</vgap>
+			<hgap>0</hgap>
+			<growablecols></growablecols>
+			<growablerows></growablerows>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="message_text">
+							<label>Confirm conf msg</label>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="detail_text">
+							<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
+							<size>300,-1</size>
+							<value></value>
+							<maxlength>0</maxlength>
 						</object>
 					</object>
 				</object>

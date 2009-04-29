@@ -36,43 +36,94 @@ import roslib
 roslib.load_manifest('qualification')
 
 import rospy
-from std_srvs.srv import *
 from qualification.srv import *
 from robot_srvs.srv import *
 
+import sys
+from time import sleep
+
 rospy.init_node("run_selftest", anonymous=True)
 
-selftestname = rospy.resolve_name('node') + '/self_test'
+hokuyo_name = 'hokuyo'
+hokuyo_id = 'None found.'
+try:
+    hokuyo_name = rospy.resolve_name('hokuyo_name')
+    selftestname = hokuyo_name + '/self_test'
+    rospy.logout('Testing %s' % selftestname)
+    
+    test_service = rospy.ServiceProxy(selftestname, SelfTest)
+    result_service = rospy.ServiceProxy('test_result', TestResult)
+    
+    rospy.wait_for_service(selftestname)
+    sleep(5)
 
-test_service = rospy.ServiceProxy(selftestname, SelfTest)
-result_service = rospy.ServiceProxy('test_result', TestResult)
 
-rospy.wait_for_service(selftestname, 5)
-result = test_service.call(SelfTestRequest(),60)
+    result = test_service.call(SelfTestRequest(), 90)
+    rospy.logout('Received self test service.')
+    
+    r = TestResultRequest()
+    if (result.passed):
+        r.result = r.RESULT_PASS
+    else:
+        r.result = r.RESULT_HUMAN_REQUIRED #RESULT_FAIL
 
-r = TestResultRequest()
-if (result.passed):
-    r.result = r.RESULT_PASS
-else:
+    html = "<p><b>Hokuyo ID: %s, using name %s.</b></p>\n" % (result.id, hokuyo_name)
+
+    passfail = 'PASS'
+    i = 1
+    
+    hokuyo_id = result.id
+
+    statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
+    
+    summary = "<p>Hokuyo: %s.<br>Topic: %s</p>\n" % (hokuyo_id, hokuyo_name)
+    
+    for stat in result.status:
+        if (stat.level > 1):
+            passfail = 'FAIL'
+        html += "<p><b>Test %2d) %s</b>\n" % (i, stat.name)
+        html +=  '<br>Result %s: %s</p>\n' % (statdict[stat.level], stat.message)
+        
+        if len(stat.values) > 0:
+            html += "Diagnostic Values<br>\n"
+            html += "<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\">\n"
+            html += "<tr><b><td>Label</td><td>Value</td></b></tr>\n"
+            for val in stat.values:
+                html += "<tr><td>%s</td><td>%f</td></tr>\n" % (val.label, val.value)
+                html += "</table>\n"
+        
+        if len(stat.strings) > 0:
+            html += "Diagnostic Strings<br>\n"
+            html += "<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\">\n"
+            html += "<tr><b><td>Label</td><td>Value</td></b></tr>\n"
+            for val in stat.values:
+                html += "<tr><td>%s</td><td>%s</td></tr>\n" % (val.label, val.value)
+                html += "</table>\n"
+
+        html += "<hr size=\"2\">\n\n"
+        
+        i += 1
+
+    r.plots = []
+    r.html_result = html
+    r.text_summary = 'Hokuyo ID: %s, name %s. Self test result: %s' % (hokuyo_id, hokuyo_name, passfail)
+    
+    rospy.wait_for_service('test_result')
+    result_service.call(r)
+
+except Exception, e:
+    msg = 'Caught exception testing hokuyo %s, %s.</p>\n' % (hokuyo_id, hokuyo_name)
+    rospy.logerr(msg)
+    rospy.logerr(str(e))
+    rospy.wait_for_service('test_result', 10)
+    r = TestResultRequest()
+    r.plots = []
+    r.html_result = '<p>%s</p>' % msg
+    r.text_summary = msg
     r.result = r.RESULT_FAIL
+    result_service.call(r)
+    sys.exit(255)
 
-r.text_result = ""
+sys.exit(0)
 
-passfail = 'PASS'
-i = 1
 
-statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
-
-for stat in result.status:
-    if (stat.level > 1):
-        passfail = 'FAIL'
-    r.text_result += 'Test %2d) %s\n' % (i, stat.name)
-    r.text_result += '  [%s]: %s\n' % (statdict[stat.level], stat.message)
-    for val in stat.values:
-        r.text_result += '   [%s] = %f\n' % (val.label, val.value)
-    i += 1
-
-r.plots = []
-
-rospy.wait_for_service('test_result')
-result_service.call(r)
