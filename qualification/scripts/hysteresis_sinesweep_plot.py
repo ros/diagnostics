@@ -220,7 +220,7 @@ class App:
     summary_txt = ""
     
     # Check to range against expected values
-    if (min_encoder > min_range_param or max_encoder < max_range_param) and (min_range_param != 0 and max_range_param != 0):
+    if (min_encoder > min_range_param and max_encoder < max_range_param) and (min_range_param != 0 and max_range_param != 0):
       error_html += "Mechanism is not traveling the complete distance!<br>"
       range_msg = "FAIL"
       summary_txt += "Range: FAIL. "
@@ -388,7 +388,7 @@ class App:
       summary += "First mode: OK."
       tr=True
     html += "<p>First mode measured: %f, expected: %f.</p>" % (self.first_mode, first_mode_param)
-    html += "<p>Second mode measured: %f, expected %f.</p>" % (self.second_mode, second_mode_param)
+    #html += "<p>Second mode measured: %f, expected %f.</p>" % (self.second_mode, second_mode_param)
 
     html += '<br><img src=\"IMG_PATH/%s.png\", width = 640, height = 480/><br>' % image_title
 

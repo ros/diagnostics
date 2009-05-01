@@ -68,13 +68,13 @@ try:
     else:
         r.result = r.RESULT_HUMAN_REQUIRED #RESULT_FAIL
 
-    html = "<p><b>Item ID: %s, using node name %s.</b></p>\n" % (node_id, node_name)
-
     passfail = 'PASS'
     i = 1
     
     if result.id is not None and result.id != '':
         node_id = result.id
+
+    html = "<p><b>Item ID: %s, using node name %s.</b></p>\n" % (node_id, node_name)
 
     statdict = {0: 'OK', 1: 'WARN', 2: 'ERROR'}
     
@@ -100,7 +100,7 @@ try:
                 html += "<tr><td>%s</td><td>%s</td></tr>\n" % (val.label, val.value)
                 html += "</table>\n"
 
-        html += "<hr size=\"2\">\n\n"
+        html += "<hr size=\"2\">\n"
         
         i += 1
 

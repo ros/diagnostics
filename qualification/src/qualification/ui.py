@@ -735,7 +735,7 @@ class QualificationFrame(wx.Frame):
     test_xml = '<test>\n' 
 
     if show_viz:
-      test_xml = test_xml + '<subtest>visualization/visualization.launch</subtest>\n'
+      test_xml = test_xml + '<subtest name="Visualization">visualization/visualization.launch</subtest>\n'
     for test in tests:
       test_xml = test_xml + str(test)
     test_xml = test_xml + '</test>'
