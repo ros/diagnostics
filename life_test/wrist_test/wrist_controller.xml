@@ -1,0 +1,25 @@
+<controllers>
+<controller name="head_controller" type="HeadPanTiltControllerNode">
+    <controller name="head_pan_controller" topic="head_pan_controller" type="JointPositionController">
+      <joint name="head_pan_joint" >
+        <pid p="2.5" d="0.5" i="12.0" iClamp="0.5" />
+      </joint>
+    </controller>
+
+    <controller name="head_tilt_controller" topic="head_tilt_controller" type="JointPositionController">
+      <joint name="head_tilt_joint" >
+        <pid p="4.2" d=".4" i="2.0" iClamp="0.1" />
+      </joint>
+    </controller>
+
+</controller>
+
+<controller name="laser_controller" topic="laser_controller" type="LaserScannerControllerNode">
+    <filter smoothing_factor="0.1" />
+    <joint name="laser_tilt_mount_joint">
+      <pid p="12" i=".1" d="1" iClamp="0.5" />
+    </joint>
+  </controller>
+
+
+</controllers>

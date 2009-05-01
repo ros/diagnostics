@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="life_test" type="wrist_test.py" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find life_test)/wrist_test/wrist_controller.xml" />
+</launch>
