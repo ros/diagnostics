@@ -1,12 +1,11 @@
 <launch>
-  <!-- Turn power board to standby, cycle after script completes -->
-  <!-- Call from local host after setting ROS_TEST_HOST -->
   <include file="$(find qualification)/tests/init.machine" />
 
   <!-- configure_mcbs -->
   <node machine="realtime" pkg="qualification" type="program_mcb.py" args="--wg005=1" />
 
-  <!-- service -->
-  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
 
+  <!-- Confirm configuation -->
+  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>

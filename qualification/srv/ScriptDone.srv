@@ -1,0 +1,8 @@
+byte RESULT_OK = 0
+byte RESULT_FAIL = 1
+byte RESULT_ERROR = 2
+
+byte result
+string script
+string failure_msg
+---

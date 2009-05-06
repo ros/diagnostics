@@ -72,14 +72,6 @@ class Test:
     self.pre_subtests = {}
     self.post_subtests = {}
 
-    #if (not os.path.isdir(dir)):
-    #  raise NotADirectoryError
-    
-    #self._test_dir = dir
-    #self._test_file = os.path.join(dir, 'test.xml')
-    #if (not os.path.isfile(self._test_file)):
-    #  raise TestDoesNotExistError
-    
     try:
       self._doc = minidom.parseString(test_str)
     except IOError:

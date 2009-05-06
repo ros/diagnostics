@@ -5,6 +5,8 @@
 <!-- program mcbs -->
 <node machine="realtime" pkg="qualification" type="program_mcb.py" args="--wg005=1 --wg005=2 --wg005=3" />
 
+<node machine="realtime" pkg="qualification" type="count_mcbs.py" />
+
 <!-- service -->
 <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 

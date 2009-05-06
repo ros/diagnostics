@@ -64,6 +64,7 @@ def msg_detail_prompt(msg):
   # Load MCB conf dialog box from gui.xrc
   xrc_path = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'xrc/gui.xrc')
   xrc_resource = xrc.XmlResource(xrc_path)
+  # See if it works to set a parent
   dialog = xrc_resource.LoadDialog(None, 'confirm_conf_dialog')
   # Set text in message text
   xrc.XRCCTRL(dialog, 'message_text').SetLabel(msg)
@@ -80,9 +81,10 @@ def msg_detail_prompt(msg):
   else:
     prompt_click = "no"
   prompt_done = True
+  dialog.Destroy()
    
 def check_w_user(req):
-  print "Confirm Conf Result: %s" % req.str
+  rospy.logout("Confirm Conf Result: %s" % req.str)
   if req.str == "done":
     wx.CallAfter(frame.Close)
     return StringStringResponse("na")
@@ -92,9 +94,11 @@ def check_w_user(req):
   wx.CallAfter(msg_detail_prompt, req.str)
 
   while(not prompt_done):
-    print "Waiting for retry prompt . . ."
-    time.sleep(5) 
-  print "User result: %s" % prompt_click
+    rospy.logout("Waiting for retry prompt . . .")
+    for i in range(0, 5):
+      time.sleep(1) 
+
+  rospy.logout("User result: %s" % prompt_click)
   
   if prompt_click =="yes":
     return StringStringResponse("retry")

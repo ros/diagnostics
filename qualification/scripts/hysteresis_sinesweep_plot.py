@@ -381,7 +381,7 @@ class App:
     summary = ''
     if abs(self.first_mode - first_mode_param)/first_mode_param > mode_error_param:
       html += "<H6>The first mode is incorrect: <b>FAIL</b>.</H6>"
-      summary += "First mode: <b>FAIL</b>."
+      summary += "First mode: FAIL."
       tr=False
     else:
       html += "<H6>First mode: <b>OK</b>.</H6>"

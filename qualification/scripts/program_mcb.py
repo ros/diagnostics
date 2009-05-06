@@ -39,13 +39,21 @@ roslib.load_manifest('qualification')
 import rospy, sys
 import subprocess
 from optparse import OptionParser
+from time import sleep
 
 from deprecated_srvs.srv import * 
+from qualification.srv import *
 
 rospy.init_node("mcb_programmer")
 rospy.wait_for_service('mcb_conf_results')
 
 result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
+done_proxy = rospy.ServiceProxy('prestartup_done', ScriptDone)
+done = ScriptDoneRequest()
+done.script = 'program mcbs'
+done.failure_msg = ''
+done.result = ScriptDoneRequest.RESULT_OK
+
 parser = OptionParser()
 parser.add_option("--wg005=", type="string", dest="wg005", action="append")
 parser.add_option("--wg006=", type="string", dest="wg006", action="append")
@@ -65,20 +73,52 @@ if options.wg005:
 else:
   all = options.wg006
 
-# Use count_mcbs.py to count
-# Call script from here, returns 0 if correct count
-expected = len(all)
-count_cmd = roslib.packages.get_pkg_dir("qualification", True) + "/scripts/count_mcbs.py %s" % expected
+count_proxy = rospy.ServiceProxy('count_mcbs', CountBoards)
+count_req = CountBoardsRequest()
+count_req.expected = len(all)
 
-retcode = subprocess.call(count_cmd, shell=True)
-if retcode != 0:
-  print 'Unable to verify MCB count'
+try:
+  #rospy.logout('Counting MCB\'s')
+  rospy.wait_for_service('count_mcbs', 15)
+  count_resp = count_proxy.call(count_req)
+
+  #rospy.logerr('Count resp: %s' % count_resp.ok)
+  if count_resp.ok != CountBoardsResponse.RESULT_OK:
+    if count_resp.ok == CountBoardsResponse.RESULT_ERROR:
+      rospy.logerr('Count resp: Error!')
+      done.result = ScriptDoneRequest.RESULT_ERROR
+      rospy.logerr('Logged error')
+    else:
+      rospy.logerr('Count resp: Error!')
+      done.result = ScriptDoneRequest.RESULT_FAIL
+      rospy.logerr('Logged error')
+
+    done.failure_msg = 'Unable to count MCB\'s, count_mcbs.py returned with %d, found %d board.' % (count_resp.ok, count_resp.count)
+    rospy.logerr(done.failure_msg)
+  else:
+    rospy.logout('MCB count: ok')
+except Exception, e:
+  rospy.logerr('Exception counting: %s' % str(e))
+  rospy.logerr(e)
+  done.result = ScriptDoneRequest.RESULT_ERROR
+  done.failure_msg = 'MCB programming failed, caught exception. %s' % str(e)
   success = False
-  sys.exit(255)
 
+
+if done.result != ScriptDoneRequest.RESULT_OK:
+  try:
+    rospy.wait_for_service('prestartup_done')
+    done_proxy.call(done)
+  except Exception, e:
+    rospy.logerr('Caught exception after count ended')
+    rospy.logerr(e)
+  
 for num in all:
+  if not success:
+    break
+
   action = StringStringResponse('retry')
-  print "Programming MCB %s"%num
+  #print "Programming MCB %s"%num
   details = ''
   try:
     while(action.str == "retry"):
@@ -88,34 +128,51 @@ for num in all:
       p = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell=True)
       stdout, stderr = p.communicate()
       retcode = p.returncode
-
+      
       details = 'Ran fwprog on MCB %s, returned %s.\n\n' % (num, retcode)
       details += 'CMD:\n' + cmd + '\n'
       details += 'STDOUT:\n' + stdout
       if len(stderr) > 5:
         details += '\nSTDERR:\n' + stderr
-            
+        
       if retcode != 0:
         action = result_proxy("Programming MCB firmware failed for MCB #%s with error %d! Would you like to retry?:::%s"%(num, retcode, details))
+
         if action.str == "fail":
           print "Programming MCB firmware failed for %s!"%num
+          done = ScriptDoneRequest()
+          done.result = ScriptDoneRequest.RESULT_FAIL
+          done.script = 'Program MCB'
+          done.failure_msg = 'MCB programming failed, user chose not to retry!'
           success = False
-          sys.exit(1)
           break
         
       else: # retcode = 0 -> success
-        print "Programmed MCB %s" % num
+        #print "Programmed MCB %s" % num
         action.str = "pass"
-  except OSError, e:
-    print e
-    action = result_proxy("The MCB firmware programing failed to execute. Click YES or NO to exit.:::%s" % details)
+  except Exception, e:
+    rospy.logerr('Caught exception attempting to program MCB\'s')
+    rospy.logerr(str(e))
+    done = ScriptDoneRequest()
+    done.result = ScriptDoneRequest.RESULT_ERROR
+    done.script = 'Program MCB'
+    done.failure_msg = 'MCB programming failed, caught exception. %s' % str(e)
     success = False
-    sys.exit(2)
+    break
+ 
 
 if success:
-  print "Programming MCB firmware finished."
-  action = result_proxy("done")
-  sys.exit(0) 
+  rospy.logout("Programming MCB firmware finished.")
+  done.result = ScriptDoneRequest.RESULT_OK
 
-sys.exit(4) 
+  
+try:
+  action = result_proxy("done")
+  rospy.wait_for_service('prestartup_done', 5)
+  done_proxy.call(done)
+  rospy.spin()
+except Exception, e:
+  rospy.logerr(e)
+  rospy.spin()
+
 

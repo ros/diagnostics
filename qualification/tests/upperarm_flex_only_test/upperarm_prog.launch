@@ -1,10 +1,10 @@
 <launch>
   <include file="$(find qualification)/tests/init.machine" />
 
-  <!-- configure_mcbs -->
   <node machine="realtime" pkg="qualification" type="program_mcb.py" args="--wg005=1" />
 
-  <!-- service -->
-  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
 
+  <!-- Confirm configuation -->
+  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>

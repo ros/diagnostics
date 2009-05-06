@@ -26,6 +26,10 @@ bin/#!/usr/env python
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Tully Foote
+
+# Not used, serves almost no useful purpose
+
 PKG = "qualification"
 NAME = "waiter"
 

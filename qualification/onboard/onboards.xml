@@ -17,7 +17,7 @@
        
        -->
 
-  <robot label="Robot Checkout" test="checkout/robot_checkout.launch" />
+  <!--robot label="Robot Checkout" test="checkout/robot_checkout.launch" /-->
 
   <robot label="Sensors" child_name="sensors" >
     <sensors label="Base Hokuyo" 

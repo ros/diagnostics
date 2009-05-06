@@ -1,0 +1,9 @@
+int32 expected
+---
+byte RESULT_OK = 0
+byte RESULT_FAIL = 1
+byte RESULT_ERROR = 2
+
+
+int32 count
+byte ok

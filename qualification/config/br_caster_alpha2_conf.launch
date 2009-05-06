@@ -1,11 +1,11 @@
 <launch>
-
   <include file="$(find qualification)/tests/init.machine" />
 
-<!-- configure_mcbs -->
-<node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=br_caster_r_wheel_motor_alpha2,0 --motor=br_caster_l_wheel_motor_alpha2,1 --motor=br_caster_rotation_motor_alpha2,2" />
+  <!-- configure_mcbs -->
+  <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=br_caster_r_wheel_motor_alpha2,0 --motor=br_caster_l_wheel_motor_alpha2,1 --motor=br_caster_rotation_motor_alpha2,2" />
 
-<!-- service -->
-<node pkg="qualification" type="confirm_conf.py" output="screen"/>
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
 
+  <!-- Confirm configuation -->
+  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>

@@ -58,7 +58,6 @@ from qualification.msg import *
 from srv import *
 from test import *
 from result import *
-from config import * # Is this component thing going to work in a separate file?
 
 from cStringIO import StringIO
 import struct
@@ -132,7 +131,8 @@ class SerialPanel(wx.Panel):
     launch_script = self._manager.select_conf_to_load(serial)
     name = self._manager._config_descrips_by_file[launch_script]
 
-    wx.CallAfter(self._manager.configure_assembly, serial, name, launch_script)
+    # Call normal subtest from here...
+    wx.CallAfter(self._manager.load_configuration_script, serial, name, launch_script)
 
 
   # Recursively add onboard test tree to tree control
@@ -207,7 +207,6 @@ class SerialPanel(wx.Panel):
       # Clear the old contents and put focus in the serial box so the rest of input goes there
       self._serial_text.Clear()
       self._serial_text_conf.Clear()
-      # self._serial_text.SetFocus()
       
 class InstructionsPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame, file):
@@ -234,13 +233,13 @@ class InstructionsPanel(wx.Panel):
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
     
   def on_continue(self, event):
-    self._manager.test_startup()
+    self._manager.start_test()
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed")
     
 class WaitingPanel(wx.Panel):
-  def __init__(self, parent, resource, qualification_frame):
+  def __init__(self, parent, resource, qualification_frame, cancel_enabled = True):
     wx.Panel.__init__(self, parent)
     
     self._manager = qualification_frame
@@ -254,9 +253,13 @@ class WaitingPanel(wx.Panel):
     self.SetSizer(self._sizer)
     self.Layout()
     self.Fit()
-    
+
+    # Make cancel button gray if can't cancel
     self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+    self._cancel_enabled = cancel_enabled
+    self._cancel_button.Enable(cancel_enabled)
 
   def set_progress_label_waiting(self, name, num, total, next = ''):
     label = "Test '%s' in progress...\nTest %d of %d." % (name, num, total)
@@ -268,48 +271,13 @@ class WaitingPanel(wx.Panel):
     self._progress_label.SetLabel(label)
 
   def on_cancel(self, event):
+    #if not self._cancel_enabled:
+    #  wx.MessageBox('Unable to cancel during shutdown, please wait for termination.', 
+    #                'Unable to cancel', wx.OK | wx.ICON_ERROR, self)
+    #else:
     self._manager.cancel("Cancel button pressed during test.")
     
-
-    
-class ImagePanel(wx.Panel):
-  def __init__(self, parent, id, image_data):
-    wx.Panel.__init__(self, parent)
-    
-    wx.InitAllImageHandlers();
-    
-    stream = StringIO(image_data)
-    self._image = wx.ImageFromStream(stream)
-    self.scale_bitmap()
-    
-    self.Bind(wx.EVT_PAINT, self.on_paint)
-    self.Bind(wx.EVT_ERASE_BACKGROUND, self.on_erase_background)
-    self.Bind(wx.EVT_SIZE, self.on_size)
-    
-    self.SetSize(wx.Size(self._image.GetWidth(), self._image.GetHeight()))
-    
-    self._needs_scale = False
-    
-  def scale_bitmap(self):
-    size = self.GetSize()
-    image = self._image.Scale(size.GetWidth(), size.GetHeight())
-    self._bitmap = wx.BitmapFromImage(image)
-
-  def on_size(self, event):
-    event.Skip()
-    self._needs_scale = True
-    self.Refresh()
-    
-  def on_paint(self, event):
-    dc = wx.BufferedPaintDC(self)
-    if (self._needs_scale):
-      self.scale_bitmap()
-      self._needs_scale = False
-    dc.DrawBitmap(self._bitmap, 0, 0, False)
-  
-  def on_erase_background(self, event):
-    pass
-    
+   
 class PlotsPanel(wx.Panel):
   def __init__(self, parent, resource, qualification_frame, test_name):
     wx.Panel.__init__(self, parent)
@@ -374,17 +342,18 @@ class ResultsPanel(wx.Panel):
     self._notesbox = xrc.XRCCTRL(self._panel, 'notes_text')
     self._submit_button.Bind(wx.EVT_BUTTON, self.on_submit)
     self._submit_button.SetFocus()
+
+    self._dir_picker = xrc.XRCCTRL(self._panel, 'results_dir_picker')
+    
     
   def set_results(self, results):
     self._results_window.Freeze()
-
     self._results_window.SetPage(results.make_summary_page())
-    
     self._results_window.Thaw()
-
+    self._dir_picker.SetPath(results._results_dir)
 
   def on_submit(self, event):
-      wx.CallAfter(self._manager.submit_results, self._notesbox.GetValue())
+      wx.CallAfter(self._manager.submit_results, self._notesbox.GetValue(), self._dir_picker.GetPath())
 
 class RoslaunchProcessListener(roslaunch.pmon.ProcessListener):
   def __init__(self):
@@ -408,6 +377,8 @@ class QualificationFrame(wx.Frame):
     wx.Frame.__init__(self, parent, wx.ID_ANY, "Qualification")
 
     self._result_service = None
+    self._prestartup_done_srv = None
+    self._shutdown_done_srv = None
     
     # Load test directory
     tests_xml_path = os.path.join(TESTS_DIR, 'tests.xml')
@@ -432,8 +403,6 @@ class QualificationFrame(wx.Frame):
         self._tests[serial] = [ test_file ]
       
       self._test_descripts_by_file[test_file] = descrip
-
-     
 
     # Store robots by name and launch file
     self._robots = { 'PRE' : '<startup>robots/pre_test.launch</startup>\n', 
@@ -493,6 +462,7 @@ class QualificationFrame(wx.Frame):
     self._log = xrc.XRCCTRL(self._log_panel, 'log')
     
     self.reset()
+    self._test_log = {}
     self.log("Startup")
     
     self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -501,7 +471,9 @@ class QualificationFrame(wx.Frame):
     self._shutdown_launch = None
     self._core_launch = None
     self._subtest_launch = None
-    
+    self._prestartup_launch = None
+    self._current_test = None
+
     self._spin_timer = wx.Timer(self, wx.ID_ANY)
     self.Bind(wx.EVT_TIMER, self.on_spin, self._spin_timer)
     self._spin_timer.Start(100)
@@ -512,84 +484,9 @@ class QualificationFrame(wx.Frame):
     self._username = None
     self._password = None
 
-  # Configure assembly
-  # Load by serial # and log that config occured
-  def configure_assembly(self, serial, name, script):
-    self.log('Configuring subassembly %s as %s' % (serial, name) )
+  # Load onboards before GUI startup
 
-    wx.MessageBox('Make sure your power and etherCAT cables are connected.')
-    
-    self._core_launch = self.launch_core()
-        
-    self.log('Turning on power board')
-    power_board_launch = self.launch_script(os.path.join(CONFIG_DIR, '../scripts/power_cycle.launch'), None)
-    if power_board_launch == None:
-      self.log('Unable to cycle power board! Cannot configure MCB!')
-      return
-    
-    power_board_launch.spin()
-        
-    # Launch configuration script
-    self.log('Starting configuration')
-    listener = RoslaunchProcessListener()
-    config_launcher = self.launch_script(os.path.join(CONFIG_DIR, script), listener)
-  
-    if config_launcher is None:
-      self.log('Configuration failed, unable to load launch script %s' % launch_script)
-      return
 
-    config_launcher.spin()
-
-    if (listener.has_any_process_died_badly()):
-      s = 'Configuration failed! Press OK to cancel test.' % (script)
-      wx.MessageBox(s, 'Configuration Failed', wx.OK|wx.ICON_ERROR, self)
-      self.log('Configuration of %s failed!' % name)
-      return
-
-    self.log('Shutting down power board')
-    shutdown_launch = self.launch_script(os.path.join(CONFIG_DIR, '../scripts/power_board_disable.launch'), None)
-    if (shutdown_launch == None):
-      s = 'Could not load roslaunch shutdown script. SHUTDOWN POWER BOARD MANUALLY!'
-      wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
-      self.log('No shutdown script')
-      self.log('SHUT DOWN POWER BOARD MANUALLY')
-
-    shutdown_launch.spin()
-    
-    shutdown_launch.stop()
-    config_launcher.stop()
-    power_board_launch.stop()
-
-    self._core_launch.stop()
-    self._core_launch = None
-    shutdown_launch = None
-    config_launcher = None
-    power_board_launch = None
-    self.log('Configuration finished')
-    
-    #res, msg = configure_component(script)
-    
-    #if res:
-    msg = 'Configured part %s as %s.' % (serial, name)
-    invent = self.get_inventory_object()
-    if (invent != None):
-      invent.setNote(serial, msg)
-
-    wx.MessageBox(msg, 'Configuration complete', wx.OK, self)
-    
-
-  # TODO: This is dumb, just make subtest instead
-  # Generates XMl line for each subtest, with pre and post tests
-  def generate_subtest_xml_line(self, test, pre_test = None, post_test = None, name = None):
-    details_str = ''
-    if pre_test is not None:
-      details_str += ' pre=\"%s\" ' % pre_test
-    if post_test is not None:
-      details_str += ' post=\"%s\" ' % post_test
-    if name is not None:
-      details_str += ' name=\"%s\" ' % name
-
-    return '<subtest %s>%s</subtest>\n' % (details_str, test)
       
   # TODO: Could generate key for each test while parsing XML file!
   # Parses through the xml file recursively
@@ -639,10 +536,13 @@ class QualificationFrame(wx.Frame):
         ob_branch[label] = None # Means no child tests
 
   def log(self, msg):
-    self._log.AppendText(datetime.now().strftime("%m/%d/%Y %H:%M:%S: ") + msg + '\n')
+    log_msg = datetime.now().strftime("%m/%d/%Y %H:%M:%S: ") + msg
+    self._test_log[datetime.now()] = msg 
+    self._log.AppendText(log_msg + '\n')
     self._log.Refresh()
     self._log.Update()
-    
+    #print log_msg
+        
   def set_top_panel(self, panel):
     self._current_panel = panel
     self._top_sizer.Clear(True)
@@ -651,9 +551,8 @@ class QualificationFrame(wx.Frame):
     
   def reset(self):
     self.set_top_panel(SerialPanel(self._top_panel, self._res, self))
-    
-  def launcher_spin_thread(self, launcher):
-    launcher.spin()
+    self._results = None
+    self._test_log = {}
 
   def has_conf_script(self, serial):
     return self._configs.has_key(serial[0:7])
@@ -664,8 +563,41 @@ class QualificationFrame(wx.Frame):
   def has_test_onboard(self, label):
     return self._onboards.has_key(label)
 
-  # TODO: Combine in to a function to select using GUI and 
-  # a function to pull the conf/test lists from serials numbers
+  # TODO: This is dumb, just make subtest instead
+  # Generates XMl line for each subtest, with pre and post tests
+  def generate_subtest_xml_line(self, test, pre_test = None, post_test = None, name = None):
+    details_str = ''
+    if pre_test is not None:
+      details_str += ' pre=\"%s\" ' % pre_test
+    if post_test is not None:
+      details_str += ' post=\"%s\" ' % post_test
+    if name is not None:
+      details_str += ' name=\"%s\" ' % name
+
+    return '<subtest %s>%s</subtest>\n' % (details_str, test)
+
+  def select_string_from_list(self, msg, lst):
+    # Load robot selection dialog
+    dialog = self._res.LoadDialog(self, 'select_test_dialog')
+    select_text = xrc.XRCCTRL(dialog, 'select_text')
+    select_text.SetLabel(msg)
+    test_box = xrc.XRCCTRL(dialog, 'test_list_box')
+    test_box.InsertItems(lst, 0)
+    
+    select_text.Wrap(250)
+    
+    dialog.Layout()
+    dialog.Fit()
+
+    # return string of test folder/file to run
+    if (dialog.ShowModal() == wx.ID_OK):
+      desc = test_box.GetStringSelection()
+      dialog.Destroy()
+      return desc
+    else: 
+      dialog.Destroy()
+      return None
+
   def select_conf_to_load(self, serial):
     short_serial = serial[0:7]
     
@@ -674,26 +606,16 @@ class QualificationFrame(wx.Frame):
     for conf in self._configs[short_serial]:
       configs_by_descrip[self._config_descrips_by_file[conf]] = conf
       
-    # Load robot selection dialog
-    dialog = self._res.LoadDialog(None, 'select_test_dialog')
-    select_text = xrc.XRCCTRL(dialog, 'select_text')
-    select_text.SetLabel('Select part of robot to configure component.')
-    test_box = xrc.XRCCTRL(dialog, 'test_list_box')
-    test_box.InsertItems(dict.keys(configs_by_descrip), 0)
-    
-    select_text.Wrap(250)
-    
-    dialog.Layout()
-    dialog.Fit()
+    msg = 'Select type to configure component.'
 
-    # return string of test folder/file to run
-    if (dialog.ShowModal() == wx.ID_OK):
-      desc = test_box.GetStringSelection()
-      
-      return configs_by_descrip[desc]
-    else: # User didn't want to configure, I guess
+    descrips = dict.keys(configs_by_descrip)
+    descrips.sort()
+  
+    choice = self.select_string_from_list(msg, descrips)
+    if choice is None:
       return None
-
+    return configs_by_descrip[choice]
+    
   # If more than one test for that serial, calls up prompt to ask user to select
   def select_test_to_load(self, short_serial):
     # Load select_test_dialog
@@ -701,25 +623,15 @@ class QualificationFrame(wx.Frame):
     for test in self._tests[short_serial]:
       tests_by_descrip[self._test_descripts_by_file[test]] = test
     
-    # Load robot selection dialog
-    dialog = self._res.LoadDialog(None, 'select_test_dialog')
-    select_text = xrc.XRCCTRL(dialog, 'select_text')
-    select_text.SetLabel('Select component or component type to qualify.')
-    test_box = xrc.XRCCTRL(dialog, 'test_list_box')
-    test_box.InsertItems(dict.keys(tests_by_descrip), 0)
-
-    select_text.Wrap(250)
+    descrips = dict.keys(tests_by_descrip)
+    descrips.sort()
     
-    dialog.Layout()
-    dialog.Fit()
+    msg = 'Select component or component type to qualify.'
 
-    # return string of test folder/file to run
-    if (dialog.ShowModal() == wx.ID_OK):
-      desc = test_box.GetStringSelection()
-      
-      return tests_by_descrip[desc]
-    else: # User didn't want to test
+    choice = self.select_string_from_list(msg, descrips)
+    if choice is None:
       return None
+    return tests_by_descrip[choice]
 
   def load_onboard_tests(self, test_list, robot, show_viz, show_results):
     self._test_dir = ONBOARD_DIR
@@ -747,10 +659,31 @@ class QualificationFrame(wx.Frame):
     # Pass test class to qualification in future
     self.start_qualification()
 
+  def load_configuration_script(self, serial, name, script):
+    self.log('Starting configuration of %s to %s.' % (serial, name))
+    
+    self._current_serial = serial
+    self._test_dir = CONFIG_DIR
+
+    conf_str = open(os.path.join(CONFIG_DIR, script)).read()
+
+    test = '<test>\n'
+    test += '<pre_startup>../scripts/power_cycle.launch</pre_startup>\n'
+    test += '<pre_startup>%s</pre_startup>\n' % script
+    test += '<startup>startup_conf.launch</startup>\n'
+    test += '<subtest>subtest_conf.launch</subtest>\n'
+    test += '<shutdown>../scripts/power_board_disable.launch</shutdown>\n</test>'
+
+    self._current_test = Test()
+    self._current_test.load(test)
+    
+    self.start_qualification(True, serial, name)
+
+
   # Component qualification
   def load_tests(self, serial, rework_reason = ''):
     short_serial = serial[0:7]
-    self.log('Starting test %s'%(self._tests[short_serial]))
+    self.log('Starting test %s' % (self._tests[short_serial]))
     self._current_serial = serial
 
     if (len(rework_reason) > 0):
@@ -764,7 +697,8 @@ class QualificationFrame(wx.Frame):
       test_folder_file = self.select_test_to_load(short_serial)
 
     if test_folder_file is None:
-      self.on_cancel()
+      self.cancel()
+      return
 
     # Hack to find directory of scripts
     dir, sep, test_file = test_folder_file.partition('/')
@@ -777,8 +711,8 @@ class QualificationFrame(wx.Frame):
   
     self.start_qualification()
     
-  # Launches program for either onboard or test cart tests
-  def start_qualification(self): #, test_str):
+  # Launches program for either onboard, component conf or test cart tests
+  def start_qualification(self, config_only = False, serial = '', name = ''): 
     self._tests_start_date = datetime.now()
   
     self._results = QualTestResult(self._current_serial, self._tests_start_date)
@@ -800,59 +734,116 @@ class QualificationFrame(wx.Frame):
 
     self._result_service = rospy.Service('test_result', TestResult, self.subtest_callback)
 
+    # Let configuration know whick parts it configured
+    self._results.config_only = config_only
+    self._results._conf_name = name
+    if serial != '' and config_only:
+      rospy.set_param("conf_serial", serial)
+    if name != '' and config_only:
+      rospy.set_param("conf_name", name)
+
     if (self._current_test.getInstructionsFile() != None):
       self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(self._test_dir, self._current_test.getInstructionsFile())))
     else:
-      self.test_startup()
-     
-  def test_startup(self):
-    panel = WaitingPanel(self._top_panel, self._res, self)
-    panel.set_progress_label('Initializing pre-startup sequence')
-    self.set_top_panel(panel)
-    time.sleep(2)
-    wx.CallAfter(self.test_startup_real(panel))
-    
-  def run_prestartup_scripts(self, panel):
-    # Run any pre_startup scripts synchronously
-    if (len(self._current_test.pre_startup_scripts) > 0):
-      for script in self._current_test.pre_startup_scripts:
-        # Set script label in waiting panel
-        log_message = 'Running pre_startup script [%s]...'%(script)
-        self.log(log_message)
-        panel.set_progress_label(log_message)
-        
-        # If cancel button pressed in pre-startup, cancel all tests
-        # Cancel button called to cancel()...should work
-
-        listener = RoslaunchProcessListener()
-        
-        launch = self.launch_script(os.path.join(self._test_dir, script), listener)
-        if (launch == None):
-          s = 'Could not load roslaunch script "%s"! Press OK to cancel test.' % (script)
-          wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
-          self.cancel(s)
-          return
-        
-        launch.spin(); # Spin until it finishes
-        
-        if (listener.has_any_process_died_badly()):
-          s = 'Pre_startup script %s died badly! Press OK to cancel test.' % (script)
-          wx.MessageBox(s, 'Pre_startup Failed', wx.OK|wx.ICON_ERROR, self)
-          # Record that pre-startup failed 
-          self.prestartup_failed(script)
-          
-          return
-    else:
-      self.log('No pre_startup scripts')
-
-  # Called from InstructionsPanel, runs through prestartup scripts
-  def test_startup_real(self, panel):
-    self.run_prestartup_scripts(panel)
+      self.start_test()
       
+  def start_test(self):
+    time.sleep(0.5)
+    wx.CallAfter(self.run_prestartup_scripts)
+    
+  def run_prestartup_scripts(self):
+    # Run any pre_startup scripts synchronously
+    if (len(self._current_test.pre_startup_scripts) == 0):
+      self.log('No prestartup scripts.')
+      wx.CallAfter(self.test_startup)
+      return
+
+    self._prestartup_index = 0
+
+    if (self._prestartup_done_srv != None):
+      self._prestartup_done_srv.shutdown()
+      self._prestartup_done_srv = None
+
+    self._prestartup_done_srv = rospy.Service('prestartup_done', ScriptDone, self.prestartup_done_callback)
+
+    self.prestartup_call()
+
+  def prestartup_done_callback(self, srv):
+    self.prestartup_finished(srv) 
+      
+    return ScriptDoneResponse()
+
+  def prestartup_finished(self, srv):
+    if self._prestartup_launch != None:
+      self._prestartup_launch.stop()
+      self._prestartup_launch = None
+
+    result_dict = { 0: 'OK', 1: 'FAIL', 2: 'ERROR' }
+
+
+    self.log('Prestartup script %s finished. Result %s.' % (srv.script, result_dict[srv.result]))
+
+    if srv.result == 0:
+      # Continue to next test
+      self._prestartup_index += 1
+      if self._prestartup_index >= len(self._current_test.pre_startup_scripts):
+        
+        if (self._prestartup_done_srv != None):
+          self._prestartup_done_srv.shutdown()
+          self._prestartup_done_srv = None
+
+        wx.CallAfter(self.test_startup) # Done with prestartups
+      else:
+        wx.CallAfter(self.prestartup_call)
+    else:
+      if (self._prestartup_done_srv != None):
+        self._prestartup_done_srv.shutdown()
+        self._prestartup_done_srv = None
+
+      wx.CallAfter(self.prestartup_failed, srv)
+      
+
+  def prestartup_call(self):
+    script = self._current_test.pre_startup_scripts[self._prestartup_index]
+    # update script label in waiting panel
+    log_message = 'Running pre_startup script [%s]...'%(script)
+    self.log(log_message)
+
+    # Set waiting panel stuff
+    panel = WaitingPanel(self._top_panel, self._res, self)
+    panel.set_progress_label(log_message)
+
+    self.set_top_panel(panel)
+    
+    # If cancel button pressed in pre-startup, cancel all tests
+    # Cancel button called to cancel()...should work
+    self._prestartup_launch = self.launch_script(os.path.join(self._test_dir, script), None)
+    if (self._prestartup_launch == None):
+      s = 'Could not load roslaunch script "%s"! Press OK to cancel test.' % (script)
+      wx.MessageBox(s, 'Invalid roslaunch file', wx.OK|wx.ICON_ERROR, self)
+      self.cancel(s)
+      return
+        
+  def prestartup_failed(self, srv):
+    msg = TestResultRequest()
+    msg.result = TestResultRequest.RESULT_FAIL
+    msg.text_summary = 'Prestartup script %s failed. ' % srv.script
+    msg.html_result = '<p>Prestartup script \'%s\' failed. Unable to load subtests. Qualification canceled.</p><p>Failure Data:<br>%s</p>' % (srv.script, srv.failure_msg)
+    msg.plots = None
+
+    name = 'Pre-startup %s' % srv.script
+    self._results.add_sub_result(-1, name, msg)
+
+    if srv.result == ScriptDoneRequest.RESULT_ERROR:
+      self._results.has_error_no_invent = True
+
+    self.test_finished()
+    #self.show_results()
+
+  def test_startup(self):
     # Run the startup script if we have one
     if (self._current_test.getStartupScript() != None):
       self.log('Running startup script...')
-      panel.set_progress_label('Running startup script')
       self._startup_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getStartupScript()), None)
       if (self._startup_launch == None):
         s = 'Could not load roslaunch script "%s"'%(self._current_test.getStartupScript())
@@ -883,27 +874,22 @@ class QualificationFrame(wx.Frame):
       wx.MessageBox(s, 'Invalid roslaunch file. Press OK to cancel.', wx.OK|wx.ICON_ERROR, self)
       self.cancel(s)
       return
-    
-  def prestartup_failed(self, script):
-    msg = TestResult()
-    msg.text_summary = 'Prestartup script %s failed.' % script
-    msg.html_result = '<p>Prestartup script %s failed. Unable to load remainings subtests. Qualification canceled.</p>'
-    msg.plots = None
-
-    name = 'Pre-startup %s' % script
-    self._results.add_subtest(-1, name, msg)
-
-    self.test_finished()
-
-    self.show_results()
 
   def show_results(self):
     panel = ResultsPanel(self._top_panel, self._res, self)
     self.set_top_panel(panel)
     
-    self._results.write_results_to_file() # Write to temp dir
+    if self._results is not None:
+      self._results.write_results_to_file() # Write to temp dir
+      panel.set_results(self._results)
+    else:
+      self.reset()
 
-    panel.set_results(self._results)
+  def show_plots(self, sub_result):
+    panel = PlotsPanel(self._top_panel, self._res, self, self._subtest._test_script)
+    self.set_top_panel(panel)
+    
+    panel.show_plots(sub_result.make_result_page())
     
   def get_inventory_object(self):
     if (self._username != None and self._password != None):
@@ -939,53 +925,57 @@ class QualificationFrame(wx.Frame):
       return invent
     
     return None
+
+  def verify_submit(self):
+    submit_check = 'Are you sure you want to submit?\n\n'
+    submit_check += 'Press OK to submit or Cancel to recheck results.\n'
+    submit_check += 'Be sure to select the correct directory to record your results.\n'
+
+    are_you_sure = wx.MessageDialog(self, submit_check, 'Verify Results Submission',
+                                    wx.OK|wx.CANCEL)
+    return are_you_sure.ShowModal() == wx.ID_OK
     
-  def submit_results(self, notes = ''):
+  def submit_results(self, notes, dir):
+    if not self.verify_submit():
+      return
+
     if self._current_serial is None:
       self.log('Can\'t submit, no serial number')
       self.reset()
       return
+
+    if not dir.endswith('/'):
+      dir += '/'
+    self._results._results_dir = dir 
 
     invent = self.get_inventory_object()
     self._results.set_notes(notes)
     self._results.set_operator(self._username)
     
     self._results.log_results_invent(invent)
-
-    #if (invent != None):
-    #  status_str = self._results.test_status_str()
-      
-        #msg = r['msg']
-        #if msg is not None:
-        #  for p in msg.plots:
-        #    if (len(p.image) > 0 ):
-        #      invent.add_attachment(self._current_serial, prefix + p.title, "image/" + p.image_format, p.image)
-        #      i += 1
-            
-    self.log('Results submitted in inventory system.')
+    if invent is None:
+      self.log('Unable store results invent, login may be missing or invalid')
+    elif self._results.has_error_no_invent:
+      self.log('Results not logged in invent, test ended with internal error')
+    else:
+      self.log('Results submitted in inventory system.')    
 
     self._results.write_results_to_file(False)
-
     self.log('Results logged to %s' % self._results._results_dir)
+
+    self._results.email_dev_team()
+    self.log('Emailed summary to %s' % self._results.get_dev_team())
     
     self.reset()
 
-  def discard_results(self):
-    self.log('Results discarded')
-    self.reset()
-    
+  
   def next_subtest(self):
     if (self._subtest_index + 1 >= len(self._current_test.subtests)):
       self.test_finished()
-      self.show_results()
     else:
       self.start_subtest(self._subtest_index + 1)
     
-  def show_plots(self, sub_result):
-    panel = PlotsPanel(self._top_panel, self._res, self, self._subtest._test_script)
-    self.set_top_panel(panel)
-    
-    panel.show_plots(sub_result.make_result_page())
+
   
   def launch_pre_subtest(self):
     if (self._subtest == None):
@@ -1015,27 +1005,27 @@ class QualificationFrame(wx.Frame):
       else:
         post_launcher.spin() 
   
-  def subtest_result(self, result, failure_reason = ''):
-    str_result = "PASS"
-    if result:
+  def subtest_result(self, passfail, failure_reason = ''):
+    str_result = "OK"
+    if not passfail:
       str_result = "FAIL"
     
     self.log('Subtest "%s" result: %s'%(self._subtest.get_name(), str_result))
     
     sub_result = self._results.get_subresult(self._subtest_index)
     sub_result.set_failure_text(failure_reason)
-    sub_result.set_passfail(result)
+    sub_result.set_passfail(passfail)
 
     self.launch_post_subtest()
     
-    if not result:
+    if not passfail:
       self.test_finished() # Terminate rest of test
-      self.show_results()
+      #self.show_results()
     else:
       self.next_subtest()
     
   def subtest_finished(self, msg):
-    self.log('Subtest "%s" finished'%(self._subtest.get_name()))
+    #self.log('Subtest "%s" finished'%(self._subtest.get_name()))
     self._subtest_launch.stop()
     self._subtest_launch = None
     
@@ -1061,7 +1051,7 @@ class QualificationFrame(wx.Frame):
     self.start_subtest(self._subtest_index)
     
   def launch_core(self):
-    self.log('Launching ros core services')
+    self.log('Launching ROS master.')
     
     # Create a roslauncher
     config = roslaunch.ROSLaunchConfig()
@@ -1105,10 +1095,14 @@ class QualificationFrame(wx.Frame):
     if (self._shutdown_launch != None):
       self._shutdown_launch.spin_once()
       
+    if (self._prestartup_launch != None):
+      self._prestartup_launch.spin_once()
+      
     if (self._core_launch != None):
       self._core_launch.spin_once()
     
   def stop_launches(self):
+    self.log('Stopping launches')
     if (self._subtest_launch != None):
       self._subtest_launch.stop()
     
@@ -1117,6 +1111,9 @@ class QualificationFrame(wx.Frame):
       
     if (self._shutdown_launch != None):
       self._shutdown_launch.stop()
+
+    if (self._prestartup_launch != None):
+      self._prestartup_launch.stop()
       
     if (self._core_launch != None):
       self._core_launch.stop()
@@ -1124,37 +1121,111 @@ class QualificationFrame(wx.Frame):
     self._startup_launch = None
     self._shutdown_launch = None
     self._core_launch = None
+    self._prestartup_launch = None
     self._subtest_launch = None
+    self.log('Launches stopped.')
     
-  def test_finished(self):
-    self.launch_post_subtest()
-    
+  def shutdown_test(self):
     if (self._current_test.getShutdownScript() != None):
       self.log('Running shutdown script...')
+      
+      if (self._shutdown_done_srv != None):
+        self._shutdown_done_srv.shutdown()
+        self._shutdown_done_srv = None
+      
+      self._shutdown_done_srv = rospy.Service('shutdown_done', ScriptDone, self.shutdown_callback)
+
+      # Set waiting panel stuff
+      panel = WaitingPanel(self._top_panel, self._res, self)
+      panel.set_progress_label("Shut down in progress.\nRunning %s..." % self._current_test.getShutdownScript())
+      
+      self.set_top_panel(panel)
+
+      # Launch given shutdown script
+      self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
+
+      if (self._shutdown_launch == None):
+        s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
+        wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
+        self.log('No shutdown script: %s' % (s))
+        self.log('SHUT DOWN POWER BOARD MANUALLY!')
+        #self.reset()
+        return
+    else:
+      self.log('No shutdown script')
+
+  def shutdown_callback(self, srv):
+    self.log('Shutdown finished')
+    wx.CallAfter(self.shutdown_finished, srv)
+    return ScriptDoneResponse()
+
+  def shutdown_finished(self, srv):
+    if self._shutdown_launch != None:
+      self._shutdown_launch.stop()
+      self._shutdown_launch = None
+
+    if (self._shutdown_done_srv != None):
+      self._shutdown_done_srv.shutdown()
+      self._shutdown_done_srv = None
+
+    if srv.result != ScriptDoneRequest.RESULT_OK:
+      fail_msg = 'Shutdown script failed!'
+      wx.MessageBox(fail_msg + '\n' + srv.failure_msg, fail_msg, wx.OK|wx.ICON_ERROR, self)
+      self.log('Shutdown failed for: %s' % srv.failure_msg)
+
+    wx.CallAfter(self.test_cleanup)
+
+  def test_finished(self):
+    if (self._current_test is not None and self._current_test.getShutdownScript() != None):
+      self.log('Running shutdown script...')
+      
+      if (self._shutdown_done_srv != None):
+        self._shutdown_done_srv.shutdown()
+        self._shutdown_done_srv = None
+      
+      self._shutdown_done_srv = rospy.Service('shutdown_done', ScriptDone, self.shutdown_callback)
+
+      # Set waiting panel stuff
+      panel = WaitingPanel(self._top_panel, self._res, self, False)
+      panel.set_progress_label("Running shutdown script %s..." % self._current_test.getShutdownScript())
+      
+      self.set_top_panel(panel)
+
+      # Launch given shutdown script
       self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
       if (self._shutdown_launch == None):
         s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
         wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
         self.log('No shutdown script: %s' % (s))
         self.log('SHUT DOWN POWER BOARD MANUALLY')
-        self.reset()
+        #self.reset()
         return
-
-      self._shutdown_launch.spin()
     else:
       self.log('No shutdown script')
-        
+      self.test_cleanup()
+      
+
+  def test_cleanup(self):
     self.stop_launches()
     
     self._current_test = None
     self._subtest = None
     self._subtest_index = -1
+
+    if self._results is not None:
+      self._results._test_log = self._test_log
+    self._test_log = {}
     
-  def cancel(self, reason):
-    self.log('Test canceled, reason: %s'%(reason))
+    self.show_results()
+
+  def cancel(self, reason = ''):
+    if reason != '':
+      self.log('Test canceled, reason: %s'%(reason))
+    
+    if self._results is not None:
+      self._results.canceled = True
     
     self.test_finished()
-    self.reset()
   
   def on_close(self, event):
     event.Skip()

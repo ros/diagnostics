@@ -1,10 +1,12 @@
 <launch>
-<include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/init.machine" />
 
-<!-- Configure MCB -->
-<node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=l_gripper_motor,0" />
+  <!-- Configure MCB -->
+  <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=l_gripper_motor,0" />
 
-<!-- service -->
-<node pkg="qualification" type="confirm_conf.py" output="screen"/>
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
 
+  <!-- Confirm configuation -->
+  <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>
+

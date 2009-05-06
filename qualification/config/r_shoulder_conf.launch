@@ -4,6 +4,8 @@
   <!-- configure_mcbs -->
   <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=r_shoulder_pan_motor,0 --motor=r_shoulder_lift_motor,1 --motor=r_upper_arm_roll_motor,2" />
 
-  <!-- service -->
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
+
+  <!-- Confirm configuation -->
   <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>

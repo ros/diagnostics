@@ -1,5 +1,5 @@
 <launch>
 <node pkg="pr2_power_board" type="power_node" />
-<node pkg="qualification" type="power_cycle_power_board.py" />
+<node pkg="qualification" type="power_board_cmd.py" args="--cmd=disable --cmd=reset --cmd=start" />
 
 </launch>

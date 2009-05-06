@@ -1,2 +1,3 @@
 <launch>
+  <node pkg="qualification" type="simple_shutdown.py" />
 </launch>

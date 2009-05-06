@@ -41,16 +41,13 @@ import subprocess
 from optparse import OptionParser
 
 from deprecated_srvs.srv import * 
+from qualification.srv import *
 
+def count_boards(srv):
+    expected = srv.expected
 
-def main():
-    expected = sys.argv[1] # Number of MCB's expected
-    
-    # Need to init node?    
-    rospy.init_node("mcb_counter")
+    count_resp = CountBoardsResponse()
 
-    result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
-    
     success = True
     
     count_path = roslib.packages.get_pkg_dir("qualification", True) + "/fwprog"
@@ -67,30 +64,43 @@ def main():
             count = p.returncode
             details = 'Ran eccount. Expected %s MCB\'s, found %s.\n\n' % (expected, count)
             details += 'STDOUT:\n' + stdout
-            if len(stderr) > 5:
+            if len(stderr) > 3:
                 details += '\nSTDERR:\n' + stderr
+
+            count_resp.count = count
                       
-            if str(count) == str(expected):
-                print "Found %s MCB's, programming" % count
+            if count == expected:
+                rospy.logerr("Found %s MCB's, programming" % count)
                 action.str = "pass"
                 #return 0
-                sys.exit(0)
+                count_resp.ok = CountBoardsResponse.RESULT_OK
+                rospy.logerr('Counted, returning %s MCB' % count)
+                return count_resp
             elif count == 0:
                 action = result_proxy("Found no MCB's! Check cables and power. Retry?:::%s" % details)
+            elif count == 200:
+                action = result_proxy("Unable to initialize interface. Make sure you have root access and the link is connected. Code: %s:::%s" % (count, details))
+            elif count == 203:
+                action = result_proxy("No response through link, check connection. Code: %s:::%s" % (count, details))
             elif count > 199:
                 action = result_proxy("Error counting MCB's. eccount gave error code: %s. Retry?:::%s" % (count, details))
             else:
                 action = result_proxy("MCB counts don't match. Found %s, expected %s. Retry?:::%s" % (count, expected, details))
                 
-            if action.str == "fail":
+            if action.str != "retry":
                 print "Programming MCB's failed, counts don't match!"
-                #return 1
-                sys.exit(1)
-    
+                count_resp.ok = CountBoardsResponse.RESULT_FAIL
+                return count_resp
     except OSError, e:
-        action = result_proxy("Failed to count MCB's, cannot program. Press OK to cancel.:::%s", details)
-        #return 2
-        sys.exit(2)
+        count_resp.count = -1
+        count_resp.ok = CountBoardsResponse.RESULT_ERROR
+        return count_resp
+
 
 if __name__ == '__main__':
-    main()
+    # Need to init node?    
+    rospy.init_node("mcb_counter")
+    result_proxy = rospy.ServiceProxy('mcb_conf_results', StringString)
+    count_service = rospy.Service('count_mcbs', CountBoards, count_boards)
+    rospy.spin()
+

@@ -32,12 +32,34 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import roslib
+roslib.load_manifest('qualification')
 import wx
 import sys
+
+from qualification.srv import *
+
+import rospy
+
+finish = rospy.ServiceProxy('prestartup_done', ScriptDone)
 
 app = wx.PySimpleApp()
 ret = wx.MessageBox("Hello!", "Hi!", wx.OK|wx.CANCEL)
 if (ret == wx.CANCEL):
-    sys.exit(1)
-
-sys.exit(0)
+    done = ScriptDoneRequest()
+    done.result = ScriptDoneRequest.RESULT_FAIL
+    done.script = 'popup message'
+    done.failure_msg = 'Cancel pressed on popup window.'
+else:
+    done = ScriptDoneRequest()
+    done.result = ScriptDoneRequest.RESULT_OK
+    done.script = 'popup message'
+    done.failure_msg = ''
+    
+try:
+    rospy.wait_for_service('prestartup_done', 2)
+    finish.call(done)
+    sys.exit(0)
+except:
+    # Timeout exceeded while waiting for service
+    sys.exit(0)

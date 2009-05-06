@@ -6,7 +6,9 @@
   <include file="$(find qualification)/tests/init.machine" />
 
   <!-- Full Arm Calibration uses sequential arm calibrator -->
-  <include file="$(find qualification)/tests/full_arm_test/calibrate.launch" />
-
+  <launch>
+	<node pkg="mechanism_bringup" type="calibrate_arms.py"/>
+<!--args="$(find qualification)/tests/full_arm_test/full_arm_cal.xml" /> -->
+  </launch>
 
 </launch>

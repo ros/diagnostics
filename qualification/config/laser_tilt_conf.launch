@@ -4,6 +4,8 @@
   <!-- configure_mcbs -->
   <node machine="realtime" pkg="qualification" type="configure_mcbs.py" args="--motor=laser_tilt_mount_motor,0" />
 
-  <!-- service -->
+  <node machine="realtime" pkg="qualification" type="count_mcbs.py" />
+
+  <!-- Confirm configuation -->
   <node pkg="qualification" type="confirm_conf.py" output="screen"/>
 </launch>

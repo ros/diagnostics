@@ -26,7 +26,7 @@
 								<flag>wxALL|wxEXPAND</flag>
 								<border>5</border>
 								<object class="wxTextCtrl" name="log">
-									<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
+									<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
 									<value></value>
 									<maxlength>0</maxlength>
 								</object>
@@ -57,7 +57,7 @@
 					</font>
 					<object class="notebookpage">
 						<label>Test Cart</label>
-						<selected>0</selected>
+						<selected>1</selected>
 						<object class="wxPanel" name="test_cart_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
@@ -200,7 +200,7 @@
 													<underlined>0</underlined>
 													<face>Sans</face>
 												</font>
-												<label>Serial Number</label>
+												<label>Serial Number:</label>
 											</object>
 										</object>
 										<object class="sizeritem">
@@ -268,7 +268,7 @@
 					</object>
 					<object class="notebookpage">
 						<label>PR-2 Qualification</label>
-						<selected>1</selected>
+						<selected>0</selected>
 						<object class="wxPanel" name="robot_qual_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
@@ -747,6 +747,23 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
+						<object class="wxDirPickerCtrl" name="results_dir_picker">
+							<value>/wg/stor2/watts/ros/ros-pkg/hardware__test/qualification/xrc</value>
+							<message>Select a folder to store results</message>
+							<style>wxDIRP_DEFAULT_STYLE</style>
+							<size>300,-1</size>
+						</object>
+					</object>
+					<object class="spacer">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<size>0,0</size>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
 						<object class="wxButton" name="submit_button">
 							<font>
 								<size>12</size>
@@ -924,7 +941,7 @@
 	</object>
 	<object class="wxDialog" name="confirm_conf_dialog">
 		<style>wxDEFAULT_DIALOG_STYLE</style>
-		<size>320,260</size>
+		<size>316,312</size>
 		<title></title>
 		<object class="wxFlexGridSizer">
 			<rows>2</rows>
@@ -953,7 +970,7 @@
 						<border>5</border>
 						<object class="wxTextCtrl" name="detail_text">
 							<style>wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP</style>
-							<size>300,-1</size>
+							<size>300,180</size>
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>

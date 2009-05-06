@@ -33,44 +33,32 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
+# Kevin Watts
+
 import roslib
 roslib.load_manifest('qualification')
-import rospy, sys,time
-import subprocess
-from optparse import OptionParser
+
+import rospy
+
+import sys, time, os
+
+from qualification.srv import *
+
+rospy.init_node('configuration_subtest')
+result_proxy = rospy.ServiceProxy('test_result', TestResult)
+
+# Later we can run motor conf and actually check the configuration
+serial = rospy.get_param('conf_serial')
+name = rospy.get_param('conf_name')
+
+html = '<p>Configured %s as %s.</p>\n' % (serial, name)
 
 
-#rospy.init_node("power_cycler")
-# block until the service is available
-#rospy.wait_for_service('power_board_control')
+r = TestResultRequest()
+r.plots = []
+r.text_summary = "Configured %s as %s." % (serial, name)
+r.html_result = html
+r.result = TestResultRequest.RESULT_PASS
 
-parser = OptionParser()
-parser.add_option("--time=", type="int", dest="seconds", action="store", default="10")
-
-
-options, args = parser.parse_args()
-
-print "Shutting down Power Board"
-path = roslib.packages.get_pkg_dir("pr2_power_board", True)
-try:
-  retcode = subprocess.call(path + "/scripts/send_command 0 disable", shell=True)
-  if retcode != 0:
-    print "Power Cycle command failed"
-
-  retcode = subprocess.call(path + "/scripts/send_command 1 disable", shell=True)
-  if retcode != 0:
-    print "Power Cycle command failed"
-
-  retcode = subprocess.call(path + "/scripts/send_command 2 disable", shell=True)
-  if retcode != 0:
-    print "Power Cycle command failed"
-
-  time.sleep(1)
-  retcode = subprocess.call(path + "/scripts/send_command 2 terrible_hack_shutdown", shell=True)
-  if retcode != 0:
-    print "Power Cycle command failed"
-
-
-
-except OSError, e:
-  print "OSError"
+rospy.wait_for_service('test_result')
+result_proxy.call(r)

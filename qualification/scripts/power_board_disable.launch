@@ -1,6 +1,7 @@
 <launch>
 <node pkg="pr2_power_board" type="power_node" />
 <!-- Disable power board -->
-<node pkg="qualification" type="power_board_disable.py" />
+<node pkg="qualification" type="power_board_cmd.py" args="--srv=shutdown_done  --cmd=disable" />
+
 
 </launch>

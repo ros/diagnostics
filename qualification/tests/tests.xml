@@ -24,10 +24,6 @@
 	file="laser_tilt_test/test_alpha2.xml" descrip="Laser Tilt Alpha2" />  
 
   <!-- Arm Tests -->
-  <test serial="shoulde" 
-	file="shoulder_test/test_qual.xml" descrip="Shoulder Test - Qual" />
-
-
   <test serial="6804178" 
 	file="full_arm_test/test.xml" descrip="Full Arm Test" />
   <test serial="6804204" 
@@ -46,6 +42,8 @@
   <!-- Special tests -->
   <test serial="simple_" 
 	file="simple_example/test.xml" descrip="Simple Example" />
+
+
   <test serial="6801024" 
 	file="hokuyo_test/test.xml" descrip="Hokuyo Test" />
   <test serial="6801050" 
