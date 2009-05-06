@@ -1,0 +1,35 @@
+<launch>
+  <node pkg="cb_characterization" type="cmd_node.py" name="arm_commander" output="screen">
+    <param name="joint_headers" type="string"
+           textfile="$(find cb_characterization)/data/joint_names.txt" />
+
+    <param name="joint_commands" type="string"
+           textfile="$(find cb_characterization)/data/joint_pos.txt" />
+
+  </node>
+
+
+
+
+
+
+
+<!-- Arm trajectory controller -->
+  <param name="right_arm_trajectory_controller/velocity_scaling_factor" type="double" value="1.0"/>
+  <param name="right_arm_trajectory_controller/trajectory_wait_timeout" type="double" value=".25"/>
+
+  <param name="right_arm_trajectory_controller/r_shoulder_pan_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_shoulder_lift_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_shoulder_roll_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_elbow_flex_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_forearm_roll_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_wrist_flex_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_wrist_roll_joint/goal_reached_threshold" type="double" value="0.1"/>
+  <param name="right_arm_trajectory_controller/r_gripper_l_finger_joint/goal_reached_threshold" type="double" value="0.1"/>
+
+
+  <node pkg="mechanism_control" type="spawner.py"
+        args="$(find cb_characterization)/r_arm_traj_controller.xml"
+	output="screen" />
+
+</launch>
