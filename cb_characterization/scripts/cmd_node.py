@@ -45,7 +45,7 @@ for k in range(0,num_cmds) :
         arm_stats = settler.get_stats_latest(joints, 100)
         arm_settled = True
         for x in arm_stats.ranges :
-            arm_settled = arm_settled and (x < .01)
+            arm_settled = arm_settled and (x < .00000001)
         time.sleep(.25)
         print "    [" + ', '.join( ['%.6f'%x for x in arm_stats.ranges] ) + "]"
     print "   Arm is settled!"        
