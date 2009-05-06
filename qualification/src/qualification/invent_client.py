@@ -7,7 +7,7 @@ usage: %(progname)s --username=... --password=... reference key value
 """
 
 
-import os, sys, string, time, getopt
+import os, sys, string, time, getopt, re
 
 import urllib2, cookielib
 
@@ -43,15 +43,24 @@ class Invent:
     self.loggedin = True
     return True
 
-  def setNote(self, reference, note):
+  def setNote(self, reference, note, noteid=None):
     if self.loggedin == False:
       self.login()
 
     url = self.site + "invent/api.py?Action.AddNoteToItem=1&reference=%s&note=%s" % (reference, urllib2.quote(note))
+    if noteid:
+      url = url + "&noteid=%s" % noteid
 
     fp = self.opener.open(url)
-    fp.read()
+    body = fp.read()
     fp.close()
+
+    pat = re.compile("rowid=([0-9]+)")
+    m = pat.search(body)
+    if m:
+      noteid = int(m.group(1))
+      return noteid
+    return None
 
   def setKV(self, reference, key, value):
     if self.loggedin == False:
@@ -135,20 +144,15 @@ def encode_multipart_formdata(fields, files, BOUNDARY = '-----'+mimetools.choose
         filetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
         L.append('--' + BOUNDARY)
         L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, filename))
-
+        L.append('Content-Length: %s' % len(value))
         L.append('Content-Type: %s' % filetype)
+        L.append('Content-Transfer-Encoding: binary')
         L.append('')
         L.append(value)
 
     L.append('--' + BOUNDARY + '--')
     L.append('')
-    body = ''
-    import array
-    buff = array.array('c')
-    for s in L:
-      buff.fromstring(s)
-      buff.fromstring(CRLF)
-    body = buff.tostring()
+    body = CRLF.join(L)
 
     content_type = 'multipart/form-data; boundary=%s' % BOUNDARY        # XXX what if no files are encoded
 
