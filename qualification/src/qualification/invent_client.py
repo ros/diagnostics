@@ -80,6 +80,26 @@ class Invent:
     fp.read()
     fp.close()
 
+  def getKV(self, reference, key):
+    if self.loggedin == False:
+      self.login()
+
+    key = key.strip()
+
+    if not key:
+      raise ValueError, "the key is blank"
+
+    url = self.site + "invent/api.py?Action.getKeyValue=1&reference=%s&key=%s" % (reference, urllib2.quote(key))
+
+    fp = self.opener.open(url)
+    value = fp.read()
+    fp.close()
+
+    i = string.find(value, "\n<!--")
+    value = string.strip(value[:i])
+    
+    return value
+
   def add_attachment(self, reference, name, mimetype, attachment):
     if self.loggedin == False:
       self.login()
