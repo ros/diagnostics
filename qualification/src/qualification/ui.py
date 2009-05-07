@@ -62,6 +62,7 @@ from result import *
 from cStringIO import StringIO
 import struct
 
+import traceback
 from invent_client import Invent
 
 TESTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'tests')
@@ -154,6 +155,17 @@ class SerialPanel(wx.Panel):
       if branch[test_label] is not None:
         self.insert_onboard_test_nodes(tree_id, branch[test_label])
 
+  def verify_onboard_test(self, robot):
+    onboard_check = 'Are you sure you want to run this test?\n\n'
+    onboard_check += 'This will shut down everything on %s.\n'
+    onboard_check += 'Make sure you have all your tests selected.\n\n'
+    onboard_check += 'The wheels must be off the ground for caster tests.\n\n\n'
+    onboard_check += 'DO NOT PROCEED IF YOU ARE NOT READY.'
+
+    are_you_sure = wx.MessageDialog(self, onboard_check, 'Confirm Onboard Selection',
+                                    wx.OK|wx.CANCEL)
+    return are_you_sure.ShowModal() == wx.ID_OK
+
   # Need to get story straight on how onboards are stored in tree
   def on_onboard_test(self, event):
     try:
@@ -162,6 +174,9 @@ class SerialPanel(wx.Panel):
       if robot is None or robot == '':
         return
       
+      if not self.verify_onboard_test(robot):
+        return
+
       robot_launch = self._manager._robots[robot]
       
       # Get selections returns tree items that haven't been added
@@ -952,19 +967,15 @@ class QualificationFrame(wx.Frame):
     self._results.set_notes(notes)
     self._results.set_operator(self._username)
     
-    self._results.log_results_invent(invent)
-    if invent is None:
-      self.log('Unable store results invent, login may be missing or invalid')
-    elif self._results.has_error_no_invent:
-      self.log('Results not logged in invent, test ended with internal error')
-    else:
-      self.log('Results submitted in inventory system.')    
-
-    self._results.write_results_to_file(False)
     self.log('Results logged to %s' % self._results._results_dir)
+    res, log_str = self._results.log_results(invent)
+    self.log(log_str)
 
-    self._results.email_dev_team()
-    self.log('Emailed summary to %s' % self._results.get_dev_team())
+    if not self._results.email_qual_team():
+      wx.MessageBox('Unable to email qualification results. Do you have \'sendmail\' installed?', 'Unable to email results', wx.OK|wx.ICON_ERROR, self)
+      self.log('Unable to email summary.')
+    else:
+      self.log('Emailed summary to %s' % self._results.get_qual_team())
     
     self.reset()
 
@@ -1251,6 +1262,7 @@ if __name__ == '__main__':
     app.MainLoop()
   except Exception, e:
     print e
+    traceback.print_exc()
     
   print 'Quitting qualification app'
 

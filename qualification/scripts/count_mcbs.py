@@ -62,7 +62,7 @@ def count_boards(srv):
                                  stderr = subprocess.PIPE, shell=True)
             stdout, stderr = p.communicate()
             count = p.returncode
-            details = 'Ran eccount. Expected %s MCB\'s, found %s.\n\n' % (expected, count)
+            details = 'Ran eccount. Expected %s MCB\'s, got return code %s.\n\n' % (expected, count)
             details += 'STDOUT:\n' + stdout
             if len(stderr) > 3:
                 details += '\nSTDERR:\n' + stderr

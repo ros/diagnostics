@@ -62,6 +62,21 @@ class Invent:
       return noteid
     return None
 
+  def getKV(self, reference, key):
+    if self.loggedin == False:
+      self.login()
+
+    key = key.strip()
+ 
+    if not key:
+      raise ValueError, "the key is blank"
+ 
+    url = self.site + "invent/api.py?Action.getKeyValue=1&reference=%s&key=%s" % (reference, urllib2.quote(key), urllib2.quote(value))
+
+    fp = self.opener.open(url)
+    fp.read()
+    fp.close()    
+
   def setKV(self, reference, key, value):
     if self.loggedin == False:
       self.login()

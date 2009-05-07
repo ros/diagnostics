@@ -3,7 +3,7 @@
   <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
   <include filename="$(find pr2_defs)/defs/base_defs.xml" />
 
-<pr2_caster_alpha2 suffix="fl" parent="world">
+<pr2_caster_alpha2 suffix="fl" parent="world" ref_position="0.0" >
       <origin xyz="0 0 0" rpy="0 0 0" />
 </pr2_caster_alpha2>
 

@@ -44,6 +44,7 @@ from optparse import OptionParser
 from deprecated_srvs.srv import *
 from qualification.srv import * 
 
+import traceback
 
 rospy.init_node("mcb_configurer")
 rospy.wait_for_service('mcb_conf_results')
@@ -162,11 +163,11 @@ for name, num in mcbs:
         action.str = "pass"
   except Exception, e:
     rospy.logerr('Caught exception attempting to configure MCB\'s')
-    rospy.logerr(str(e))
+    rospy.logerr(traceback.format_exc())
     done = ScriptDoneRequest()
     done.result = ScriptDoneRequest.RESULT_ERROR
     done.script = 'Program MCB'
-    done.failure_msg = 'MCB programming failed, caught exception. %s' % str(e)
+    done.failure_msg = 'MCB programming failed, caught exception. %s' % traceback.format_exc()
     success = False
     break
       

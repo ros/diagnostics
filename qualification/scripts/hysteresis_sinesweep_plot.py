@@ -46,7 +46,6 @@ from time import sleep
 import rospy
 
 import matplotlib
-#matplotlib.use('WXAgg')
 import matplotlib.pyplot as plot
 from StringIO import StringIO
 
@@ -54,6 +53,8 @@ from qualification.msg import Plot
 from qualification.srv import *
 
 from joint_qualification_controllers.srv import *
+
+import traceback
 
 class App:
   def __init__(self):
@@ -70,7 +71,7 @@ class App:
     elif self.data.test_name == "sinesweep":
       self.sine_sweep_plot()
     else:
-      print 'Recieved test message with name %s, unable to analyze' % s
+      rospy.logerr('Recieved test message with name %s, unable to analyze' % s)
       self.test_failed_service_call('Unable to analyze result.')
     return TestDataResponse(1)
       
@@ -139,9 +140,9 @@ class App:
       p.image_format = "png"
       self.result_service.call(r)
     except Exception, e:
-      print 'hysteresis_plot caught exception, returning test failure.'
-      print e
-      self.test_failed_service_call(str(e))
+      rospy.logerr('hysteresis_plot caught exception, returning test failure.')
+      rospy.logerr(traceback.format_exc())
+      self.test_failed_service_call(traceback.format_exc())
 
   def hysteresis_analysis(self, image_title):
     self.max_avg = 0
@@ -153,9 +154,14 @@ class App:
     print "Num pts %s." % num_pts
 
     if num_pts < 250: 
-      error_msg = "<p>Not enough data points, hysteresis controller may have malfunctioned. Check controller gains.</p><p>Test status: <p>FAIL</b>.</p>"
+      error_msg = "<p>Not enough data points, hysteresis controller may have malfunctioned. Check diagnostics.</p>"
+      error_msg += "<p>The encoder may be missing ticks, check encoder.<br>\n"
+      error_msg += "Make sure mechanism is free to move and not trapped or constrained<br>\n"
+      error_msg += "Make sure motors are not in safety lockout (check diagnostics)<br>\n"
+      error_msg += "Check controller gains if problem persists on components of same type.</p>\n"
+      error_msg += "<p>Test status: <p>FAIL</b>.</p>"
       print error_msg
-      return (error_msg, "Not enough data points, bad controller.", False)
+      return (error_msg, "Not enough data points, bad encoder or bad gains.", False)
 
     # Expected values
     min_effort_param = self.data.arg_value[0]
@@ -167,10 +173,10 @@ class App:
     min_encoder = min(numpy.array(self.data.position))
     max_encoder = max(numpy.array(self.data.position))
 
-    if abs(max_encoder - min_encoder) < 0.0001:
+    if abs(max_encoder - min_encoder) < 0.001:
       error_msg = "<p>No travel of mechanism, hysteresis did not complete. Check controller gains and encoder.</p><p>Test status: <b>FAIL</b>.</p>"
       print error_msg
-      return (error_msg, "No travel in mechanism.", False)
+      return (error_msg, "No travel in mechanism. Bad encoder, bad gains, or motors on lockout.", False)
 
     # Find the index to do the average over
     # Data set starts close to one end of hysteresis
@@ -234,7 +240,7 @@ class App:
       negative_msg = "FAIL"
       tr = False
     
-    summary_txt += "Negative Effort: %s" % positive_msg
+    summary_txt += "Negative Effort: %s" % negative_msg
 
     # Check that effort is even (<20% standard deviation)
     if abs(self.min_sd / self.min_avg) > 0.20:
@@ -301,7 +307,6 @@ class App:
       axes1.psd(numpy.array(self.data.effort), NFFT=next_pow_two, Fs=1000, Fc=0, color='r')
       axes1.psd(numpy.array(self.data.position), NFFT=next_pow_two, Fs=1000, Fc=0)
       axes1.set_xlim(0, 100)
-      # axes1.set_xlabel('Frequency')
       axes1.set_title('Position PSD')
     
       # plot in power (pxx - power, f - freqs)
@@ -359,9 +364,9 @@ class App:
       p.image_format = "png"
       self.result_service.call(r)
     except Exception, e:
-      print 'sine_sweep_plot caught exception, returning test failure.'
-      print e
-      self.test_failed_service_call(str(e))
+      rospy.logerr('sine_sweep_plot caught exception, returning test failure.')
+      rospy.logerr(traceback.format_exc())
+      self.test_failed_service_call(traceback.format_exc())
 
   def sine_sweep_analysis(self, image_title): 
     # Check data array for mininum number of points

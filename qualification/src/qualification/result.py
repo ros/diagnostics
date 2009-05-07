@@ -51,13 +51,18 @@ from PIL import Image
 from cStringIO import StringIO
 import wx
 
+import tarfile
+
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import Encoders
 
 
 RESULTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results')
 TEMP_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results/temp/')
+
 
 class SubTestResult:
     def __init__(self, test_name, msg):
@@ -105,7 +110,7 @@ class SubTestResult:
             img_file = path + plot.title + '.' + plot.image_format
             im.save(img_file)
 
-    def html_image_result(self, img_path = TEMP_DIR):
+    def html_image_result(self, img_path):
         html = '<H5 ALIGN=CENTER>Result Details</H5>'
         
         # Put '<img src=\"IMG_PATH/%s.png\" /> % image_title' in html_result
@@ -119,7 +124,7 @@ class SubTestResult:
     # 
     # TODO: Make failure appear in red text
     # 
-    def make_result_page(self, back_link = False, back_path = TEMP_DIR):
+    def make_result_page(self, back_link = False, link_dir = TEMP_DIR, prev = None, next = None):
         html = "<html><head><title>Qualification Test Results: %s</title>\
 <style type=\"text/css\">\
 body { color: black; background: white; }\
@@ -135,13 +140,20 @@ em { font-style:normal; font-weight: bold; }\
         html += '<hr size="3">\n'
         
         # Parses through text and adds image source to file
-        html += self.html_image_result()
+        html += self.html_image_result(link_dir)
         
         # Add link back to index if applicable
         # May want to make page "portable" so whole folder can move
         if back_link:
-            back_index_file = back_path + 'index.html'
-            html += '<p><a href="%s">Back to Index</a></p>' % back_index_file
+            if prev:
+                html += '<p align=center><a href="%s%s">Previous: %s</a></p>\n' % (link_dir, prev.filename(), prev.get_name())
+            
+            back_index_file = link_dir + 'index.html'
+            html += '<p align=center><a href="%s">Back to Index</a></p>\n' % back_index_file
+
+            if next:
+                html += '<p align=center><a href="%s%s">Next: %s</a></p>\n' % (link_dir, next.filename(), next.get_name())
+           
 
         html += '</body></html>'
         
@@ -166,6 +178,22 @@ em { font-style:normal; font-weight: bold; }\
 
         return html
 
+    # Moved to subresult class?
+    def make_index_line(self, link, link_dir):
+        result = '<div class="warn">FAIL</div>'
+        if self.get_passfail():
+            result = '<div class="pass">OK</div>'
+        
+        path = link_dir + self.filename()
+        if link:
+            hyperlink = '<a href=\"%s\">%s</a>' % (path, self._name)
+        else:
+            hyperlink = self._name
+
+        summary = self._summary + '\n' + self._failure_txt
+
+        return '<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n' % (hyperlink, summary, result)
+
 
 class QualTestResult:
     def __init__(self, serial, start_time):
@@ -175,8 +203,12 @@ class QualTestResult:
         self._start_time_filestr = self._start_time.strftime("%Y%m%d_%H%M")
         self._start_time_name = self._start_time.strftime("%Y/%m/%d %I:%M%p")
         self._serial = serial
+        self._tar_filename = None
 
-        self._results_dir = os.path.join(RESULTS_DIR, '%s_%s/' % (self._serial, self._start_time_filestr))
+        self._results_name = '%s_%s' % (self._serial, self._start_time_filestr)
+
+        # Record that directory made
+        self._results_dir = os.path.join(RESULTS_DIR, self._results_name)
         if not os.path.isdir(self._results_dir):
             self._made_dir = self._results_dir
             os.mkdir(self._results_dir)
@@ -197,10 +229,8 @@ class QualTestResult:
     def __del__(self):
         # Delete extra directories if empty
         if self._made_dir != '' and len(os.listdir(self._made_dir)) == 0:
-            print 'Removing directory %s' % self._made_dir
             os.rmdir(self._made_dir)
        
-
     def set_notes(self, note):
         self._note = note
 
@@ -208,11 +238,11 @@ class QualTestResult:
         self._operator = name
 
     def get_subresults(self):
-        kys = dict.keys(self._subresults)
+        kys = dict.keys(self._subresults_by_index)
         kys.sort()
         vals = []
         for ky in kys:
-            vals.append(self._subresults[ky])
+            vals.append(self._subresults_by_index[ky])
         
         # return sorted by index
         return vals
@@ -226,13 +256,16 @@ class QualTestResult:
 
     # Come up with better enforcement of get functions
     def get_subresult(self, index):
+        if not self._subresults_by_index.has_key(index):
+            return None
+
         return self._subresults_by_index[index]
 
     def test_result(self):
         if len(self.get_subresults()) == 0:
             return False
 
-        if self.canceled:
+        if self.canceled or self.has_error_no_invent:
             return False
 
         for res in self.get_subresults():
@@ -242,32 +275,12 @@ class QualTestResult:
         return True
 
     def test_status_str(self):
-        result = self.test_result()
-        if result:
+        if self.test_result():
             return 'PASS'
         else:
             return 'FAIL'
 
-    def make_log_table(self):
-        if self._test_log is None or self._test_log == '':
-            return ''
-
-        # Sort test log by times
-        kys = dict.keys(self._test_log)
-        kys.sort()
-        
-        html = '<H4 AlIGN=CENTER>Test Log Data</H4>\n'
-        html += '<table border="1" cellpadding="2" cellspacing="0">\n'
-        html += '<tr><td><b>Time</b></td><td><b>Log Message</b></td></tr></b>\n'
-        for ky in kys:
-            time_str = ky.strftime("%m/%d/%Y %H:%M:%S")
-            html += '<tr><td>%s</td><td>%s</td></tr>\n' % (time_str, self._test_log[ky])
-        html += '</table>'
-
-        return html
-        
-
-    def make_summary_page(self, link = True, write_dir = TEMP_DIR):
+    def make_summary_page(self, link = True, link_dir = TEMP_DIR):
         html = "<html><head>\n"
         html += "<title>Qualification Test Result Summary for %s: %s</title>\n" % (self._serial, self._start_time_name)
         html += "<style type=\"text/css\">\
@@ -283,6 +296,10 @@ em { font-style: normal; font-weight: bold; }\
             html += '<H2 ALIGN=CENTER>Qualification of: %s</H2>\n<br>\n' % self._serial
         else:
             html += '<H2 ALIGN=CENTER>Configuration of: %s</H2>\n<br>\n' % self._serial
+            st = self.get_subresult(0)
+            html += st.html_header()
+            html += '</body></html>'
+            return html
 
         result = '<H3>Test Result: <strong>FAIL</strong></H3>\n' 
         if self.test_result():
@@ -317,13 +334,12 @@ em { font-style: normal; font-weight: bold; }\
         else:
             html += '<HR size="2">'
             # Index items link to each page if link 
-            html += self.make_index(link, write_dir)
+            html += self.make_index(link, link_dir)
             
         html += '<hr size="4">\n'
         html += self.make_log_table()
         html += '<hr size="4">\n'
 
-        
         html += '</body></html>'
 
         return html
@@ -334,7 +350,7 @@ em { font-style: normal; font-weight: bold; }\
             result = "PASS"
 
         if self.config_only and self.test_result():
-            sum = "Reconfigured of %s as %s." % (self._serial, self._conf_name)
+            sum = "Reconfigured %s as %s." % (self._serial, self._conf_name)
         else:
             sum = "Qualification of %s, Result: %s" % (self._serial, result)            
         if self.has_error_no_invent:
@@ -343,106 +359,168 @@ em { font-style: normal; font-weight: bold; }\
             sum += ". Test CANCEL"
         return sum
 
-    def make_index(self, link, folder):
+    def make_index(self, link, link_dir):
         html = '<H4 AlIGN=CENTER>Results Index</H4>\n'
         html += '<table border="1" cellpadding="2" cellspacing="0">\n'
         html += '<tr><td><b>Test Name</b></td><td><b>Summary</b></td><td><b>Final Result</b></td></tr></b>\n'
 
         for st in self.get_subresults():
-            html += self.make_subresult_index_line(st, link, folder)
+            html += st.make_index_line(link, link_dir)
 
         html += '</table>\n'
         
         return html
-
-    # Moved to subresult class?
-    def make_subresult_index_line(self, subresult, link, folder):
-        result = '<div class="warn">FAIL</div>'
-        if subresult.get_passfail():
-            result = '<div class="pass">OK</div>'
         
-        path = folder + subresult.filename()
-        if link:
-            hyperlink = '<a href=\"%s\">%s</a>' % (path, subresult._name)
-        else:
-            hyperlink = subresult._name
+    # Made table of all log entries for this test series
+    def make_log_table(self):
+        if self._test_log is None or self._test_log == '':
+            return ''
 
-        summary = subresult._summary + '\n' + subresult._failure_txt
-
-        return '<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n' % (hyperlink, summary, result)
+        # Sort test log by times
+        kys = dict.keys(self._test_log)
+        kys.sort()
         
-    def write_results_to_file(self, temp = True):
+        html = '<H4 AlIGN=CENTER>Test Log Data</H4>\n'
+        html += '<table border="1" cellpadding="2" cellspacing="0">\n'
+        html += '<tr><td><b>Time</b></td><td><b>Log Message</b></td></tr></b>\n'
+        for ky in kys:
+            time_str = ky.strftime("%m/%d/%Y %H:%M:%S")
+            html += '<tr><td>%s</td><td>%s</td></tr>\n' % (time_str, self._test_log[ky])
+        html += '</table>'
+
+        return html
+
+    def write_results_to_file(self, temp = True, local_link = False):
         # Write into temp or final dir
         # Temp for display in Qual GUI, final for storing for later
         write_dir = TEMP_DIR
         if not temp:
             write_dir = self._results_dir
+        
+        # Use local links for image sources, etc if true
+        link_dir = write_dir
+        if local_link:
+            link_dir = ''
 
         if (not os.path.isdir(write_dir)):
             os.mkdir(write_dir)
               
         index_path = write_dir + 'index.html'
         index = open(index_path, 'w')
-        index.write(self.make_summary_page(True, write_dir))
+        index.write(self.make_summary_page(True, link_dir))
         index.close()
         
-        for st in self.get_subresults():
+        for i in self._subresults_by_index:
+            st = self.get_subresult(i)
+            
+            prev = None
+            next = None
+            if i > 0:
+                prev = self.get_subresult(i - 1)
+            if i < len(self._subresults_by_index):
+                next = self.get_subresult(i + 1)
+
+            # for st in self.get_subresults():
             st_path = write_dir + st.filename()
             st_file = open(st_path, 'w')
-            # Set back path for backlinks here, if needed
-            st_file.write(st.make_result_page(True, write_dir))
+            st_file.write(st.make_result_page(True, link_dir, prev, next))
             st_file.close()
 
             st.write_images(write_dir)
+        
+        # Make tar file of results
+        if not temp:
+            self.write_tar_file()
+        
+    # Dumps all files in results directory into tar file
+    def write_tar_file(self):
+        self._tar_filename = '%s/%s.tar' % (self._results_dir, self._results_name)
+        
+        # Change filename to basename when adding to tar file
+#        tar = tarfile.open(self._tar_filename, 'w:gz')
+        tar = tarfile.open(self._tar_filename, 'w:')
+        for filename in os.listdir(self._results_dir):
+            # Use only file base names in tar file
+            fullname = os.path.join(self._results_dir, filename)
+            tar.add(fullname, arcname=filename)
+        tar.close()
 
     # Make invent results pretty, HTML links work
-    def log_results_invent(self, invent):
-        if invent == None or self.has_error_no_invent:
-            return
+    def log_results(self, invent):
+        # Write results to results dir, with local links
+        self.write_results_to_file(False, True)
+
+        if invent == None:
+            return False, "No inventory object"
         if len(self.get_subresults()) == 0:
-            return
+            return False, "No subtest results"
+        if self.has_error_no_invent:
+            return False, "Test recorded internal error, not submitting to invent"
         
         prefix = self._start_time_filestr + "_" # Put prefix first so images sorted by date
 
-        if self.config_only:
-            sub = self.get_subresult(0)
-            invent.setNote(self._serial, self.line_summary())
-            invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
-            return
+        invent.setNote(self._serial, self.line_summary())
 
-        invent.setKV(self._serial, "Test Status", self.test_status_str())
-        test_log = "Test run on %s, status: %s."%(self._start_time_name, self.test_status_str())
-        invent.setNote(self._serial, test_log)
-        
-        
-        invent.add_attachment(self._serial, prefix + "summary.html", "text/html", self.make_summary_page(False))
-        
-        for sub in self.get_subresults():
-            invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
-            for plt in sub._plots:
-                invent.add_attachment(self._serial, prefix + plt.title + '.' + plt.image_format, "image/" + plt.image_format, plt.image)
+        if 0:
+            if self.config_only:
+                sub = self.get_subresult(0) # Only subresult of configuration
+                invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
+                return True, 'Logged reconfiguration in inventory system.'
+
+            invent.setKV(self._serial, "Test Status", self.test_status_str())
+            invent.add_attachment(self._serial, prefix + "summary.html", "text/html", self.make_summary_page(False))
+
+        try:
+            # Need to get tar to bit stream
+            f = open(self._tar_filename, "rb")
+            tar = f.read()
+            invent.add_attachment(self._serial, prefix + os.path.basename(self._tar_filename),
+                                  'applicaton/tar', tar)
+
+
+            f.close()            
+            return True, 'Wrote tar file, uploaded to inventory'
+        except Exception, e:
+            import traceback
+            traceback.print_exc()
+            print "filename", self._tar_filename
+            print 'Caught exception uploading tar file. %s' % str(e)
+            return False, 'Caught exception loading tar file. %s' % str(e)
+         
+        #for sub in self.get_subresults():
+        #    invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
+        #    for plt in sub._plots:
+        #        invent.add_attachment(self._serial, prefix + plt.title + '.' + plt.image_format, "image/" + plt.image_format, plt.image)
             
 
-    def get_dev_team(self):
+    def get_qual_team(self):
         return string.join(self.dev_team, ", ")
 
-    def email_dev_team(self):
+    # Email qualification team results as HTML summary and tar file
+    def email_qual_team(self):
         try:
-            if self._operator is not None and self._operator != '':
-                sender = "%s@willowgarage.com" % self._operator
-            else:
-                sender = "watts@willowgarage.com"
-
             msg = MIMEMultipart('alternative')
             msg['Subject'] = "--QualResult-- %s" % self.line_summary()
-            msg['From'] = sender
-            msg['To'] = self.get_dev_team()
+            msg['From'] = "qual.test@willowgarage.com" 
+            msg['To'] = self.get_qual_team()
 
             msg.attach(MIMEText(self.make_summary_page(False), 'html'))
+            
+            # Add results as tar file
+            if self._tar_filename is not None and self._tar_filename != '':
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload( open(self._tar_filename, 'rb').read())
+                Encoders.encode_base64(part)
+                part.add_header('Content-Disposition', 'attachment; filename="%s"' 
+                                % os.path.basename(self._tar_filename))
+                msg.attach(part)
+
 
             s = smtplib.SMTP('localhost')
-            s.sendmail(sender, self.get_dev_team(), msg.as_string())
+            s.sendmail('qual.test@willowgarage.com', self.get_qual_team(), msg.as_string())
             s.quit()
+            return True
         except Exception, e:
             print 'Unable to sent mail, caught exception!'
             print e
+            return False

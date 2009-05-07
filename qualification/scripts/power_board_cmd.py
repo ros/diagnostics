@@ -85,10 +85,12 @@ def main():
           break
 
   except Exception, e:
+    import traceback
+    
     rospy.logerr('Caught exception!')
-    rospy.logerr(e)
+    rospy.logerr(traceback.format_exc())
     done.result = ScriptDoneRequest.RESULT_ERROR
-    done.failure_msg = 'Caught exception. %s' % str(e)
+    done.failure_msg = 'Caught exception.\n%s' % traceback.format_exc()
 
   try:
     # If we're all done...
