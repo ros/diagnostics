@@ -458,6 +458,16 @@ em { font-style: normal; font-weight: bold; }\
             return False, "Test recorded internal error, not submitting to invent"
         
         prefix = self._start_time_filestr + "_" # Put prefix first so images sorted by date
+        
+        serial_dict = { 'PRF' : '68-02241-01001', 
+                        'PRE': '68-02241-01000', 
+                        'PRG': '68-02241-01002' }
+        if self._serial == 'PRE' or self._serial == 'PRF' or self._serial == 'PRG':
+            reference = serial_dict[self._serial]
+        else:
+            reference = self._serial
+            
+
 
         invent.setNote(self._serial, self.line_summary())
 
@@ -468,15 +478,15 @@ em { font-style: normal; font-weight: bold; }\
                 return True, 'Logged reconfiguration in inventory system.'
 
             invent.setKV(self._serial, "Test Status", self.test_status_str())
-            invent.add_attachment(self._serial, prefix + "summary.html", "text/html", self.make_summary_page(False))
+            invent.add_attachment(reference, prefix + "summary.html", "text/html", self.make_summary_page(False))
 
         try:
             # Need to get tar to bit stream
             f = open(self._tar_filename, "rb")
             tar = f.read()
-            invent.add_attachment(self._serial, prefix + os.path.basename(self._tar_filename),
+            invent.add_attachment(reference, 
+                                  prefix + os.path.basename(self._tar_filename),
                                   'applicaton/tar', tar)
-
 
             f.close()            
             return True, 'Wrote tar file, uploaded to inventory'
@@ -486,11 +496,6 @@ em { font-style: normal; font-weight: bold; }\
             print "filename", self._tar_filename
             print 'Caught exception uploading tar file. %s' % str(e)
             return False, 'Caught exception loading tar file. %s' % str(e)
-         
-        #for sub in self.get_subresults():
-        #    invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
-        #    for plt in sub._plots:
-        #        invent.add_attachment(self._serial, prefix + plt.title + '.' + plt.image_format, "image/" + plt.image_format, plt.image)
             
 
     def get_qual_team(self):
