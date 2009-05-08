@@ -1,0 +1,3 @@
+<launch>
+<node pkg = "mechanism_control" type="spawner.py" args="$(find tune_joints)/controllers.xml" output="screen"/>
+</launch>

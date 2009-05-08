@@ -1,0 +1,17 @@
+<package>
+  <description brief="tune_joints">
+
+     tune_joints
+
+  </description>
+  <author>Eric Berger/ YOUR E-MAIL HERE</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/tune_joints</url>
+  <depend package="rospy"/>
+  <depend package="robot_mechanism_controllers"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
