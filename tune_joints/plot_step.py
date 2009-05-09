@@ -39,8 +39,8 @@ except:
 
 time.sleep(1)
 
-del(pub)
-del(sub)
+sub.unregister()
+pub.unregister()
 
 from pylab import *
 
