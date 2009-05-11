@@ -42,7 +42,7 @@
 #include "ros/node.h"
 
 #include "robot_msgs/DiagnosticMessage.h"
-
+#include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
 template <class T>
 class DiagnosticUpdater
@@ -52,7 +52,7 @@ private:
   T* client_;
   ros::Node* node_;
 
-  std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)> status_fncs_;
+  std::vector<void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&)> status_fncs_;
 
   ros::Time next_time_;
 
@@ -82,6 +82,11 @@ public:
 
   void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
   {
+    status_fncs_.push_back((void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&))f); // @todo Is this acceptable?
+  }
+
+  void addUpdater(void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
     status_fncs_.push_back(f);
   }
 
@@ -92,17 +97,15 @@ public:
       return;
     }
 
-    msg_.set_status_size(status_fncs_.size());
-
     if (node_->ok())
     {
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-      for (typename std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)>::iterator status_fncs_iter = status_fncs_.begin();
+      for (typename std::vector<void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&)>::iterator status_fncs_iter = status_fncs_.begin();
            status_fncs_iter != status_fncs_.end();
            status_fncs_iter++)
       {
-        robot_msgs::DiagnosticStatus status;
+        diagnostic_updater::DiagnosticStatusWrapper status;
 
         status.name = "None";
         status.level = 2;
