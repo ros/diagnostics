@@ -53,7 +53,7 @@ def ntp_monitor():
     else:
         timeout = 500
         if len(sys.argv) == 3:
-            timeout = sys.argv[2]
+            timeout = int(sys.argv[2])
         pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
         rospy.init_node(NAME, anonymous=True)
 
