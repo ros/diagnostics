@@ -38,7 +38,7 @@ from robot_msgs.msg import *
 import sys
 import rospy
 import socket
-import subprocess
+from subprocess import Popen, PIPE
 
 import time
 
@@ -46,35 +46,53 @@ import re
 
 NAME = 'ntp_monitor'
 
-def ntp_monitor():
-    if len(sys.argv) < 2:
-        print "Please pass host as argument"
-        return
-    else:
-        timeout = 500
-        if len(sys.argv) == 3:
-            timeout = int(sys.argv[2])
-        pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
-        rospy.init_node(NAME, anonymous=True)
+def ntp_monitor(ntp_hostname, offset=500):
+    pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
+    rospy.init_node(NAME, anonymous=True)
 
-        hostname = socket.gethostbyaddr(socket.gethostname())[0]
-  
-        while not rospy.is_shutdown():
-            p = subprocess.Popen(["ntpdate", "-q", sys.argv[1]], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    hostname = socket.gethostbyaddr(socket.gethostname())[0]
+
+    while not rospy.is_shutdown():
+        try:
+            p = Popen(["ntpdate", "-q", ntp_hostname], stdout=PIPE, stdin=PIPE, stderr=PIPE)
             res = p.wait()
             (o,e) = p.communicate()
-            if (res == 0):
-                offset = float(re.search("offset (.*),", o).group(1))*1000000
-                if (abs(offset) < timeout):
-                    stat = DiagnosticStatus(0,"NTP offset from: "+ hostname + " to: " +sys.argv[1], "Acceptable synchronization", [DiagnosticValue(offset,"offset (us)")],[])
-                    print offset
-                else:
-                    stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +sys.argv[1], "Offset too great", [DiagnosticValue(offset,"offset (us)")],[])
+        except OSError, (errno, msg):
+            if errno == 4:
+                break #ctrl-c interrupt
             else:
-                stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +sys.argv[1], "Failure to run ntpdate -q", [],[])
+                raise
+        if (res == 0):
+            offset = float(re.search("offset (.*),", o).group(1))*1000000
+            if (abs(offset) < offset):
+                stat = DiagnosticStatus(0,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Acceptable synchronization", [DiagnosticValue(offset,"offset (us)")],[])
+                print offset
+            else:
+                stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Offset too great", [DiagnosticValue(offset,"offset (us)")],[])
+        else:
+            stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Failure to run ntpdate -q", [],[])
 
-            pub.publish(DiagnosticMessage(None, [stat]))
-            time.sleep(1)
+        pub.publish(DiagnosticMessage(None, [stat]))
+        time.sleep(1)
+
+def ntp_monitor_main(argv=sys.argv):
+    import optparse
+    parser = optparse.OptionParser(usage="usage: ntp_monitor ntp-hostname [offset-tolerance]")
+    options, args = parser.parse_args(argv[1:])
+    if len(args) == 1:
+        ntp_hostname, offset = args[0], 500
+    elif len(args) == 2:
+        ntp_hostname, offset = args
+        try:
+            offset = int(offset)
+        except:
+            parser.error("offset must be a number")
+    else:
+        parser.error("Invalid arguments")
+    ntp_monitor(ntp_hostname, offset)
 
 if __name__ == "__main__":
-    ntp_monitor()
+    try:
+        ntp_monitor_main(rospy.myargv())
+    except KeyboardInterrupt: pass
+    
