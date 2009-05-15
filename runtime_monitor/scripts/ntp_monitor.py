@@ -63,12 +63,12 @@ def ntp_monitor(ntp_hostname, offset=500):
             else:
                 raise
         if (res == 0):
-            offset = float(re.search("offset (.*),", o).group(1))*1000000
-            if (abs(offset) < offset):
-                stat = DiagnosticStatus(0,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Acceptable synchronization", [DiagnosticValue(offset,"offset (us)")],[])
-                print offset
+            measured_offset = float(re.search("offset (.*),", o).group(1))*1000000
+            if (abs(measured_offset) < offset):
+                stat = DiagnosticStatus(0,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Acceptable synchronization", [DiagnosticValue(measured_offset,"offset (us)")],[])
+                print measured_offset
             else:
-                stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Offset too great", [DiagnosticValue(offset,"offset (us)")],[])
+                stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Offset too great", [DiagnosticValue(measured_offset,"offset (us)")],[])
         else:
             stat = DiagnosticStatus(2,"NTP offset from: "+ hostname + " to: " +ntp_hostname, "Failure to run ntpdate -q", [],[])
 
