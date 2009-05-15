@@ -55,7 +55,7 @@ if __name__ == "__main__":
        #point_head_client(0.0, -0.4)
        pan = random.uniform(-2.7, 2.7)
        print pan
-       tilt = random.uniform(-0.4, 1.4)
+       tilt = random.uniform(-0.5, 1.35)
        print tilt
        #point_head_client(0.0, 1.2)
        point_head_client(pan, tilt)

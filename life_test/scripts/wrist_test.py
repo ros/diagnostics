@@ -43,11 +43,6 @@
 # This program runs a impact life test on the head tilt, pan and laser tilt. 500 cycles, with effort safety removed.
 # @endverbatim
  
-
-
-CONTROLLER_NAMES = ["wrist_flex_effort", "wrist_roll_effort"]
-JOINT_NAMES = ["wrist_flex_joint", "wrist_roll_joint"]
-
 import sys
 
 import random
@@ -64,42 +59,64 @@ spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
 kill_controller = rospy.ServiceProxy('kill_controller', KillController)
 
 pub_flex = rospy.Publisher("/wrist_flex_effort/command", Float64)
+pub_grip = rospy.Publisher("/grip_effort/command", Float64)
 pub_roll = rospy.Publisher("/wrist_roll_effort/command", Float64)
 
 ## Create XML code for controller on the fly
 def xml_for_flex():
-    return  '''\
+    return  "\
 <controller name=\"wrist_flex_effort\" type=\"JointEffortControllerNode\">\
-<joint name=\"wrist_flex_joint\" />\
-</controller>''' 
+  <joint name=\"r_wrist_flex_joint\" />\
+</controller>"
 
 def xml_for_roll():
-    return  '''\
+    return  "\
 <controller name=\"wrist_roll_effort\" type=\"JointEffortControllerNode\">\
-<joint name=\"wrist_roll_joint\" />\
-</controller>''' 
+  <joint name=\"r_wrist_roll_joint\" />\
+</controller>" 
+
+def xml_for_grip():
+    return  "\
+<controller name=\"grip_effort\" type=\"JointEffortControllerNode\">\
+  <joint name=\"r_gripper_joint\" />\
+</controller>" 
+
+
+
 
 def main():
-    rospy.init_node('head_impact_test', anonymous=True)
+    rospy.init_node('wrist_test', anonymous=True)
     rospy.wait_for_service('spawn_controller')
-
              
     resp = spawn_controller(xml_for_flex())
     if len(resp.ok) < 1 or not ord(resp.ok[0]):
-        print "Failed to spawn effort controller"
+        rospy.logerr("Failed to spawn effort controller")
+        print xml_for_flex()
+        sys.exit(100)
     else:
         print "Spawned flex controller successfully"
-        sys.exit(100)
+
 
     resp = spawn_controller(xml_for_roll())
     if len(resp.ok) < 1 or not ord(resp.ok[0]):
-        print "Failed to spawn effort controller"
+        rospy.logerr("Failed to spawn effort controller roll")
+        print xml_for_roll()
+        sys.exit(101)
     else:
         print "Spawned flex controller successfully"
-        sys.exit(101)
 
-    effort_flex = 1000
-    effort_roll = 1000
+
+    resp = spawn_controller(xml_for_grip())
+    if len(resp.ok) < 1 or not ord(resp.ok[0]):
+        rospy.logerr("Failed to spawn effort controller roll")
+        print xml_for_grip()
+        sys.exit(102)
+    else:
+        print "Spawned grip controller successfully"
+
+    effort_grip = -100 
+    effort_flex = 3
+    effort_roll = 3
         
     try:
         while not rospy.is_shutdown():
@@ -108,13 +125,15 @@ def main():
 
             if random.randint(0, 1) == 1:
                 effort_roll = effort_roll * -1
-
+                
+            pub_grip.publish(Float64(effort_grip))
             pub_flex.publish(Float64(effort_flex))
             pub_roll.publish(Float64(effort_roll))
 
-            sleep(random.uniform(0.2, 0.8))
+            sleep(0.3)
 
     finally:
+        kill_controller('grip_effort')
         kill_controller('wrist_flex_effort')
         kill_controller('wrist_roll_effort')
         sleep(1)
