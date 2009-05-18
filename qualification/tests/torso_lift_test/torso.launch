@@ -6,12 +6,6 @@
   <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
 
   <!-- Torso Calibration -->
-  <include file="$(find qualification)/tests/torso_test/calibrate.launch" />
+  <include file="$(find qualification)/tests/torso_lift_test/calibrate.launch" />
 
-<<<<<<< .mine
-=======
-<!-- Torso Calibration -->
-<include file="$(find qualification)/tests/torso_lift_test/calibrate.launch" />
-
->>>>>>> .r12590
 </launch>
