@@ -44,23 +44,26 @@
 
 #include "robot_msgs/DiagnosticStatus.h"
 #include "robot_srvs/SelfTest.h"
+#include "diagnostic_updater/diagnostic_updater.h"
 
+namespace self_test
+{
 
+using namespace diagnostic_updater;
 
 template <class T>
-class SelfTest
-{
+class Dispatcher : public Updater_base<T>
+{        
 private:
 
-  T* node_;
   boost::mutex testing_mutex;
   boost::condition_variable testing_condition;
   boost::mutex done_testing_mutex;
   boost::condition_variable done_testing_condition;
 
+  ros::NodeHandle node_handle_;
+  
   std::string id_;
-
-  std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)> test_fncs;
 
   void (T::*pretest_)();
   void (T::*posttest_)();
@@ -71,20 +74,19 @@ private:
   bool ready;
   bool done;
 
+  ros::ServiceServer service_server_;
+
 public:
 
-  SelfTest(T* node) : node_(node), pretest_(NULL), posttest_(NULL)
+  Dispatcher(T *owner, ros::NodeHandle h) : 
+    Updater_base<T>(owner), node_handle_(h), pretest_(NULL), posttest_(NULL)
   {
-    node_->advertiseService("~self_test", &SelfTest::doTest, this);
+    ROS_WARN("Advertising self_test");
+    service_server_ = node_handle_.advertiseService("~self_test", &Dispatcher::doTest, this);
     count = 0;
     waiting = false;
     ready   = false;
     done    = false;
-  }
-
-  void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
-  {
-    test_fncs.push_back(f);
   }
 
   void setPretest(void (T::*f)())
@@ -140,7 +142,7 @@ public:
       {
         if (!testing_condition.timed_wait(lock, boost::get_system_time() + boost::posix_time::seconds(5)))
         {
-          printf("Timed out waiting to run self test.\n");
+          ROS_ERROR("Timed out waiting to run self test.\n");
           waiting = false;
           return false;
         }
@@ -149,29 +151,29 @@ public:
 
     bool retval = false;
 
-    printf("Begining test.\n");
+    ROS_INFO("Begining test.\n");
 
-    if (node_->ok())
+    if (node_handle_.ok())
     {
 
       id_ = "";
 
-      printf("Entering self test.  Other operation should be suspended\n");
+      ROS_INFO("Entering self test.  Other operation should be suspended\n");
 
       if (pretest_ != NULL)
       {
-        (*node_.*pretest_)();
+        (Updater_base<T>::owner_->*pretest_)();
       }
 
-      printf("Completed pretest\n");
+      ROS_INFO("Completed pretest\n");
 
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-      for (typename std::vector<void (T::*)(robot_msgs::DiagnosticStatus&)>::iterator test_fncs_iter = test_fncs.begin();
-           test_fncs_iter != test_fncs.end();
-           test_fncs_iter++)
+      for (typename std::vector<TaskFunction>::iterator tasks_iter = Updater_base<T>::tasks_.begin();
+           tasks_iter != Updater_base<T>::tasks_.end();
+           tasks_iter++)
       {
-        robot_msgs::DiagnosticStatus status;
+        diagnostic_updater::DiagnosticStatusWrapper status;
 
         status.name = "None";
         status.level = 2;
@@ -179,7 +181,7 @@ public:
 
         try {
 
-          (*node_.*(*test_fncs_iter))(status);
+          (*tasks_iter)(status);
 
         } catch (std::exception& e)
         {
@@ -212,9 +214,9 @@ public:
       res.set_status_vec(status_vec);
 
       if (posttest_ != NULL)
-        (*node_.*posttest_)();
+        (Updater_base<T>::owner_->*posttest_)();
 
-      printf("Self test completed\n");
+      ROS_INFO("Self test completed\n");
 
       retval = true;
 
@@ -229,6 +231,34 @@ public:
 
     return retval;
 
+  }
+};
+
+};
+
+template <class T>
+class SelfTest : public self_test::Dispatcher<T>
+{
+public:
+  SelfTest(T *n) : self_test::Dispatcher<T>(n, ros::NodeHandle())
+  {
+  }
+
+  void addTest(void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
+    self_test::Dispatcher<T>::add(f);
+  }
+
+  void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
+  {
+    void (T::*f2)(diagnostic_updater::DiagnosticStatusWrapper&);
+    f2 = (typeof f2) f; // @todo Is this acceptable?
+    self_test::Dispatcher<T>::add(f2);
+  }
+  
+  void complain()
+  {
+    //ROS_WARN("SelfTest is deprecated, please use self_test::Dispatcher instead.");
   }
 };
 
