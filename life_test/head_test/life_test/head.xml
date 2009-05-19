@@ -11,9 +11,9 @@
   </pr2_torso>
 
   <!-- Change to desired version of head -->
-  <pr2_head_alpha2a name="head" parent="torso_lift_link">
+  <pr2_head_alpha2 name="head" parent="torso_lift_link">
     <origin xyz="0 0 0.3815" rpy="0 0 0" />
-  </pr2_head_alpha2a>
+  </pr2_head_alpha2>
 
   <pr2_tilting_laser_alpha2 name="laser_tilt" parent="torso_lift_link">
     <origin xyz="0.1 0 0.19525" rpy="0 0 0" />
