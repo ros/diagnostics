@@ -227,7 +227,7 @@ public:
     complain();
   }
 
-  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater<T>(n, ros::NodeHandle())
+  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater<T>(c, ros::NodeHandle())
   {
     complain();
   }
