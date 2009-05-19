@@ -41,6 +41,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <stdarg.h>
 
 #include "ros/node.h"
@@ -53,13 +54,13 @@ namespace diagnostic_updater
 class DiagnosticStatusWrapper : public robot_msgs::DiagnosticStatus
 {
 public:
-  void summary(unsigned char level, std::string s)
+  void summary(unsigned char lvl, const std::string s)
   {
-    level = level;
+    level = lvl;
     message = s;
   }
 
-  void adds(std::string &key, std::string &s)
+  void adds(const std::string &key, const std::string &s)
   {
     robot_msgs::DiagnosticString ds;
     ds.label = key;
@@ -67,25 +68,48 @@ public:
     strings.push_back(ds);
   }
 
-  void addsf(std::string &key, std::string &format, ...)
+  template<class T>
+  void adds(const std::string &key, T &val)
+  {
+    std::stringstream ss;
+    ss << val;
+    std::string sval = ss.str();
+    adds(key, sval);
+  }
+
+/*  template<class T>
+  void adds(const char *key, T &val)
+  {
+    std::string skey(key);
+    adds(skey, val);
+  }*/
+
+  //template<class T>
+  void addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
   {
     va_list va;
     char buff[1000]; // @todo This could be done more elegantly.
     va_start(va, format);
-    if (vsnprintf(buff, 1000, format.c_str(), va) >= 1000)
+    if (vsnprintf(buff, 1000, format, va) >= 1000)
       ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
     std::string value = std::string(buff);
     adds(key, value);
     va_end(va);
   }
 
-  void addv(std::string &key, double v)
+  void addv(const std::string &key, double v)
   {
     robot_msgs::DiagnosticValue dv;
     dv.label = key;
     dv.value = v;
     values.push_back(dv);
   }
+  
+  /*void addv(const char *key, double v)
+  {
+    std::string skey(key);
+    addv(skey, v);
+  }*/
 };
 
 }

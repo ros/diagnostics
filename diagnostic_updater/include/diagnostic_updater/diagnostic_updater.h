@@ -39,57 +39,106 @@
 #include <vector>
 #include <string>
 
-#include "ros/node.h"
+#include "ros/node_handle.h"
 
 #include "robot_msgs/DiagnosticMessage.h"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
-template <class T>
-class DiagnosticUpdater
+/**
+
+@mainpage
+
+@htmlinclude manifest.html
+
+@b diagnostic_updater.h defines the Updater class, which
+simplifies writing of diagnostic publishing code, by allowing a set of
+registered callbacks to be published at a fixed rate.
+
+<hr>
+
+@section topics ROS topics
+
+Subscribes to (name/type):
+- None
+
+Publishes to (name / type):
+
+@section parameters ROS parameters
+
+Reads the following parameters from the parameter server
+
+- @b "diagnostic_period" : @b [double] period at which diagnostics should be sent in seconds (Default: 1)
+
+**/
+
+/**
+\@class Updater Simplifies writing of diagnostic publishing code, by allowing a set of
+registered callbacks to be published at a fixed rate.
+*/
+
+namespace diagnostic_updater
 {
-private:
+  
+typedef boost::function<void(diagnostic_updater::DiagnosticStatusWrapper&)> TaskFunction;
 
-  T* client_;
-  ros::Node* node_;
+/**
+ *
+ * The updater_base class is an internally used class that manages a
+ * collection of diagnostic updaters. It contains the common functionality
+ * used for producing diagnostic updates and for self-checks.
+ *
+ */
 
-  std::vector<void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&)> status_fncs_;
+template <class C>
+class Updater_base 
+{
+public:
+  Updater_base(C *owner)
+  {
+    owner_ = owner;
+  }
+  
+  void add(TaskFunction &f)
+  {
+    tasks_.push_back(f); // @todo Is this acceptable?
+  }
 
-  ros::Time next_time_;
+  template <class T>
+  void add(T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
+    TaskFunction f2 = boost::bind(f, c, _1);
+    tasks_.push_back(f2);
+  }
+  
+  void add(void (C::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
+    add(owner_, f);
+  }
 
-  double period_;
+protected:
+  std::vector<TaskFunction> tasks_;
+  C *owner_;
+};
 
-  robot_msgs::DiagnosticMessage msg_;
-
+template <class C>
+class Updater : public Updater_base<C>
+{
 public:
 
-  DiagnosticUpdater(T* node) : client_(node), node_(static_cast<ros::Node*>(node))
+  /**
+   * Do we really want this constructor?
+   */
+
+  /*Updater() : node_handle_()
+  {
+    setup();
+  }*/
+  
+  Updater(C *owner, ros::NodeHandle h) : Updater_base<C>(owner), node_handle_(h)
   {
     setup();
   }
   
-  DiagnosticUpdater(T* client, ros::Node* node) : client_(client), node_(node)
-  {
-    setup();
-  }
-
-  void setup()
-  {
-    node_->advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
-
-    node_->param("~diagnostic_period", period_, 1.0);
-    next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
-  }
-
-  void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
-  {
-    status_fncs_.push_back((void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&))f); // @todo Is this acceptable?
-  }
-
-  void addUpdater(void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
-  {
-    status_fncs_.push_back(f);
-  }
-
   void update()
   {
     ros::Time now_time = ros::Time::now();
@@ -97,13 +146,20 @@ public:
       return;
     }
 
-    if (node_->ok())
+    force_update();
+  }
+
+  void force_update()
+  {
+    next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
+    
+    if (node_handle_.ok())
     {
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-      for (typename std::vector<void (T::*)(diagnostic_updater::DiagnosticStatusWrapper&)>::iterator status_fncs_iter = status_fncs_.begin();
-           status_fncs_iter != status_fncs_.end();
-           status_fncs_iter++)
+      for (std::vector<TaskFunction>::iterator tasks_iter = Updater_base<C>::tasks_.begin();
+           tasks_iter != Updater_base<C>::tasks_.end();
+           tasks_iter++)
       {
         diagnostic_updater::DiagnosticStatusWrapper status;
 
@@ -111,27 +167,87 @@ public:
         status.level = 2;
         status.message = "No message was set";
 
-        (client_->*(*status_fncs_iter))(status);
+        (*tasks_iter)(status);
 
         if (status.name != "None")
         {
-          status.name = node_->getName() + std::string(": ") + status.name;
+          status.name = node_handle_.getName() + std::string(": ") + status.name;
           status_vec.push_back(status);
         }
       }
 
       msg_.set_status_vec(status_vec);
 
-      node_->publish("/diagnostics", msg_);
+      publisher_.publish(msg_);
     }
 
-    node_->param("~diagnostic_period", period_, 1.0);
-    next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
+    node_handle_.param("~diagnostic_period", period_, 1.0);
   }
 
   double getPeriod()
   {
     return period_;
+  }
+
+private:
+  void setup()
+  {
+    publisher_ = node_handle_.advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+
+    node_handle_.param("~diagnostic_period", period_, 1.0);
+    next_time_ = ros::Time::now();
+  }
+
+  ros::NodeHandle node_handle_;
+  ros::Publisher publisher_;
+
+  ros::Time next_time_;
+
+  double period_;
+
+  robot_msgs::DiagnosticMessage msg_;
+
+};
+
+};
+
+/**
+ *
+ * Compatibility class to support the nodes that use the old version of the
+ * diagnostic_updater. This is deprecated, so avoid using it.
+ *
+ */
+
+template <class T>
+class DiagnosticUpdater : public diagnostic_updater::Updater<T>
+{
+public:
+  DiagnosticUpdater(T *n) : diagnostic_updater::Updater<T>(n, ros::NodeHandle())
+  {
+    complain();
+  }
+
+  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater<T>(n, ros::NodeHandle())
+  {
+    complain();
+  }
+
+  DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater<T>(c, h)
+  {
+    complain();
+  }
+
+  void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
+  {
+    void (T::*f2)(diagnostic_updater::DiagnosticStatusWrapper&);
+    f2 = (typeof f2) f; // @todo Is this acceptable?
+    diagnostic_updater::Updater<T>::add(f2);
+  }
+
+private:
+  void complain()
+  {
+    //ROS_WARN("DiagnosticUpdater is deprecated, please use diagnostic_updater::Updater instead.");
   }
 };
 

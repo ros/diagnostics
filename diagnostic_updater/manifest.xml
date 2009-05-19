@@ -1,6 +1,6 @@
 <package>
   <description>A package containing a class for easily updating diagnostics.</description>
-  <author>Jeremy Leibs</author>
+  <author>Jeremy Leibs, Blaise Gassend</author>
   <license>BSD</license>
   <review status="unreviewed" notes="proposal (Jeremy)"/>
   <depend package="roscpp" />
