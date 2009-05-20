@@ -233,7 +233,6 @@ class TestMonitorPanel(wx.Panel):
 
         self._test_duration_ctrl = xrc.XRCCTRL(self._panel, 'test_duration_ctrl')
         
-
         self._close_button = xrc.XRCCTRL(self._panel, 'close_button')
         self._close_button.Bind(wx.EVT_BUTTON, self.on_close)
         
@@ -342,7 +341,7 @@ class TestMonitorPanel(wx.Panel):
             self._test_duration_ctrl.SetValue(min + 10)
         elif choice == 'Cycles':
             cycle_val = cycles + math.ceil(self._test._cycle_rate * 300) # 5 min
-            self._test_duration_ctrl.SetRange(cycles, 10000) # Long time
+            self._test_duration_ctrl.SetRange(cycles, 100000) # Long time
             self._test_duration_ctrl.SetValue(cycle_val)
         else:
             self._test_duration_ctrl.SetRange(0, 0) # Can't change limits
@@ -369,13 +368,12 @@ class TestMonitorPanel(wx.Panel):
     def update_test_record(self, note = ''):
         alert, msg = self._record.update(self.is_launched(), self._is_running, self._is_stale, note)
         if alert > 0:
-            #self.log(msg)
+            self.log(msg)
             self.notify_operator(alert, msg)
 
 
     def calc_run_time(self):
         end_condition = self._end_cond_type.GetStringSelection()
-
         
         duration = self._test_duration_ctrl.GetValue()
 
@@ -528,6 +526,10 @@ class TestMonitorPanel(wx.Panel):
 
     def stop_if_done(self):
         remain = self.calc_remaining()
+
+        # Make sure we've had five consecutive seconds of 
+        # negative time before we shutdown
+        # Can this be part of test record?
         if remain < 0:
             self.notify_operator(1, 'Test complete!')
             self._test_complete = True

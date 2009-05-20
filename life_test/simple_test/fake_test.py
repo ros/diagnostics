@@ -107,7 +107,6 @@ class FakeTestFrame(wx.Frame):
         stat.name = 'EtherCAT Master' # So ghetto
         stat.message = choice #'OK'
      
-        print 'Publishing message'
         self.diag_pub.publish(msg)
 
 class FakeTestApp(wx.App):
