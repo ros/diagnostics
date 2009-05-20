@@ -1,0 +1,12 @@
+<package>
+
+  <description brief="Interfaces with WG inventory system" >
+Description of invent client.    
+  </description>
+  <author>Scott Hassen, Kevin Watts</author>
+  <review status="na" notes=""/>
+  <license>BSD</license>
+  <url>http://pr.willowgarage.com/wiki/Invent_Client</url>
+
+  <depend package="pr2_defs" />
+</package>
