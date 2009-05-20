@@ -836,7 +836,7 @@
                                                                                 <property name="proportion">0</property>
                                                                                 <object class="wxChoice" expanded="1">
                                                                                     <property name="bg"></property>
-                                                                                    <property name="choices">&quot;nsf&quot; &quot;testa&quot; &quot;testb&quot; &quot;testd&quot; &quot;testi&quot; &quot;testj&quot; &quot;testg&quot; &quot;testl&quot; &quot;testm&quot; &quot;tc5a&quot;</property>
+                                                                                    <property name="choices">&quot;nsf&quot; &quot;testa&quot; &quot;testb&quot; &quot;testc&quot; &quot;testd&quot; &quot;testg&quot; &quot;testi&quot; &quot;testj&quot; &quot;testk&quot; &quot;testl&quot; &quot;testm&quot; &quot;tc5a&quot;</property>
                                                                                     <property name="context_help"></property>
                                                                                     <property name="enabled">1</property>
                                                                                     <property name="fg"></property>
