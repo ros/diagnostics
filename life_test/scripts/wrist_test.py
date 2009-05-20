@@ -58,9 +58,9 @@ from time import sleep
 spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
 kill_controller = rospy.ServiceProxy('kill_controller', KillController)
 
-pub_flex = rospy.Publisher("/wrist_flex_effort/command", Float64)
-pub_grip = rospy.Publisher("/grip_effort/command", Float64)
-pub_roll = rospy.Publisher("/wrist_roll_effort/command", Float64)
+pub_flex = rospy.Publisher("wrist_flex_effort/command", Float64)
+pub_grip = rospy.Publisher("grip_effort/command", Float64)
+pub_roll = rospy.Publisher("wrist_roll_effort/command", Float64)
 
 ## Create XML code for controller on the fly
 def xml_for_flex():

@@ -28,4 +28,6 @@ When launching on robot, part must be calibrated with power on.
   <depend package="mechanism_control" />
   <depend package="mechanism_bringup" />
   <depend package="robot_mechanism_controllers" />
+  <depend package="runtime_monitor" />
+  <depend package="invent_client" />
 </package>

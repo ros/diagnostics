@@ -1,0 +1,756 @@
+<?xml version="1.0"?>
+<robot xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface">
+
+  <property name="M_PI" value="3.1415926535897931" />
+  <property name="VELOCITY_LIMIT_SCALE" value="1.0" /> <!-- Faster for cable wrap -->
+
+  <property name="shoulder_lift_length" value="0.10" />
+  <property name="shoulder_lift_radius" value="0.12" />
+
+  <!-- for non-symmetric upper arm -->
+  <property name="uar_xyz1" value= "0.21398" />
+  <property name="uar_xyz2" value="-0.01621" />
+  <property name="uar_xyz3" value="-0.00020" />
+  <property name="uar_ixx"  value= "0.01537748957" />
+  <property name="uar_ixy"  value= "0.00375711247" />
+  <property name="uar_ixz"  value="-0.00070852914" />
+  <property name="uar_iyy"  value= "0.07473670440" />
+  <property name="uar_iyz"  value="-0.00017936450" />
+  <property name="uar_izz"  value= "0.07608763307" />
+
+  <property name="ual_xyz1" value= "0.21405" />
+  <property name="ual_xyz2" value= "0.01658" />
+  <property name="ual_xyz3" value="-0.00057" />
+  <property name="ual_ixx"  value= "0.01530603856" />
+  <property name="ual_ixy"  value="-0.00339324862" />
+  <property name="ual_ixz"  value= "0.00060765455" />
+  <property name="ual_iyy"  value= "0.07473694455" />
+  <property name="ual_iyz"  value="-0.00019953729" />
+  <property name="ual_izz"  value= "0.07601594191" />
+
+  <macro name="pr2_shoulder" params="side parent reflect *origin">
+
+    <!-- Shoulder pan -->
+
+    <joint name="${side}_shoulder_pan_joint" type="revolute">
+      <axis xyz="0 0 1" />
+
+      <limit min="${reflect*M_PI/4-1.5}" max="${reflect*M_PI/4+1.5}"
+             effort="30" velocity="${VELOCITY_LIMIT_SCALE*3.48}"
+             k_position="100" k_velocity="10"
+             safety_length_min="0.15" safety_length_max="0.15" />
+      <calibration reference_position="${(reflect*M_PI/4)*cal_r_shoulder_pan_gearing+cal_r_shoulder_pan_flag}" values="1.5 -1" />
+
+      <joint_properties damping="10.0" />
+      <map name="${side}_shoulder_pan_joint_stop" flag="gazebo">
+        <elem key="stopKd" value="1.0" />
+        <elem key="stopKp" value="1000000.0" />
+      </map>
+    </joint>
+
+    <link name="${side}_shoulder_pan_link">
+      <parent name="${parent}" />
+      <insert_block name="origin" />
+      <joint name="${side}_shoulder_pan_joint" />
+      <inertial>
+        <mass value="25.799322" />
+        <com xyz="-0.001201 0.024513 -0.098231" />
+        <inertia ixx="0.866179142480"  ixy="-0.06086507933"  ixz="-0.12118061183"
+                 iyy="0.87421714893"  iyz="-0.05886609911"
+                 izz="0.27353821674" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Blue" />
+        </map>
+        <geometry name="${side}_shoulder_pan_visual">
+          <mesh filename="shoulder_yaw" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.05 0 -0.2" rpy="0 0 0" />
+        <geometry name="${side}_shoulder_pan_collision">
+          <box size="0.347 0.254 0.646" />
+        </geometry>
+      </collision>
+      <map name="${side}_shoulder_pan_sensor" flag="gazebo">
+        <verbatim key="${side}_shoulder_pan_bumper_sensor">
+          <sensor:contact name="${side}_shoulder_pan_contact_sensor">
+            <geom>${side}_shoulder_pan_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_shoulder_pan_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_shoulder_pan_bumper</bumperTopicName>
+              <interface:bumper name="${side}_shoulder_pan_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_shoulder_pan_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="SimpleTransmission" name="${side}_shoulder_pan_trans">
+      <actuator name="${side}_shoulder_pan_motor" />
+      <joint name="${side}_shoulder_pan_joint" />
+      <mechanicalReduction>${63.16/cal_r_shoulder_pan_gearing}</mechanicalReduction>
+    </transmission>
+
+    <!-- Shoulder lift -->
+
+    <joint name="${side}_shoulder_lift_joint" type="revolute">
+      <axis xyz="0 1 0" />
+      <anchor xyz="0 0 0" />
+
+      <!-- Limits updated from Function's CAD values as of 2009_02_24 (link_data.xls) -->
+      <limit min="-0.5236" max="1.3963" effort="30" velocity="${VELOCITY_LIMIT_SCALE*3.47}"
+             k_position="100" k_velocity="10"
+             safety_length_min="0.17" safety_length_max="0.05" />
+      <calibration reference_position="cal_r_shoulder_lift_flag" values="1.5 -1" />
+
+      <joint_properties damping="10.0" />
+      <map name="${side}_shoulder_lift_joint_stop" flag="gazebo">
+        <elem key="stopKd" value="1.0" />
+        <elem key="stopKp" value="1000000.0" />
+      </map>
+    </joint>
+
+    <link name="${side}_shoulder_lift_link">
+      <parent name="${side}_shoulder_pan_link" />
+      <origin xyz="0.1 0 0" rpy="0 0 0" />
+      <joint name="${side}_shoulder_lift_joint" />
+      <inertial>
+        <mass value="2.74988" />
+        <com xyz="0.02195 -0.02664 -0.03127" />
+        <inertia ixx="0.02105584615" ixy="0.00496704022"  ixz="-0.00194808955"
+                 iyy="0.02127223737" iyz="0.00110425490"
+                 izz="0.01975753814" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Grey" />
+        </map>
+        <geometry name="${side}_shoulder_lift_visual">
+          <mesh filename="shoulder_lift" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+        <geometry name="${side}_shoulder_lift_collision">
+          <cylinder radius="${shoulder_lift_radius}" length="${shoulder_lift_length}" />
+        </geometry>
+      </collision>
+      <map name="${side}_shoulder_lift_sensor" flag="gazebo">
+        <verbatim key="${side}_shoulder_lift_bumper_sensor">
+          <sensor:contact name="${side}_shoulder_lift_contact_sensor">
+            <geom>${side}_shoulder_lift_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_shoulder_lift_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_r_shoulder_lift_bumper</bumperTopicName>
+              <interface:bumper name="${side}_shoulder_lift_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_shoulder_lift_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="SimpleTransmission" name="${side}_shoulder_lift_trans">
+      <actuator name="${side}_shoulder_lift_motor" />
+      <joint name="${side}_shoulder_lift_joint" />
+      <mechanicalReduction>${61.89/cal_r_shoulder_lift_gearing}</mechanicalReduction>
+    </transmission>
+
+    <!-- Upperarm roll -->
+
+    <joint name="${side}_upper_arm_roll_joint" type="revolute">
+      <axis xyz="1 0 0" />
+      <anchor xyz="0 0 0" />
+
+      <limit min="${reflect*1.55-2.35}" max="${reflect*1.55+2.35}" effort="30" velocity="${VELOCITY_LIMIT_SCALE*5.45}"
+             k_position="100" k_velocity="2"
+             safety_length_min="0.15" safety_length_max="0.15" />
+      <calibration reference_position="${(reflect*M_PI/2)*cal_r_upper_arm_roll_gearing + cal_r_upper_arm_roll_flag}" values="1.5 -1" />
+
+      <joint_properties damping="0.1" />
+      <map name="${side}_upper_arm_roll_joint_ode" flag="gazebo">
+        <elem key="stopKd" value="1.0" />
+        <elem key="stopKp" value="1000000.0" />
+        <elem key="fudgeFactor" value="0.5" />
+      </map>
+    </joint>
+
+    <link name="${side}_upper_arm_roll_link">
+      <parent name="${side}_shoulder_lift_link" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <joint name="${side}_upper_arm_roll_joint" />
+      <inertial>
+        <!-- dummy mass, to be removed -->
+        <mass value="0.1" />
+        <com xyz="0 0 0" />
+        <inertia  ixx="0.01" ixy="0.00"  ixz="0.00"
+                  iyy="0.01" iyz="0.00"
+                  izz="0.01" />
+      </inertial>
+      <visual> <!-- TODO: This component doesn't actually have a mesh -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Fish" />
+        </map>
+        <geometry name="${side}_upper_arm_roll_visual">
+          <mesh filename="upper_arm_roll" scale="1 1 1" />
+        </geometry>
+      </visual>
+      <collision> <!-- TODO: collision tag should be optional -->
+        <origin xyz="0.0 0 0" rpy="0 0 0" />
+        <geometry name="${side}_upper_arm_roll_collision">
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+      </collision>
+      <map name="${side}_upper_arm_roll_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="SimpleTransmission" name="${side}_upper_arm_roll_trans">
+      <actuator name="${side}_upper_arm_roll_motor" />
+      <joint name="${side}_upper_arm_roll_joint" />
+      <mechanicalReduction>${32.65/cal_r_upper_arm_roll_gearing}</mechanicalReduction>
+    </transmission>
+
+  </macro>
+
+
+
+  <!-- ============================   Upper Arm   ============================ -->
+
+
+  <macro name="pr2_upper_arm" params="side parent reflect">
+
+    <joint name="${side}_upper_arm_joint" type="fixed" />
+
+    <link name="${side}_upper_arm_link">
+      <parent name="${parent}" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <joint name="${side}_upper_arm_joint" />
+
+      <inertial>
+        <!-- NOTE:reflect==-1 for right side, reflect==1 for the left side -->
+        <mass value="6.01769" />
+        <com xyz="${0.5*((reflect+1)*ual_xyz1+(1-reflect)*uar_xyz1)} ${0.5*((reflect+1)*ual_xyz2+(1-reflect)*uar_xyz2)} ${0.5*((reflect+1)*ual_xyz3+(1-reflect)*uar_xyz3)}" />
+        <inertia  ixx="${0.5*((reflect+1)*ual_ixx+(1-reflect)*uar_ixx)}"
+                  ixy="${0.5*((reflect+1)*ual_ixy+(1-reflect)*uar_ixy)}"
+                  ixz="${0.5*((reflect+1)*ual_ixz+(1-reflect)*uar_ixz)}"
+                  iyy="${0.5*((reflect+1)*ual_iyy+(1-reflect)*uar_iyy)}"
+                  iyz="${0.5*((reflect+1)*ual_iyz+(1-reflect)*uar_iyz)}"
+                  izz="${0.5*((reflect+1)*ual_izz+(1-reflect)*uar_izz)}" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Green" />
+        </map>
+        <geometry name="${side}_upper_arm_visual">
+          <mesh filename="upper_arm" />
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0.3 0 0" rpy="0 0 0" />
+        <geometry name="${side}_upper_arm_collision">
+          <box size="0.362 0.144 0.157" />
+        </geometry>
+      </collision>
+
+      <map name="${side}_upper_arm_sensor" flag="gazebo">
+        <verbatim key="${side}_upper_arm_bumper_sensor">
+          <sensor:contact name="${side}_upper_arm_contact_sensor">
+            <geom>${side}_upper_arm_collision</geom><!-- TODO -->
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_upper_arm_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_upper_arm_bumper</bumperTopicName>
+              <interface:bumper name="${side}_upper_arm_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+
+      <map name="${side}_upper_arm_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <!-- Elbow flex -->
+
+    <joint name="${side}_elbow_flex_joint" type="revolute">
+      <axis xyz="0 1 0" />
+      <anchor xyz="0 0 0" />
+
+      <limit min="-2.3" max="0.1" effort="30" velocity="${VELOCITY_LIMIT_SCALE*5.5}"
+             k_position="100" k_velocity="3"
+             safety_length_min="0.25" safety_length_max="0.1" />
+      <calibration reference_position="${-1.1606 + cal_r_elbow_flex_flag}" values="1.5 -1" />
+
+      <joint_properties damping="1.0" />
+      <map name="${side}_elbow_flex_joint_ode" flag="gazebo">
+        <elem key="stopKd" value="1.0" />
+        <elem key="stopKp" value="1000000.0" />
+      </map>
+    </joint>
+
+    <link name="${side}_elbow_flex_link">
+      <parent name="${side}_upper_arm_link" />
+      <origin xyz="0.4 0 0" rpy="0 0 0" />
+      <joint name="${side}_elbow_flex_joint" />
+
+      <inertial>
+        <mass value="1.90327" />
+        <com xyz="0.01014 0.00032 -0.01211" />
+        <inertia  ixx="0.00346541989" ixy="0.00004066825"  ixz="0.00043171614"
+                  iyy="0.00441606455"  iyz="-0.00003968914"
+                  izz="0.00359156824" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Grey" />
+        </map>
+        <geometry name="${side}_elbow_flex_visual">
+          <mesh filename="elbow_flex" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+        <geometry name="${side}_elbow_flex_collision">
+          <cylinder radius="0.1" length="0.08" />
+        </geometry>
+      </collision>
+      <map name="${side}_elbow_flex_sensor" flag="gazebo">
+        <verbatim key="${side}_elbow_flex_bumper_sensor">
+          <sensor:contact name="${side}_elbow_flex_contact_sensor">
+            <geom>${side}_elbow_flex_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_elbow_flex_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_elbow_flex_bumper</bumperTopicName>
+              <interface:bumper name="${side}_elbow_flex_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_elbow_flex_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="SimpleTransmission" name="${side}_elbow_flex_trans">
+      <actuator name="${side}_elbow_flex_motor" />
+      <joint name="${side}_elbow_flex_joint" />
+      <mechanicalReduction>-36.17</mechanicalReduction>
+    </transmission>
+
+    <map name="sensor" flag="gazebo">
+      <verbatim key="p3d_${side}_upper_arm">
+        <!--
+        <controller:ros_p3d name="p3d_${side}_shoulder_pan_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_shoulder_pan_link</bodyName>
+          <topicName>${side}_shoulder_pan_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_shoulder_pan_position_iface" />
+        </controller:ros_p3d>
+        <controller:ros_p3d name="p3d_${side}_shoulder_lift_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_shoulder_lift_link</bodyName>
+          <topicName>${side}_shoulder_lift_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_shoulder_lift_position_iface" />
+        </controller:ros_p3d>
+        <controller:ros_p3d name="p3d_${side}_upper_arm_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_upper_arm_link</bodyName>
+          <topicName>${side}_upper_arm_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_upper_arm_position_iface" />
+        </controller:ros_p3d>
+        <controller:ros_p3d name="p3d_${side}_elbow_flex_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_elbow_flex_link</bodyName>
+          <topicName>${side}_elbow_flex_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_elbow_flex_position_iface" />
+        </controller:ros_p3d>
+        -->
+      </verbatim>
+    </map>
+
+    <!-- Forearm roll -->
+
+    <joint name="${side}_forearm_roll_joint" type="revolute">
+      <axis xyz="-1 0 0" />
+      <anchor xyz="0 0 0" />
+
+      <limit effort="30" velocity="${VELOCITY_LIMIT_SCALE*6}" k_velocity="1" />
+      <calibration reference_position="cal_r_forearm_roll_flag" values="1.5 -1" />
+
+      <joint_properties damping="0.1" />
+      <map name="${side}_forearm_roll_joint_ode" flag="gazebo">
+        <elem key="fudgeFactor" value="0.5" />
+      </map>
+    </joint>
+
+    <link name="${side}_forearm_roll_link">
+      <parent name="${side}_elbow_flex_link" />
+      <joint name="${side}_forearm_roll_joint" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <inertial>
+        <!-- dummy masses, to be removed -->
+        <mass value="0.1" />
+        <com xyz="0 0 0" />
+        <inertia  ixx="0.01" ixy="0.00"  ixz="0.00"
+                  iyy="0.01" iyz="0.00"
+                  izz="0.01" />
+      </inertial>
+      <visual><!-- TODO: need a mesh for this -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Fish" />
+        </map>
+        <geometry name="${side}_forearm_roll_visual">
+          <mesh filename="forearm_roll" scale="1 1 1" />
+        </geometry>
+      </visual>
+      <collision> <!-- TODO: collision tag should be optional -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry name="${side}_forearm_roll_collision">
+          <box size="0.1 0.1 0.1" />
+        </geometry>
+      </collision>
+      <map name="${side}_forearm_roll_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="SimpleTransmission" name="${side}_forearm_roll_trans">
+      <actuator name="${side}_forearm_roll_motor" />
+      <joint name="${side}_forearm_roll_joint" />
+      <mechanicalReduction>${576/25*55/14}</mechanicalReduction>
+    </transmission>
+
+  </macro>
+
+
+  <!-- ============================   Forearm   ============================ -->
+
+  <macro name="pr2_forearm" params="side parent reflect">
+
+    <joint name="${side}_forearm_joint" type="fixed" />
+    <link name="${side}_forearm_link">
+      <parent name="${parent}" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <joint name="${side}_forearm_joint" />
+      <inertial>
+        <mass value="2.57968" />
+        <com xyz="0.18791 -0.00017 -0.00912" />
+        <inertia ixx="0.00364857222" ixy="0.00005215877" ixz="0.00071534842"
+                 iyy="0.01507736897" iyz="-0.00001310770"
+                 izz="0.01659310749" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Blue" />
+        </map>
+        <geometry name="${side}_forearm_visual">
+          <mesh filename="forearm" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.22 0 0" rpy="0 0 0" />
+        <geometry name="${side}_forearm_collision">
+          <box size="0.27 0.12 0.08" />
+        </geometry>
+      </collision>
+      <map name="${side}_forearm_sensor" flag="gazebo">
+        <verbatim key="${side}_forearm_bumper_sensor">
+          <sensor:contact name="${side}_forearm_contact_sensor">
+            <geom>${side}_forearm_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_forearm_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_forearm_bumper</bumperTopicName>
+              <interface:bumper name="${side}_forearm_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_forearm_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <!-- Wrist flex -->
+
+    <joint name="${side}_wrist_flex_joint" type="revolute">
+      <axis xyz="0 -1 0" />
+      <anchor xyz="0 0 0" />
+
+      <limit min="-0.1" max="2.2" effort="200" velocity="${VELOCITY_LIMIT_SCALE*5.13}"
+             k_position="20" k_velocity="4"
+             safety_length_min="0.2" safety_length_max="0.2" />
+      <calibration reference_position="${0.4363+cal_r_wrist_flex_flag}" values="1.5 -1" />
+
+      <joint_properties damping="0.1" />
+      <map name="${side}_wrist_flex_joint_ode" flag="gazebo">
+        <elem key="stopKd" value="1.0" />
+        <elem key="stopKp" value="1000000.0" />
+      </map>
+    </joint>
+
+    <link name="${side}_wrist_flex_link">
+      <parent name="${side}_forearm_link" />
+      <origin xyz="0.32025 0 0" rpy="0 0 0" />
+      <joint name="${side}_wrist_flex_joint" />
+      <inertial>
+        <mass value="0.61402" />
+        <com xyz="-0.00157 0.0 -0.00075" />
+        <inertia ixx="0.00065165722" ixy="0.00000028864" ixz="0.00000303477"
+                 iyy="0.00019824443" iyz="-0.00000022645"
+                 izz="0.00064450498" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Grey" />
+        </map>
+        <geometry name="${side}_wrist_flex_visual">
+          <mesh filename="wrist_flex" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+        <geometry name="${side}_wrist_flex_collision">
+          <cylinder radius="0.033" length="0.103" />
+        </geometry>
+      </collision>
+      <map name="${side}_wrist_flex_sensor" flag="gazebo">
+        <verbatim key="${side}_wrist_flex_bumper_sensor">
+          <sensor:contact name="${side}_wrist_flex_contact_sensor">
+            <geom>${side}_wrist_flex_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_wrist_flex_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_wrist_flex_bumper</bumperTopicName>
+              <interface:bumper name="${side}_wrist_flex_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_wrist_flex_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <!-- Wrist roll -->
+
+    <joint name="${side}_wrist_roll_joint" type="revolute">
+      <axis xyz="1 0 0" />
+      <anchor xyz="0 0 0" />
+      <limit effort="10" velocity="${VELOCITY_LIMIT_SCALE*6}" k_velocity="2" />
+      <calibration reference_position="${1.27+cal_r_wrist_roll_flag}" values="1.5 -1" />
+      <joint_properties damping="0.1" />
+      <map name="${side}_wrist_roll_joint_ode" flag="gazebo">
+        <elem key="fudgeFactor" value="0.5" />
+      </map>
+    </joint>
+
+
+    <link name="${side}_wrist_roll_link">
+      <parent name="${side}_wrist_flex_link" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <joint name="${side}_wrist_roll_joint" />
+      <inertial>
+        <!-- dummy masses, to be removed.  wrist roll masses are on "gripper_palm" -->
+        <mass value="0.1" />
+        <com xyz="0 0 0" />
+        <inertia ixx="0.01" ixy="0" ixz="0"
+                 iyy="0.01" iyz="0"
+                 izz="0.01" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Fish" />
+        </map>
+        <geometry name="${side}_wrist_roll_visual">
+          <mesh filename="wrist_roll" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0 0 0" rpy="0 0 0" />
+        <geometry name="${side}_wrist_roll_collision">
+          <box size="0.01 0.01 0.01" />
+        </geometry>
+        <verbose value="Yes" />
+      </collision>
+      <map name="${side}_wrist_roll_sensor" flag="gazebo">
+        <verbatim key="${side}_wrist_roll_bumper_sensor">
+          <sensor:contact name="${side}_wrist_roll_contact_sensor">
+            <geom>${side}_wrist_roll_collision</geom>
+            <updateRate>100.0</updateRate>
+            <controller:ros_bumper name="${side}_wrist_roll_ros_bumper_controller" plugin="libros_bumper.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>100.0</updateRate>
+              <bumperTopicName>${side}_wrist_roll_bumper</bumperTopicName>
+              <interface:bumper name="${side}_wrist_roll_ros_bumper_iface" />
+            </controller:ros_bumper>
+          </sensor:contact>
+        </verbatim>
+      </map>
+      <map name="${side}_wrist_roll_gravity" flag="gazebo">
+        <elem key="turnGravityOff">true</elem>
+      </map>
+    </link>
+
+    <transmission type="WristTransmission" name="${side}_wrist_trans">
+      <rightActuator name="${side}_wrist_r_motor" />
+      <leftActuator name="${side}_wrist_l_motor" />
+      <flexJoint name="${side}_wrist_flex_joint" mechanicalReduction="${624/35*54/16}" />
+      <rollJoint name="${side}_wrist_roll_joint" mechanicalReduction="${624/35*54/16}" />
+    </transmission>
+
+    <map name="sensor" flag="gazebo">
+      <verbatim key="p3d_${side}_forearm">
+        <!--
+        <controller:ros_p3d name="p3d_${side}_forearm_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_forearm_link</bodyName>
+          <topicName>${side}_forearm_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_forearm_position_iface" />
+        </controller:ros_p3d>
+        <controller:ros_p3d name="p3d_${side}_wrist_flex_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_wrist_flex_link</bodyName>
+          <topicName>${side}_wrist_flex_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_wrist_flex_position_iface" />
+        </controller:ros_p3d>
+        <controller:ros_p3d name="p3d_${side}_wrist_roll_controller" plugin="libros_p3d.so">
+          <alwaysOn>true</alwaysOn>
+          <updateRate>100.0</updateRate>
+          <bodyName>${side}_wrist_roll_link</bodyName>
+          <topicName>${side}_wrist_roll_pose_ground_truth</topicName>
+          <gaussianNoise>0.0</gaussianNoise>
+          <frameName>map</frameName>
+          <interface:position name="p3d_${side}_wrist_roll_position_iface" />
+        </controller:ros_p3d>
+        -->
+      </verbatim>
+    </map>
+
+  </macro>
+
+
+
+  <macro name="pr2_arm" params="side parent reflect *origin">
+    <pr2_shoulder side="${side}" reflect="${reflect}" parent="${parent}">
+      <insert_block name="origin" />
+    </pr2_shoulder>
+    <pr2_upper_arm side="${side}" reflect="${reflect}" parent="${side}_upper_arm_roll_link" />
+    <pr2_forearm side="${side}" reflect="${reflect}" parent="${side}_forearm_roll_link" />
+  </macro>
+
+
+
+  <!--                    Calibration                            -->
+
+
+  <macro name="upper_arm_calibrator" params="side">
+    <controller name="${side}_cal_shoulder_pan" topic="${side}_cal_shoulder_pan"
+                type="JointUDCalibrationControllerNode">
+      <calibrate joint="${side}_shoulder_pan_joint"
+                 actuator="${side}_shoulder_pan_motor"
+                 transmission="${side}_shoulder_pan_trans"
+                 velocity="1.0" />
+      <pid p="7" i="0.5" d="0" iClamp="1.0" />
+    </controller>
+
+    <controller name="cal_shoulder_lift_${side}" topic="cal_shoulder_lift_${side}"
+                type="JointUDCalibrationControllerNode">
+      <calibrate joint="${side}_shoulder_lift_joint"
+                 actuator="${side}_shoulder_lift_motor"
+                 transmission="${side}_shoulder_lift_trans"
+                 velocity="-1.0" />
+      <pid p="9" i="1.0" d="0" iClamp="6.0" />
+    </controller>
+
+    <controller name="cal_${side}_upper_arm_roll" topic="cal_${side}_upper_arm_roll"
+                type="JointUDCalibrationControllerNode">
+      <calibrate joint="${side}_upper_arm_roll_joint"
+                 actuator="${side}_upper_arm_roll_motor"
+                 transmission="${side}_upper_arm_roll_trans"
+                 velocity="1.0" />
+      <pid p="6" i="0.2" d="0" iClamp="2.0" />
+    </controller>
+
+    <controller name="cal_${side}_elbow_flex" topic="cal_${side}_elbow_flex"
+                type="JointUDCalibrationControllerNode">
+      <calibrate joint="${side}_elbow_flex_joint"
+                 actuator="${side}_elbow_flex_motor"
+                 transmission="${side}_elbow_flex_trans"
+                 velocity="-1.0" />
+      <pid p="6" i="0.2" d="0" iClamp="1.0" />
+    </controller>
+  </macro>
+
+
+  <macro name="forearm_calibrator" params="side">
+    <controller name="cal_${side}_forearm_roll" type="JointUDCalibrationControllerNode">
+      <calibrate joint="${side}_forearm_roll_joint"
+                 actuator="${side}_forearm_roll_motor"
+                 transmission="${side}_forearm_roll_trans"
+                 velocity="-1.2" />
+      <pid p="5.0" i="0" d="0" iClamp="0" />
+    </controller>
+
+    <controller type="WristCalibrationControllerNode" name="cal_${side}_wrist">
+      <calibrate transmission="${side}_wrist_trans"
+                 actuator_l="${side}_wrist_l_motor" actuator_r="${side}_wrist_r_motor"
+                 flex_joint="${side}_wrist_flex_joint" roll_joint="${side}_wrist_roll_joint"
+                 velocity="1.2" />
+      <pid p="3.0" i="0.2" d="0" iClamp="2.0" />
+    </controller>
+  </macro>
+
+
+
+</robot>

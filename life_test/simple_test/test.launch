@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="life_test" type="fake_test.py" />
+</launch>

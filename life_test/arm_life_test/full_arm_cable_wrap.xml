@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="test_arm">
+  
+  <!-- Use modified arm defs for increased velocity -->
+  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
+  <include filename="arm_defs.xml" />
+  <include filename="$(find pr2_defs)/defs/gripper_defs.xml" />
+  <include filename="$(find pr2_defs)/defs/body_defs.xml" />
+  <include filename="$(find life_test)/arm_life_test/groups_arm.xml" />
+
+<pr2_torso name="base" parent="world"> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+</pr2_torso>
+
+<pr2_torso name="torso_lift" parent="base_link"> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+</pr2_torso>
+
+<pr2_arm side="r" reflect="1" parent="torso_lift_link">
+    <origin xyz="0.0 0.0 1.0" rpy="0 0 0" />
+</pr2_arm>
+<pr2_gripper side="r" parent="r_wrist_roll_link" /> 
+ 
+</robot>

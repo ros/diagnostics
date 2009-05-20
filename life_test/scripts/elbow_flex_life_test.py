@@ -26,9 +26,9 @@
 # INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,          
 # BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;              
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER              
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT            
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN             
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE               
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT  
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN      
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE       
 # POSSIBILITY OF SUCH DAMAGE.                                                   
 #                                                                               
 
@@ -62,27 +62,42 @@ def xml_for():
   </joint>\
 </controller>"
 
-
+def xml_for_roll():
+    return "\
+<controller name=\"forearm_roll_controller\" type=\"JointEffortControllerNode\">\
+  <joint name=\"r_forearm_roll_joint\" />\
+</controller>"
 
 def main():
     rospy.wait_for_service('spawn_controller')
     rospy.init_node('ua_life_test', anonymous=True)
+
+    # Should probably update to option parser... at some point
+    roll = False
+    # Should be rospy.myargv!!!
+    if len(sys.argv) > 1 and sys.argv[1] == 'roll':
+        roll = True
+        mechanism.spawn_controller(xml_for_roll())
     
     mechanism.spawn_controller(xml_for())
 
     arm_pos = rospy.Publisher('upperarm_life_controller/set_command', Float64)
+    fore_roll = rospy.Publisher('forearm_roll_controller/command', Float64)
 
     try:
         while not rospy.is_shutdown():
+            if roll:
+                fore_roll.publish(Float64(1.0))
             arm_pos.publish(Float64(0.0))
-            sleep(1.5)
-            arm_pos.publish(Float64(2.5))
-            sleep(1.5)
+            sleep(0.5)
+            arm_pos.publish(Float64(-2.05))
+            sleep(0.5)
     except Exception, e:
         print "Caught exception!"
         print e
         e
     finally:
+        fore_roll.publish(Float64(0.0))
         arm_pos.publish(Float64(0))
         mechanism.kill_controller('upperarm_life_controller')
         

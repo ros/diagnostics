@@ -1,0 +1,14 @@
+<launch>
+  <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find life_test)/arm_life_test/full_arm_cable_wrap.xml'" />
+
+  <node machine="test_host_root" pkg="pr2_etherCAT" type="pr2_etherCAT" args="-i eth0 -x robotdesc/pr2"/>
+
+
+  <!-- Calibration -->
+  <node pkg="mechanism_bringup" type="calibrate.py"
+        args="$(find life_test)/arm_life_test/full_arm_cal.xml"
+        output="screen" />
+ 
+  <node machine="test_host" pkg="life_test" type="elbow_flex_life_test.py" />
+
+</launch>
