@@ -95,11 +95,14 @@ class MonitorPanel(wx.Panel):
     self.Bind(wx.EVT_TIMER, self.on_timer)
     self._timer.Start(5000)
     
-    rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
+    self._subcriber = rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
     
     self._messages = []
     self._used_items = 0
       
+  def change_diagnostic_topic(self, topic):
+    self._subscriber = rospy.Subscriber(topic, DiagnosticMessage, self.diagnostics_callback)
+
   def diagnostics_callback(self, message):
     self._mutex.acquire()
     
