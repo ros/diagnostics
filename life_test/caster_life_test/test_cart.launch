@@ -1,13 +1,13 @@
 <launch>
   <param name="robotdesc/pr2"
-         command="$(find xacro)/xacro.py '$(find caster_life_test)/caster.xml'" /> 
+         command="$(find xacro)/xacro.py '$(find life_test)/caster_life_test/caster.xml'" /> 
  
   <include file="$(find life_test)/init.machine" />
   <include file="$(find life_test)/pr2_etherCAT.launch" />
 
   <!-- Calibration -->
   <node pkg="mechanism_bringup" type="calibrate.py"
-        args="$(find life_test)/caster_life/cal_caster.xml"
+        args="$(find life_test)/caster_life_test/cal_caster.xml"
         output="screen" />
 
   <!-- Power board -->

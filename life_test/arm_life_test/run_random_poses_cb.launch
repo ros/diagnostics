@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find life_test)/arm_life_test/controller_cartesian_pose_right.launch" /> <!-- Was "_forearm.launch" / -->
+  <node pkg="life_test" type="random_poses_right_cb.py" />
+  <node pkg="life_test" type="gripper_effort_controller.py" args="r_gripper_joint hold"/>
+</launch>

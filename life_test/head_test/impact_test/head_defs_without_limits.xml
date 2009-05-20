@@ -427,6 +427,55 @@
     </link>
   </macro>
 
+  <!-- Reverts to small tilt motor, still has same cal flags and limits -->
+  <macro name="pr2_head_tilt_alpha2" params="name parent *origin">
+
+    <joint name="${name}_joint" type="revolute">
+      <axis xyz="0 1 0" />
+      <limit effort="20"
+             velocity="10" k_velocity="15"
+             safety_length_min="0.02" safety_length_max="0.02" k_position="100" />
+      <calibration reference_position="${-0.195+cal_head_tilt_flag}" values="0 0" />
+      <joint_properties damping="1.0" />
+      </joint>
+
+    <transmission type="SimpleTransmission" name="${name}_trans">
+      <actuator name="${name}_motor" /> <!-- Alpha 1.0 motor -->
+      <joint name="${name}_joint" />
+      <mechanicalReduction>6.0</mechanicalReduction>
+    </transmission>
+
+    <link name="${name}_link">
+      <parent name="${parent}" />
+      <insert_block name="origin" />
+      <joint name="${name}_joint" />
+
+      <inertial>
+        <mass value="1.749727" />
+        <com xyz="0.041935 0.003569 0.028143" />
+        <inertia ixx="0.010602303435"  ixy="-0.000408814235"  ixz="0.00198303894"  iyy="0.011874383747"  iyz="0.000197908779"  izz="0.005516790626" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0.0 0.0 0.0 " />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Green" />
+        </map>
+        <geometry name="${name}_visual">
+          <mesh filename="head_tilt" />
+        </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0.041935 0.003569 0.028143" rpy="0 0 0" />
+        <geometry name="${name}_collision">
+          <box size="0.064 0.253 0.181" />
+        </geometry>
+      </collision>
+    </link>
+  </macro>
+
+
 <macro name="pr2_head_tilt_alpha2a" params="name parent *origin">
   <!-- Motor must be configured with 148877 motor -->
     <joint name="${name}_joint" type="revolute">
@@ -521,6 +570,51 @@
     </link>
   </macro>
 
+ <macro name="pr2_head_alpha2" params="name parent *origin">
+    <pr2_head_pan_alpha2 name="${name}_pan" parent="${parent}">
+      <insert_block name="origin" />
+    </pr2_head_pan_alpha2>
+
+    <pr2_head_tilt_alpha2 name="${name}_tilt" parent="${name}_pan_link">
+      <origin xyz="0.058 0 0" rpy="0 0 0" />
+    </pr2_head_tilt_alpha2>
+
+    <!-- Head plate frame -->
+    <joint name="${name}_plate_fixed_joint" type="fixed" />
+    <link name="${name}_plate_frame">
+      <parent name="${name}_tilt_link" />
+      <origin xyz="0.0232 0 0.0645" rpy="0 0 0" />
+      <joint name="${name}_plate_fixed_joint" />
+
+      <inertial>
+        <mass value="0.01" />
+        <com xyz="0 0 0" />
+        <inertia ixx="0.001"  ixy="0.0"  ixz="0.0"
+                 iyy="0.001"  iyz="0.0"
+                 izz="0.001" />
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <map name="gazebo_material" flag="gazebo">
+          <elem key="material" value="Gazebo/Blue" />
+        </map>
+        <geometry name="${name}_plate_frame_visual">
+          <mesh scale="0.01 0.01 0.01" />
+	  </geometry>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry name="${name}_plate_frame_collision">
+          <box size="0.01 0.01 0.01" />
+	  </geometry>
+      </collision>
+    </link>
+
+  </macro>
+
+
 <!-- Difference between two heads is motors and gearheads -->
   <macro name="pr2_head_alpha2a" params="name parent *origin">
     <pr2_head_pan_alpha2 name="${name}_pan" parent="${parent}">
@@ -611,76 +705,7 @@
   </macro>
 
 
-  <!--                    Calibration                            -->
+  <!--                    Calibration removed, use normal defs               -->
 
-  <macro name="head_calibrator">
-    <controller name="cal_head_pan" topic="cal_head_pan"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_pan_joint"
-                 actuator="head_pan_motor"
-                 transmission="head_pan_trans"
-                 velocity="-1.5" />
-      <pid p="2.0" i="0.0" d="0" iClamp="1.0" />
-    </controller>
-
-    <controller name="cal_head_tilt" topic="cal_head_tilt"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_tilt_joint"
-                 actuator="head_tilt_motor"
-                 transmission="head_tilt_trans"
-                 velocity="-0.7" />
-      <pid p="4.0" i="0.0" d="0" iClamp="5.0" />
-    </controller>
-  </macro>
-
-  <macro name="head_calibrator_alpha2a">
-    <controller name="cal_head_pan" topic="cal_head_pan"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_pan_joint"
-                 actuator="head_pan_motor"
-                 transmission="head_pan_trans"
-                 velocity="1.5" />
-      <pid p="3.0" i="0.0" d="0" iClamp="1.0" />
-    </controller>
-
-    <controller name="cal_head_tilt" topic="cal_head_tilt"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_tilt_joint"
-                 actuator="head_tilt_motor_alpha2a"
-                 transmission="head_tilt_trans"
-                 velocity="-1.0" />
-      <pid p="20.0" i="5.0" d="0" iClamp="1.0" />
-    </controller>
-  </macro>
-
-  <macro name="head_calibrator_alpha2b">
-    <controller name="cal_head_pan" topic="cal_head_pan"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_pan_joint"
-                 actuator="head_pan_motor"
-                 transmission="head_pan_trans"
-                 velocity="1.5" />
-      <pid p="3.0" i="0.0" d="0" iClamp="1.0" />
-    </controller>
-
-    <controller name="cal_head_tilt" topic="cal_head_tilt"
-                type="JointUDCalibrationControllerNode">
-      <calibrate joint="head_tilt_joint"
-                 actuator="head_tilt_motor_alpha2b"
-                 transmission="head_tilt_trans"
-                 velocity="-1.0" />
-      <pid p="20.0" i="5.0" d="0" iClamp="1.0" />
-    </controller>
-  </macro>
-
-  <macro name="tilting_laser_calibrator" params="name">
-    <controller name="cal_${name}" topic="cal_${name}" type="JointUDCalibrationControllerNode">
-      <calibrate joint="${name}_mount_joint"
-                 actuator="${name}_mount_motor"
-                 transmission="${name}_mount_trans"
-                 velocity="-1.5" />
-      <pid p=".3" i="0.1" d="0" iClamp="1.0" />
-    </controller>
-  </macro>
 
 </robot>

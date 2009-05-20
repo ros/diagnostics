@@ -270,7 +270,7 @@ class TestMonitorPanel(wx.Panel):
         self.SetSizer(self._sizer)
         self.Layout()
 
-        self._test_team = [ "watts@willowgarage.com" ]
+        self._test_team = [ "watts@willowgarage.com", "stanford@willowgarage.com" ]
         
         self._machine = None
         self._current_log = {}
@@ -614,7 +614,7 @@ class TestMonitorPanel(wx.Panel):
         launch += '<machine name="test_host_root" user="root" address="%s" ' % self._machine
         launch += 'ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="never"/>'
         launch += '<machine name="test_host" address="%s" ' % self._machine
-        launch += 'ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)" default="true" />'
+        launch += 'ros-root="$(env ROS_ROOT)" ros-package-path="$(env ROS_PACKAGE_PATH)"  />'
 
         launch += '<include file="$(find life_test)/%s" />' % self._test._launch_script
         launch += '</group>\n</launch>'
@@ -643,6 +643,9 @@ class TestMonitorPanel(wx.Panel):
         self._machine = machine
 
         self.log('Launching test %s on machine %s.' % (self._test._name, self._machine))
+
+        # rospy.logerr('Environment vars for launch script')
+        # rospy.logerr(os.environ['PATH'])
 
         config = roslaunch.ROSLaunchConfig()
         try:

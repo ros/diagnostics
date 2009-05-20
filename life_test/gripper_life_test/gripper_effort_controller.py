@@ -31,7 +31,7 @@
 # Launches effort controller and drives gripper open and close at random times
 
 import roslib
-roslib.load_manifest('gripper_life_test')
+roslib.load_manifest('life_test')
 import rospy
 from std_msgs.msg import *
 from joy.msg import Joy
@@ -52,6 +52,11 @@ def xml_for(control_name, joint):
 
 def main():
     joint = sys.argv[1]
+
+    hold = False
+    if len(sys.argv) > 2:
+        hold = True
+
     control_name = joint + '_controller'
 
     rospy.init_node('gripper_life_' + control_name, anonymous=True)
@@ -59,7 +64,7 @@ def main():
     spawn_controller = rospy.ServiceProxy('spawn_controller', SpawnController)
     kill_controller = rospy.ServiceProxy('kill_controller', KillController)
 
-    eff = 100
+    eff = -100
 
     try:
         print "Spawning effort controller %s"%joint
@@ -74,7 +79,9 @@ def main():
         while not rospy.is_shutdown():
             time.sleep(random.uniform(0.5, 2.0))
             m = Float64(eff)
-            eff = eff * -1
+            
+            if not hold:
+                eff = eff * -1
             pub.publish(m)
     finally:
         kill_controller(control_name)

@@ -115,8 +115,8 @@ def main():
         print "Spawned grip controller successfully"
 
     effort_grip = -100 
-    effort_flex = 3
-    effort_roll = 3
+    effort_flex = 4
+    effort_roll = 4
         
     try:
         while not rospy.is_shutdown():

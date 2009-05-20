@@ -1,13 +1,13 @@
 <launch>
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find pr2_defs)/robots/r_arm.xacro.xml'" />
-  <!--param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find arm_life_test)/full_arm.xml'" /-->
+  <!--param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find life_test)/arm_life_test/full_arm.xml'" /-->
 
   <include file="$(find life_test)/init.machine" />
   <include file="$(find life_test)/pr2_etherCAT.launch" />
 
 <!-- Arm Calibration -->
   <node pkg="mechanism_bringup" type="calibrate.py"
-  	args="$(find arm_life_test)/full_arm_cal.xml" />
+  	args="$(find life_test)/arm_life_test/full_arm_cal.xml" />
 
 <!-- spacenav -->
   <!--node pkg="spacenav_node" type="spacenav_node" /-->
