@@ -60,7 +60,7 @@ public:
     message = s;
   }
 
-  void adds(const std::string &key, const std::string &s)
+  void addss(const std::string &key, const std::string &s)
   {
     robot_msgs::DiagnosticString ds;
     ds.label = key;
@@ -74,7 +74,7 @@ public:
     std::stringstream ss;
     ss << val;
     std::string sval = ss.str();
-    adds(key, sval);
+    addss(key, sval);
   }
 
 /*  template<class T>
