@@ -113,7 +113,7 @@ public:
   template <class T>
   void add(T &c)
   {
-    TaskFunction f = boost::bind<void>(c, _1);
+    TaskFunction f = boost::bind<void>(boost::ref(c), _1);
     tasks_.push_back(f);
   }
 

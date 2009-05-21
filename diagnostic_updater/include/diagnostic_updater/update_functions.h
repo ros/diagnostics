@@ -58,6 +58,7 @@ public:
 
   void tick()
   {
+    //ROS_DEBUG("TICK %i", count_);
     count_++;
   }
 
@@ -68,8 +69,8 @@ public:
     ros::Time curtime = ros::Time::now();
     int curseq = count_;
     int events = curseq - seq_nums_[hist_indx_];
-    double interval = (curtime - times_[hist_indx_]).toSec();
-    double freq = events / interval;
+    double window = (curtime - times_[hist_indx_]).toSec();
+    double freq = events / window;
     seq_nums_[hist_indx_] = curseq;
     times_[hist_indx_] = curtime;
     hist_indx_ = (hist_indx_ + 1) % window_size_;
@@ -87,8 +88,9 @@ public:
       stat.summary(0, "Desired frequency met");
     }
 
-    stat.addv("Events in interval", events);
-    stat.addv("Duration of interval (s)", interval);
+    stat.addv("Events in window", events);
+    stat.addv("Events since startup", count_);
+    stat.addv("Duration of window (s)", window);
     stat.addv("Actual frequency (Hz)", freq);
     if (min_freq_ == max_freq_)
       stat.addv("Target frequency (Hz)", min_freq_);
