@@ -110,6 +110,13 @@ public:
     tasks_.push_back(f2);
   }
   
+  template <class T>
+  void add(T &c)
+  {
+    TaskFunction f = boost::bind<void>(c, _1);
+    tasks_.push_back(f);
+  }
+
   void add(void (C::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
   {
     add(owner_, f);

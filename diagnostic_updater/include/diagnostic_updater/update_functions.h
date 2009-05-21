@@ -2,6 +2,7 @@
 #define __FREQUENCY_STATUS_DIAGNOSTIC_H__
 
 #include <diagnostic_updater/diagnostic_updater.h>
+#include <math.h>
 
 namespace diagnostic_updater
 {
@@ -33,11 +34,7 @@ private:
 class FrequencyStatus
 {
 public:
-/*  FrequencyStatus(): desired_freq_(*(double *) NULL) 
-  {
-  }*/
-
-  FrequencyStatus(double &desired, double tolerance = 0.1, int window_size = 5) : desired_freq_(desired)
+  FrequencyStatus(double &min_freq, double& max_freq, double tolerance = 0.1, int window_size = 5) : min_freq_(min_freq), max_freq_(max_freq)
   {
     tolerance_ = tolerance;
     window_size_ = window_size;
@@ -64,7 +61,7 @@ public:
     count_++;
   }
 
-  void update(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  void operator()(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
     stat.name = "Frequency Status";
 
@@ -77,9 +74,13 @@ public:
     times_[hist_indx_] = curtime;
     hist_indx_ = (hist_indx_ + 1) % window_size_;
 
-    if (fabs(freq - desired_freq_) > tolerance_ * desired_freq_)
+    if (freq < min_freq_ * (1 - tolerance_))
     {
-      stat.summary(2, "Desired frequency not met");
+      stat.summary(2, "Frequency too low.");
+    }
+    else if (freq > max_freq_ * (1 + tolerance_))
+    {
+      stat.summary(2, "Frequency too high.");
     }
     else
     {
@@ -88,12 +89,20 @@ public:
 
     stat.addv("Events in interval", events);
     stat.addv("Duration of interval (s)", interval);
-    stat.addv("Desired frequency (Hz)", desired_freq_);
     stat.addv("Actual frequency (Hz)", freq);
+    if (min_freq_ == max_freq_)
+      stat.addv("Target frequency (Hz)", min_freq_);
+    if (min_freq_ > 0)
+      stat.addv("Minimum acceptable frequency (Hz)", 
+          min_freq_ * (1 - tolerance_));
+    if (finite(max_freq_))
+      stat.addv("Maximum acceptable frequency (Hz)", 
+          max_freq_ * (1 - tolerance_));
   }
 
 private:
-  double &desired_freq_;
+  double &min_freq_;
+  double &max_freq_;
 
   int count_;
   double tolerance_;
