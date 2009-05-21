@@ -97,7 +97,7 @@ public:
           min_freq_ * (1 - tolerance_));
     if (finite(max_freq_))
       stat.addv("Maximum acceptable frequency (Hz)", 
-          max_freq_ * (1 - tolerance_));
+          max_freq_ * (1 + tolerance_));
   }
 
 private:
