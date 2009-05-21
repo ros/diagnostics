@@ -29,4 +29,15 @@
 	rate="1.0" script="arm_life_test/test_roll_gui.launch"
 	type="Life Test" />
 
+  <test serial="6804178" name="Full Arm Counterbalance Test"
+	desc="Moves arm up and down for full counterbalance workout."
+	rate="0.5" script="arm_life_test/test_gui_cb.launch"
+	type="Life Test" />
+
+  <test serial="6804178" name="Full Arm CB Test - Dummy Forearm"
+	desc="Moves arm up and down for full counterbalance workout."
+	rate="0.5" script="arm_life_test/test_gui_cb_forearm.launch"
+	type="Life Test" />
+  
+
 </tests>

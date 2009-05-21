@@ -97,8 +97,9 @@ class TestRecord:
         csv_name = csv_name.replace(' ', '_').replace('/', '__')
         self.log_file = os.path.join(roslib.packages.get_pkg_dir('life_test'), 'logs/%s' % csv_name)
 
-        self.log_csv = csv.writer(open(self.log_file, 'w'))
-        self.log_csv.writerow(['Time', 'Status', 
+        
+        log_csv = csv.writer(open(self.log_file, 'wb'))
+        log_csv.writerow(['Time', 'Status', 
                                'Elapsed (s)', 'Active (s)', 
                                'Cycles', 'Cycle Rate', 'Notes'])
 
@@ -185,11 +186,13 @@ class TestRecord:
         log_msg = log_msg.replace(',', ';')
 
         time_str = strftime("%m/%d/%Y %H:%M:%S", localtime(update_time))
-        self.log_csv.writerow([time_str, state, 
+
+        log_csv = csv.writer(open(self.log_file, 'ab'))
+        log_csv.writerow([time_str, state, 
                                self.get_elapsed(), self.get_cum_time(), 
                                self.get_cycles(), self._rate, 
                                log_msg])
-
+      
     def csv_filename(self):
         return self.log_file
         
@@ -259,6 +262,10 @@ class TestMonitorPanel(wx.Panel):
 
         self._log_ctrl = xrc.XRCCTRL(self._panel, 'test_log')
 
+        self._test_log_window = xrc.XRCCTRL(self._panel, 'test_log_window')
+        self._send_log_button = xrc.XRCCTRL(self._panel, 'send_test_log_button')
+        self._send_log_button.Bind(wx.EVT_BUTTON, self.on_send_test_log)
+
         
         # Add runtime to the pane...
         self._notebook = xrc.XRCCTRL(self._panel, 'test_data_notebook')
@@ -312,6 +319,12 @@ class TestMonitorPanel(wx.Panel):
         print 'Stopping launches'
         self.stop_test()
         
+    def on_send_test_log(self, event):
+        address = wx.GetTextFromUser('Enter recipient of test log: NAME@willowgarage.com', 'Enter recipient', '', self)
+        self.notify_operator(3, 'Test log requested.', address + '@willowgarage.com')
+        
+        
+
     def is_launched(self):
         return self._test_launcher is not None
 
@@ -506,6 +519,8 @@ class TestMonitorPanel(wx.Panel):
         cycles = "%.1f" % self._record.get_cycles()
         self._total_cycles_ctrl.SetValue(cycles)
 
+        self._test_log_window.SetPage(self.make_html_cycle_log_table())
+
         self._active_time_ctrl.SetValue(self._record.get_active_str())
         self._elapsed_time_ctrl.SetValue(self._record.get_elapsed_str())
         
@@ -698,6 +713,9 @@ class TestMonitorPanel(wx.Panel):
     # Loggers and data processing -> Move to record class or elsewhere
     # 
     def get_test_team(self):
+        if os.environ['USER'] == 'watts':
+            return 'watts@willowgarage.com'
+
         return string.join(self._test_team, ", ")
 
     def line_summary(self, msg):
@@ -706,7 +724,7 @@ class TestMonitorPanel(wx.Panel):
             machine_str = 'NONE'
         return "%s Test %s on machine %s of %s" % (msg, self._test._name, machine_str, self._serial)
 
-    def notify_operator(self, level, alert_msg):
+    def notify_operator(self, level, alert_msg, recepient = None):
         # Don't notify if we haven't done anything
         if self._record.get_cum_time() == 0 and not self.is_launched() and level == 1:
             return
@@ -716,10 +734,14 @@ class TestMonitorPanel(wx.Panel):
         if level == 2:
             sender = 'test.alerts@willowgarage.com'
             header = '--Test Alert--'
+        elif level == 3:
+            sender = 'test.reports@willowgarage.com'
+            header = '--Test Report--'
         
         try:
-            # rospy.logerr('Sending mail')
-            
+            if not recepient:
+                recepient = self.get_test_team()
+
             msg = MIMEMultipart('alternative')
             msg['Subject'] = header + self.line_summary(alert_msg)
             msg['From'] = sender
@@ -727,37 +749,54 @@ class TestMonitorPanel(wx.Panel):
 
             msg.attach(MIMEText(self.make_html_test_summary(alert_msg), 'html'))
             
-            #part = MIMEBase('application', 'octet-stream')
-            #part.set_payload(open(self._record.csv_filename(), 'r').read())
-            #Encoders.encode_quopri(part)
-            #part.add_header('Content-Disposition', 'attachment; filename="%s"' 
-            #                % os.path.basename(self._record.csv_filename()))
+            log_csv = open(self._record.csv_filename(), 'rb')
+            log_data = log_csv.read()
+            log_csv.close()
 
-            #msg.attach(part)
-
-            # This whole csv attachment isn't working out
-            # TODO
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(log_data)
+            Encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename="%s"' 
+                            % os.path.basename(self._record.csv_filename()))
             
-            #log_csv = open(self._record.csv_filename(), 'r')
-            #log_data = log_csv.read()
-            #log_csv.close()
-
-            #msg.attach(MIMEText(log_data, 'csv'))
-
+            msg.attach(part)
 
             s = smtplib.SMTP('localhost')
             s.sendmail(sender, self.get_test_team(), msg.as_string())
             s.quit()
-            # rospy.logerr('Sent mail')
-            return True
 
+            return True
         except Exception, e:
             rospy.logerr('Unable to send mail! %s' % traceback.format_exc())
             self.log('Unable to send mail! %s' % traceback.format_exc())
             return False
 
 
+    def make_html_cycle_log_table(self):
+        log_csv = csv.reader(open(self._record.csv_filename(), 'rb'))
         
+        is_first = True
+
+        html = '<html>\n<table border="1" cellpadding="2" cellspacing="0">\n'
+        for row in log_csv:
+            html += '<tr>'
+            for val in row:  
+                if unicode(val).isnumeric():
+                    val = "%.2f" % float(val)
+                
+                if is_first:
+                    html += '<td><b>%s</b></td>' % val
+                else:
+                    html += '<td>%s</td>' % val
+
+            is_first = False
+            html += '</tr>\n'
+
+        html += '</table>\n</html>'
+
+        return html
+
+
 
     # Dump these into test_result class of some sort
     def make_html_test_summary(self, alert_msg = ''):
@@ -850,7 +889,7 @@ em { font-style:normal; font-weight: bold; }\
         for ky in kys:
             time_str = strftime("%m/%d/%Y %H:%M:%S", localtime(ky))
             html += self.make_table_row(time_str, self._record._log[ky])
-            #html += '<tr><td>%s</td><td>%s</td></tr>\n' % (time_str, self._record._log[ky])
+            
         html += '</table>\n'
 
         return html

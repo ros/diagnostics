@@ -344,7 +344,7 @@ class TestManagerApp(wx.App):
 
         rospy.init_node("life_test_manager")
         self._frame = TestManagerFrame(None)
-        self._frame.SetSize(wx.Size(645, 840))
+        self._frame.SetSize(wx.Size(650, 850))
         self._frame.Layout()
         self._frame.Centre()
         self._frame.Show(True)
