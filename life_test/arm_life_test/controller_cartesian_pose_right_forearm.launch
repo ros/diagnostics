@@ -1,0 +1,38 @@
+<launch>
+
+<!-- Cartesian wrench controller -->
+  <param name="r_arm_cartesian_wrench_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="r_arm_cartesian_wrench_controller/tip_name" type="string" value="r_forearm_roll_link" />
+<!-- Change above to forearm roll when fixed -->
+
+<!-- Cartesian twist controller -->
+  <param name="r_arm_cartesian_twist_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="r_arm_cartesian_twist_controller/tip_name" type="string" value="r_forearm_roll_link" />
+  <param name="r_arm_cartesian_twist_controller/output" type="string" value="r_arm_cartesian_wrench_controller" />
+
+  <param name="r_arm_cartesian_twist_controller/ff_trans" value="0.0" />
+  <param name="r_arm_cartesian_twist_controller/ff_rot" value="0.0" />
+
+  <param name="r_arm_cartesian_twist_controller/fb_trans/p" value="20.0" />
+  <param name="r_arm_cartesian_twist_controller/fb_trans/i" value="0.5" />
+  <param name="r_arm_cartesian_twist_controller/fb_trans/d" value="0.0" />
+  <param name="r_arm_cartesian_twist_controller/fb_trans/i_clamp" value="1.0" />
+
+  <param name="r_arm_cartesian_twist_controller/fb_rot/p" value="0.5" />
+  <param name="r_arm_cartesian_twist_controller/fb_rot/i" value="0.1" />
+  <param name="r_arm_cartesian_twist_controller/fb_rot/d" value="0.0" />
+  <param name="r_arm_cartesian_twist_controller/fb_rot/i_clamp" value="0.2" />
+
+
+<!-- Cartesian pose controller -->
+  <param name="r_arm_cartesian_pose_controller/root_name" type="string" value="torso_lift_link" />
+  <param name="r_arm_cartesian_pose_controller/tip_name" type="string" value="r_forearm_roll_link" />
+  <param name="r_arm_cartesian_pose_controller/output" type="string" value="r_arm_cartesian_twist_controller" />
+
+  <param name="r_arm_cartesian_pose_controller/p" value="20.0" />
+  <param name="r_arm_cartesian_pose_controller/i" value="0.1" />
+  <param name="r_arm_cartesian_pose_controller/d" value="0.0" />
+  <param name="r_arm_cartesian_pose_controller/i_clamp" value="0.5" />
+
+  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/r_arm_cartesian_wrench_controller.xml $(find pr2_default_controllers)/r_arm_cartesian_twist_controller.xml $(find pr2_default_controllers)/r_arm_cartesian_pose_controller.xml" />
+</launch>
