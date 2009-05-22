@@ -13,7 +13,7 @@
         <property name="internationalize">0</property>
         <property name="name">life_test_gui</property>
         <property name="namespace"></property>
-        <property name="path">/wg/stor2/watts/ros/ros-pkg/hardware_test/life_test/xrc</property>
+        <property name="path">.</property>
         <property name="precompiled_header"></property>
         <property name="relative_path">1</property>
         <property name="use_enum">0</property>

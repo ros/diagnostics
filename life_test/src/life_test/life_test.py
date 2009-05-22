@@ -37,29 +37,23 @@
 import roslib
 roslib.load_manifest('life_test')
 
-import rospy
-
-import csv
-import string
-import math
-import sys, os
-import roslaunch
+import sys, os, math, string
 from datetime import datetime
+import csv
 import traceback
-from std_srvs.srv import *
-from robot_msgs.msg import *
-
 from time import sleep, mktime, strftime, localtime
-
-import random
+import threading
+from socket import gethostname
 
 import wx
 import wx.aui
 from wx import xrc
+
+import rospy, roslaunch
+from std_srvs.srv import *
+from robot_msgs.msg import *
 import runtime_monitor
 from runtime_monitor.monitor_panel import MonitorPanel
-
-import threading
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -112,9 +106,9 @@ class TestRecord:
 
     def get_duration_str(self, duration):
         hrs = max(math.floor(duration / 3600), 0)
-        min = max(math.floor(duration / 6), 0) / 10
+        min = max(math.floor(duration / 6), 0) / 10 - hrs * 60
 
-        return "%d hrs, %.1f min" % (hrs, min)
+        return "%dhr, %.1fm" % (hrs, min)
 
     def get_active_str(self):
         return self.get_duration_str(self._cum_seconds)
@@ -205,7 +199,6 @@ class TestMonitorPanel(wx.Panel):
 
         self._mutex = threading.Lock()
 
-        self._key = random.randint(0, 10**8 - 1)
 
         self._diag_sub = None
         self._diags = []
@@ -319,12 +312,6 @@ class TestMonitorPanel(wx.Panel):
         print 'Stopping launches'
         self.stop_test()
         
-    def on_send_test_log(self, event):
-        address = wx.GetTextFromUser('Enter recipient of test log: NAME@willowgarage.com', 'Enter recipient', '', self)
-        self.notify_operator(3, 'Test log requested.', address + '@willowgarage.com')
-        
-        
-
     def is_launched(self):
         return self._test_launcher is not None
 
@@ -369,6 +356,16 @@ class TestMonitorPanel(wx.Panel):
         self._user_log.Clear()
         self._user_log.SetFocus()
 
+    def on_send_test_log(self, event):
+        names = wx.GetTextFromUser('Enter recipient names, separated by commas: NAME1,NAME2 (without "@willowgarage.com").', 'Enter recipient', '', self)
+
+        names = names.split(',')
+        for name in names:
+            if name.find('@') < 0:
+                name = name + '@willowgarage.com'
+
+        self.notify_operator(3, 'Test log requested by operator.', string.join(names, ','))
+
     def on_close(self, event):
         #self.stop_test()
         self.log('Closing down test.')
@@ -381,7 +378,11 @@ class TestMonitorPanel(wx.Panel):
     def update_test_record(self, note = ''):
         alert, msg = self._record.update(self.is_launched(), self._is_running, self._is_stale, note)
         if alert > 0:
-            self.log(msg)
+            #self.log(msg)
+            self._current_log[rospy.get_time()] = msg
+            self._manager.log_test_entry(self._test._name, self._machine, msg)
+            
+            wx.CallAfter(self.display_logs)
             self.notify_operator(alert, msg)
 
 
@@ -495,7 +496,7 @@ class TestMonitorPanel(wx.Panel):
             self._status_bar.SetValue("Test Running: OK")
             self._status_bar.SetBackgroundColour("Light Green")
         elif level == 1:
-            self._status_bar.SetValue("Test Warning! Check Diagnostics. Warning: %s" % msg)
+            self._status_bar.SetValue("Test Warning! Warning: %s" % msg)
             self._status_bar.SetBackgroundColour("Orange")
         elif level == 2:
             self._status_bar.SetValue("Error in EtherCAT Master: %s" % msg)
@@ -503,7 +504,6 @@ class TestMonitorPanel(wx.Panel):
         else:
             self._status_bar.SetBackgroundColour("White")
             self._status_bar.SetValue("EtherCAT Master Stale!")
-                            
         
         self._reset_button.Enable(self.is_launched())
         self._halt_button.Enable(self.is_launched())
@@ -519,7 +519,11 @@ class TestMonitorPanel(wx.Panel):
         cycles = "%.1f" % self._record.get_cycles()
         self._total_cycles_ctrl.SetValue(cycles)
 
+        self._test_log_window.Freeze()
+        (x, y) = self._test_log_window.GetViewStart()
         self._test_log_window.SetPage(self.make_html_cycle_log_table())
+        self._test_log_window.Scroll(x, y)
+        self._test_log_window.Thaw()
 
         self._active_time_ctrl.SetValue(self._record.get_active_str())
         self._elapsed_time_ctrl.SetValue(self._record.get_elapsed_str())
@@ -549,7 +553,6 @@ class TestMonitorPanel(wx.Panel):
             self.notify_operator(1, 'Test complete!')
             self._test_complete = True
             self.stop_test()
-
         
     def stop_test(self, event = None):
         if self.is_launched():
@@ -570,7 +573,6 @@ class TestMonitorPanel(wx.Panel):
     def log(self, msg):
         self.update_test_record(msg)
         self._current_log[rospy.get_time()] = msg
-        # rospy.logerr('Log message: %s' % msg)
         self._manager.log_test_entry(self._test._name, self._machine, msg)
 
         wx.CallAfter(self.display_logs)
@@ -580,10 +582,11 @@ class TestMonitorPanel(wx.Panel):
         try:
             self._mutex.acquire()
         except:
-            #rospy.logerr('Caught exception acquiring mutex. %s' % traceback.format_exc())
             return
       
         self._log_ctrl.AppendText(self.print_cur_log())
+        self._log_ctrl.Refresh()
+        self._log_ctrl.Update()
         self._current_log = {}
         self._mutex.release()
 
@@ -661,9 +664,6 @@ class TestMonitorPanel(wx.Panel):
 
         self.log('Launching test %s on machine %s.' % (self._test._name, self._machine))
 
-        # rospy.logerr('Environment vars for launch script')
-        # rospy.logerr(os.environ['PATH'])
-
         config = roslaunch.ROSLaunchConfig()
         try:
             loader = roslaunch.XmlLoader()
@@ -713,10 +713,11 @@ class TestMonitorPanel(wx.Panel):
     # Loggers and data processing -> Move to record class or elsewhere
     # 
     def get_test_team(self):
-        if os.environ['USER'] == 'watts':
+        # Don't email everyone it's debugging on NSF
+        if os.environ['USER'] == 'watts' and gethostname() == 'nsf':
             return 'watts@willowgarage.com'
 
-        return string.join(self._test_team, ", ")
+        return string.join(self._test_team, ",")
 
     def line_summary(self, msg):
         machine_str = self._machine
@@ -724,7 +725,7 @@ class TestMonitorPanel(wx.Panel):
             machine_str = 'NONE'
         return "%s Test %s on machine %s of %s" % (msg, self._test._name, machine_str, self._serial)
 
-    def notify_operator(self, level, alert_msg, recepient = None):
+    def notify_operator(self, level, alert_msg, recipient = None):
         # Don't notify if we haven't done anything
         if self._record.get_cum_time() == 0 and not self.is_launched() and level == 1:
             return
@@ -739,13 +740,13 @@ class TestMonitorPanel(wx.Panel):
             header = '--Test Report--'
         
         try:
-            if not recepient:
-                recepient = self.get_test_team()
+            if not recipient:
+                recipient = self.get_test_team()
 
             msg = MIMEMultipart('alternative')
             msg['Subject'] = header + self.line_summary(alert_msg)
             msg['From'] = sender
-            msg['To'] = self.get_test_team()
+            msg['To'] = recipient
 
             msg.attach(MIMEText(self.make_html_test_summary(alert_msg), 'html'))
             
@@ -762,7 +763,7 @@ class TestMonitorPanel(wx.Panel):
             msg.attach(part)
 
             s = smtplib.SMTP('localhost')
-            s.sendmail(sender, self.get_test_team(), msg.as_string())
+            s.sendmail(sender, recipient, msg.as_string())
             s.quit()
 
             return True
@@ -796,8 +797,6 @@ class TestMonitorPanel(wx.Panel):
 
         return html
 
-
-
     # Dump these into test_result class of some sort
     def make_html_test_summary(self, alert_msg = ''):
         html = '<html><head><title>Test Log: %s of %s</title>' % (self._test._name, self._serial)
@@ -825,8 +824,6 @@ em { font-style:normal; font-weight: bold; }\
                 html += '<H3>Test Status: Launched, Running</H3>\n'
             else:
                 html += '<H3>Test Status: Shutdown</H3>\n'
-
-
 
         html += '<H4>Test Info</H4>\n'
         html += '<p>Description: %s</p>\n<br>' % self._test._desc
