@@ -95,12 +95,18 @@ class MonitorPanel(wx.Panel):
     self.Bind(wx.EVT_TIMER, self.on_timer)
     self._timer.Start(5000)
     
-    self._subcriber = rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
+    self._subscriber = rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
     
     self._messages = []
     self._used_items = 0
+
+  def __del__(self):
+    self._subscriber.unregister()
       
   def change_diagnostic_topic(self, topic):
+    self._subscriber.unregister()
+    self._name_to_item = {} # Reset all stale topics
+    self._messages = []
     self._subscriber = rospy.Subscriber(topic, DiagnosticMessage, self.diagnostics_callback)
 
   def diagnostics_callback(self, message):
