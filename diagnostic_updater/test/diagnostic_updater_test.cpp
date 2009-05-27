@@ -111,24 +111,24 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
 
 TEST(DiagnosticUpdater, testFrequencyStatus)
 {
-  double minFreq = 100;
-  double maxFreq = 200;
+  double minFreq = 10;
+  double maxFreq = 20;
   
   FrequencyStatus fs(minFreq, maxFreq, 0.5, 2);
   
   DiagnosticStatusWrapper stat[5];
   fs.tick();
-  usleep(2000);
-  fs(stat[0]); // Should be too fast, 2 ms for 1 tick, lower limit should be 3.3ms.
-  usleep(5000);
+  usleep(20000);
+  fs(stat[0]); // Should be too fast, 20 ms for 1 tick, lower limit should be 33ms.
+  usleep(50000);
   fs.tick();
-  fs(stat[1]); // Should be good, 7 ms for 2 ticks, lower limit should be 6.6 ms.
-  usleep(30000);
+  fs(stat[1]); // Should be good, 70 ms for 2 ticks, lower limit should be 66 ms.
+  usleep(300000);
   fs.tick();
-  fs(stat[2]); // Should be good, 35 ms for 2 ticks, upper limit should be 40 ms.
-  usleep(15000);
+  fs(stat[2]); // Should be good, 350 ms for 2 ticks, upper limit should be 400 ms.
+  usleep(150000);
   fs.tick();
-  fs(stat[3]); // Should be too slow, 45 ms for 2 ticks, upper limit should be 40 ms.
+  fs(stat[3]); // Should be too slow, 450 ms for 2 ticks, upper limit should be 400 ms.
   fs.clear();
   fs(stat[4]); // Should be good, just cleared it.
 
