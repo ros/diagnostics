@@ -89,6 +89,73 @@ private:
   int hist_indx_;
 };
 
+class TimeStampStatus : public DiagnosticTask
+{
+public:
+  TimeStampStatus(double min_acceptable = -1, double max_acceptable = 5) : 
+    DiagnosticTask("Timestamp Status"), 
+    early_count_(0), late_count_(0), max_delta_(0), 
+    min_delta_(0), deltas_valid_(false), max_acceptable_(max_acceptable),
+    min_acceptable_(min_acceptable)
+  {}
+
+  void tick(double stamp)
+  {
+    double delta = ros::Time::now().toSec() - stamp;
+
+    if (!deltas_valid_ || delta > max_delta_)
+      max_delta_ = delta;
+
+    if (!deltas_valid_ || delta < min_delta_)
+      min_delta_ = delta;
+
+    deltas_valid_ = true;
+  }
+
+  void tick(ros::Time t)
+  {
+    tick(t.toSec());
+  }
+
+  void operator()(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    if (!deltas_valid_)
+      stat.summary(1, "No data since last update.");
+    else if (min_delta_ < min_acceptable_)
+    {
+      stat.summary(2, "Timestamps too far in future seen.");
+      early_count_++;
+    }
+    else if (max_delta_ > max_acceptable_)
+    {
+      stat.summary(2, "Timestamps too far in past seen.");
+      late_count_++;
+    }
+    else
+      stat.summary(0, "Timestamps are reasonable.");
+
+    stat.addv("Earliest timestamp delay:", min_delta_);
+    stat.addv("Latest timestamp delay:", max_delta_);
+    stat.addv("Earliest acceptable timestamp delay:", min_acceptable_);
+    stat.addv("Latest acceptable timestamp delay:", max_acceptable_);
+    stat.adds("Late diagnostic update count:", late_count_); 
+    stat.adds("Early diagnostic update count:", early_count_); 
+
+    deltas_valid_ = false;
+    min_delta_ = 0;
+    max_delta_ = 0;
+  }
+private:
+
+  int early_count_;
+  int late_count_;
+  double max_delta_;
+  double min_delta_;
+  bool deltas_valid_;
+  double max_acceptable_;
+  double min_acceptable_;
+};
+
 };
 
 #endif

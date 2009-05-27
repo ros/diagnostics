@@ -138,7 +138,31 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   EXPECT_EQ(2, stat[3].level) << "min frequency exceeded but not reported";
   EXPECT_EQ(2, stat[4].level) << "freshly cleared should fail";
   EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by FrequencyStatus";
-  EXPECT_STREQ("Frequency Status", fs.getName().c_str()) << "Name should be FrequencyStatus";
+  EXPECT_STREQ("Frequency Status", fs.getName().c_str()) << "Name should be \"Frequency Status\"";
+}
+
+TEST(DiagnosticUpdater, testTimeStampStatus)
+{
+  TimeStampStatus ts;
+
+  DiagnosticStatusWrapper stat[5];
+  ts(stat[0]);
+  ts.tick(ros::Time::now().toSec() + 2);
+  ts(stat[1]);
+  ts.tick(ros::Time::now());
+  ts(stat[2]);
+  ts.tick(ros::Time::now().toSec() - 4);
+  ts(stat[3]);
+  ts.tick(ros::Time::now().toSec() - 6);
+  ts(stat[4]);
+ 
+  EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
+  EXPECT_EQ(2, stat[1].level) << "too far future not reported";
+  EXPECT_EQ(0, stat[2].level) << "now not accepted";
+  EXPECT_EQ(0, stat[3].level) << "4 seconds ago not accepted";
+  EXPECT_EQ(2, stat[4].level) << "too far past not reported";
+  EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by TimeStapmStatus";
+  EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) << "Name should be \"Timestamp Status\"";
 }
 
 int main(int argc, char **argv){
