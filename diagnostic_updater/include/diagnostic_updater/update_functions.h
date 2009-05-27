@@ -6,35 +6,12 @@
 
 namespace diagnostic_updater
 {
-
-/*class UpdateClass
-{
-public:
-  UpdateFunction(std::string name) : name_(name);
-
-  DiagnosticUpdateFunction func()
-  {
-    return boost::bind(&update_func, this);
-  }
-
-    
-
-protected:
-  virtual void update_func(DiagnosticStatusWrapper &stat)
-  {
-
-  }
-
-private:
-  std::string name_;
-  std::vector<>
-}*/
-
   
-class FrequencyStatus
+class FrequencyStatus : public DiagnosticTask
 {
 public:
-  FrequencyStatus(double &min_freq, double& max_freq, double tolerance = 0.1, int window_size = 5) : min_freq_(min_freq), max_freq_(max_freq)
+  FrequencyStatus(double &min_freq, double& max_freq, double tolerance = 0.1, int window_size = 5) : 
+    DiagnosticTask("Frequency Status"), min_freq_(min_freq), max_freq_(max_freq)
   {
     tolerance_ = tolerance;
     window_size_ = window_size;
@@ -64,8 +41,6 @@ public:
 
   void operator()(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.name = "Frequency Status";
-
     ros::Time curtime = ros::Time::now();
     int curseq = count_;
     int events = curseq - seq_nums_[hist_indx_];

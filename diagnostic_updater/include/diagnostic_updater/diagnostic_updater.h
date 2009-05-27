@@ -79,69 +79,139 @@ registered callbacks to be published at a fixed rate.
 namespace diagnostic_updater
 {
   
-typedef boost::function<void(diagnostic_updater::DiagnosticStatusWrapper&)> TaskFunction;
+typedef boost::function<void(DiagnosticStatusWrapper&)> TaskFunction;
+typedef boost::function<void(robot_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
+
+/**
+ * DiagnosticTask is an abstract base class for diagnostic tasks.
+ * Subclasses will be provided for generating common diagnostic
+ * information.
+ */
+
+class DiagnosticTask
+{
+public:
+  DiagnosticTask(const std::string name) : name_(name)
+  {}
+  const std::string &getName()
+  {
+    return name_;
+  }
+  virtual void operator() (diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
+  virtual ~DiagnosticTask()
+  {}
+
+private:
+  const std::string name_;
+};
+
+template <class T>
+class GenericFunctionDiagnosticTask : public DiagnosticTask
+{
+public:
+  GenericFunctionDiagnosticTask(const std::string &name, boost::function<void(T&)> fn) : 
+    DiagnosticTask(name), fn_(fn)
+  {}
+  
+  virtual void operator ()(DiagnosticStatusWrapper &stat)
+  {
+    fn_(stat);
+  }
+  
+private:
+  const std::string name_;
+  const TaskFunction fn_;
+};
+
+typedef GenericFunctionDiagnosticTask<robot_msgs::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
+typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
 
 /**
  *
- * The updater_base class is an internally used class that manages a
+ * The @b DiagnosticTaskVector class is abstract base class that manages a
  * collection of diagnostic updaters. It contains the common functionality
  * used for producing diagnostic updates and for self-checks.
  *
  */
 
-template <class C>
-class Updater_base 
+class DiagnosticTaskVector
 {
-public:
-  Updater_base(C *owner)
-  {
-    owner_ = owner;
-  }
-  
-  void add(TaskFunction &f)
-  {
-    tasks_.push_back(f); // @todo Is this acceptable?
-  }
-
-  template <class T>
-  void add(T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
-  {
-    TaskFunction f2 = boost::bind(f, c, _1);
-    tasks_.push_back(f2);
-  }
-  
-  template <class T>
-  void add(T &c)
-  {
-    TaskFunction f = boost::bind<void>(boost::ref(c), _1);
-    tasks_.push_back(f);
-  }
-
-  void add(void (C::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
-  {
-    add(owner_, f);
-  }
-
 protected:
-  std::vector<TaskFunction> tasks_;
-  C *owner_;
-};
+  class DiagnosticTaskInternal
+  {
+  public:
+    DiagnosticTaskInternal(const std::string name, TaskFunction f) :
+      name_(name), fn_(f)
+    {}
 
-template <class C>
-class Updater : public Updater_base<C>
-{
-public:
+    void operator() (diagnostic_updater::DiagnosticStatusWrapper &stat) const
+    {
+      stat.name = name_;
+      fn_(stat);
+    }
 
+    const std::string &getName() const
+    {
+      return name_;
+    }
+
+  private:
+    std::string name_;
+    TaskFunction fn_;
+  };
+
+  boost::mutex lock_;
+
+  const std::vector<DiagnosticTaskInternal> &getTasks()
+  {
+    return tasks_;
+  }
+
+public:    
   /**
-   * Do we really want this constructor?
+   * \brief Add a DiagnosticTask to the DiagnosticTaskVector
+   *
+   * \param task The DiagnosticTask to be added. It must remain valid at
+   * least until the last time its operator() is called. It need not be
+   * valid at the time the DiagnosticTaskVector is destructed.
    */
 
-  /*Updater() : node_handle_()
+  void add(const std::string &name, TaskFunction f)
   {
-    setup();
-  }*/
+    DiagnosticTaskInternal int_task(name, f);
+    add(int_task);
+  }
+
+  void add(DiagnosticTask &task)
+  {
+    TaskFunction f = boost::bind<void>(boost::ref(task), _1);
+    add(task.getName(), f);
+  }
   
-  Updater(C *owner, ros::NodeHandle h) : Updater_base<C>(owner), node_handle_(h)
+  template <class T>
+  void add(const std::string name, T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
+    DiagnosticTaskInternal int_task(name, boost::bind(f, c, _1));
+    add(int_task);
+  }
+  
+private:
+  virtual void addedTaskCallback(DiagnosticTaskInternal &)
+  {}
+  std::vector<DiagnosticTaskInternal> tasks_;
+  
+  void add(DiagnosticTaskInternal &task)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    tasks_.push_back(task); 
+    addedTaskCallback(task);
+  }
+};
+
+class Updater : public DiagnosticTaskVector
+{
+public:
+  Updater(ros::NodeHandle h) : node_handle_(h)
   {
     setup();
   }
@@ -164,28 +234,23 @@ public:
     {
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-      for (std::vector<TaskFunction>::iterator tasks_iter = Updater_base<C>::tasks_.begin();
-           tasks_iter != Updater_base<C>::tasks_.end();
-           tasks_iter++)
+      boost::mutex::scoped_lock lock(lock_); // Make sure no adds happen while we are processing here.
+      const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
+      for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+           iter != tasks.end(); iter++)
       {
         diagnostic_updater::DiagnosticStatusWrapper status;
 
-        status.name = "None";
+        status.name = iter->getName();
         status.level = 2;
         status.message = "No message was set";
 
-        (*tasks_iter)(status);
+        (*iter)(status);
 
-        if (status.name != "None")
-        {
-          status.name = node_handle_.getName() + std::string(": ") + status.name;
-          status_vec.push_back(status);
-        }
+        status_vec.push_back(status);
       }
 
-      msg_.set_status_vec(status_vec);
-
-      publisher_.publish(msg_);
+      publish(status_vec);
     }
 
     node_handle_.param("~diagnostic_period", period_, 1.0);
@@ -196,7 +261,58 @@ public:
     return period_;
   }
 
+  // Destructor has troble because the node is already shut down.
+  /*~Updater()
+  {
+    // Create a new node handle and publisher because the existing one is 
+    // probably shut down at this stage.
+    
+    ros::NodeHandle newnh; 
+    node_handle_ = newnh; 
+    publisher_ = node_handle_.advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+    broadcast(2, "Node shut down"); 
+  }*/
+
+  void broadcast(int lvl, const std::string msg)
+  {
+    std::vector<robot_msgs::DiagnosticStatus> status_vec;
+      
+    const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
+    for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+        iter != tasks.end(); iter++)
+    {
+      diagnostic_updater::DiagnosticStatusWrapper status;
+
+      status.name = iter->getName();
+      status.summary(lvl, msg);
+
+      status_vec.push_back(status);
+    }
+
+    publish(status_vec);
+  }
+
 private:
+  void publish(robot_msgs::DiagnosticStatus &stat)
+  {
+    std::vector<robot_msgs::DiagnosticStatus> status_vec;
+    status_vec.push_back(stat);
+    publish(status_vec);
+  }
+
+  void publish(std::vector<robot_msgs::DiagnosticStatus> &status_vec)
+  {
+    for  (std::vector<robot_msgs::DiagnosticStatus>::iterator 
+        iter = status_vec.begin(); iter != status_vec.end(); iter++)
+    {
+      iter->name = 
+        node_handle_.getName().substr(1) + std::string(": ") + iter->name;
+    }
+    robot_msgs::DiagnosticMessage msg;
+    msg.set_status_vec(status_vec);
+    publisher_.publish(msg);
+  }
+
   void setup()
   {
     publisher_ = node_handle_.advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
@@ -205,14 +321,20 @@ private:
     next_time_ = ros::Time::now();
   }
 
+  virtual void addedTaskCallback(DiagnosticTaskInternal &task)
+  {
+    DiagnosticStatusWrapper stat;
+    stat.name = task.getName();
+    stat.summary(2, "Node starting up");
+    publish(stat);
+  }
+
   ros::NodeHandle node_handle_;
   ros::Publisher publisher_;
 
   ros::Time next_time_;
 
   double period_;
-
-  robot_msgs::DiagnosticMessage msg_;
 
 };
 
@@ -226,29 +348,33 @@ private:
  */
 
 template <class T>
-class DiagnosticUpdater : public diagnostic_updater::Updater<T>
+class DiagnosticUpdater : public diagnostic_updater::Updater
 {
 public:
-  DiagnosticUpdater(T *n) : diagnostic_updater::Updater<T>(n, ros::NodeHandle())
+  DiagnosticUpdater(T *n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(n)
   {
     complain();
   }
 
-  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater<T>(c, ros::NodeHandle())
+  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(c)
   {
     complain();
   }
 
-  DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater<T>(c, h)
+  DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater(h), owner_(c)
   {
     complain();
   }
 
   void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
   {
-    void (T::*f2)(diagnostic_updater::DiagnosticStatusWrapper&);
-    f2 = (typeof f2) f; // @todo Is this acceptable?
-    diagnostic_updater::Updater<T>::add(f2);
+    diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, owner_, _1);
+    robot_msgs::DiagnosticStatus stat;
+    f2(stat); // Get the function to fill out its name.
+    boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
+      fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask(stat.name, f2));
+    tasks_vect_.push_back(fcls);
+    add(*fcls);
   }
 
 private:
@@ -256,6 +382,9 @@ private:
   {
     //ROS_WARN("DiagnosticUpdater is deprecated, please use diagnostic_updater::Updater instead.");
   }
+  
+  T *owner_;
+  std::vector<boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> > tasks_vect_;
 };
 
 #endif

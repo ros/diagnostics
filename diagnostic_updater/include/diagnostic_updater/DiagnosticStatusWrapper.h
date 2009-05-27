@@ -60,42 +60,16 @@ public:
     message = s;
   }
 
-  void addss(const std::string &key, const std::string &s)
-  {
-    robot_msgs::DiagnosticString ds;
-    ds.label = key;
-    ds.value = s;
-    strings.push_back(ds);
-  }
-
   template<class T>
-  void adds(const std::string &key, T &val)
+  void adds(const std::string &key, const T &val)
   {
     std::stringstream ss;
     ss << val;
     std::string sval = ss.str();
-    addss(key, sval);
+    adds(key, sval);
   }
-
-/*  template<class T>
-  void adds(const char *key, T &val)
-  {
-    std::string skey(key);
-    adds(skey, val);
-  }*/
-
-  //template<class T>
-  void addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
-  {
-    va_list va;
-    char buff[1000]; // @todo This could be done more elegantly.
-    va_start(va, format);
-    if (vsnprintf(buff, 1000, format, va) >= 1000)
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
-    std::string value = std::string(buff);
-    adds(key, value);
-    va_end(va);
-  }
+  
+  void addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
 
   void addv(const std::string &key, double v)
   {
@@ -104,13 +78,31 @@ public:
     dv.value = v;
     values.push_back(dv);
   }
-  
-  /*void addv(const char *key, double v)
-  {
-    std::string skey(key);
-    addv(skey, v);
-  }*/
 };
+
+template<>
+void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const std::string &s)
+{
+  robot_msgs::DiagnosticString ds;
+  ds.label = key;
+  ds.value = s;
+  strings.push_back(ds);
+}
+  
+// Need to place addsf after DiagnosticStatusWrapper::adds<std::string> or
+// gcc complains that the specialization occurs after instatiation.
+void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
+{
+  va_list va;
+  char buff[1000]; // @todo This could be done more elegantly.
+  va_start(va, format);
+  if (vsnprintf(buff, 1000, format, va) >= 1000)
+    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+  std::string value = std::string(buff);
+  adds(key, value);
+  va_end(va);
+}
+
 
 }
 #endif
