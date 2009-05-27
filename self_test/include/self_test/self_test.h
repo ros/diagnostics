@@ -52,7 +52,7 @@ namespace self_test
 using namespace diagnostic_updater;
 
 template <class T>
-class Dispatcher : public Updater_base<T>
+class Dispatcher : public DiagnosticTaskVector
 {        
 private:
 
@@ -65,6 +65,10 @@ private:
   
   std::string id_;
 
+protected: /// @todo Get rid of this when we get rid of the legacy interface.
+  T *owner_;
+
+private:
   void (T::*pretest_)();
   void (T::*posttest_)();
 
@@ -79,7 +83,7 @@ private:
 public:
 
   Dispatcher(T *owner, ros::NodeHandle h) : 
-    Updater_base<T>(owner), node_handle_(h), pretest_(NULL), posttest_(NULL)
+    node_handle_(h), owner_(owner), pretest_(NULL), posttest_(NULL)
   {
     ROS_WARN("Advertising self_test");
     service_server_ = node_handle_.advertiseService("~self_test", &Dispatcher::doTest, this);
@@ -99,6 +103,13 @@ public:
     posttest_ = f;
   }
 
+  template<class S>
+  void add(const std::string name, void (S::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
+  {
+    DiagnosticTaskInternal int_task(name, boost::bind(f, owner_, _1));
+    add(int_task);
+  }
+  
   void checkTest()
   {
     bool local_waiting = false;
@@ -162,16 +173,16 @@ public:
 
       if (pretest_ != NULL)
       {
-        (Updater_base<T>::owner_->*pretest_)();
+        (owner_->*pretest_)();
       }
 
       ROS_INFO("Completed pretest\n");
 
       std::vector<robot_msgs::DiagnosticStatus> status_vec;
 
-      for (typename std::vector<TaskFunction>::iterator tasks_iter = Updater_base<T>::tasks_.begin();
-           tasks_iter != Updater_base<T>::tasks_.end();
-           tasks_iter++)
+      const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
+      for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+          iter != tasks.end(); iter++)
       {
         diagnostic_updater::DiagnosticStatusWrapper status;
 
@@ -181,7 +192,7 @@ public:
 
         try {
 
-          (*tasks_iter)(status);
+          (*iter)(status);
 
         } catch (std::exception& e)
         {
@@ -214,7 +225,7 @@ public:
       res.set_status_vec(status_vec);
 
       if (posttest_ != NULL)
-        (Updater_base<T>::owner_->*posttest_)();
+        (owner_->*posttest_)();
 
       ROS_INFO("Self test completed\n");
 
@@ -251,15 +262,22 @@ public:
 
   void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
   {
-    void (T::*f2)(diagnostic_updater::DiagnosticStatusWrapper&);
-    f2 = (typeof f2) f; // @todo Is this acceptable?
-    self_test::Dispatcher<T>::add(f2);
+    diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, self_test::Dispatcher<T>::owner_, _1);
+    robot_msgs::DiagnosticStatus stat;
+    f2(stat); // Get the function to fill out its name.
+    boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
+      fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask(stat.name, f2));
+    tests_vect_.push_back(fcls);
+    self_test::DiagnosticTaskVector::add(*fcls);
   }
   
   void complain()
   {
     //ROS_WARN("SelfTest is deprecated, please use self_test::Dispatcher instead.");
   }
+
+private:
+  std::vector<boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> > tests_vect_;
 };
 
 #endif
