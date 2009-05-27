@@ -160,7 +160,7 @@ class SerialPanel(wx.Panel):
 
   def verify_onboard_test(self, robot):
     onboard_check = 'Are you sure you want to run this test?\n\n'
-    onboard_check += 'This will shut down everything on %s.\n'
+    onboard_check += 'This will shut down everything on %s.\n' % robot
     onboard_check += 'Make sure you have all your tests selected.\n\n'
     onboard_check += 'The wheels must be off the ground for caster tests.\n\n\n'
     onboard_check += 'DO NOT PROCEED IF YOU ARE NOT READY.'
@@ -353,17 +353,23 @@ class PlotsPanel(wx.Panel):
     self._cancel_button.Enable(cancel_enabled)
     
   def on_pass(self, event):
-    self._manager.subtest_result(True, self._notes_text.GetValue())
+    notes =  self._notes_text.GetValue()
     self._notes_text.Clear()
+    self._manager.subtest_result(True, notes)
+
   
   def on_fail(self, event):
-    self._manager.subtest_result(False, self._notes_text.GetValue())
+    notes =  self._notes_text.GetValue()
     self._notes_text.Clear()
+    self._manager.subtest_result(False, notes)
+
   
   def on_retry(self, event):
     # Will pass notes to subtest result eventually
-    self._manager.retry_subtest()
+    
     self._notes_text.Clear()
+    self._manager.retry_subtest()
+
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed.")
@@ -702,7 +708,7 @@ class QualificationFrame(wx.Frame):
     test_xml = '<test>\n' 
 
     if show_viz:
-      test_xml = test_xml + '<subtest name="Visualization">visualization/visualization.launch</subtest>\n'
+      test_xml = test_xml + '<subtest name="Visualization">checkout/robot_checkout.launch</subtest>\n'
     for test in tests:
       test_xml = test_xml + str(test)
     test_xml = test_xml + '</test>'

@@ -156,7 +156,7 @@ class VisualizerApp(wx.App):
       call_done_service(ScriptDoneRequest.RESULT_ERROR, 'Visual check recorded error on initialization: %s' % traceback.format_exc())
       rospy.logerr('Error initializing rviz: %s' % traceback.format_exc())
 
- def OnExit(self):        
+  def OnExit(self):
     ogre_tools.cleanupOgre()
 
 if __name__ == "__main__":

@@ -87,6 +87,7 @@ class CounterBalanceAnalysis:
         print 'Num joints', len(self._joints)
         print 'Joints: %s' % string.join(self._joints, ', ')
 
+        sleep(1.0)
         self.wait_for_analysis()
 
     def wait_for_analysis(self):
@@ -190,7 +191,7 @@ class CounterBalanceAnalysis:
         effort_sd = []
 
         for hold in srv.hold_data:
-            pos_avg.append())
+            pos_avg.append(numpy.average(hold.position))
             vel_sd.append(numpy.std(hold.velocity))
             effort_avg.append(numpy.average(hold.effort))
             effort_sd.append(numpy.std(hold.effort))
