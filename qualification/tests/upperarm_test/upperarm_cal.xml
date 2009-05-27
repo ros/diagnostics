@@ -6,28 +6,5 @@
   <forearm_calibrator side="r" />
 
 
-<!-- Hack. Only use iff no cal flags on upperarm -->
-<!-- Uses limit controllers to calibrate at end of travel -->
-<!-- Doesn't really work for roll, because doesn't have an end -->
-<!-- Stop roll joint manually (grab it) to calibrate -->
-<!--
-    <controller name="cal_r_elbow_flex" topic="cal_r_elbow_flex"
-                type="JointLimitCalibrationControllerNode">
-      <calibrate joint="r_elbow_flex_joint"
-                 actuator="r_elbow_flex_motor"
-                 transmission="r_elbow_flex_trans"
-                 velocity="1.0" />
-      <pid p="6" i="0.2" d="0" iClamp="1.0" />
-    </controller>
-
-    <controller name="cal_r_forearm_roll" topic="cal_r_forearm_roll"
-		type="JointLimitCalibrationControllerNode">
-      <calibrate joint="r_forearm_roll_joint"
-                 actuator="r_forearm_roll_motor"
-                 transmission="r_forearm_roll_trans"
-                 velocity="-1.2" />
-      <pid p="5.0" i="0" d="0" iClamp="0" />
-    </controller>
--->
 
 </controllers>

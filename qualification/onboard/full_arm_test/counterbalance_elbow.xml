@@ -1,0 +1,19 @@
+<controller type="HoldSetControllerNode" name="test_controller">
+  <joint name="%s_elbow_flex_joint"> <!-- Goes in to full arm test spawner -->
+    <pid p="12" i="3.0" d="0" iClamp="0.75" />
+   </joint>
+  
+  <controller_defaults dither_amplitude="0.5" settle_time="2.0"
+		       dither_time="1.0" timeout="60" />
+
+  <hold_pt position="-0.05" />
+  <hold_pt position="-0.25" />
+  <hold_pt position="-0.5" />
+  <hold_pt position="-0.75" />
+  <hold_pt position="-1.0" />
+  <hold_pt position="-1.25" />
+  <hold_pt position="-1.5" />
+  <hold_pt position="-1.75" />
+  <hold_pt position="-2.0" />
+
+</controller>

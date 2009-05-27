@@ -589,15 +589,13 @@
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
 				<option>1</option>
-				<flag>wxEXPAND</flag>
+				<flag>wxEXPAND | wxALL</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxVERTICAL</orient>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxPanel" name="m_panel3">
+				<object class="wxNotebook" name="results_notebook">
+					<object class="notebookpage">
+						<label>Results and Plots</label>
+						<selected>0</selected>
+						<object class="wxPanel" name="results_panel">
 							<style>wxTAB_TRAVERSAL</style>
 							<object class="wxBoxSizer">
 								<orient>wxVERTICAL</orient>
@@ -607,6 +605,41 @@
 									<border>5</border>
 									<object class="wxHtmlWindow" name="plots_window">
 										<style>wxHW_SCROLLBAR_AUTO</style>
+									</object>
+								</object>
+								<object class="sizeritem">
+									<option>0</option>
+									<flag>wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxALL</flag>
+											<border>5</border>
+											<object class="wxStaticText" name="m_staticText15">
+												<font>
+													<size>11</size>
+													<family>swiss</family>
+													<style>normal</style>
+													<weight>bold</weight>
+													<underlined>0</underlined>
+													<face>Sans</face>
+												</font>
+												<label>Operator Notes:</label>
+											</object>
+										</object>
+										<object class="sizeritem">
+											<option>1</option>
+											<flag>wxALL|wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxTextCtrl" name="notes_text">
+												<style>wxTE_MULTILINE|wxTE_WORDWRAP</style>
+												<size>-1,60</size>
+												<value></value>
+												<maxlength>0</maxlength>
+											</object>
+										</object>
 									</object>
 								</object>
 							</object>
@@ -686,22 +719,6 @@
 				<object class="wxBoxSizer">
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL|wxALIGN_CENTER_HORIZONTAL</flag>
-						<border>5</border>
-						<object class="wxStaticText" name="m_staticText81">
-							<font>
-								<size>13</size>
-								<family>swiss</family>
-								<style>normal</style>
-								<weight>bold</weight>
-								<underlined>0</underlined>
-								<face>Sans</face>
-							</font>
-							<label>Test Result Summary</label>
-						</object>
-					</object>
-					<object class="sizeritem">
 						<option>1</option>
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
@@ -739,19 +756,19 @@
 			</object>
 			<object class="sizeritem">
 				<option>0</option>
-				<flag>wxALIGN_RIGHT</flag>
+				<flag>wxEXPAND|wxALIGN_CENTER_HORIZONTAL</flag>
 				<border>5</border>
 				<object class="wxBoxSizer">
 					<orient>wxHORIZONTAL</orient>
 					<object class="sizeritem">
 						<option>0</option>
-						<flag>wxALL</flag>
+						<flag>wxALL|wxALIGN_BOTTOM</flag>
 						<border>5</border>
 						<object class="wxDirPickerCtrl" name="results_dir_picker">
 							<value>/wg/stor2/watts/ros/ros-pkg/hardware__test/qualification/xrc</value>
 							<message>Select a folder to store results</message>
 							<style>wxDIRP_DEFAULT_STYLE</style>
-							<size>300,-1</size>
+							<size>250,-1</size>
 						</object>
 					</object>
 					<object class="spacer">
@@ -762,7 +779,7 @@
 					</object>
 					<object class="sizeritem">
 						<option>0</option>
-						<flag>wxALL</flag>
+						<flag>wxALL|wxALIGN_BOTTOM</flag>
 						<border>5</border>
 						<object class="wxButton" name="submit_button">
 							<font>

@@ -1,0 +1,3 @@
+<controller name="test_controller" type="CheckoutControllerNode">
+  <controller_defaults timeout="30" />
+</controller>

@@ -1,0 +1,38 @@
+Background\ ColorR=0
+Background\ ColorG=0
+Background\ ColorB=0
+Fixed\ Frame=base_link
+Target\ Frame=base_link
+Grid.Cell\ Count=10
+Grid.Cell\ Size=1
+Grid.ColorR=0.5
+Grid.ColorG=0.5
+Grid.ColorB=0.5
+Grid.Enabled=1
+Robot\ Model.Collision\ Enabled=0
+Robot\ Model.Enabled=1
+Robot\ Model.Mechanism\ Topic=mechanism_state
+Robot\ Model.Robot\ Description=robotdesc/pr2
+Robot\ Model.Update\ Rate=0.1
+Robot\ Model.Visual\ Enabled=1
+Robot\:\ Robot\ Model\ Link\ r_wrist_flex_linkShow\ Axes=1
+Robot\:\ Robot\ Model\ Link\ r_wrist_flex_linkShow\ Trail=0
+Robot\:\ Robot\ Model\ Link\ r_wrist_roll_linkShow\ Axes=1
+Robot\:\ Robot\ Model\ Link\ r_wrist_roll_linkShow\ Trail=0
+tf.Enabled=1
+tf.Show\ Arrows=0
+tf.Show\ Axes=1
+tf.Show\ Names=0
+tf.Update\ Rate=100
+Property\ Grid\ State=selection=tf.Show Arrows;expanded=.Global Options,Grid,Robot Model,tf,tf.Frames,tf.Tree;scrollpos=0,0;splitterpos=146,292;ispageselected=1
+Camera\ Type=Orbit
+Camera\ Config=0.016 0.000803471 0.7 -0.00526259 8.7585e-05 -0.262487
+[Display0]
+Type=Grid
+Name=Grid
+[Display1]
+Type=Robot Model
+Name=Robot Model
+[Display2]
+Type=TF
+Name=tf

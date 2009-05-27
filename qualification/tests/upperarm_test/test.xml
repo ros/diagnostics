@@ -6,7 +6,7 @@
   <pre_startup>../../config/r_upperarm_conf.launch</pre_startup>
   <startup>upperarm.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
-  <subtest>upperarm_visualization.launch</subtest>
+  <subtest>upperarm_checkout.launch</subtest>
   <subtest>sinesweep_elbow_flex.launch</subtest>
   <subtest>hysteresis_elbow_flex.launch</subtest>
   <subtest>sinesweep_forearm_roll.launch</subtest>

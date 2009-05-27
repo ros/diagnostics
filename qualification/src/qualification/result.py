@@ -37,8 +37,9 @@
 import roslib
 roslib.load_manifest('qualification')
 
-import sys, os, time, string
+import sys, os, time, string, subprocess
 from xml.dom import minidom
+
 
 from qualification.msg import *
 from srv import *
@@ -78,7 +79,7 @@ class SubTestResult:
             self._summary = ''
 
         self._msg = msg
-        self._failure_txt = ''
+        self._subresult_note = ''
         
         self._plots = []
         if msg.plots is not None:
@@ -96,8 +97,8 @@ class SubTestResult:
     def get_passfail(self):
         return self._result
 
-    def set_failure_text(self, txt):
-        self._failure_txt = txt
+    def set_note(self, txt):
+        self._subresult_note = txt
 
     def filename(self):
         return self._name.replace(' ', '_').replace('/', '__') + '.html'
@@ -172,9 +173,9 @@ em { font-style:normal; font-weight: bold; }\
         if self._summary != '':
             html += '<p><em>Summary</em></p>\n' 
             html += '<p>%s</p>\n' % self._summary
-        if self._failure_txt != '':
-            html += '<p><em>Failure Reason</em></p>\n' 
-            html += '<p>%s</p>\n' % self._failure_txt
+        if self._subresult_note != '':
+            html += '<p><em>Operator\'s Notes:</em></p>\n' 
+            html += '<p>%s</p>\n' % self._subresult_note
 
         return html
 
@@ -190,7 +191,7 @@ em { font-style:normal; font-weight: bold; }\
         else:
             hyperlink = self._name
 
-        summary = self._summary + '\n' + self._failure_txt
+        summary = self._summary + '\n' + self._subresult_note
 
         return '<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n' % (hyperlink, summary, result)
 
@@ -451,11 +452,11 @@ em { font-style: normal; font-weight: bold; }\
         self.write_results_to_file(False, True)
 
         if invent == None:
-            return False, "No inventory object"
+            return False, "Attempted to log results to inventory, but no invent client found."
         if len(self.get_subresults()) == 0:
-            return False, "No subtest results"
+            return False, "No subtest results found, not logging to invent."
         if self.has_error_no_invent:
-            return False, "Test recorded internal error, not submitting to invent"
+            return False, "Test recorded internal error, not submitting to inventory system."
         
         prefix = self._start_time_filestr + "_" # Put prefix first so images sorted by date
         
@@ -471,32 +472,44 @@ em { font-style: normal; font-weight: bold; }\
 
         invent.setNote(self._serial, self.line_summary())
 
+        if self.config_only:
+            sub = self.get_subresult(0) # Only subresult of configuration
+            invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
+            return True, 'Logged reconfiguration in inventory system.'
+
+        invent.setKV(self._serial, "Test Status", self.test_status_str())
+        invent.add_attachment(reference, prefix + "summary.html", "text/html", self.make_summary_page(False))
+        
+        # Use add attachment...
         if 0:
-            if self.config_only:
-                sub = self.get_subresult(0) # Only subresult of configuration
-                invent.add_attachment(self._serial, prefix + sub.filename(), 'text/html', sub.make_result_page())
-                return True, 'Logged reconfiguration in inventory system.'
+            try:
+                # Need to get tar to bit stream
+                f = open(self._tar_filename, "rb")
+                tar = f.read()
+                invent.add_attachment(reference, 
+                                      prefix + os.path.basename(self._tar_filename),
+                                      'applicaton/tar', tar)
 
-            invent.setKV(self._serial, "Test Status", self.test_status_str())
-            invent.add_attachment(reference, prefix + "summary.html", "text/html", self.make_summary_page(False))
+                f.close()            
+                return True, 'Wrote tar file, uploaded to inventory system.'
+            except Exception, e:
+                import traceback
+                traceback.print_exc()
+                print "filename", self._tar_filename
+                print 'Caught exception uploading tar file. %s' % str(e)
+                return False, 'Caught exception loading tar file to inventory. %s' % str(e)
 
-        try:
-            # Need to get tar to bit stream
-            f = open(self._tar_filename, "rb")
-            tar = f.read()
-            invent.add_attachment(reference, 
-                                  prefix + os.path.basename(self._tar_filename),
-                                  'applicaton/tar', tar)
+        if 1:
+            _path = os.path.join(roslib.packages.get_pkg_dir("qualification"), "src", "qualification", "add_attachment.py")
+            print "_path", _path
+            cmd = [_path, "--username=" + invent.username, "--password=" + invent.password, reference, self._tar_filename]
+            print cmd
+            retcode = subprocess.call(cmd)
+            print "retcode:", retcode
 
-            f.close()            
-            return True, 'Wrote tar file, uploaded to inventory'
-        except Exception, e:
-            import traceback
-            traceback.print_exc()
-            print "filename", self._tar_filename
-            print 'Caught exception uploading tar file. %s' % str(e)
-            return False, 'Caught exception loading tar file. %s' % str(e)
-            
+            if retcode == 0:
+                return True, 'Wrote tar file, uploaded to inventory system.'
+            return False, 'Received retcode %s from add_attachment, unable to upload to inventory system.' % retcode
 
     def get_qual_team(self):
         return string.join(self.dev_team, ", ")

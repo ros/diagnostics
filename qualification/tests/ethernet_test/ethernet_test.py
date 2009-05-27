@@ -56,10 +56,7 @@ def ethernet_test():
     res = os.popen('ping -f -q -w 1 -s 32768 %s' % (ip)).readlines()
 
     r = TestResultRequest()
-    p = Plot()
-    p.image = ""
-    p.image_format = ""
-    r.plots = [p]
+    r.plots = []
     
     s = StringIO()
 
@@ -85,12 +82,14 @@ def ethernet_test():
           else:
             speed_str = '< 10 Megabit'
           
-          r.text_result = speed_str
-          print >> s, 'Speed: %f (%s)'%(speed, speed_str)
+          r.text_summary = speed_str
+          r.html_result = '<p>Speed: %f (%s).</p>'%(speed, speed_str)
         else:
-          r.text_result = 'Too many packets lost'
+          r.text_summary = 'Too many packets lost.'
+          r.html_result = '<p>Too many packets lost.</p>'
     else:
-      r.text_result = 'Running ping failed'
+      r.text_summary = 'Running ping failed.'
+      r.html_result = '<p>Running ping failed!</p>'
         
     p.text = s.getvalue()
     

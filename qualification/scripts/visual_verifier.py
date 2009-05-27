@@ -1,4 +1,33 @@
 #!/usr/bin/python
+# Copyright (c) 2008, Willow Garage, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the Willow Garage, Inc. nor the names of its
+#       contributors may be used to endorse or promote products derived from
+#       this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+# Author: Josh Faust
+
 
 import os
 import sys
@@ -19,6 +48,7 @@ roslib.load_manifest('qualification')
 from optparse import OptionParser
 import shutil
 import glob
+import traceback
 
 import roslib.packages
 import rospy
@@ -27,6 +57,14 @@ import rviz
 import ogre_tools
 
 from qualification.srv import *
+
+def call_done_service(result, msg):
+  result_service = rospy.ServiceProxy('visual_check', ScriptDone)
+  r = ScriptDoneRequest()
+  r.result = result
+  r.failure_msg = msg
+  rospy.wait_for_service('visual_check')
+  result_service.call(r)
 
 class VisualizerFrame(wx.Frame):
   def __init__(self, parent, id=wx.ID_ANY, title='Standalone Visualizer', pos=wx.DefaultPosition, size=(800, 600), style=wx.DEFAULT_FRAME_STYLE):
@@ -69,25 +107,12 @@ class VisualizerFrame(wx.Frame):
     self.Destroy()
     
   def on_pass(self, event):
-    result_service = rospy.ServiceProxy('test_result', TestResult)
-    r = TestResultRequest()
-    r.plots = []
-    r.text_summary = 'Visual Verification OK.'
-    r.html_result = "<p>Visual Verification Succeeded.</p>"
-    r.result = TestResultRequest.RESULT_PASS
-    rospy.wait_for_service('test_result')
-    result_service.call(r)
-    
-    
+    call_done_service(ScriptDoneRequest.RESULT_OK, 'Visual check passed by operator.')
+    self.Destroy()
+
   def on_fail(self, event):
-    result_service = rospy.ServiceProxy('test_result', TestResult)
-    r = TestResultRequest()
-    r.plots = []
-    r.text_summary = 'Visual Verification failed.'
-    r.html_result = "<p>Visual Verification Failed.</p>"
-    r.result = TestResultRequest.RESULT_FAIL
-    rospy.wait_for_service('test_result')
-    result_service.call(r)
+    call_done_service(ScriptDoneRequest.RESULT_FAIL, 'Visual check failed by operator.')
+    self.Destroy()
       
   def load_config_from_path(self, path):
     manager = self._visualizer_panel.getManager()
@@ -106,31 +131,43 @@ class VisualizerFrame(wx.Frame):
       self.load_config_from_path(path)
 
 class VisualizerApp(wx.App):
-  def __init__(self, file, instructions):
+  def __init__(self, file):
     self._filepath = file
-    self._instructions = instructions
+    self._instructions = 'Move joints and verify robot is OK.'
     
     wx.App.__init__(self)
   
   def OnInit(self):
-    frame = VisualizerFrame(None, wx.ID_ANY, "Visual Verifier", wx.DefaultPosition, wx.Size( 800, 600 ) )
+    try:
+      frame = VisualizerFrame(None, wx.ID_ANY, "Visual Verifier", wx.DefaultPosition, wx.Size( 800, 600 ) )
     
-    if (not os.path.exists(self._filepath)):
-      print "File '%s' does not exist!"%(self._filepath)
-      sys.exit(1)
+      if (not os.path.exists(self._filepath)):
+        call_done_service(ScriptDoneRequest.RESULT_ERROR, 'Visual check recorded error, file does not exist!')
+        rospy.logerr('Visual check recorded error, file does not exist!')
+        #print "File '%s' does not exist!"%(self._filepath)
+        #sys.exit(1)
     
-    frame.load_config_from_path(self._filepath)
-    frame.set_instructions(self._instructions)
-    frame.Show(True)
-    return True
-        
-  def OnExit(self):        
+      frame.load_config_from_path(self._filepath)
+      frame.set_instructions(self._instructions)
+      frame.Show(True)
+      return True
+    except:
+      # Fail here, because this could mean TF is giving NaN values (encoder failure...)
+      call_done_service(ScriptDoneRequest.RESULT_ERROR, 'Visual check recorded error on initialization: %s' % traceback.format_exc())
+      rospy.logerr('Error initializing rviz: %s' % traceback.format_exc())
+
+ def OnExit(self):        
     ogre_tools.cleanupOgre()
 
 if __name__ == "__main__":
-  if (len(sys.argv) < 3):
-    print "usage: visual_verifier.py 'path to config file' 'instruction text'"
-    sys.exit(1)
+  if (len(sys.argv) < 2):
+    call_done_service(ScriptDoneRequest.RESULT_ERROR, "Visual verifier not given path to config file.\nusage: visual_verifier.py 'path to config file'")
+    #print "usage: visual_verifier.py 'path to config file'"
+    #sys.exit(1)
   
-  app = VisualizerApp(sys.argv[1], sys.argv[2])
-  app.MainLoop()
+  try:
+    app = VisualizerApp(sys.argv[1])
+    app.MainLoop()
+  except:
+    call_done_service(ScriptDoneRequest.RESULT_ERROR, 'Visual check recorded error: %s' % traceback.format_exc())
+    rospy.logerr(traceback.format_exc())

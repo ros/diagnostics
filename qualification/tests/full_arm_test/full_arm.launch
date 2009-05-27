@@ -1,14 +1,12 @@
 <launch>
-
   <param name="robotdesc/pr2" command="$(find xacro)/xacro.py '$(find qualification)/tests/full_arm_test/full_arm.xml'" />
 
-  <!-- Loads xenomai_root machine and PR2_etherCAT -->
+  <param name="full_arm_test/side" value="r" type="str" />
+
   <include file="$(find qualification)/tests/init.machine" />
+  <include file="$(find qualification)/tests/pr2_etherCAT.launch" />
 
-  <!-- Full Arm Calibration uses sequential arm calibrator -->
-  <launch>
-	<node pkg="mechanism_bringup" type="calibrate_arms.py"/>
-<!--args="$(find qualification)/tests/full_arm_test/full_arm_cal.xml" /> -->
-  </launch>
-
+  <node pkg="mechanism_bringup" type="calibrate_arms.py"/>
+	args="$(find qualification)/tests/full_arm_test/full_arm_cal.xml" /> 
+ 
 </launch>

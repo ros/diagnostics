@@ -74,13 +74,17 @@ def hold_joint(name, p, i, d, iClamp, holding):
         if ord(resp.ok[0]) != 0:
             holding.append(resp.name[0])
             return True
+        else:
+            rospy.logerr('Failed to spawn controller %s' % resp.name)
+            rospy.logerr('Spawner error: %s' % resp.error)
     except Exception, e:
         print "Failed to spawn holding controller %s" % name
         print xml_for_hold(name, p, i, d, iClamp)
+        
     return False
 
 def set_controller(controller, command):
-    pub = rospy.Publisher('/' + controller + '/set_command', Float64,
+    pub = rospy.Publisher(controller + '/set_command', Float64,
                               SendMessageOnSubscribe(Float64(command)))
 
 def hold_arm(side, pan_angle, holding):
@@ -129,6 +133,10 @@ def main():
     
         rospy.wait_for_service('spawn_controller')
         
+        print 'Raising torso'
+        if hold_joint("torso_lift", 2000000, 0, 1000, 1200):
+            set_controller("torso_lift_hold", float(0.30))
+
         print 'Holding arms'
         # Hold both arms in place
         hold_arm('r', -1.2, holding)
@@ -143,7 +151,7 @@ def main():
         else:
             print 'Joint %s is not being held' % joint
         
-        time.sleep(1.5)
+        time.sleep(1.0)
         
         print 'Spawning test controller'
         # Spawn test controller and run test
@@ -172,9 +180,10 @@ def main():
             for i in range(0,5):
                 try:
                     rospy.logout("Trying to kill %s" % name)
-                    kill_controller(name)
-                    rospy.logout("Succeeded in killing %s" % name)
-                    break
+                    resp = kill_controller(name)
+                    if (ord(resp) != 0):
+                        rospy.logout("Succeeded in killing %s" % name)
+                        break
                 except rospy.ServiceException:
                     rospy.logerr("ServiceException while killing %s" % name)
 

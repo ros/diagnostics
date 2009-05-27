@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/onboard/checkout/robot_checkout.xml" />
+  <node pkg="qualification" type="robot_checkout.py" />
+</launch>

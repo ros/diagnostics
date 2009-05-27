@@ -2,6 +2,9 @@
   <!-- Base and Spine -->
   <test serial="6804108" 
 	file="caster_test/test.xml" descrip="Caster Alpha 1.0"/>
+
+  <test serial="6804108" 
+	file="simple_example/test.xml" descrip="Simple Example"/>
   <test serial="6804108" 
 	file="caster_test/test_alpha2.xml" descrip="Caster Alpha 2.0" />
   <test serial="torsoli" 
@@ -40,7 +43,7 @@
       file="upperarm_flex_only_test/test.xml"/-->
   
   <!-- Special tests -->
-  <test serial="simple_" 
+  <test serial="faketes" 
 	file="simple_example/test.xml" descrip="Simple Example" />
 
 

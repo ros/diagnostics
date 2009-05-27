@@ -6,6 +6,6 @@
   <pre_startup>../../config/r_gripper_conf.launch</pre_startup>
   <startup>gripper.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
+  <subtest>gripper_checkout.launch</subtest>
   <subtest>hysteresis_gripper.launch</subtest>
-  <!--subtest>backlash_gripper.launch</subtest-->
 </test>

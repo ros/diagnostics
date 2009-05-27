@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="qualification" type="visual_verifier.py" args="$(find qualification)/tests/full_arm_test/view.vcg" />
+  <node pkg="mechanism_control" type="spawner.py" args="$(find qualification)/onboard/checkout/robot_checkout.xml" />
+  <node pkg="qualification" type="robot_checkout.py" />
+</launch>

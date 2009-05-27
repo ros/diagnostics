@@ -74,9 +74,10 @@ def main():
         for i in range(3):
             try:
                 rospy.logout("Trying to kill test_controller")
-                kill_controller('test_controller')
-                rospy.logout("Succeeded in killing test_controller")
-                break
+                resp = kill_controller('test_controller')
+                if resp.ok[0] == chr(1):
+                    rospy.logout("Succeeded in killing test_controller")
+                    break
             except rospy.ServiceException:
                 rospy.logerr("ServiceException while killing test_controller")
 

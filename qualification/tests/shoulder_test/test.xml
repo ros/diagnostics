@@ -6,10 +6,9 @@
   <pre_startup>../../config/r_shoulder_conf.launch</pre_startup>
   <startup>shoulder.launch</startup>
   <shutdown>../../scripts/power_board_disable.launch</shutdown>
-  <subtest>shoulder_visualization.launch</subtest>
+  <subtest>shoulder_checkout.launch</subtest>
   <subtest>sinesweep_shoulder_pan.launch</subtest>
   <subtest>hysteresis_shoulder_pan.launch</subtest>
-  <!--subtest>sinesweep_shoulder_lift.launch</subtest-->
   <subtest>hysteresis_shoulder_lift.launch</subtest>
   <subtest>sinesweep_upper_arm_roll.launch</subtest>
   <subtest>hysteresis_upper_arm_roll.launch</subtest>

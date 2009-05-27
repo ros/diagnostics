@@ -74,8 +74,10 @@ class Invent:
     url = self.site + "invent/api.py?Action.getKeyValue=1&reference=%s&key=%s" % (reference, urllib2.quote(key), urllib2.quote(value))
 
     fp = self.opener.open(url)
-    fp.read()
+    value = fp.read()
     fp.close()    
+
+    return value
 
   def setKV(self, reference, key, value):
     if self.loggedin == False:

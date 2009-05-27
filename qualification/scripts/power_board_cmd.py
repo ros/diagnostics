@@ -40,6 +40,7 @@ import subprocess
 from optparse import OptionParser
 from qualification.srv import *
 from pr2_power_board.srv import *
+import traceback
 
 def main():
   parser = OptionParser()
@@ -56,7 +57,19 @@ def main():
   done.script = 'power_board_commands'
   done.failure_msg = ''
 
-  rospy.wait_for_service('power_board_control', 5)
+  try:
+    rospy.wait_for_service('power_board_control', 5)
+  except ROSException, e:
+    rospy.logerr('Service wait timed out! %s' % traceback.format_exc())
+    # Timeout exceeded, return fail
+    done.result = ScriptDoneRequest.RESULT_ERROR
+    done.failure_msg = 'Power bower service timed out! %s\n' % traceback.format_exc()
+    try:
+      rospy.wait_for_service(options.service, 5)
+      done_proxy.call(done)
+    finally:
+      time.sleep(2)
+
   control_proxy = rospy.ServiceProxy('power_board_control', PowerBoardCommand)
   
   is_first = True
@@ -64,7 +77,7 @@ def main():
   try:
     for power_cmd in options.commands:
       
-      # Wait for power cmd to take effect
+      # Wait for previous power cmd to take effect
       if not is_first:
         time.sleep(1)
         
@@ -85,8 +98,6 @@ def main():
           break
 
   except Exception, e:
-    import traceback
-    
     rospy.logerr('Caught exception!')
     rospy.logerr(traceback.format_exc())
     done.result = ScriptDoneRequest.RESULT_ERROR

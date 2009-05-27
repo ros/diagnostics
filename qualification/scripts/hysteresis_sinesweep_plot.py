@@ -293,8 +293,24 @@ class App:
 
   def sine_sweep_plot(self):
     try:
+
+      r = TestResultRequest()
+      r.html_result = ''
+      r.text_summary = 'No data.'
+      r.plots = []
+      r.result = TestResultRequest.RESULT_FAIL
+
       image_title = self.data.joint_name + "_sine_sweep"
 
+      # Compute the encoder travel
+      min_encoder = min(numpy.array(self.data.position))
+      max_encoder = max(numpy.array(self.data.position))
+      
+      if abs(max_encoder - min_encoder) < 0.001:
+        r.html_result = "<p>No travel of mechanism, sinesweep did not complete. Check controller gains and encoder.</p><p>Test status: <b>FAIL</b>.</p>"
+        r.text_summary = "No travel of mechanism. Bad encoder, bad gains, or motors on lockout."
+        self.result_service.call(r)
+      
       # Plot the values and line of best fit
       fig = plot.figure(1)
       axes1 = fig.add_subplot(211)
@@ -333,7 +349,7 @@ class App:
       axes2.plot([f[index2]], [pxx[index2]], 'r.', markersize = 8);
       self.second_mode = f[index2]
       
-      html, summary, tr = self.sine_sweep_analysis(image_title)
+      r.html_result, r.text_summary, tr = self.sine_sweep_analysis(image_title)
       axes2.axvline(x=self.data.arg_value[0], color='r') # Line at first mode
       axes2.set_xlim(0, 100)
       axes2.set_ylim(0, max_value+10)
@@ -344,10 +360,9 @@ class App:
       # Title
       fig.text(.35, .95, self.data.joint_name + ' SineSweep Test')
 
-      r = TestResultRequest()
-      r.html_result = html
-      r.text_summary = summary
-      r.plots = []
+      
+      #r.html_result = html
+      #r.text_summary = summary
       if tr==True:
         r.result = TestResultRequest.RESULT_PASS
       else:
@@ -356,6 +371,7 @@ class App:
       stream = StringIO()
       plot.savefig(stream, format="png")
       image = stream.getvalue()
+      
       
       p = qualification.msg.Plot()
       r.plots.append(p)

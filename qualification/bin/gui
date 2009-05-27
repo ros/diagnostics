@@ -39,6 +39,8 @@ import wx
 
 import qualification.ui
 
+import traceback
+
 if __name__ == '__main__':
   try:
     app = qualification.ui.QualificationApp(0)
@@ -46,4 +48,4 @@ if __name__ == '__main__':
   except Exception, e:
     print "Caught exception in Qualification App Main Loop"
     print e
-    e
+    traceback.print_exc()

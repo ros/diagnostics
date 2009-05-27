@@ -65,6 +65,9 @@ import struct
 import traceback
 from invent_client import Invent
 
+import runtime_monitor
+from runtime_monitor.monitor_panel import MonitorPanel
+
 TESTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'tests')
 RESULTS_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'results')
 ONBOARD_DIR = os.path.join(roslib.packages.get_pkg_dir('qualification'), 'onboard')
@@ -248,53 +251,51 @@ class InstructionsPanel(wx.Panel):
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
     
   def on_continue(self, event):
-    self._manager.start_test()
+    wx.CallAfter(self._manager.start_qualification())
     
   def on_cancel(self, event):
-    self._manager.cancel("Cancel button pressed")
-    
-class WaitingPanel(wx.Panel):
-  def __init__(self, parent, resource, qualification_frame, cancel_enabled = True):
-    wx.Panel.__init__(self, parent)
-    
-    self._manager = qualification_frame
-    
-    self._panel = resource.LoadPanel(self, 'waiting_panel')
-    self._sizer = wx.BoxSizer(wx.HORIZONTAL)
-    
-    self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
-        
-    self._sizer.Add(self._panel, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
-    self.SetSizer(self._sizer)
-    self.Layout()
-    self.Fit()
+    #self._manager.cancel("Cancel button pressed")
+    wx.CallAfter(self._manager.reset())
 
-    # Make cancel button gray if can't cancel
-    self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
-    self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
-
-    self._cancel_enabled = cancel_enabled
-    self._cancel_button.Enable(cancel_enabled)
-
-  def set_progress_label_waiting(self, name, num, total, next = ''):
-    label = "Test '%s' in progress...\nTest %d of %d." % (name, num, total)
-    if next != '':
-      label += "\nNext test: %s." % next
-    self._progress_label.SetLabel(label)
     
-  def set_progress_label(self, label):
-    self._progress_label.SetLabel(label)
+#class WaitingPanel(wx.Panel):
+#  def __init__(self, parent, resource, qualification_frame, cancel_enabled = True):
+#    wx.Panel.__init__(self, parent)
+#    
+#    self._manager = qualification_frame
+#    
+#    self._panel = resource.LoadPanel(self, 'waiting_panel')
+#    self._sizer = wx.BoxSizer(wx.HORIZONTAL)
+#    
+#    self._progress_label = xrc.XRCCTRL(self._panel, 'progress_label')
+#        
+#    self._sizer.Add(self._panel, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
+#    self.SetSizer(self._sizer)
+#    self.Layout()
+#    self.Fit()#
 
-  def on_cancel(self, event):
-    #if not self._cancel_enabled:
-    #  wx.MessageBox('Unable to cancel during shutdown, please wait for termination.', 
-    #                'Unable to cancel', wx.OK | wx.ICON_ERROR, self)
-    #else:
-    self._manager.cancel("Cancel button pressed during test.")
+#    # Make cancel button gray if can't cancel
+#    self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
+#    self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+#    self._cancel_enabled = cancel_enabled
+#    self._cancel_button.Enable(cancel_enabled)
+
+#  def set_progress_label_waiting(self, name, num, total, next = ''):
+#    label = "Test '%s' in progress...\nTest %d of %d." % (name, num, total)
+#    if next != '':
+#      label += "\nNext test: %s." % next
+#    self._progress_label.SetLabel(label)
+#    
+#  def set_progress_label(self, label):
+#    self._progress_label.SetLabel(label)
+#
+#  def on_cancel(self, event):
+#    self._manager.cancel("Cancel button pressed during test.")
     
    
 class PlotsPanel(wx.Panel):
-  def __init__(self, parent, resource, qualification_frame, test_name):
+  def __init__(self, parent, resource, qualification_frame):
     wx.Panel.__init__(self, parent)
     
     self._manager = qualification_frame
@@ -314,25 +315,55 @@ class PlotsPanel(wx.Panel):
     self._pass_button.Bind(wx.EVT_BUTTON, self.on_pass)
     self._fail_button.Bind(wx.EVT_BUTTON, self.on_fail)
     self._retry_button.Bind(wx.EVT_BUTTON, self.on_retry)
- 
-    
-    self._pass_button.SetFocus()
+
+    self._notes_text = xrc.XRCCTRL(self._panel, 'notes_text')
+     
+    # self._pass_button.SetFocus()
     
     self._cancel_button = xrc.XRCCTRL(self._panel, 'cancel_button')
     self._cancel_button.Bind(wx.EVT_BUTTON, self.on_cancel)
+
+    # Make runtime monitor panel
+    self._notebook = xrc.XRCCTRL(self._panel, 'results_notebook')
+    wx.CallAfter(self.create_monitor)
+
+  def create_monitor(self):
+    print 'Creating runtime monitor...'
+    self._monitor_panel = MonitorPanel(self._notebook)
+    self._monitor_panel.SetSize(wx.Size(400, 500))
+    self._notebook.AddPage(self._monitor_panel, "Runtime Monitor")
     
   def show_plots(self, result_page):
-     self._plots_window.SetPage(result_page)
+    self._notes_text.SetEditable(True)
+    self._notebook.SetSelection(0)
+    self._plots_window.SetPage(result_page)
+    self._pass_button.Enable(True)
+    self._fail_button.Enable(True)
+    self._retry_button.Enable(True)
+    self._cancel_button.Enable(True)
+    self._pass_button.SetFocus()
+      
+  # Can have results generate waiting page... TODO
+  def show_waiting(self, wait_page, cancel_enabled = True):
+    self._notes_text.SetEditable(False)
+    self._plots_window.SetPage(wait_page)
+    self._pass_button.Enable(False)
+    self._fail_button.Enable(False)
+    self._retry_button.Enable(False)
+    self._cancel_button.Enable(cancel_enabled)
     
   def on_pass(self, event):
-    self._manager.subtest_result(True)
+    self._manager.subtest_result(True, self._notes_text.GetValue())
+    self._notes_text.Clear()
   
   def on_fail(self, event):
-    failure_reason = wx.GetTextFromUser("Record the reason for failure:", "Failure Reason", "", self)
-    self._manager.subtest_result(False, failure_reason)
+    self._manager.subtest_result(False, self._notes_text.GetValue())
+    self._notes_text.Clear()
   
   def on_retry(self, event):
+    # Will pass notes to subtest result eventually
     self._manager.retry_subtest()
+    self._notes_text.Clear()
     
   def on_cancel(self, event):
     self._manager.cancel("Cancel button pressed.")
@@ -359,7 +390,6 @@ class ResultsPanel(wx.Panel):
     self._submit_button.SetFocus()
 
     self._dir_picker = xrc.XRCCTRL(self._panel, 'results_dir_picker')
-    
     
   def set_results(self, results):
     self._results_window.Freeze()
@@ -469,16 +499,20 @@ class QualificationFrame(wx.Frame):
     # Load the main panel
     self._root_panel = self._res.LoadPanel(self, 'main_panel')
 
+
+
+
     #self._log = xrc.XRCCTRL(self._root_panel, "log")
     self._top_panel = xrc.XRCCTRL(self._root_panel, "top_panel")
     self._top_sizer = wx.BoxSizer(wx.HORIZONTAL)
     self._top_panel.SetSizer(self._top_sizer)
+    self._current_panel = None
     self._log_panel = xrc.XRCCTRL(self._root_panel, "log_panel")
     self._log = xrc.XRCCTRL(self._log_panel, 'log')
-    
+
+    self._test_log = {} # Move to results class?
+    self.log("Startup")    
     self.reset()
-    self._test_log = {}
-    self.log("Startup")
     
     self.Bind(wx.EVT_CLOSE, self.on_close)
     
@@ -556,17 +590,23 @@ class QualificationFrame(wx.Frame):
     self._log.AppendText(log_msg + '\n')
     self._log.Refresh()
     self._log.Update()
-    #print log_msg
-        
-  def set_top_panel(self, panel):
+    
+  def set_top_panel(self, panel): # , delete_window = True):
+    if self._current_panel == panel:
+      #print 'Not changing top panel'
+      return
+    
+    #print 'Changing top panel'
     self._current_panel = panel
-    self._top_sizer.Clear(True)
+    self._top_sizer.Clear(True) # self._delete_window_on_clear)
     self._top_sizer.Add(self._current_panel, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
     self._top_panel.Layout()
+    #self._delete_window_on_clear = delete_window
     
   def reset(self):
     self.set_top_panel(SerialPanel(self._top_panel, self._res, self))
     self._results = None
+    self._plots_panel = None
     self._test_log = {}
 
   def has_conf_script(self, serial):
@@ -692,7 +732,7 @@ class QualificationFrame(wx.Frame):
     self._current_test = Test()
     self._current_test.load(test)
     
-    self.start_qualification(True, serial, name)
+    self.start_qualification(True, name)
 
 
   # Component qualification
@@ -724,18 +764,26 @@ class QualificationFrame(wx.Frame):
     self._current_test = Test()
     self._current_test.load(test_str)
   
-    self.start_qualification()
+    if (self._current_test.getInstructionsFile() != None):
+      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(self._test_dir, self._current_test.getInstructionsFile())))
+    else:
+      self.start_qualification()
+
+  #def start_test(self):
+  #  time.sleep(0.5)
+  #  wx.CallAfter(self.start_qualification)
     
   # Launches program for either onboard, component conf or test cart tests
-  def start_qualification(self, config_only = False, serial = '', name = ''): 
+  def start_qualification(self, config_only = False, name = ''):
     self._tests_start_date = datetime.now()
   
     self._results = QualTestResult(self._current_serial, self._tests_start_date)
+    self._plots_panel = PlotsPanel(self._top_panel, self._res, self)
     self._subtest = None
     
     # Print tests
-    for st in self._current_test.subtests:
-      print st.get_name()
+    #for st in self._current_test.subtests:
+    #  print st.get_name()
     
     if (len(self._current_test.subtests) == 0):
       wx.MessageBox('Test selected has no subtests defined', 'No tests', wx.OK|wx.ICON_ERROR, self)
@@ -752,19 +800,12 @@ class QualificationFrame(wx.Frame):
     # Let configuration know whick parts it configured
     self._results.config_only = config_only
     self._results._conf_name = name
-    if serial != '' and config_only:
-      rospy.set_param("conf_serial", serial)
-    if name != '' and config_only:
+    if config_only:
+      rospy.set_param("conf_serial", self._current_serial)
+    if config_only:
       rospy.set_param("conf_name", name)
 
-    if (self._current_test.getInstructionsFile() != None):
-      self.set_top_panel(InstructionsPanel(self._top_panel, self._res, self, os.path.join(self._test_dir, self._current_test.getInstructionsFile())))
-    else:
-      self.start_test()
-      
-  def start_test(self):
-    time.sleep(0.5)
-    wx.CallAfter(self.run_prestartup_scripts)
+    self.run_prestartup_scripts()
     
   def run_prestartup_scripts(self):
     # Run any pre_startup scripts synchronously
@@ -794,8 +835,6 @@ class QualificationFrame(wx.Frame):
       self._prestartup_launch = None
 
     result_dict = { 0: 'OK', 1: 'FAIL', 2: 'ERROR' }
-
-
     self.log('Prestartup script %s finished. Result %s.' % (srv.script, result_dict[srv.result]))
 
     if srv.result == 0:
@@ -817,7 +856,6 @@ class QualificationFrame(wx.Frame):
 
       wx.CallAfter(self.prestartup_failed, srv)
       
-
   def prestartup_call(self):
     script = self._current_test.pre_startup_scripts[self._prestartup_index]
     # update script label in waiting panel
@@ -825,11 +863,17 @@ class QualificationFrame(wx.Frame):
     self.log(log_message)
 
     # Set waiting panel stuff
-    panel = WaitingPanel(self._top_panel, self._res, self)
-    panel.set_progress_label(log_message)
+    #panel = WaitingPanel(self._top_panel, self._res, self)
+    #panel.set_progress_label(log_message)
 
-    self.set_top_panel(panel)
-    
+    wait_html = '<html><H2 align=center>Prestartup Scripts Running</H2>\n'
+    wait_html += '<H3 align=center>Script: %s</H3>\n</html>' % script
+
+    self._plots_panel.show_waiting(wait_html)
+ 
+    #self.set_top_panel(panel)
+    self.set_top_panel(self._plots_panel)
+
     # If cancel button pressed in pre-startup, cancel all tests
     # Cancel button called to cancel()...should work
     self._prestartup_launch = self.launch_script(os.path.join(self._test_dir, script), None)
@@ -869,16 +913,26 @@ class QualificationFrame(wx.Frame):
       self.log('No startup script')
       
     self.start_subtest(0)
-    
+
+  # Make better version in results.py
+  def make_html_waiting_page(self, subtest_name, index, len_subtests):
+    html = '<html>\n<H2 align=center>Waiting for Subtest to Complete</H2>\n'
+    html += '<H3 align=center>Test Name: %s</H3>\n' % subtest_name
+    html += '<H4 align=center>Test %s of %s</H4>\n</html>' % (index + 1, len_subtests)
+    return html
+
   def start_subtest(self, index):
     self._subtest_index = index
     self._subtest = self._current_test.subtests[index]
     
     # Change label to make it cooler
-    panel = WaitingPanel(self._top_panel, self._res, self)
-    panel.set_progress_label_waiting(self._subtest.get_name(), index + 1, len(self._current_test.subtests))
+    #panel = WaitingPanel(self._top_panel, self._res, self)
+    #panel.set_progress_label_waiting(self._subtest.get_name(), index + 1, len(self._current_test.subtests))
 
-    self.set_top_panel(panel)
+    #self.set_top_panel(panel)
+
+    self._plots_panel.show_waiting(self.make_html_waiting_page(self._subtest.get_name(), index, len(self._current_test.subtests)))
+    self.set_top_panel(self._plots_panel)
     
     self.launch_pre_subtest()
 
@@ -901,11 +955,13 @@ class QualificationFrame(wx.Frame):
       self.reset()
 
   def show_plots(self, sub_result):
-    panel = PlotsPanel(self._top_panel, self._res, self, self._subtest._test_script)
-    self.set_top_panel(panel)
+    #panel = PlotsPanel(self._top_panel, self._res, self, self._subtest._test_script)
+    #self.set_top_panel(panel)
+    #panel.show_plots(sub_result.make_result_page())
     
-    panel.show_plots(sub_result.make_result_page())
-    
+    self._plots_panel.show_plots(sub_result.make_result_page())
+    self.set_top_panel(self._plots_panel)
+
   def get_inventory_object(self):
     if (self._username != None and self._password != None):
       invent = Invent(self._username, self._password)
@@ -971,6 +1027,8 @@ class QualificationFrame(wx.Frame):
     res, log_str = self._results.log_results(invent)
     self.log(log_str)
 
+    self._results._test_log = self._test_log
+
     if not self._results.email_qual_team():
       wx.MessageBox('Unable to email qualification results. Do you have \'sendmail\' installed?', 'Unable to email results', wx.OK|wx.ICON_ERROR, self)
       self.log('Unable to email summary.')
@@ -1016,7 +1074,7 @@ class QualificationFrame(wx.Frame):
       else:
         post_launcher.spin() 
   
-  def subtest_result(self, passfail, failure_reason = ''):
+  def subtest_result(self, passfail, operator_notes):
     str_result = "OK"
     if not passfail:
       str_result = "FAIL"
@@ -1024,7 +1082,7 @@ class QualificationFrame(wx.Frame):
     self.log('Subtest "%s" result: %s'%(self._subtest.get_name(), str_result))
     
     sub_result = self._results.get_subresult(self._subtest_index)
-    sub_result.set_failure_text(failure_reason)
+    sub_result.set_note(operator_notes)
     sub_result.set_passfail(passfail)
 
     self.launch_post_subtest()
@@ -1046,7 +1104,7 @@ class QualificationFrame(wx.Frame):
       self.show_plots(sub_result)
     else:
       if (msg.result == TestResultRequest.RESULT_PASS):
-        self.subtest_result(True)
+        self.subtest_result(True, '')
       elif (msg.result == TestResultRequest.RESULT_FAIL):
         self.subtest_result(False, "Automated failure")
       elif (msg.result == TestResultRequest.RESULT_HUMAN_REQUIRED):
@@ -1136,34 +1194,36 @@ class QualificationFrame(wx.Frame):
     self._subtest_launch = None
     self.log('Launches stopped.')
     
-  def shutdown_test(self):
-    if (self._current_test.getShutdownScript() != None):
-      self.log('Running shutdown script...')
+  #def shutdown_test(self):
+  #  if (self._current_test.getShutdownScript() != None):
+  #    self.log('Running shutdown script...')
       
-      if (self._shutdown_done_srv != None):
-        self._shutdown_done_srv.shutdown()
-        self._shutdown_done_srv = None
+  #    if (self._shutdown_done_srv != None):
+  #      self._shutdown_done_srv.shutdown()
+  #      self._shutdown_done_srv = None
       
-      self._shutdown_done_srv = rospy.Service('shutdown_done', ScriptDone, self.shutdown_callback)
+  #    self._shutdown_done_srv = rospy.Service('shutdown_done', ScriptDone, self.shutdown_callback)
 
       # Set waiting panel stuff
-      panel = WaitingPanel(self._top_panel, self._res, self)
-      panel.set_progress_label("Shut down in progress.\nRunning %s..." % self._current_test.getShutdownScript())
+      #panel = WaitingPanel(self._top_panel, self._res, self)
+      #panel.set_progress_label("Shut down in progress.\nRunning %s..." % self._current_test.getShutdownScript())
       
-      self.set_top_panel(panel)
+      #self.set_top_panel(panel)
 
-      # Launch given shutdown script
-      self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
 
-      if (self._shutdown_launch == None):
-        s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
-        wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
-        self.log('No shutdown script: %s' % (s))
-        self.log('SHUT DOWN POWER BOARD MANUALLY!')
-        #self.reset()
-        return
-    else:
-      self.log('No shutdown script')
+
+    #  # Launch given shutdown script
+    #  self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
+
+#      if (self._shutdown_launch == None):
+#        s = 'Could not load roslaunch shutdown script "%s". SHUTDOWN POWER BOARD MANUALLY!'%(self._current_test.getShutdownScript())
+#        wx.MessageBox(s, 'Invalid shutdown script!', wx.OK|wx.ICON_ERROR, self)
+#        self.log('No shutdown script: %s' % (s))
+#        self.log('SHUT DOWN POWER BOARD MANUALLY!')
+#        #self.reset()
+#        return
+#    else:
+#      self.log('No shutdown script')
 
   def shutdown_callback(self, srv):
     self.log('Shutdown finished')
@@ -1184,6 +1244,7 @@ class QualificationFrame(wx.Frame):
       wx.MessageBox(fail_msg + '\n' + srv.failure_msg, fail_msg, wx.OK|wx.ICON_ERROR, self)
       self.log('Shutdown failed for: %s' % srv.failure_msg)
 
+    # TODO: See if we need a callafter here...
     wx.CallAfter(self.test_cleanup)
 
   def test_finished(self):
@@ -1197,10 +1258,15 @@ class QualificationFrame(wx.Frame):
       self._shutdown_done_srv = rospy.Service('shutdown_done', ScriptDone, self.shutdown_callback)
 
       # Set waiting panel stuff
-      panel = WaitingPanel(self._top_panel, self._res, self, False)
-      panel.set_progress_label("Running shutdown script %s..." % self._current_test.getShutdownScript())
+      #panel = WaitingPanel(self._top_panel, self._res, self, False)
+      #panel.set_progress_label("Running shutdown script %s..." % self._current_test.getShutdownScript())
       
-      self.set_top_panel(panel)
+      #self.set_top_panel(panel)
+
+      html = '<html><H2 align=center>Shutting down test and stopping launches</H2></html>'
+      
+      self._plots_panel.show_waiting(html, False)
+      self.set_top_panel(self._plots_panel)
 
       # Launch given shutdown script
       self._shutdown_launch = self.launch_script(os.path.join(self._test_dir, self._current_test.getShutdownScript()), None)
