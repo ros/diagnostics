@@ -263,10 +263,8 @@ public:
   void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
   {
     diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, self_test::Dispatcher<T>::owner_, _1);
-    robot_msgs::DiagnosticStatus stat;
-    f2(stat); // Get the function to fill out its name.
     boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
-      fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask(stat.name, f2));
+      fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask("", f2));
     tests_vect_.push_back(fcls);
     self_test::DiagnosticTaskVector::add(*fcls);
   }
