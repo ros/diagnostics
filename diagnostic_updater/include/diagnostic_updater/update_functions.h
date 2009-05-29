@@ -11,7 +11,8 @@ class FrequencyStatus : public DiagnosticTask
 {
 public:
   FrequencyStatus(double &min_freq, double& max_freq, double tolerance = 0.1, int window_size = 5) : 
-    DiagnosticTask("Frequency Status"), min_freq_(min_freq), max_freq_(max_freq)
+    DiagnosticTask("Frequency Status"), min_freq_(min_freq), max_freq_(max_freq),
+    times_(window_size), seq_nums_(window_size)
   {
     tolerance_ = tolerance;
     window_size_ = window_size;
@@ -21,13 +22,14 @@ public:
 
   void clear()
   {
+    boost::mutex::scoped_lock lock(lock_);
     ros::Time curtime = ros::Time::now();
     count_ = 0;
 
     for (int i = 0; i < window_size_; i++)
     {
-      times_.push_back(curtime);
-      seq_nums_.push_back(count_);
+      times_[i] = curtime;
+      seq_nums_[i] = count_;
     }
 
     hist_indx_ = 0;
@@ -35,12 +37,14 @@ public:
 
   void tick()
   {
+    boost::mutex::scoped_lock lock(lock_);
     //ROS_DEBUG("TICK %i", count_);
     count_++;
   }
 
   void operator()(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
+    boost::mutex::scoped_lock lock(lock_);
     ros::Time curtime = ros::Time::now();
     int curseq = count_;
     int events = curseq - seq_nums_[hist_indx_];
@@ -50,7 +54,11 @@ public:
     times_[hist_indx_] = curtime;
     hist_indx_ = (hist_indx_ + 1) % window_size_;
 
-    if (freq < min_freq_ * (1 - tolerance_))
+    if (events == 0)
+    {
+      stat.summary(2, "No events recorded.");
+    }
+    else if (freq < min_freq_ * (1 - tolerance_))
     {
       stat.summary(2, "Frequency too low.");
     }
@@ -87,6 +95,7 @@ private:
   std::vector <ros::Time> times_;
   std::vector <int> seq_nums_;
   int hist_indx_;
+  boost::mutex lock_;
 };
 
 class TimeStampStatus : public DiagnosticTask
@@ -101,6 +110,8 @@ public:
 
   void tick(double stamp)
   {
+    
+    boost::mutex::scoped_lock lock(lock_);
     double delta = ros::Time::now().toSec() - stamp;
 
     if (!deltas_valid_ || delta > max_delta_)
@@ -119,6 +130,7 @@ public:
 
   void operator()(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
+    boost::mutex::scoped_lock lock(lock_);
     if (!deltas_valid_)
       stat.summary(1, "No data since last update.");
     else if (min_delta_ < min_acceptable_)
@@ -154,6 +166,7 @@ private:
   bool deltas_valid_;
   double max_acceptable_;
   double min_acceptable_;
+  boost::mutex lock_;
 };
 
 };
