@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="dynamic_verification" type="dynamic_verify_joint.py" />
-  <!--node pkg="mechanism_control" type="spawner.py" args="$(find dynamic_verification)/tests/const_torque/wrist_flex_const_torque.xml" /-->
-  <node pkg="dynamic_verification" type="run_test.py" args="r_wrist_roll_joint 0 $(find dynamic_verification)/tests/const_torque/wrist_flex_const_torque.xml" /> 
-</launch>

@@ -1,9 +1,0 @@
-<controllers>
-  <controller name="caster" type="CasterControllerEffortNode">
-    <joints caster="fl_caster_rotation_joint"
-            wheel_l="fl_caster_l_wheel_joint"
-            wheel_r="fl_caster_r_wheel_joint" />
-    <caster_pid p="5.0" i="0" d="0" iClamp="0" />
-    <wheel_pid p="4" i="0" d="0" iClamp="0" />
-  </controller>
-</controllers>

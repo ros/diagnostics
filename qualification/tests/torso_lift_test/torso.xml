@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<robot name="test_torso">
-  <include filename="$(find pr2_defs)/defs/body_defs.xml" />
-
-  <pr2_torso name="torso_lift" parent="world">
-    <origin xyz=" 0 0 0" rpy=" 0 0 0" />
-  </pr2_torso>
-</robot>

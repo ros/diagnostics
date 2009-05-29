@@ -1,7 +1,0 @@
-<launch>
-  <!-- Left controller will fail gracefully on a test cart (right grips only) -->
-  <node pkg="life_test" type="gripper_effort_controller.py" args="l_gripper_joint" output="screen"/>
-
-  <node pkg="life_test" type="gripper_effort_controller.py" args="r_gripper_joint" output="screen"/>
-
-</launch>

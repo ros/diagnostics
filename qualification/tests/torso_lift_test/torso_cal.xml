@@ -1,6 +1,0 @@
-<controllers>
-  <include filename="$(find pr2_defs)/defs/body_defs.xml" />
-
-  <torso_limit_calibrator />
-
-</controllers>

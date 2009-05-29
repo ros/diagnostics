@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="qualification" type="test_node.py"/>
-</launch>

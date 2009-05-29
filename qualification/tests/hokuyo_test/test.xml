@@ -1,5 +1,0 @@
-<test>
-  <startup>startup.launch</startup>
-  <instructions>instructions.html</instructions>
-  <subtest>selftest.launch</subtest>
-</test>

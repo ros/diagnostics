@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<robot name="test_head">
-  <include filename="laser_tilt_no_limits.xml" />
-
-  <pr2_tilting_laser name="laser_tilt" parent="world">
-    <origin xyz="0 0 0.03" rpy="0 0 0" />
-  </pr2_tilting_laser>
-
-</robot>

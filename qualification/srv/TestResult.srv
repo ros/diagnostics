@@ -1,9 +1,0 @@
-byte RESULT_PASS = 0
-byte RESULT_FAIL = 1
-byte RESULT_HUMAN_REQUIRED = 2
-
-string html_result
-string text_summary
-byte result
-Plot[] plots
----

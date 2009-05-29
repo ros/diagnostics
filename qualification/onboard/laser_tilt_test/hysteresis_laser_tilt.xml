@@ -1,6 +1,0 @@
-<controller name="test_controller" type="HysteresisControllerNode">
-  <joint name="laser_tilt_mount_joint">
-    <pid p="5.0" d="0" i="0.00" iClamp="0.1" />
-    <controller_defaults velocity="3" max_effort="0.55" max_expected_effort="0.15" min_expected_effort="-0.14" min_pos="-0.69" max_pos="1.47" timeout="15"/>   
-  </joint>
-</controller>

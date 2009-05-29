@@ -1,3 +1,0 @@
-<launch>
-<node pkg="pr2_power_node" type="send_command.py" args="0 stop" />
-</launch>

@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<robot name="test_gripper">
-
-  <include file="$(find pr2_defs)/defs/gripper_defs.xml" />
-  <pr2_gripper side="r" parent="base_link" />
-
-
-</robot>

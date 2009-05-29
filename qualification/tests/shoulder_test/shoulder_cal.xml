@@ -1,4 +1,0 @@
-<controllers>
-  <include filename="$(find pr2_defs)/defs/arm_defs.xml" />
-  <upper_arm_calibrator side="r" />
-</controllers>

@@ -1,5 +1,0 @@
-<controller type="FrequencyResponseControllerNode" name="r_wrist_flex_freq_controller">
-  <joint name="r_wrist_flex_joint">
-    <controller_defaults effort="0.1" frequency="20.0" duration="10" settle_time="10" />
-  </joint>
-</controller>

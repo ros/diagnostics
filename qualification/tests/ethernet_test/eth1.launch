@@ -1,4 +1,0 @@
-<launch>
- <machine name="ethertest0.local" address="ethertest0.local" user="root" password="willow" default="true" ros-root="/u/wgtest/ros/ros/" ros-package-path="/u/wgtest/ros/ros-pkg/" ros-ip="ethertest0.local"/>
- <node pkg="qualification" type="ethernet_test.py" args="eth1 10.142.1.2" />
-</launch>

@@ -1,4 +1,0 @@
-<launch>
-  <node pkg="mechanism_bringup" type="calibrate.py"
-        args="$(find qualification)/tests/upperarm_flex_only_test/upperarm_cal.xml" />
-</launch>

@@ -1,7 +1,0 @@
-<controllers>
-  <include filename="$(find pr2_defs)/calibration/default_cal.xml" />
-  <include filename="$(find pr2_defs)/defs/head_defs.xml" />
-
-  <head_calibrator_alpha2 />
-  <!--tilting_laser_calibrator name="laser_tilt" /-->
-</controllers>

@@ -1,4 +1,0 @@
-<launch>
-
-  <node pkg="qualification" type="counterbalance_analysis.py" args="_shoulder_lift,$(find qualification)/onboard/full_arm_test/counterbalance_shoulder.xml _elbow_flex,$(find qualification)/onboard/full_arm_test/counterbalance_elbow.xml" />
-</launch>

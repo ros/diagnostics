@@ -1,4 +1,0 @@
-<launch>
-<node pkg="life_test" type="impact_head_test.py" />
-
-</launch>

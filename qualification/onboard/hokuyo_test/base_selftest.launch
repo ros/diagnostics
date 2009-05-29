@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="qualification" type="run_selftest.py">
-        <remap from="node_name" to="base_hokuyo_node"/>
-  </node>
-</launch>

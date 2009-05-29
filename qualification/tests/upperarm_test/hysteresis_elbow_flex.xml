@@ -1,6 +1,0 @@
-<controller name="test_controller" type="HysteresisControllerNode">
-  <joint name="r_elbow_flex_joint">
-    <pid p="5" i="0.35" d="0.0" iClamp="0.50" />
-    <controller_defaults velocity="1.5" max_effort="2.0" max_expected_effort="1.25" min_expected_effort="-0.35" min_pos="-2.0" max_pos="0.0"/>   
-  </joint>
-</controller>

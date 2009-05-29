@@ -1,4 +1,0 @@
-<launch>
-  <include file="$(find life_test)/arm_life_test/controller_cartesian_pose_right_forearm.launch" /> 
-  <node pkg="life_test" type="random_poses_right_cb.py" />
-</launch>

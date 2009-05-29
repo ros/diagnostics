@@ -1,3 +1,0 @@
-<launch>
-  <include file="$(find pr2_alpha)/pre.launch" />
-</launch>

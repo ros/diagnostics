@@ -1,8 +1,0 @@
-<launch>
-
-<!-- Cartesian wrench controller -->
-  <param name="r_arm_cartesian_wrench_controller/root_name" type="string" value="torso_lift_link" />
-  <param name="r_arm_cartesian_wrench_controller/tip_name" type="string" value="r_gripper_tool_frame" />
-
-  <node pkg="mechanism_control" type="spawner.py" args="$(find pr2_default_controllers)/r_arm_cartesian_wrench_controller.xml" output="screen" />
-</launch>

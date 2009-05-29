@@ -1,5 +1,0 @@
-<controllers>
-  <include filename="$(find pr2_defs)/defs/base_defs.xml" />
-  
-  <caster_calibrator_alpha2 suffix="fl" />
-</controllers>

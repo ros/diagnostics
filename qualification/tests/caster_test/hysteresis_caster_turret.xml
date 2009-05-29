@@ -1,6 +1,0 @@
-<controller name="test_controller" type="HysteresisControllerNode">
-  <joint name="fl_caster_rotation_joint">
-     <pid p="3" d="0" i="0.1" iClamp="0.5" />
-    <controller_defaults velocity="1.5" max_effort="2.0" max_expected_effort="0.53" min_expected_effort="-0.53" min_pos="0" max_pos="0"/>   
-  </joint>
-</controller>

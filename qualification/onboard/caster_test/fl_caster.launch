@@ -1,3 +1,0 @@
-<launch>
-  <param name="caster_test/side" value="fl" type="str" />
-</launch>

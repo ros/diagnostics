@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="life_test" type="impact_laser_tilt_test.py" />
-</launch>

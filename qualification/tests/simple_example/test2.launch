@@ -1,3 +1,0 @@
-<launch>
-  <node pkg="qualification" type="analyzer_node.py" args="human"/>
-</launch>
