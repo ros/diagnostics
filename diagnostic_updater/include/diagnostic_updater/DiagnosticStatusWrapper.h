@@ -60,6 +60,18 @@ public:
     message = s;
   }
 
+  void summaryf(unsigned char lvl, const char *format, ...)
+  {
+    va_list va;
+    char buff[1000]; // @todo This could be done more elegantly.
+    va_start(va, format);
+    if (vsnprintf(buff, 1000, format, va) >= 1000)
+      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+    std::string value = std::string(buff);
+    summary(lvl, value);
+    va_end(va);
+  }
+
   template<class T>
   void adds(const std::string &key, const T &val)
   {
