@@ -82,6 +82,8 @@ private:
 
 public:
 
+  using DiagnosticTaskVector::add;
+
   Dispatcher(T *owner, ros::NodeHandle h) : 
     node_handle_(h), owner_(owner), pretest_(NULL), posttest_(NULL)
   {
