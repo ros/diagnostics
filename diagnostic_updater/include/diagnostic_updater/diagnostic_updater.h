@@ -179,7 +179,7 @@ public:
   void add(const std::string &name, TaskFunction f)
   {
     DiagnosticTaskInternal int_task(name, f);
-    add(int_task);
+    addInternal(int_task);
   }
 
   void add(DiagnosticTask &task)
@@ -192,7 +192,7 @@ public:
   void add(const std::string name, T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
   {
     DiagnosticTaskInternal int_task(name, boost::bind(f, c, _1));
-    add(int_task);
+    addInternal(int_task);
   }
   
 private:
@@ -200,7 +200,7 @@ private:
   {}
   std::vector<DiagnosticTaskInternal> tasks_;
   
-  void add(DiagnosticTaskInternal &task)
+  void addInternal(DiagnosticTaskInternal &task)
   {
     boost::mutex::scoped_lock lock(lock_);
     tasks_.push_back(task); 
@@ -365,6 +365,8 @@ public:
   {
     complain();
   }
+
+  using diagnostic_updater::Updater::add;
 
   void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
   {
