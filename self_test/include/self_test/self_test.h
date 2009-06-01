@@ -87,7 +87,7 @@ public:
   Dispatcher(T *owner, ros::NodeHandle h) : 
     node_handle_(h), owner_(owner), pretest_(NULL), posttest_(NULL)
   {
-    ROS_WARN("Advertising self_test");
+    ROS_DEBUG("Advertising self_test");
     service_server_ = node_handle_.advertiseService("~self_test", &Dispatcher::doTest, this);
     count = 0;
     waiting = false;

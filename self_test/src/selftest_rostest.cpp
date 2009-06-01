@@ -38,11 +38,21 @@
 #include <gtest/gtest.h>
 #include <string>
 
-bool doTest(ros::NodeHandle nh)
+TEST(SelfTest, runSelfTest)
 {
+  ros::NodeHandle nh;
+
+  std::string node_to_test;
+  double delay;
+  nh.param("~node_to_test", node_to_test, std::string());
+  nh.param("~delay", delay, 1.);
+  ASSERT_FALSE(node_to_test.empty()) << "selftest_rostest needs the \"node_to_test\" parameter.";
+    
+  ros::Duration(delay).sleep();
+
   robot_srvs::SelfTest srv;
   
-  if (nh.serviceClient<robot_srvs::SelfTest>("self_test").call(srv))
+  if (nh.serviceClient<robot_srvs::SelfTest>(node_to_test+"/self_test").call(srv))
   {
     robot_srvs::SelfTest::Response &res = srv.response;
     
@@ -52,9 +62,10 @@ bool doTest(ros::NodeHandle nh)
       passfail = "PASSED";
     else
       passfail = "FAILED";
+    
+    EXPECT_TRUE(res.passed) << "Overall self-test FAILED.";
 
     printf("Self test %s for device with id: [%s]\n", passfail.c_str(), res.id.c_str());
-
 
     for (size_t i = 0; i < res.get_status_size(); i++)
     {
@@ -67,34 +78,26 @@ bool doTest(ros::NodeHandle nh)
         printf("     [ERROR]: ");
 
       printf("%s\n", res.status[i].message.c_str());
+    
+      EXPECT_EQ(0, res.status[i].level) << res.status[i].name << " did not PASS: " << res.status[i].message;
 
       for (size_t j = 0; j < res.status[i].get_values_size(); j++)
         printf("      [%s] %f\n", res.status[i].values[j].label.c_str(), res.status[i].values[j].value);
 
       printf("\n");
     }
-    return true;
   }
   else
   {
+    FAIL() << "Unable to trigger self-test.";
     printf("Failed to call service.\n");
-    return false;
   }
 }
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "run_selftest", ros::init_options::AnonymousName);
-  if (argc != 2)
-  {
-    printf("usage: run_selftest name\n");
-    return 1;
-  }
-
-  ros::NodeHandle nh(argv[1]);
-  doTest(nh);
-
-  
-  return 0;
+  ros::init(argc, argv, "selftest_nodetest");
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
 
