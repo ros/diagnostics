@@ -109,7 +109,7 @@ public:
   void add(const std::string name, void (S::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
   {
     DiagnosticTaskInternal int_task(name, boost::bind(f, owner_, _1));
-    add(int_task);
+    addInternal(int_task);
   }
   
   void checkTest()
@@ -194,7 +194,7 @@ public:
 
         try {
 
-          (*iter)(status);
+          iter->run(status);
 
         } catch (std::exception& e)
         {
@@ -259,7 +259,7 @@ public:
 
   void addTest(void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
   {
-    self_test::Dispatcher<T>::add(f);
+    self_test::Dispatcher<T>::add("", f);
   }
 
   void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))

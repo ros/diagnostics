@@ -59,8 +59,7 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
     classFunction() : DiagnosticTask("classFunction")
     {}
 
-  private:
-    void operator() (DiagnosticStatusWrapper &s) 
+    void run(DiagnosticStatusWrapper &s) 
     {
       s.summary(0, "Test is running");
       s.addv("Value", 5);
@@ -114,23 +113,23 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   double minFreq = 10;
   double maxFreq = 20;
   
-  FrequencyStatus fs(minFreq, maxFreq, 0.5, 2);
+  FrequencyStatus fs(FrequencyStatusParam(&minFreq, &maxFreq, 0.5, 2));
   
   DiagnosticStatusWrapper stat[5];
   fs.tick();
   usleep(20000);
-  fs(stat[0]); // Should be too fast, 20 ms for 1 tick, lower limit should be 33ms.
+  fs.run(stat[0]); // Should be too fast, 20 ms for 1 tick, lower limit should be 33ms.
   usleep(50000);
   fs.tick();
-  fs(stat[1]); // Should be good, 70 ms for 2 ticks, lower limit should be 66 ms.
+  fs.run(stat[1]); // Should be good, 70 ms for 2 ticks, lower limit should be 66 ms.
   usleep(300000);
   fs.tick();
-  fs(stat[2]); // Should be good, 350 ms for 2 ticks, upper limit should be 400 ms.
+  fs.run(stat[2]); // Should be good, 350 ms for 2 ticks, upper limit should be 400 ms.
   usleep(150000);
   fs.tick();
-  fs(stat[3]); // Should be too slow, 450 ms for 2 ticks, upper limit should be 400 ms.
+  fs.run(stat[3]); // Should be too slow, 450 ms for 2 ticks, upper limit should be 400 ms.
   fs.clear();
-  fs(stat[4]); // Should be good, just cleared it.
+  fs.run(stat[4]); // Should be good, just cleared it.
 
   EXPECT_EQ(2, stat[0].level) << "max frequency exceeded but not reported";
   EXPECT_EQ(0, stat[1].level) << "within max frequency but reported error";
@@ -143,18 +142,18 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
 
 TEST(DiagnosticUpdater, testTimeStampStatus)
 {
-  TimeStampStatus ts;
+  TimeStampStatus ts(DefaultTimeStampStatusParam);
 
   DiagnosticStatusWrapper stat[5];
-  ts(stat[0]);
+  ts.run(stat[0]);
   ts.tick(ros::Time::now().toSec() + 2);
-  ts(stat[1]);
+  ts.run(stat[1]);
   ts.tick(ros::Time::now());
-  ts(stat[2]);
+  ts.run(stat[2]);
   ts.tick(ros::Time::now().toSec() - 4);
-  ts(stat[3]);
+  ts.run(stat[3]);
   ts.tick(ros::Time::now().toSec() - 6);
-  ts(stat[4]);
+  ts.run(stat[4]);
  
   EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
   EXPECT_EQ(2, stat[1].level) << "too far future not reported";

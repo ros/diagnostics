@@ -97,7 +97,7 @@ public:
   {
     return name_;
   }
-  virtual void operator() (diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
   virtual ~DiagnosticTask()
   {}
 
@@ -113,7 +113,7 @@ public:
     DiagnosticTask(name), fn_(fn)
   {}
   
-  virtual void operator ()(DiagnosticStatusWrapper &stat)
+  virtual void run(DiagnosticStatusWrapper &stat)
   {
     fn_(stat);
   }
@@ -125,6 +125,63 @@ private:
 
 typedef GenericFunctionDiagnosticTask<robot_msgs::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
 typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
+
+/**
+ * A ComposableDiagnosticTask is a DiagnosticTask that is designed to be
+ * composed with other ComposableDiagnosticTask into a single status
+ * message using a CombinationDiagnosticTask.
+ */
+
+class ComposableDiagnosticTask : public DiagnosticTask
+{
+public:
+  ComposableDiagnosticTask(const std::string name) : DiagnosticTask(name)
+  {}
+  
+  void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    split_run(stat, stat);
+  }
+
+  virtual void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
+      diagnostic_updater::DiagnosticStatusWrapper &details) = 0;
+};
+
+/**
+ * The CombinationDiagnosticTask allows multiple ComposableDiagnosticTask instances
+ * to be combined into a single DiagnosticStatus. The output of the
+ * combination has the max of the status levels, and a concatenation of the
+ * non-zero-level messages.
+ */
+
+class CombinationDiagnosticTask : public DiagnosticTask
+{
+public:
+  CombinationDiagnosticTask(const std::string name) : DiagnosticTask(name)
+  {}
+
+  virtual void run(DiagnosticStatusWrapper &stat)
+  {
+    DiagnosticStatusWrapper summary;
+    stat.summary(0, "");
+    
+    for (std::vector<ComposableDiagnosticTask *>::iterator i = tasks_.begin();
+        i != tasks_.end(); i++)
+    {
+      (*i)->split_run(summary, stat);
+    
+      stat.mergeSummary(summary.level, summary.message);
+    }
+  }
+  
+  void addTask(ComposableDiagnosticTask *t)
+  {
+    tasks_.push_back(t);
+  }
+
+private:
+  std::vector<ComposableDiagnosticTask *> tasks_;
+};
 
 /**
  *
@@ -144,7 +201,7 @@ protected:
       name_(name), fn_(f)
     {}
 
-    void operator() (diagnostic_updater::DiagnosticStatusWrapper &stat) const
+    void run(diagnostic_updater::DiagnosticStatusWrapper &stat) const
     {
       stat.name = name_;
       fn_(stat);
@@ -172,7 +229,7 @@ public:
    * \brief Add a DiagnosticTask to the DiagnosticTaskVector
    *
    * \param task The DiagnosticTask to be added. It must remain valid at
-   * least until the last time its operator() is called. It need not be
+   * least until the last time its diagnostic method is called. It need not be
    * valid at the time the DiagnosticTaskVector is destructed.
    */
 
@@ -184,7 +241,7 @@ public:
 
   void add(DiagnosticTask &task)
   {
-    TaskFunction f = boost::bind<void>(boost::ref(task), _1);
+    TaskFunction f = boost::bind(&DiagnosticTask::run, &task, _1);
     add(task.getName(), f);
   }
   
@@ -200,6 +257,7 @@ private:
   {}
   std::vector<DiagnosticTaskInternal> tasks_;
   
+protected:
   void addInternal(DiagnosticTaskInternal &task)
   {
     boost::mutex::scoped_lock lock(lock_);
@@ -245,7 +303,7 @@ public:
         status.level = 2;
         status.message = "No message was set";
 
-        (*iter)(status);
+        iter->run(status);
 
         status_vec.push_back(status);
       }

@@ -60,6 +60,36 @@ public:
     message = s;
   }
 
+  void mergeSummary(unsigned char lvl, const std::string s)
+  {
+      if (lvl > level)
+      {
+        if (lvl == 0)
+          message = "";
+  
+        level = lvl;
+      }
+  
+      if ((lvl > 0) == (level > 0))
+      {
+        if (!message.empty())
+          message += " ";
+        message += s;
+      }
+  }
+
+  void mergeSummaryf(unsigned char lvl, const char *format, ...)
+  {
+    va_list va;
+    char buff[1000]; // @todo This could be done more elegantly.
+    va_start(va, format);
+    if (vsnprintf(buff, 1000, format, va) >= 1000)
+      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+    std::string value = std::string(buff);
+    mergeSummary(lvl, value);
+    va_end(va);
+  }
+
   void summaryf(unsigned char lvl, const char *format, ...)
   {
     va_list va;
