@@ -42,6 +42,9 @@ from robot_msgs.msg import DiagnosticMessage
 
 NAME = 'runtime_test'
 
+# must initialize a node before we call get_time()
+rospy.init_node(NAME, anonymous=True)
+
 latest_messages = {}
 test_name = 'uninitialized'
 package = 'uninitialized'
