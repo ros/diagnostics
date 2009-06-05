@@ -105,9 +105,21 @@ class MonitorPanel(wx.Panel):
       
   def change_diagnostic_topic(self, topic):
     self._subscriber.unregister()
+    self._subscriber = rospy.Subscriber(topic, DiagnosticMessage, self.diagnostics_callback)
+    self.reset_monitor()
+
+
+  def reset_monitor(self):
     self._name_to_item = {} # Reset all stale topics
     self._messages = []
-    self._subscriber = rospy.Subscriber(topic, DiagnosticMessage, self.diagnostics_callback)
+    self.clear_tree()
+
+  def clear_tree(self):
+    self._tree_control.DeleteChildren(self._stale_id)
+    self._tree_control.DeleteChildren(self._errors_id)
+    self._tree_control.DeleteChildren(self._warnings_id)
+    self._tree_control.DeleteChildren(self._ok_id)
+
 
   def diagnostics_callback(self, message):
     self._mutex.acquire()
