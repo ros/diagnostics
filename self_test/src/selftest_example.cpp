@@ -30,7 +30,7 @@
 
 #include <ros/node.h>
 
-#include "robot_srvs/SelfTest.h"
+#include "diagnostic_msgs/SelfTest.h"
 
 #include "self_test/self_test.h"
 
@@ -82,7 +82,7 @@ public:
 
   // All tests take a reference to a DiagnosticStatus message which they should populate
   // The default values are status.level = 2 (ERROR), and status.message = "No message was set"
-  void test1(robot_msgs::DiagnosticStatus& status)
+  void test1(diagnostic_msgs::DiagnosticStatus& status)
   {
     // Good practice is to set the name of the test first
     status.name = "ID Lookup";
@@ -106,7 +106,7 @@ public:
   }
 
   // Tests do not necessarily need to catch their exceptions.
-  void test2(robot_msgs::DiagnosticStatus& status)
+  void test2(diagnostic_msgs::DiagnosticStatus& status)
   {
     status.name = "Exception generating test";
 
@@ -127,7 +127,7 @@ public:
   }
 
   // The state of the node can be changed as the tests are operating
-  void test3(robot_msgs::DiagnosticStatus& status)
+  void test3(diagnostic_msgs::DiagnosticStatus& status)
   {
     status.name = "Value generating test";
 
@@ -142,7 +142,7 @@ public:
     status.message = "We successfully changed the value.";
   }
 
-  void test4(robot_msgs::DiagnosticStatus& status)
+  void test4(diagnostic_msgs::DiagnosticStatus& status)
   {
     status.name = "Value testing test";
 

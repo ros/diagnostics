@@ -33,18 +33,18 @@
 *********************************************************************/
 
 #include "ros/ros.h"
-#include "robot_srvs/SelfTest.h"
+#include "diagnostic_msgs/SelfTest.h"
 
 #include <gtest/gtest.h>
 #include <string>
 
 bool doTest(ros::NodeHandle nh)
 {
-  robot_srvs::SelfTest srv;
+  diagnostic_msgs::SelfTest srv;
   
-  if (nh.serviceClient<robot_srvs::SelfTest>("self_test").call(srv))
+  if (nh.serviceClient<diagnostic_msgs::SelfTest>("self_test").call(srv))
   {
-    robot_srvs::SelfTest::Response &res = srv.response;
+    diagnostic_msgs::SelfTest::Response &res = srv.response;
     
     std::string passfail;
 

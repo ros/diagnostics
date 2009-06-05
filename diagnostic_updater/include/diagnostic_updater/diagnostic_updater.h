@@ -41,7 +41,7 @@
 
 #include "ros/node_handle.h"
 
-#include "robot_msgs/DiagnosticMessage.h"
+#include "diagnostic_msgs/DiagnosticMessage.h"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
 /**
@@ -80,7 +80,7 @@ namespace diagnostic_updater
 {
   
 typedef boost::function<void(DiagnosticStatusWrapper&)> TaskFunction;
-typedef boost::function<void(robot_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
+typedef boost::function<void(diagnostic_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
 
 /**
  * DiagnosticTask is an abstract base class for diagnostic tasks.
@@ -123,7 +123,7 @@ private:
   const TaskFunction fn_;
 };
 
-typedef GenericFunctionDiagnosticTask<robot_msgs::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
+typedef GenericFunctionDiagnosticTask<diagnostic_msgs::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
 typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
 
 /**
@@ -290,7 +290,7 @@ public:
     
     if (node_handle_.ok())
     {
-      std::vector<robot_msgs::DiagnosticStatus> status_vec;
+      std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
       boost::mutex::scoped_lock lock(lock_); // Make sure no adds happen while we are processing here.
       const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
@@ -327,13 +327,13 @@ public:
     
     ros::NodeHandle newnh; 
     node_handle_ = newnh; 
-    publisher_ = node_handle_.advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticMessage>("/diagnostics", 1);
     broadcast(2, "Node shut down"); 
   }*/
 
   void broadcast(int lvl, const std::string msg)
   {
-    std::vector<robot_msgs::DiagnosticStatus> status_vec;
+    std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
       
     const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
     for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
@@ -351,29 +351,29 @@ public:
   }
 
 private:
-  void publish(robot_msgs::DiagnosticStatus &stat)
+  void publish(diagnostic_msgs::DiagnosticStatus &stat)
   {
-    std::vector<robot_msgs::DiagnosticStatus> status_vec;
+    std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
     status_vec.push_back(stat);
     publish(status_vec);
   }
 
-  void publish(std::vector<robot_msgs::DiagnosticStatus> &status_vec)
+  void publish(std::vector<diagnostic_msgs::DiagnosticStatus> &status_vec)
   {
-    for  (std::vector<robot_msgs::DiagnosticStatus>::iterator 
+    for  (std::vector<diagnostic_msgs::DiagnosticStatus>::iterator 
         iter = status_vec.begin(); iter != status_vec.end(); iter++)
     {
       iter->name = 
         node_handle_.getName().substr(1) + std::string(": ") + iter->name;
     }
-    robot_msgs::DiagnosticMessage msg;
+    diagnostic_msgs::DiagnosticMessage msg;
     msg.set_status_vec(status_vec);
     publisher_.publish(msg);
   }
 
   void setup()
   {
-    publisher_ = node_handle_.advertise<robot_msgs::DiagnosticMessage>("/diagnostics", 1);
+    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticMessage>("/diagnostics", 1);
 
     node_handle_.param("~diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now();
@@ -426,10 +426,10 @@ public:
 
   using diagnostic_updater::Updater::add;
 
-  void addUpdater(void (T::*f)(robot_msgs::DiagnosticStatus&))
+  void addUpdater(void (T::*f)(diagnostic_msgs::DiagnosticStatus&))
   {
     diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, owner_, _1);
-    robot_msgs::DiagnosticStatus stat;
+    diagnostic_msgs::DiagnosticStatus stat;
     f2(stat); // Get the function to fill out its name.
     boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
       fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask(stat.name, f2));

@@ -46,12 +46,12 @@
 
 #include "ros/node.h"
 
-#include "robot_msgs/DiagnosticStatus.h"
+#include "diagnostic_msgs/DiagnosticStatus.h"
 
 namespace diagnostic_updater
 {
 
-class DiagnosticStatusWrapper : public robot_msgs::DiagnosticStatus
+class DiagnosticStatusWrapper : public diagnostic_msgs::DiagnosticStatus
 {
 public:
   void summary(unsigned char lvl, const std::string s)
@@ -115,7 +115,7 @@ public:
 
   void addv(const std::string &key, double v)
   {
-    robot_msgs::DiagnosticValue dv;
+    diagnostic_msgs::DiagnosticValue dv;
     dv.label = key;
     dv.value = v;
     values.push_back(dv);
@@ -125,7 +125,7 @@ public:
 template<>
 void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const std::string &s)
 {
-  robot_msgs::DiagnosticString ds;
+  diagnostic_msgs::DiagnosticString ds;
   ds.label = key;
   ds.value = s;
   strings.push_back(ds);

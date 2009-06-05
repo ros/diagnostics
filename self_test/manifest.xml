@@ -4,10 +4,10 @@
   <license>BSD</license>
   <review status="unreviewed" notes="proposal (Jeremy)"/>
   <depend package="roscpp" />
-  <depend package="robot_srvs" />
   <depend package="diagnostic_updater" />
+  <depend package="diagnostic_msgs" />  
   <export>
-    <cpp cflags="-I${prefix}/include"/>
+    <cpp cflags="-I${prefix}/include -I${prefix}/srv/cpp"/>
   </export>
   <url></url>
 </package>

@@ -13,7 +13,7 @@ missing parts as well as report failiures.
 <cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
 </export>
 <depend package="rospy"/>
-<depend package="robot_msgs"/>
+<depend package="diagnostic_msgs"/>
     <sysdepend os="ubuntu" version="7.04-feisty" package="libwxgtk2.8-dev"/>
     <sysdepend os="ubuntu" version="8.04-feisty" package="python-wxgtk2.8"/>
     <sysdepend os="ubuntu" version="8.04-hardy" package="libwxgtk2.8-dev"/>

@@ -34,7 +34,7 @@
 import roslib
 roslib.load_manifest('runtime_monitor')
 
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
 import sys
 import rospy
 import socket

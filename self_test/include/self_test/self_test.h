@@ -42,8 +42,8 @@
 #include "ros/node.h"
 #include <boost/thread.hpp>
 
-#include "robot_msgs/DiagnosticStatus.h"
-#include "robot_srvs/SelfTest.h"
+#include "diagnostic_msgs/DiagnosticStatus.h"
+#include "diagnostic_msgs/SelfTest.h"
 #include "diagnostic_updater/diagnostic_updater.h"
 
 namespace self_test
@@ -142,8 +142,8 @@ public:
     id_ = id;
   }
 
-  bool doTest(robot_srvs::SelfTest::Request &req,
-                robot_srvs::SelfTest::Response &res)
+  bool doTest(diagnostic_msgs::SelfTest::Request &req,
+                diagnostic_msgs::SelfTest::Response &res)
   {
     {
       boost::mutex::scoped_lock lock(testing_mutex);
@@ -180,7 +180,7 @@ public:
 
       ROS_INFO("Completed pretest\n");
 
-      std::vector<robot_msgs::DiagnosticStatus> status_vec;
+      std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
       const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
       for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
@@ -214,7 +214,7 @@ public:
       res.id = id_;
 
       res.passed = true;
-      for (std::vector<robot_msgs::DiagnosticStatus>::iterator status_iter = status_vec.begin();
+      for (std::vector<diagnostic_msgs::DiagnosticStatus>::iterator status_iter = status_vec.begin();
            status_iter != status_vec.end();
            status_iter++)
       {
@@ -262,7 +262,7 @@ public:
     self_test::Dispatcher<T>::add("", f);
   }
 
-  void addTest(void (T::*f)(robot_msgs::DiagnosticStatus&))
+  void addTest(void (T::*f)(diagnostic_msgs::DiagnosticStatus&))
   {
     diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, self_test::Dispatcher<T>::owner_, _1);
     boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 

@@ -39,7 +39,7 @@ roslib.load_manifest('runtime_monitor')
 
 import sys, time 
 import rospy
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
 
 NAME = 'test_runtime_broadcaster'
 

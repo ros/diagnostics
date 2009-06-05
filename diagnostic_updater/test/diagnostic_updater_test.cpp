@@ -42,7 +42,7 @@ using namespace diagnostic_updater;
 class TestClass 
 {
 public: 
-  void unwrapped(robot_msgs::DiagnosticStatus &s)
+  void unwrapped(diagnostic_msgs::DiagnosticStatus &s)
   {
   }
 

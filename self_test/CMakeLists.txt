@@ -4,6 +4,8 @@ rospack(self_test)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+gensrv()
+
 rospack_add_boost_directories()
 
 rospack_add_executable(selftest_rostest src/selftest_rostest.cpp)

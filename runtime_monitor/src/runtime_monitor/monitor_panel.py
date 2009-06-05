@@ -39,7 +39,7 @@ roslib.load_manifest(PKG)
 
 import sys
 import rospy
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
 
 import wx
 from wx import xrc

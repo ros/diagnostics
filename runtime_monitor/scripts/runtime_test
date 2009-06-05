@@ -38,7 +38,7 @@ import roslib; roslib.load_manifest('runtime_monitor')
 
 import sys, time
 import rospy
-from robot_msgs.msg import DiagnosticMessage
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
 
 NAME = 'runtime_test'
 
