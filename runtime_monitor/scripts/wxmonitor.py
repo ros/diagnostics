@@ -39,7 +39,7 @@ roslib.load_manifest('runtime_monitor')
 
 import sys
 import rospy
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import *
 
 import wx
 import threading, time
