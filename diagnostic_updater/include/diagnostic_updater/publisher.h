@@ -37,6 +37,8 @@
 #define __DIAGNOSTIC_UPDATER__DRIVER_H__
 
 #include <ros/publisher.h>
+#include <ros/subscription.h>
+#include <diagnostic_updater/update_functions.h>
 
 namespace diagnostic_updater
 {
