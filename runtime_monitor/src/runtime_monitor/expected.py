@@ -37,7 +37,7 @@
 
 import sys
 import rospy
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import *
 
 
 
