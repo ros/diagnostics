@@ -49,7 +49,7 @@ public:
   HeaderlessDiagnosedPublisher(const ros::Publisher &pub,
       diagnostic_updater::Updater &diag,
       const diagnostic_updater::FrequencyStatusParam &freq) :
-    CombinationDiagnosticTask(const_cast<ros::Publisher &>(pub).getTopic() + " topic status"), /// @todo Get rid of this const_cast as soon as the publisher API is fixed.
+    CombinationDiagnosticTask(pub.getTopic() + " topic status"), /// @todo Get rid of this const_cast as soon as the publisher API is fixed.
     publisher_(pub),
     freq_(freq)
   {
