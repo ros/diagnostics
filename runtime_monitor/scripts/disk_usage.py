@@ -71,8 +71,10 @@ def disk_usage_monitor(device, offset=5):
            
             if (g_available > offset):
                 stat = DiagnosticStatus(0,component_string, "Acceptable Disk Space Avaiable", [DiagnosticValue(float(g_available),"free space (GB)")],[])
+            elif (g_available > 1):
+                stat = DiagnosticStatus(1,component_string, "Low Disk Space Avaiable", [DiagnosticValue(float(g_available),"free space (GB)")],[])
             else:
-                stat = DiagnosticStatus(2,component_string, "Low Disk Space Avaiable", [DiagnosticValue(float(g_available),"free space (GB)")],[])
+                stat = DiagnosticStatus(2,component_string, "Critically Low Disk Space Avaiable", [DiagnosticValue(float(g_available),"free space (GB)")],[])
         else:
             stat = DiagnosticStatus(2,component_string, "Failure to run \"df -P --block-size\"", [],[])
 
