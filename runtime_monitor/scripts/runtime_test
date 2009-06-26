@@ -50,6 +50,7 @@ test_name = 'uninitialized'
 package = 'uninitialized'
 last_runtime = rospy.get_time()
 startup_delay = 5.0
+start_time = rospy.get_time()
 
 def status_to_map(status):
     str_map = {}
@@ -79,7 +80,11 @@ def callback(message, args):
     execute_test(args)
 
 def execute_test(args):
+    global startup_delay
     global last_runtime
+    if rospy.get_time() < start_time + startup_delay:
+        rospy.logdebug("Waiting to for startup delay")
+        return
     time_step = rospy.get_time() - last_runtime
     if 1.0 /time_step > options.max_freq:
         return
@@ -116,10 +121,6 @@ def runtime_test(package, test_name):
 
     # get it's parameters
     params = rospy.get_param("~")
-
-
-    global startup_delay
-    time.sleep(startup_delay)
 
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
 
