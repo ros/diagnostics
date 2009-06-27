@@ -43,6 +43,7 @@
 #include <string>
 #include <sstream>
 #include <stdarg.h>
+#include <cstdio>
 
 #include "ros/node.h"
 
