@@ -43,10 +43,12 @@ import roslib
 def plot_key(label, stats):
     boards = [b for b in stats.keys() if b.count('motor') > 0]
     for board in boards:
-        pylab.plot(stats[board][label])
-        pylab.title(board)
-        pylab.xlabel('Time (s)')
-        pylab.ylabel(label)
+        pylab.plot(stats[board][label], label=board)
+
+    pylab.title(label + ' Timeseries')
+    pylab.xlabel('Message Number')
+    pylab.ylabel(label)
+    pylab.legend()
 
     pylab.show()
 
@@ -59,10 +61,24 @@ def main():
     stats = pickle.load(file(sys.argv[1]))
 
     keys = stats['tracked_values']
+    key_str_list = ''
+    key_index = {}
+    for index, key in enumerate(keys):
+        key_index[index] = key
+        key_str_list += "%d %s\n" % (index, key)
     while(1):
-        print "Available keys:" + str(keys)
-        key = input("What  value would you like to plot?")
-        if key in keys:
-            plot_key(key, stats)
-        else:
-            print "Error, key not found"
+        print "Available values:\n" + key_str_list
+        try:
+            index = input("What value would you like to plot (give index)? ")
+            key = key_index[index]
+            if key in keys:
+                plot_key(key, stats)
+            else:
+                print "Error, key not found"
+        except:
+            traceback.print_exc()
+            return
+
+
+if __name__ == '__main__':
+    main()

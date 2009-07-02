@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 PKG = 'diagnostics_analysis'
 import roslib; roslib.load_manifest(PKG)
 import rosrecord

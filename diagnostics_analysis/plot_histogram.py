@@ -36,8 +36,10 @@
 
 import sys, getopt
 import roslib
+roslib.load_manifest('diagnostics_analysis')
 import pylab
 import cPickle
+import traceback
 
 plotLines = False
 
@@ -52,24 +54,29 @@ def plot_key(label, stats):
   n = len(boards)
   #print "n=%d" %( n)
 
-  if plotLines == True:
+  if plotLines:
     if n == 1:
       pylab.plot(stats[boards[0]][label], label=boards[0])
+      pylab.title(label)
+      pylab.ylabel('Count')
+      pylab.xlabel('Value')
     else:
       for index, board in enumerate(boards):
         print board
 
-        #pylab.subplot(4, 4, index + 1)
         pylab.plot(stats[board][label], label=board)
-        #pylab.title(board)
+
   else:
     if n == 1:
       pylab.hist(stats[boards[0]][label], 100)
+      pylab.title(label)
+      pylab.ylabel('Count')
+      pylab.xlabel('Value')
 
     else:
       for index, board in enumerate(boards):
         print board
-
+        # 16 batteries, so this works
         pylab.subplot(4, 4, index + 1)
         pylab.hist(stats[board][label], 100)
         pylab.title(board)
@@ -83,15 +90,22 @@ def plot_key(label, stats):
 def readFile(my_file):
   stats = cPickle.load(my_file)
   keys = stats['tracked_values']
+  key_str_list = ''
+  key_index = {}
+  for index, key in enumerate(keys):
+    key_index[index] = key
+    key_str_list += "%d %s\n" % (index, key)
   while(1):
-    print "available keys:" + str(keys)
+    print "Available values:\n" + key_str_list
     try:
-      key = input("what value would you like to plot?")
+      index = input("What value would you like to plot (Give index)? ")
+      key = key_index[index]
       if key in keys:
         plot_key(key, stats)
       else:
         print "Error, key not found"
     except:
+      traceback.print_exc()
       return
 
 def usage():
