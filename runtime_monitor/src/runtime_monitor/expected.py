@@ -51,8 +51,6 @@ def test(latest_msgs, parameters, test_name):
     if "expected_present" in parameters:
         for name in parameters["expected_present"]:
             if name in latest_msgs and rospy.get_time() - latest_msgs[name]["last_time"] < 3.0:
-                print 'Last time %s' % latest_msgs[name]["last_time"]
-                print 'Now %s' % rospy.get_time()
                 msg = 'OK'
             elif name in latest_msgs:
                 msg = 'Stale - Error'
