@@ -47,6 +47,7 @@ rospy.init_node(NAME, anonymous=True)
 
 latest_messages = {}
 test_name = 'uninitialized'
+status_name = 'Runtime Test'
 package = 'uninitialized'
 last_runtime = rospy.get_time()
 startup_delay = 5.0
@@ -60,31 +61,33 @@ def status_to_map(status):
         str_map[val.label] = val.value;
     str_map["name"]= status.name
     str_map["message"] = status.message
+
+    # Store last time message was recorded
+    str_map["last_time"] = rospy.get_time()
     return str_map
     
-def analyze(package, test_impl, params):
+
+
+def analyze(test_impl, params):
     # run the test
-    return test_impl.test(latest_messages, params)
-
-def error_response(error):
-    rospy.logerr( "Error: %s"% error)
-
-def warning_response(warning):
-    rospy.logwarn("Warning: %s"% warning)
+    return test_impl.test(latest_messages, params, status_name)
 
 
 def callback(message, args):
     for s in message.status:
         latest_messages[s.name] = status_to_map(s)
-    sys.stdout.flush()
+    #sys.stdout.flush()
     execute_test(args)
 
 def execute_test(args):
-    global startup_delay
     global last_runtime
+    global publisher
+
     if rospy.get_time() < start_time + startup_delay:
         rospy.logdebug("Waiting to for startup delay")
         return
+    
+    # Don't execute at greater than max frequency
     time_step = rospy.get_time() - last_runtime
     if 1.0 /time_step > options.max_freq:
         return
@@ -92,17 +95,11 @@ def execute_test(args):
         last_runtime = rospy.get_time()
     
     test_impl, params = args
-    results = analyze(package, test_impl, params)
 
-    if 'error' in results:
-        for err in results['error']:
-            error_response(err)
-    
-    if 'warn' in results:
-        for warn in results['warn']:
-            warning_response(warn)
+    msg = DiagnosticMessage()
+    msg.status = [analyze(test_impl, params)]
+    publisher.publish(msg)
 
-    
 def runtime_test(package, test_name):
     # retrieve the test implementation
     roslib.load_manifest(package)
@@ -118,12 +115,16 @@ def runtime_test(package, test_name):
     # must be inited before reading parameters
     rospy.init_node(NAME, anonymous=True)
 
-
     # get it's parameters
     params = rospy.get_param("~")
 
     rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
 
+    # Publish in diagnostics the test results
+    global publisher
+    publisher = rospy.Publisher('/diagnostics', DiagnosticMessage)
+    
+    # Always executes at greater than the min frequency
     while not rospy.is_shutdown():
         if rospy.get_time() - last_runtime > 1/options.min_freq:
             execute_test((test_impl, params))
@@ -135,6 +136,9 @@ if __name__ == '__main__':
     parser.add_option("--test", metavar="TEST_NAME",
                       dest="test_name", default='', 
                       type="string", help="test name")
+    parser.add_option("--name", metavar="STATUS_NAME",
+                      dest="status_name", default='Runtime Test', 
+                      type="string", help="Name of status message")
     parser.add_option("--package", metavar="ROS_PACKAGE",
                       dest="package", default='runtime_monitor', 
                       type="string", help="package test is in")
@@ -147,16 +151,17 @@ if __name__ == '__main__':
     parser.add_option("--startup_delay", metavar="startup_delay",
                       dest="startup_delay", default='5.0', 
                       type="float", help="Time to wait before Polling(Seconds)")
+    
 
     options, args = parser.parse_args()
-
 
     
     # expected or default
     package = options.package 
-    global startup_delay
     startup_delay = options.startup_delay
     
+    status_name = options.status_name
+
     if options.test_name:
         test_name = options.test_name 
     else:

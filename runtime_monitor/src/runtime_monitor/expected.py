@@ -39,35 +39,43 @@ import sys
 import rospy
 from diagnostic_msgs.msg import *
 
+stat_dict = { 0: 'OK', 2: 'Error', 1: 'Warning' }
 
+def test(latest_msgs, parameters, test_name):
+    status = DiagnosticStatus()
+    status.name = 'Expected %s' % test_name
+    status.level = 0
+    status.message = 'OK'
+    status.strings = []
+    status.values = []
 
-
-def test(latest_status, parameters):
-    #print latest_status
-    results = {}
     if "expected_present" in parameters:
         for name in parameters["expected_present"]:
-            if name in latest_status:
-                #print "OK"
-                pass
+            if name in latest_msgs and latest_msgs[name]["last_time"] - rospy.get_time() < 3:
+                msg = 'OK'
+            elif name in latest_msgs:
+                msg = 'Stale - Error'
+                status.level = max(status.level, 2)
             else:
-                #print name, "expected but not observed"
-                if 'error' in results:
-                    results['error'].append("%s expected but not observed"%name)
-                else:
-                    results['error'] = ["%s expected but not observed"%name]
+                msg = 'Missing - Error'
+                status.level = max(status.level, 2)
+            status.strings.append(DiagnosticString(label = name, value = msg))
+
 
     if "desired_present" in parameters:
         for name in parameters["desired_present"]:
-            if name in latest_status:
-                #print "OK"
-                pass
+            if name in latest_msgs and latest_msgs[name]["last_time"] - rospy.get_time() < 3:
+                msg = 'OK'
+            elif name in latest_msgs:
+                msg = 'Stale - Warning'
+                status.level = max(status.level, 1)
             else:
-                #print name, "expected but not observed"
-                if 'warn' in results:
-                    results['warn'].append("%s desired but not observed"%name)
-                else:
-                    results['warn'] = ["%s desired but not observed"%name]
-    return results
+                msg = 'Missing - Warning'
+                status.level = max(status.level, 1)
+            status.strings.append(DiagnosticString(label = name, value = msg))
+
+    status.message = stat_dict[status.level]
+
+    return status
 
     

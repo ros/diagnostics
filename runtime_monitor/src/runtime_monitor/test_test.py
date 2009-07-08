@@ -37,19 +37,27 @@
 
 import sys
 import rospy
-from robot_msgs.msg import *
+from diagnostic_msgs.msg import *
 
 
 
 
-def test(latest_status, parameters):
-    #print latest_status
+def test(latest_status, parameters, test_name):
+    status = DiagnosticStatus()
+    status.name = test_name
+    status.level = 0
+    status.message = 'OK'
+    status.strings = []
+    status.values = []
 
     for name in parameters["expected_present"]:
         if name in latest_status:
-            print "OK"
+            msg = 'OK'
         else:
-            print name, "expected but not observed"
+            msg = 'Error'
+        status.strings.append(DiagnosticString(label = name, value = msg))
+
+    return status
 
 
     
