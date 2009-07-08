@@ -35,11 +35,10 @@
 #import roslib
 #roslib.load_manifest(PKG)
 
-import sys
 import rospy
 from diagnostic_msgs.msg import *
 
-stat_dict = { 0: 'OK', 2: 'Error', 1: 'Warning' }
+stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }
 
 def test(latest_msgs, parameters, test_name):
     status = DiagnosticStatus()
@@ -51,7 +50,9 @@ def test(latest_msgs, parameters, test_name):
 
     if "expected_present" in parameters:
         for name in parameters["expected_present"]:
-            if name in latest_msgs and latest_msgs[name]["last_time"] - rospy.get_time() < 3:
+            if name in latest_msgs and rospy.get_time() - latest_msgs[name]["last_time"] < 3.0:
+                print 'Last time %s' % latest_msgs[name]["last_time"]
+                print 'Now %s' % rospy.get_time()
                 msg = 'OK'
             elif name in latest_msgs:
                 msg = 'Stale - Error'
@@ -64,7 +65,7 @@ def test(latest_msgs, parameters, test_name):
 
     if "desired_present" in parameters:
         for name in parameters["desired_present"]:
-            if name in latest_msgs and latest_msgs[name]["last_time"] - rospy.get_time() < 3:
+            if name in latest_msgs and rospy.get_time() - latest_msgs[name]["last_time"] < 3.0:
                 msg = 'OK'
             elif name in latest_msgs:
                 msg = 'Stale - Warning'

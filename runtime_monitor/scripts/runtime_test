@@ -53,6 +53,8 @@ last_runtime = rospy.get_time()
 startup_delay = 5.0
 start_time = rospy.get_time()
 
+# Records status as dictionary by labels for strings, values
+# Also stores last time of message, allows stale checks.
 def status_to_map(status):
     str_map = {}
     for s in status.strings:
@@ -66,17 +68,15 @@ def status_to_map(status):
     str_map["last_time"] = rospy.get_time()
     return str_map
     
-
-
 def analyze(test_impl, params):
-    # run the test
+    # The test takes the latest_messages dictionary, the private parameters
+    # and the status name (the name of the DiagnosticStatus message
+    # it publishes)
     return test_impl.test(latest_messages, params, status_name)
-
 
 def callback(message, args):
     for s in message.status:
         latest_messages[s.name] = status_to_map(s)
-    #sys.stdout.flush()
     execute_test(args)
 
 def execute_test(args):
@@ -89,7 +89,7 @@ def execute_test(args):
     
     # Don't execute at greater than max frequency
     time_step = rospy.get_time() - last_runtime
-    if 1.0 /time_step > options.max_freq:
+    if 1.0 / time_step > options.max_freq:
         return
     else:
         last_runtime = rospy.get_time()
