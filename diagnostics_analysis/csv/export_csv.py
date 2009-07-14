@@ -50,7 +50,7 @@ def init():
 
 
 
-def update(stats, mech_stats, topic, msg):
+def update(stats, topic, msg):
   global output_dir
 
   if(not (topic == '/diagnostics')):
@@ -67,7 +67,7 @@ def update(stats, mech_stats, topic, msg):
       stats[name]['float_fields'] = [s.label for s in status.values]
       
       file_name = name.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '__').replace('.', '').replace('#', '')
-      stats[name]['file'] = file(output_dir + file_name + '.csv', 'w')
+      stats[name]['file'] = file(output_dir + '/' + file_name + '.csv', 'w')
 
       fields = stats[name]['string_fields'] + stats[name]['float_fields'];
       stats[name]['file'].write(', '.join(['timestamp'] + [f.replace(',','') for f in fields]) + '\n')
@@ -84,6 +84,7 @@ def update(stats, mech_stats, topic, msg):
       #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.label)
       #return stats
       continue
+    # Should make time machine readable better
     stats[name]['file'].write(', '.join([time.asctime(t)] + [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + [str(s.value) for s in status.values]) + '\n')
 
 
