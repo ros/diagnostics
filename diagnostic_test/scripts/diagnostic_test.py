@@ -34,24 +34,22 @@
 
 ## A basic node to monitor diagnostics for expected status
 
-import roslib; roslib.load_manifest('runtime_monitor')
+PKG = 'diagnostic_test'
+
+import roslib; roslib.load_manifest(PKG)
 
 import sys, time
 import rospy
 from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
 
-NAME = 'runtime_test'
-
-# must initialize a node before we call get_time()
-rospy.init_node(NAME, anonymous=True)
+NAME = 'diagnostic_test'
 
 latest_messages = {}
 test_name = 'uninitialized'
-status_name = 'Runtime Test'
 package = 'uninitialized'
 last_runtime = 0
 startup_delay = 5.0
-start_time = rospy.get_time()
+start_time = 0
 
 ## Records status as dictionary by labels for strings, values
 ## Also stores last time of message, allows stale checks.
@@ -63,6 +61,7 @@ def status_to_map(status):
         str_map[val.label] = val.value;
     str_map["name"]= status.name
     str_map["message"] = status.message
+    str_map["level"] = status.level
 
     # Store last time message was recorded
     str_map["last_time"] = rospy.get_time()
@@ -72,13 +71,16 @@ def status_to_map(status):
 ## and the status name (the name of the DiagnosticStatus message
 ## it publishes)
 def analyze(test_impl, params):
-    return test_impl.test(latest_messages, params, status_name)
+    return test_impl.test(latest_messages, params)
 
 def callback(message, args):
     for s in message.status:
         latest_messages[s.name] = status_to_map(s)
     execute_test(args)
 
+## Performs designated test using latest messages. Publishes to /diagnostics
+## Never tests greater than max frequency.
+##@param args (Test implementation, private parameters for test)
 def execute_test(args):
     global publisher
     global last_runtime
@@ -100,7 +102,8 @@ def execute_test(args):
     msg.status = [analyze(test_impl, params)]
     publisher.publish(msg)
 
-def runtime_test(package, test_name):
+## Starts up test, subscribes and publishes to diagnostics
+def diagnostic_test(package, test_name):
     # retrieve the test implementation
     roslib.load_manifest(package)
     __import__("%s.%s"%(package, test_name))
@@ -114,8 +117,9 @@ def runtime_test(package, test_name):
 
     # must be inited before reading parameters
     rospy.init_node(NAME, anonymous=True)
-    global last_runtime
+    global start_time, last_runtime
     last_runtime  = rospy.get_time()
+    start_time = rospy.get_time()
 
     # get it's parameters
     params = rospy.get_param("~")
@@ -138,20 +142,17 @@ if __name__ == '__main__':
     parser.add_option("--test", metavar="TEST_NAME",
                       dest="test_name", default='', 
                       type="string", help="test name")
-    parser.add_option("--name", metavar="STATUS_NAME",
-                      dest="status_name", default='Runtime Test', 
-                      type="string", help="Name of status message")
     parser.add_option("--package", metavar="ROS_PACKAGE",
-                      dest="package", default='runtime_monitor', 
+                      dest="package", default='diagnostic_test',
                       type="string", help="package test is in")
-    parser.add_option("--min_freq", metavar="min_frequency",
+    parser.add_option("--min_freq", metavar="MIN_FREQ",
                       dest="min_freq", default='0.5', 
                       type="float", help="Minimum Execution Frequency(Hz)")
-    parser.add_option("--max_freq", metavar="max_frequency",
+    parser.add_option("--max_freq", metavar="MAX_FREQ",
                       dest="max_freq", default='1.0', 
                       type="float", help="Maximum Execution Frequency(Hz)")
-    parser.add_option("--startup_delay", metavar="startup_delay",
-                      dest="startup_delay", default='5.0', 
+    parser.add_option("--startup_delay", metavar="STARTUP_DELAY",
+                      dest="startup_delay", default='10.0', 
                       type="float", help="Time to wait before Polling(Seconds)")
     
 
@@ -162,15 +163,13 @@ if __name__ == '__main__':
     package = options.package 
     startup_delay = options.startup_delay
     
-    status_name = options.status_name
-
     if options.test_name:
         test_name = options.test_name 
     else:
-        parser.error("you must give me a test to run")
+        parser.error("Diagnostic test must be given test to run")
 
     try:
-        runtime_test(package, options.test_name)
+        diagnostic_test(package, options.test_name)
     except KeyboardInterrupt, e:
         pass
     print "exiting"

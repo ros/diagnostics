@@ -32,49 +32,39 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-#import roslib
-#roslib.load_manifest(PKG)
+# Author: Kevin Watts
 
+# Performs testing on diagnostic_test scripts
+
+import roslib
+roslib.load_manifest('diagnostic_test')
+
+import sys
 import rospy
 from diagnostic_msgs.msg import *
+import time
 
-stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }
-
-def test(latest_msgs, parameters, test_name):
+def make_status_msg(name):
     status = DiagnosticStatus()
-    status.name = 'Expected %s' % test_name
+    status.name = name
     status.level = 0
     status.message = 'OK'
-    status.strings = []
-    status.values = []
-
-    if "expected_present" in parameters:
-        for name in parameters["expected_present"]:
-            if name in latest_msgs and rospy.get_time() - latest_msgs[name]["last_time"] < 3.0:
-                msg = 'OK'
-            elif name in latest_msgs:
-                msg = 'Stale - Error'
-                status.level = max(status.level, 2)
-            else:
-                msg = 'Missing - Error'
-                status.level = max(status.level, 2)
-            status.strings.append(DiagnosticString(label = name, value = msg))
-
-
-    if "desired_present" in parameters:
-        for name in parameters["desired_present"]:
-            if name in latest_msgs and rospy.get_time() - latest_msgs[name]["last_time"] < 3.0:
-                msg = 'OK'
-            elif name in latest_msgs:
-                msg = 'Stale - Warning'
-                status.level = max(status.level, 1)
-            else:
-                msg = 'Missing - Warning'
-                status.level = max(status.level, 1)
-            status.strings.append(DiagnosticString(label = name, value = msg))
-
-    status.message = stat_dict[status.level]
-
     return status
 
-    
+if __name__ == '__main__':
+    rospy.init_node('diagnostic_test_tester')
+
+    pub = rospy.Publisher('/diagnostics', DiagnosticMessage)
+
+    while not rospy.is_shutdown():
+        msg = DiagnosticMessage()
+
+        msg.status.append(make_status_msg('Expected 1'))
+        msg.status.append(make_status_msg('Expected 2'))
+        msg.status.append(make_status_msg('Desired 1'))
+
+        pub.publish(msg)
+        time.sleep(1.0)
+
+
+

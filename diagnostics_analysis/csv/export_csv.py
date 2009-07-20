@@ -65,12 +65,15 @@ def update(stats, topic, msg):
       stats[name] = {}
       stats[name]['string_fields'] = [s.label for s in status.strings]
       stats[name]['float_fields'] = [s.label for s in status.values]
+      stats[name]['level'] = status.level
+      stats[name]['message'] = status.message
       
       file_name = name.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '__').replace('.', '').replace('#', '')
       stats[name]['file'] = file(output_dir + '/' + file_name + '.csv', 'w')
 
       fields = stats[name]['string_fields'] + stats[name]['float_fields'];
-      stats[name]['file'].write(', '.join(['timestamp'] + [f.replace(',','') for f in fields]) + '\n')
+      stats[name]['file'].write(', '.join(['timestamp'] + ['Level', 'Message'] + 
+                                          [f.replace(',','') for f in fields]) + '\n')
     
     # Need stuff for different string fields
     # Store as dictionary, then convert to CSV?
@@ -84,8 +87,11 @@ def update(stats, topic, msg):
       #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.label)
       #return stats
       continue
+
     # Should make time machine readable better
-    stats[name]['file'].write(', '.join([time.asctime(t)] + [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + [str(s.value) for s in status.values]) + '\n')
+    stats[name]['file'].write(', '.join([time.asctime(t)] + [str(status.level), status.message] + 
+                                        [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + 
+                                        [str(s.value) for s in status.values]) + '\n')
 
 
 def output(stats):

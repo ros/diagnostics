@@ -1,0 +1,20 @@
+<package>
+<description brief='A program to test and analyze diagnostics on robot'>
+
+Monitors diagnostics by testing them. Checking battery prescence, checking motors are OK, etc.
+
+</description>
+<author>Kevin Watts</author>
+<license>BSD</license>
+<review status="proposal cleared" notes=""/>
+<url>http://pr.willowgarage.com/wiki/diagnostic_test</url>
+<export>
+<cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
+</export>
+<depend package="rospy"/>
+<depend package="diagnostic_msgs"/>
+<sysdepend os="ubuntu" version="7.04-feisty" package="libwxgtk2.8-dev"/>
+<sysdepend os="ubuntu" version="8.04-feisty" package="python-wxgtk2.8"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="libwxgtk2.8-dev"/>
+<sysdepend os="ubuntu" version="8.04-hardy" package="python-wxgtk2.8"/>
+</package>

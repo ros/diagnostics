@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="diagnostic_test" type="expected_publisher.py" />
+</launch>
