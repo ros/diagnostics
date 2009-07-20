@@ -89,7 +89,9 @@ def update(stats, topic, msg):
       continue
 
     # Should make time machine readable better
-    stats[name]['file'].write(', '.join([time.asctime(t)] + [str(status.level), status.message] + 
+    msg = status.message.replace(',',' ')
+
+    stats[name]['file'].write(', '.join([time.asctime(t)] + [str(status.level), msg] + 
                                         [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + 
                                         [str(s.value) for s in status.values]) + '\n')
 
