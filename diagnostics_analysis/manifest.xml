@@ -1,7 +1,7 @@
 <package>
   <description brief="Process diagnostics log files for statistics">
   </description>
-  <author>Eric Berger</author>
+  <author>Eric Berger, Kevin Watts</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <depend package="rosrecord"/>
