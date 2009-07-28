@@ -37,7 +37,7 @@
 PKG = 'diagnostics_analysis'
 import roslib; roslib.load_manifest(PKG)
 import rosrecord
-import std_msgs.msg
+import diagnostic_msgs.msg
 import time, sys
 import traceback
 import os

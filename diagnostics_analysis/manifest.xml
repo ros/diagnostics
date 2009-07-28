@@ -5,6 +5,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <depend package="rosrecord"/>
-  <depend package="std_msgs"/>
+  <depend package="diagnostic_msgs"/>
   <url>http://pr.willowgarage.com</url>
 </package>
