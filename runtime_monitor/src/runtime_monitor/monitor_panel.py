@@ -120,7 +120,6 @@ class MonitorPanel(wx.Panel):
     self._tree_control.DeleteChildren(self._warnings_id)
     self._tree_control.DeleteChildren(self._ok_id)
 
-
   def diagnostics_callback(self, message):
     self._mutex.acquire()
     
@@ -131,8 +130,13 @@ class MonitorPanel(wx.Panel):
     wx.CallAfter(self.new_message)
       
   def new_message(self):
-    self._mutex.acquire()
-    
+    # The panel can have messages in the queue after it's destroyed
+    # If it's been destroyed, just ignore it
+    try:
+      self._mutex.acquire()
+    except:
+      return
+
     had_errors = False
     
     for message in self._messages:

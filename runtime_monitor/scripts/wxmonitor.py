@@ -49,20 +49,44 @@ from runtime_monitor.monitor_panel import *
 
 NAME = 'runtime_monitor'
 
+ID_RESET = 8686
+ID_CHANGE_TOPIC = 7777
+
 class MainWindow(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, wx.ID_ANY, title)
         self.filemenu = wx.Menu()
         self.filemenu.Append(wx.ID_EXIT, "E&xit"," Exit the program")
+
+        self.monitor_menu = wx.Menu()
+        self.monitor_menu.Append(ID_CHANGE_TOPIC, "Change Topic")
+        self.monitor_menu.Append(ID_RESET, "Reset Monitor")
+        
         self.menubar = wx.MenuBar()
         self.menubar.Append(self.filemenu,"&File")
+        self.menubar.Append(self.monitor_menu, "&Monitor")
         self.SetMenuBar(self.menubar)
-        wx.EVT_MENU(self, wx.ID_EXIT, self.on_exit)
-        
-        panel = MonitorPanel(self)
-        panel.set_new_errors_callback(self.on_error)
+        #wx.EVT_MENU(self, wx.ID_EXIT, self.on_exit)
+        self.Bind(wx.EVT_MENU, self.on_menu)
+
+        self.panel = MonitorPanel(self)
+        self.panel.set_new_errors_callback(self.on_error)
         
         self.SetSize(wx.Size(750,450))
+
+    def on_menu(self, event):
+        if (event.GetEventObject() == self.filemenu):
+            if (event.GetId() == wx.ID_EXIT):
+                self.Close(True)
+                return
+        if (event.GetEventObject() == self.monitor_menu):
+            if (event.GetId() == ID_RESET):
+                self.panel.reset_monitor()
+                return
+            if (event.GetId() == ID_CHANGE_TOPIC):
+                topic = wx.GetTextFromUser('Enter new diagnostics topic', 'Change Topic', '/diagnostics')
+                self.panel.change_diagnostic_topic(str(topic))
+                return
 
 
     def on_exit(self, e):
