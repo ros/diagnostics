@@ -87,8 +87,13 @@ public:
     return publisher_;
   }
 
+  void set_publisher(ros::Publisher pub)
+  {
+    publisher_ = pub;
+  }
+
 private:
-  const ros::Publisher publisher_;
+  ros::Publisher publisher_;
   diagnostic_updater::FrequencyStatus freq_;
 };
 
