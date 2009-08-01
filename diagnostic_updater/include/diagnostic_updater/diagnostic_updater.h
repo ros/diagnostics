@@ -40,6 +40,7 @@
 #include <string>
 
 #include "ros/node_handle.h"
+#include "ros/this_node.h"
 
 #include "diagnostic_msgs/DiagnosticMessage.h"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
@@ -364,7 +365,7 @@ private:
         iter = status_vec.begin(); iter != status_vec.end(); iter++)
     {
       iter->name = 
-        node_handle_.getName().substr(1) + std::string(": ") + iter->name;
+        ros::this_node::getName().substr(1) + std::string(": ") + iter->name;
     }
     diagnostic_msgs::DiagnosticMessage msg;
     msg.set_status_vec(status_vec);
