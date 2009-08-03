@@ -178,7 +178,7 @@ public:
         (owner_->*pretest_)();
       }
 
-      ROS_INFO("Completed pretest\n");
+      ROS_INFO("Completed pretest");
 
       std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
@@ -229,7 +229,7 @@ public:
       if (posttest_ != NULL)
         (owner_->*posttest_)();
 
-      ROS_INFO("Self test completed\n");
+      ROS_INFO("Self test completed");
 
       retval = true;
 
