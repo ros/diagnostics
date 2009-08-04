@@ -248,7 +248,8 @@ class MonitorPanel(wx.Panel):
     
     s.write("<html><body>")
     s.write("<b>Component</b>: %s<br>\n" % (status.name))
-    s.write("<b>Message</b>: %s<br><br>\n\n" % (status.message))
+    s.write("<b>Message</b>: %s<br>\n" % (status.message))
+    s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id)) 
     
     s.write('<table border="1" cellpadding="2" cellspacing="0">')
     for value in status.strings: 
