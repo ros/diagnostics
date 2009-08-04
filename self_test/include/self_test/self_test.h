@@ -153,11 +153,17 @@ public:
 
       while (!ready)
       {
-        if (!testing_condition.timed_wait(lock, boost::get_system_time() + boost::posix_time::seconds(5)))
+        if (!testing_condition.timed_wait(lock, boost::get_system_time() + boost::posix_time::seconds(10)))
         {
+          diagnostic_updater::DiagnosticStatusWrapper status;
+          status.name = "Wait for Node Ready";
+          status.level = 2;
+          status.message = "Timed out waiting to run self test.";
           ROS_ERROR("Timed out waiting to run self test.\n");
+	  res.passed = false;
+          res.status.push_back(status);
           waiting = false;
-          return false;
+          return true;
         }
       }
     }
