@@ -406,7 +406,13 @@ private:
  *
  */
 
-template <class T>
+/**
+ *
+ * This class is deprecated. Use diagnostic_updater::Updater instead.
+ *
+ */
+
+ROSCPP_DEPRECATED template <class T>
 class DiagnosticUpdater : public diagnostic_updater::Updater
 {
 public:

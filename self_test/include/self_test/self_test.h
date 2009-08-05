@@ -255,7 +255,13 @@ public:
 
 };
 
-template <class T>
+/**
+ *
+ * This class is deprecated. Use self_test::Dispatcher instead.
+ *
+ */
+
+ROSCPP_DEPRECATED template <class T>
 class SelfTest : public self_test::Dispatcher<T>
 {
 public:
