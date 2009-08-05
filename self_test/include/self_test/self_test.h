@@ -261,11 +261,11 @@ public:
  *
  */
 
-ROSCPP_DEPRECATED template <class T>
+template <class T>
 class SelfTest : public self_test::Dispatcher<T>
 {
 public:
-  SelfTest(T *n) : self_test::Dispatcher<T>(n, ros::NodeHandle())
+  ROSCPP_DEPRECATED SelfTest(T *n) : self_test::Dispatcher<T>(n, ros::NodeHandle())
   {
   }
 

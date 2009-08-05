@@ -412,21 +412,21 @@ private:
  *
  */
 
-ROSCPP_DEPRECATED template <class T>
+template <class T>
 class DiagnosticUpdater : public diagnostic_updater::Updater
 {
 public:
-  DiagnosticUpdater(T *n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(n)
+  ROSCPP_DEPRECATED DiagnosticUpdater(T *n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(n)
   {
     complain();
   }
 
-  DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(c)
+  ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(c)
   {
     complain();
   }
 
-  DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater(h), owner_(c)
+  ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater(h), owner_(c)
   {
     complain();
   }
