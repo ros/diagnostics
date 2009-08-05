@@ -3,13 +3,13 @@
     Packages related to gathering, viewing, and analyzing diagnostics data
     from robots.
   </description>
-  <version>0.1</version>
   <author>Tully Foote tfoote@willowgarage.com</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/diagnostics</url>
   
-  <depend stack="ros" version="0.5"/>
-  <depend stack="common" version="0.1"/>
-</stack>
 
+  <depend stack="ros"/> <!-- rospy, rosrecord, roscpp, roscpp, rospy --> 
+  <depend stack="common_msgs"/> <!-- diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs --> 
+
+</stack>
