@@ -138,7 +138,7 @@ def diagnostic_test(package, test_name):
         
 if __name__ == '__main__': 
     from optparse import OptionParser
-    parser = OptionParser(usage="usage: %prog [options]", prog='runtime_test')
+    parser = OptionParser(usage="usage: %prog [options]", prog='diagnostic_test.py')
     parser.add_option("--test", metavar="TEST_NAME",
                       dest="test_name", default='', 
                       type="string", help="test name")
