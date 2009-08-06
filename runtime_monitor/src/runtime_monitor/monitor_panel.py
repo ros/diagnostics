@@ -99,13 +99,18 @@ class MonitorPanel(wx.Panel):
     
     self._messages = []
     self._used_items = 0
-
+    
   def __del__(self):
+    print 'Unregistering from /diagnostics'
     self._subscriber.unregister()
       
   def change_diagnostic_topic(self, topic):
+    if len(topic) == 0:
+      self.reset_monitor()
+      return
+
     self._subscriber.unregister()
-    self._subscriber = rospy.Subscriber(topic, DiagnosticMessage, self.diagnostics_callback)
+    self._subscriber = rospy.Subscriber(str(topic), DiagnosticMessage, self.diagnostics_callback)
     self.reset_monitor()
 
 
