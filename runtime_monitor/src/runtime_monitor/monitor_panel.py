@@ -101,7 +101,6 @@ class MonitorPanel(wx.Panel):
     self._used_items = 0
     
   def __del__(self):
-    print 'Unregistering from /diagnostics'
     self._subscriber.unregister()
       
   def change_diagnostic_topic(self, topic):
