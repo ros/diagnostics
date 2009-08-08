@@ -62,7 +62,7 @@ def test(latest_msgs, parameters):
             else:
                 msg = 'Missing - Error'
                 status.level = max(status.level, 2)
-            status.strings.append(DiagnosticString(label = name, value = msg))
+            status.strings.append(KeyValue(label = name, value = msg))
 
 
     if "desired_present" in parameters:
@@ -75,7 +75,7 @@ def test(latest_msgs, parameters):
             else:
                 msg = 'Missing - Warning'
                 status.level = max(status.level, 1)
-            status.strings.append(DiagnosticString(label = name, value = msg))
+            status.strings.append(KeyValue(label = name, value = msg))
 
     status.message = stat_dict[status.level]
 
