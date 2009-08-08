@@ -114,22 +114,22 @@ public:
   
   void addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
 
-  void addv(const std::string &key, double v)
+  /*  void addv(const std::string &key, double v)
   {
     diagnostic_msgs::KeyValue dv;
     dv.label = key;
     dv.value = v;
     values.push_back(dv);
-  }
+    }*/
 };
 
 template<>
 void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const std::string &s)
 {
-  diagnostic_msgs::DiagnosticString ds;
+  diagnostic_msgs::KeyValue ds;
   ds.label = key;
   ds.value = s;
-  strings.push_back(ds);
+  values.push_back(ds);
 }
   
 // Need to place addsf after DiagnosticStatusWrapper::adds<std::string> or

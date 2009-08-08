@@ -62,7 +62,7 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
     void run(DiagnosticStatusWrapper &s) 
     {
       s.summary(0, "Test is running");
-      s.addv("Value", 5);
+      s.addsf("Value", "%f", 5);
       s.adds("String", "Toto");
       s.adds("Floating", 5.55);
       s.adds("Integer", 5);
@@ -96,16 +96,16 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
   EXPECT_STREQ(message, stat.message.c_str()) << "DiagnosticStatusWrapper::summary failed to set message";
   EXPECT_EQ(level, stat.level) << "DiagnosticStatusWrapper::summary failed to set level";
 
-  stat.addv("toto", 5);
+  stat.addsf("toto", "%.1f", 5.0);
   stat.adds("baba", 5);
   stat.addsf("foo", "%05i", 27);
   
-  EXPECT_EQ(5.0, stat.values[0].value) << "Bad value, adding a value with addv";
-  EXPECT_STREQ("5", stat.strings[0].value.c_str()) << "Bad value, adding a string with adds";
-  EXPECT_STREQ("00027", stat.strings[1].value.c_str()) << "Bad value, adding a string with addsf";
+  EXPECT_STREQ("5.0", stat.values[0].value.c_str()) << "Bad value, adding a value with addsf";
+  EXPECT_STREQ("5", stat.values[1].value.c_str()) << "Bad value, adding a string with adds";
+  EXPECT_STREQ("00027", stat.values[2].value.c_str()) << "Bad value, adding a string with addsf";
   EXPECT_STREQ("toto", stat.values[0].label.c_str()) << "Bad label, adding a value with addv";
-  EXPECT_STREQ("baba", stat.strings[0].label.c_str()) << "Bad label, adding a string with adds";
-  EXPECT_STREQ("foo", stat.strings[1].label.c_str()) << "Bad label, adding a string with addsf";
+  EXPECT_STREQ("baba", stat.values[1].label.c_str()) << "Bad label, adding a string with adds";
+  EXPECT_STREQ("foo", stat.values[2].label.c_str()) << "Bad label, adding a string with addsf";
 }
 
 TEST(DiagnosticUpdater, testFrequencyStatus)

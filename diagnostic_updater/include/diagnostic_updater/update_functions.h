@@ -126,17 +126,17 @@ public:
       summary.summary(0, "Desired frequency met");
     }
 
-    details.addv("Events in window", events);
-    details.addv("Events since startup", count_);
-    details.addv("Duration of window (s)", window);
-    details.addv("Actual frequency (Hz)", freq);
+    details.addsf("Events in window", "%f", events);
+    details.addsf("Events since startup", "%f", count_);
+    details.addsf("Duration of window (s)", "%f", window);
+    details.addsf("Actual frequency (Hz)", "%f",freq);
     if (*params_.min_freq_ == *params_.max_freq_)
-      details.addv("Target frequency (Hz)", *params_.min_freq_);
+      details.addsf("Target frequency (Hz)", "%f",*params_.min_freq_);
     if (*params_.min_freq_ > 0)
-      details.addv("Minimum acceptable frequency (Hz)", 
+      details.addsf("Minimum acceptable frequency (Hz)", "%f",
           *params_.min_freq_ * (1 - params_.tolerance_));
     if (finite(*params_.max_freq_))
-      details.addv("Maximum acceptable frequency (Hz)", 
+      details.addsf("Maximum acceptable frequency (Hz)", "%f",
           *params_.max_freq_ * (1 + params_.tolerance_));
   }
 };
@@ -240,10 +240,10 @@ public:
       }
     }
 
-    details.addv("Earliest timestamp delay:", min_delta_);
-    details.addv("Latest timestamp delay:", max_delta_);
-    details.addv("Earliest acceptable timestamp delay:", params_.min_acceptable_);
-    details.addv("Latest acceptable timestamp delay:", params_.max_acceptable_);
+    details.addsf("Earliest timestamp delay:", "%f", min_delta_);
+    details.addsf("Latest timestamp delay:", "%f", max_delta_);
+    details.addsf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
+    details.addsf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
     details.adds("Late diagnostic update count:", late_count_); 
     details.adds("Early diagnostic update count:", early_count_); 
     details.adds("Zero seen diagnostic update count:", zero_count_); 
