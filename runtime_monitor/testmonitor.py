@@ -39,7 +39,7 @@ roslib.load_manifest('runtime_monitor')
 
 import sys, time 
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
 
 NAME = 'test_runtime_broadcaster'
 
@@ -50,10 +50,10 @@ def loop(pub):
         for c in range(0,4):
             floatval = []
             strval = []
-            floatval.append(DiagnosticValue(c, "Time Remaining Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.1, "Average charge percent Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.2, "Current Controller %d"%c))
-            floatval.append(DiagnosticValue(c+.2, "Voltage Controller %d"%c))
+            floatval.append(KeyValue(c, "Time Remaining Controller %d"%c))
+            floatval.append(KeyValue(c+.1, "Average charge percent Controller %d"%c))
+            floatval.append(KeyValue(c+.2, "Current Controller %d"%c))
+            floatval.append(KeyValue(c+.2, "Voltage Controller %d"%c))
             strval.append(DiagnosticString("String Value","Controller String Label"))
             stat.append(DiagnosticStatus(c, "IBPS %d"%c, "All good", floatval,strval))
             ## @todo make the status string represent errors etc
@@ -61,9 +61,9 @@ def loop(pub):
             for b in range(0,4):
                 bval = []
                 bstrval = []
-                bval.append(DiagnosticValue(c+b*.01+.1, "present (0,1)"))
-                bval.append(DiagnosticValue(c+b*.01+.2, "charging (0,1)"))
-                bval.append(DiagnosticValue(c+b*.01+.3, "supplying power (0,1)"))
+                bval.append(KeyValue(c+b*.01+.1, "present (0,1)"))
+                bval.append(KeyValue(c+b*.01+.2, "charging (0,1)"))
+                bval.append(KeyValue(c+b*.01+.3, "supplying power (0,1)"))
                 bstrval.append(DiagnosticString("String Value","Controller, String Label"))
 		
 		for a in range(0,100):

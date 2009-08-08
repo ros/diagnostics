@@ -116,7 +116,7 @@ public:
 
   void addv(const std::string &key, double v)
   {
-    diagnostic_msgs::DiagnosticValue dv;
+    diagnostic_msgs::KeyValue dv;
     dv.label = key;
     dv.value = v;
     values.push_back(dv);

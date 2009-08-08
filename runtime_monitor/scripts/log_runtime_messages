@@ -40,7 +40,7 @@ roslib.load_manifest('runtime_monitor')
 
 import sys
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
 
 NAME = 'runtime_monitor_logging'
 

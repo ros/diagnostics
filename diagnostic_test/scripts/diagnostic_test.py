@@ -40,7 +40,7 @@ import roslib; roslib.load_manifest(PKG)
 
 import sys, time
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, DiagnosticValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
 
 NAME = 'diagnostic_test'
 
