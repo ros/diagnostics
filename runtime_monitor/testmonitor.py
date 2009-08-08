@@ -39,7 +39,9 @@ roslib.load_manifest('runtime_monitor')
 
 import sys, time 
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+
 
 NAME = 'test_runtime_broadcaster'
 
@@ -73,7 +75,7 @@ def loop(pub):
                             
 
             
-        out = DiagnosticMessage(None, stat)
+        out = DiagnosticArray(None, stat)
         pub.publish(out)
         print "Published"
 
@@ -81,7 +83,7 @@ def loop(pub):
 
     
 def listener():
-    pub = rospy.Publisher("/diagnostics", DiagnosticMessage)
+    pub = rospy.Publisher("/diagnostics", DiagnosticArray)
     rospy.init_node(NAME, anonymous=True)
     while not rospy.is_shutdown():
         loop(pub)

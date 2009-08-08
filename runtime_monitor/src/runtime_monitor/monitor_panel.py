@@ -39,7 +39,9 @@ roslib.load_manifest(PKG)
 
 import sys
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
+
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
 
 import wx
 from wx import xrc
@@ -95,7 +97,7 @@ class MonitorPanel(wx.Panel):
     self.Bind(wx.EVT_TIMER, self.on_timer)
     self._timer.Start(5000)
     
-    self._subscriber = rospy.Subscriber("/diagnostics", DiagnosticMessage, self.diagnostics_callback)
+    self._subscriber = rospy.Subscriber("/diagnostics", DiagnosticArray, self.diagnostics_callback)
     
     self._messages = []
     self._used_items = 0
@@ -109,7 +111,7 @@ class MonitorPanel(wx.Panel):
       return
 
     self._subscriber.unregister()
-    self._subscriber = rospy.Subscriber(str(topic), DiagnosticMessage, self.diagnostics_callback)
+    self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
     self.reset_monitor()
 
 

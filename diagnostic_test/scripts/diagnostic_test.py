@@ -40,7 +40,8 @@ import roslib; roslib.load_manifest(PKG)
 
 import sys, time
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
 
 NAME = 'diagnostic_test'
 
@@ -98,7 +99,7 @@ def execute_test(args):
     
     test_impl, params = args
 
-    msg = DiagnosticMessage()
+    msg = DiagnosticArray()
     msg.status = [analyze(test_impl, params)]
     publisher.publish(msg)
 
@@ -124,11 +125,11 @@ def diagnostic_test(package, test_name):
     # get it's parameters
     params = rospy.get_param("~")
 
-    rospy.Subscriber("/diagnostics", DiagnosticMessage, callback, (test_impl, params))
+    rospy.Subscriber("/diagnostics", DiagnosticArray, callback, (test_impl, params))
 
     # Publish results in diagnostics
     global publisher
-    publisher = rospy.Publisher('/diagnostics', DiagnosticMessage)
+    publisher = rospy.Publisher('/diagnostics', DiagnosticArray)
     
     # Always executes at greater than the min frequency
     while not rospy.is_shutdown():

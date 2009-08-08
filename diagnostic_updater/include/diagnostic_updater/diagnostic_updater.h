@@ -42,7 +42,7 @@
 #include "ros/node_handle.h"
 #include "ros/this_node.h"
 
-#include "diagnostic_msgs/DiagnosticMessage.h"
+#include "diagnostic_msgs/DiagnosticArray.h"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
 /**
@@ -328,7 +328,7 @@ public:
     
     ros::NodeHandle newnh; 
     node_handle_ = newnh; 
-    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticMessage>("/diagnostics", 1);
+    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
     broadcast(2, "Node shut down"); 
   }*/
 
@@ -367,14 +367,14 @@ private:
       iter->name = 
         ros::this_node::getName().substr(1) + std::string(": ") + iter->name;
     }
-    diagnostic_msgs::DiagnosticMessage msg;
+    diagnostic_msgs::DiagnosticArray msg;
     msg.set_status_vec(status_vec);
     publisher_.publish(msg);
   }
 
   void setup()
   {
-    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticMessage>("/diagnostics", 1);
+    publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
 
     node_handle_.param("~diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now();

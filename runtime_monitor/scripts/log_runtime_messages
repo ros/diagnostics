@@ -40,7 +40,9 @@ roslib.load_manifest('runtime_monitor')
 
 import sys
 import rospy
-from diagnostic_msgs.msg import DiagnosticMessage, DiagnosticStatus, KeyValue, DiagnosticString
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+
 
 NAME = 'runtime_monitor_logging'
 
@@ -70,8 +72,7 @@ def callback(message):
     f.write("\n")
     
 def listener():
-    
-    rospy.Subscriber("/diagnostics", DiagnosticMessage, callback)
+    rospy.Subscriber("/diagnostics", DiagnosticArray, callback)
     rospy.init_node(NAME, anonymous=True)
     rospy.spin()
         

@@ -54,10 +54,10 @@ def make_status_msg(name):
 if __name__ == '__main__':
     rospy.init_node('diagnostic_test_tester')
 
-    pub = rospy.Publisher('/diagnostics', DiagnosticMessage)
+    pub = rospy.Publisher('/diagnostics', DiagnosticArray)
 
     while not rospy.is_shutdown():
-        msg = DiagnosticMessage()
+        msg = DiagnosticArray()
 
         msg.status.append(make_status_msg('Expected 1'))
         msg.status.append(make_status_msg('Expected 2'))
