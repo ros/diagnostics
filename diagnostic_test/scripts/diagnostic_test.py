@@ -41,7 +41,7 @@ import roslib; roslib.load_manifest(PKG)
 import sys, time
 import rospy
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 NAME = 'diagnostic_test'
 
@@ -61,7 +61,8 @@ def status_to_map(status):
     str_map["name"]= status.name
     str_map["message"] = status.message
     str_map["level"] = status.level
-
+    str_map["hardware"] = status.hardware_id
+    
     # Store last time message was recorded
     str_map["last_time"] = rospy.get_time()
     return str_map

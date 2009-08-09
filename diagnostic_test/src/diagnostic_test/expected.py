@@ -33,7 +33,7 @@
 #
 
 import rospy
-from diagnostic_msgs.msg import *
+from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }
 
@@ -42,7 +42,7 @@ def test(latest_msgs, parameters):
     status.name = 'Expected Test'
     status.level = 0
     status.message = 'OK'
-    status.strings = []
+    status.hardware_id = ''
     status.values = []
 
     if "name" in parameters:
@@ -62,7 +62,7 @@ def test(latest_msgs, parameters):
             else:
                 msg = 'Missing - Error'
                 status.level = max(status.level, 2)
-            status.strings.append(KeyValue(label = name, value = msg))
+            status.values.append(KeyValue(key = name, value = msg))
 
 
     if "desired_present" in parameters:
@@ -75,7 +75,7 @@ def test(latest_msgs, parameters):
             else:
                 msg = 'Missing - Warning'
                 status.level = max(status.level, 1)
-            status.strings.append(KeyValue(label = name, value = msg))
+            status.values.append(KeyValue(key = name, value = msg))
 
     status.message = stat_dict[status.level]
 
