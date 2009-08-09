@@ -56,10 +56,8 @@ start_time = 0
 ## Also stores last time of message, allows stale checks.
 def status_to_map(status):
     str_map = {}
-    for s in status.strings:
-        str_map[s.label] = s.value;
     for val in status.values:
-        str_map[val.label] = val.value;
+        str_map[val.key] = val.value;
     str_map["name"]= status.name
     str_map["message"] = status.message
     str_map["level"] = status.level

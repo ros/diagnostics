@@ -63,8 +63,8 @@ def update(stats, topic, msg):
 
     if(not stats.has_key(name)):
       stats[name] = {}
-      stats[name]['string_fields'] = [s.label for s in status.strings]
-      stats[name]['float_fields'] = [s.label for s in status.values]
+      stats[name]['string_fields'] = [s.key for s in status.strings]
+      stats[name]['float_fields'] = [s.key for s in status.values]
       stats[name]['level'] = status.level
       stats[name]['message'] = status.message
       
@@ -77,14 +77,14 @@ def update(stats, topic, msg):
     
     # Need stuff for different string fields
     # Store as dictionary, then convert to CSV?
-    if (not [s.label for s in status.strings] == stats[name]['string_fields']):
-      #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.label)
-      #print [s.label for s in status.strings]
+    if (not [s.key for s in status.strings] == stats[name]['string_fields']):
+      #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.key)
+      #print [s.key for s in status.strings]
       #print str(stats[name]['string_fields'])
       #return stats
       continue
-    if (not [s.label for s in status.values] == stats[name]['float_fields']):
-      #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.label)
+    if (not [s.key for s in status.values] == stats[name]['float_fields']):
+      #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.key)
       #return stats
       continue
 

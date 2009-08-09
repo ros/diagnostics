@@ -103,9 +103,9 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
   EXPECT_STREQ("5.0", stat.values[0].value.c_str()) << "Bad value, adding a value with addsf";
   EXPECT_STREQ("5", stat.values[1].value.c_str()) << "Bad value, adding a string with adds";
   EXPECT_STREQ("00027", stat.values[2].value.c_str()) << "Bad value, adding a string with addsf";
-  EXPECT_STREQ("toto", stat.values[0].label.c_str()) << "Bad label, adding a value with addv";
-  EXPECT_STREQ("baba", stat.values[1].label.c_str()) << "Bad label, adding a string with adds";
-  EXPECT_STREQ("foo", stat.values[2].label.c_str()) << "Bad label, adding a string with addsf";
+  EXPECT_STREQ("toto", stat.values[0].key.c_str()) << "Bad label, adding a value with addv";
+  EXPECT_STREQ("baba", stat.values[1].key.c_str()) << "Bad label, adding a string with adds";
+  EXPECT_STREQ("foo", stat.values[2].key.c_str()) << "Bad label, adding a string with addsf";
 }
 
 TEST(DiagnosticUpdater, testFrequencyStatus)

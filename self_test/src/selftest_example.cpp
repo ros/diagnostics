@@ -136,7 +136,7 @@ public:
 
     status.set_values_size(1);
     status.values[0].value = some_val;
-    status.values[0].label = "some value";
+    status.values[0].key = "some value";
 
     status.level = 0;
     status.message = "We successfully changed the value.";

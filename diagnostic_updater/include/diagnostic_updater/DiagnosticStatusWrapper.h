@@ -127,7 +127,7 @@ template<>
 void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const std::string &s)
 {
   diagnostic_msgs::KeyValue ds;
-  ds.label = key;
+  ds.key = key;
   ds.value = s;
   values.push_back(ds);
 }
