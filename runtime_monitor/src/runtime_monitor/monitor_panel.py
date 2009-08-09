@@ -40,8 +40,7 @@ roslib.load_manifest(PKG)
 import sys
 import rospy
 
-
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 import wx
 from wx import xrc
@@ -258,11 +257,9 @@ class MonitorPanel(wx.Panel):
     s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id)) 
     
     s.write('<table border="1" cellpadding="2" cellspacing="0">')
-    for value in status.strings: 
-      value.value = value.value.replace("\n", "<br>")
-      s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.label, value.value))
     for value in status.values:
-      s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.label, value.value))
+      value.value = value.value.replace("\n", "<br>")
+      s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.key, value.value))
         
     s.write("</table></body></html>")
         
