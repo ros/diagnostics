@@ -115,7 +115,7 @@ public:
     std::stringstream ss;
     ss << val;
     std::string sval = ss.str();
-    adds(key, sval);
+    add(key, sval);
   }
   
   void ROSCPP_DEPRECATED addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
@@ -124,7 +124,7 @@ public:
 };
 
 template<>
-void DiagnosticStatusWrapper::add<std::string>(const std::string &key, const std::string &s)
+inline void DiagnosticStatusWrapper::add<std::string>(const std::string &key, const std::string &s)
 {
   diagnostic_msgs::KeyValue ds;
   ds.key = key;
@@ -134,7 +134,7 @@ void DiagnosticStatusWrapper::add<std::string>(const std::string &key, const std
   
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
 // gcc complains that the specialization occurs after instatiation.
-void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
+inline void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
 {
   va_list va;
   char buff[1000]; // @todo This could be done more elegantly.
@@ -142,11 +142,11 @@ void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, 
   if (vsnprintf(buff, 1000, format, va) >= 1000)
     ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
   std::string value = std::string(buff);
-  adds(key, value);
+  add(key, value);
   va_end(va);
 }
 
-void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, ...) // In practice format will always be a char *
+inline void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, ...) // In practice format will always be a char *
 {
   va_list va;
   char buff[1000]; // @todo This could be done more elegantly.
@@ -154,7 +154,7 @@ void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, .
   if (vsnprintf(buff, 1000, format, va) >= 1000)
     ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
   std::string value = std::string(buff);
-  adds(key, value);
+  add(key, value);
   va_end(va);
 }
 
