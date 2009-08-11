@@ -126,17 +126,17 @@ public:
       summary.summary(0, "Desired frequency met");
     }
 
-    details.addsf("Events in window", "%f", events);
-    details.addsf("Events since startup", "%f", count_);
-    details.addsf("Duration of window (s)", "%f", window);
-    details.addsf("Actual frequency (Hz)", "%f",freq);
+    details.addf("Events in window", "%f", events);
+    details.addf("Events since startup", "%f", count_);
+    details.addf("Duration of window (s)", "%f", window);
+    details.addf("Actual frequency (Hz)", "%f",freq);
     if (*params_.min_freq_ == *params_.max_freq_)
-      details.addsf("Target frequency (Hz)", "%f",*params_.min_freq_);
+      details.addf("Target frequency (Hz)", "%f",*params_.min_freq_);
     if (*params_.min_freq_ > 0)
-      details.addsf("Minimum acceptable frequency (Hz)", "%f",
+      details.addf("Minimum acceptable frequency (Hz)", "%f",
           *params_.min_freq_ * (1 - params_.tolerance_));
     if (finite(*params_.max_freq_))
-      details.addsf("Maximum acceptable frequency (Hz)", "%f",
+      details.addf("Maximum acceptable frequency (Hz)", "%f",
           *params_.max_freq_ * (1 + params_.tolerance_));
   }
 };
@@ -240,13 +240,13 @@ public:
       }
     }
 
-    details.addsf("Earliest timestamp delay:", "%f", min_delta_);
-    details.addsf("Latest timestamp delay:", "%f", max_delta_);
-    details.addsf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
-    details.addsf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
-    details.adds("Late diagnostic update count:", late_count_); 
-    details.adds("Early diagnostic update count:", early_count_); 
-    details.adds("Zero seen diagnostic update count:", zero_count_); 
+    details.addf("Earliest timestamp delay:", "%f", min_delta_);
+    details.addf("Latest timestamp delay:", "%f", max_delta_);
+    details.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
+    details.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
+    details.add("Late diagnostic update count:", late_count_); 
+    details.add("Early diagnostic update count:", early_count_); 
+    details.add("Zero seen diagnostic update count:", zero_count_); 
 
     deltas_valid_ = false;
     min_delta_ = 0;

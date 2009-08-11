@@ -85,7 +85,7 @@ public:
     char buff[1000]; // @todo This could be done more elegantly.
     va_start(va, format);
     if (vsnprintf(buff, 1000, format, va) >= 1000)
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
     std::string value = std::string(buff);
     mergeSummary(lvl, value);
     va_end(va);
@@ -97,7 +97,7 @@ public:
     char buff[1000]; // @todo This could be done more elegantly.
     va_start(va, format);
     if (vsnprintf(buff, 1000, format, va) >= 1000)
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
     std::string value = std::string(buff);
     summary(lvl, value);
     va_end(va);
@@ -152,7 +152,7 @@ inline void DiagnosticStatusWrapper::addf(const std::string &key, const char *fo
   char buff[1000]; // @todo This could be done more elegantly.
   va_start(va, format);
   if (vsnprintf(buff, 1000, format, va) >= 1000)
-    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
   std::string value = std::string(buff);
   add(key, value);
   va_end(va);
