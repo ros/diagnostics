@@ -104,12 +104,6 @@ public:
   }
 
   template<class T>
-  void ROSCPP_DEPRECATED adds(const std::string &key, const T &val)
-  {
-    add(key, val);
-  }
-
-  template<class T>
   void add(const std::string &key, const T &val)
   {
     std::stringstream ss;
@@ -117,8 +111,6 @@ public:
     std::string sval = ss.str();
     add(key, sval);
   }
-  
-  void ROSCPP_DEPRECATED addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
   
   void addf(const std::string &key, const char *format, ...); // In practice format will always be a char *
 };
@@ -134,18 +126,6 @@ inline void DiagnosticStatusWrapper::add<std::string>(const std::string &key, co
   
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
 // gcc complains that the specialization occurs after instatiation.
-inline void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
-{
-  va_list va;
-  char buff[1000]; // @todo This could be done more elegantly.
-  va_start(va, format);
-  if (vsnprintf(buff, 1000, format, va) >= 1000)
-    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
-  std::string value = std::string(buff);
-  add(key, value);
-  va_end(va);
-}
-
 inline void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, ...) // In practice format will always be a char *
 {
   va_list va;
