@@ -104,7 +104,13 @@ public:
   }
 
   template<class T>
-  void adds(const std::string &key, const T &val)
+  void ROSCPP_DEPRECATED adds(const std::string &key, const T &val)
+  {
+    add(key, val);
+  }
+
+  template<class T>
+  void add(const std::string &key, const T &val)
   {
     std::stringstream ss;
     ss << val;
@@ -112,19 +118,13 @@ public:
     adds(key, sval);
   }
   
-  void addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
-
-  /*  void addv(const std::string &key, double v)
-  {
-    diagnostic_msgs::KeyValue dv;
-    dv.label = key;
-    dv.value = v;
-    values.push_back(dv);
-    }*/
+  void ROSCPP_DEPRECATED addsf(const std::string &key, const char *format, ...); // In practice format will always be a char *
+  
+  void addf(const std::string &key, const char *format, ...); // In practice format will always be a char *
 };
 
 template<>
-void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const std::string &s)
+void DiagnosticStatusWrapper::add<std::string>(const std::string &key, const std::string &s)
 {
   diagnostic_msgs::KeyValue ds;
   ds.key = key;
@@ -132,9 +132,21 @@ void DiagnosticStatusWrapper::adds<std::string>(const std::string &key, const st
   values.push_back(ds);
 }
   
-// Need to place addsf after DiagnosticStatusWrapper::adds<std::string> or
+// Need to place addf after DiagnosticStatusWrapper::add<std::string> or
 // gcc complains that the specialization occurs after instatiation.
 void DiagnosticStatusWrapper::addsf(const std::string &key, const char *format, ...) // In practice format will always be a char *
+{
+  va_list va;
+  char buff[1000]; // @todo This could be done more elegantly.
+  va_start(va, format);
+  if (vsnprintf(buff, 1000, format, va) >= 1000)
+    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addsf, it was truncated.");
+  std::string value = std::string(buff);
+  adds(key, value);
+  va_end(va);
+}
+
+void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, ...) // In practice format will always be a char *
 {
   va_list va;
   char buff[1000]; // @todo This could be done more elegantly.
