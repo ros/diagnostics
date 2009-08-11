@@ -82,7 +82,7 @@ TEST(SelfTest, runSelfTest)
       EXPECT_EQ(0, res.status[i].level) << res.status[i].name << " did not PASS: " << res.status[i].message;
 
       for (size_t j = 0; j < res.status[i].get_values_size(); j++)
-        printf("      [%s] %f\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value);
+        printf("      [%s] %s\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value.c_str());
 
       printf("\n");
     }

@@ -69,7 +69,7 @@ bool doTest(ros::NodeHandle nh)
       printf("%s\n", res.status[i].message.c_str());
 
       for (size_t j = 0; j < res.status[i].get_values_size(); j++)
-        printf("      [%s] %f\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value);
+        printf("      [%s] %s\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value.c_str());
 
       printf("\n");
     }
