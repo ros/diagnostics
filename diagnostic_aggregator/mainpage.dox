@@ -1,0 +1,101 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+\b diagnostic_aggregator aggregates and performs basic analysis on the diagnostics of a robot. This package consists of the base node, or aggregator, and several analyzers to collect and process diagnostics data.
+
+
+\section codeapi Code API
+
+The aggregator loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized by an XML node by the aggregator.
+
+All analyzers work by grouping diagnostics data by status name. Each group is pushed into a namespace using '/'. For example:
+\verbatim
+\Robot
+\Robot\Motors
+\Robot\Motors\EtherCAT Device (head_tilt_motor)
+\endverbatim
+
+Forms a tree with the trunk "Robot" and the child branch "Motors" and the grandchild "EtherCAT Device (head_tilt_motor)". This allows graphical display of diagnostics data.
+
+Analyzers can choose the error state for the parents. It should be related to the state of the children, but can follow any rule.
+
+The aggregator will publish the DiagnosticArray on the /diagnostics_agg topic at 1 Hz.
+
+
+\section rosapi ROS API
+
+Nodes:
+- \b diagnostic_aggregator
+
+
+<!-- START: copy from here to 'END' for each node 
+
+<hr>
+
+\subsection diagnostic_aggregator diagnostic_aggregator
+
+diagnostic_aggregator subscribes to "/diagnstics" and publishes an aggregated set of data to "/diagnostics_agg"
+
+\subsubsection Usage
+\verbatim
+$ diagnostic_aggregator -p Robot -f '$(find diagnostic_aggregator)/test/robot_analyzers.xml'
+\endverbatim
+
+\par Example
+
+Using the above usage, the diagnostic aggregator will spawn analyzers that group the robot's data by category. The analyzer code is as follows:
+
+\verbatim
+<aggregator>
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator" 
+            file="generic_analyzer"       prefix="Motors" >
+    <topic startswith="EtherCAT" />
+    <topic startswith="Power Node" />
+  </analyzer>
+
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Joints" >
+    <topic startswith="Joint" />
+  </analyzer>
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Computers" >
+    <topic contains="CPU Temp" />
+    <topic contains="HD Temp" />
+    <topic contains="HD Usage" />
+    <topic contains="CPU Usage" />
+    <topic contains="CPU Temp" />
+    <topic contains="NFS I/O" />
+    <topic contains="NTP" />
+  </analyzer>
+
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Sensors" >
+    <topic contains="prosilica" />
+    <topic contains="hokuyo" />
+  </analyzer>
+
+</aggregator>
+\endverbatim
+
+Analyzers are dynamically loaded by the aggregator. The 'type', 'pkg', 'file'
+and 'prefix' fields are mandatory, and are used to intialize the aggregator.
+
+- \b type : Class name of analyzer
+- \b pkg : ROS-PKG location of analyzer
+- \b file : File name of analyzer. Must be in src/PKG_NAME path
+- \b prefix : Prepended to all analyzed topics, used to group together
+
+
+\subsubsection topics ROS topics
+
+Subscribes to:
+- \b "/diagnostics": [diagnostics_msgs/DiagnosticArray] 
+
+Publishes to:
+- \b "/diagnostics_agg": [diagnostics_msgs/DiagnosticArray] 
+
+
+
+
+*/

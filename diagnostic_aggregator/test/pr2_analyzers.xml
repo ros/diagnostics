@@ -1,0 +1,29 @@
+<aggregator>
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator" 
+            file="generic_analyzer"       prefix="Motors" >
+    <topic startswith="EtherCAT" />
+    <topic startswith="Power Node" />
+  </analyzer>
+
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Joints" >
+    <topic startswith="Joint" />
+  </analyzer>
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Computers" >
+    <topic contains="CPU Temp" />
+    <topic contains="HD Temp" />
+    <topic contains="HD Usage" />
+    <topic contains="CPU Usage" />
+    <topic contains="CPU Temp" />
+    <topic contains="NFS I/O" />
+    <topic contains="NTP" />
+  </analyzer>
+
+  <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+            file="generic_analyzer"       prefix="Sensors" >
+    <topic contains="prosilica" />
+    <topic contains="hokuyo" />
+  </analyzer>
+
+</aggregator>

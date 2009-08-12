@@ -1,0 +1,12 @@
+<package>
+  <description brief="Aggregates robot diagnostics to allow easy display" >
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/diagnostic_aggregator</url>
+  <depend package="rospy" />
+  <depend package="diagnostic_msgs" />
+</package>
+
+
