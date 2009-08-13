@@ -2,118 +2,44 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b robot_monitor is ... 
+\b robot_monitor is a graphical monitor that displays the aggregated diagnostics data published on /diagnostics_agg. It is useful for display large amounts of data in a compact form. Users can double click on data in the compressed form to see more detailed information.
 
-<!-- 
-In addition to providing an overview of your package,
-this is the section where the specification and design/architecture 
-should be detailed. While the original specification may be done on the
-wiki, it should be transferred here once your package starts to take shape.
-You can then link to this documentation page from the Wiki. 
--->
+The file robot_monitor_panel contains the main panel for the monitor, and viewer_panel contains the data for the popup panel. 
 
-
-\section codeapi Code API
-
-<!--
-Provide links to specific auto-generated API documentation within your
-package that is of particular interest to a reader. Doxygen will
-document pretty much every part of your code, so do your best here to
-point the reader to the actual API.
-
-If your codebase is fairly large or has different sets of APIs, you
-should use the doxygen 'group' tag to keep these APIs together. For
-example, the roscpp documentation has 'libros' group.
--->
 
 \section rosapi ROS API
 
-<!--
-Names are very important in ROS because they can be remapped on the
-command-line, so it is VERY IMPORTANT THAT YOU LIST NAMES AS THEY
-APPEAR IN THE CODE. You should list names of every topic, service and
-parameter used in your code. There is a template below that you can
-use to document each node separately.
-
-List of nodes:
-- \b node_name1
-- \b node_name2
--->
-
-<!-- START: copy from here to 'END' for each node 
+List of nodes
+- \b robot_monitor.py
 
 <hr>
 
-\subsection node_name node_name
+\subsection robot_monitor robot_monitor
 
-node_name does (provide a basic description of your node)
+robot_monitor displays incoming aggregated diagnostics graphically.
 
 \subsubsection Usage
 \verbatim
-$ node_type1 [standard ROS args]
+$ ./robot_monitor.py
 \endverbatim
 
-\par Example
-
+The incoming diagnostics data is parsed by DiagnosticStatus name, and separated by '/'. The names:
 \verbatim
-$ node_type1
+\Robot
+\Robot\Motors
+\Robot\Motors\Head Motor
 \endverbatim
-
+Form a tree with the trunk 'Robot' and branch 'Motors' with leaf 'Head Motor'. Multiple trunk names, publishing as one or more DiagnosticArray's, can be displayed.
 
 \subsubsection topics ROS topics
 
 Subscribes to:
-- \b "in": [std_msgs/FooType] description of in
+- \b "diagnostics": [diagnostics_msgs/DiagnosticArray] Raw input
 
 Publishes to:
-- \b "out": [std_msgs/FooType] description of out
+- \b "diagnostics_agg": [diagnostics_msgs/DiagnosticArray] Aggregated output
 
 
-\subsubsection parameters ROS parameters
 
-Reads the following parameters from the parameter server
-
-- \b "~param_name" : \b [type] description of param_name
-- \b "~my_param" : \b [string] description of my_param
-
-Sets the following parameters on the parameter server
-
-- \b "~param_name" : \b [type] description of param_name
-
-
-\subsubsection services ROS services
-- \b "foo_service": [std_srvs/FooType] description of foo_service
-
-
-END: copy for each node -->
-
-
-<!-- START: Uncomment if you have any command-line tools
-
-\section commandline Command-line tools
-
-This section is a catch-all for any additional tools that your package
-provides or uses that may be of use to the reader. For example:
-
-- tools/scripts (e.g. rospack, roscd)
-- roslaunch .launch files
-- xmlparam files
-
-\subsection script_name script_name
-
-Description of what this script/file does.
-
-\subsubsection Usage
-\verbatim
-$ ./script_name [args]
-\endverbatim
-
-\par Example
-
-\verbatim
-$ ./script_name foo bar
-\endverbatim
-
-END: Command-Line Tools Section -->
 
 */
