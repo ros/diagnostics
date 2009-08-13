@@ -152,18 +152,24 @@ class GenericAnalyzer:
         self._update_status_names(msgs_to_analyze)
 
         # Process messages
+        all_stale = True
         for name, item in self._status_names.iteritems():
             # Update level
             header_status.level = max(header_status.level, item._level)
 
-            # Update value with last update time
+            level_str = stat_dict[item._level]
+            header_status.values.append(KeyValue(name, level_str))
+
             update_time = rospy.get_time() - item._update_time
-            update_str = '%.3f' % update_time
-            header_status.values.append(KeyValue(name, update_str))
             stale = update_time > 3.0 ##@todo Make this parameter
+            all_stale = stale and all_stale
             
             # Output status message
             status_array.append(item.to_status_msg(self._prefix, stale))
+
+        if all_stale:
+            header_status.level = 3
+            header_status.message = 'All Stale'
     
         return status_array
 
