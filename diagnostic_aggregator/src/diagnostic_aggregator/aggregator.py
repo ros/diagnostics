@@ -50,6 +50,9 @@ import sys
 import threading
 from threading import Timer
 
+##\brief Creates analyzer class from XML snippet
+##@param xml_node mindom node : XML node to choose, initialize analyzer
+##@param global_prefix str : Prefix of all analyzers for this aggregator
 def create_analyzer(xml_node, global_prefix):
     type   = xml_node.attributes['type'].value
     pkg    = xml_node.attributes['pkg'].value
@@ -82,14 +85,34 @@ def create_analyzer(xml_node, global_prefix):
         
     return analyzer
 
+##\brief Aggregates /diagnostics topic and republishes on /diagnostics_agg
+## 
+## DiagnosticAggregator ia an aggregator that creates "analyzers" to 
+## analyze, store and track DiagnosticStatus messages. It publishes the 
+## aggregated data on /diagnostics_agg as a DiagnosticArray. It prepends the 
+## given prefix to all aggregated DiagnosticStatus message names.
+## 
+## The XML snippet to initialize the aggregator contains the necessary 
+## data to dynamically load the analyzers.
+##\verbatim
+## <aggregator>
+##  <analyzer type="AnalyzerClassName" pkg="analyzer_package"
+##            file="analyzer_file" prefix="Prefix" >
+##   <!-- Anything else to initialize the analyzer -->
+##  </analyzer>
+## <!-- Other analyzers -->
+## </aggregator>
+##\endverbatim
+## The analyzer will prepend the prefix "/aggregator_prefix/Prefix/" to 
+## all topics it analyzes. 
 class DiagnosticAggregator:
+    ##@param prefix str : Prepended to all processed DiagnosticStatus names
+    ##@param xml_doc minidom node : XML node for analyzer creation
     def __init__(self, prefix, xml_doc):
         self._analyzers = []
         self._msgs = {}
 
         self._mutex = threading.Lock()
-
-        rospy.init_node('diagnostic_aggregator')
 
         if not prefix.startswith('/'):
             prefix = '/' + prefix
@@ -103,6 +126,7 @@ class DiagnosticAggregator:
 
         self._agg_pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
 
+    ##\brief Callback for /diagnostics subscription
     def diag_callback(self, array):
         self._mutex.acquire()
         
@@ -110,11 +134,20 @@ class DiagnosticAggregator:
             self._msgs[msg] = 0
         self._mutex.release()
 
+    ##\brief Calls analyzers, publishes /diagnostics_agg 
     def publish_data(self):
         self._mutex.acquire()
 
+        # Global status
+        status = DiagnosticStatus()
+        status.name = self._prefix
+        status.level = 0
+        status.message = 'OK'
+        status.values = []
+
         array = DiagnosticArray()
-        array.status = []
+        
+        array.status = [ status ]
 
         for analyzer in self._analyzers:
             array.status.extend(analyzer.analyze(self._msgs))
@@ -126,7 +159,7 @@ class DiagnosticAggregator:
 
         self._mutex.release()
 
-    ## Process remaining messages, uses 'Other' prefix
+    ##\brief Process remaining messages with 'Other' prefix
     def _process_remainder(self):
         remainder_header = DiagnosticStatus()
         remainder_header.name = '%s/%s' % (self._prefix, 'Other')

@@ -67,7 +67,9 @@ def main():
     except:
         parser.error('Unable to open XML file')
     
-    
+
+    rospy.init_node('diagnostic_aggregator')    
+
     try:    
         agg = DiagnosticAggregator(options.prefix, xml_doc)
     

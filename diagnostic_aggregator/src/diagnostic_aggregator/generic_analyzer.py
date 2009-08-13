@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
+#
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -32,50 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-## Aggregates diagnostics from robot and republishes to /diagnostics_agg
-
-PKG = 'diagnostic_aggregator'
-import roslib; roslib.load_manifest(PKG)
-
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
-
-# Pulls together all data that starts with fields 
-
-stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }#!/usr/bin/env python
-# Software License Agreement (BSD License)
-#
-# Copyright (c) 2008, Willow Garage, Inc.
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of the Willow Garage nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
-
-## Aggregates diagnostics from robot and republishes to /diagnostics_agg
+# Author: Kevin Watts
 
 PKG = 'diagnostic_aggregator'
 import roslib; roslib.load_manifest(PKG)
@@ -91,6 +49,7 @@ class IncorrectNameError(Exception): pass
 
 ##\brief Stores DiagnosticStatus messages with update time
 class DiagnosticItem:
+    ##@param status DiagnosticStatus : First status message received
     def __init__(self, status):
         self._name = status.name
         self._level = status.level
@@ -100,6 +59,8 @@ class DiagnosticItem:
         self._update_time = rospy.get_time()
         self._count = 0
 
+    ## Update item with latest status
+    ##@param status DiagnosticStatus : Latest message, must have same name as original
     def update(self, status):
         if self._name != status.name:
             raise IncorrectNameError
@@ -111,6 +72,9 @@ class DiagnosticItem:
         self._update_time = rospy.get_time()
         self._count += 1
 
+    ##\brief Outputs diagnostics status
+    ## Output item as DiagnosticStatus, sets level to stale if 
+    ## timeout > 3.0 seconds
     def to_status_msg(self, prefix, stale):
         status = DiagnosticStatus()
         status.name = str(prefix + '/' + self._name.replace('/', ''))
@@ -127,19 +91,18 @@ class DiagnosticItem:
 ##\brief Analyzes all data for selected topics
 ## Initialized by XML snippet:
 ##\verbatim
-##   <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator" 
-##             file="generic_analyzer" prefix="Motors" >
-##    <topic startswith="EtherCAT" />
-##    <topic contains="Power Node" />
-##    <topic name="Mechanism Control" />
-##  </analyzer>
+## <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator" 
+##           file="generic_analyzer" prefix="Motors" >
+##  <topic startswith="EtherCAT" />
+##  <topic startswith="Realtime" />
+##  <topic contains="Power Node" />
+##  <topic name="Mechanism Control" />
+##</analyzer>
 ##\endverbatim
 ## The analyzer will group together selected topics according to the options 
 ## selected by the user. Users can specify status names by 'startswith', 
 ## 'contains', or 'name' for an exact name. 
 ## Analyzers are dynamically loaded by the aggregator.
-3
-
 ## GenericAnalyzer stores, analyzes and outputs [ DiagnosticStatus ]
 class GenericAnalyzer:
     ##@param xml_node minidom node : XML node to initialize analyzer
@@ -169,8 +132,9 @@ class GenericAnalyzer:
 
         
     ##\brief Analyze messages, returns processed array
+    ## 
     ## Analyze messages and returns list of analyzed DiagnosticStatus msgs
-    ##@param msgs dict : Dictionary of (msgs, count). Count++ if analyzed by this node
+    ##@param msgs dict : Dictionary of (msgs, count). Count++ if analyzed by this analyzer
     def analyze(self, msgs):
         status_array = []
 
@@ -201,10 +165,9 @@ class GenericAnalyzer:
             # Output status message
             status_array.append(item.to_status_msg(self._prefix, stale))
     
-
         return status_array
 
-    ## Returns messages to analyze based on topic name
+    ##\brief Returns messages to analyze based on topic name
     def _select_msgs(self, msgs):
         to_analyze = []
         for msg, value in msgs.iteritems():
@@ -228,7 +191,7 @@ class GenericAnalyzer:
 
         return to_analyze
 
-    ## Updates stored array of status messages 
+    ##\brief Updates stored array of status messages 
     ##@param msgs list : List of DiagnosticStatus messages
     def _update_status_names(self, msgs):
         for msg in msgs:
