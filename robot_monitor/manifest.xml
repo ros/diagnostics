@@ -1,0 +1,20 @@
+<package>
+  <description brief="Monitors robot diagnostics from diagnostics_aggregator">
+    Monitors robot diagnostics from diagnostics_aggregator, and outputs them
+    in a GUI with a tree structure. Displays analyzed, simplified diagnostics
+    view.
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/robot_monitor</url>
+  <depend package="rospy" />
+  <depend package="diagnostic_aggregator" />
+  <depend package="diagnostic_msgs" />
+  
+  <rosdep name="wxwidgets"/>
+  <rosdep name="wxpython"/>
+
+</package>
+
+
