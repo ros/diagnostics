@@ -113,6 +113,11 @@ public:
   }
   
   void addf(const std::string &key, const char *format, ...); // In practice format will always be a char *
+
+  void clear()
+  {
+    values.clear();
+  }
 };
 
 template<>
