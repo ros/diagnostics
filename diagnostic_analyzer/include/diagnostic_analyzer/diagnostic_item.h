@@ -46,22 +46,61 @@
 
 namespace diagnostic_item {
 
-// Helper class to store, update diagnostic status items
+/*!
+ *\brief Helper class to hold, store DiagnosticStatus messages
+ *
+ * The DiagnosticItem class is used by the DiagnosticAggregator to store
+ * incoming DiagnosticStatus messages. An item stores whether it has been
+ * examined by an analyzer. After it has been converted to a DiagnosticStatus
+ * message with the "toStatusMsg()" functions, it has been "checked". This
+ * is important for processing the "remainder" of DiagnosticStatus messages,
+ * those that haven't been analyzed by other analyzers.
+ */
 class DiagnosticItem
 {
 public:
+  /*!
+   *\brief Constructed from DiagnosticStatus*
+   */
   DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status);
   ~DiagnosticItem();
 
+  /*!
+   *\brief Must have same name as originial status or it won't update.
+   */
   void update(const diagnostic_msgs::DiagnosticStatus *status);
 
+  /*!
+   *\brief Sets hasChecked() to true
+   */
   diagnostic_msgs::DiagnosticStatus *toStatusMsg();
+  
+  /*!
+   *\brief Sets hasChecked() to true, prepends "prefix/" to name.
+   *
+   *\param prefix : Prepended to name
+   *\param stale : If true, status level is 3
+   */
   diagnostic_msgs::DiagnosticStatus *toStatusMsg(std::string prefix, bool stale);
 
+  /*
+   *\brief Returns level of DiagnosticStatus message
+   */
   int8_t getLevel();
+  
+  /*!
+   *\brief Message field of DiagnosticStatus 
+   */
   std::string getMessage();
+  
+  /*!
+   *\brief Returns name of status
+   */
   std::string getName();
 
+  /*!
+   *\brief True if item has been converted to DiagnosticStatus
+   */
   bool hasChecked();
 
 private:

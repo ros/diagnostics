@@ -47,14 +47,9 @@
 namespace diagnostic_analyzer {
 
 /*!
- *\brief (DiagnosticStatus message, count of number of times analyzed)
- */
-//typedef std::pair<diagnostic_msgs::DiagnosticStatus*, int*>  StatusPair;
-
-/*!
  *\brief Base class of all DiagnosticAnalyzers. Loaded by aggregator.
  *
- * Base class. Loaded by pluginlib. All analyzers must implement these
+ * Base class, loaded by pluginlib. All analyzers must implement these
  * functions: init, analyze, getPrefix and getName.
  * 
  * Analyzers must output their data in a tree structure. The tree branches
@@ -92,7 +87,7 @@ public:
   /*!
    *\brief Analysis function, output processed data.
    *
-   *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed
+   *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed. Returned array must be deleted by aggregator.
    */
   virtual std::vector<diagnostic_msgs::DiagnosticStatus*> analyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs)
   {
