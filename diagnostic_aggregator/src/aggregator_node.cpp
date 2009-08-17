@@ -49,7 +49,6 @@ int main(int argc, char **argv)
     exit(2);
   }
 
-
   ros::init(argc, argv, "diagnostic_aggregator");
   
   string prefix = argv[1];
@@ -61,7 +60,7 @@ int main(int argc, char **argv)
   while (agg.n_.ok())
   {
     ros::spinOnce();
-    agg.publish_data();
+    agg.publishData();
     pub_rate.sleep();
   }
   exit(0);

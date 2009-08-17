@@ -51,12 +51,12 @@ DiagnosticAggregator::DiagnosticAggregator(std::string prefix) :
 
 DiagnosticAggregator::~DiagnosticAggregator() 
 {
-  clear_messages();
+  clearMessages();
 }
 
 void DiagnosticAggregator::init() 
 {
-  diag_sub_ = n_.subscribe("/diagnostics", 1000, &DiagnosticAggregator::diag_callback, this);
+  diag_sub_ = n_.subscribe("/diagnostics", 1000, &DiagnosticAggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
 
   // Initialize all analyzers.
@@ -112,7 +112,7 @@ void DiagnosticAggregator::init()
     analyzers_.push_back(remainder);
 }
 
-void DiagnosticAggregator::diag_callback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
+void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
 {
   map<string, diagnostic_item::DiagnosticItem*>::iterator it;
   for (unsigned int i = 0; i < diag_msg->status.size(); ++i)
@@ -126,7 +126,7 @@ void DiagnosticAggregator::diag_callback(const diagnostic_msgs::DiagnosticArray:
 }
 
 
-void DiagnosticAggregator::clear_messages()
+void DiagnosticAggregator::clearMessages()
 {
   map<string, diagnostic_item::DiagnosticItem*>::iterator it;
 
@@ -139,7 +139,7 @@ void DiagnosticAggregator::clear_messages()
 }
 
 
-void DiagnosticAggregator::publish_data()
+void DiagnosticAggregator::publishData()
 {
   diagnostic_msgs::DiagnosticArray array;
 
@@ -190,18 +190,7 @@ void DiagnosticAggregator::publish_data()
 
   agg_pub_.publish(array);
 
-  /*
-  // Clear messages array, delete items*
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-
-  for (it = msgs_.begin(); it != msgs_.end(); ++it)
-  {
-    delete it->second;
-    it->second = NULL;
-  }    
-  msgs_.clear();
-  */
-  clear_messages();
+  clearMessages();
 }
   
 

@@ -76,8 +76,7 @@ namespace diagnostic_aggregator {
  * prefix. Any other data output is up to the analyzer developer.
  * 
  * DiagnosticAnalyzer's are loaded by specifying the private parameters of the
- * aggregator. Analyzers should be in packages that depend on "pluginlib",
- * "diagnostic_aggregator", and "diagnostic_analyzer". 
+ * aggregator. 
  *\verbatim
  *sensors:
  *  type: GenericAnalyzer
@@ -88,6 +87,9 @@ namespace diagnostic_aggregator {
  *  type: PR2MotorsDiagnosticAnalyzer
  *joints:
  *  type: PR2JointsDiagnosticAnalyzer
+ *other:
+ *  type: GenericAnalyzer
+ *  other: true
  *\endverbatim
  * Each analyzer is created according to the "type" parameter in its namespace.
  * Any other parametes in the namespace can by used to specify the analyzer. If
@@ -98,7 +100,11 @@ class DiagnosticAggregator
 {
   
 public:
+  /*!
+   *\brief Constructor initializes with main prefix (ex: '/Robot')
+   */
    DiagnosticAggregator(std::string prefix);
+
   ~DiagnosticAggregator();
 
   /*!
@@ -106,12 +112,12 @@ public:
    */
   void init();
 
-  void diag_callback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
+  void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
   /*!
    *\brief Processes, publishes data. Should be called at 1Hz.
    */
-  void publish_data();
+  void publishData();
 
   ros::NodeHandle n_;
 
@@ -120,14 +126,18 @@ private:
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
 
+  /*!
+   *\brief Loads DiagnosticAnalyzer plugins
+   */
   pluginlib::PluginLoader<diagnostic_analyzer::DiagnosticAnalyzer> analyzer_loader_;
 
+  
   std::vector<diagnostic_analyzer::DiagnosticAnalyzer*> analyzers_;
 
   std::map<std::string, diagnostic_item::DiagnosticItem*> msgs_;
   std::string prefix_; /**< Prepended to all status names of aggregator. */
 
-  void clear_messages(); /**< Clears map of (name, DiagnosticItems). */
+  void clearMessages(); /**< Clears msgs_ map of (name, DiagnosticItems). */
 };
 
 }
