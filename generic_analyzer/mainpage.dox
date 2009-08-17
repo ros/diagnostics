@@ -2,118 +2,32 @@
 \mainpage
 \htmlinclude manifest.html
 
-\b generic_analyzer is ... 
-
-<!-- 
-In addition to providing an overview of your package,
-this is the section where the specification and design/architecture 
-should be detailed. While the original specification may be done on the
-wiki, it should be transferred here once your package starts to take shape.
-You can then link to this documentation page from the Wiki. 
--->
+\b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the DiagnosticAnalyzer's. It is used by the diagnostic_aggregator/DiagnosticAggregator to store, process and republish diagnostics data.
 
 
 \section codeapi Code API
 
-<!--
-Provide links to specific auto-generated API documentation within your
-package that is of particular interest to a reader. Doxygen will
-document pretty much every part of your code, so do your best here to
-point the reader to the actual API.
+The GenericAnalyzer is loaded by the pluginlib as a DiagnosticAnalyzer plugin. It is the most basic of all DiagnosticAnalyzer's. 
 
-If your codebase is fairly large or has different sets of APIs, you
-should use the doxygen 'group' tag to keep these APIs together. For
-example, the roscpp documentation has 'libros' group.
--->
+\subsubsection usage Usage
 
-\section rosapi ROS API
-
-<!--
-Names are very important in ROS because they can be remapped on the
-command-line, so it is VERY IMPORTANT THAT YOU LIST NAMES AS THEY
-APPEAR IN THE CODE. You should list names of every topic, service and
-parameter used in your code. There is a template below that you can
-use to document each node separately.
-
-List of nodes:
-- \b node_name1
-- \b node_name2
--->
-
-<!-- START: copy from here to 'END' for each node 
-
-<hr>
-
-\subsection node_name node_name
-
-node_name does (provide a basic description of your node)
-
-\subsubsection Usage
+To create a GenericAnalyzer, the parameters must be given as private parameters to the DiagnosticAggregator. 
 \verbatim
-$ node_type1 [standard ROS args]
+powersystem:
+  type: GenericAnalyzer
+  prefix: Power System
+  expected: [ 
+    'IBPS 0',
+    'IBPS 1']
+  startswith: [
+    'Smart Battery']
+  name: [
+    'Power Node 1018']
+  contains: [
+    'Battery']
 \endverbatim
-
-\par Example
-
-\verbatim
-$ node_type1
-\endverbatim
+That would create an GenericAnalyzer that will process any DiagnosticStatus message that has a name that matches the given criteria ("startswith", "contains", "name", or "expected"). "expected" and "name" status names require an exact match, but missing "expected" names will display an error. 
 
 
-\subsubsection topics ROS topics
-
-Subscribes to:
-- \b "in": [std_msgs/FooType] description of in
-
-Publishes to:
-- \b "out": [std_msgs/FooType] description of out
-
-
-\subsubsection parameters ROS parameters
-
-Reads the following parameters from the parameter server
-
-- \b "~param_name" : \b [type] description of param_name
-- \b "~my_param" : \b [string] description of my_param
-
-Sets the following parameters on the parameter server
-
-- \b "~param_name" : \b [type] description of param_name
-
-
-\subsubsection services ROS services
-- \b "foo_service": [std_srvs/FooType] description of foo_service
-
-
-END: copy for each node -->
-
-
-<!-- START: Uncomment if you have any command-line tools
-
-\section commandline Command-line tools
-
-This section is a catch-all for any additional tools that your package
-provides or uses that may be of use to the reader. For example:
-
-- tools/scripts (e.g. rospack, roscd)
-- roslaunch .launch files
-- xmlparam files
-
-\subsection script_name script_name
-
-Description of what this script/file does.
-
-\subsubsection Usage
-\verbatim
-$ ./script_name [args]
-\endverbatim
-
-\par Example
-
-\verbatim
-$ ./script_name foo bar
-\endverbatim
-
-END: Command-Line Tools Section -->
 
 */

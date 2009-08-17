@@ -61,7 +61,11 @@ class GenericAnalyzer : public DiagnosticAnalyzer
 {
 
 public:
+  /*!
+   *\brief Default constructor loaded by pluginlib
+   */
   GenericAnalyzer();
+  ~GenericAnalyzer();
 
   /*!
    *\brief Initializes GenericAnalyzer from namespace
@@ -82,11 +86,22 @@ public:
    *     'Power Node 1018']
    *   contains: [
    *     'Battery']
+   *\endverbatim
+   * The GenericAnalyzer can also be set to process only data that hasn't
+   * been processed by other analyzers as well.
+   *\verbatim
+   *other:
+   *  type: GenericAnalyzer
+   *  other: true
+   *\endverbatim
+   * If the "other" parameter is true, the analyzer will process all remaining
+   * data, and ignore all other parameters. It should be in the namespace
+   * "other", so the aggregator will call it last.
+   *   
    *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
    */
   bool init(std::string first_prefix, const ros::NodeHandle &n);
-  ~GenericAnalyzer();
 
   /*!
    *\brief Analyzes DiagnosticStatus messages
@@ -94,11 +109,18 @@ public:
    */
   std::vector<diagnostic_msgs::DiagnosticStatus*> analyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
 
+  /*!
+   *\brief Returns full prefix (ex: "/Robot/Power System")
+   */
   std::string getPrefix() { return full_prefix_; } 
+
+  /*!
+   *\brief Returns nice name (ex: "Power System")
+   */
   std::string getName()  { return nice_name_; }
  
 private:
-  bool other_;
+  bool other_; /**< True if analyzer is supposed to analyze remainder */
 
   std::string nice_name_;
   std::string full_prefix_;
@@ -115,8 +137,14 @@ private:
   
   void updateItems(std::vector<diagnostic_msgs::DiagnosticStatus*> to_analyze);
     
+  /*!
+   *\brief Returns items to be analyzed
+   */
   std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyzeOther(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
     
+  /*!
+   *\brief Returns items that need to be analyzed
+   */
   std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
 
 
