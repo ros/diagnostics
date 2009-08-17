@@ -49,6 +49,8 @@ from wx import html
 
 import cStringIO
 
+stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
+
 ##\brief View status messages in pop-up window
 ##
 ## Allows users to view details of status in popup window
@@ -85,8 +87,10 @@ class StatusViewer(wx.Panel):
         s.write("<html><body>")
         s.write("<b>Full name</b>: %s<br>\n" % (status.name))
         s.write("<b>Component</b>: %s<br>\n" % (status.name.split('/')[-1]))
-        s.write("<b>Message</b>: %s<br>\n" % (status.message))
-        s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id)) 
+        s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id))
+
+        s.write("<b>Level</b>: %s<br>\n" % (stat_dict[status.level]))
+        s.write("<b>Message</b>: %s<br><br>\n\n" % (status.message))
 
         s.write('<table border="1" cellpadding="2" cellspacing="0">')
         for value in status.values:

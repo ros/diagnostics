@@ -158,7 +158,8 @@ class RobotMonitorPanel(wx.Panel):
         # Search for first parent names in this message
         parents = find_parent_names_in_msg(self._msg)
 
-        # Find expanded items under first parents, then delete children
+        # Find expanded items under first parents, then delete any children
+        # Reset parent names
         expanded_names = {}
         for parent in parents:
             expanded_names[parent] = []
@@ -166,6 +167,7 @@ class RobotMonitorPanel(wx.Panel):
             if self._parent_name_to_id.has_key(parent):
                 self._find_expanded(self._parent_name_to_id[parent], expanded_names[parent])
                 self._tree_ctrl.DeleteChildren(self._parent_name_to_id[parent])
+                self._tree_ctrl.SetItemText(self._parent_name_to_id[parent], parent.split('/')[-1])
 
 
         for status in self._msg.status:
@@ -217,15 +219,48 @@ class RobotMonitorPanel(wx.Panel):
                 except:
                     pass
 
+        # Set selected to previous selection
         for key in self._parent_to_name_to_id.keys():
             if self._parent_to_name_to_id[key].has_key(selected_name):
                 id = self._parent_to_name_to_id[key][selected_name]
                 self._tree_ctrl.SelectItem(id)
 
         # Comb through tree and assign images
-        self._assign_tree_status_images()            
+        self._assign_tree_status_images()  
+
+        # Set message, count of children
+        self._set_count_and_message(self._root_id)
                                 
         self._mutex.release()
+
+    ##\brief Adds ': MESSAGE (COUNT)' to all tree text
+    ##
+    ## Recursively adds message and child count to all tree
+    ## items. Count is number of immediate children.
+    ##\param tree_id wxTreeItemId : Id to start combing through tree
+    def _set_count_and_message(self, tree_id):
+        item = self._tree_ctrl.GetPyData(tree_id)
+
+        if item and item.status:
+            old_text = self._tree_ctrl.GetItemText(tree_id)
+            if not self._tree_ctrl.ItemHasChildren(tree_id):
+                new_text = '%s: %s' % (old_text, item.status.message)
+            else:
+                child_count = self._tree_ctrl.GetChildrenCount(tree_id, False)
+                new_text = '%s (%d): %s' % (old_text, child_count, item.status.message)
+            self._tree_ctrl.SetItemText(tree_id, new_text)
+
+        if not self._tree_ctrl.ItemHasChildren(tree_id):
+            return
+
+        sibling, cookie = self._tree_ctrl.GetFirstChild(tree_id)
+        while not rospy.is_shutdown():
+            self._set_count_and_message(sibling)
+            
+            sibling, cookie = self._tree_ctrl.GetNextChild(tree_id, cookie)
+            if not sibling.IsOk():
+                break
+            
 
     ##\brief Removes StatusViewerFrame from list to update
     ##\param name str : Status name to remove from dictionary
