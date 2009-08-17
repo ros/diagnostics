@@ -1,0 +1,19 @@
+<package>
+  <description brief="diagnostic_analyzer">
+
+     diagnostic_analyzer
+
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://pr.willowgarage.com/wiki/diagnostic_analyzer</url>
+  <depend package="roscpp" />
+  <depend package="diagnostic_msgs" />
+  
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_analyzer"/>
+  </export>
+</package>
+
+
