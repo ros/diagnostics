@@ -7,7 +7,7 @@
 
 \section codeapi Code API
 
-The aggregator loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized by an XML node by the aggregator.
+The DiagnosticAggregator class loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized by an XML node by the aggregator.
 
 All analyzers work by grouping diagnostics data by status name. Each group is pushed into a namespace using '/'. For example:
 \verbatim
@@ -26,16 +26,14 @@ The aggregator will publish the DiagnosticArray on the /diagnostics_agg topic at
 \section rosapi ROS API
 
 Nodes:
-- \b diagnostic_aggregator
+- \b aggregator_node.py
 
-
-<!-- START: copy from here to 'END' for each node 
 
 <hr>
 
-\subsection diagnostic_aggregator diagnostic_aggregator
+\subsection aggregator_node aggregator_node
 
-diagnostic_aggregator subscribes to "/diagnstics" and publishes an aggregated set of data to "/diagnostics_agg"
+aggregator_node subscribes to "/diagnstics" and publishes an aggregated set of data to "/diagnostics_agg"
 
 \subsubsection Usage
 \verbatim

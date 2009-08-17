@@ -2,7 +2,7 @@
   <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator" 
             file="generic_analyzer"       prefix="Motors" >
     <topic startswith="EtherCAT" />
-    <topic startswith="Power Node" />
+    <topic startswith="Power board" />
   </analyzer>
 
   <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
@@ -24,6 +24,13 @@
             file="generic_analyzer"       prefix="Sensors" >
     <topic contains="prosilica" />
     <topic contains="hokuyo" />
+  </analyzer>
+
+    <analyzer type="GenericAnalyzer" pkg="diagnostic_aggregator"
+              file="generic_analyzer"       prefix="Power System"
+              expected="batteries" >
+    <topic startswith="Smart Battery" />
+    <topic contains="Power board" />
   </analyzer>
 
 </aggregator>

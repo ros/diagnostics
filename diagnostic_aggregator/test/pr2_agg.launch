@@ -1,5 +1,0 @@
-<launch>
-
-  <node pkg="diagnostic_aggregator" type="aggregator_node.py" args="-p Robot -f '$(find diagnostic_aggregator)/test/pr2_analyzers.xml'" output="screen" />
-  
-</launch>

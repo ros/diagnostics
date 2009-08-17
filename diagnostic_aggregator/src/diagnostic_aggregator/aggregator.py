@@ -32,6 +32,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+# Author: Kevin Watts
+
 ## Aggregates diagnostics from robot and republishes to /diagnostics_agg
 
 PKG = 'diagnostic_aggregator'
@@ -50,9 +52,20 @@ import sys
 import threading
 from threading import Timer
 
+from diagnostic_aggregator.generic_analyzer import GenericAnalyzer
+
+stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }
+
+def key_comp(a, b):
+    return cmp(a.key, b.key)
+
 ##\brief Creates analyzer class from XML snippet
-##@param xml_node mindom node : XML node to choose, initialize analyzer
-##@param global_prefix str : Prefix of all analyzers for this aggregator
+##
+## Dyanamically loads analyzer class from given package, file and 
+## type in XML snippet. Must be able to load manifest of give package
+## and 
+##\param xml_node mindom node : XML node to choose, initialize analyzer
+##\param global_prefix str : Prefix of all analyzers for this aggregator
 def create_analyzer(xml_node, global_prefix):
     type   = xml_node.attributes['type'].value
     pkg    = xml_node.attributes['pkg'].value
@@ -83,7 +96,7 @@ def create_analyzer(xml_node, global_prefix):
 
     # Check that it has attributes analyze, topic
         
-    return analyzer
+    return analyzer, prefix
 
 ##\brief Aggregates /diagnostics topic and republishes on /diagnostics_agg
 ## 
@@ -106,11 +119,11 @@ def create_analyzer(xml_node, global_prefix):
 ## The analyzer will prepend the prefix "/aggregator_prefix/Prefix/" to 
 ## all topics it analyzes. 
 class DiagnosticAggregator:
-    ##@param prefix str : Prepended to all processed DiagnosticStatus names
-    ##@param xml_doc minidom node : XML node for analyzer creation
+    ##\param prefix str : Prepended to all processed DiagnosticStatus names
+    ##\param xml_doc minidom node : XML node for analyzer creation
     def __init__(self, prefix, xml_doc):
-        self._analyzers = []
-        self._msgs = {}
+        self._analyzers = {}
+        self._msgs = []
 
         self._mutex = threading.Lock()
 
@@ -120,7 +133,11 @@ class DiagnosticAggregator:
         
         analyzers = xml_doc.getElementsByTagName('analyzer')
         for analyzer in analyzers:
-            self._analyzers.append(create_analyzer(analyzer, self._prefix))
+            new_analyzer, second_parent = create_analyzer(analyzer, self._prefix)
+            self._analyzers[new_analyzer] = second_parent
+
+        self._remainder_analyzer = GenericAnalyzer(None, 
+                                                   self._prefix + '/Other', True)
 
         rospy.Subscriber('/diagnostics', DiagnosticArray, self.diag_callback)
 
@@ -131,50 +148,63 @@ class DiagnosticAggregator:
         self._mutex.acquire()
         
         for msg in array.status:
-            self._msgs[msg] = 0
+            self._msgs.append(msg)
         self._mutex.release()
 
     ##\brief Calls analyzers, publishes /diagnostics_agg 
+    ## 
+    ## Publishes on /diagnostics_agg, fills out "Header" or first parent
+    ## node with data on the child nodes below it. Calls analyzers, and 
+    ## calls remainder analyzer on the remainder. 
     def publish_data(self):
         self._mutex.acquire()
 
         # Global status
-        status = DiagnosticStatus()
-        status.name = self._prefix
-        status.level = 0
-        status.message = 'OK'
-        status.values = []
+        header_status = DiagnosticStatus()
+        header_status.name = self._prefix
+        header_status.level = 0
+        header_status.message = 'OK'
+        header_status.values = []
 
         array = DiagnosticArray()
         
-        array.status = [ status ]
+        array.status = [ header_status ]
 
-        for analyzer in self._analyzers:
-            array.status.extend(analyzer.analyze(self._msgs))
+        msg_dict = {}
+        for msg in self._msgs:
+            msg_dict[msg] = 0
+
+        for analyzer, second_parent in self._analyzers.iteritems():
+            data  = analyzer.analyze(msg_dict)
             
-        array.status.extend(self._process_remainder())
+            # Add branch names, status to root item
+            for item in data:
+                if item.name == second_parent:
+                    nice_name = str(second_parent.split('/')[-1])
+                    header_status.values.append(KeyValue(nice_name, item.message))
+                    break
+            array.status.extend(data)
+            
+        # Process remaining data
+        other_data = self._remainder_analyzer.analyze(msg_dict)
+        for item in other_data:
+            if item.name == self._prefix + '/Other':
+                header_status.values.append(KeyValue('Other', item.message))
+                break
+         
+        array.status.extend(other_data)
+
+        # Sort header status by keys
+        header_status.values.sort(key_comp)
+
+        for sub_status in array.status:
+            header_status.level = max(sub_status.level, header_status.level)
+        if header_status.level == 3:
+            header_status.level = 2 # Report stale as error
+        header_status.message = stat_dict[header_status.level]
         
         self._agg_pub.publish(array)
-        self._msgs = {}
+        self._msgs = []
 
         self._mutex.release()
 
-    ##\brief Process remaining messages with 'Other' prefix
-    def _process_remainder(self):
-        remainder_header = DiagnosticStatus()
-        remainder_header.name = '%s/%s' % (self._prefix, 'Other')
-        remainder_header.level = 0
-        remainder_header.message = 'OK'
-        remainder_header.values = []
-
-        remainder = [ remainder_header ]
-        for msg, value in self._msgs.iteritems():
-            if value > 0:
-                continue # Has been processed
-
-            msg.name = '%s/%s/%s' % (self._prefix, 'Other', msg.name)
-            remainder.append(msg)
-
-        return remainder
-        
- 

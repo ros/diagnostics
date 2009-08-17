@@ -7,6 +7,11 @@
   <url>http://pr.willowgarage.com/wiki/diagnostic_aggregator</url>
   <depend package="rospy" />
   <depend package="diagnostic_msgs" />
+  <depend package="roscpp" />
+  <depend package="xmlrpc++" />
+  <depend package="pluginlib" />
+  <depend package="diagnostic_analyzer" />
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_aggregator"/>
+  </export>
 </package>
-
-

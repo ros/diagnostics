@@ -44,8 +44,6 @@ from xml.dom import minidom
 
 from diagnostic_aggregator.aggregator import DiagnosticAggregator
 
-from time import sleep
-
 import rospy
 
 import traceback
@@ -73,8 +71,10 @@ def main():
     try:    
         agg = DiagnosticAggregator(options.prefix, xml_doc)
     
+        rate = rospy.Rate(1.0)
+
         while not rospy.is_shutdown():
-            sleep(1.0)
+            rate.sleep()
             agg.publish_data()
     except:
         traceback.print_exc()
