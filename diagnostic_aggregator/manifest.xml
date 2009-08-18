@@ -5,7 +5,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://pr.willowgarage.com/wiki/diagnostic_aggregator</url>
-  <depend package="rospy" />
   <depend package="diagnostic_msgs" />
   <depend package="roscpp" />
   <depend package="xmlrpc++" />
