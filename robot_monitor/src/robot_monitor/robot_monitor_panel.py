@@ -111,7 +111,6 @@ class RobotMonitorPanel(wx.Panel):
 
         self._image_dict = { 0: ok_id, 1: warn_id, 2: error_id, 3: stale_id }
 
-
         # Bind double click event
         self._tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_item_active)
         self._viewers = {}
@@ -158,7 +157,8 @@ class RobotMonitorPanel(wx.Panel):
         # Search for first parent names in this message
         parents = find_parent_names_in_msg(self._msg)
 
-        # Find expanded items under first parents, then delete any children
+        # Find expanded items under first parents
+        # Delete any children under parents
         # Reset parent names
         expanded_names = {}
         for parent in parents:
@@ -169,7 +169,7 @@ class RobotMonitorPanel(wx.Panel):
                 self._tree_ctrl.DeleteChildren(self._parent_name_to_id[parent])
                 self._tree_ctrl.SetItemText(self._parent_name_to_id[parent], parent.split('/')[-1])
 
-
+        # Add each status to tree, parents first
         for status in self._msg.status:
             name = status.name
             if not name.startswith('/'):
@@ -177,15 +177,13 @@ class RobotMonitorPanel(wx.Panel):
 
             first_parent = '/'.join(name.split('/')[0:2]) ## Ex: '/robot'
 
-            # Update if we have it already
+            # Update item if we have it already in the tree
             if self._parent_to_name_to_id[first_parent].has_key(name):
                 self._update_item(self._parent_to_name_to_id[first_parent][name], status)
                 continue
 
-            # Add status to tree_ctrl, after parents have been added
-
             # Adding first parent to tree is special, since we need to add it
-            # to the _parent_names_to_ids dictionary
+            # to the _parent_names_to_ids, _parent_to_name_to_id dictionaries
             if not self._parent_name_to_id.has_key(first_parent):
                 # Add tree item to parent
                 id = self._create_item(first_parent, self._root_id, first_parent)
@@ -194,7 +192,7 @@ class RobotMonitorPanel(wx.Panel):
             else:
                 id = self._parent_name_to_id[first_parent]
  
-            # Now add second parents, etc
+            # Now add second parents, third parents, etc recursively
             for i in range(3, len(name.split('/')) + 1):
                 next_parent_name = '/'.join(name.split('/')[0:i])
                 if not self._parent_to_name_to_id[first_parent].has_key(next_parent_name):
@@ -209,7 +207,8 @@ class RobotMonitorPanel(wx.Panel):
             if self._viewers.has_key(name):
                 self._viewers[name].panel.write_status(status)
 
-        # Expand and sort first parents and previously expanded 
+        # Expand and sort first parents and any items that were
+        # previously expanded 
         for parent in expanded_names.keys():
             for expanded in expanded_names[parent]:
                 try:
@@ -229,14 +228,15 @@ class RobotMonitorPanel(wx.Panel):
         self._assign_tree_status_images()  
 
         # Set message, count of children
-        self._set_count_and_message(self._root_id)
+        for parent in parents:
+            self._set_count_and_message(self._parent_name_to_id[parent])
                                 
         self._mutex.release()
 
     ##\brief Adds ': MESSAGE (COUNT)' to all tree text
     ##
-    ## Recursively adds message and child count to all tree
-    ## items. Count is number of immediate children.
+    ## Recursively adds message and child count to  items. Count
+    ## is number of immediate children.
     ##\param tree_id wxTreeItemId : Id to start combing through tree
     def _set_count_and_message(self, tree_id):
         item = self._tree_ctrl.GetPyData(tree_id)

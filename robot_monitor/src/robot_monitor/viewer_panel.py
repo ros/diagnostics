@@ -107,7 +107,7 @@ class StatusViewer(wx.Panel):
 
 ##\brief Frame views status messages in separate window
 ##
-##\todo Don't initialize it on top of main frame
+##\todo Don't initialize it on top of main frame somehow
 class StatusViewerFrame(wx.Frame):
     ##\param parent RobotMonitorFrame : Parent frame
     ##\param name str : Full topic name
