@@ -47,6 +47,17 @@ DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
   message_ = status->message;
   hw_id_ = status->hardware_id;
   values_ = status->values; // Copy?
+
+  // Replace "/" with "" in name to output
+  output_name_ = name_;
+  string slash_str = "/";
+  string::size_type pos = 0;
+  while ((pos = output_name_.find(slash_str, pos)) != string::npos)
+  {
+    output_name_.replace( pos, slash_str.size(), " ");
+    pos++;
+  }
+
 }
 
 DiagnosticItem::~DiagnosticItem() {}
@@ -68,7 +79,7 @@ diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg()
   checked_ = true;
 
   diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-  status->name = name_;
+  status->name = output_name_;
   status->level = level_;
   status->message = message_;
   status->hardware_id = hw_id_;
@@ -84,7 +95,7 @@ diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg(std::string prefi
   diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
   ///\todo Check original name to make sure no "/" characters
 
-  status->name = prefix + "/" + name_;
+  status->name = prefix + "/" + output_name_;
   status->level = level_;
   status->message = message_;
   status->hardware_id = hw_id_;

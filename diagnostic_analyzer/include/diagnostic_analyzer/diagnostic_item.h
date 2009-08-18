@@ -107,6 +107,7 @@ private:
   bool checked_;
 
   int8_t level_;
+  std::string output_name_; /**< name_ w/o "/" */
   std::string name_;
   std::string message_;
   std::string hw_id_;
