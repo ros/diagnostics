@@ -55,7 +55,7 @@ namespace diagnostic_analyzer {
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended by
  * '/FirstPrefix/SecondPrefix', where FirstPrefix is common to all analyzers
- * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Sensors').
+ * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
  */
 class GenericAnalyzer : public DiagnosticAnalyzer
 {
@@ -120,7 +120,7 @@ public:
   std::string getName()  { return nice_name_; }
  
 private:
-  bool other_; /**< True if analyzer is supposed to analyze remainder */
+  bool other_; /**< True if analyzer is supposed to analyze remaining messages */
 
   std::string nice_name_;
   std::string full_prefix_;
@@ -135,10 +135,13 @@ private:
    */
   std::map<std::string, diagnostic_item::DiagnosticItem*> items_;
   
+  /*!
+   *\brief Updates items_ with messages to analyze. Deletes to_analyze param.
+   */
   void updateItems(std::vector<diagnostic_msgs::DiagnosticStatus*> to_analyze);
     
   /*!
-   *\brief Returns items to be analyzed
+   *\brief Returns items to be analyzed (items that haven't been already)
    */
   std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyzeOther(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
     
@@ -146,10 +149,6 @@ private:
    *\brief Returns items that need to be analyzed
    */
   std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
-
-
-
-
 
 
 };

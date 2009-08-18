@@ -12,7 +12,8 @@ computers:
     'HD Temp',
     'CPU Usage',
     'CPU Temperature',
-    'HD Usage']
+    'HD Usage',
+    'NFS']
 motors:
   type: GenericAnalyzer
   prefix: Motors
