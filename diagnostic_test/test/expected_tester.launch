@@ -1,7 +1,0 @@
-<launch>
-  <group ns="diagnostic_test">
-  <node pkg="diagnostic_test" type="diagnostic_test.py" args="--test=expected --min_freq=1.0 --max_freq=2.0 --startup_delay=10.0" output="screen" name="expected_test" >
- <rosparam  command="load" file="$(find diagnostic_test)/test/expected_status.yaml" />
-  </node>
- </group>
-</launch>
