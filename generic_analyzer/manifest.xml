@@ -13,7 +13,7 @@
   <depend package="diagnostic_analyzer" />
   
   <export>
-    <diagnostic_aggregator diagnostic_analyzer="${prefix}/generic_analyzer_plugin.xml" />
+    <diagnostic_aggregator plugin="${prefix}/generic_analyzer_plugin.xml" />
   </export>
 </package>
 

@@ -46,7 +46,7 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 #include "XmlRpcValue.h"
-#include "pluginlib/plugin_loader.h"
+#include "pluginlib/class_loader.h"
 #include "diagnostic_analyzer/diagnostic_analyzer.h"
 #include "diagnostic_analyzer/diagnostic_item.h"
 
@@ -129,7 +129,7 @@ private:
   /*!
    *\brief Loads DiagnosticAnalyzer plugins
    */
-  pluginlib::PluginLoader<diagnostic_analyzer::DiagnosticAnalyzer> analyzer_loader_;
+  pluginlib::ClassLoader<diagnostic_analyzer::DiagnosticAnalyzer> analyzer_loader_;
 
   
   std::vector<diagnostic_analyzer::DiagnosticAnalyzer*> analyzers_;

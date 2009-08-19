@@ -41,7 +41,7 @@ using namespace diagnostic_aggregator;
 
 
 DiagnosticAggregator::DiagnosticAggregator(std::string prefix) : 
-  analyzer_loader_("diagnostic_aggregator", "diagnostic_analyzer")
+  analyzer_loader_("diagnostic_aggregator", "diagnostic_analyzer::DiagnosticAnalyzer")
 {
   prefix_ = prefix;
   
@@ -87,7 +87,7 @@ void DiagnosticAggregator::init()
 
     string an_type = analyzer_type;
     
-    diagnostic_analyzer::DiagnosticAnalyzer* analyzer = analyzer_loader_.createPluginInstance(an_type);
+    diagnostic_analyzer::DiagnosticAnalyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
     if (analyzer == NULL)
     {
       ROS_FATAL("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), ns.c_str());

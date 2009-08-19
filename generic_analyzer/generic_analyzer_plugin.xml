@@ -1,7 +1,7 @@
 <library path="lib/libgeneric_analyzer">
-  <plugin name="GenericAnalyzer" class="diagnostic_analyzer::GenericAnalyzer" type="diagnostic_analyzer::DiagnosticAnalyzer">
+  <class name="GenericAnalyzer" type="diagnostic_analyzer::GenericAnalyzer" base_class_type="diagnostic_analyzer::DiagnosticAnalyzer">
     <description>
       GenericAnalyzer is default diagnostic analyzer.
     </description>
-  </plugin>
+  </class>
 </library>
