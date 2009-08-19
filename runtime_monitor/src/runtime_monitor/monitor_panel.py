@@ -314,6 +314,15 @@ class MonitorPanel(wx.Panel):
   def set_new_errors_callback(self, callback):
     self._new_errors_callback = callback
 
+  def get_num_errors(self):
+    return self._tree_control.GetChildrenCount(self._errors_id, False) + self._tree_control.GetChildrenCount(self._stale_id, False)
+  
+  def get_num_warnings(self):
+    return self._tree_control.GetChildrenCount(self._warnings_id, False)
+  
+  def get_num_ok(self):
+    return self._tree_control.GetChildrenCount(self._ok_id, False)
+
   def update_root_labels(self):
     self._tree_control.SetItemText(self._ok_id, "Ok (%s)" % (self._tree_control.GetChildrenCount(self._ok_id, False)))
     self._tree_control.SetItemText(self._warnings_id, "Warnings (%s)" % (self._tree_control.GetChildrenCount(self._warnings_id, False)))
