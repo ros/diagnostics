@@ -11,5 +11,6 @@
 
   <depend stack="ros"/> <!-- rospy, rosrecord, roscpp, roscpp, rospy --> 
   <depend stack="common_msgs"/> <!-- diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs --> 
+  <depend stack="common"/>
 
 </stack>
