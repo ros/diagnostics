@@ -429,6 +429,19 @@ class RobotMonitorPanel(wx.Panel):
             sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
             if not sibling.IsOk():
                 break
-
-        
     
+    ##\brief Gets the "top level" state of the diagnostics, ie. the highest value of any of the root tree items
+    ##\return 0 = OK, 1 = Warning, 2 = Error
+    def get_top_level_state(self):
+        level = 0
+        id, cookie = self._tree_ctrl.GetFirstChild(self._root_id)
+        while not rospy.is_shutdown():
+            item = self._tree_ctrl.GetPyData(id)
+            if item and item.status and item.status.level > level:
+                level = item.status.level
+            
+            id, cookie = self._tree_ctrl.GetNextChild(self._root_id, cookie)
+            if not id.IsOk():
+                break
+              
+        return level
