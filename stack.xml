@@ -6,11 +6,9 @@
   <author>Kevin Watts watts@willowgarage.com, Tully Foote tfoote@willowgarage.com</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://pr.willowgarage.com/wiki/diagnostics</url>
-  
-
-  <depend stack="ros"/> <!-- rospy, rosrecord, roscpp, roscpp, rospy --> 
-  <depend stack="common_msgs"/> <!-- diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs, diagnostic_msgs --> 
-  <depend stack="common"/>
+  <url>http://ros.org/wiki/diagnostics</url>
+  <depend stack="ros"/> <!-- xmlrpc++, rospy, roscpp, rosrecord --> 
+  <depend stack="common"/> <!-- pluginlib --> 
+  <depend stack="common_msgs"/> <!-- diagnostic_msgs --> 
 
 </stack>
