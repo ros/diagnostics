@@ -37,7 +37,4 @@ power:
     'IBPS 2',
     'IBPS 3',
     'IBPS 0']
-other:
-  prefix: Other
-  type: GenericAnalyzer
-  other: true
+

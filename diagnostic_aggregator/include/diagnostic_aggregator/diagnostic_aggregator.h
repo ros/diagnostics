@@ -47,9 +47,9 @@
 #include <diagnostic_msgs/KeyValue.h>
 #include "XmlRpcValue.h"
 #include "pluginlib/class_loader.h"
-#include "diagnostic_analyzer/diagnostic_analyzer.h"
-#include "diagnostic_analyzer/diagnostic_item.h"
-
+#include "diagnostic_aggregator/diagnostic_analyzer.h"
+#include "diagnostic_aggregator/diagnostic_item.h"
+#include "diagnostic_aggregator/generic_analyzer.h"
 
 
 namespace diagnostic_aggregator {
@@ -112,6 +112,9 @@ public:
    */
   void init();
 
+  /*!
+   *\brief Callback for "/diagnostics"
+   */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
   /*!

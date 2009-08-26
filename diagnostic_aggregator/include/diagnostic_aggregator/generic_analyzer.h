@@ -43,8 +43,8 @@
 #include <string>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_analyzer/diagnostic_analyzer.h"
-#include "diagnostic_analyzer/diagnostic_item.h"
+#include "diagnostic_aggregator/diagnostic_analyzer.h"
+#include "diagnostic_aggregator/diagnostic_item.h"
 #include "XmlRpcValue.h"
 
 namespace diagnostic_analyzer {
@@ -53,7 +53,7 @@ namespace diagnostic_analyzer {
  *\brief GenericAnalyzer is most basic DiagnosticAnalyzer
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
- * processed diagnostics data. All analyzed status messages are prepended by
+ * processed diagnostics data. All analyzed status messages are prepended with
  * '/FirstPrefix/SecondPrefix', where FirstPrefix is common to all analyzers
  * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
  */
@@ -65,6 +65,8 @@ public:
    *\brief Default constructor loaded by pluginlib
    */
   GenericAnalyzer();
+
+  
   ~GenericAnalyzer();
 
   /*!
@@ -87,21 +89,21 @@ public:
    *   contains: [
    *     'Battery']
    *\endverbatim
-   * The GenericAnalyzer can also be set to process only data that hasn't
-   * been processed by other analyzers as well.
-   *\verbatim
-   *other:
-   *  type: GenericAnalyzer
-   *  other: true
-   *\endverbatim
-   * If the "other" parameter is true, the analyzer will process all remaining
-   * data, and ignore all other parameters. It should be in the namespace
-   * "other", so the aggregator will call it last.
    *   
    *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
    */
   bool init(std::string first_prefix, const ros::NodeHandle &n);
+
+  /*!
+   *\brief Initializes analyzer to deal with remaining data
+   *
+   * After all analyzers have been created this analyzer is created to 
+   * process all remaining messages. It will prepend "first_prefix/Other"
+   * to all messages that haven't been handled by other analyzers.
+   * The "Other" analyzer is created automatically by the aggregator.
+   */
+  bool initOther(std::string first_prefix);
 
   /*!
    *\brief Analyzes DiagnosticStatus messages

@@ -34,7 +34,7 @@
 
 // Author: Kevin Watts
 
-#include <diagnostic_analyzer/diagnostic_item.h>
+#include <diagnostic_aggregator/diagnostic_item.h>
 
 using namespace diagnostic_item;
 using namespace std;

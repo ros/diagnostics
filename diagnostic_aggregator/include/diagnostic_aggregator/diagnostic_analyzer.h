@@ -42,7 +42,7 @@
 #include <ros/ros.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
-#include "diagnostic_analyzer/diagnostic_item.h"
+#include "diagnostic_aggregator/diagnostic_item.h"
 
 namespace diagnostic_analyzer {
 
@@ -57,6 +57,7 @@ namespace diagnostic_analyzer {
  * 
  * Each analyzer should output a "base" DiagnosticStatus, with the name of
  * "first_prefix/second_prefix" (ex: "/Robot/Motors")
+ *
  */
 class DiagnosticAnalyzer
 {

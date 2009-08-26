@@ -34,12 +34,22 @@
 
 // Author: Kevin Watts
 
-#include "generic_analyzer/generic_analyzer.h"
+#include "diagnostic_aggregator/generic_analyzer.h"
 
 using namespace diagnostic_analyzer;
 using namespace std;
 
 GenericAnalyzer::GenericAnalyzer() : other_(false) { }
+
+bool GenericAnalyzer::initOther(string first_prefix)
+{
+  other_ = true;
+  nice_name_ = "Other";
+  full_prefix_ = first_prefix + "/" + nice_name_;
+
+  ROS_DEBUG("Created remainder analyzer");
+  return true;
+}
 
 bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
 { 
@@ -49,13 +59,6 @@ bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
     ROS_BREAK();
   }
   full_prefix_ = first_prefix + "/" + nice_name_;
-
-  n.param("~other", other_, false);
-  if (other_)
-  {
-    ROS_DEBUG("Created remainder analyzer");
-    return true;
-  }
 
   XmlRpc::XmlRpcValue startswith;
   if (n.getParam("~startswith", startswith))
@@ -197,7 +200,7 @@ void GenericAnalyzer::updateItems(vector<diagnostic_msgs::DiagnosticStatus*> to_
   to_analyze.clear();
 }
 
-// Returns vector of msgs to analyze (REMAINDERS)
+// Returns vector of msgs that haven't been analyzed
 vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyzeOther(map<string, diagnostic_item::DiagnosticItem*> msgs)
 {
   vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;

@@ -22,6 +22,9 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #gensrv()
 
 rospack_add_library(diagnostic_aggregator
+  src/plugin_list.cpp
+  src/generic_analyzer.cpp
+  src/diagnostic_item.cpp
   src/diagnostic_aggregator.cpp)
 
 

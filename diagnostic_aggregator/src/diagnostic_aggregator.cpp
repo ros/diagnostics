@@ -52,6 +52,11 @@ DiagnosticAggregator::DiagnosticAggregator(std::string prefix) :
 DiagnosticAggregator::~DiagnosticAggregator() 
 {
   clearMessages();
+
+  for (unsigned int i = 0; i < analyzers_.size(); ++i)
+    delete analyzers_[i];
+
+  analyzers_.clear();
 }
 
 void DiagnosticAggregator::init() 
@@ -66,8 +71,6 @@ void DiagnosticAggregator::init()
   ROS_DEBUG("Private params: %s.", private_params.toXml().c_str());
 
   XmlRpc::XmlRpcValue::iterator xml_it;
-
-  diagnostic_analyzer::DiagnosticAnalyzer *remainder = NULL;
 
   for (xml_it = private_params.begin(); xml_it != private_params.end(); ++xml_it)
   {
@@ -84,7 +87,6 @@ void DiagnosticAggregator::init()
     }
 
     XmlRpc::XmlRpcValue analyzer_type = analyzer_value["type"];
-
     string an_type = analyzer_type;
     
     diagnostic_analyzer::DiagnosticAnalyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
@@ -99,17 +101,15 @@ void DiagnosticAggregator::init()
       ROS_FATAL("Unable to initialize analyzer NS: %s, type: %s", ns.c_str(), an_type.c_str());
       ROS_BREAK();
     }
-
-    if (analyzer_name == "other")
-      remainder = analyzer;
-    else
-      analyzers_.push_back(analyzer);
+    
+    analyzers_.push_back(analyzer);
   }
 
-  // Initialize the remainder last, so it's guarenteed to pick up
-  // anything that hasn't been analyzed
-  if (remainder != NULL)
-    analyzers_.push_back(remainder);
+  // Last analyzer handles remaining data
+  diagnostic_analyzer::GenericAnalyzer *remainder = new diagnostic_analyzer::GenericAnalyzer();
+  remainder->initOther(prefix_);
+  
+  analyzers_.push_back(remainder);
 }
 
 void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
