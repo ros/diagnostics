@@ -63,20 +63,17 @@ public:
 
   void mergeSummary(unsigned char lvl, const std::string s)
   {
-      if (lvl > level)
-      {
-        if (lvl == 0)
-          message = "";
-  
-        level = lvl;
-      }
-  
-      if ((lvl > 0) == (level > 0))
+      if ((lvl>0) == (level>0))
       {
         if (!message.empty())
-          message += " ";
+          message += "; ";
         message += s;
       }
+      else if (lvl > level)
+        message = s;
+      
+      if (lvl > level)
+        level = lvl;
   }
 
   void mergeSummaryf(unsigned char lvl, const char *format, ...)
