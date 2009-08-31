@@ -431,9 +431,9 @@ class RobotMonitorPanel(wx.Panel):
                 break
     
     ##\brief Gets the "top level" state of the diagnostics, ie. the highest value of any of the root tree items
-    ##\return 0 = OK, 1 = Warning, 2 = Error
+    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error
     def get_top_level_state(self):
-        level = 0
+        level = -1
         id, cookie = self._tree_ctrl.GetFirstChild(self._root_id)
         while not rospy.is_shutdown():
             item = self._tree_ctrl.GetPyData(id)
