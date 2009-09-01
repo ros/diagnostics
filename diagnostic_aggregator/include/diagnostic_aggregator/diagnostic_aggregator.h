@@ -62,43 +62,41 @@ namespace diagnostic_aggregator {
  * creates a series of analyzers according to the specifications of its
  * private parameters. The aggregated diagnostics data is organized
  * in a tree structure. For example:
- *\verbatim
- *Input (status names):
- *  tilt_hokuyo_node Frequency
- *  tilt_hokuyo_node Connection
- *Output:
- *  /Robot
- *  /Robot/Sensors
- *  /Robot/Sensors/tilt_hokuyo_node Frequency
- *  /Robot/Sensors/tilt_hokuyo_node Connection
- *\endverbatim
+\verbatim
+Input (status names):
+  tilt_hokuyo_node Frequency
+  tilt_hokuyo_node Connection
+Output:
+  /Robot
+  /Robot/Sensors
+  /Robot/Sensors/tilt_hokuyo_node Frequency
+  /Robot/Sensors/tilt_hokuyo_node Connection
+\endverbatim
  * The analyzer should always output a DiagnosticStatus with the name of the 
  * prefix. Any other data output is up to the analyzer developer.
  * 
  * DiagnosticAnalyzer's are loaded by specifying the private parameters of the
  * aggregator. 
- *\verbatim
- *sensors:
- *  type: GenericAnalyzer
- *  prefix: Sensors
- *  contains: [
- *    'hokuyo']
- *motors:
- *  type: PR2MotorsDiagnosticAnalyzer
- *joints:
- *  type: PR2JointsDiagnosticAnalyzer
- *other:
- *  type: GenericAnalyzer
- *  other: true
- *\endverbatim
+\verbatim
+sensors:
+  type: GenericAnalyzer
+  prefix: Sensors
+  contains: [
+    'hokuyo']
+motors:
+  type: PR2MotorsDiagnosticAnalyzer
+joints:
+  type: PR2JointsDiagnosticAnalyzer
+\endverbatim
  * Each analyzer is created according to the "type" parameter in its namespace.
  * Any other parametes in the namespace can by used to specify the analyzer. If
  * any analyzer is not properly specified, or returns false on initialization,
  * the aggregator program will exit.
  */
+
+
 class DiagnosticAggregator
-{
-  
+{ 
 public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
@@ -108,7 +106,7 @@ public:
   ~DiagnosticAggregator();
 
   /*!
-   *\brief Loads private parameters, initializes analyzers.
+   *\brief Loads private parameters, creates analyzers.
    */
   void init();
 
