@@ -108,6 +108,11 @@ class RobotMonitorPanel(wx.Panel):
         ok_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16, 16)))
         stale_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_QUESTION, wx.ART_OTHER, wx.Size(16, 16)))
         self._tree_ctrl.AssignImageList(image_list)
+        
+        # Tell users we don't have any items yet
+        self._empty_id = self._tree_ctrl.AppendItem(self._root_id, "No data")
+        self._tree_ctrl.SetItemImage(self._empty_id, stale_id)
+        self._have_message = False
 
         self._image_dict = { 0: ok_id, 1: warn_id, 2: error_id, 3: stale_id }
 
@@ -145,6 +150,13 @@ class RobotMonitorPanel(wx.Panel):
     ## 
     def new_message(self):
         self._mutex.acquire()
+        
+        # Since we have message, remove empty item
+        if not self._have_message:
+            self._have_message = True
+            self._tree_ctrl.Delete(self._empty_id)
+
+        scroll = self._tree_ctrl.GetScrollPos(wx.VERTICAL)
 
         # Find selected item to reselect next round
         selected_name = None
@@ -230,12 +242,14 @@ class RobotMonitorPanel(wx.Panel):
         # Set message, count of children
         for parent in parents:
             self._set_count_and_message(self._parent_name_to_id[parent])
+
+        self._tree_ctrl.SetScrollPos(wx.VERTICAL, scroll)
                                 
         self._mutex.release()
 
-    ##\brief Adds ': MESSAGE (COUNT)' to all tree text
+    ##\brief Adds ': Message (COUNT)' to all tree text
     ##
-    ## Recursively adds message and child count to  items. Count
+    ## Recursively adds message and child count to items. Count
     ## is number of immediate children.
     ##\param tree_id wxTreeItemId : Id to start combing through tree
     def _set_count_and_message(self, tree_id):
@@ -355,14 +369,19 @@ class RobotMonitorPanel(wx.Panel):
     ## Recursively goes through tree to assign images. Assigns stale images 
     ## to anything that has been still for >3.0 seconds
     def _assign_status_images(self, id):
+        if not self._have_message:
+            return
+
         # Assign to ID
         item = self._tree_ctrl.GetPyData(id)
         level = 0
-        if item and item.status:
-            level = item.status.level
+        if item is not None:
+            if item.status is not None:
+                level = item.status.level
         # Sets items as stale if >3.0 seconds
-        if item and rospy.get_time() - item.update_time > 3.0:
-            level = 3
+            if rospy.get_time() - item.update_time > 3.0:
+                level = 3
+
         
         image = self._image_dict[level]
         self._tree_ctrl.SetItemImage(id, image)
@@ -430,11 +449,16 @@ class RobotMonitorPanel(wx.Panel):
             if not sibling.IsOk():
                 break
     
-    ##\brief Gets the "top level" state of the diagnostics, ie. the highest value of any of the root tree items
-    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error
+    ##\brief Gets the "top level" state of the diagnostics
+    ##
+    ## Returns the highest value of any of the root tree items
+    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = Stale
     def get_top_level_state(self):
         level = -1
         id, cookie = self._tree_ctrl.GetFirstChild(self._root_id)
+        if id == self._empty_id:
+            return level
+
         while not rospy.is_shutdown():
             item = self._tree_ctrl.GetPyData(id)
             if item and item.status and item.status.level > level:

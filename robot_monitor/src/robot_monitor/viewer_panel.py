@@ -62,7 +62,6 @@ class StatusViewer(wx.Panel):
     def __init__(self, parent, name, manager):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
 
-
         xrc_path = os.path.join(roslib.packages.get_pkg_dir(PKG), 'xrc/gui.xrc')
         self._res = xrc.XmlResource(xrc_path)
         self._panel = self._res.LoadPanel(self, 'status_viewer')
@@ -81,7 +80,6 @@ class StatusViewer(wx.Panel):
 
     ##\brief Write status as HTML, like runtime monitor
     def write_status(self, status):
-        self._html_ctrl.Freeze()
         s = cStringIO.StringIO()
         
         s.write("<html><body>")
@@ -98,7 +96,8 @@ class StatusViewer(wx.Panel):
             s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.key, value.value))
       
         s.write("</table></body></html>")
-        
+
+        self._html_ctrl.Freeze()        
         (x, y) = self._html_ctrl.GetViewStart()
         self._html_ctrl.SetPage(s.getvalue())
         self._html_ctrl.Scroll(x, y)
