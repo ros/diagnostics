@@ -63,27 +63,20 @@ def update(stats, topic, msg):
 
     if(not stats.has_key(name)):
       stats[name] = {}
-      stats[name]['string_fields'] = [s.key for s in status.strings]
-      stats[name]['float_fields'] = [s.key for s in status.values]
+      stats[name]['fields'] = [s.key for s in status.values]
       stats[name]['level'] = status.level
       stats[name]['message'] = status.message
       
       file_name = name.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '__').replace('.', '').replace('#', '')
       stats[name]['file'] = file(output_dir + '/' + file_name + '.csv', 'w')
 
-      fields = stats[name]['string_fields'] + stats[name]['float_fields'];
+      fields = stats[name]['fields'];
       stats[name]['file'].write(', '.join(['timestamp'] + ['Level', 'Message'] + 
                                           [f.replace(',','') for f in fields]) + '\n')
     
     # Need stuff for different string fields
     # Store as dictionary, then convert to CSV?
-    if (not [s.key for s in status.strings] == stats[name]['string_fields']):
-      #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.key)
-      #print [s.key for s in status.strings]
-      #print str(stats[name]['string_fields'])
-      #return stats
-      continue
-    if (not [s.key for s in status.values] == stats[name]['float_fields']):
+    if (not [s.key for s in status.values] == stats[name]['fields']):
       #print "ERROR, mismatched field names in component %s. Label: %s" %(name, s.key)
       #return stats
       continue
@@ -92,8 +85,7 @@ def update(stats, topic, msg):
     msg = status.message.replace(',',' ')
 
     stats[name]['file'].write(', '.join([time.asctime(t)] + [str(status.level), msg] + 
-                                        [s.value.replace('\n', ' ').replace(',','') for s in status.strings] + 
-                                        [str(s.value) for s in status.values]) + '\n')
+                                        [s.value.replace('\n', ' ').replace(',','') for s in status.values]) + '\n')
 
 
 def output(stats):
