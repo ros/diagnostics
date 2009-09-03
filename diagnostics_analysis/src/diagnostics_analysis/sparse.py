@@ -32,47 +32,59 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-##\author Eric Berger, Kevin Watts
-
-##\brief Converts diagnostics log files into CSV's for analysis
+##\author Kevin Watts
+##\brief Make CSV files smaller for use in spreadsheet software
 
 PKG = 'diagnostics_analysis'
-import roslib; roslib.load_manifest(PKG)
-import rosrecord
-import diagnostic_msgs.msg
-import time, sys, os
-import operator, tempfile, subprocess
+import roslib
+roslib.load_manifest(PKG)
 
-from optparse import OptionParser
+import csv, os, sys
 
-from diagnostics_analysis.exporter import LogExporter
+##\brief Makes sparse CSV by skipping every nth value
+##\param csv_file str : CSV filename
+##\param skip int : Write every nth row to sparse CSV
+##\return Path of output file
+def make_sparse_skip(csv_file, skip):
+    output_file = csv_file[:-4] + '_sparse.csv'
 
-if __name__ == '__main__':
-    # Allow user to set output directory
-    parser = OptionParser()
-    parser.add_option("-d", "--directory", dest="directory",
-                      help="Write output to DIR. Default: %s" % PKG, metavar="DIR",
-                      default=roslib.packages.get_pkg_dir(PKG), action="store")
-    options, args = parser.parse_args()
+    input_reader = csv.reader(open(csv_file, 'rb'))
 
-    exporters = []
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
 
-    print 'Output directory: %s/output' % options.directory
-
-    try:
-        for i, f in enumerate(args):
-            filepath = 'output/%s_csv' % os.path.basename(f)[0:os.path.basename(f).find('.')]
+    skip_count = skip
+    for row in input_reader:
+        if skip_count == skip:
+            output_writer.writerow(row)
+            skip_count = 0
             
-            output_dir = os.path.join(options.directory,  filepath)
-            print "Processing file %s. File %d of %d." % (os.path.basename(f), i + 1, len(args))
-            
-            exp = LogExporter(output_dir, f)
-            exp.process_log()
-            exp.finish_logfile()
-            exporters.append(exp)
+        skip_count = skip_count + 1
 
-        print 'Finished processing files.'
-    except:
-        import traceback
-        print "Caught exceptiong processing log file"
-        traceback.print_exc()
+    return output_file
+
+##\brief Makes sparse CSV with the given number of rows
+##\param csv_file str : CSV filename
+##\param length int : Desired number of rows in CSV
+##\return Path of output file
+def make_sparse_length(csv_file, length):
+    output_file = csv_file[:-4] + '_sprs_len.csv'
+
+    input_reader = csv.reader(open(csv_file, 'rb'))
+
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
+
+    # Calculate skip count for file
+    orig_len = len(open(csv_file, 'r').read().split('\n'))
+    skip = max(int(orig_len / length), 1)
+
+    skip_count = skip
+    for row in input_reader:
+        if skip_count >= skip:
+            output_writer.writerow(row)
+            skip_count = 0
+            
+        skip_count = skip_count + 1
+
+    return output_file
