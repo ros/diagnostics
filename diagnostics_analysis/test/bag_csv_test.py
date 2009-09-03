@@ -53,6 +53,7 @@ from diagnostics_analysis.sparse import *
 
 row_count = 100
 
+##\brief Make DiagnosticArray message for testing
 def make_status_msg(count):
     array = DiagnosticArray()
     stat = DiagnosticStatus()
@@ -87,10 +88,12 @@ class TestBagToCSV(unittest.TestCase):
         self.skip_10 = make_sparse_skip(self.filename, 10)
         self.length_10 = make_sparse_length(self.filename, 10)
 
+    ##\brief Tests that exported file exists and is not None
     def test_file_exists(self):
         self.assert_(self.filename is not None, "CSV file is None")
         self.assert_(os.path.isfile(self.filename), "CSV file doesn't exist")
 
+    ##\brief Test that CSV file has correct data, number of lines
     def test_export(self):
         # Read CSV, count rows
         input_reader = csv.reader(open(self.filename, 'rb'))
@@ -108,9 +111,11 @@ class TestBagToCSV(unittest.TestCase):
       
         self.assert_(count == row_count, "Row count doesn't match")
 
+    ##\brief Tests that sparse CSV made with 'skip' option has correct number of lines
     def test_sparse_skip(self):
         self.assert_(len(open(self.skip_10).read().split('\n')) <= int(row_count / 10) + 2, "Length of sparse CSV (skipped) incorrect")
 
+    ##\brief Tests that sparse CSV made with 'length' option has correct number of lines
     def test_sparse_length(self):
         self.assert_(len(open(self.length_10).read().split('\n')) == 12, "Length of sparse CSV incorrect")
 

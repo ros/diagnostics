@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # Allow user to set output directory
     parser = OptionParser()
     parser.add_option("-d", "--directory", dest="directory",
-                      help="Write output to DIR. Default: %s" % PKG, metavar="DIR",
+                      help="Write output to DIR/output. Default: %s" % PKG, metavar="DIR",
                       default=roslib.packages.get_pkg_dir(PKG), action="store")
     options, args = parser.parse_args()
 

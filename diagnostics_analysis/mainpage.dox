@@ -25,10 +25,10 @@ The above code will export my_bagfile... into the directory output/my_bagfile_20
 If your CSV file is too big, it may not be readable by common spreadsheet editor, such as Open Office. To solve this problem, you can make a "sparse" CSV by removing every nth line from the file.
 
 \verbatim
-$ ./sparse_csv.py output/my_bagfile_2009_07_24-topic_csv/status_name.csv [number_of_lines_to_skip]
+$ rosrun diagnostics_analysi sparse_csv.py output/my_bagfile_2009_07_24-topic_csv/status_name.csv -m
 \endverbatim
 
-This makes the file output/my_bagfile_2009_07_24-topic_csv/status_name_sparse.csv, and only records every 10th line be default. To change the frequency of recording, change the number_of_lines_to_skip arguement.
+This makes the file output/my_bagfile_2009_07_24-topic_csv/status_name_sprs_len.csv, and makes sure it is no longer than 65000 lines.
 
 
 */
