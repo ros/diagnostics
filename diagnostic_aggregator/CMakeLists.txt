@@ -21,11 +21,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 #gensrv()
 
+rosbuild_add_boost_directories()
 rospack_add_library(diagnostic_aggregator
   src/plugin_list.cpp
   src/generic_analyzer.cpp
   src/diagnostic_item.cpp
   src/diagnostic_aggregator.cpp)
+rosbuild_link_boost(diagnostic_aggregator system)
 
 
 #target_link_libraries(${PROJECT_NAME} another_library)
