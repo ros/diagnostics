@@ -287,6 +287,7 @@ public:
 
   void force_update()
   {
+    private_node_handle_.param("diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
     
     if (node_handle_.ok())
@@ -311,8 +312,6 @@ public:
 
       publish(status_vec);
     }
-
-    node_handle_.param("~diagnostic_period", period_, 1.0);
   }
 
   double getPeriod()
@@ -375,8 +374,9 @@ private:
   void setup()
   {
     publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
+    private_node_handle_ = ros::NodeHandle("~");
 
-    node_handle_.param("~diagnostic_period", period_, 1.0);
+    private_node_handle_.param("diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now();
   }
 
@@ -388,6 +388,7 @@ private:
     publish(stat);
   }
 
+  ros::NodeHandle private_node_handle_;
   ros::NodeHandle node_handle_;
   ros::Publisher publisher_;
 

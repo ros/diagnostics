@@ -88,7 +88,8 @@ public:
     node_handle_(h), owner_(owner), pretest_(NULL), posttest_(NULL)
   {
     ROS_DEBUG("Advertising self_test");
-    service_server_ = node_handle_.advertiseService("~self_test", &Dispatcher::doTest, this);
+    ros::NodeHandle private_node_handle_("~");
+    service_server_ = private_node_handle_.advertiseService("self_test", &Dispatcher::doTest, this);
     count = 0;
     waiting = false;
     ready   = false;
