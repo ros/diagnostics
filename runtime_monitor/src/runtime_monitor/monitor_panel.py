@@ -58,7 +58,7 @@ class TreeItem(object):
     self.tree_id = tree_id
         
 class MonitorPanel(wx.Panel):
-  def __init__(self, parent):
+  def __init__(self, parent, topic="/diagnostics"): # Topic is HACK for ROS #1702
     wx.Panel.__init__(self, parent, wx.ID_ANY)
     
     self._mutex = threading.Lock()
@@ -96,7 +96,8 @@ class MonitorPanel(wx.Panel):
     self.Bind(wx.EVT_TIMER, self.on_timer)
     self._timer.Start(5000)
     
-    self._subscriber = rospy.Subscriber("/diagnostics", DiagnosticArray, self.diagnostics_callback)
+    # 'topic' is HACK for ROS #1702
+    self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
     
     self._messages = []
     self._used_items = 0
