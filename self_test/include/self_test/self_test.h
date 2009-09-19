@@ -78,6 +78,8 @@ private:
   bool ready;
   bool done;
 
+  bool verbose;
+
   ros::ServiceServer service_server_;
 
 public:
@@ -94,6 +96,7 @@ public:
     waiting = false;
     ready   = false;
     done    = false;
+    verbose = true;
   }
 
   void setPretest(void (T::*f)())
@@ -228,6 +231,8 @@ public:
         if (status_iter->level >= 2)
         {
           res.passed = false;
+          if (verbose)
+            ROS_WARN("Non-zero self-test test status. Name: '%s', status %i: '%s'", status_iter->name.c_str(), status_iter->level, status_iter->message.c_str());
         }
       }
 

@@ -270,6 +270,8 @@ protected:
 class Updater : public DiagnosticTaskVector
 {
 public:
+  bool verbose_;
+  
   Updater(ros::NodeHandle h) : node_handle_(h)
   {
     setup();
@@ -308,6 +310,9 @@ public:
         iter->run(status);
 
         status_vec.push_back(status);
+
+        if (verbose_ && status.level)
+          ROS_WARN("Non-zero diagnostic status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
       }
 
       publish(status_vec);
@@ -378,6 +383,8 @@ private:
 
     private_node_handle_.param("diagnostic_period", period_, 1.0);
     next_time_ = ros::Time::now();
+
+    verbose_ = false;
   }
 
   virtual void addedTaskCallback(DiagnosticTaskInternal &task)
