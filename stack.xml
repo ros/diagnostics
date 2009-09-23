@@ -1,0 +1,14 @@
+<stack name="diagnostics" version="0.1">
+  <description brief="diagnostics packages from ros-pkg">
+    Packages related to gathering, viewing, and analyzing diagnostics data
+    from robots.
+  </description>
+  <author>Kevin Watts watts@willowgarage.com, Tully Foote tfoote@willowgarage.com</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/diagnostics</url>
+  <depend stack="ros"/> <!-- xmlrpc++, rospy, roscpp, rosrecord --> 
+  <depend stack="common"/> <!-- pluginlib --> 
+  <depend stack="common_msgs"/> <!-- diagnostic_msgs --> 
+
+</stack>

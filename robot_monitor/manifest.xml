@@ -1,0 +1,15 @@
+<package>
+  <description brief="Monitors, displays aggregated robot diagnostics" >
+    robot_monitor displays robot diagnostics from the <b>diagnostics_aggregator</b>, and outputs it in a GUI with a tree structure. Displays analyzed, simplified diagnostics view. The data must be aggregated first by the diagnostic_aggregator.
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.ros.org/wiki/robot_monitor</url>
+  <depend package="rospy" />
+  <depend package="diagnostic_msgs" />
+  <rosdep name="wxwidgets"/>
+  <rosdep name="wxpython"/>
+</package>
+
+

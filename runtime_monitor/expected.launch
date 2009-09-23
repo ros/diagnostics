@@ -1,0 +1,7 @@
+<launch>
+<group ns="/runtime">
+ <node pkg="runtime_monitor" type="runtime_test" args="--test=expected" output="screen" name="prf_ethercat_presence">
+ <rosparam  command="load" file="prg_ethercat_presence.yaml"/>
+ </node>
+ </group>
+</launch>

@@ -1,0 +1,9 @@
+<launch>
+  <!-- launch-prefix="xterm -e gdb -args"  -->
+  <node 
+        pkg="diagnostic_aggregator" type="aggregator_node"
+        name="diag_agg" args="CPP" output="screen" >
+    <rosparam command="load" 
+              file="$(find diagnostic_aggregator)/test/analyzers.yaml" />
+  </node>
+</launch>

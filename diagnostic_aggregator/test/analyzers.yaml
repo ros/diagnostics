@@ -1,0 +1,40 @@
+sensors:
+  type: GenericAnalyzer
+  prefix: Sensors
+  contains: [
+    'hokuyo',
+    'prosilica',
+    'imu' ]
+computers:
+  type: GenericAnalyzer
+  prefix: Computers
+  contains: [
+    'HD Temp',
+    'CPU Usage',
+    'CPU Temperature',
+    'HD Usage',
+    'NFS']
+motors:
+  type: GenericAnalyzer
+  prefix: Motors
+  startswith: [
+    'EtherCAT',
+    'Power board']
+joints:
+  type: GenericAnalyzer
+  prefix: Joints
+  startswith: [
+    'Joint']
+power:
+  type: GenericAnalyzer
+  prefix: 'Power System'
+  startswith: [
+    'Smart Battery']
+  name: [
+    'Expected Batteries']
+  expected: [
+    'IBPS 1',
+    'IBPS 2',
+    'IBPS 3',
+    'IBPS 0']
+

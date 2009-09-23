@@ -1,0 +1,45 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+\b robot_monitor is a graphical monitor that displays the aggregated diagnostics data published on /diagnostics_agg. It is useful for display large amounts of data in a compact form. Users can double click on data in the compressed form to see more detailed information.
+
+The file robot_monitor_panel contains the main panel for the monitor, and viewer_panel contains the data for the popup panel. 
+
+
+\section rosapi ROS API
+
+List of nodes
+- \b robot_monitor.py
+
+<hr>
+
+\subsection robot_monitor robot_monitor
+
+robot_monitor displays incoming aggregated diagnostics graphically.
+
+\subsubsection Usage
+\verbatim
+$ ./robot_monitor.py
+\endverbatim
+
+The incoming diagnostics data is parsed by DiagnosticStatus name, and separated by '/'. The names:
+\verbatim
+\Robot
+\Robot\Motors
+\Robot\Motors\Head Motor
+\endverbatim
+Form a tree with the trunk 'Robot' and branch 'Motors' with leaf 'Head Motor'. Multiple trunk names, publishing as one or more DiagnosticArray's, can be displayed.
+
+\subsubsection topics ROS topics
+
+Subscribes to:
+- \b "diagnostics": [diagnostics_msgs/DiagnosticArray] Raw input
+
+Publishes to:
+- \b "diagnostics_agg": [diagnostics_msgs/DiagnosticArray] Aggregated output
+
+
+
+
+*/

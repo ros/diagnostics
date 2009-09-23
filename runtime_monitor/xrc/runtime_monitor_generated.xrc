@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxPanel" name="RuntimeMonitorInnerPanel">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>709,443</size>
+		<object class="wxBoxSizer">
+			<orient>wxHORIZONTAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxSplitterWindow" name="m_splitter1">
+					<style>wxSP_3D</style>
+					<sashpos>345</sashpos>
+					<gravity>0</gravity>
+					<minsize>0</minsize>
+					<orientation>vertical</orientation>
+					<object class="wxPanel" name="m_panel1">
+						<style>wxTAB_TRAVERSAL</style>
+						<object class="wxBoxSizer">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxTreeCtrl" name="_tree_control">
+									<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="wxPanel" name="m_panel2">
+						<style>wxTAB_TRAVERSAL</style>
+						<object class="wxBoxSizer">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxALL|wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxHtmlWindow" name="_html_control">
+									<style>wxHW_SCROLLBAR_AUTO</style>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>

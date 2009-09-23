@@ -1,0 +1,19 @@
+<package>
+  <description brief="Aggregates robot diagnostics and performs online analysis" >
+    <p>diagnostic_aggregator contains the tools to aggregate and analyze robot diagnostics on an active robot. It uses the <b>DiagnosticAggregator</b> class as to aggregate and process data. The aggregator tool creates analyzers according to user specifications, and these analyzers can perform basic tests on diagnostics, such as testing when things are stale, or having known errors. Analyzers are subclasses of <b>DiagnosticAnalyzer</b> and <b>GenericAnalyzer</b> is one of these subclasses and is the most basic analysis tool.</p>
+
+    <p>The DiagnosticAggregator must be run on a robot, and is typically launched in the robot's launch file. Viewing of this aggregated diagnostics is done with the <b>robot_monitor</b> package. </p>   
+  </description>
+  <author>Kevin Watts</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://www.ros.org/wiki/diagnostic_aggregator</url>
+  <depend package="diagnostic_msgs" />
+  <depend package="roscpp" />
+  <depend package="xmlrpc++" />
+  <depend package="pluginlib" />
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_aggregator"/>
+    <diagnostic_aggregator plugin="${prefix}/generic_analyzer_plugin.xml" />
+  </export>
+</package>

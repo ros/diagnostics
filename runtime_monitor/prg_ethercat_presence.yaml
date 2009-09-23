@@ -1,0 +1,18 @@
+expected_present: [
+   'EtherCAT Device #19 (fl_caster_rotation_motor)', 
+   'EtherCAT Device #18 (fl_caster_r_wheel_motor)',
+   'EtherCAT Device #17 (fl_caster_l_wheel_motor)',
+   'EtherCAT Device #14 (head_tilt_motor)',
+   'EtherCAT Device #13 (head_pan_motor)',
+   'EtherCAT Device #12 (laser_tilt_mount_motor)',
+   'EtherCAT Device #11 (torso_lift_motor)',
+   'EtherCAT Device #10 (fr_caster_rotation_motor)',
+   'EtherCAT Device #09 (fr_caster_r_wheel_motor)',
+   'EtherCAT Device #08 (fr_caster_l_wheel_motor)',
+   'EtherCAT Device #07 (bl_caster_rotation_motor)',
+   'EtherCAT Device #06 (bl_caster_r_wheel_motor)',
+   'EtherCAT Device #05 (bl_caster_l_wheel_motor)',
+   'EtherCAT Device #04 (br_caster_rotation_motor)'] 
+
+desired_present: ['Realtime Control Loop']
+
