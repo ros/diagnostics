@@ -76,7 +76,7 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
   // Note: Some of this code does nothing in terms of testing, but ensures
   // that all the constructors compile.
   DiagnosticUpdater<TestClass> dummy1(&c);
-  DiagnosticUpdater<TestClass> dummy2(&c, *nh.getNode());
+  //  DiagnosticUpdater<TestClass> dummy2(&c, *nh.getNode());
   DiagnosticUpdater<TestClass> updater(&c, nh);
   
   updater.addUpdater(&TestClass::unwrapped);

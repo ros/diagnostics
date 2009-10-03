@@ -45,6 +45,8 @@
 #include "diagnostic_msgs/DiagnosticArray.h"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
+#include <boost/thread.hpp>
+
 /**
 
 @mainpage
@@ -420,6 +422,7 @@ private:
  *
  */
 
+
 template <class T>
 class DiagnosticUpdater : public diagnostic_updater::Updater
 {
@@ -429,10 +432,13 @@ public:
     complain();
   }
 
+  // This constructor goes away now that ros::node is gone
+  /*
   ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(c)
   {
     complain();
   }
+  */
 
   ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater(h), owner_(c)
   {
@@ -455,7 +461,7 @@ public:
 private:
   void complain()
   {
-    //ROS_WARN("DiagnosticUpdater is deprecated, please use diagnostic_updater::Updater instead.");
+    ROS_WARN("DiagnosticUpdater is deprecated, please use diagnostic_updater::Updater instead.");
   }
   
   T *owner_;
