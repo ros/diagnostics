@@ -28,7 +28,7 @@
  */
 
 
-#include <ros/node.h>
+#include <ros/ros.h>
 
 #include "diagnostic_msgs/SelfTest.h"
 
@@ -38,7 +38,7 @@
 
 //  using namespace std;
 
-class MyNode : public ros::Node
+class MyNode
 {
 public:
 
@@ -48,8 +48,10 @@ public:
   // A value showing statefulness of tests
   double some_val;
 
+  ros::NodeHandle nh_;
+
   // During construction, the self_test_ takes a pointer to your node
-  MyNode() : ros::Node("my_node"), self_test_(this)
+  MyNode() : self_test_(this)
   {
     // A pretest can be added which will run before all other tests.
     // NOTE: It is only run once for the entire test sequence
@@ -165,7 +167,7 @@ public:
 
   bool spin()
   {
-    while (ok())
+    while (nh_.ok())
     {
       //Do something important...
       usleep(1000000);
@@ -184,7 +186,7 @@ public:
 int
 main(int argc, char** argv)
 {
-  ros::init(argc, argv);
+  ros::init(argc, argv, "my_node");
 
   MyNode n;
 
