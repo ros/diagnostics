@@ -45,7 +45,7 @@
 #include <stdarg.h>
 #include <cstdio>
 
-#include "ros/node.h"
+#include "ros/ros.h"
 
 #include "diagnostic_msgs/DiagnosticStatus.h"
 

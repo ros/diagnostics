@@ -39,7 +39,6 @@
 #include <vector>
 #include <string>
 
-#include "ros/node.h"
 #include <boost/thread.hpp>
 
 #include "diagnostic_msgs/DiagnosticStatus.h"
