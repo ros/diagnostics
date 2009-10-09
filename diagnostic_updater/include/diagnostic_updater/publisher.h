@@ -43,45 +43,62 @@
 namespace diagnostic_updater
 {
                                    
-class HeaderlessDiagnosedPublisher : public CombinationDiagnosticTask
+class HeaderlessTopicDiagnostic : public CombinationDiagnosticTask
 {
 public:
-  HeaderlessDiagnosedPublisher(const ros::Publisher &pub,
+  HeaderlessTopicDiagnostic(
+      std::string name,
       diagnostic_updater::Updater &diag,
       const diagnostic_updater::FrequencyStatusParam &freq) :
-    CombinationDiagnosticTask(pub.getTopic() + " topic status"), 
-    publisher_(pub),
+    CombinationDiagnosticTask(name + " topic status"), 
     freq_(freq)
   {
     addTask(&freq_);
     diag.add(*this);
   }
 
+  virtual ~HeaderlessTopicDiagnostic()
+  {}
+  
+  virtual void tick()
+  {
+    freq_.tick();
+  }
+  
+  virtual void clear_window()
+  {
+    freq_.clear();
+  }
+
+private:
+  diagnostic_updater::FrequencyStatus freq_;
+};
+
+class HeaderlessDiagnosedPublisher : public HeaderlessTopicDiagnostic
+{
+public:
+  HeaderlessDiagnosedPublisher(const ros::Publisher &pub,
+      diagnostic_updater::Updater &diag,
+      const diagnostic_updater::FrequencyStatusParam &freq) :
+    HeaderlessTopicDiagnostic(pub.getTopic(), diag, freq),
+    publisher_(pub)
+  {}
+
   virtual ~HeaderlessDiagnosedPublisher()
   {}
   
   virtual void publish(const ros::MessageConstPtr& message)
   {
-    freq_.tick();
+    tick();
     publisher_.publish(message);
   }
  
   virtual void publish(const ros::Message& message)
   {
-    freq_.tick();
+    tick();
     publisher_.publish(message);
   }
 
-  /*void set(Publisher &pub)
-  {
-    publisher_ = pub;
-  }*/
-
-  virtual void clear_window()
-  {
-    freq_.clear();
-  }
-  
   ros::Publisher publisher() const
   {
     return publisher_;
@@ -94,41 +111,81 @@ public:
 
 private:
   ros::Publisher publisher_;
-  diagnostic_updater::FrequencyStatus freq_;
+};
+
+class TopicDiagnostic : public HeaderlessTopicDiagnostic
+{
+public:
+  TopicDiagnostic(
+      std::string name,
+      diagnostic_updater::Updater &diag,
+      const diagnostic_updater::FrequencyStatusParam &freq,
+      const diagnostic_updater::TimeStampStatusParam &stamp) : 
+    HeaderlessTopicDiagnostic(name, diag, freq), 
+    stamp_(stamp)
+  {
+    addTask(&stamp_);
+  }
+  
+  virtual ~TopicDiagnostic()
+  {}
+  
+  virtual void tick()
+  {
+    ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead.");
+  }
+
+  virtual void tick(const ros::Time &stamp)
+  {
+    stamp_.tick(stamp);
+    HeaderlessTopicDiagnostic::tick();
+  }
+  
+private:
+  TimeStampStatus stamp_;
 };
 
 template<class T>
-class DiagnosedPublisher : public HeaderlessDiagnosedPublisher
+class DiagnosedPublisher : public TopicDiagnostic
 {
 public:
   DiagnosedPublisher(const ros::Publisher &pub,
       diagnostic_updater::Updater &diag, 
       const diagnostic_updater::FrequencyStatusParam &freq, 
       const diagnostic_updater::TimeStampStatusParam &stamp) : 
-    HeaderlessDiagnosedPublisher(pub, diag, freq),
-    stamp_(stamp)
-  {
-    addTask(&stamp_);
-  }
-  
+    TopicDiagnostic(pub.getTopic(), diag, freq, stamp),
+    publisher_(pub)
+  {}
+
   virtual ~DiagnosedPublisher()
   {}
   
   virtual void publish(const boost::shared_ptr<T>& message)
   {
-    stamp_.tick(message->header.stamp);
-    HeaderlessDiagnosedPublisher::publish(message);
+    tick(message->header.stamp);
+    publisher_.publish(message);
   }
  
   virtual void publish(const T& message)
   {
-    stamp_.tick(message.header.stamp);
-    HeaderlessDiagnosedPublisher::publish(message);
+    tick(message.header.stamp);
+    publisher_.publish(message);
+  }
+
+  ros::Publisher publisher() const
+  {
+    return publisher_;
+  }
+
+  void set_publisher(ros::Publisher pub)
+  {
+    publisher_ = pub;
   }
 
 private:
-  TimeStampStatus stamp_;
+  ros::Publisher publisher_;
 };
+
 
 };
 
