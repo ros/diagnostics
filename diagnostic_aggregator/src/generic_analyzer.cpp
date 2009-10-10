@@ -36,10 +36,10 @@
 
 #include "diagnostic_aggregator/generic_analyzer.h"
 
-using namespace diagnostic_analyzer;
+using namespace diagnostic_aggregator;
 using namespace std;
 
-GenericAnalyzer::GenericAnalyzer() : other_(false) { }
+GenericAnalyzer::GenericAnalyzer() : other_(false), timeout_(5.0) { }
 
 bool GenericAnalyzer::initOther(string first_prefix)
 {
@@ -53,6 +53,8 @@ bool GenericAnalyzer::initOther(string first_prefix)
 
 bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
 { 
+  n.param("~timeout", timeout_, 5.0);
+  
   if (!n.getParam("~prefix", nice_name_))
   {
     ROS_FATAL("GenericAnalyzer was not given parameter \"prefix\".");
@@ -101,10 +103,10 @@ bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
       // Make sure we're looking for this item
       diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
       status->name = expected_str;
-      status->level = 2;
+      status->level = 3;
       status->message = "Missing";
       
-      diagnostic_item::DiagnosticItem *item = new diagnostic_item::DiagnosticItem(status);
+      boost::shared_ptr<DiagnosticItem> item(new DiagnosticItem(status));
       items_[expected_str] = item;
 
       delete status;
@@ -116,49 +118,37 @@ bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
 
 GenericAnalyzer::~GenericAnalyzer() 
 {
-  // Clear all items
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-  for (it = items_.begin(); it != items_.end(); ++it)
-  {
-    delete it->second;
-    it->second = NULL;
-  }
   items_.clear();
 }
 
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::analyze(map<string, diagnostic_item::DiagnosticItem*> msgs)
+vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::analyze(map<string, boost::shared_ptr<DiagnosticItem> > msgs)
 {
-  diagnostic_msgs::DiagnosticStatus *header_status = new diagnostic_msgs::DiagnosticStatus();
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
   header_status->name = full_prefix_;
   header_status->level = 0;
   header_status->message = "OK";
 
-  // Output array, gets deleted by aggregator
-  vector<diagnostic_msgs::DiagnosticStatus*> processed;
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
   processed.push_back(header_status);
 
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
+  vector<boost::shared_ptr<DiagnosticItem> > to_analyze;
   if (!other_)
     to_analyze = toAnalyze(msgs);
   else
     to_analyze = toAnalyzeOther(msgs);
 
-  // Deletes items to analyze
+  // Updates our stored list of items with the latest values
   updateItems(to_analyze);
 
   bool all_stale = true;
   
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
+  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
   for (it = items_.begin(); it != items_.end(); it++)
   {
     string name = it->first;
-    diagnostic_item::DiagnosticItem *item = it->second;
+    boost::shared_ptr<DiagnosticItem> item = it->second;
 
     int8_t level = item->getLevel();
-
-    ///\todo NEED TO CHECK UPDATE TIME
-
-    all_stale = all_stale && (level == 3);
 
     header_status->level = max(header_status->level, level);
 
@@ -167,50 +157,56 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::analyze(map<string, 
     kv.value = item->getMessage();
     
     header_status->values.push_back(kv);
-    processed.push_back(item->toStatusMsg(full_prefix_, false));
-  }
-  if (header_status->level == 3 && !all_stale)
-    header_status->level = 2;
 
+    bool stale = item->getUpdateInterval().toSec() > timeout_; // 5.0 sec timeout
+
+    all_stale = all_stale && ((level == 3) || stale);
+
+    processed.push_back(item->toStatusMsg(full_prefix_, stale));
+
+    if (stale)
+      header_status->level = 2;
+  }
+  
+  // Header is not stale unless all subs are
+  if (all_stale)
+    header_status->level = 3;
+  else if (header_status->level == 3)
+    header_status->level = 2; 
+  
   if (header_status->level == 1)
     header_status->message = "Warning";
   if (header_status->level == 2)
     header_status->message = "Error";
   if (header_status->level == 3)
     header_status->message = "All Stale";
-
+  
   return processed;
 }
+                                                                                       
 
-void GenericAnalyzer::updateItems(vector<diagnostic_msgs::DiagnosticStatus*> to_analyze)
+void GenericAnalyzer::updateItems(vector<boost::shared_ptr<DiagnosticItem> > to_analyze)
 {
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
+  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
 
   for (unsigned int i = 0; i < to_analyze.size(); ++i)
   {
-    it = items_.find(to_analyze[i]->name);
-    if (it == items_.end())
-      items_[to_analyze[i]->name] = new diagnostic_item::DiagnosticItem(to_analyze[i]);
-    else
-      items_[to_analyze[i]->name]->update(to_analyze[i]);
-    
-    delete to_analyze[i];
-    to_analyze[i] = NULL;
+    items_[to_analyze[i]->getName()] = to_analyze[i];
   }
-  to_analyze.clear();
+
 }
 
 // Returns vector of msgs that haven't been analyzed
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyzeOther(map<string, diagnostic_item::DiagnosticItem*> msgs)
+vector<boost::shared_ptr<DiagnosticItem> > GenericAnalyzer::toAnalyzeOther(map<string, boost::shared_ptr<DiagnosticItem> > msgs )
 {
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
+  vector<boost::shared_ptr<DiagnosticItem> > to_analyze;
   
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
+  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
 
   for (it = msgs.begin(); it != msgs.end(); ++it)
   {
     if (!it->second->hasChecked())
-      to_analyze.push_back(it->second->toStatusMsg());
+      to_analyze.push_back(it->second);
   }
 
   return to_analyze;
@@ -218,16 +214,16 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyzeOther(map<s
 
 // Returns vector of msgs to analyze
 ///\todo optimize with dictionaries or something
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string, diagnostic_item::DiagnosticItem*> msgs)
+vector<boost::shared_ptr<DiagnosticItem> > GenericAnalyzer::toAnalyze(map<string, boost::shared_ptr<DiagnosticItem> > msgs)
 {
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
+  vector<boost::shared_ptr<DiagnosticItem> > to_analyze;
   
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
+  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
 
   for (it = msgs.begin(); it != msgs.end(); ++it)
   {
     // Look for all startswith, etc
-    diagnostic_item::DiagnosticItem *item = it->second;
+    boost::shared_ptr<DiagnosticItem> item = it->second;
     
     string name = item->getName();
 
@@ -239,7 +235,7 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string
     {
       if (name == expected_[i])
       {
-        to_analyze.push_back(item->toStatusMsg());
+        to_analyze.push_back(item);
         analyzed = true;
         break;
       }
@@ -251,7 +247,7 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string
     {
       if (name == name_[i])
       {
-        to_analyze.push_back(item->toStatusMsg());
+        to_analyze.push_back(item);
         analyzed = true;
         break;
       }
@@ -263,7 +259,7 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string
     {
       if (name.find(startswith_[i]) == 0)
       {
-        to_analyze.push_back(item->toStatusMsg());
+        to_analyze.push_back(item);
         analyzed = true;
         break;
       }
@@ -275,7 +271,7 @@ vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string
     {
       if (name.find(contains_[i]) != string::npos)
       {
-        to_analyze.push_back(item->toStatusMsg());
+        to_analyze.push_back(item);
         analyzed = true;
         break;
       }

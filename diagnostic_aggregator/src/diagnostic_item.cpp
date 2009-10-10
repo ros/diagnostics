@@ -36,11 +36,12 @@
 
 #include <diagnostic_aggregator/diagnostic_item.h>
 
-using namespace diagnostic_item;
+using namespace diagnostic_aggregator;
 using namespace std;
 
 DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
+
   checked_ = false;
   level_ = status->level;
   name_ = status->name;
@@ -58,6 +59,7 @@ DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
     pos++;
   }
 
+  update_time_ = ros::Time::now();
 }
 
 DiagnosticItem::~DiagnosticItem() {}
@@ -65,35 +67,24 @@ DiagnosticItem::~DiagnosticItem() {}
 void DiagnosticItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 {
   if (name_ != status->name)
+  {
     ROS_ERROR("Incorrect name when updating DiagnosticItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
-
+    return;
+  }
 
   level_ = status->level;
   message_ = status->message;
   hw_id_ = status->hardware_id;
-  values_ = status->values; // Copy?
+  values_ = status->values;
+
+  update_time_ = ros::Time::now();
 }
 
-diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg()
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> DiagnosticItem::toStatusMsg(std::string prefix, bool stale)
 {
   checked_ = true;
 
-  diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-  status->name = output_name_;
-  status->level = level_;
-  status->message = message_;
-  status->hardware_id = hw_id_;
-  status->values = values_;
-
-  return status;
-}
-
-diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg(std::string prefix, bool stale)
-{
-  checked_ = true;
-
-  diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-  ///\todo Check original name to make sure no "/" characters
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
 
   status->name = prefix + "/" + output_name_;
   status->level = level_;
@@ -107,11 +98,3 @@ diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg(std::string prefi
   return status;
 }
 
-
-int8_t DiagnosticItem::getLevel() { return level_; }
-
-string DiagnosticItem::getMessage() { return message_; }
-string DiagnosticItem::getName() { return name_; }
-
-bool DiagnosticItem::hasChecked() {return checked_;}
-  

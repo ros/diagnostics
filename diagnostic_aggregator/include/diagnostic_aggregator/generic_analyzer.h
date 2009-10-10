@@ -41,13 +41,14 @@
 #include <ros/ros.h>
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
 #include "diagnostic_aggregator/diagnostic_analyzer.h"
 #include "diagnostic_aggregator/diagnostic_item.h"
 #include "XmlRpcValue.h"
 
-namespace diagnostic_analyzer {
+namespace diagnostic_aggregator {
 
 /*!
  *\brief GenericAnalyzer is most basic DiagnosticAnalyzer
@@ -109,7 +110,7 @@ public:
    *\brief Analyzes DiagnosticStatus messages
    * 
    */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> analyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
 
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")
@@ -123,6 +124,7 @@ public:
  
 private:
   bool other_; /**< True if analyzer is supposed to analyze remaining messages */
+  double timeout_;
 
   std::string nice_name_;
   std::string full_prefix_;
@@ -135,22 +137,24 @@ private:
   /*!
    *\brief Stores items by name
    */
-  std::map<std::string, diagnostic_item::DiagnosticItem*> items_;
+  std::map<std::string, boost::shared_ptr<DiagnosticItem> > items_;
   
   /*!
    *\brief Updates items_ with messages to analyze. Deletes to_analyze param.
+   *
+   * Stores latest values of all data that this analyzer looks at.
    */
-  void updateItems(std::vector<diagnostic_msgs::DiagnosticStatus*> to_analyze);
+  void updateItems(std::vector<boost::shared_ptr<DiagnosticItem> > to_analyze);
     
   /*!
    *\brief Returns items to be analyzed (items that haven't been already)
    */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyzeOther(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
+  std::vector<boost::shared_ptr<DiagnosticItem> > toAnalyzeOther(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
     
   /*!
    *\brief Returns items that need to be analyzed
    */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
+  std::vector<boost::shared_ptr<DiagnosticItem> > toAnalyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
 
 
 };

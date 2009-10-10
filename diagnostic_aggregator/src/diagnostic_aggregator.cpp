@@ -41,7 +41,7 @@ using namespace diagnostic_aggregator;
 
 
 DiagnosticAggregator::DiagnosticAggregator(std::string prefix) : 
-  analyzer_loader_("diagnostic_aggregator", "diagnostic_analyzer::DiagnosticAnalyzer")
+  analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::DiagnosticAnalyzer")
 {
   prefix_ = prefix;
   
@@ -89,7 +89,7 @@ void DiagnosticAggregator::init()
     XmlRpc::XmlRpcValue analyzer_type = analyzer_value["type"];
     string an_type = analyzer_type;
     
-    diagnostic_analyzer::DiagnosticAnalyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
+    DiagnosticAnalyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
     if (analyzer == NULL)
     {
       ROS_FATAL("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), ns.c_str());
@@ -106,7 +106,7 @@ void DiagnosticAggregator::init()
   }
 
   // Last analyzer handles remaining data
-  diagnostic_analyzer::GenericAnalyzer *remainder = new diagnostic_analyzer::GenericAnalyzer();
+  GenericAnalyzer *remainder = new GenericAnalyzer();
   remainder->initOther(prefix_);
   
   analyzers_.push_back(remainder);
@@ -114,12 +114,15 @@ void DiagnosticAggregator::init()
 
 void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
 {
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
+  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
   for (unsigned int i = 0; i < diag_msg->status.size(); ++i)
   {
     it = msgs_.find(diag_msg->status[i].name);
     if (it == msgs_.end())
-      msgs_[diag_msg->status[i].name] = new diagnostic_item::DiagnosticItem(&diag_msg->status[i]);
+    {
+      boost::shared_ptr<DiagnosticItem> item(new DiagnosticItem(&diag_msg->status[i]));
+      msgs_[diag_msg->status[i].name] = item;
+    }
     else
       msgs_[diag_msg->status[i].name]->update(&diag_msg->status[i]);
   }
@@ -128,13 +131,6 @@ void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::
 
 void DiagnosticAggregator::clearMessages()
 {
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-
-  for (it = msgs_.begin(); it != msgs_.end(); ++it)
-  {
-    diagnostic_item::DiagnosticItem *ptr = (*it).second;
-    delete ptr;
-  }
   msgs_.clear();
 }
 
@@ -154,7 +150,7 @@ void DiagnosticAggregator::publishData()
     string prefix = analyzers_[j]->getPrefix();
     string nice_name = analyzers_[j]->getName();
 
-    vector<diagnostic_msgs::DiagnosticStatus*> processed = analyzers_[j]->analyze(msgs_);
+    vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = analyzers_[j]->analyze(msgs_);
 
     // Look through processed data for header, append it to header_status
     // Ex: Look for /Robot/Power and append (Power, OK) to header
@@ -172,10 +168,9 @@ void DiagnosticAggregator::publishData()
         header_status.level = max(header_status.level, processed[i]->level);
         header_status.values.push_back(kv);
       }
-
-      delete processed[i];
     }
-    processed.clear();
+    // Not sure if I need this
+    //processed.clear();
   }
 
   if (header_status.level == 1)

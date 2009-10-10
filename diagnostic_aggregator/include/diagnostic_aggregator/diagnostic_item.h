@@ -43,8 +43,9 @@
 #include <ros/ros.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
+#include <boost/shared_ptr.hpp>
 
-namespace diagnostic_item {
+namespace diagnostic_aggregator {
 
 /*!
  *\brief Helper class to hold, store DiagnosticStatus messages
@@ -60,7 +61,7 @@ class DiagnosticItem
 {
 public:
   /*!
-   *\brief Constructed from DiagnosticStatus*
+   *\brief Constructed from const DiagnosticStatus*
    */
   DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status);
   ~DiagnosticItem();
@@ -73,7 +74,7 @@ public:
   /*!
    *\brief Sets hasChecked() to true
    */
-  diagnostic_msgs::DiagnosticStatus *toStatusMsg();
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg();
   
   /*!
    *\brief Sets hasChecked() to true, prepends "prefix/" to name.
@@ -81,30 +82,34 @@ public:
    *\param prefix : Prepended to name
    *\param stale : If true, status level is 3
    */
-  diagnostic_msgs::DiagnosticStatus *toStatusMsg(std::string prefix, bool stale);
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(std::string prefix, bool stale);
 
   /*
    *\brief Returns level of DiagnosticStatus message
    */
-  int8_t getLevel();
+  int8_t getLevel() { return level_; }
   
   /*!
    *\brief Message field of DiagnosticStatus 
    */
-  std::string getMessage();
+  std::string getMessage() { return message_; }
   
   /*!
    *\brief Returns name of status
    */
-  std::string getName();
+  std::string getName() { return name_; }
 
   /*!
    *\brief True if item has been converted to DiagnosticStatus
    */
-  bool hasChecked();
+  bool hasChecked() { return checked_; }
+
+  ros::Duration getUpdateInterval() { return ros::Time::now() - update_time_; }
 
 private:
   bool checked_;
+
+  ros::Time update_time_;
 
   int8_t level_;
   std::string output_name_; /**< name_ w/o "/" */

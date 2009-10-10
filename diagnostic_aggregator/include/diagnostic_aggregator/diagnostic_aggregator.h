@@ -41,7 +41,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
@@ -130,12 +130,12 @@ private:
   /*!
    *\brief Loads DiagnosticAnalyzer plugins
    */
-  pluginlib::ClassLoader<diagnostic_analyzer::DiagnosticAnalyzer> analyzer_loader_;
+  pluginlib::ClassLoader<DiagnosticAnalyzer> analyzer_loader_;
 
   
-  std::vector<diagnostic_analyzer::DiagnosticAnalyzer*> analyzers_;
+  std::vector<DiagnosticAnalyzer*> analyzers_;
 
-  std::map<std::string, diagnostic_item::DiagnosticItem*> msgs_;
+  std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs_;
   std::string prefix_; /**< Prepended to all status names of aggregator. */
 
   void clearMessages(); /**< Clears msgs_ map of (name, DiagnosticItems). */

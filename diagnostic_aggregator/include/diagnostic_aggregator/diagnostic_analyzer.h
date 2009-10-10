@@ -44,7 +44,7 @@
 #include <diagnostic_msgs/KeyValue.h>
 #include "diagnostic_aggregator/diagnostic_item.h"
 
-namespace diagnostic_analyzer {
+namespace diagnostic_aggregator {
 
 /*!
  *\brief Base class of all DiagnosticAnalyzers. Loaded by aggregator.
@@ -90,12 +90,12 @@ public:
    *
    *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed. Returned array must be deleted by aggregator.
    */
-  virtual std::vector<diagnostic_msgs::DiagnosticStatus*> analyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs)
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs)
   {
     ROS_FATAL("DiagnosticAnalyzer did not implement the analyze function");
     ROS_BREAK();
 
-    std::vector<diagnostic_msgs::DiagnosticStatus*> my_vec;
+    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_vec;
     return my_vec;
   }
 

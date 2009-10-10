@@ -28,6 +28,7 @@ joints:
 power:
   type: GenericAnalyzer
   prefix: 'Power System'
+  timeout: 5.0
   startswith: [
     'Smart Battery']
   name: [
