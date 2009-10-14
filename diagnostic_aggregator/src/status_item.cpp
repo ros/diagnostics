@@ -34,12 +34,12 @@
 
 // Author: Kevin Watts
 
-#include <diagnostic_aggregator/diagnostic_item.h>
+#include <diagnostic_aggregator/status_item.h>
 
 using namespace diagnostic_aggregator;
 using namespace std;
 
-DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
+StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
 
   checked_ = false;
@@ -62,13 +62,13 @@ DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
   update_time_ = ros::Time::now();
 }
 
-DiagnosticItem::~DiagnosticItem() {}
+StatusItem::~StatusItem() {}
 
-void DiagnosticItem::update(const diagnostic_msgs::DiagnosticStatus *status)
+void StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 {
   if (name_ != status->name)
   {
-    ROS_ERROR("Incorrect name when updating DiagnosticItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
+    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
     return;
   }
 
@@ -80,7 +80,7 @@ void DiagnosticItem::update(const diagnostic_msgs::DiagnosticStatus *status)
   update_time_ = ros::Time::now();
 }
 
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> DiagnosticItem::toStatusMsg(std::string prefix, bool stale)
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale)
 {
   checked_ = true;
 

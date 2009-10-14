@@ -44,21 +44,21 @@
 #include <boost/shared_ptr.hpp>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_aggregator/diagnostic_analyzer.h"
-#include "diagnostic_aggregator/diagnostic_item.h"
+#include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/status_item.h"
 #include "XmlRpcValue.h"
 
 namespace diagnostic_aggregator {
 
 /*!
- *\brief GenericAnalyzer is most basic DiagnosticAnalyzer
+ *\brief GenericAnalyzer is most basic Analyzer
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended with
  * '/FirstPrefix/SecondPrefix', where FirstPrefix is common to all analyzers
  * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
  */
-class GenericAnalyzer : public DiagnosticAnalyzer
+class GenericAnalyzer : public Analyzer
 {
 
 public:
@@ -110,7 +110,7 @@ public:
    *\brief Analyzes DiagnosticStatus messages
    * 
    */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
 
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")
@@ -137,24 +137,24 @@ private:
   /*!
    *\brief Stores items by name
    */
-  std::map<std::string, boost::shared_ptr<DiagnosticItem> > items_;
+  std::map<std::string, boost::shared_ptr<StatusItem> > items_;
   
   /*!
    *\brief Updates items_ with messages to analyze. Deletes to_analyze param.
    *
    * Stores latest values of all data that this analyzer looks at.
    */
-  void updateItems(std::vector<boost::shared_ptr<DiagnosticItem> > to_analyze);
+  void updateItems(std::vector<boost::shared_ptr<StatusItem> > to_analyze);
     
   /*!
    *\brief Returns items to be analyzed (items that haven't been already)
    */
-  std::vector<boost::shared_ptr<DiagnosticItem> > toAnalyzeOther(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
+  std::vector<boost::shared_ptr<StatusItem> > toAnalyzeOther(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
     
   /*!
    *\brief Returns items that need to be analyzed
    */
-  std::vector<boost::shared_ptr<DiagnosticItem> > toAnalyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs);
+  std::vector<boost::shared_ptr<StatusItem> > toAnalyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
 
 
 };

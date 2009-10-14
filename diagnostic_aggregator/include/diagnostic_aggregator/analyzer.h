@@ -42,12 +42,12 @@
 #include <ros/ros.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
-#include "diagnostic_aggregator/diagnostic_item.h"
+#include "diagnostic_aggregator/status_item.h"
 
 namespace diagnostic_aggregator {
 
 /*!
- *\brief Base class of all DiagnosticAnalyzers. Loaded by aggregator.
+ *\brief Base class of all Analyzers. Loaded by aggregator.
  *
  * Base class, loaded by pluginlib. All analyzers must implement these
  * functions: init, analyze, getPrefix and getName.
@@ -59,20 +59,20 @@ namespace diagnostic_aggregator {
  * "first_prefix/second_prefix" (ex: "/Robot/Motors")
  *
  */
-class DiagnosticAnalyzer
+class Analyzer
 {
 public:
   /*!
    *\brief Default constructor, called by pluginlib.
    */
-  DiagnosticAnalyzer() {}
+  Analyzer() {}
 
-  virtual ~DiagnosticAnalyzer() {}
+  virtual ~Analyzer() {}
 
   /*!
-   *\brief DiagnosticAnalyzer is initialized with first prefix and namespace.
+   *\brief Analyzer is initialized with first prefix and namespace.
    *
-   * The DiagnosticAnalyzer initialized with parameters in its given 
+   * The Analyzer initialized with parameters in its given 
    * namespace. The "first_prefix" is common to all analyzers, and needs to be
    * prepended to all DiagnosticStatus names.
    *\param first_prefix : Common to all analyzers, prepended to all processed names. Starts with "/".
@@ -80,7 +80,7 @@ public:
    */
   virtual bool init(std::string first_prefix, const ros::NodeHandle &n) 
   {
-    ROS_FATAL("DiagnosticAnalyzer did not implement the init function");
+    ROS_FATAL("Analyzer did not implement the init function");
     ROS_BREAK();
     return false;
   }
@@ -90,9 +90,9 @@ public:
    *
    *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed. Returned array must be deleted by aggregator.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<DiagnosticItem> > msgs)
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs)
   {
-    ROS_FATAL("DiagnosticAnalyzer did not implement the analyze function");
+    ROS_FATAL("Analyzer did not implement the analyze function");
     ROS_BREAK();
 
     std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_vec;

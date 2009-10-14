@@ -34,14 +34,14 @@
 
 // Author: Kevin Watts
 
-#include <diagnostic_aggregator/diagnostic_aggregator.h>
+#include <diagnostic_aggregator/aggregator.h>
 
 using namespace std;
 using namespace diagnostic_aggregator;
 
 
-DiagnosticAggregator::DiagnosticAggregator(std::string prefix) : 
-  analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::DiagnosticAnalyzer")
+Aggregator::Aggregator(std::string prefix) : 
+  analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 {
   prefix_ = prefix;
   
@@ -49,9 +49,9 @@ DiagnosticAggregator::DiagnosticAggregator(std::string prefix) :
     prefix_ = "/" + prefix_;
 }
 
-DiagnosticAggregator::~DiagnosticAggregator() 
+Aggregator::~Aggregator() 
 {
-  clearMessages();
+  msgs_.clear();
 
   for (unsigned int i = 0; i < analyzers_.size(); ++i)
     delete analyzers_[i];
@@ -59,15 +59,17 @@ DiagnosticAggregator::~DiagnosticAggregator()
   analyzers_.clear();
 }
 
-void DiagnosticAggregator::init() 
+void Aggregator::init() 
 {
-  diag_sub_ = n_.subscribe("/diagnostics", 1000, &DiagnosticAggregator::diagCallback, this);
+  diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
 
   // Initialize all analyzers.
-  // Give node handle in "prefix" namespace
+  ros::NodeHandle nh = ros::NodeHandle("~");
+  
+
   XmlRpc::XmlRpcValue private_params;
-  n_.getParam("~", private_params);
+  nh.getParam("", private_params);
   ROS_DEBUG("Private params: %s.", private_params.toXml().c_str());
 
   XmlRpc::XmlRpcValue::iterator xml_it;
@@ -89,14 +91,14 @@ void DiagnosticAggregator::init()
     XmlRpc::XmlRpcValue analyzer_type = analyzer_value["type"];
     string an_type = analyzer_type;
     
-    DiagnosticAnalyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
+    Analyzer* analyzer = analyzer_loader_.createClassInstance(an_type);
     if (analyzer == NULL)
     {
       ROS_FATAL("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), ns.c_str());
       ROS_BREAK();
     }
     
-    if (!analyzer->init(prefix_, ros::NodeHandle(n_, ns)))
+    if (!analyzer->init(prefix_, ros::NodeHandle(nh, ns)))
     {
       ROS_FATAL("Unable to initialize analyzer NS: %s, type: %s", ns.c_str(), an_type.c_str());
       ROS_BREAK();
@@ -112,15 +114,15 @@ void DiagnosticAggregator::init()
   analyzers_.push_back(remainder);
 }
 
-void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
+void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
 {
-  map<string, boost::shared_ptr<DiagnosticItem> >::iterator it;
+  map<string, boost::shared_ptr<StatusItem> >::iterator it;
   for (unsigned int i = 0; i < diag_msg->status.size(); ++i)
   {
     it = msgs_.find(diag_msg->status[i].name);
     if (it == msgs_.end())
     {
-      boost::shared_ptr<DiagnosticItem> item(new DiagnosticItem(&diag_msg->status[i]));
+      boost::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[i]));
       msgs_[diag_msg->status[i].name] = item;
     }
     else
@@ -129,13 +131,8 @@ void DiagnosticAggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::
 }
 
 
-void DiagnosticAggregator::clearMessages()
-{
-  msgs_.clear();
-}
 
-
-void DiagnosticAggregator::publishData()
+void Aggregator::publishData()
 {
   diagnostic_msgs::DiagnosticArray array;
 
@@ -169,8 +166,6 @@ void DiagnosticAggregator::publishData()
         header_status.values.push_back(kv);
       }
     }
-    // Not sure if I need this
-    //processed.clear();
   }
 
   if (header_status.level == 1)
@@ -180,12 +175,11 @@ void DiagnosticAggregator::publishData()
   if (header_status.level == 3)
     header_status.message = "Error";
 
-
   array.status.push_back(header_status);
 
   agg_pub_.publish(array);
 
-  clearMessages();
+  msgs_.clear();
 }
   
 

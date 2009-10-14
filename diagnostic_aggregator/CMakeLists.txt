@@ -9,7 +9,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-rospack(diagnostic_aggregator)
+rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -25,8 +25,8 @@ rosbuild_add_boost_directories()
 rospack_add_library(diagnostic_aggregator
   src/plugin_list.cpp
   src/generic_analyzer.cpp
-  src/diagnostic_item.cpp
-  src/diagnostic_aggregator.cpp)
+  src/status_item.cpp
+  src/aggregator.cpp)
 rosbuild_link_boost(diagnostic_aggregator system)
 
 

@@ -34,8 +34,8 @@
 
 // Author: Kevin Watts
 
-#ifndef DIAGNOSTIC_ITEM_H
-#define DIAGNOSTIC_ITEM_H
+#ifndef DIAGNOSTIC_STATUS_ITEM_H
+#define DIAGNOSTIC_STATUS_ITEM_H
 
 #include <map>
 #include <string>
@@ -50,21 +50,21 @@ namespace diagnostic_aggregator {
 /*!
  *\brief Helper class to hold, store DiagnosticStatus messages
  *
- * The DiagnosticItem class is used by the DiagnosticAggregator to store
+ * The StatusItem class is used by the DiagnosticAggregator to store
  * incoming DiagnosticStatus messages. An item stores whether it has been
  * examined by an analyzer. After it has been converted to a DiagnosticStatus
  * message with the "toStatusMsg()" functions, it has been "checked". This
  * is important for processing the "remainder" of DiagnosticStatus messages,
  * those that haven't been analyzed by other analyzers.
  */
-class DiagnosticItem
+class StatusItem
 {
 public:
   /*!
    *\brief Constructed from const DiagnosticStatus*
    */
-  DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status);
-  ~DiagnosticItem();
+  StatusItem(const diagnostic_msgs::DiagnosticStatus *status);
+  ~StatusItem();
 
   /*!
    *\brief Must have same name as originial status or it won't update.
@@ -122,4 +122,4 @@ private:
 
 }
 
-#endif //DIAGNOSTIC_ITEM_H
+#endif //DIAGNOSTIC_STATUS_ITEM_H

@@ -34,9 +34,8 @@
 
 // Author: Kevin Watts
 
-#include <diagnostic_aggregator/diagnostic_aggregator.h>
+#include <diagnostic_aggregator/aggregator.h>
 #include <string>
-
 
 using namespace std;
 
@@ -53,10 +52,11 @@ int main(int argc, char **argv)
   
   string prefix = argv[1];
   
-  diagnostic_aggregator::DiagnosticAggregator agg(prefix);
+  diagnostic_aggregator::Aggregator agg(prefix);
   agg.init();
   
   ros::Rate pub_rate(1.0);
+ 
   while (agg.n_.ok())
   {
     ros::spinOnce();
