@@ -72,11 +72,6 @@ public:
   void update(const diagnostic_msgs::DiagnosticStatus *status);
 
   /*!
-   *\brief Sets hasChecked() to true
-   */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg();
-  
-  /*!
    *\brief Sets hasChecked() to true, prepends "prefix/" to name.
    *
    *\param prefix : Prepended to name
@@ -100,11 +95,44 @@ public:
   std::string getName() { return name_; }
 
   /*!
+   *\brief Returns HW id of item
+   */
+  std::string getHwId() { return hw_id_; }
+
+  /*!
+   *\brief Returns true if item has key in values KeyValues
+   */
+  bool hasKey(std::string key) 
+  {
+    for (unsigned int i = 0; i < values_.size(); ++i)
+    {
+      if (values_[i].key == key)
+        return true;
+    }
+    return false;
+  }
+
+  /*!
+   *\brief Returns value for given key, NULL if doens't exist
+   */
+  std::string getValue(std::string key)
+  {
+    for (unsigned int i = 0; i < values_.size(); ++i)
+    {
+      if (values_[i].key == key)
+        return values_[i].value;
+    }
+    return NULL;
+  }
+
+  /*!
    *\brief True if item has been converted to DiagnosticStatus
    */
   bool hasChecked() { return checked_; }
 
   ros::Duration getUpdateInterval() { return ros::Time::now() - update_time_; }
+
+
 
 private:
   bool checked_;
