@@ -36,3 +36,5 @@ rosbuild_link_boost(diagnostic_aggregator system)
 
 rospack_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
+
+rosbuild_add_rostest(test/test_agg.launch)

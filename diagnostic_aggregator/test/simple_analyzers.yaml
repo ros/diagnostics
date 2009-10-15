@@ -1,0 +1,18 @@
+prefix1:
+  type: GenericAnalyzer
+  prefix: First
+  startswith: [
+    'pref1' ]
+  contains: [
+    'contains1a',
+    'contains1b' ]
+  name: [
+    'name1' ]
+  expected: [
+    'expected1' ]
+prefix2:
+  type: GenericAnalyzer
+  prefix: Second
+  contains: [
+    'contain2a',
+    'contain2b' ]
