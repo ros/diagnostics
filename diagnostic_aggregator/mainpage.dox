@@ -12,7 +12,7 @@ All analyzers work by grouping diagnostics data by status name. Each group is pu
 \verbatim
 /Robot
 /Robot/Motors
-/Robot/Motors\EtherCAT Device (head_tilt_motor)
+/Robot/Motors/EtherCAT Device (head_tilt_motor)
 \endverbatim
 
 Forms a tree with the trunk "Robot" and the child branch "Motors" and the grandchild "EtherCAT Device (head_tilt_motor)". This allows graphical display of diagnostics data.
