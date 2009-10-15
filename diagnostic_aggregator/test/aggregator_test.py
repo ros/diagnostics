@@ -124,7 +124,7 @@ class TestAggregator(unittest.TestCase):
     def test_agg(self):
         start = rospy.get_time()
         while not rospy.is_shutdown():
-            sleep(5.0)
+            sleep(1.0)
             if rospy.get_time() - start > DURATION:
                 break
 
