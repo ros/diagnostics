@@ -47,27 +47,13 @@ Aggregator::Aggregator(std::string prefix) :
   
   if (prefix_.find("/") != 0)
     prefix_ = "/" + prefix_;
-}
 
-Aggregator::~Aggregator() 
-{
-  msgs_.clear();
-
-  for (unsigned int i = 0; i < analyzers_.size(); ++i)
-    delete analyzers_[i];
-
-  analyzers_.clear();
-}
-
-void Aggregator::init() 
-{
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
 
   // Initialize all analyzers.
   ros::NodeHandle nh = ros::NodeHandle("~");
   
-
   XmlRpc::XmlRpcValue private_params;
   nh.getParam("", private_params);
   ROS_DEBUG("Private params: %s.", private_params.toXml().c_str());
@@ -131,6 +117,15 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& 
 }
 
 
+Aggregator::~Aggregator() 
+{
+  msgs_.clear();
+
+  for (unsigned int i = 0; i < analyzers_.size(); ++i)
+    delete analyzers_[i];
+
+  analyzers_.clear();
+}
 
 void Aggregator::publishData()
 {

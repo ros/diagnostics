@@ -53,11 +53,9 @@ int main(int argc, char **argv)
   string prefix = argv[1];
   
   diagnostic_aggregator::Aggregator agg(prefix);
-  agg.init();
   
   ros::Rate pub_rate(1.0);
- 
-  while (agg.n_.ok())
+  while (agg.ok())
   {
     ros::spinOnce();
     agg.publishData();

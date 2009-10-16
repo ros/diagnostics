@@ -90,7 +90,7 @@ public:
   /*!
    *\brief Must have same name as originial status or it won't update.
    */
-  void update(const diagnostic_msgs::DiagnosticStatus *status);
+  bool update(const diagnostic_msgs::DiagnosticStatus *status);
 
   /*!
    *\brief Sets hasChecked() to true, prepends "prefix/" to name.
@@ -165,7 +165,6 @@ private:
   std::string message_;
   std::string hw_id_;
   std::vector<diagnostic_msgs::KeyValue> values_;
-  
 };
 
 }

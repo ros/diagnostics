@@ -106,26 +106,21 @@ public:
   ~Aggregator();
 
   /*!
-   *\brief Loads private parameters, creates analyzers.
+   *\brief Processes, publishes data. Should be called at 1Hz.
    */
-  void init();
+  void publishData();
+
+  bool ok() { return n_.ok(); }
+
+private:
+  ros::NodeHandle n_;
+  ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
+  ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
 
   /*!
    *\brief Callback for "/diagnostics"
    */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
-
-  /*!
-   *\brief Processes, publishes data. Should be called at 1Hz.
-   */
-  void publishData();
-
-  ros::NodeHandle n_;
-
-
-private:
-  ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
-  ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
 
   /*!
    *\brief Loads Analyzer plugins

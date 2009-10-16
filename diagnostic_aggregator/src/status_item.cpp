@@ -41,7 +41,6 @@ using namespace std;
 
 StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
-
   checked_ = false;
   level_ = status->level;
   name_ = status->name;
@@ -68,12 +67,12 @@ StatusItem::StatusItem(const string item_name)
 
 StatusItem::~StatusItem() {}
 
-void StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
+bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 {
   if (name_ != status->name)
   {
     ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
-    return;
+    return false;
   }
 
   level_ = status->level;
@@ -82,6 +81,8 @@ void StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
   values_ = status->values;
 
   update_time_ = ros::Time::now();
+
+  return true;
 }
 
 boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale)
