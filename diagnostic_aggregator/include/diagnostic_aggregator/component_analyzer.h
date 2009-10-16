@@ -32,73 +32,77 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+///\author Kevin Watts
 
-#include <diagnostic_aggregator/status_item.h>
+#ifndef COMPONENT_ANALYZER_H
+#define COMPONENT_ANALYZER_H
 
-using namespace diagnostic_aggregator;
-using namespace std;
+#include <map>
+#include <ros/ros.h>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <boost/shared_ptr.hpp>
+#include "diagnostic_msgs/DiagnosticStatus.h"
+#include "diagnostic_msgs/KeyValue.h"
+#include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/status_item.h"
+#include "XmlRpcValue.h"
+#include "diagnostic_aggregator/component.h"
 
-StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
+namespace diagnostic_aggregator {
+
+/*!
+ *\brief ComponentAnalyzer analyzers sensors devices on a PR2
+ * 
+ */
+class ComponentAnalyzer : public Analyzer
 {
 
-  checked_ = false;
-  level_ = status->level;
-  name_ = status->name;
-  message_ = status->message;
-  hw_id_ = status->hardware_id;
-  values_ = status->values; 
+public:
+  /*!
+   *\brief Default constructor loaded by pluginlib
+   */
+  ComponentAnalyzer();
+  
+  ~ComponentAnalyzer();
 
-  output_name_ = getOutputName(name_);  
+  /*!
+   *\brief Initializes ComponentAnalyzer from namespace
+   *
+   *   
+   *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
+   *\param n : NodeHandle in full namespace
+   */
+  bool init(std::string first_prefix, const ros::NodeHandle &n);
 
-  update_time_ = ros::Time::now();
+
+  /*!
+   *\brief Analyzes DiagnosticStatus messages
+   * 
+   */
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
+
+  /*!
+   *\brief Returns full prefix (ex: "/Robot/Power System")
+   */
+  std::string getPrefix() { return full_prefix_; } 
+
+  /*!
+   *\brief Returns nice name (ex: "Power System")
+   */
+  std::string getName()  { return nice_name_; }
+
+private:
+  double timeout_;
+
+  std::string nice_name_;
+  std::string full_prefix_;
+
+  std::vector<boost::shared_ptr<Component> > components_;
+
+};
+
+
 }
-
-StatusItem::StatusItem(const string item_name) 
-{ 
-  name_ = item_name;
-  message_ = "Missing"; 
-  level_ = 3;
-  checked_ = false;
- 
-  output_name_ = getOutputName(name_);  
-
-  update_time_ = ros::Time::now();
-}
-
-StatusItem::~StatusItem() {}
-
-void StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
-{
-  if (name_ != status->name)
-  {
-    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
-    return;
-  }
-
-  level_ = status->level;
-  message_ = status->message;
-  hw_id_ = status->hardware_id;
-  values_ = status->values;
-
-  update_time_ = ros::Time::now();
-}
-
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale)
-{
-  checked_ = true;
-
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
-
-  status->name = prefix + "/" + output_name_;
-  status->level = level_;
-  status->message = message_;
-  status->hardware_id = hw_id_;
-  status->values = values_;
-
-  if (stale)
-    status->level = 3;
-
-  return status;
-}
-
+#endif // COMPONENT_ANALYZER_H

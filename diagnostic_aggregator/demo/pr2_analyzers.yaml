@@ -1,10 +1,26 @@
 sensors:
-  type: GenericAnalyzer
+  type: ComponentAnalyzer
   prefix: Sensors
-  contains: [
-    'hokuyo',
-    'prosilica',
-    'imu' ]
+  timeout: 5.0
+  base_hk:
+    name: Base Hokuyo
+    start_name: base_hokuyo_node
+    fields: [
+      'base_hokuyo_node: Connection Status',
+      'base_hokuyo_node: Frequency Status']
+  tilt_hk:
+    name: Tilt Hokuyo
+    start_name: tilt_hokuyo_node
+    fields: [
+      'tilt_hokuyo_node: Connection Status',
+      'tilt_hokuyo_node: Frequency Status']
+  imu:
+    name: IMU
+    start_name: imu_node
+    fields: [
+      'imu_node: Calibration Status',
+      'imu_node: Frequency Status',
+      'imu_node: IMU Status']
 computers:
   type: GenericAnalyzer
   prefix: Computers

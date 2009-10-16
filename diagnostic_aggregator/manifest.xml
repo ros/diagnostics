@@ -15,6 +15,6 @@
   <depend package="rospy" /> <!-- For testing -->
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_aggregator"/>
-    <diagnostic_aggregator plugin="${prefix}/generic_analyzer_plugin.xml" />
+    <diagnostic_aggregator plugin="${prefix}/analyzer_plugins.xml" />
   </export>
 </package>

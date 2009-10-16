@@ -47,10 +47,25 @@
 
 namespace diagnostic_aggregator {
 
+// Replace "/" with "" in output name, to avoid confusing robot monitor
+inline std::string getOutputName(const std::string item_name)
+{
+  std::string output_name = item_name;
+  std::string slash_str = "/";
+  std::string::size_type pos = 0;
+  while ((pos = output_name.find(slash_str, pos)) != std::string::npos)
+  {
+    output_name.replace( pos, slash_str.size(), " ");
+    pos++;
+  }
+
+  return output_name;
+}
+
 /*!
  *\brief Helper class to hold, store DiagnosticStatus messages
  *
- * The StatusItem class is used by the DiagnosticAggregator to store
+ * The StatusItem class is used by the Aggregator to store
  * incoming DiagnosticStatus messages. An item stores whether it has been
  * examined by an analyzer. After it has been converted to a DiagnosticStatus
  * message with the "toStatusMsg()" functions, it has been "checked". This
@@ -64,6 +79,12 @@ public:
    *\brief Constructed from const DiagnosticStatus*
    */
   StatusItem(const diagnostic_msgs::DiagnosticStatus *status);
+
+  /*!
+   *\brief Constructed from string, (Level = 3, Message = "Missing")
+   */
+  StatusItem(const std::string item_name);
+
   ~StatusItem();
 
   /*!
@@ -122,7 +143,8 @@ public:
       if (values_[i].key == key)
         return values_[i].value;
     }
-    return NULL;
+
+    return std::string("");
   }
 
   /*!
@@ -131,8 +153,6 @@ public:
   bool hasChecked() { return checked_; }
 
   ros::Duration getUpdateInterval() { return ros::Time::now() - update_time_; }
-
-
 
 private:
   bool checked_;
