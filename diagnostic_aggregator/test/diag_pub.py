@@ -53,14 +53,14 @@ if __name__ == '__main__':
     array = DiagnosticArray()
     array.status = [
         DiagnosticStatus(0, 'pref1a', 'OK', '', []),
-        DiagnosticStatus(0, 'pref1b', 'OK', '', []),
+        DiagnosticStatus(1, 'pref1b', 'OK', '', []),
         DiagnosticStatus(0, 'contains1a', 'OK', '', []),
         DiagnosticStatus(0, 'contains1b', 'OK', '', []),
         DiagnosticStatus(0, 'name1', 'OK', '', []),
         DiagnosticStatus(0, 'expected1', 'OK', '', []),
         DiagnosticStatus(0, 'contain2a', 'OK', '', []),
         DiagnosticStatus(0, 'contain2b', 'OK', '', []),
-        DiagnosticStatus(0, 'other1', 'OK', '', []),
+        DiagnosticStatus(2, 'other1', 'OK', '', []),
         DiagnosticStatus(0, 'other2', 'OK', '', []),
         DiagnosticStatus(0, 'other3', 'OK', '', [])]
 
