@@ -52,15 +52,34 @@ if __name__ == '__main__':
     
     array = DiagnosticArray()
     array.status = [
+        # GenericAnalyzer prefix1
         DiagnosticStatus(0, 'pref1a', 'OK', '', []),
-        DiagnosticStatus(1, 'pref1b', 'OK', '', []),
+        DiagnosticStatus(1, 'pref1b', 'Warning', '', []),
         DiagnosticStatus(0, 'contains1a', 'OK', '', []),
         DiagnosticStatus(0, 'contains1b', 'OK', '', []),
         DiagnosticStatus(0, 'name1', 'OK', '', []),
         DiagnosticStatus(0, 'expected1', 'OK', '', []),
+
+        # GenericAnalyzer prefix2
         DiagnosticStatus(0, 'contain2a', 'OK', '', []),
         DiagnosticStatus(0, 'contain2b', 'OK', '', []),
-        DiagnosticStatus(2, 'other1', 'OK', '', []),
+        
+        # ComponentAnalyzer Hokuyo
+        DiagnosticStatus(0, 'tilt_hokuyo: freq', 'OK', '', []),
+        DiagnosticStatus(0, 'tilt_hokuyo: connect', 'OK', '', []),
+        DiagnosticStatus(0, 'tilt_hokuyo: status', 'OK', '', []),
+        DiagnosticStatus(0, 'base_hokuyo: freq', 'OK', '', []),
+        DiagnosticStatus(1, 'base_hokuyo: connect', 'OK', '', []),
+        DiagnosticStatus(0, 'base_hokuyo: status', 'OK', '', []),
+
+        # ComponentAnalyzer Computers
+        DiagnosticStatus(0, 'pre1: cpu', 'OK', '', []),
+        DiagnosticStatus(0, 'pre1: hd', 'OK', '', []),
+        DiagnosticStatus(0, 'pre2: cpu', 'OK', '', []),
+        DiagnosticStatus(1, 'pre2: hd', 'OK', '', []),
+
+        # GenericAnalyzer for Other
+        DiagnosticStatus(2, 'other1', 'Error', '', []),
         DiagnosticStatus(0, 'other2', 'OK', '', []),
         DiagnosticStatus(0, 'other3', 'OK', '', [])]
 
