@@ -82,13 +82,18 @@ public:
   {
     ROS_FATAL("Analyzer did not implement the init function");
     ROS_BREAK();
+
     return false;
   }
 
   /*!
    *\brief Analysis function, output processed data.
    *
+   * analyze is called at 1Hz intervals, with the complete map<name, item> of all StatusItem's
+   * that have been received in this past interval. 
+   *
    *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed. Returned array must be deleted by aggregator.
+   *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs)
   {

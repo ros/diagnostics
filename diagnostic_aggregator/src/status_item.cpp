@@ -42,7 +42,8 @@ using namespace std;
 StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
   checked_ = false;
-  level_ = status->level;
+
+  level_ = valToLevel(status->level);
   name_ = status->name;
   message_ = status->message;
   hw_id_ = status->hardware_id;
@@ -57,7 +58,7 @@ StatusItem::StatusItem(const string item_name)
 { 
   name_ = item_name;
   message_ = "Missing"; 
-  level_ = 3;
+  level_ = Level_Stale;
   checked_ = false;
  
   output_name_ = getOutputName(name_);  
@@ -75,12 +76,14 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
     return false;
   }
 
-  level_ = status->level;
+  level_ = valToLevel(status->level);
   message_ = status->message;
   hw_id_ = status->hardware_id;
   values_ = status->values;
 
   update_time_ = ros::Time::now();
+
+  checked_ = false;
 
   return true;
 }
@@ -98,7 +101,7 @@ boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std
   status->values = values_;
 
   if (stale)
-    status->level = 3;
+    status->level = Level_Stale;
 
   return status;
 }

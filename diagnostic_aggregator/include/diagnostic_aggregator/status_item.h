@@ -47,7 +47,9 @@
 
 namespace diagnostic_aggregator {
 
-// Replace "/" with "" in output name, to avoid confusing robot monitor
+/*!
+ *\brief Replace "/" with "" in output name, to avoid confusing robot monitor
+ */
 inline std::string getOutputName(const std::string item_name)
 {
   std::string output_name = item_name;
@@ -55,11 +57,58 @@ inline std::string getOutputName(const std::string item_name)
   std::string::size_type pos = 0;
   while ((pos = output_name.find(slash_str, pos)) != std::string::npos)
   {
-    output_name.replace( pos, slash_str.size(), " ");
+    output_name.replace(pos, slash_str.size(), " ");
     pos++;
   }
 
   return output_name;
+}
+
+/*!
+ *\brief Level of StatusItem. OK, Warn, Error, Stale
+ */
+enum DiagnosticLevel
+{
+  Level_OK = diagnostic_msgs::DiagnosticStatus::OK,
+  Level_Warn = diagnostic_msgs::DiagnosticStatus::WARN,
+  Level_Error = diagnostic_msgs::DiagnosticStatus::ERROR,
+  Level_Stale = 3
+};
+
+/*!
+ *\brief Converts in to DiagnosticLevel. Values: [0, 3]
+ */
+inline DiagnosticLevel valToLevel(const int val)
+{
+  if (val == diagnostic_msgs::DiagnosticStatus::OK)
+    return Level_OK;
+  if (val == diagnostic_msgs::DiagnosticStatus::WARN)
+    return Level_Warn;
+  if (val == diagnostic_msgs::DiagnosticStatus::ERROR)
+    return Level_Error;
+  if (val == 3)
+    return Level_Stale;
+  
+  ROS_ERROR("Attempting to convert %d into DiagnosticLevel. Values are: 0: OK,1: Warning, 2: Error, 3: Stale", val);
+  return Level_Error;
+}
+ 
+/*!
+ *\brief Converts int to message {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
+ */
+inline std::string valToMsg(const int val)
+{
+  if (val == diagnostic_msgs::DiagnosticStatus::OK)
+    return "OK";
+  if (val == diagnostic_msgs::DiagnosticStatus::WARN)
+    return "Warning";
+  if (val == diagnostic_msgs::DiagnosticStatus::ERROR)
+    return "Error";
+  if (val == 3)
+    return "Stale";
+  
+  ROS_ERROR("Attempting to convert %d into string. Values are: 0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"", val);
+  return "Error";
 }
 
 /*!
@@ -89,6 +138,9 @@ public:
 
   /*!
    *\brief Must have same name as originial status or it won't update.
+   * 
+   * After update, hasChecked() is false until converted toStatusMsg.
+   *\return True if update successful, false if error
    */
   bool update(const diagnostic_msgs::DiagnosticStatus *status);
 
@@ -103,7 +155,7 @@ public:
   /*
    *\brief Returns level of DiagnosticStatus message
    */
-  int8_t getLevel() { return level_; }
+  DiagnosticLevel getLevel() { return level_; }
   
   /*!
    *\brief Message field of DiagnosticStatus 
@@ -135,6 +187,7 @@ public:
 
   /*!
    *\brief Returns value for given key, NULL if doens't exist
+   *\return Value if key present, "" if not
    */
   std::string getValue(std::string key)
   {
@@ -149,9 +202,14 @@ public:
 
   /*!
    *\brief True if item has been converted to DiagnosticStatus
+   *
+   * After an item has been converted to a DiagnosticStatus  
    */
   bool hasChecked() { return checked_; }
 
+  /*!
+   *\brief Returns the time since last update for this item
+   */
   ros::Duration getUpdateInterval() { return ros::Time::now() - update_time_; }
 
 private:
@@ -159,7 +217,7 @@ private:
 
   ros::Time update_time_;
 
-  int8_t level_;
+  DiagnosticLevel level_;
   std::string output_name_; /**< name_ w/o "/" */
   std::string name_;
   std::string message_;

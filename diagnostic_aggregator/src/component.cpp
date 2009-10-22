@@ -61,6 +61,9 @@ Component::Component(string prefix, string name, double timeout, string start_na
     boost::shared_ptr<StatusItem> item(new StatusItem(field_name));
     items_[field_name] = item;
   }
+
+  if (items_.size() == 0)
+    ROS_WARN("No items to analyze for analyzer %s, component %s. It may have been initialized badly.", prefix_.c_str(), nice_name_.c_str());
 }
 
 void Component::updateItems(std::map<string, boost::shared_ptr<StatusItem> > msgs)
@@ -129,14 +132,11 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > Component::analyze
   else if (header_status->level == 3)
     header_status->level = 2; 
 
-  if (header_status->level == 1)
-    header_status->message = "Warning";
-  if (header_status->level == 2)
-    header_status->message = "Error";
+  header_status->message = valToMsg(header_status->level);
   if (header_status->level == 3)
     header_status->message = "All Stale";
 
-  header_level_ = header_status->level;
+  header_level_ = valToLevel(header_status->level);
   header_msg_ = header_status->message;
 
   return processed;

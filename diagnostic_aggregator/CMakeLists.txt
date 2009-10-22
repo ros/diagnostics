@@ -22,7 +22,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #gensrv()
 
 rosbuild_add_boost_directories()
-rospack_add_library(diagnostic_aggregator
+rosbuild_add_library(diagnostic_aggregator
   src/plugin_list.cpp
   src/generic_analyzer.cpp
   src/component.cpp
@@ -36,7 +36,7 @@ rosbuild_link_boost(diagnostic_aggregator system)
 #rospack_add_boost_directories()
 #rospack_link_boost(${PROJECT_NAME} thread)
 
-rospack_add_executable(aggregator_node src/aggregator_node.cpp)
+rosbuild_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
 
 rosbuild_add_rostest(test/test_agg.launch)

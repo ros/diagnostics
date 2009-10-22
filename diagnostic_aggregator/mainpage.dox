@@ -6,7 +6,7 @@
 
 \section codeapi Code API
 
-The DiagnosticAggregator class loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized by an XML node by the aggregator.
+The Aggregator class loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized by an XML node by the aggregator.
 
 All analyzers work by grouping diagnostics data by status name. Each group is pushed into a namespace using '/'. For example:
 \verbatim
@@ -21,9 +21,9 @@ The aggregator will publish the diagnostic_msgs/DiagnosticArray message on the /
 
 \subsection analyzers Analyzers
 
-The DiagnosticAggregator will create analyzers to store and process the diagnostic data. Each analyzer inherits from the base class diagnostic_analyzer/DiagnosticAnalyzer. Analyzers should be in packages that depend directly on "pluginlib" and "diagnostic_aggregator".
+The Aggregator will create analyzers to store and process the diagnostic data. Each analyzer inherits from the base class diagnostic_analyzer/Analyzer. Analyzers should be in packages that depend directly on "pluginlib" and "diagnostic_aggregator".
 
-The base analyzer class is the DiagnosticAnalyzer. All derived classes must implement these methods as specified by the Analyzer:
+The base analyzer class is the Analyzer. All derived classes must implement these methods as specified by the Analyzer:
 - \b init
 - \b analyze
 - \b getPrefix
@@ -34,7 +34,7 @@ Analyzers can choose the error state for any DiagnosticStatus message they analy
 
 \subsubsection generic_analyzer Generic Analyzer
 
-\b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the DiagnosticAnalyzer's. It is used by the diagnostic_aggregator/DiagnosticAggregator to store, process and republish diagnostics data. The GenericAnalyzer is loaded by the pluginlib as a DiagnosticAnalyzer plugin. It is the most basic of all DiagnosticAnalyzer's. 
+\b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the Analyzer's. It is used by the diagnostic_aggregator/Aggregator to store, process and republish diagnostics data. The GenericAnalyzer is loaded by the pluginlib as a Analyzer plugin. It is the most basic of all Analyzer's. 
 
 The following YAML parameters will create a GenericAnalyzer to motor a PR2 power system.
 \verbatim
@@ -85,11 +85,11 @@ sensors:
   contains: [
     'hokuyo']
 motors:
-  type: PR2MotorsDiagnosticAnalyzer
+  type: PR2MotorsAnalyzer
 joints:
-  type: PR2JointsDiagnosticAnalyzer
+  type: PR2JointsAnalyzer
 \endverbatim
-Each analyzer is started with a namespace, and must have the parameter "type" in that namespace. Analyzers are loaded as plugins with "pluginlib" and inherit from the base class diagnostic_analyzer/DiagnosticAnalyzer.
+Each analyzer is started with a namespace, and must have the parameter "type" in that namespace. Analyzers are loaded as plugins with "pluginlib" and inherit from the base class diagnostic_analyzer/Analyzer.
 
 If any analyzer is not properly specified, or returns false on initialization, the aggregator program will exit.
 

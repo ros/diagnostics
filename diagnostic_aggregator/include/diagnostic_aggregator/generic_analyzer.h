@@ -51,7 +51,7 @@
 namespace diagnostic_aggregator {
 
 /*!
- *\brief GenericAnalyzer is most basic Analyzer
+ *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended with
@@ -60,7 +60,6 @@ namespace diagnostic_aggregator {
  */
 class GenericAnalyzer : public Analyzer
 {
-
 public:
   /*!
    *\brief Default constructor loaded by pluginlib
@@ -75,7 +74,7 @@ public:
    *
    * NodeHandle is given private namespace to initialize (ex: ~Sensors)
    * Parameters of NodeHandle must follow this form. See DiagnosticAggregator
-   * for instructions on passing these to the aggregator.
+   * for instructions on passing these parameters to the aggregator.
    *\verbatim
    * PowerSystem:
    *   type: GenericAnalyzer
@@ -103,12 +102,16 @@ public:
    * process all remaining messages. It will prepend "first_prefix/Other"
    * to all messages that haven't been handled by other analyzers.
    * The "Other" analyzer is created automatically by the aggregator.
+   *
+   * The "Other" analyzer is initialized by the diagnostic Aggregator, and can never
+   * be instantiated from the parameters by a user.
    */
   bool initOther(std::string first_prefix);
 
   /*!
    *\brief Analyzes DiagnosticStatus messages
    * 
+   *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
    */
   std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
 
@@ -155,10 +158,7 @@ private:
    *\brief Returns items that need to be analyzed
    */
   std::vector<boost::shared_ptr<StatusItem> > toAnalyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
-
-
 };
-
 
 }
 #endif //GENERIC_ANALYZER_H

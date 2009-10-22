@@ -52,6 +52,12 @@
 
 namespace diagnostic_aggregator {
 
+/*!
+ *\brief Removes redundant prefixes from status name. 
+ *
+ * Useful for cleaning up status names. 
+ * Ex: /Hokuyo/Tilt HK/tilt_node: Connection to /Hokuyo/Tilt HK/Connection
+ */
 inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
 {
   std::string output_name = input_name;
@@ -89,7 +95,7 @@ public:
   
   std::string getHeaderMsg() { return header_msg_; }
   std::string getName() { return nice_name_; }
-  int8_t getHeaderLevel() { return header_level_; }
+  DiagnosticLevel getHeaderLevel() { return header_level_; }
 
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
   
@@ -100,7 +106,7 @@ protected:
   
   double timeout_;
 
-  int8_t header_level_;
+  DiagnosticLevel header_level_;
   std::string header_msg_;
 
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;  

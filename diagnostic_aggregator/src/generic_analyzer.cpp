@@ -124,7 +124,6 @@ GenericAnalyzer::~GenericAnalyzer()
 
 vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::analyze(map<string, boost::shared_ptr<StatusItem> > msgs)
 {
-  //ROS_INFO("Analyzing: %s", nice_name_.c_str());
   boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
   header_status->name = full_prefix_;
   header_status->level = 0;
@@ -160,7 +159,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::a
     
     header_status->values.push_back(kv);
 
-    bool stale = item->getUpdateInterval().toSec() > timeout_; // 5.0 sec timeout
+    bool stale = item->getUpdateInterval().toSec() > timeout_;
 
     all_stale = all_stale && ((level == 3) || stale);
 
@@ -176,17 +175,12 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::a
   else if (header_status->level == 3)
     header_status->level = 2; 
   
-  if (header_status->level == 1)
-    header_status->message = "Warning";
-  if (header_status->level == 2)
-    header_status->message = "Error";
-  if (header_status->level == 3)
+  header_status->message = valToMsg(header_status->level);
+  if (all_stale)
     header_status->message = "All Stale";
   
-  //ROS_INFO("Done analyzing: %s", nice_name_.c_str());
   return processed;
 }
-                                                                                       
 
 void GenericAnalyzer::updateItems(vector<boost::shared_ptr<StatusItem> > to_analyze)
 {
@@ -199,7 +193,6 @@ void GenericAnalyzer::updateItems(vector<boost::shared_ptr<StatusItem> > to_anal
 
 }
 
-// Returns vector of msgs that haven't been analyzed
 vector<boost::shared_ptr<StatusItem> > GenericAnalyzer::toAnalyzeOther(map<string, boost::shared_ptr<StatusItem> > msgs )
 {
   vector<boost::shared_ptr<StatusItem> > to_analyze;
@@ -215,8 +208,6 @@ vector<boost::shared_ptr<StatusItem> > GenericAnalyzer::toAnalyzeOther(map<strin
   return to_analyze;
 }
 
-// Returns vector of msgs to analyze
-///\todo optimize with dictionaries or something
 vector<boost::shared_ptr<StatusItem> > GenericAnalyzer::toAnalyze(map<string, boost::shared_ptr<StatusItem> > msgs)
 {
   vector<boost::shared_ptr<StatusItem> > to_analyze;
@@ -232,8 +223,6 @@ vector<boost::shared_ptr<StatusItem> > GenericAnalyzer::toAnalyze(map<string, bo
 
     bool analyzed = false;
 
-    // Check expected, name, startswith, contains
-    // If we're going to analyze it, don't check remainder
     for (unsigned int i = 0; i < expected_.size(); ++i)
     {
       if (name == expected_[i])

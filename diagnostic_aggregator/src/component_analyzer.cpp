@@ -64,7 +64,7 @@ bool ComponentAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
   for (xml_it = params.begin(); xml_it != params.end(); ++xml_it)
   {
     XmlRpc::XmlRpcValue param_name = xml_it->first;
-    ROS_DEBUG("Got param name: %s", param_name.toXml().c_str());
+    ROS_DEBUG("Got param \"name\": %s", param_name.toXml().c_str());
     string p_name = param_name;
 
     // special parameter names
@@ -133,10 +133,10 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > ComponentAnalyzer:
   {
     boost::shared_ptr<Component> component = components_[i];
     
-    vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_sensors = component->analyze(msgs);
+    vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_components = component->analyze(msgs);
     
-    for (unsigned int j = 0; j < my_sensors.size(); ++j)
-      processed.push_back(my_sensors[j]);
+    for (unsigned int j = 0; j < my_components.size(); ++j)
+      processed.push_back(my_components[j]);
 
     diagnostic_msgs::KeyValue kv;
     kv.key = component->getName();
@@ -154,12 +154,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > ComponentAnalyzer:
   else if (header_status->level == 3)
     header_status->level = 2; 
   
-  if (header_status->level == 1)
-    header_status->message = "Warning";
-  if (header_status->level == 2)
-    header_status->message = "Error";
-  if (header_status->level == 3)
-    header_status->message = "Sensors Stale";
+  header_status->message = valToMsg(header_status->level);
 
   return processed;
 }
