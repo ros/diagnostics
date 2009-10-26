@@ -146,6 +146,9 @@ public:
     split_run(stat, stat);
   }
 
+protected:
+  friend class CombinationDiagnosticTask;
+
   virtual void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
       diagnostic_updater::DiagnosticStatusWrapper &details) = 0;
 };

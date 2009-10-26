@@ -52,14 +52,52 @@
 namespace diagnostic_updater
 {
 
+/**
+ *
+ * \brief Wrapper for the diagnostic_msgs::DiagnosticStatus message that
+ * makes it easier to fill out.
+ *
+ * This class handles common string formatting and vector handling issues
+ * for the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
+ * diagnostic_msgs::DiagnosticStatus, so it can be passed directly to
+ * diagnostic publish calls.
+ */
+
 class DiagnosticStatusWrapper : public diagnostic_msgs::DiagnosticStatus
 {
 public:
+
+  /**
+	 * \brief Fills out the level and message fields of the DiagnosticStatus.
+	 *
+	 * \param lvl Numerical level to assign to this Status (OK, Warn, Err).
+	 * \param s Descriptive status message.
+	 */
+
   void summary(unsigned char lvl, const std::string s)
   {
     level = lvl;
     message = s;
   }
+
+  /**
+	 * \brief Merges a level and message with the existing ones.
+	 *
+	 * It is sometimes useful to merge two DiagnosticStatuses. In that case,
+	 * the key value pairs can be unioned, but the level and summary message
+	 * have to be merged more intelligently. This function does the merge in
+	 * an intelligent manner, combining the summary in *this, with the one
+	 * that is passed in.
+	 *
+	 * The combined level is the greater of the two levels to be merged.
+	 * If both levels are non-zero (not OK), the messages are combined with a
+	 * semicolon separator. If only one level is zero, and the other is
+	 * non-zero, the message for the zero level is discarded. If both are
+	 * zero, the new message is ignored.
+	 *
+	 * \param lvl Numerical level to of the merged-in summary.
+	 * \param s Descriptive status message for the merged-in summary.
+	 */
 
   void mergeSummary(unsigned char lvl, const std::string s)
   {
@@ -76,7 +114,19 @@ public:
         level = lvl;
   }
 
-  void mergeSummaryf(unsigned char lvl, const char *format, ...)
+  /**
+	 * \brief Formatted version of mergeSummary.
+	 *
+	 * This method is identical to mergeSummary, except that the message is
+	 * an sprintf-style format string.
+	 * 
+	 * \param lvl Numerical level to of the merged-in summary.
+	 * \param format Format string for the descriptive status message for the 
+	 * merged-in summary.
+	 * \param ... Values to be formatted by the format string.
+	 */
+	
+	void mergeSummaryf(unsigned char lvl, const char *format, ...)
   {
     va_list va;
     char buff[1000]; // @todo This could be done more elegantly.
@@ -88,7 +138,19 @@ public:
     va_end(va);
   }
 
-  void summaryf(unsigned char lvl, const char *format, ...)
+  /**
+	 * \brief Formatted version of summary.
+	 *
+	 * This method is identical to summary, except that the message is an
+	 * sprintf-style format string.
+	 *
+	 * \param lvl Numerical level to assign to this Status (OK, Warn, Err).
+	 * \param s Format string for the descriptive status message.
+	 * \param ... Values to be formatted by the format string.
+	 *
+	 */
+	
+	void summaryf(unsigned char lvl, const char *format, ...)
   {
     va_list va;
     char buff[1000]; // @todo This could be done more elegantly.
@@ -100,6 +162,16 @@ public:
     va_end(va);
   }
 
+  /**
+	 * \brief Add a key-value pair.
+	 *
+	 * This method adds a key-value pair. Any type that has a << stream
+	 * operator can be passed as the second argument.  Formatting is done
+	 * using a std::stringstream.
+	 *
+	 * \param key Key to be added.  \param value Value to be added.
+	 */
+
   template<class T>
   void add(const std::string &key, const T &val)
   {
@@ -109,7 +181,21 @@ public:
     add(key, sval);
   }
   
+  /**
+	 * \brief Add a key-value pair using a format string.
+	 *
+	 * This method adds a key-value pair. A format string is used to set the
+	 * value. The current implementation limits the value to 1000 characters
+	 * in length.
+	 */
+
   void addf(const std::string &key, const char *format, ...); // In practice format will always be a char *
+
+  /**
+	 * \brief Clear the key-value pairs.
+	 *
+	 * The values vector containing the key-value pairs is cleared.
+	 */
 
   void clear()
   {
