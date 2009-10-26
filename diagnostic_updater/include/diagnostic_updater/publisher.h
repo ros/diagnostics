@@ -42,11 +42,32 @@
 
 namespace diagnostic_updater
 {
-                                   
+     
+/**
+ * \brief A class to facilitate making diagnostics for a topic using a
+ * FrequencyStatus. 
+ *
+ * The word "headerless" in the class name refers to the fact that it is
+ * mainly designed for use with messages that do not have a header, and
+ * that cannot therefore be checked using a TimeStampStatus.
+ */
+
 class HeaderlessTopicDiagnostic : public CombinationDiagnosticTask
 {
 public:
-  HeaderlessTopicDiagnostic(
+/**
+ * \brief Constructs a HeaderlessTopicDiagnostic. 
+ *
+ * \param name The name of the topic that is being diagnosed.
+ *
+ * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * should add itself to.
+ *
+ * \param freq The parameters for the FrequencyStatus class that will be
+ * computing statistics.
+ */
+	
+	HeaderlessTopicDiagnostic(
       std::string name,
       diagnostic_updater::Updater &diag,
       const diagnostic_updater::FrequencyStatusParam &freq) :
@@ -60,11 +81,19 @@ public:
   virtual ~HeaderlessTopicDiagnostic()
   {}
   
+  /**
+	 * \brief Signals that a publication has occurred.
+	 */
+
   virtual void tick()
   {
     freq_.tick();
   }
   
+  /**
+	 * \brief Clears the frequency statistics.
+	 */
+
   virtual void clear_window()
   {
     freq_.clear();
@@ -74,9 +103,28 @@ private:
   diagnostic_updater::FrequencyStatus freq_;
 };
 
+/**
+ * \brief A HeaderlessTopicDiagnostic combined with a ros::Publisher.
+ *
+ * For a standard ros::Publisher, this class allows the ros::Publisher and
+ * the HeaderlessTopicDiagnostic to be combined for added convenience.
+ */
+
 class HeaderlessDiagnosedPublisher : public HeaderlessTopicDiagnostic
 {
 public:
+  /**
+   * \brief Constructs a HeaderlessTopicDiagnostic. 
+   *
+   * \param pub The publisher on which statistics are being collected.
+   *
+   * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+   * should add itself to.
+   *
+   * \param freq The parameters for the FrequencyStatus class that will be
+   * computing statistics.
+   */
+
   HeaderlessDiagnosedPublisher(const ros::Publisher &pub,
       diagnostic_updater::Updater &diag,
       const diagnostic_updater::FrequencyStatusParam &freq) :
@@ -87,24 +135,54 @@ public:
   virtual ~HeaderlessDiagnosedPublisher()
   {}
   
+  /**
+	 * \brief Collects statistics and publishes the message.
+	 */
   virtual void publish(const ros::MessageConstPtr& message)
   {
     tick();
     publisher_.publish(message);
   }
  
+  /**
+	 * \brief Collects statistics and publishes the message.
+	 */
   virtual void publish(const ros::Message& message)
   {
     tick();
     publisher_.publish(message);
   }
 
-  ros::Publisher publisher() const
+  /**
+	 * \brief Returns the publisher.
+	 */
+  ros::Publisher getPublisher() const
   {
     return publisher_;
   }
 
-  void set_publisher(ros::Publisher pub)
+  /**
+	 * Deprecated, use getPublisher instead.
+	 */
+  
+	ROSCPP_DEPRECATED ros::Publisher publisher() const
+  {
+    return publisher_;
+  }
+
+  /**
+	 * \brief Changes the publisher.
+	 */
+  void setPublisher(ros::Publisher pub)
+  {
+    publisher_ = pub;
+  }
+
+  /**
+	 * Deprecated, use setPublisher instead.
+	 */
+
+  ROSCPP_DEPRECATED void set_publisher(ros::Publisher pub)
   {
     publisher_ = pub;
   }
@@ -113,9 +191,29 @@ private:
   ros::Publisher publisher_;
 };
 
+/**
+ * \brief A class to facilitate making diagnostics for a topic using a
+ * FrequencyStatus and TimeStampStatus. 
+ */
+
 class TopicDiagnostic : public HeaderlessTopicDiagnostic
 {
 public:
+/**
+ * \brief Constructs a TopicDiagnostic. 
+ *
+ * \param name The name of the topic that is being diagnosed.
+ *
+ * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * should add itself to.
+ *
+ * \param freq The parameters for the FrequencyStatus class that will be
+ * computing statistics.
+ *
+ * \param stamp The parameters for the TimeStampStatus class that will be
+ * computing statistics.
+ */
+	
   TopicDiagnostic(
       std::string name,
       diagnostic_updater::Updater &diag,
@@ -130,11 +228,21 @@ public:
   virtual ~TopicDiagnostic()
   {}
   
-  virtual void tick()
-  {
-    ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead.");
-  }
+  /**
+	 * This method should never be called on a TopicDiagnostic as a timestamp
+	 * is needed to collect the timestamp diagnostics. It is defined here to
+	 * prevent the inherited tick method from being used accidentally.
+	 */
+	virtual void tick() { ROS_FATAL("tick(void) has been called on a
+			TopicDiagnostic. This is never correct. Use tick(ros::Time &)
+			instead."); }
 
+  /**
+	 * \brief Collects statistics and publishes the message.
+	 *
+	 * \param stamp Timestamp to use for interval computation by the
+	 * TimeStampStatus class.
+	 */
   virtual void tick(const ros::Time &stamp)
   {
     stamp_.tick(stamp);
@@ -145,10 +253,32 @@ private:
   TimeStampStatus stamp_;
 };
 
+/**
+ * \brief A TopicDiagnostic combined with a ros::Publisher.
+ *
+ * For a standard ros::Publisher, this class allows the ros::Publisher and
+ * the TopicDiagnostic to be combined for added convenience.
+ */
+
 template<class T>
 class DiagnosedPublisher : public TopicDiagnostic
 {
 public:
+/**
+ * \brief Constructs a DiagnosedPublisher. 
+ *
+ * \param pub The publisher on which statistics are being collected.
+ *
+ * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * should add itself to.
+ *
+ * \param freq The parameters for the FrequencyStatus class that will be
+ * computing statistics.
+ *
+ * \param stamp The parameters for the TimeStampStatus class that will be
+ * computing statistics.
+ */
+	
   DiagnosedPublisher(const ros::Publisher &pub,
       diagnostic_updater::Updater &diag, 
       const diagnostic_updater::FrequencyStatusParam &freq, 
@@ -160,24 +290,54 @@ public:
   virtual ~DiagnosedPublisher()
   {}
   
-  virtual void publish(const boost::shared_ptr<T>& message)
-  {
-    tick(message->header.stamp);
-    publisher_.publish(message);
-  }
+  /**
+	 * \brief Collects statistics and publishes the message.
+	 *
+	 * The timestamp to be used by the TimeStampStatus class will be
+	 * extracted from message.header.stamp.
+	 */
+	virtual void publish(const boost::shared_ptr<T>& message) {
+		tick(message->header.stamp); publisher_.publish(message); }
  
-  virtual void publish(const T& message)
-  {
-    tick(message.header.stamp);
-    publisher_.publish(message);
-  }
+  /**
+	 * \brief Collects statistics and publishes the message.
+	 *
+	 * The timestamp to be used by the TimeStampStatus class will be
+	 * extracted from message.header.stamp.
+	 */
+	virtual void publish(const T& message) { tick(message.header.stamp);
+		publisher_.publish(message); }
 
-  ros::Publisher publisher() const
+  /**
+	 * \brief Returns the publisher.
+	 */
+  ros::Publisher getPublisher() const
   {
     return publisher_;
   }
 
-  void set_publisher(ros::Publisher pub)
+  /**
+	 * Deprecated, use getPublisher instead.
+	 */
+  
+	ROSCPP_DEPRECATED ros::Publisher publisher() const
+  {
+    return publisher_;
+  }
+
+  /**
+	 * \brief Changes the publisher.
+	 */
+  void setPublisher(ros::Publisher pub)
+  {
+    publisher_ = pub;
+  }
+
+  /**
+	 * Deprecated, use setPublisher instead.
+	 */
+
+  ROSCPP_DEPRECATED void set_publisher(ros::Publisher pub)
   {
     publisher_ = pub;
   }
@@ -185,7 +345,6 @@ public:
 private:
   ros::Publisher publisher_;
 };
-
 
 };
 
