@@ -50,6 +50,15 @@ namespace self_test
 
 using namespace diagnostic_updater;
 
+/**
+ * \brief Class to facilitate the creation of component self-tests.
+ *
+ * The self_test::Dispatcher class advertises the "self_test" service, and
+ * maintains a list of pretests and tests. When "self_test" is invoked,
+ * Dispatcher waits for a suitable time to interrupt the node and run the
+ * tests. Results from the tests are collected and returned to the caller.
+ */
+
 template <class T>
 class Dispatcher : public DiagnosticTaskVector
 {        
@@ -85,7 +94,16 @@ public:
 
   using DiagnosticTaskVector::add;
 
-  Dispatcher(T *owner, ros::NodeHandle h) : 
+  /**
+	 * \brief Constructs a dispatcher.
+	 *
+	 * \param owner Class that owns this dispatcher. This is used as the
+	 * default class for tests that are member-functions.
+	 *
+	 * \param h NodeHandle from which to work. (Currently unused?)
+	 */
+
+	Dispatcher(T *owner, ros::NodeHandle h) : 
     node_handle_(h), owner_(owner), pretest_(NULL), posttest_(NULL)
   {
     ROS_DEBUG("Advertising self_test");
@@ -98,15 +116,37 @@ public:
     verbose = true;
   }
 
+  /**
+	 * \brief Sets a method to call before the tests.
+	 *
+	 * \param f : Method of the owner class to call.
+	 */
+
   void setPretest(void (T::*f)())
   {
     pretest_ = f;
   }
 
+  /**
+	 * \brief Sets a method to call after the tests.
+	 *
+	 * \param f : Method of the owner class to call.
+	 */
+
   void setPosttest(void (T::*f)())
   {
     posttest_ = f;
   }
+
+  /**
+	 * \brief Add a test that is a method of the owner class.
+	 *
+	 * \param name : Name of the test. Will be filled into the
+	 * DiagnosticStatusWrapper automatically.
+	 *
+	 * \param f : Method of the owner class that fills out the
+	 * DiagnosticStatusWrapper.
+	 */
 
   template<class S>
   void add(const std::string name, void (S::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
@@ -115,7 +155,12 @@ public:
     addInternal(int_task);
   }
   
-  void checkTest()
+  /**
+	 * \brief Check if a self-test is pending. If so start it and wait for it
+	 * to complete.
+	 */
+	
+	void checkTest()
   {
     bool local_waiting = false;
     {
@@ -140,12 +185,25 @@ public:
     boost::this_thread::yield();
   }
 
+  /**
+	 * \brief Sets the ID of the part being tested.
+	 *
+	 * This method is expected to be called by one of the tests during the
+	 * self-test.
+	 *
+	 * \param id : String that identifies the piece of hardware being tested.
+	 */
+
   void setID(std::string id)
   {
     id_ = id;
   }
 
-  bool doTest(diagnostic_msgs::SelfTest::Request &req,
+private:
+  /**
+	 * The service callback for the "self-test" service.
+	 */
+	bool doTest(diagnostic_msgs::SelfTest::Request &req,
                 diagnostic_msgs::SelfTest::Response &res)
   {
     {
