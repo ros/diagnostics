@@ -50,7 +50,6 @@ import threading, time
 
 from robot_monitor.viewer_panel import StatusViewerFrame
 
-
 ##\brief Finds list of first-parent names in msg array
 ##\param msg DiagnosticArray : Received array of DiagnosticStatus messages
 def find_parent_names_in_msg(msg):
@@ -155,7 +154,7 @@ class RobotMonitorPanel(wx.Panel):
         if not self._have_message:
             self._have_message = True
             self._tree_ctrl.Delete(self._empty_id)
-
+            self._empty_id = None
         scroll = self._tree_ctrl.GetScrollPos(wx.VERTICAL)
 
         # Find selected item to reselect next round
@@ -398,7 +397,7 @@ class RobotMonitorPanel(wx.Panel):
                 break
                     
 
-    ## Creates an empty tree item
+    ##\brief Creates an empty tree item
     ##\param first_parent str : Name of first parent
     ##\param parent_id wxTreeItemId : Id of immediate parent
     ##\param name str : Name of tree item
@@ -425,7 +424,7 @@ class RobotMonitorPanel(wx.Panel):
             item.update_time = rospy.get_time()
 
 
-    ## Find all tree nodes expanded by parent node
+    ##\brief Find all tree nodes expanded by parent node
     ##\param id wxTreeItemId : Id of node to see 
     def _find_expanded(self, id, expanded_names):
         if not self._tree_ctrl.ItemHasChildren(id):
