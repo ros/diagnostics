@@ -1,52 +1,24 @@
-prefix1:
-  type: GenericAnalyzer
-  prefix: First
-  startswith: [
-    'pref1' ]
-  contains: [
-    'contains1a',
-    'contains1b' ]
-  name: [
-    'name1' ]
-  expected: [
-    'expected1' ]
-prefix2:
-  type: GenericAnalyzer
-  prefix: Second
-  contains: [
-    'contain2a',
-    'contain2b' ]
-sensor:
-  type: ComponentAnalyzer
-  prefix: Sensors
-  timeout: 5
-  tilt_hk:
-    name: Tilt Hokuyo
-    start_name: tilt_hokuyo
-    fields: [
-      'tilt_hokuyo: freq',
-      'tilt_hokuyo: connect',
-      'tilt_hokuyo: status']
-  base_hk:
-    name: Base Hokuyo
-    start_name: base_hokuyo
-    fields: [
-      'base_hokuyo: freq',
-      'base_hokuyo: connect',
-      'base_hokuyo: status']
-computers:
-  type: ComponentAnalyzer
-  prefix: Computers
-  timeout: 5
-  pre1:
-    name: PRE1
-    start_name: pre1
-    fields: [
-      'pre1: cpu',
-      'pre1: hd']
-  pre2:
-    name: PRE2
-    start_name: pre2
-    fields: [
-      'pre2: cpu',
-      'pre2: hd']
+analyzers:
+  prefix1:
+    type: GenericAnalyzer
+    path: First
+    remove_prefix: [ 'prefix1' ]
+    find_and_remove_prefix: [ 'find1_items'] 
+    startswith: [
+      'pref1' ]
+    contains: [
+      'contains1a',
+      'contains1b' ]
+    name: [
+      'name1' ]
+    expected: [
+      'prefix1: expected1a',
+      'prefix1: expected1b',
+      'prefix1: expected1c',
+      'prefix1: expected1d' ]
+  prefix2:
+    type: GenericAnalyzer
+    path: Second
+    contains: [
+      'contain2a',
+      'contain2b' ]

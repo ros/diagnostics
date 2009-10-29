@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**!< \author Kevin Watts */
 
 #ifndef GENERIC_ANALYZER_H
 #define GENERIC_ANALYZER_H
@@ -41,7 +41,10 @@
 #include <ros/ros.h>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
+#include <pluginlib/class_list_macros.h>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
 #include "diagnostic_aggregator/analyzer.h"
@@ -55,7 +58,7 @@ namespace diagnostic_aggregator {
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended with
- * '/FirstPrefix/SecondPrefix', where FirstPrefix is common to all analyzers
+ * '/BasePath/MyPath', where FirstPrefix is common to all analyzers
  * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
  */
 class GenericAnalyzer : public Analyzer
@@ -67,7 +70,7 @@ public:
   GenericAnalyzer();
 
   
-  ~GenericAnalyzer();
+  virtual ~GenericAnalyzer();
 
   /*!
    *\brief Initializes GenericAnalyzer from namespace
@@ -90,74 +93,51 @@ public:
    *     'Battery']
    *\endverbatim
    *   
-   *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
+   *\param base_path : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
    */
-  bool init(std::string first_prefix, const ros::NodeHandle &n);
-
-  /*!
-   *\brief Initializes analyzer to deal with remaining data
-   *
-   * After all analyzers have been created this analyzer is created to 
-   * process all remaining messages. It will prepend "first_prefix/Other"
-   * to all messages that haven't been handled by other analyzers.
-   * The "Other" analyzer is created automatically by the aggregator.
-   *
-   * The "Other" analyzer is initialized by the diagnostic Aggregator, and can never
-   * be instantiated from the parameters by a user.
-   */
-  bool initOther(std::string first_prefix);
+  bool init(const std::string base_path, const ros::NodeHandle &n);
 
   /*!
    *\brief Analyzes DiagnosticStatus messages
    * 
    *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
    */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item);
+
+  virtual bool match(const std::string name) const;
 
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")
    */
-  std::string getPrefix() { return full_prefix_; } 
+  std::string getPath() const { return base_path_; }
 
   /*!
    *\brief Returns nice name (ex: "Power System")
    */
-  std::string getName()  { return nice_name_; }
- 
-private:
-  bool other_; /**< True if analyzer is supposed to analyze remaining messages */
-  double timeout_;
+  std::string getName() const { return nice_name_; }
 
+protected:
   std::string nice_name_;
-  std::string full_prefix_;
+  std::string base_path_;
 
+private:
+  double timeout_;
+  int num_items_expected_;
+
+  std::vector<std::string> chaff_; /**< Removed from the start of node names */
   std::vector<std::string> expected_;
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
+  std::vector<boost::regex> regex_;
 
   /*!
    *\brief Stores items by name
    */
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;
-  
-  /*!
-   *\brief Updates items_ with messages to analyze. Deletes to_analyze param.
-   *
-   * Stores latest values of all data that this analyzer looks at.
-   */
-  void updateItems(std::vector<boost::shared_ptr<StatusItem> > to_analyze);
-    
-  /*!
-   *\brief Returns items to be analyzed (items that haven't been already)
-   */
-  std::vector<boost::shared_ptr<StatusItem> > toAnalyzeOther(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
-    
-  /*!
-   *\brief Returns items that need to be analyzed
-   */
-  std::vector<boost::shared_ptr<StatusItem> > toAnalyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
 };
 
 }

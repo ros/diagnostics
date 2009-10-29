@@ -73,12 +73,12 @@ public:
    *\brief Analyzer is initialized with first prefix and namespace.
    *
    * The Analyzer initialized with parameters in its given 
-   * namespace. The "first_prefix" is common to all analyzers, and needs to be
+   * namespace. The "base_path" is common to all analyzers, and needs to be
    * prepended to all DiagnosticStatus names.
-   *\param first_prefix : Common to all analyzers, prepended to all processed names. Starts with "/".
+   *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(std::string first_prefix, const ros::NodeHandle &n) 
+  virtual bool init(const std::string base_path, const ros::NodeHandle &n)
   {
     ROS_FATAL("Analyzer did not implement the init function");
     ROS_BREAK();
@@ -87,18 +87,29 @@ public:
   }
 
   /*!
+   *\brief Returns true if analyzer will handle this item
+   */
+  virtual bool match(const std::string name) const { return true; }
+
+  /*!
+   *\brief Returns true if analyzer will analyze this name
+   *
+   * This is called with every new item that an analyzer reports that it wants
+   * to look at.
+   */
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item) { ROS_INFO("Returning false"); return false; }
+
+  /*!
    *\brief Analysis function, output processed data.
    *
-   * analyze is called at 1Hz intervals, with the complete map<name, item> of all StatusItem's
-   * that have been received in this past interval. 
+   * report is called at 1Hz intervals. Analyzers should return a vector 
+   * of fully processed DiagnosticStatus messages.
    *
-   *\param msgs : The input map of messages, by status name. StatusPair stores message, count++ if analyzed. Returned array must be deleted by aggregator.
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs)
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
   {
-    ROS_FATAL("Analyzer did not implement the analyze function");
-    ROS_BREAK();
+    ROS_ERROR("Analyzer did not implement the report function");
 
     std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_vec;
     return my_vec;
@@ -107,12 +118,12 @@ public:
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')
    */
-  virtual std::string getPrefix() { return ""; }
+  virtual std::string getPath() const { return ""; }
   
   /*!
    *\brief Returns nice name for display. (ex: 'Sensors')
    */
-  virtual std::string getName() { return ""; }
+  virtual std::string getName() const { return ""; }
 
 };
 

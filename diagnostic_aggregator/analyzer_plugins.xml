@@ -4,11 +4,6 @@
       GenericAnalyzer is default diagnostic analyzer.
     </description>
   </class>
-  <class name="ComponentAnalyzer" type="diagnostic_aggregator::ComponentAnalyzer" base_class_type="diagnostic_aggregator::Analyzer">
-    <description>
-      ComponentAnalyzer looks at components by group.
-    </description>
-  </class>
 </library>
 
 </library>

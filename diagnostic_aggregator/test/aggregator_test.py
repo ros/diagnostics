@@ -49,161 +49,106 @@ import threading
 
 from diagnostic_msgs.msg import DiagnosticArray
 
-#DURATION = 15
-prefix = "/CPP"
+prefix = ""
 
-def combine_name_prefix(my_prefix, name):
-    return '/'.join([prefix, my_prefix, name.replace('/', '')])
+##\brief Removes name chaff (ex: 'tilt_hokuyo_node: Frequency' to 'Frequency')
+def fix_sub_name(name, remove_prefixes):
+    last = str(name)
+    for start_name in remove_prefixes:
+        if last.startswith(start_name):
+            last = last[len(start_name):]
+        if last.startswith(':'):
+            last = last[1:]
+        while last.startswith(' '):
+            last = last[1:]
+    
+    return last
 
-def combine_name_sub_prefix(my_prefix, sub_prefix, name):
-    return '/'.join([prefix, my_prefix, sub_prefix, name.replace('/', '')])
+def combine_name_prefix(my_prefix, name, remove_prefixes):
+    fixed = fix_sub_name(name.replace('/', ''), remove_prefixes)
+    return '/'.join([prefix, my_prefix, fixed])
 
 def header_name(my_prefix):
     return '/'.join([prefix, my_prefix])
 
-def sub_head_name(my_prefix, sub_prefix):
-    return '/'.join([prefix, my_prefix, sub_prefix])
-
 def name_to_full_generic(name, my_prefix, value, header=False):
+    remove_prefixes = []
+    if value.has_key('remove_prefix'):
+        for rp in value['remove_prefix']:
+            remove_prefixes.append(rp)
+
+    if value.has_key('find_and_remove_prefix'):
+        for rp in value['find_and_remove_prefix']:
+            remove_prefixes.append(rp)
+        for sw in value['find_and_remove_prefix']:
+            if name.startswith(sw):
+                if header:
+                    return header_name(my_prefix)
+                return combine_name_prefix(my_prefix, name, remove_prefixes)
+
     if value.has_key('startswith'):
         for sw in value['startswith']:
             if name.startswith(sw):
                 if header:
-                    return  header_name(my_prefix)
-                return combine_name_prefix(my_prefix, name)
+                    return header_name(my_prefix)
+                return combine_name_prefix(my_prefix, name, remove_prefixes)
     if value.has_key('contains'):
         for con in value['contains']:
             if name.find(con) >= 0:
                 if header:
-                    return  header_name(my_prefix)
-                return combine_name_prefix(my_prefix, name)
+                    return header_name(my_prefix)
+                return combine_name_prefix(my_prefix, name, remove_prefixes)
 
 
     if value.has_key('name'):
         for nm in value['name']:
             if name == nm:
                 if header:
-                    return  header_name(my_prefix)
-                return combine_name_prefix(my_prefix, name)
+                    return header_name(my_prefix)
+                return combine_name_prefix(my_prefix, name, remove_prefixes)
 
     if value.has_key('expected'):
         for nm in value['expected']:
             if name == nm:
                 if header:
-                    return  header_name(my_prefix)
-                return combine_name_prefix(my_prefix, name)
+                    return header_name(my_prefix)
+                return combine_name_prefix(my_prefix, name, remove_prefixes)
 
 
     return None
 
-def fix_sub_name(name, start_name):
-    last = str(name)
-    if last.startswith(start_name):
-        last = last[len(start_name):]
-    if last.startswith(':'):
-        last = last[1:]
-    while last.startswith(' '):
-        last = last[1:]
-
-    return last
-
-def name_to_full_sub_component(name, my_prefix, component_value, header=False, sub=False):
-    start_name = ''
-    if component_value.has_key('start_name'):
-        start_name = component_value['start_name']
-    if not component_value.has_key('name'):
-        return None
-    sub_prefix = component_value['name']
-    
-    if not component_value.has_key('fields'):
-        return None
-    fields = component_value['fields']
-    for field in fields:
-        if name == field:
-            if not header:
-                fixed_name = fix_sub_name(name, start_name)
-                rospy.loginfo('Fixed name %s into %s' % (name, fixed_name))
-                return combine_name_sub_prefix(my_prefix, sub_prefix, fixed_name)
-            else:
-                if sub:
-                    return sub_head_name(my_prefix, sub_prefix)
-                return header_name(my_prefix)
-
-    return None
-
-# Takes parameters for component name
-def name_to_full_component(name, my_prefix, value, header=False, sub=False):
-    for key, component_value in value.iteritems():
-        if key == 'type' or key == 'prefix' or key == 'timeout':
-            continue
-        
-        comp_name = name_to_full_sub_component(name, my_prefix, component_value, header, sub)
-        if comp_name is not None:
-            return comp_name
-
-    return None
-
-
-# Supports all options of generic and compenent analyzers
 def name_to_agg_name(name, params):
     for key, value in params.iteritems():
-        if not value.has_key('prefix') or not value.has_key('type'):
+        if not value.has_key('path') or not value.has_key('type'):
             return None
-        my_prefix = value['prefix']
+        my_prefix = value['path']
         if value['type'] == 'GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value)
             if generic_name is not None:
                 return generic_name
-        elif value['type'] == 'ComponentAnalyzer':
-            component_name = name_to_full_component(name, my_prefix, value)
-            if component_name is not None:
-                return component_name
         else:
             return None
 
     # If we don't have it...
-    return combine_name_prefix('Other', name)
+    return combine_name_prefix('Other', name, [])
 
 # Returns header name for particular item
 def name_to_agg_header(name, params):
     for key, value in params.iteritems():
-        if not value.has_key('prefix') or not value.has_key('type'):
+        if not value.has_key('path') or not value.has_key('type'):
             return None
-        my_prefix = value['prefix']
+        my_prefix = value['path']
         if value['type'] == 'GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value, header=True)
             if generic_name is not None:
                 return generic_name
-        elif value['type'] == 'ComponentAnalyzer':
-            component_name = name_to_full_component(name, my_prefix, value, header=True)
-            if component_name is not None:
-                return component_name
         else:
             return None
 
     # If we don't have it...
     return header_name('Other')
 
-# Returns sub header name for given item (GenericAnalyzer's sub are None)
-def name_to_agg_sub_header(name, params):
-    for key, value in params.iteritems():
-        if not value.has_key('prefix') or not value.has_key('type'):
-            return None
-        my_prefix = value['prefix']
-        if value['type'] == 'GenericAnalyzer':
-            continue
-        elif value['type'] == 'ComponentAnalyzer':
-            component_sub_head = name_to_full_component(name, my_prefix, value, header=True, sub=True)
-            rospy.loginfo('Sub header for %s. %s' % (name, component_sub_head))
-            if component_sub_head is not None:
-                return component_sub_head
-        else:
-            return None
-
-    # If we don't have it...
-    return None
-
-
+##\brief Uses aggregator parameters to compare diagnostics with aggregated output
 class TestAggregator(unittest.TestCase):
     def __init__(self, *args):
         super(TestAggregator, self).__init__(*args)
@@ -215,12 +160,18 @@ class TestAggregator(unittest.TestCase):
         parser.add_option('--duration', action="store", dest="duration",
                           default=10, metavar="DURATIION",
                           help="Duration of test")
+        parser.add_option('--base_path', action="store", dest="base_path",
+                          default="", metavar="BASE_PATH",
+                          help="Base path for all output topics")
         
         self.diag_msgs = {}
         self.agg_msgs = {}
         
         rospy.init_node('test_diag_agg')
         options, args = parser.parse_args(rospy.myargv())
+
+        global prefix
+        prefix = options.base_path
         
         self.params = rospy.get_param(options.param)
         self.duration = options.duration
@@ -257,7 +208,7 @@ class TestAggregator(unittest.TestCase):
         # Go through all messages and check that we have them in aggregate
         for name, msg in self.diag_msgs.iteritems():
             agg_name = name_to_agg_name(name, self.params)
-            rospy.loginfo('Name: %s, agg_name: %s', name, agg_name)
+            #rospy.loginfo('Name: %s, agg_name: %s', name, agg_name)
 
             self.assert_(agg_name is not None, 'Aggregated name is None for %s' % name)
             self.assert_(self.agg_msgs.has_key(agg_name), 'No matching name found for name: %s, aggregated name: %s' % (name, agg_name))
@@ -275,14 +226,6 @@ class TestAggregator(unittest.TestCase):
             else:
                 all_headers[header] = self.agg_msgs[agg_name].level
 
-            sub_header = name_to_agg_sub_header(name, self.params)
-            if sub_header is not None:
-                if all_headers.has_key(sub_header):
-                    all_headers[sub_header] = max(all_headers[sub_header], self.agg_msgs[agg_name].level)
-                else:
-                    all_headers[sub_header] = self.agg_msgs[agg_name].level
-
-
             del self.agg_msgs[agg_name]
             
         # Check that we have all_headers
@@ -292,14 +235,16 @@ class TestAggregator(unittest.TestCase):
                 lvl = 3
 
             self.assert_(self.agg_msgs.has_key(header), "Header %s not found in messages" % header)
-            self.assert_(self.agg_msgs[header].level == lvl, "Level of header %s doesn't match expected." % header)
+            self.assert_(self.agg_msgs[header].level == lvl, "Level of header %s doesn't match expected value." % header)
             del self.agg_msgs[header]
 
         # Check that we have the main header message
-        self.assert_(len(self.agg_msgs) == 1, "Incorrect number of messages remaining: %d. Messages: %s" % (len(self.agg_msgs), str(self.agg_msgs)))
-        
-        self.assert_(self.agg_msgs.has_key(prefix), "Global prefix not found in messages: %s. Messages: %s" % (prefix, str(self.agg_msgs)))
-                    
+        if len(prefix) > 0:
+            self.assert_(len(self.agg_msgs) == 1, "Incorrect number of messages remaining: %d. Messages: %s" % (len(self.agg_msgs), str(self.agg_msgs)))
+            
+            self.assert_(self.agg_msgs.has_key(prefix), "Global prefix not found in messages: %s. Messages: %s" % (prefix, str(self.agg_msgs)))
+        else:
+            self.assert_(len(self.agg_msgs) == 0, "Incorrect number of messages remaining: %d. Messages: %s. Expected 0." % (len(self.agg_msgs), str(self.agg_msgs)))
 
         self._mutex.release()
 

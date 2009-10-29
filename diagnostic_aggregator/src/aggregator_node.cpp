@@ -32,27 +32,17 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**< \author Kevin Watts */
 
 #include <diagnostic_aggregator/aggregator.h>
-#include <string>
 
 using namespace std;
 
-
 int main(int argc, char **argv)
 {
-  if (argc < 2)
-  {
-    cout << "Unable to initialize aggregator, prefix not given." << endl;
-    exit(2);
-  }
-
   ros::init(argc, argv, "diagnostic_aggregator");
   
-  string prefix = argv[1];
-  
-  diagnostic_aggregator::Aggregator agg(prefix);
+  diagnostic_aggregator::Aggregator agg;
   
   ros::Rate pub_rate(1.0);
   while (agg.ok())

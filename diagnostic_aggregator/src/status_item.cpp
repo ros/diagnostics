@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**!< \author Kevin Watts */
 
 #include <diagnostic_aggregator/status_item.h>
 
@@ -41,29 +41,27 @@ using namespace std;
 
 StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
-  checked_ = false;
+	level_ = valToLevel(status->level);
+	name_ = status->name;
+	message_ = status->message;
+	hw_id_ = status->hardware_id;
+	values_ = status->values;
 
-  level_ = valToLevel(status->level);
-  name_ = status->name;
-  message_ = status->message;
-  hw_id_ = status->hardware_id;
-  values_ = status->values; 
+	output_name_ = getOutputName(name_);
 
-  output_name_ = getOutputName(name_);  
-
-  update_time_ = ros::Time::now();
+	update_time_ = ros::Time::now();
 }
 
-StatusItem::StatusItem(const string item_name) 
-{ 
-  name_ = item_name;
-  message_ = "Missing"; 
-  level_ = Level_Stale;
-  checked_ = false;
+StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
+{
+	name_ = item_name;
+	message_ = message;
+	level_ = level;
+	hw_id_ = "";
  
-  output_name_ = getOutputName(name_);  
+	output_name_ = getOutputName(name_);
 
-  update_time_ = ros::Time::now();
+	update_time_ = ros::Time::now();
 }
 
 StatusItem::~StatusItem() {}
@@ -76,6 +74,10 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
     return false;
   }
 
+  double update_interval = (ros::Time::now() - update_time_).toSec();
+  if (update_interval < 0)
+	  ROS_WARN("StatusItem is being updated with stale status item. Negative update time: %f", update_interval);
+
   level_ = valToLevel(status->level);
   message_ = status->message;
   hw_id_ = status->hardware_id;
@@ -83,15 +85,11 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 
   update_time_ = ros::Time::now();
 
-  checked_ = false;
-
   return true;
 }
 
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale)
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale) const
 {
-  checked_ = true;
-
   boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
 
   status->name = prefix + "/" + output_name_;

@@ -32,77 +32,43 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-///\author Kevin Watts
+// Author: Kevin Watts
 
-#ifndef COMPONENT_ANALYZER_H
-#define COMPONENT_ANALYZER_H
+#ifndef OTHER_ANALYZER_H
+#define OTHER_ANALYZER_H
 
-#include <map>
-#include <ros/ros.h>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <boost/shared_ptr.hpp>
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_aggregator/analyzer.h"
-#include "diagnostic_aggregator/status_item.h"
-#include "XmlRpcValue.h"
-#include "diagnostic_aggregator/component.h"
+
+#include "diagnostic_aggregator/generic_analyzer.h"
+
 
 namespace diagnostic_aggregator {
 
-/*!
- *\brief ComponentAnalyzer analyzers sensors devices on a PR2
- * 
- */
-class ComponentAnalyzer : public Analyzer
+class OtherAnalyzer : public GenericAnalyzer
 {
-
 public:
   /*!
-   *\brief Default constructor loaded by pluginlib
+   *\brief Default constructor. OtherAnalyzer isn't loaded by pluginlib
    */
-  ComponentAnalyzer();
-  
-  ~ComponentAnalyzer();
+  OtherAnalyzer() { }
 
-  /*!
-   *\brief Initializes ComponentAnalyzer from namespace
-   *
-   *   
-   *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
-   *\param n : NodeHandle in full namespace
-   */
-  bool init(std::string first_prefix, const ros::NodeHandle &n);
+  ~OtherAnalyzer() { }
 
+  bool init(std::string base_path, const ros::NodeHandle &n)
+  {
+	  ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
+	  return false;
+  }
 
-  /*!
-   *\brief Analyzes DiagnosticStatus messages
-   * 
-   */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > analyze(std::map<std::string, boost::shared_ptr<StatusItem> > msgs);
-
-  /*!
-   *\brief Returns full prefix (ex: "/Robot/Power System")
-   */
-  std::string getPrefix() { return full_prefix_; } 
-
-  /*!
-   *\brief Returns nice name (ex: "Power System")
-   */
-  std::string getName()  { return nice_name_; }
-
-private:
-  double timeout_;
-
-  std::string nice_name_;
-  std::string full_prefix_;
-
-  std::vector<boost::shared_ptr<Component> > components_;
+  bool init(std::string base_path)
+  {
+	  nice_name_ = "Other";
+	  base_path_ = base_path + "/" + nice_name_;
+	  return true;
+  }
 
 };
 
-
 }
-#endif // COMPONENT_ANALYZER_H
+
+
+#endif

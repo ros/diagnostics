@@ -49,7 +49,7 @@
 #include "pluginlib/class_loader.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
-#include "diagnostic_aggregator/generic_analyzer.h"
+#include "diagnostic_aggregator/other_analyzer.h"
 
 
 namespace diagnostic_aggregator {
@@ -101,7 +101,7 @@ public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
    */
-   Aggregator(std::string prefix);
+   Aggregator();
 
   ~Aggregator();
 
@@ -110,7 +110,7 @@ public:
    */
   void publishData();
 
-  bool ok() { return n_.ok(); }
+  bool ok() const { return n_.ok(); }
 
 private:
   ros::NodeHandle n_;
@@ -130,8 +130,11 @@ private:
   
   std::vector<Analyzer*> analyzers_;
 
-  std::map<std::string, boost::shared_ptr<StatusItem> > msgs_;
-  std::string prefix_; /**< Prepended to all status names of aggregator. */
+  OtherAnalyzer* other_analyzer_;
+
+  std::string base_path_; /**< Prepended to all status names of aggregator. */
+
+  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 
 };
 

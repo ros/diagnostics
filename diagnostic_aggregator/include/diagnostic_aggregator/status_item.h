@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**< \author Kevin Watts */
 
 #ifndef DIAGNOSTIC_STATUS_ITEM_H
 #define DIAGNOSTIC_STATUS_ITEM_H
@@ -89,7 +89,7 @@ inline DiagnosticLevel valToLevel(const int val)
   if (val == 3)
     return Level_Stale;
   
-  ROS_ERROR("Attempting to convert %d into DiagnosticLevel. Values are: 0: OK,1: Warning, 2: Error, 3: Stale", val);
+  ROS_ERROR("Attempting to convert %d into DiagnosticLevel. Values are: {0: OK, 1: Warning, 2: Error, 3: Stale}", val);
   return Level_Error;
 }
  
@@ -112,6 +112,36 @@ inline std::string valToMsg(const int val)
 }
 
 /*!
+ *\brief Removes redundant prefixes from status name.
+ *
+ * Useful for cleaning up status names.
+ * Ex: /Hokuyo/Tilt HK/tilt_node: Connection to /Hokuyo/Tilt HK/Connection
+ */
+inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
+{
+  std::string output_name = input_name;
+
+  if (chaff.size() == 0)
+    return output_name;
+
+  // Remove start name from all output names
+  // Turns "/PREFIX/base_hokuyo_node: Connection Status" to "/PREFIX/Connection Status"
+  std::size_t last_slash = output_name.rfind("/");
+  std::string start_of_name = output_name.substr(0, last_slash) + std::string("/");
+
+  if (output_name.find(chaff) == last_slash + 1)
+    output_name.replace(last_slash + 1, chaff.size(), "");
+
+  if (output_name.find(":", last_slash) == last_slash + 1)
+    output_name= start_of_name + output_name.substr(last_slash + 2);
+
+  while (output_name.find(" ", last_slash) == last_slash + 1)
+    output_name = start_of_name + output_name.substr(last_slash + 2);
+
+  return output_name;
+}
+
+/*!
  *\brief Helper class to hold, store DiagnosticStatus messages
  *
  * The StatusItem class is used by the Aggregator to store
@@ -129,15 +159,15 @@ public:
    */
   StatusItem(const diagnostic_msgs::DiagnosticStatus *status);
 
-  /*!
-   *\brief Constructed from string, (Level = 3, Message = "Missing")
+   /*!
+   *\brief Constructed from string of item name (Level = 3)
    */
-  StatusItem(const std::string item_name);
+  StatusItem(const std::string item_name, const std::string message = "Missing", const DiagnosticLevel level = Level_Stale);
 
   ~StatusItem();
 
   /*!
-   *\brief Must have same name as originial status or it won't update.
+   *\brief Must have same name as original status or it won't update.
    * 
    * After update, hasChecked() is false until converted toStatusMsg.
    *\return True if update successful, false if error
@@ -150,32 +180,37 @@ public:
    *\param prefix : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(std::string prefix, bool stale);
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string prefix, const bool stale) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message
    */
-  DiagnosticLevel getLevel() { return level_; }
+  DiagnosticLevel getLevel() const { return level_; }
   
   /*!
    *\brief Message field of DiagnosticStatus 
    */
-  std::string getMessage() { return message_; }
+  std::string getMessage() const { return message_; }
   
   /*!
    *\brief Returns name of status
    */
-  std::string getName() { return name_; }
+  std::string getName() const { return name_; }
 
   /*!
    *\brief Returns HW id of item
    */
-  std::string getHwId() { return hw_id_; }
+  std::string getHwId() const { return hw_id_; }
+
+  /*!
+   *\brief Returns the time since last update for this item
+   */
+  ros::Time getLastUpdateTime() const { return update_time_; }
 
   /*!
    *\brief Returns true if item has key in values KeyValues
    */
-  bool hasKey(std::string key) 
+  bool hasKey(const std::string key) const
   {
     for (unsigned int i = 0; i < values_.size(); ++i)
     {
@@ -189,7 +224,7 @@ public:
    *\brief Returns value for given key, NULL if doens't exist
    *\return Value if key present, "" if not
    */
-  std::string getValue(std::string key)
+  std::string getValue(const std::string key) const
   {
     for (unsigned int i = 0; i < values_.size(); ++i)
     {
@@ -200,21 +235,8 @@ public:
     return std::string("");
   }
 
-  /*!
-   *\brief True if item has been converted to DiagnosticStatus
-   *
-   * After an item has been converted to a DiagnosticStatus  
-   */
-  bool hasChecked() { return checked_; }
-
-  /*!
-   *\brief Returns the time since last update for this item
-   */
-  ros::Duration getUpdateInterval() { return ros::Time::now() - update_time_; }
 
 private:
-  bool checked_;
-
   ros::Time update_time_;
 
   DiagnosticLevel level_;

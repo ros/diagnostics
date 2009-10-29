@@ -1,57 +1,57 @@
-sensors:
-  type: ComponentAnalyzer
-  prefix: Sensors
-  timeout: 5.0
-  base_hk:
-    name: Base Hokuyo
-    start_name: base_hokuyo_node
-    fields: [
-      'base_hokuyo_node: Connection Status',
-      'base_hokuyo_node: Frequency Status']
-  tilt_hk:
-    name: Tilt Hokuyo
-    start_name: tilt_hokuyo_node
-    fields: [
-      'tilt_hokuyo_node: Connection Status',
-      'tilt_hokuyo_node: Frequency Status']
-  imu:
-    name: IMU
-    start_name: imu_node
-    fields: [
-      'imu_node: Calibration Status',
-      'imu_node: Frequency Status',
-      'imu_node: IMU Status']
-computers:
-  type: GenericAnalyzer
-  prefix: Computers
-  contains: [
-    'HD Temp',
-    'CPU Usage',
-    'CPU Temperature',
-    'HD Usage',
-    'NFS']
-motors:
-  type: GenericAnalyzer
-  prefix: Motors
-  startswith: [
-    'EtherCAT',
-    'Power board']
-joints:
-  type: GenericAnalyzer
-  prefix: Joints
-  startswith: [
-    'Joint']
-power:
-  type: GenericAnalyzer
-  prefix: 'Power System'
-  timeout: 5.0
-  startswith: [
-    'Smart Battery']
-  name: [
-    'Expected Batteries']
-  expected: [
-    'IBPS 1',
-    'IBPS 2',
-    'IBPS 3',
-    'IBPS 0']
-
+analyzers:
+  sensors:
+    type: ComponentAnalyzer
+    prefix: Sensors
+    timeout: 5.0
+    base_hk:
+      name: Base Hokuyo
+      start_name: base_hokuyo_node
+      fields: [
+        'base_hokuyo_node: Connection Status',
+        'base_hokuyo_node: Frequency Status']
+    tilt_hk:
+      name: Tilt Hokuyo
+      start_name: tilt_hokuyo_node
+      fields: [
+        'tilt_hokuyo_node: Connection Status',
+        'tilt_hokuyo_node: Frequency Status']
+    imu:
+      name: IMU
+      start_name: imu_node
+      fields: [
+        'imu_node: Calibration Status',
+        'imu_node: Frequency Status',
+        'imu_node: IMU Status']
+  computers:
+    type: GenericAnalyzer
+    path: Computers
+    contains: [
+      'HD Temp',
+      'CPU Usage',
+      'CPU Temperature',
+      'HD Usage',
+      'NFS']
+  motors:
+    type: GenericAnalyzer
+    path: Motors
+    startswith: [
+      'EtherCAT',
+      'Power board']
+  joints:
+    type: GenericAnalyzer
+    path: Joints
+    startswith: [
+      'Joint']
+  power:
+    type: GenericAnalyzer
+    path: 'Power System'
+    timeout: 5.0
+    startswith: [
+      'Smart Battery']
+    name: [
+      'Expected Batteries']
+    expected: [
+      'IBPS 1',
+      'IBPS 2',
+      'IBPS 3',
+      'IBPS 0']
