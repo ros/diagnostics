@@ -122,7 +122,7 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& 
     for (unsigned int i = 0; i < analyzers_.size(); ++i)
     {
       if (analyzers_[i]->match(item->getName()))
-    	  analyzed = analyzers_[i]->analyze(item);
+    	  analyzed = analyzed || analyzers_[i]->analyze(item);
     }
     if (!analyzed)
       other_analyzer_->analyze(item);

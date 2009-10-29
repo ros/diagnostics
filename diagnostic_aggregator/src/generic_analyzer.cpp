@@ -41,16 +41,16 @@ using namespace std;
 
 PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, diagnostic_aggregator::Analyzer)
 
-GenericAnalyzer::GenericAnalyzer() : timeout_(5.0), num_items_expected_(-1) { }
+GenericAnalyzer::GenericAnalyzer() { }
 
 bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
 { 
-  if (!n.getParam("path", nice_name_))
+	string nice_name;
+  if (!n.getParam("path", nice_name))
   {
     ROS_ERROR("GenericAnalyzer was not given parameter \"path\".");
     return false;
   }
-  base_path_ = base_path + "/" + nice_name_;
 
   XmlRpc::XmlRpcValue findRemove;
   if (n.getParam("find_and_remove_prefix", findRemove))
@@ -170,7 +170,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
 		  expected_.push_back(expected_str);
 
 	      boost::shared_ptr<StatusItem> item(new StatusItem(expected_str));
-	      items_[expected_str] = item;
+	      addItem(expected_str, item);
 	  }
 	  else if (type == XmlRpc::XmlRpcValue::TypeArray)
 	  {
@@ -180,54 +180,67 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
 			  expected_.push_back(expected_str);
 
 		      boost::shared_ptr<StatusItem> item(new StatusItem(expected_str));
-		      items_[expected_str] = item;
+		      addItem(expected_str, item);
 		  }
 	  }
 	  else
 		  ROS_WARN("Parameter \"expected\" was not a list or string for Analyzer %s", nice_name_.c_str());
   }
 
-  /*
+  vector<string> regex_strs;
   XmlRpc::XmlRpcValue regexes;
   if (n.getParam("regex", regexes))
   {
-    for (int i = 0; i < regexes.size(); ++i)
-    {
-      string regex_str = regexes[i];
-      try
+	  XmlRpc::XmlRpcValue::Type type = regexes.getType();
+	  if (type == XmlRpc::XmlRpcValue::TypeString)
+	  {
+		  string regex_str = regexes;
+		  regex_strs.push_back(regex_str);
+	  }
+	  else if (type == XmlRpc::XmlRpcValue::TypeArray)
+	  {
+		  for (int i = 0; i < regexes.size(); ++i)
+		  {
+			  string regex_str = regexes[i];
+			  regex_strs.push_back(regex_str);
+		  }
+	  }
+	  else
+		  ROS_WARN("Parameter \"regex\" was not a list or string for Analyzer %s", nice_name_.c_str());
+  }
+
+  for (unsigned int i = 0; i < regex_strs.size(); ++i)
+  {
+	  try
       {
-		  boost::regex re(regex_str);
+		  boost::regex re(regex_strs[i]);
 		  regex_.push_back(re);
       }
       catch (boost::regex_error& e)
       {
-    	  ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. %s", regex_str.c_str(), e.what());
+    	  ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. %s", regex_strs[i].c_str(), e.what());
       }
-    }
   }
-*/
 
-  n.param("timeout", timeout_, 5.0);   // Timeout for stale
-  n.param("num_items", num_items_expected_, -1); // Number of items must match this
+  double timeout;
+  int num_items_expected;
+  n.param("timeout", timeout, 5.0);   // Timeout for stale
+  n.param("num_items", num_items_expected, -1); // Number of items must match this
 
-  return true;
+  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, timeout, num_items_expected);
 }
 
-GenericAnalyzer::~GenericAnalyzer()
-{
-  items_.clear();
-}
+GenericAnalyzer::~GenericAnalyzer() { }
+
 
 bool GenericAnalyzer::match(const string name) const
 {
-	/*
 	boost::cmatch what;
 	for (unsigned int i = 0; i < regex_.size(); ++i)
 	{
 		if (boost::regex_match(name.c_str(), what, regex_[i]))
 			return true;
 	}
-	*/
 
 	for (unsigned int i = 0; i < expected_.size(); ++i)
 	{
@@ -256,71 +269,15 @@ bool GenericAnalyzer::match(const string name) const
 	return false;
 }
 
-bool GenericAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
-{
-	items_[item->getName()] = item;
-	return true;
-}
-
 vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::report()
 {
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
-  header_status->name = base_path_;
-  header_status->level = 0;
-  header_status->message = "OK";
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
 
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
-  processed.push_back(header_status);
-
-  bool all_stale = true;
-  
-  map<string, boost::shared_ptr<StatusItem> >::iterator it;
-  for (it = items_.begin(); it != items_.end(); it++)
+  for (unsigned int j = 0; j < processed.size(); ++j)
   {
-    string name = it->first;
-    boost::shared_ptr<StatusItem> item = it->second;
-
-    int8_t level = item->getLevel();
-
-    header_status->level = max(header_status->level, level);
-
-    diagnostic_msgs::KeyValue kv;
-    kv.key = name;
-    kv.value = item->getMessage();
-    
-    header_status->values.push_back(kv);
-
-    bool stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
-
-    all_stale = all_stale && ((level == 3) || stale);
-
-    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(base_path_, stale);
-
-    for (unsigned int i = 0; i < chaff_.size(); ++i)
-    	stat->name = removeLeadingNameChaff(stat->name, chaff_[i]);
-    processed.push_back(stat);
-
-    if (stale)
-      header_status->level = 2;
+	  for (unsigned int i = 0; i < chaff_.size(); ++i)
+		  processed[j]->name = removeLeadingNameChaff(processed[j]->name, chaff_[i]);
   }
-  
-  // Header is not stale unless all subs are
-  if (all_stale)
-    header_status->level = 3;
-  else if (header_status->level == 3)
-    header_status->level = 2;
 
-  header_status->message = valToMsg(header_status->level);
-
-  if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
-  {
-	  int8_t lvl = 1;
-	  header_status->level = max(lvl, header_status->level);
-	  stringstream expec, item;
-	  expec << num_items_expected_;
-	  item << items_.size();
-	  header_status->message = "Expected " + expec.str() + ", found " + item.str();
-  }
-  
   return processed;
 }

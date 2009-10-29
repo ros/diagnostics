@@ -32,18 +32,24 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**!< \author Kevin Watts */
 
 #ifndef OTHER_ANALYZER_H
 #define OTHER_ANALYZER_H
 
-
-#include "diagnostic_aggregator/generic_analyzer.h"
-
+#include <string>
+#include <ros/ros.h>
+#include "diagnostic_aggregator/generic_analyzer_base.h"
 
 namespace diagnostic_aggregator {
 
-class OtherAnalyzer : public GenericAnalyzer
+/*
+ *\brief OtherAnalyzer analyzes any messages that haven't been analyzed by other Analyzers
+ *
+ * OtherAnalyzer is not loaded as a plugin. It is created by the Aggregator, and called seperately.
+ *
+ */
+class OtherAnalyzer : public GenericAnalyzerBase
 {
 public:
   /*!
@@ -53,22 +59,30 @@ public:
 
   ~OtherAnalyzer() { }
 
-  bool init(std::string base_path, const ros::NodeHandle &n)
+  bool init(std::string path)
+  {
+	  return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0);
+  }
+
+  /*
+   *\brief OtherAnalyzer cannot be initialized with a NodeHandle
+   */
+  bool init(const std::string base_path, const ros::NodeHandle &n)
   {
 	  ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
 	  return false;
   }
 
-  bool init(std::string base_path)
-  {
-	  nice_name_ = "Other";
-	  base_path_ = base_path + "/" + nice_name_;
-	  return true;
-  }
+  /*
+   *\brief Returns true for all items
+   */
+  bool match(std::string name) const { return true; }
+
+
 
 };
 
 }
 
 
-#endif
+#endif // OTHER_ANALYZER_H

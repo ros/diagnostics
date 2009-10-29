@@ -92,7 +92,7 @@ inline DiagnosticLevel valToLevel(const int val)
   ROS_ERROR("Attempting to convert %d into DiagnosticLevel. Values are: {0: OK, 1: Warning, 2: Error, 3: Stale}", val);
   return Level_Error;
 }
- 
+
 /*!
  *\brief Converts int to message {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
  */
@@ -107,7 +107,7 @@ inline std::string valToMsg(const int val)
   if (val == 3)
     return "Stale";
   
-  ROS_ERROR("Attempting to convert %d into string. Values are: 0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"", val);
+  ROS_ERROR("Attempting to convert %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}", val);
   return "Error";
 }
 
@@ -193,19 +193,19 @@ public:
   std::string getMessage() const { return message_; }
   
   /*!
-   *\brief Returns name of status
+   *\brief Returns name of DiagnosticStatus message
    */
   std::string getName() const { return name_; }
 
   /*!
-   *\brief Returns HW id of item
+   *\brief Returns HW id of DiagnosticStatus message
    */
   std::string getHwId() const { return hw_id_; }
 
   /*!
    *\brief Returns the time since last update for this item
    */
-  ros::Time getLastUpdateTime() const { return update_time_; }
+  const ros::Time getLastUpdateTime() const { return update_time_; }
 
   /*!
    *\brief Returns true if item has key in values KeyValues
@@ -221,7 +221,8 @@ public:
   }
 
   /*!
-   *\brief Returns value for given key, NULL if doens't exist
+   *\brief Returns value for given key, "" if doens't exist
+   *
    *\return Value if key present, "" if not
    */
   std::string getValue(const std::string key) const
@@ -234,7 +235,6 @@ public:
 
     return std::string("");
   }
-
 
 private:
   ros::Time update_time_;

@@ -64,13 +64,13 @@ namespace diagnostic_aggregator {
  * in a tree structure. For example:
 \verbatim
 Input (status names):
-  tilt_hokuyo_node Frequency
-  tilt_hokuyo_node Connection
+  tilt_hokuyo_node: Frequency
+  tilt_hokuyo_node: Connection
 Output:
   /Robot
   /Robot/Sensors
-  /Robot/Sensors/tilt_hokuyo_node Frequency
-  /Robot/Sensors/tilt_hokuyo_node Connection
+  /Robot/Sensors/Tilt Hokuyo/Frequency
+  /Robot/Sensors/Tilt Hokuyo/Connection
 \endverbatim
  * The analyzer should always output a DiagnosticStatus with the name of the 
  * prefix. Any other data output is up to the analyzer developer.
@@ -80,9 +80,8 @@ Output:
 \verbatim
 sensors:
   type: GenericAnalyzer
-  prefix: Sensors
-  contains: [
-    'hokuyo']
+  path: Sensors/Tilt Hokuyo
+  find_and_remove_prefix: tilt_hokuyo_node
 motors:
   type: PR2MotorsAnalyzer
 joints:
@@ -118,7 +117,7 @@ private:
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
 
   /*!
-   *\brief Callback for "/diagnostics"
+   *\brief Callback for incoming "/diagnostics"
    */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
@@ -126,7 +125,6 @@ private:
    *\brief Loads Analyzer plugins
    */
   pluginlib::ClassLoader<Analyzer> analyzer_loader_;
-
   
   std::vector<Analyzer*> analyzers_;
 
@@ -135,7 +133,6 @@ private:
   std::string base_path_; /**< Prepended to all status names of aggregator. */
 
   std::vector<boost::shared_ptr<StatusItem> > aux_items_;
-
 };
 
 }

@@ -23,14 +23,10 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_boost_directories()
 rosbuild_add_library(diagnostic_aggregator
-  src/generic_analyzer.cpp
-  #src/other_analyzer.cpp
-#  src/component.cpp
-#  src/component_analyzer.cpp
   src/status_item.cpp
+  src/generic_analyzer.cpp
   src/aggregator.cpp)
-rosbuild_link_boost(diagnostic_aggregator system)
-
+rosbuild_link_boost(diagnostic_aggregator system regex)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rospack_add_boost_directories()

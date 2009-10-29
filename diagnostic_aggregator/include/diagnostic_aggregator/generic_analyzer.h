@@ -49,6 +49,7 @@
 #include "diagnostic_msgs/KeyValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
+#include "diagnostic_aggregator/generic_analyzer_base.h"
 #include "XmlRpcValue.h"
 
 namespace diagnostic_aggregator {
@@ -58,24 +59,23 @@ namespace diagnostic_aggregator {
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended with
- * '/BasePath/MyPath', where FirstPrefix is common to all analyzers
- * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
+ * 'BasePath/MyPath', where BasePath is common to all analyzers
+ * (ex: 'PRE') and MyPath is from this analyzer (ex: 'Power System').
  */
-class GenericAnalyzer : public Analyzer
+class GenericAnalyzer : public GenericAnalyzerBase
 {
 public:
   /*!
    *\brief Default constructor loaded by pluginlib
    */
   GenericAnalyzer();
-
   
   virtual ~GenericAnalyzer();
 
   /*!
    *\brief Initializes GenericAnalyzer from namespace
    *
-   * NodeHandle is given private namespace to initialize (ex: ~Sensors)
+   * NodeHandle is given private namespace to initialize GenericAnalyzer.
    * Parameters of NodeHandle must follow this form. See DiagnosticAggregator
    * for instructions on passing these parameters to the aggregator.
    *\verbatim
@@ -99,34 +99,18 @@ public:
   bool init(const std::string base_path, const ros::NodeHandle &n);
 
   /*!
-   *\brief Analyzes DiagnosticStatus messages
+   *\brief Reports current state, returns vector of formatted status messages
    * 
    *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item);
-
+  /*!
+   *\brief Returns true if it wants to analyze this item
+   */
   virtual bool match(const std::string name) const;
 
-  /*!
-   *\brief Returns full prefix (ex: "/Robot/Power System")
-   */
-  std::string getPath() const { return base_path_; }
-
-  /*!
-   *\brief Returns nice name (ex: "Power System")
-   */
-  std::string getName() const { return nice_name_; }
-
-protected:
-  std::string nice_name_;
-  std::string base_path_;
-
 private:
-  double timeout_;
-  int num_items_expected_;
-
   std::vector<std::string> chaff_; /**< Removed from the start of node names */
   std::vector<std::string> expected_;
   std::vector<std::string> startswith_;
@@ -134,10 +118,6 @@ private:
   std::vector<std::string> name_;
   std::vector<boost::regex> regex_;
 
-  /*!
-   *\brief Stores items by name
-   */
-  std::map<std::string, boost::shared_ptr<StatusItem> > items_;
 };
 
 }
