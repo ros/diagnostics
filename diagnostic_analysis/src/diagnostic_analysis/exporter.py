@@ -35,7 +35,7 @@
 ##\author Kevin Watts
 ##\brief LogExporter class does logfile conversion
 
-PKG = 'diagnostics_analysis'
+PKG = 'diagnostic_analysis'
 
 import roslib; roslib.load_manifest(PKG)
 import rosrecord

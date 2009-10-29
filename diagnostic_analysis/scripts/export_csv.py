@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# 
+#
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -32,53 +32,47 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# Author: Kevin Watts
+##\author Eric Berger, Kevin Watts
 
+##\brief Converts diagnostics log files into CSV's for analysis
 
-# Make any csv into sparse csv
+PKG = 'diagnostic_analysis'
+import roslib; roslib.load_manifest(PKG)
+import rosrecord
+import diagnostic_msgs.msg
+import time, sys, os
+import operator, tempfile, subprocess
 
-
-PKG = 'diagnostics_analysis'
-import roslib
-roslib.load_manifest(PKG)
-
-import csv, os, sys
 from optparse import OptionParser
 
-from diagnostics_analysis.sparse import make_sparse_skip, make_sparse_length
+from diagnostic_analysis.exporter import LogExporter
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # Allow user to set output directory
     parser = OptionParser()
-    parser.add_option("-l", "--length", dest="length",
-                      help="Set length of output CSV", metavar="LEN",
-                      default=None, action="store")
-    parser.add_option("-s", "--skip", dest="skip",
-                      help="Skip every nth row. If length set, will ignore this value.", 
-                      metavar="SKIP", default=10, action="store")
-    parser.add_option("-m", "--max", dest="max", 
-                      help="Make largest possible file for Open Office (65k lines). If selected, other options ignored.",
-                      metavar="MAX", default=False, action="store_true")
+    parser.add_option("-d", "--directory", dest="directory",
+                      help="Write output to DIR/output. Default: %s" % PKG, metavar="DIR",
+                      default=roslib.packages.get_pkg_dir(PKG), action="store")
     options, args = parser.parse_args()
 
-    options, args = parser.parse_args()
+    exporters = []
 
-    # Get CSV file
-    if len(args) < 1:
-        print 'No CSV file given.'
-        sys.exit(0)
+    print 'Output directory: %s/output' % options.directory
 
-    csv_file = args[0]
+    try:
+        for i, f in enumerate(args):
+            filepath = 'output/%s_csv' % os.path.basename(f)[0:os.path.basename(f).find('.')]
+            
+            output_dir = os.path.join(options.directory,  filepath)
+            print "Processing file %s. File %d of %d." % (os.path.basename(f), i + 1, len(args))
+            
+            exp = LogExporter(output_dir, f)
+            exp.process_log()
+            exp.finish_logfile()
+            exporters.append(exp)
 
-    if not csv_file.endswith('.csv'):
-        print 'File %s is not a CSV file. Aborting.' % csv_file
-        sys.exit(0)    
-    
-    if options.max:
-        output_file = make_sparse_length(csv_file, 65000)
-    elif options.length is None:
-        output_file = make_sparse_skip(csv_file, options.skip)
-    else:
-        output_file = make_sparse_length(csv_file, int(options.length))
-
-    print 'Created sparse CSV %s' % output_file
+        print 'Finished processing files.'
+    except:
+        import traceback
+        print "Caught exceptiong processing log file"
+        traceback.print_exc()

@@ -35,7 +35,7 @@
 ##\author Kevin Watts
 ##\brief Make CSV files smaller for use in spreadsheet software
 
-PKG = 'diagnostics_analysis'
+PKG = 'diagnostic_analysis'
 import roslib
 roslib.load_manifest(PKG)
 

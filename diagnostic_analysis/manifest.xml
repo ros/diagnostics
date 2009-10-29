@@ -1,6 +1,6 @@
 <package>
   <description brief="Process diagnostics log files for data">
-    The diagnostics_analysis package can convert a log of diagnostics data
+    The diagnostic_analysis package can convert a log of diagnostics data
     into a series of CSV files. Robot logs are recorded with rosrecord, and
     can be processed offline using the scripts in this package.
   </description>
