@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**< \author Kevin Watts */
+/*!
+ *\author Kevin Watts 
+ */
 
 #ifndef DIAGNOSTIC_STATUS_ITEM_H
 #define DIAGNOSTIC_STATUS_ITEM_H
@@ -144,12 +146,9 @@ inline std::string removeLeadingNameChaff(const std::string input_name, const st
 /*!
  *\brief Helper class to hold, store DiagnosticStatus messages
  *
- * The StatusItem class is used by the Aggregator to store
- * incoming DiagnosticStatus messages. An item stores whether it has been
- * examined by an analyzer. After it has been converted to a DiagnosticStatus
- * message with the "toStatusMsg()" functions, it has been "checked". This
- * is important for processing the "remainder" of DiagnosticStatus messages,
- * those that haven't been analyzed by other analyzers.
+ * The StatusItem class is used by the Aggregator to store incoming 
+ * DiagnosticStatus messages. Helper messages make it easy to calculate update
+ * intervals, and extract KeyValue pairs.
  */
 class StatusItem
 {
@@ -160,7 +159,7 @@ public:
   StatusItem(const diagnostic_msgs::DiagnosticStatus *status);
 
    /*!
-   *\brief Constructed from string of item name (Level = 3)
+   *\brief Constructed from string of item name
    */
   StatusItem(const std::string item_name, const std::string message = "Missing", const DiagnosticLevel level = Level_Stale);
 
@@ -198,7 +197,7 @@ public:
   std::string getName() const { return name_; }
 
   /*!
-   *\brief Returns HW id of DiagnosticStatus message
+   *\brief Returns hardware ID field of DiagnosticStatus message
    */
   std::string getHwId() const { return hw_id_; }
 

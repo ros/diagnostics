@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/*!
+ *\author Kevin Watts
+ */
 
 #ifndef DIAGNOSTIC_AGGREGATOR_H
 #define DIAGNOSTIC_AGGREGATOR_H
@@ -78,22 +80,23 @@ Output:
  * Analyzer's are loaded by specifying the private parameters of the
  * aggregator. 
 \verbatim
-sensors:
-  type: GenericAnalyzer
-  path: Sensors/Tilt Hokuyo
-  find_and_remove_prefix: tilt_hokuyo_node
-motors:
-  type: PR2MotorsAnalyzer
-joints:
-  type: PR2JointsAnalyzer
+base_path: My Robot
+pub_rate: 1.0
+analyzers:
+  sensors:
+    type: GenericAnalyzer
+    path: Sensors/Tilt Hokuyo
+    find_and_remove_prefix: tilt_hokuyo_node
+  motors:
+    type: PR2MotorsAnalyzer
+  joints:
+    type: PR2JointsAnalyzer
 \endverbatim
  * Each analyzer is created according to the "type" parameter in its namespace.
  * Any other parametes in the namespace can by used to specify the analyzer. If
  * any analyzer is not properly specified, or returns false on initialization,
- * the aggregator program will exit.
+ * the aggregator will report the error and publish it in the aggregated output.
  */
-
-
 class Aggregator
 { 
 public:
@@ -105,12 +108,18 @@ public:
   ~Aggregator();
 
   /*!
-   *\brief Processes, publishes data. Should be called at 1Hz.
+   *\brief Processes, publishes data. Should be called at pub_rate.
    */
   void publishData();
 
+  /*!
+   *\brief True if the NodeHandle reports OK
+   */
   bool ok() const { return n_.ok(); }
 
+  /*!
+   *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
+   */
   double getPubRate() const { return pub_rate_; }
 private:
   ros::NodeHandle n_;

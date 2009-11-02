@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**
+ * \author Kevin Watts 
+ */
 
 #ifndef DIAGNOSTIC_ANALYZER_H
 #define DIAGNOSTIC_ANALYZER_H
@@ -49,14 +51,35 @@ namespace diagnostic_aggregator {
 /*!
  *\brief Base class of all Analyzers. Loaded by aggregator.
  *
- * Base class, loaded by pluginlib. All analyzers must implement these
- * functions: init, analyze, getPrefix and getName.
+ * Base class, for all Analyzers loaded by pluginlib. All analyzers must implement 
+ * these functions: init, match, analyze, report, getPath and getName.
  * 
- * Analyzers must output their data in a tree structure. The tree branches
- * are marked by '/' in the DiagnosticStatus name of the output. 
+ * Analyzers must output their data in a vector of DiagnosticStatus messages
+ * when the report() function is called. Each DiagnosticStatus message name should
+ * be prepended by the path of the Analyzer. The path is "BASE_PATH/MY_PATH" for 
+ * each analyzer. For example:
+ * \verbatim
+EtherCAT Device (head_pan_motor)
+EtherCAT Device (head_tilt_motor)
+---
+PATH/EtherCAT Device (head_pan_motor)
+PATH/EtherCAT Device (head_tilt_motor)
+PATH/EtherCAT Devices
+ * \endverbatim
+ * Analyzers should also output another DiagnosticStatus message for the "header", with the
+ * name BASE_PATH/MY_PATH, as in the example above ("PATH/EtherCAT Devices").
  * 
- * Each analyzer should output a "base" DiagnosticStatus, with the name of
- * "first_prefix/second_prefix" (ex: "/Robot/Motors")
+ * For each new DiagnosticStatus name recieved, the analyzer will be asked whether it wants
+ * view the message using "match(string name)". If the analyzer wants to view the message, 
+ * all future messages with that name will be given to the analyzer, using "analyze(item)".
+ *
+ * If an analyzer is given a message to analyze, it should return true only if it will report
+ * that status value. For example, an Analyzer may look at all the messages for robots motors
+ * and power, but will only report messages on motors. This allows Analyzers to use data from
+ * other sections of the robot in reporting data. 
+ * 
+ * Since the match() function is called only when new DiagnosticStatus names arrive, the 
+ * analyzers are not allowed to change which messages they want to look at. 
  *
  */
 class Analyzer
@@ -82,14 +105,18 @@ public:
 
   /*!
    *\brief Returns true if analyzer will handle this item
+   * 
+   * Match is called once for each new status name, so this return value cannot change
+   * with time.
    */
   virtual bool match(const std::string name) const = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
    *
-   * This is called with every new item that an analyzer reports that it wants
-   * to look at.
+   * This is called with every new item that an analyzer matches.
+   * Analyzers should only return "true" if they will report the value of this 
+   * item. If it is only looking at an item, it should return false.
    */
   virtual bool analyze(const boost::shared_ptr<StatusItem> item) = 0;
 
@@ -97,12 +124,11 @@ public:
    *\brief Analysis function, output processed data.
    *
    * report is called at 1Hz intervals. Analyzers should return a vector 
-   * of fully processed DiagnosticStatus messages.
+   * of fully processed DiagnosticStatus messages. 
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report() = 0;
-
 
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')

@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**!< \author Kevin Watts */
+/*!
+ * \author Kevin Watts 
+ */
 
 #ifndef GENERIC_ANALYZER_H
 #define GENERIC_ANALYZER_H
@@ -58,7 +60,7 @@ namespace diagnostic_aggregator {
  *\brief Returns list of strings from a parameter
  *
  * Given an XmlRpcValue, gives vector of strings of that parameter
- *\return False if parameter is not string or array of strings
+ *\return False if XmlRpcValue is not string or array of strings
  */
 bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
 {
@@ -132,7 +134,7 @@ public:
   /*!
    *\brief Reports current state, returns vector of formatted status messages
    * 
-   *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
+   *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
@@ -142,7 +144,7 @@ public:
   virtual bool match(const std::string name) const;
 
 private:
-  std::vector<std::string> chaff_; /**< Removed from the start of node names */
+  std::vector<std::string> chaff_; /**< Removed from the start of node names. */
   std::vector<std::string> expected_;
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
