@@ -78,18 +78,12 @@ public:
    *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(const std::string base_path, const ros::NodeHandle &n)
-  {
-    ROS_FATAL("Analyzer did not implement the init function");
-    ROS_BREAK();
-
-    return false;
-  }
+  virtual bool init(const std::string base_path, const ros::NodeHandle &n) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
    */
-  virtual bool match(const std::string name) const { return true; }
+  virtual bool match(const std::string name) const = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
@@ -97,7 +91,7 @@ public:
    * This is called with every new item that an analyzer reports that it wants
    * to look at.
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item) { ROS_INFO("Returning false"); return false; }
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item) = 0;
 
   /*!
    *\brief Analysis function, output processed data.
@@ -107,23 +101,18 @@ public:
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
-  {
-    ROS_ERROR("Analyzer did not implement the report function");
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report() = 0;
 
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > my_vec;
-    return my_vec;
-  }
 
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')
    */
-  virtual std::string getPath() const { return ""; }
+  virtual std::string getPath() const = 0;
   
   /*!
    *\brief Returns nice name for display. (ex: 'Sensors')
    */
-  virtual std::string getName() const { return ""; }
+  virtual std::string getName() const = 0;
 
 };
 

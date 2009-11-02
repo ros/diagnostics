@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   
   diagnostic_aggregator::Aggregator agg;
   
-  ros::Rate pub_rate(1.0);
+  ros::Rate pub_rate(agg.getPubRate());
   while (agg.ok())
   {
     ros::spinOnce();

@@ -69,7 +69,7 @@ if __name__ == '__main__':
         DiagnosticStatus(0, 'contain2a', 'OK', '', []),
         DiagnosticStatus(0, 'contain2b', 'OK', '', []),
 
-        # GenericAnalyzer for Other
+        # OtherAnalyzer for Other
         DiagnosticStatus(2, 'other1', 'Error', '', []),
         DiagnosticStatus(0, 'other2', 'OK', '', []),
         DiagnosticStatus(0, 'other3', 'OK', '', [])]

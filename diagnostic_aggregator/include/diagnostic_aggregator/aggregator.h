@@ -111,10 +111,12 @@ public:
 
   bool ok() const { return n_.ok(); }
 
+  double getPubRate() const { return pub_rate_; }
 private:
   ros::NodeHandle n_;
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
+  double pub_rate_;
 
   /*!
    *\brief Callback for incoming "/diagnostics"

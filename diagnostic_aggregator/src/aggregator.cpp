@@ -40,13 +40,16 @@ using namespace std;
 using namespace diagnostic_aggregator;
 
 Aggregator::Aggregator() :
+  pub_rate_(1.0),
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 {
   ros::NodeHandle nh = ros::NodeHandle("~");
   nh.param(string("base_path"), base_path_, string(""));
   if (base_path_.size() > 0 && base_path_.find("/") != 0)
     base_path_ = "/" + base_path_;
-  
+
+  nh.param("pub_rate", pub_rate_, pub_rate_);
+    
   XmlRpc::XmlRpcValue private_params;
   nh.getParam("analyzers", private_params);
   ROS_DEBUG("Private params: %s.", private_params.toXml().c_str());
@@ -75,15 +78,15 @@ Aggregator::Aggregator() :
     Analyzer* analyzer = NULL;
     try
     {
-    	analyzer = analyzer_loader_.createClassInstance(an_type);
+      analyzer = analyzer_loader_.createClassInstance(an_type);
     }
-	catch (pluginlib::LibraryLoadException& e)
-	{
-		ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s", ns.c_str(), an_type.c_str(), e.what());
-		boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib exception loading analyzer"));
-		aux_items_.push_back(item);
-		continue;
-	}
+    catch (pluginlib::LibraryLoadException& e)
+    {
+      ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s", ns.c_str(), an_type.c_str(), e.what());
+      boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib exception loading analyzer"));
+      aux_items_.push_back(item);
+      continue;
+    }
 
     if (analyzer == NULL)
     {
@@ -180,12 +183,12 @@ void Aggregator::publishData()
   header_status.message = valToMsg(header_status.level);
 
   if (base_path_ != "") // No header if we don't have a base path
-	  array.status.push_back(header_status);
+    array.status.push_back(header_status);
 
   for (unsigned int i = 0; i < aux_items_.size(); ++i)
   {
-	  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>  stat = aux_items_[i]->toStatusMsg(base_path_, true);
-	  array.status.push_back(*stat);
+    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>  stat = aux_items_[i]->toStatusMsg(base_path_, true);
+    array.status.push_back(*stat);
   }
 
   agg_pub_.publish(array);

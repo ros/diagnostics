@@ -41,27 +41,27 @@ using namespace std;
 
 StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
-	level_ = valToLevel(status->level);
-	name_ = status->name;
-	message_ = status->message;
-	hw_id_ = status->hardware_id;
-	values_ = status->values;
-
-	output_name_ = getOutputName(name_);
-
-	update_time_ = ros::Time::now();
+  level_ = valToLevel(status->level);
+  name_ = status->name;
+  message_ = status->message;
+  hw_id_ = status->hardware_id;
+  values_ = status->values;
+  
+  output_name_ = getOutputName(name_);
+  
+  update_time_ = ros::Time::now();
 }
 
 StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
 {
-	name_ = item_name;
-	message_ = message;
-	level_ = level;
-	hw_id_ = "";
- 
-	output_name_ = getOutputName(name_);
+  name_ = item_name;
+  message_ = message;
+  level_ = level;
+  hw_id_ = "";
+  
+  output_name_ = getOutputName(name_);
 
-	update_time_ = ros::Time::now();
+  update_time_ = ros::Time::now();
 }
 
 StatusItem::~StatusItem() {}
@@ -76,7 +76,7 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 
   double update_interval = (ros::Time::now() - update_time_).toSec();
   if (update_interval < 0)
-	  ROS_WARN("StatusItem is being updated with stale status item. Negative update time: %f", update_interval);
+    ROS_WARN("StatusItem is being updated with older data. Negative update time: %f", update_interval);
 
   level_ = valToLevel(status->level);
   message_ = status->message;

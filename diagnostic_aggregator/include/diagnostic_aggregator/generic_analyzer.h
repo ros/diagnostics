@@ -55,6 +55,37 @@
 namespace diagnostic_aggregator {
 
 /*!
+ *\brief Returns list of strings from a parameter
+ *
+ * Given an XmlRpcValue, gives vector of strings of that parameter
+ *\return False if parameter is not string or array of strings
+ */
+bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
+{
+  //std::vector<std::string> output;
+  XmlRpc::XmlRpcValue::Type type = param.getType();
+  if (type == XmlRpc::XmlRpcValue::TypeString)
+  {
+    std::string find = param;
+    output.push_back(find);
+    return true;
+  }
+  else if (type == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    for (int i = 0; i < param.size(); ++i)
+    {
+      std::string find = param[i];
+      output.push_back(find);
+    }
+    return true;
+  }
+  else
+    ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  
+  return true;
+}
+
+/*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
@@ -106,7 +137,7 @@ public:
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
   /*!
-   *\brief Returns true if it wants to analyze this item
+   *\brief Returns true if item matches any of the regex, expected, startswith or contains criteria
    */
   virtual bool match(const std::string name) const;
 
