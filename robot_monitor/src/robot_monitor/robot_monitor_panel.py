@@ -271,7 +271,7 @@ class RobotMonitorPanel(wx.Panel):
                 new_text = '%s: %s' % (get_nice_name(item.status.name), item.status.message)
             else:
                 child_count = self._tree_ctrl.GetChildrenCount(tree_id, False)
-                new_text = '%s (%d): %s' % (old_text, child_count, item.status.message)
+                new_text = '%s (%d): %s' % (get_nice_name(item.status.name), child_count, item.status.message)
             self._tree_ctrl.SetItemText(tree_id, new_text)
 
         if not self._tree_ctrl.ItemHasChildren(tree_id):

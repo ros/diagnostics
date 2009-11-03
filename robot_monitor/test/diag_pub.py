@@ -32,51 +32,39 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-##\brief Uses robot monitor panel to display aggregated diagnostics
-
 ##\author Kevin Watts
+
+##\brief Publishes diagnostic messages for robot monitor regression test
 
 PKG = 'robot_monitor'
 
-import roslib
-roslib.load_manifest('robot_monitor')
+import roslib; roslib.load_manifest(PKG)
 
 import rospy
+from time import sleep
 
-import wx
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
-from robot_monitor.robot_monitor_panel import RobotMonitorPanel
-
-
-
-##\brief Main frame of robot monitor
-class RobotMonitorFrame(wx.Frame):
-    def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, wx.ID_ANY, title)
-
-        self.panel = RobotMonitorPanel(self)
-        
-    def on_exit(self, e):
-        self.Close(True)
-
-##\brief wxApp of robot monitor
-class RobotMonitorApp(wx.App):
-    def OnInit(self):
-        rospy.init_node('robot_monitor', anonymous=True)
-        
-        self._frame = RobotMonitorFrame(None, 'Robot Monitor')
-        self._frame.SetSize(wx.Size(500, 700))
-        self._frame.Layout()
-        #self._frame.Centre()
-        self._frame.Show(True)
-        return True
-        
-        
 if __name__ == '__main__':
-    try:
-        app = RobotMonitorApp()
-        app.MainLoop()
-    except Exception, e:
-        import traceback
-        traceback.print_exc()
+    rospy.init_node('diag_pub')
+    pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
+    
+    array = DiagnosticArray()
+    array.status = [
+        DiagnosticStatus(1, '/BASE', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group1/item1', 'Warning', '', []),
+        DiagnosticStatus(0, '/BASE/group1/item2', 'OK', '', []),
 
+        DiagnosticStatus(0, '/BASE/group2', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group2/item1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group2/item2', 'Warning', '', []),
+
+        DiagnosticStatus(2, '/BASE2', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE2/group3/item1', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', [])]
+
+    while not rospy.is_shutdown():
+        pub.publish(array)
+        sleep(1)
