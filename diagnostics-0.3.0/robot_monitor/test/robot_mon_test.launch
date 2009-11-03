@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="robot_monitor" type="diag_agg_pub.py" name="diag_pub" />
+  <test pkg="robot_monitor" type="test_robot_mon.py" name="test_romon"
+        test-name="test_robot_monitor" />
+</launch>

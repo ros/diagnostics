@@ -1,0 +1,16 @@
+<package>
+  <description brief="A program to moniter diagnostics on a robot">
+    The runtime monitor displays raw diagnostics data in an easy to read GUI.
+  </description>
+  <author>Tully Foote</author>
+  <license>BSD</license>
+  <review status="proposal cleared" notes=""/>
+  <url>http://www.ros.org/wiki/runtime_monitor</url>
+  <export>
+    <cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
+  </export>
+  <depend package="rospy"/>
+  <depend package="diagnostic_msgs"/>
+  <rosdep name="wxwidgets"/>
+  <rosdep name="wxpython"/>
+</package>

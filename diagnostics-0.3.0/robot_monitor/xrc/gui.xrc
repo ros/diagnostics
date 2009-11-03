@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxPanel" name="monitor_panel">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,700</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxTreeCtrl" name="tree_ctrl">
+					<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxPanel" name="status_viewer">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>500,700</size>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxHtmlWindow" name="html_ctrl">
+					<style>wxHW_SCROLLBAR_AUTO</style>
+				</object>
+			</object>
+		</object>
+	</object>
+</resource>

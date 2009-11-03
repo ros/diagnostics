@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="runtime_monitor" type="diag_pub.py" name="diag_pub" />
+  <test pkg="runtime_monitor" type="test_monitor.py" name="test_runtime"
+        test-name="test_runtime_monitor" />
+</launch>

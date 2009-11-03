@@ -1,0 +1,14 @@
+<package>
+  <description brief="Allows users to easily update diagnostics on a node">
+    diagnostic_updater contains tools for easily updating diagnostics.
+  </description>
+  <author>Jeremy Leibs, Blaise Gassend</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes="proposal (Jeremy)"/>
+  <url>http://www.ros.org/wiki/diagnostic_updater</url>
+  <depend package="roscpp" />
+  <depend package="diagnostic_msgs" />
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+  </export>
+</package>
