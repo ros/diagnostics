@@ -1,6 +1,6 @@
 analyzers:
   sensors:
-    type: ComponentAnalyzer
+    type: GenericAnalyzer
     prefix: Sensors
     timeout: 5.0
     base_hk:
