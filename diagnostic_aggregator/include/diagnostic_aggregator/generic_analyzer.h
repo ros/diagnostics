@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/*!
+ * \author Kevin Watts 
+ */
 
 #ifndef GENERIC_ANALYZER_H
 #define GENERIC_ANALYZER_H
@@ -41,40 +43,74 @@
 #include <ros/ros.h>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
+#include <pluginlib/class_list_macros.h>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_aggregator/diagnostic_analyzer.h"
-#include "diagnostic_aggregator/diagnostic_item.h"
+#include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/status_item.h"
+#include "diagnostic_aggregator/generic_analyzer_base.h"
 #include "XmlRpcValue.h"
 
-namespace diagnostic_analyzer {
+namespace diagnostic_aggregator {
 
 /*!
- *\brief GenericAnalyzer is most basic DiagnosticAnalyzer
+ *\brief Returns list of strings from a parameter
+ *
+ * Given an XmlRpcValue, gives vector of strings of that parameter
+ *\return False if XmlRpcValue is not string or array of strings
+ */
+bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
+{
+  //std::vector<std::string> output;
+  XmlRpc::XmlRpcValue::Type type = param.getType();
+  if (type == XmlRpc::XmlRpcValue::TypeString)
+  {
+    std::string find = param;
+    output.push_back(find);
+    return true;
+  }
+  else if (type == XmlRpc::XmlRpcValue::TypeArray)
+  {
+    for (int i = 0; i < param.size(); ++i)
+    {
+      std::string find = param[i];
+      output.push_back(find);
+    }
+    return true;
+  }
+  else
+    ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  
+  return true;
+}
+
+/*!
+ *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
  * GenericAnalyzer analyzes diagnostics from list of topics and returns
  * processed diagnostics data. All analyzed status messages are prepended with
- * '/FirstPrefix/SecondPrefix', where FirstPrefix is common to all analyzers
- * (ex: 'PRE') and SecondPrefix is from this analyzer (ex: 'Power System').
+ * 'BasePath/MyPath', where BasePath is common to all analyzers
+ * (ex: 'PRE') and MyPath is from this analyzer (ex: 'Power System').
  */
-class GenericAnalyzer : public DiagnosticAnalyzer
+class GenericAnalyzer : public GenericAnalyzerBase
 {
-
 public:
   /*!
    *\brief Default constructor loaded by pluginlib
    */
   GenericAnalyzer();
-
   
-  ~GenericAnalyzer();
+  virtual ~GenericAnalyzer();
 
   /*!
    *\brief Initializes GenericAnalyzer from namespace
    *
-   * NodeHandle is given private namespace to initialize (ex: ~Sensors)
+   * NodeHandle is given private namespace to initialize GenericAnalyzer.
    * Parameters of NodeHandle must follow this form. See DiagnosticAggregator
-   * for instructions on passing these to the aggregator.
+   * for instructions on passing these parameters to the aggregator.
    *\verbatim
    * PowerSystem:
    *   type: GenericAnalyzer
@@ -90,71 +126,32 @@ public:
    *     'Battery']
    *\endverbatim
    *   
-   *\param first_prefix : Prefix for all analyzers (ex: 'Robot')
+   *\param base_path : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
    */
-  bool init(std::string first_prefix, const ros::NodeHandle &n);
+  bool init(const std::string base_path, const ros::NodeHandle &n);
 
   /*!
-   *\brief Initializes analyzer to deal with remaining data
-   *
-   * After all analyzers have been created this analyzer is created to 
-   * process all remaining messages. It will prepend "first_prefix/Other"
-   * to all messages that haven't been handled by other analyzers.
-   * The "Other" analyzer is created automatically by the aggregator.
-   */
-  bool initOther(std::string first_prefix);
-
-  /*!
-   *\brief Analyzes DiagnosticStatus messages
+   *\brief Reports current state, returns vector of formatted status messages
    * 
+   *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> analyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
   /*!
-   *\brief Returns full prefix (ex: "/Robot/Power System")
+   *\brief Returns true if item matches any of the regex, expected, startswith or contains criteria
    */
-  std::string getPrefix() { return full_prefix_; } 
+  virtual bool match(const std::string name) const;
 
-  /*!
-   *\brief Returns nice name (ex: "Power System")
-   */
-  std::string getName()  { return nice_name_; }
- 
 private:
-  bool other_; /**< True if analyzer is supposed to analyze remaining messages */
-
-  std::string nice_name_;
-  std::string full_prefix_;
-
+  std::vector<std::string> chaff_; /**< Removed from the start of node names. */
   std::vector<std::string> expected_;
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
-
-  /*!
-   *\brief Stores items by name
-   */
-  std::map<std::string, diagnostic_item::DiagnosticItem*> items_;
-  
-  /*!
-   *\brief Updates items_ with messages to analyze. Deletes to_analyze param.
-   */
-  void updateItems(std::vector<diagnostic_msgs::DiagnosticStatus*> to_analyze);
-    
-  /*!
-   *\brief Returns items to be analyzed (items that haven't been already)
-   */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyzeOther(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
-    
-  /*!
-   *\brief Returns items that need to be analyzed
-   */
-  std::vector<diagnostic_msgs::DiagnosticStatus*> toAnalyze(std::map<std::string, diagnostic_item::DiagnosticItem*> msgs);
-
+  std::vector<boost::regex> regex_;
 
 };
-
 
 }
 #endif //GENERIC_ANALYZER_H

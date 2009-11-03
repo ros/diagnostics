@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+#
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -30,56 +31,60 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
-## A basic node to listen to and display incoming diagnostic messages
+##\author Kevin Watts
+##\brief Make CSV files smaller for use in spreadsheet software
 
-import getopt
+PKG = 'diagnostic_analysis'
 import roslib
-roslib.load_manifest('runtime_monitor')
+roslib.load_manifest(PKG)
 
-import sys
-import rospy
+import csv, os, sys
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+##\brief Makes sparse CSV by skipping every nth value
+##\param csv_file str : CSV filename
+##\param skip int : Write every nth row to sparse CSV
+##\return Path of output file
+def make_sparse_skip(csv_file, skip):
+    output_file = csv_file[:-4] + '_sparse.csv'
 
+    input_reader = csv.reader(open(csv_file, 'rb'))
 
-NAME = 'runtime_monitor_logging'
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:], "f:", ["file"])
-except getopt.GetoptError, err:
-    print str(err)
-    exit
+    skip_count = skip
+    for row in input_reader:
+        if skip_count == skip:
+            output_writer.writerow(row)
+            skip_count = 0
+            
+        skip_count = skip_count + 1
 
-for o, a in opts:
-    if o == "-f":
-        print "Opening %s"%a
-        f = open(a, 'a');
-    else:
-        print "Opening default"
-        f = open('diagnostic.log', 'a');
+    return output_file
 
+##\brief Makes sparse CSV with the given number of rows
+##\param csv_file str : CSV filename
+##\param length int : Desired number of rows in CSV
+##\return Path of output file
+def make_sparse_length(csv_file, length):
+    output_file = csv_file[:-4] + '_sprs_len.csv'
 
-def callback(message):
-##    global f
-    f.write("@%.1f "%message.header.stamp.to_time())
-    for s in message.status:
-        ## @TODO process byte level
-        f.write( "$C %s: %s "%(s.name, s.message))
-        for v in s.strings + s.values:
-            f.write( "$V %s : %s " % (v.label, v.value))
-    f.write("\n")
-    
-def listener():
-    rospy.Subscriber("/diagnostics", DiagnosticArray, callback)
-    rospy.init_node(NAME, anonymous=True)
-    rospy.spin()
-        
-if __name__ == '__main__':
-    try:
-        listener()
-    except KeyboardInterrupt, e:
-        pass
-    f.close()
-    print "exiting"
+    input_reader = csv.reader(open(csv_file, 'rb'))
+
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
+
+    # Calculate skip count for file
+    orig_len = len(open(csv_file, 'r').read().split('\n'))
+    skip = max(int(orig_len / length), 1)
+
+    skip_count = skip
+    for row in input_reader:
+        if skip_count >= skip:
+            output_writer.writerow(row)
+            skip_count = 0
+            
+        skip_count = skip_count + 1
+
+    return output_file

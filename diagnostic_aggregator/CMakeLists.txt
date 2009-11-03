@@ -9,7 +9,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-rospack(diagnostic_aggregator)
+rosbuild_init()
 
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -22,17 +22,17 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #gensrv()
 
 rosbuild_add_boost_directories()
-rospack_add_library(diagnostic_aggregator
-  src/plugin_list.cpp
+rosbuild_add_library(diagnostic_aggregator
+  src/status_item.cpp
   src/generic_analyzer.cpp
-  src/diagnostic_item.cpp
-  src/diagnostic_aggregator.cpp)
-rosbuild_link_boost(diagnostic_aggregator system)
-
+  src/aggregator.cpp)
+rosbuild_link_boost(diagnostic_aggregator system regex)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rospack_add_boost_directories()
 #rospack_link_boost(${PROJECT_NAME} thread)
 
-rospack_add_executable(aggregator_node src/aggregator_node.cpp)
+rosbuild_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
+
+rosbuild_add_rostest(test/test_agg.launch)

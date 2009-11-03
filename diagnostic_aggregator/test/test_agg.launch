@@ -1,0 +1,20 @@
+<launch>
+  <!--
+      launch-prefix="xterm -e gdb -args"
+      -->
+  <node 
+       pkg="diagnostic_aggregator" type="aggregator_node"
+        name="diag_agg" output="screen" >
+    <rosparam command="load" 
+              file="$(find diagnostic_aggregator)/test/simple_analyzers.yaml" />
+  </node>
+
+  <test test-name="aggregator-output"  
+        pkg="diagnostic_aggregator" type="aggregator_test.py"
+        name="diag_agg_test" args="--param_name=diag_agg/analyzers "  />
+<!--       output="screen" / -->
+
+     <node
+        pkg="diagnostic_aggregator" type="diag_pub.py"
+        name="diag_pub" />
+</launch>

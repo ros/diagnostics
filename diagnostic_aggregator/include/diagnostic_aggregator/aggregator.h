@@ -32,7 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/*!
+ *\author Kevin Watts
+ */
 
 #ifndef DIAGNOSTIC_AGGREGATOR_H
 #define DIAGNOSTIC_AGGREGATOR_H
@@ -41,104 +43,107 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 #include "XmlRpcValue.h"
 #include "pluginlib/class_loader.h"
-#include "diagnostic_aggregator/diagnostic_analyzer.h"
-#include "diagnostic_aggregator/diagnostic_item.h"
-#include "diagnostic_aggregator/generic_analyzer.h"
+#include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/status_item.h"
+#include "diagnostic_aggregator/other_analyzer.h"
 
 
 namespace diagnostic_aggregator {
 
 /*!
- *\brief DiagnosticAggregator processes /diagnostics, republishes on /diagnostics_agg
+ *\brief Aggregator processes /diagnostics, republishes on /diagnostics_agg
  *
- * DiagnosticAggregator is a node that subscribes to /diagnostics, processes it
+ * Aggregator is a node that subscribes to /diagnostics, processes it
  * and republishes aggregated data on /diagnostics_agg. The aggregator
  * creates a series of analyzers according to the specifications of its
  * private parameters. The aggregated diagnostics data is organized
  * in a tree structure. For example:
 \verbatim
 Input (status names):
-  tilt_hokuyo_node Frequency
-  tilt_hokuyo_node Connection
+  tilt_hokuyo_node: Frequency
+  tilt_hokuyo_node: Connection
 Output:
   /Robot
   /Robot/Sensors
-  /Robot/Sensors/tilt_hokuyo_node Frequency
-  /Robot/Sensors/tilt_hokuyo_node Connection
+  /Robot/Sensors/Tilt Hokuyo/Frequency
+  /Robot/Sensors/Tilt Hokuyo/Connection
 \endverbatim
  * The analyzer should always output a DiagnosticStatus with the name of the 
  * prefix. Any other data output is up to the analyzer developer.
  * 
- * DiagnosticAnalyzer's are loaded by specifying the private parameters of the
+ * Analyzer's are loaded by specifying the private parameters of the
  * aggregator. 
 \verbatim
-sensors:
-  type: GenericAnalyzer
-  prefix: Sensors
-  contains: [
-    'hokuyo']
-motors:
-  type: PR2MotorsDiagnosticAnalyzer
-joints:
-  type: PR2JointsDiagnosticAnalyzer
+base_path: My Robot
+pub_rate: 1.0
+analyzers:
+  sensors:
+    type: GenericAnalyzer
+    path: Sensors/Tilt Hokuyo
+    find_and_remove_prefix: tilt_hokuyo_node
+  motors:
+    type: PR2MotorsAnalyzer
+  joints:
+    type: PR2JointsAnalyzer
 \endverbatim
  * Each analyzer is created according to the "type" parameter in its namespace.
  * Any other parametes in the namespace can by used to specify the analyzer. If
  * any analyzer is not properly specified, or returns false on initialization,
- * the aggregator program will exit.
+ * the aggregator will report the error and publish it in the aggregated output.
  */
-
-
-class DiagnosticAggregator
+class Aggregator
 { 
 public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
    */
-   DiagnosticAggregator(std::string prefix);
+   Aggregator();
 
-  ~DiagnosticAggregator();
+  ~Aggregator();
 
   /*!
-   *\brief Loads private parameters, creates analyzers.
+   *\brief Processes, publishes data. Should be called at pub_rate.
    */
-  void init();
+  void publishData();
 
   /*!
-   *\brief Callback for "/diagnostics"
+   *\brief True if the NodeHandle reports OK
+   */
+  bool ok() const { return n_.ok(); }
+
+  /*!
+   *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
+   */
+  double getPubRate() const { return pub_rate_; }
+private:
+  ros::NodeHandle n_;
+  ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
+  ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
+  double pub_rate_;
+
+  /*!
+   *\brief Callback for incoming "/diagnostics"
    */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
   /*!
-   *\brief Processes, publishes data. Should be called at 1Hz.
+   *\brief Loads Analyzer plugins
    */
-  void publishData();
-
-  ros::NodeHandle n_;
-
-
-private:
-  ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
-  ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
-
-  /*!
-   *\brief Loads DiagnosticAnalyzer plugins
-   */
-  pluginlib::ClassLoader<diagnostic_analyzer::DiagnosticAnalyzer> analyzer_loader_;
-
+  pluginlib::ClassLoader<Analyzer> analyzer_loader_;
   
-  std::vector<diagnostic_analyzer::DiagnosticAnalyzer*> analyzers_;
+  std::vector<Analyzer*> analyzers_;
 
-  std::map<std::string, diagnostic_item::DiagnosticItem*> msgs_;
-  std::string prefix_; /**< Prepended to all status names of aggregator. */
+  OtherAnalyzer* other_analyzer_;
 
-  void clearMessages(); /**< Clears msgs_ map of (name, DiagnosticItems). */
+  std::string base_path_; /**< Prepended to all status names of aggregator. */
+
+  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 };
 
 }

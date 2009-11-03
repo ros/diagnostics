@@ -50,7 +50,6 @@ import threading, time
 
 from robot_monitor.viewer_panel import StatusViewerFrame
 
-
 ##\brief Finds list of first-parent names in msg array
 ##\param msg DiagnosticArray : Received array of DiagnosticStatus messages
 def find_parent_names_in_msg(msg):
@@ -60,6 +59,9 @@ def find_parent_names_in_msg(msg):
     parents = set(parents) # Eliminate duplicates
     return parents
 
+def get_nice_name(status_name):
+    return status_name.split('/')[-1]
+
 ##\brief Stores DiagnosticStatus message for all items in tree
 class TreeItem(object):
     ##\brief status DiagnosticStatus : Message to store
@@ -68,16 +70,24 @@ class TreeItem(object):
         self.status = status
         self.tree_id = tree_id
         self.update_time = rospy.get_time()
+        self.has_updated = True
+
+    def update(self, status):
+        self.status = status
+        self.has_updated = True
+        self.update_time = rospy.get_time()
 
 ##\brief Monitor panel for aggregated diagnostics (/diagnostics_agg)
 ##
 ## Displays data from DiagnosticArray /diagnostics_agg in a tree structure
 ## by status name. Names are parsed by '/'. Each status name is given
-## an icon by status (ok, warn, error, stale). 
+## an icon by status (ok, warn, error, stale). The robot monitor will mark an item
+## as stale after it is invisible for 3 seconds. Other than that, it does not store
+## state. Any item whose parent is updated but that is not updated in the same message
+## will be deleted.
 ## 
-## When new messages arrive, all names in the tree control below that name 
-## are deleted. However, two messages with separate first names (ex: 
-## '/PRF/...' and '/PRG/...') will not conflict. First names like 'PRF' and 
+## Two messages with separate first names (ex: '/PRF/...' and '/PRG/...') will 
+## not conflict and can "share" the robot monitor. First names like 'PRF' and 
 ## 'PRG' in the above example are known as 'first_parent' names throughout
 ## the class.
 class RobotMonitorPanel(wx.Panel):
@@ -120,9 +130,6 @@ class RobotMonitorPanel(wx.Panel):
         self._tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_item_active)
         self._viewers = {}
 
-        # Bind key down event for delete
-        self._tree_ctrl.Bind(wx.EVT_TREE_KEY_DOWN, self.on_item_key_down)
-
         # Show stale with timer
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._assign_tree_status_images)
@@ -132,7 +139,7 @@ class RobotMonitorPanel(wx.Panel):
                                             self.callback)
         self._msg = None
 
-    ##\brief Unregisters subscription from master
+    ##\brief Unregisters subscription from master in destructor
     def __del__(self):
         self._subscriber.unregister()
     
@@ -155,8 +162,9 @@ class RobotMonitorPanel(wx.Panel):
         if not self._have_message:
             self._have_message = True
             self._tree_ctrl.Delete(self._empty_id)
-
-        scroll = self._tree_ctrl.GetScrollPos(wx.VERTICAL)
+            self._empty_id = None
+       
+        self._mark_last_update(self._root_id)
 
         # Find selected item to reselect next round
         selected_name = None
@@ -175,10 +183,12 @@ class RobotMonitorPanel(wx.Panel):
         expanded_names = {}
         for parent in parents:
             expanded_names[parent] = []
-            self._parent_to_name_to_id[parent] = {}
+            if not self._parent_to_name_to_id.has_key(parent):
+                self._parent_to_name_to_id[parent] = {}
+
+            # Find expanded items under existing first parents
             if self._parent_name_to_id.has_key(parent):
                 self._find_expanded(self._parent_name_to_id[parent], expanded_names[parent])
-                self._tree_ctrl.DeleteChildren(self._parent_name_to_id[parent])
                 self._tree_ctrl.SetItemText(self._parent_name_to_id[parent], parent.split('/')[-1])
 
         # Add each status to tree, parents first
@@ -188,6 +198,10 @@ class RobotMonitorPanel(wx.Panel):
                 name = '/' + name
 
             first_parent = '/'.join(name.split('/')[0:2]) ## Ex: '/robot'
+
+            # Update viewers watching this item, if any
+            if self._viewers.has_key(name):
+                self._viewers[name].panel.write_status(status)
 
             # Update item if we have it already in the tree
             if self._parent_to_name_to_id[first_parent].has_key(name):
@@ -203,8 +217,8 @@ class RobotMonitorPanel(wx.Panel):
                 self._parent_to_name_to_id[first_parent][first_parent] = id
             else:
                 id = self._parent_name_to_id[first_parent]
- 
-            # Now add second parents, third parents, etc recursively
+
+            # Now add second parents, third parents, etc and item recursively
             for i in range(3, len(name.split('/')) + 1):
                 next_parent_name = '/'.join(name.split('/')[0:i])
                 if not self._parent_to_name_to_id[first_parent].has_key(next_parent_name):
@@ -214,10 +228,6 @@ class RobotMonitorPanel(wx.Panel):
 
             # Finally, we add the status message to the item
             self._update_item(id, status)
-
-            # Update viewers watching this item, if any
-            if self._viewers.has_key(name):
-                self._viewers[name].panel.write_status(status)
 
         # Expand and sort first parents and any items that were
         # previously expanded 
@@ -239,15 +249,15 @@ class RobotMonitorPanel(wx.Panel):
         # Comb through tree and assign images
         self._assign_tree_status_images()  
 
+        # Delete any items that should have updated but didn't
         # Set message, count of children
         for parent in parents:
+            self._delete_items_not_updated(self._parent_name_to_id[parent])
             self._set_count_and_message(self._parent_name_to_id[parent])
 
-        self._tree_ctrl.SetScrollPos(wx.VERTICAL, scroll)
-                                
         self._mutex.release()
 
-    ##\brief Adds ': Message (COUNT)' to all tree text
+    ##\brief Adds ' (Count): Message' to all tree item text
     ##
     ## Recursively adds message and child count to items. Count
     ## is number of immediate children.
@@ -258,10 +268,10 @@ class RobotMonitorPanel(wx.Panel):
         if item and item.status:
             old_text = self._tree_ctrl.GetItemText(tree_id)
             if not self._tree_ctrl.ItemHasChildren(tree_id):
-                new_text = '%s: %s' % (old_text, item.status.message)
+                new_text = '%s: %s' % (get_nice_name(item.status.name), item.status.message)
             else:
                 child_count = self._tree_ctrl.GetChildrenCount(tree_id, False)
-                new_text = '%s (%d): %s' % (old_text, child_count, item.status.message)
+                new_text = '%s (%d): %s' % (get_nice_name(item.status.name), child_count, item.status.message)
             self._tree_ctrl.SetItemText(tree_id, new_text)
 
         if not self._tree_ctrl.ItemHasChildren(tree_id):
@@ -301,7 +311,7 @@ class RobotMonitorPanel(wx.Panel):
             return
 
         name = item.status.name
-        title = name.split('/')[-1]
+        title = get_nice_name(name)
         
         ##\todo Move this viewer somewhere useful
         viewer = StatusViewerFrame(self._frame, name, self, title)
@@ -314,50 +324,77 @@ class RobotMonitorPanel(wx.Panel):
 
         viewer.panel.write_status(item.status)        
 
-
-    ##\brief Key down events, deletes items if delete pressed
-    ## 
-    ## Process key down events of tree controls
-    def on_item_key_down(self, event):
-        id = self._tree_ctrl.GetSelection()
-        if (id == None):
-            event.Skip()
+    ##\brief Marks all items below id as not updated (item.has_updated = False)
+    def _mark_last_update(self, id):
+        if not self._have_message:
             return
-        
-        key = event.GetKeyCode()
-        
-        if (key == wx.WXK_DELETE):
-            item = self._tree_ctrl.GetPyData(id)
-            if not (item and item.status):
-                self._tree_ctrl.Delete(id)
-                self.Refresh()
-                return
-            
-            # Find first parent
-            first_parent_id = id
-            while not rospy.is_shutdown():
-                parent = self._tree_ctrl.GetItemParent(first_parent_id)
-                if parent == self._root_id:
-                    break
-                else:
-                    first_parent_id = parent
-                
-            first_parent_item = self._tree_ctrl.GetPyData(first_parent_id)
-            if first_parent_item and first_parent_item.status:
-                first_parent = first_parent_item.status.name
-                if self._parent_to_name_to_id[first_parent].has_key(item.status.name):
-                    del self._parent_to_name_to_id[first_parent][item.status.name]
-                
-            if first_parent == item.status.name and self._parent_name_to_id.has_key(first_parent):
-                del self._parent_name_to_id[first_parent]
 
+        # Assign to ID
+        item = self._tree_ctrl.GetPyData(id)
+        if item is not None and item.status is not None:
+            #rospy.loginfo('Marking item as not updated: %s' % item.status.name)
+            item.has_updated = False
+            self._tree_ctrl.SetPyData(id, item)
+
+        if not self._tree_ctrl.ItemHasChildren(id):
+            return
+
+        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
+        while not rospy.is_shutdown():
+            self._mark_last_update(sibling)
+            
+            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
+            if not sibling.IsOk():
+                break
+
+    ##\brief Deletes any tree items below given ID that haven't updated
+    def _delete_items_not_updated(self, id):
+        if not self._have_message:
+            return
+
+        # Assign to ID
+        item = self._tree_ctrl.GetPyData(id)
+        if item is not None and item.status is not None:
+            if not item.has_updated:
+                self._delete_item(id)                
+
+        if not self._tree_ctrl.ItemHasChildren(id):
+            return
+
+        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
+        while not rospy.is_shutdown():
+            self._delete_items_not_updated(sibling)
+            
+            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
+            if not sibling.IsOk():
+                break
+
+    ##\brief Fully deletes tree item from tree and all other class data
+    def _delete_item(self, id):
+        item = self._tree_ctrl.GetPyData(id)
+        if item is None:
             self._tree_ctrl.Delete(id)
-        else:
-            event.Skip()
+            return
+
+        # Find first parent
+        first_parent_id = id
+        while not rospy.is_shutdown():
+            parent = self._tree_ctrl.GetItemParent(first_parent_id)
+            if parent == self._root_id:
+                break
+            else:
+                first_parent_id = parent
+                
+        first_parent_item = self._tree_ctrl.GetPyData(first_parent_id)
+        if first_parent_item and first_parent_item.status:
+            first_parent = first_parent_item.status.name
+            if item.status is not None and self._parent_to_name_to_id[first_parent].has_key(item.status.name):
+                del self._parent_to_name_to_id[first_parent][item.status.name]
+
+        if item.status is not None and first_parent == item.status.name and self._parent_name_to_id.has_key(first_parent):
+            del self._parent_name_to_id[first_parent]
             
-        self.Refresh()
-
-
+        self._tree_ctrl.Delete(id)
 
     #\brief Assigns tree status images for entire tree
     #\param event Event (optional) : Can be called by timer
@@ -381,7 +418,6 @@ class RobotMonitorPanel(wx.Panel):
         # Sets items as stale if >3.0 seconds
             if rospy.get_time() - item.update_time > 3.0:
                 level = 3
-
         
         image = self._image_dict[level]
         self._tree_ctrl.SetItemImage(id, image)
@@ -398,14 +434,16 @@ class RobotMonitorPanel(wx.Panel):
                 break
                     
 
-    ## Creates an empty tree item
+    ##\brief Creates an empty tree item, with None for data
+    ## 
     ##\param first_parent str : Name of first parent
     ##\param parent_id wxTreeItemId : Id of immediate parent
     ##\param name str : Name of tree item
     def _create_item(self, first_parent, parent_id, name):
         ## Add item to tree as short name
-        short_name = name.split('/')[-1]
-        
+        #short_name = name.split('/')[-1]
+        short_name = get_nice_name(name)
+
         id = self._tree_ctrl.AppendItem(parent_id, short_name)
         item = TreeItem(None, id)
         self._tree_ctrl.SetPyData(id, item)
@@ -421,11 +459,12 @@ class RobotMonitorPanel(wx.Panel):
     def _update_item(self, id, status_msg):
         item = self._tree_ctrl.GetPyData(id)
         if item:
-            item.status = status_msg
-            item.update_time = rospy.get_time()
+            item.update(status_msg)
+            #item.update_time = rospy.get_time()
+            #item.has_updated = True
 
 
-    ## Find all tree nodes expanded by parent node
+    ##\brief Find all tree nodes expanded by parent node
     ##\param id wxTreeItemId : Id of node to see 
     def _find_expanded(self, id, expanded_names):
         if not self._tree_ctrl.ItemHasChildren(id):

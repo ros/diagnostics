@@ -32,257 +32,138 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**< \author Kevin Watts */
 
 #include "diagnostic_aggregator/generic_analyzer.h"
 
-using namespace diagnostic_analyzer;
+using namespace diagnostic_aggregator;
 using namespace std;
 
-GenericAnalyzer::GenericAnalyzer() : other_(false) { }
+PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, diagnostic_aggregator::Analyzer)
 
-bool GenericAnalyzer::initOther(string first_prefix)
-{
-  other_ = true;
-  nice_name_ = "Other";
-  full_prefix_ = first_prefix + "/" + nice_name_;
+GenericAnalyzer::GenericAnalyzer() { }
 
-  ROS_DEBUG("Created remainder analyzer");
-  return true;
-}
-
-bool GenericAnalyzer::init(string first_prefix, const ros::NodeHandle &n)
+bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
 { 
-  if (!n.getParam("~prefix", nice_name_))
+  string nice_name;
+  if (!n.getParam("path", nice_name))
   {
-    ROS_FATAL("GenericAnalyzer was not given parameter \"prefix\".");
-    ROS_BREAK();
+    ROS_ERROR("GenericAnalyzer was not given parameter \"path\".");
+    return false;
   }
-  full_prefix_ = first_prefix + "/" + nice_name_;
 
-  XmlRpc::XmlRpcValue startswith;
-  if (n.getParam("~startswith", startswith))
+  XmlRpc::XmlRpcValue findRemove;
+  if (n.getParam("find_and_remove_prefix", findRemove))
   {
-    for (int i = 0; i < startswith.size(); ++i)
-    {
-      string starts = startswith[i];
-      startswith_.push_back(starts);
-    }
+    vector<string> output;
+    getParamVals(findRemove, output);
+    chaff_ = output;
+    startswith_ = output;
   }
+  
+  XmlRpc::XmlRpcValue removes;
+  if (n.getParam("remove_prefix", removes))
+    getParamVals(removes, chaff_);
+    
+  XmlRpc::XmlRpcValue startswith;
+  if (n.getParam("startswith", startswith))
+    getParamVals(startswith, startswith_);
 
   XmlRpc::XmlRpcValue name_val;
-  if (n.getParam("~name", name_val))
-  {
-    for (int i = 0; i < name_val.size(); ++i)
-    {
-      string name = name_val[i];
-      name_.push_back(name);
-    }
-  }
+  if (n.getParam("name", name_val))
+    getParamVals(name_val, name_);
 
   XmlRpc::XmlRpcValue contains;
-  if (n.getParam("~contains", contains))
-  {
-    for (int i = 0; i < contains.size(); ++i)
-    {
-      string contain_str = contains[i];
-      contains_.push_back(contain_str);
-    }
-  }
+  if (n.getParam("contains", contains))
+    getParamVals(contains, contains_);
 
   XmlRpc::XmlRpcValue expected;
-  if (n.getParam("~expected", expected))
+  if (n.getParam("expected", expected))
   {
-    for (int i = 0; i < expected.size(); ++i)
-    {
-      string expected_str = expected[i];
-      expected_.push_back(expected_str);
-      
-      // Make sure we're looking for this item
-      diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-      status->name = expected_str;
-      status->level = 2;
-      status->message = "Missing";
-      
-      diagnostic_item::DiagnosticItem *item = new diagnostic_item::DiagnosticItem(status);
-      items_[expected_str] = item;
-
-      delete status;
-    }
-  }
-
-  return true;
-}
-
-GenericAnalyzer::~GenericAnalyzer() 
-{
-  // Clear all items
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-  for (it = items_.begin(); it != items_.end(); ++it)
-  {
-    delete it->second;
-    it->second = NULL;
-  }
-  items_.clear();
-}
-
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::analyze(map<string, diagnostic_item::DiagnosticItem*> msgs)
-{
-  diagnostic_msgs::DiagnosticStatus *header_status = new diagnostic_msgs::DiagnosticStatus();
-  header_status->name = full_prefix_;
-  header_status->level = 0;
-  header_status->message = "OK";
-
-  // Output array, gets deleted by aggregator
-  vector<diagnostic_msgs::DiagnosticStatus*> processed;
-  processed.push_back(header_status);
-
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
-  if (!other_)
-    to_analyze = toAnalyze(msgs);
-  else
-    to_analyze = toAnalyzeOther(msgs);
-
-  // Deletes items to analyze
-  updateItems(to_analyze);
-
-  bool all_stale = true;
-  
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-  for (it = items_.begin(); it != items_.end(); it++)
-  {
-    string name = it->first;
-    diagnostic_item::DiagnosticItem *item = it->second;
-
-    int8_t level = item->getLevel();
-
-    ///\todo NEED TO CHECK UPDATE TIME
-
-    all_stale = all_stale && (level == 3);
-
-    header_status->level = max(header_status->level, level);
-
-    diagnostic_msgs::KeyValue kv;
-    kv.key = name;
-    kv.value = item->getMessage();
-    
-    header_status->values.push_back(kv);
-    processed.push_back(item->toStatusMsg(full_prefix_, false));
-  }
-  if (header_status->level == 3 && !all_stale)
-    header_status->level = 2;
-
-  if (header_status->level == 1)
-    header_status->message = "Warning";
-  if (header_status->level == 2)
-    header_status->message = "Error";
-  if (header_status->level == 3)
-    header_status->message = "All Stale";
-
-  return processed;
-}
-
-void GenericAnalyzer::updateItems(vector<diagnostic_msgs::DiagnosticStatus*> to_analyze)
-{
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-
-  for (unsigned int i = 0; i < to_analyze.size(); ++i)
-  {
-    it = items_.find(to_analyze[i]->name);
-    if (it == items_.end())
-      items_[to_analyze[i]->name] = new diagnostic_item::DiagnosticItem(to_analyze[i]);
-    else
-      items_[to_analyze[i]->name]->update(to_analyze[i]);
-    
-    delete to_analyze[i];
-    to_analyze[i] = NULL;
-  }
-  to_analyze.clear();
-}
-
-// Returns vector of msgs that haven't been analyzed
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyzeOther(map<string, diagnostic_item::DiagnosticItem*> msgs)
-{
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
-  
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-
-  for (it = msgs.begin(); it != msgs.end(); ++it)
-  {
-    if (!it->second->hasChecked())
-      to_analyze.push_back(it->second->toStatusMsg());
-  }
-
-  return to_analyze;
-}
-
-// Returns vector of msgs to analyze
-///\todo optimize with dictionaries or something
-vector<diagnostic_msgs::DiagnosticStatus*> GenericAnalyzer::toAnalyze(map<string, diagnostic_item::DiagnosticItem*> msgs)
-{
-  vector<diagnostic_msgs::DiagnosticStatus*> to_analyze;
-  
-  map<string, diagnostic_item::DiagnosticItem*>::iterator it;
-
-  for (it = msgs.begin(); it != msgs.end(); ++it)
-  {
-    // Look for all startswith, etc
-    diagnostic_item::DiagnosticItem *item = it->second;
-    
-    string name = item->getName();
-
-    bool analyzed = false;
-
-    // Check expected, name, startswith, contains
-    // If we're going to analyze it, don't check remainder
+    getParamVals(expected, expected_);
     for (unsigned int i = 0; i < expected_.size(); ++i)
     {
-      if (name == expected_[i])
-      {
-        to_analyze.push_back(item->toStatusMsg());
-        analyzed = true;
-        break;
-      }
+      boost::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+      addItem(expected_[i], item);
     }
-    if (analyzed)
-      continue;
-
-    for (unsigned int i = 0; i < name_.size(); ++i)
-    {
-      if (name == name_[i])
-      {
-        to_analyze.push_back(item->toStatusMsg());
-        analyzed = true;
-        break;
-      }
-    }
-    if (analyzed)
-      continue;
-
-    for (unsigned int i = 0; i < startswith_.size(); ++i)
-    {
-      if (name.find(startswith_[i]) == 0)
-      {
-        to_analyze.push_back(item->toStatusMsg());
-        analyzed = true;
-        break;
-      }
-    }
-    if (analyzed)
-      continue;
+ }
  
-    for (unsigned int i = 0; i < contains_.size(); ++i)
+  XmlRpc::XmlRpcValue regexes;
+  if (n.getParam("regex", regexes))
+  {
+    vector<string> regex_strs;
+    getParamVals(regexes, regex_strs);
+  
+    for (unsigned int i = 0; i < regex_strs.size(); ++i)
     {
-      if (name.find(contains_[i]) != string::npos)
+      try
       {
-        to_analyze.push_back(item->toStatusMsg());
-        analyzed = true;
-        break;
+        boost::regex re(regex_strs[i]);
+        regex_.push_back(re);
+      }
+      catch (boost::regex_error& e)
+      {
+        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. %s", regex_strs[i].c_str(), e.what());
       }
     }
   }
+  
+  double timeout;
+  int num_items_expected;
+  n.param("timeout", timeout, 5.0);   // Timeout for stale
+  n.param("num_items", num_items_expected, -1); // Number of items must match this
 
-  return to_analyze;
+  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, timeout, num_items_expected);
 }
 
+GenericAnalyzer::~GenericAnalyzer() { }
 
+
+bool GenericAnalyzer::match(const string name) const
+{
+  boost::cmatch what;
+  for (unsigned int i = 0; i < regex_.size(); ++i)
+  {
+    if (boost::regex_match(name.c_str(), what, regex_[i]))
+      return true;
+  }
+  
+  for (unsigned int i = 0; i < expected_.size(); ++i)
+  {
+    if (name == expected_[i])
+      return true;
+  }
+  
+  for (unsigned int i = 0; i < name_.size(); ++i)
+  {
+    if (name == name_[i])
+      return true;
+  }
+  
+  for (unsigned int i = 0; i < startswith_.size(); ++i)
+  {
+    if (name.find(startswith_[i]) == 0)
+      return true;
+  }
+  
+  for (unsigned int i = 0; i < contains_.size(); ++i)
+  {
+    if (name.find(contains_[i]) != string::npos)
+      return true;
+  }
+  
+  return false;
+}
+
+vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::report()
+{
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+  
+  for (unsigned int j = 0; j < processed.size(); ++j)
+  {
+    for (unsigned int i = 0; i < chaff_.size(); ++i)
+      processed[j]->name = removeLeadingNameChaff(processed[j]->name, chaff_[i]);
+  }
+  
+  return processed;
+}

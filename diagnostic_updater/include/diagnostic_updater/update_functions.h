@@ -43,17 +43,61 @@
 namespace diagnostic_updater
 {
 
+/**
+ * \brief A structure that holds the constructor parameters for the
+ * FrequencyStatus class.
+ */
+
 struct FrequencyStatusParam
 {
-  FrequencyStatusParam(double *min_freq, double *max_freq, double tolerance = 0.1, int window_size = 5) :
+	/**
+	 * \brief Creates a filled-out FrequencyStatusParam.
+	 */
+ 
+	FrequencyStatusParam(double *min_freq, double *max_freq, double tolerance = 0.1, int window_size = 5) :
     min_freq_(min_freq), max_freq_(max_freq), tolerance_(tolerance), window_size_(window_size)
   {}
 
+  /**
+	 * \brief Minimum acceptable frequency.
+	 *
+	 * A pointer is used so that the value can be updated.
+	 */
+
   double *min_freq_;
+
+  /**
+	 * \brief Maximum acceptable frequency.
+	 *
+	 * A pointer is used so that the value can be updated.
+	 */
+
   double *max_freq_;
+
+  /**
+	 * \brief Tolerance with which bounds must be satisfied.
+	 *
+	 * Acceptable values are from *min_freq_ * (1 + torelance_) to *max_freq_ *
+	 * (1 + tolerance_). 
+	 *
+	 * Common use cases are to set tolerance_ to zero, or to assign the same
+	 * value to *max_freq_ and min_freq_.
+	 */
+
   double tolerance_;
+
+	/**
+	 * \brief Number of events to consider in the statistics.
+	 */
   int window_size_;
 };
+
+/**
+ * \brief A diagnostic task that monitors the frequency of an event.
+ *
+ * This diagnostic task monitors the frequency of calls to its tick method,
+ * and creates corresponding diagnostics.
+ */
 
 class FrequencyStatus : public ComposableDiagnosticTask
 {
@@ -67,14 +111,22 @@ private:
   boost::mutex lock_;
 
 public:
-  FrequencyStatus(const FrequencyStatusParam &params) : 
+	/**
+	 * \brief Constructs a FrequencyStatus class with the given parameters.
+	 */
+	
+	FrequencyStatus(const FrequencyStatusParam &params) : 
     ComposableDiagnosticTask("Frequency Status"), params_(params), 
     times_(params_.window_size_), seq_nums_(params_.window_size_)
   {
     clear();
   }
   
-  void clear()
+  /**
+	 * \brief Resets the statistics.
+	 */
+	
+	void clear()
   {
     boost::mutex::scoped_lock lock(lock_);
     ros::Time curtime = ros::Time::now();
@@ -89,14 +141,19 @@ public:
     hist_indx_ = 0;
   }
 
-  void tick()
+  /**
+	 * \brief Signals that an event has occurred.
+	 */
+	
+	void tick()
   {
     boost::mutex::scoped_lock lock(lock_);
     //ROS_DEBUG("TICK %i", count_);
     count_++;
   }
 
-  void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
+protected:
+	virtual void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
       diagnostic_updater::DiagnosticStatusWrapper &details)
   {
     boost::mutex::scoped_lock lock(lock_);
@@ -141,18 +198,52 @@ public:
   }
 };
 
+/**
+ * \brief A structure that holds the constructor parameters for the
+ * TimeStampStatus class.
+ */
+
 struct TimeStampStatusParam
 {
-  TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5) :
+	/**
+	 * \brief Creates a filled-out TimeStampStatusParam.
+	 */
+
+	TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5) :
     max_acceptable_(max_acceptable), min_acceptable_(min_acceptable)
   {}
   
-  double max_acceptable_;
-  double min_acceptable_;
+  /**
+	 * \brief Maximum acceptable difference between two timestamps.
+	 */
+
+	double max_acceptable_;
+  
+	/**
+	 * \brief Minimum acceptable difference between two timestamps.
+	 */
+  
+	double min_acceptable_;
 
 };
   
+/**
+ * \brief Default TimeStampStatusParam. This is like calling the
+ * constructor with no arguments.
+ */
+
 static TimeStampStatusParam DefaultTimeStampStatusParam = TimeStampStatusParam();
+
+/**
+ * \brief Diagnostic task to monitor the interval between events.
+ *
+ * This diagnostic task monitors the difference between consecutive events,
+ * and creates corresponding diagnostics. An error occurs if the interval
+ * between consecutive events is too large or too small. An error condition
+ * will only be reported during a single diagnostic report unless it
+ * persists. Tallies of errors are also maintained to keep track of errors
+ * in a more persistent way.
+ */
 
 class TimeStampStatus : public ComposableDiagnosticTask
 {
@@ -169,6 +260,10 @@ private:
   }
 
 public:
+  /**
+	 * \brief Constructs the TimeStampStatus with the given parameters.
+	 */
+
   TimeStampStatus(const TimeStampStatusParam &params) : 
     ComposableDiagnosticTask("Timestamp Status"), 
     params_(params)
@@ -176,11 +271,22 @@ public:
     init();
   }
   
+  /**
+	 * \brief Constructs the TimeStampStatus with the default parameters.
+	 */
+
   TimeStampStatus() : 
     ComposableDiagnosticTask("Timestamp Status") 
   {
     init();
   }
+
+  /**
+	 * \brief Signals an event. Timestamp stored as a double.
+	 *
+	 * \param stamp The timestamp of the event that will be used in computing
+	 * intervals.
+	 */
 
   void tick(double stamp)
   {
@@ -204,12 +310,20 @@ public:
     }
   }
 
+  /**
+	 * \brief Signals an event.
+	 *
+	 * \param t The timestamp of the event that will be used in computing
+	 * intervals.
+	 */
+
   void tick(const ros::Time t)
   {
     tick(t.toSec());
   }
 
-  void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
+protected:
+  virtual void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
       diagnostic_updater::DiagnosticStatusWrapper &details)
   {
     boost::mutex::scoped_lock lock(lock_);

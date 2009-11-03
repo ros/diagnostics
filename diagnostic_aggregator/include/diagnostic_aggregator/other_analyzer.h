@@ -32,26 +32,61 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**< \author Kevin Watts */
+/*!
+ * \author Kevin Watts 
+ */
 
-#include <diagnostic_aggregator/aggregator.h>
+#ifndef OTHER_ANALYZER_H
+#define OTHER_ANALYZER_H
 
-using namespace std;
+#include <string>
+#include <ros/ros.h>
+#include "diagnostic_aggregator/generic_analyzer_base.h"
 
-int main(int argc, char **argv)
+namespace diagnostic_aggregator {
+
+/*
+ *\brief OtherAnalyzer analyzes any messages that haven't been analyzed by other Analyzers
+ *
+ * OtherAnalyzer is not loaded as a plugin. It is created by the Aggregator, and called 
+ * seperately. The aggregator will call analyze() on any message not handled by other
+ * analyzers.
+ *
+ */
+class OtherAnalyzer : public GenericAnalyzerBase
 {
-  ros::init(argc, argv, "diagnostic_aggregator");
-  
-  diagnostic_aggregator::Aggregator agg;
-  
-  ros::Rate pub_rate(agg.getPubRate());
-  while (agg.ok())
+public:
+  /*!
+   *\brief Default constructor. OtherAnalyzer isn't loaded by pluginlib
+   */
+  OtherAnalyzer() { }
+
+  ~OtherAnalyzer() { }
+
+  bool init(std::string path)
   {
-    ros::spinOnce();
-    agg.publishData();
-    pub_rate.sleep();
+    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0);
   }
-  exit(0);
-  return 0;
+
+  /*
+   *\brief OtherAnalyzer cannot be initialized with a NodeHandle
+   */
+  bool init(const std::string base_path, const ros::NodeHandle &n)
+  {
+    ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
+    return false;
+  }
+
+  /*
+   *\brief match() isn't called by aggregator for OtherAnalyzer
+   */
+  bool match(std::string name) const { return true; }
+
+
+
+};
+
 }
-  
+
+
+#endif // OTHER_ANALYZER_H

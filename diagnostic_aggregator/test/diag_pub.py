@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,60 +32,48 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-## A basic node to listen to and display incoming diagnostic messages
+##\author Kevin Watts
 
-import roslib
-roslib.load_manifest('runtime_monitor')
+##\brief Publishes diagnostic messages for diagnostic aggregator unit test
 
-import sys
+PKG = 'diagnostic_aggregator'
+
+import roslib; roslib.load_manifest(PKG)
+
+
 import rospy
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+from time import sleep
 
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
-NAME = 'runtime_monitor'
-
-aggregate = {}
-
-def value_test(agg):
-    components = ["Smart Battery 0.0",
-                  "Smart Battery 0.1",
-                  "Smart Battery 0.2"]
-
-
-    for stat in agg:
-        if agg[stat].name in components:
-            
-            print agg[stat].name
-            for v in agg[stat].values:
-                if v.label == "present (0,1)":
-                    if v.value > .11:
-                        print "high ", v.value
-                    else:
-                        print "low ", v.value
-
-def callback(message):
-    global aggregate
-    print""
-    print "New Message at %.1f"%message.header.stamp.to_time()
-    for s in message.status:
-        ## @TODO process byte level
-        ##print "Name: %s \nMessage: %s"%(s.name, s.message)
-        ##for v in s.strings + s.values:
-        ##    print "   %s: %s" % (v.label, v.value)
-        aggregate[s.name] = s
-    sys.stdout.flush()
-    
-    value_test(aggregate)
-
-    
-def listener():
-    rospy.Subscriber("/diagnostics", DiagnosticArray, callback)
-    rospy.init_node(NAME, anonymous=True)
-    rospy.spin()
-        
 if __name__ == '__main__':
-    try:
-        listener()
-    except KeyboardInterrupt, e:
-        pass
-    print "exiting"
+    rospy.init_node('diag_pub')
+    pub = rospy.Publisher('/diagnostics', DiagnosticArray)
+    
+    array = DiagnosticArray()
+    array.status = [
+        # GenericAnalyzer prefix1
+        DiagnosticStatus(0, 'pref1a', 'OK', '', []),
+        DiagnosticStatus(1, 'pref1b', 'Warning', '', []),
+        DiagnosticStatus(0, 'contains1a', 'OK', '', []),
+        DiagnosticStatus(0, 'prefix1: contains1b', 'OK', '', []),
+        DiagnosticStatus(0, 'name1', 'OK', '', []),
+        DiagnosticStatus(0, 'prefix1: expected1a', 'OK', '', []),
+        DiagnosticStatus(0, 'prefix1: expected1b', 'OK', '', []),
+        DiagnosticStatus(0, 'prefix1: expected1c', 'OK', '', []),
+        DiagnosticStatus(0, 'prefix1: expected1d', 'OK', '', []),
+        DiagnosticStatus(0, 'find1_items: find_remove1a', 'OK', '', []),
+        DiagnosticStatus(0, 'find1_items: find_remove1b', 'OK', '', []),
+
+        # GenericAnalyzer prefix2
+        DiagnosticStatus(0, 'contain2a', 'OK', '', []),
+        DiagnosticStatus(0, 'contain2b', 'OK', '', []),
+
+        # OtherAnalyzer for Other
+        DiagnosticStatus(2, 'other1', 'Error', '', []),
+        DiagnosticStatus(0, 'other2', 'OK', '', []),
+        DiagnosticStatus(0, 'other3', 'OK', '', [])]
+
+    while not rospy.is_shutdown():
+        pub.publish(array)
+        sleep(1)

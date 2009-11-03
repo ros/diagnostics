@@ -32,22 +32,25 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-##\brief Uses robot monitor panel to display aggregated diagnostics
-
 ##\author Kevin Watts
 
+##\brief Tests that robot monitor opens and doesn't throw exception
+
 PKG = 'robot_monitor'
-
-import roslib
-roslib.load_manifest('robot_monitor')
-
-import rospy
+import roslib; roslib.load_manifest(PKG)
 
 import wx
+import unittest
+import rospy, rostest
+from time import sleep
+import sys
+from optparse import OptionParser
 
 from robot_monitor.robot_monitor_panel import RobotMonitorPanel
 
+import threading
 
+DURATION = 10
 
 ##\brief Main frame of robot monitor
 class RobotMonitorFrame(wx.Frame):
@@ -62,21 +65,54 @@ class RobotMonitorFrame(wx.Frame):
 ##\brief wxApp of robot monitor
 class RobotMonitorApp(wx.App):
     def OnInit(self):
-        rospy.init_node('robot_monitor', anonymous=True)
-        
         self._frame = RobotMonitorFrame(None, 'Robot Monitor')
         self._frame.SetSize(wx.Size(500, 700))
         self._frame.Layout()
         #self._frame.Centre()
         self._frame.Show(True)
         return True
-        
-        
-if __name__ == '__main__':
-    try:
-        app = RobotMonitorApp()
-        app.MainLoop()
-    except Exception, e:
-        import traceback
-        traceback.print_exc()
 
+class RoMonRunner(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.app = RobotMonitorApp()
+        
+    def run(self):
+        self.app.MainLoop()
+        
+
+class TestRobotMonitor(unittest.TestCase):
+    def __init__(self, *args):
+        super(TestRobotMonitor, self).__init__(*args)
+        
+        rospy.init_node('test_robot_monitor', anonymous=True)
+        parser = OptionParser(usage="usage ./%prog [options]", prog="test_robot_monitor.py")
+
+        # Option comes with rostest, will fail w/o this line
+        parser.add_option('--gtest_output', action="store",
+                          dest="gtest")
+
+        options, args = parser.parse_args(rospy.myargv())
+
+        self.runner = RoMonRunner()
+        self.runner.start()
+        
+    def test_robot_monitor(self):
+        start = rospy.get_time()
+        while not rospy.is_shutdown():
+            if rospy.get_time() - start > DURATION:
+                break
+            self.assert_(self.runner.isAlive(), "Thread running robot monitor isn't running")
+            sleep(1.0)
+            
+        # Hack for closing the app
+        wx.CallAfter(self.runner.app._frame.on_exit(None))
+        self.runner.join(5)
+        
+        self.assert_(not self.runner.isAlive(), "Thread running robot monitor didn't join up")
+        self.assert_(not rospy.is_shutdown(), "Rospy shut down")
+
+
+if __name__ == '__main__':
+    rostest.run(PKG, sys.argv[0], TestRobotMonitor, sys.argv)
+    

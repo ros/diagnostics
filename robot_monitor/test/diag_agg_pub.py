@@ -1,8 +1,7 @@
-#!/usr/bin/python
-#
+#!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,60 +30,41 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
 
 ##\author Kevin Watts
-##\brief Make CSV files smaller for use in spreadsheet software
 
-PKG = 'diagnostics_analysis'
-import roslib
-roslib.load_manifest(PKG)
+##\brief Publishes diagnostic messages for robot monitor regression test
 
-import csv, os, sys
+PKG = 'robot_monitor'
 
-##\brief Makes sparse CSV by skipping every nth value
-##\param csv_file str : CSV filename
-##\param skip int : Write every nth row to sparse CSV
-##\return Path of output file
-def make_sparse_skip(csv_file, skip):
-    output_file = csv_file[:-4] + '_sparse.csv'
+import roslib; roslib.load_manifest(PKG)
 
-    input_reader = csv.reader(open(csv_file, 'rb'))
+import rospy
+from time import sleep
 
-    f = open(output_file, 'wb')
-    output_writer = csv.writer(f)
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
-    skip_count = skip
-    for row in input_reader:
-        if skip_count == skip:
-            output_writer.writerow(row)
-            skip_count = 0
-            
-        skip_count = skip_count + 1
+if __name__ == '__main__':
+    rospy.init_node('diag_agg_pub')
+    pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
+    
+    array = DiagnosticArray()
+    array.status = [
+        DiagnosticStatus(1, '/BASE', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group1/item1', 'Warning', '', []),
+        DiagnosticStatus(0, '/BASE/group1/item2', 'OK', '', []),
 
-    return output_file
+        DiagnosticStatus(0, '/BASE/group2', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group2/item1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group2/item2', 'Warning', '', []),
 
-##\brief Makes sparse CSV with the given number of rows
-##\param csv_file str : CSV filename
-##\param length int : Desired number of rows in CSV
-##\return Path of output file
-def make_sparse_length(csv_file, length):
-    output_file = csv_file[:-4] + '_sprs_len.csv'
+        DiagnosticStatus(2, '/BASE2', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE2/group3/item1', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', [])]
 
-    input_reader = csv.reader(open(csv_file, 'rb'))
-
-    f = open(output_file, 'wb')
-    output_writer = csv.writer(f)
-
-    # Calculate skip count for file
-    orig_len = len(open(csv_file, 'r').read().split('\n'))
-    skip = max(int(orig_len / length), 1)
-
-    skip_count = skip
-    for row in input_reader:
-        if skip_count >= skip:
-            output_writer.writerow(row)
-            skip_count = 0
-            
-        skip_count = skip_count + 1
-
-    return output_file
+    while not rospy.is_shutdown():
+        pub.publish(array)
+        sleep(1)

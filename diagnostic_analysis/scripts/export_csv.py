@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+#
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2008, Willow Garage, Inc.
@@ -30,39 +31,48 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
-## A basic node to listen to and display incoming diagnostic messages
+##\author Eric Berger, Kevin Watts
 
-import roslib
-roslib.load_manifest('runtime_monitor')
+##\brief Converts diagnostics log files into CSV's for analysis
 
-import sys
-import rospy
+PKG = 'diagnostic_analysis'
+import roslib; roslib.load_manifest(PKG)
+import rosrecord
+import diagnostic_msgs.msg
+import time, sys, os
+import operator, tempfile, subprocess
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+from optparse import OptionParser
 
+from diagnostic_analysis.exporter import LogExporter
 
-NAME = 'runtime_monitor'
-
-def callback(message):
-    print""
-    print "New Message at %.1f"%message.header.stamp.to_time()
-    for s in message.status:
-        ## @TODO process byte level
-        print "Name: %s \nMessage: %s"%(s.name, s.message)
-        for v in s.strings + s.values:
-            print "   %s: %s" % (v.label, v.value)
-    sys.stdout.flush()
-    
-def listener():
-    rospy.Subscriber("/diagnostics", DiagnosticArray, callback)
-    rospy.init_node(NAME, anonymous=True)
-    rospy.spin()
-        
 if __name__ == '__main__':
+    # Allow user to set output directory
+    parser = OptionParser()
+    parser.add_option("-d", "--directory", dest="directory",
+                      help="Write output to DIR/output. Default: %s" % PKG, metavar="DIR",
+                      default=roslib.packages.get_pkg_dir(PKG), action="store")
+    options, args = parser.parse_args()
+
+    exporters = []
+
+    print 'Output directory: %s/output' % options.directory
+
     try:
-        listener()
-    except KeyboardInterrupt, e:
-        pass
-    print "exiting"
+        for i, f in enumerate(args):
+            filepath = 'output/%s_csv' % os.path.basename(f)[0:os.path.basename(f).find('.')]
+            
+            output_dir = os.path.join(options.directory,  filepath)
+            print "Processing file %s. File %d of %d." % (os.path.basename(f), i + 1, len(args))
+            
+            exp = LogExporter(output_dir, f)
+            exp.process_log()
+            exp.finish_logfile()
+            exporters.append(exp)
+
+        print 'Finished processing files.'
+    except:
+        import traceback
+        print "Caught exceptiong processing log file"
+        traceback.print_exc()

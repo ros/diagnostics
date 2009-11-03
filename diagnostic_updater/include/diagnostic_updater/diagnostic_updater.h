@@ -47,7 +47,8 @@
 
 #include <boost/thread.hpp>
 
-/**
+/* Old main page, now mostly obsolete. Should delete before M3 once ROS API
+is better documented.
 
 @mainpage
 
@@ -72,11 +73,6 @@ Reads the following parameters from the parameter server
 
 - @b "diagnostic_period" : @b [double] period at which diagnostics should be sent in seconds (Default: 1)
 
-**/
-
-/**
-\@class Updater Simplifies writing of diagnostic publishing code, by allowing a set of
-registered callbacks to be published at a fixed rate.
 */
 
 namespace diagnostic_updater
@@ -86,21 +82,40 @@ typedef boost::function<void(DiagnosticStatusWrapper&)> TaskFunction;
 typedef boost::function<void(diagnostic_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
 
 /**
- * DiagnosticTask is an abstract base class for diagnostic tasks.
+ * \brief DiagnosticTask is an abstract base class for diagnostic tasks.
+ *
  * Subclasses will be provided for generating common diagnostic
  * information.
+ *
+ * A DiagnosticTask has a name, and a function that is called to cleate a
+ * DiagnosticStatusWrapper.
  */
 
 class DiagnosticTask
 {
 public:
+	/**
+	 * \brief Constructs a DiagnosticTask setting its name in the process.
+	 */
   DiagnosticTask(const std::string name) : name_(name)
   {}
+
+	/**
+	 * \brief Returns the name of the DiagnosticTask.
+	 */
   const std::string &getName()
   {
     return name_;
   }
+
+  /**
+	 * \brief Fills out this Task's DiagnosticStatusWrapper.
+	 */
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat) = 0;
+
+	/**
+	 * Virtual destructor as this is a base class.
+	 */
   virtual ~DiagnosticTask()
   {}
 
@@ -108,10 +123,22 @@ private:
   const std::string name_;
 };
 
+/**
+ * \brief a DiagnosticTask based on a boost::function.
+ */
+
 template <class T>
 class GenericFunctionDiagnosticTask : public DiagnosticTask
 {
 public:
+	/**
+	 * Constructs a GenericFunctionDiagnosticTask based on the given name and
+	 * function.
+	 *
+	 * \param name Name of the function.
+	 *
+	 * \param fn Function to be called when DiagnosticTask::run is called.
+	 */
   GenericFunctionDiagnosticTask(const std::string &name, boost::function<void(T&)> fn) : 
     DiagnosticTask(name), fn_(fn)
   {}
@@ -130,15 +157,24 @@ typedef GenericFunctionDiagnosticTask<diagnostic_msgs::DiagnosticStatus> Unwrapp
 typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
 
 /**
- * A ComposableDiagnosticTask is a DiagnosticTask that is designed to be
- * composed with other ComposableDiagnosticTask into a single status
- * message using a CombinationDiagnosticTask.
+ * \brief A DiagnosticTask that can be combined with others into a
+ * composite DiagnosticStatusWrapper.
+ *
+ * The combination operation is done by using a CombinationDiagnosticTask.
+ * 
+ * A typical use is to allow a generic diagnostic such as the \ref
+ * FrequencyStatus to be augmented with node-specific key-value pairs.
+ *
+ * This is an abstract base class. Sub-classes should redefine split_run.
  */
 
 class ComposableDiagnosticTask : public DiagnosticTask
 {
 public:
-  ComposableDiagnosticTask(const std::string name) : DiagnosticTask(name)
+  /**
+	 * \brief Contructs a ComposableDiagnosticTask with the specified name.
+	 */
+	ComposableDiagnosticTask(const std::string name) : DiagnosticTask(name)
   {}
   
   void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
@@ -146,23 +182,49 @@ public:
     split_run(stat, stat);
   }
 
+protected:
+  friend class CombinationDiagnosticTask;
+
+	/**
+	 * \brief Partially fills out a DiagnosticStatusWrapper.
+	 *
+	 * This method is called for a number of CombinationDiagnosticTask
+	 * instances when generating a DiagnosticStatusWrapper. The summary and
+	 * key-value pairs are placed in separate DiagnosticStatusWrapper
+	 * instances because the summaries need to be merged together.
+	 *
+	 * \param summary Place to store the summary (level and message) for this task.
+	 * These will be merged with the summary for the other tasks using
+	 * diagnostic_updater::DiagnosticStatusWrapper::mergeSummary.
+	 *
+	 * \param details Place to store the key-value pairs created by this
+	 * task. 
+	 */
   virtual void split_run(diagnostic_updater::DiagnosticStatusWrapper &summary, 
       diagnostic_updater::DiagnosticStatusWrapper &details) = 0;
 };
 
 /**
- * The CombinationDiagnosticTask allows multiple ComposableDiagnosticTask instances
- * to be combined into a single DiagnosticStatus. The output of the
- * combination has the max of the status levels, and a concatenation of the
- * non-zero-level messages.
+ * \brief Merges CombinationDiagnosticTask into a single DiagnosticTask.
+ *
+ * The CombinationDiagnosticTask allows multiple ComposableDiagnosticTask
+ * instances to be combined into a single DiagnosticStatus. The output of
+ * the combination has the max of the status levels, and a concatenation of
+ * the non-zero-level messages.
  */
 
 class CombinationDiagnosticTask : public DiagnosticTask
 {
 public:
+	/**
+	 * \brief Constructs a CombinationDiagnosticTask with the given name.
+	 */
   CombinationDiagnosticTask(const std::string name) : DiagnosticTask(name)
   {}
 
+	/**
+	 * \brief Runs each child and merges their outputs.
+	 */
   virtual void run(DiagnosticStatusWrapper &stat)
   {
     DiagnosticStatusWrapper summary;
@@ -177,7 +239,13 @@ public:
     }
   }
   
-  void addTask(ComposableDiagnosticTask *t)
+  /**
+	 * \brief Adds a child CombinationDiagnosticTask.
+	 *
+	 * This CombinationDiagnosticTask will be called each time this
+	 * CombinationDiagnosticTask is run.
+	 */
+	void addTask(ComposableDiagnosticTask *t)
   {
     tasks_.push_back(t);
   }
@@ -187,17 +255,23 @@ private:
 };
 
 /**
+ * \brief Internal use only.
  *
- * The @b DiagnosticTaskVector class is abstract base class that manages a
- * collection of diagnostic updaters. It contains the common functionality
- * used for producing diagnostic updates and for self-checks.
- *
+ * Base class for diagnostic_updater::Updater and self_test::Dispatcher.
+ * The class manages a collection of diagnostic updaters. It contains the
+ * common functionality used for producing diagnostic updates and for
+ * self-tests.
  */
 
 class DiagnosticTaskVector
 {
 protected:
-  class DiagnosticTaskInternal
+  /**
+	 * \brief Class used to represent a diagnostic task internally in
+	 * DiagnosticTaskVector.
+	 */
+	
+	class DiagnosticTaskInternal
   {
   public:
     DiagnosticTaskInternal(const std::string name, TaskFunction f) :
@@ -222,6 +296,9 @@ protected:
 
   boost::mutex lock_;
 
+  /**
+	 * \brief Returns the vector of tasks.
+	 */
   const std::vector<DiagnosticTaskInternal> &getTasks()
   {
     return tasks_;
@@ -229,11 +306,15 @@ protected:
 
 public:    
   /**
-   * \brief Add a DiagnosticTask to the DiagnosticTaskVector
+	 * \brief Add a DiagnosticTask embodied by a name and function to the
+	 * DiagnosticTaskVector
    *
-   * \param task The DiagnosticTask to be added. It must remain valid at
-   * least until the last time its diagnostic method is called. It need not be
-   * valid at the time the DiagnosticTaskVector is destructed.
+	 * \param name Name to autofill in the DiagnosticStatusWrapper for this task.
+	 * 
+	 * \param f Function to call to fill out the DiagnosticStatusWrapper.
+	 * This function need not remain valid after the last time the tasks are
+	 * called, and in particular it need not be valid at the time the
+	 * DiagnosticTaskVector is destructed.
    */
 
   void add(const std::string &name, TaskFunction f)
@@ -242,12 +323,33 @@ public:
     addInternal(int_task);
   }
 
+  /**
+   * \brief Add a DiagnosticTask to the DiagnosticTaskVector
+   *
+   * \param task The DiagnosticTask to be added. It must remain live at
+   * least until the last time its diagnostic method is called. It need not be
+   * valid at the time the DiagnosticTaskVector is destructed.
+   */
+
   void add(DiagnosticTask &task)
   {
     TaskFunction f = boost::bind(&DiagnosticTask::run, &task, _1);
     add(task.getName(), f);
   }
   
+  /**
+	 * \brief Add a DiagnosticTask embodied by a name and method to the
+	 * DiagnosticTaskVector
+   *
+	 * \param name Name to autofill in the DiagnosticStatusWrapper for this task.
+	 *
+	 * \param c Class instance the method is being called on.
+	 * 
+	 * \param f Method to call to fill out the DiagnosticStatusWrapper.
+	 * This method need not remain valid after the last time the tasks are
+	 * called, and in particular it need not be valid at the time the
+	 * DiagnosticTaskVector is destructed.
+   */
   template <class T>
   void add(const std::string name, T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
   {
@@ -256,11 +358,19 @@ public:
   }
   
 private:
-  virtual void addedTaskCallback(DiagnosticTaskInternal &)
+  /**
+	 * Allows an action to be taken when a task is added. The Updater class
+	 * uses this to immediately publish a diagnostic that says that the node
+	 * is loading.
+	 */
+	virtual void addedTaskCallback(DiagnosticTaskInternal &)
   {}
   std::vector<DiagnosticTaskInternal> tasks_;
   
 protected:
+	/**
+	 * Common code for all add methods.
+	 */
   void addInternal(DiagnosticTaskInternal &task)
   {
     boost::mutex::scoped_lock lock(lock_);
@@ -269,16 +379,44 @@ protected:
   }
 };
 
+/**
+ * \brief Manages a list of diagnostic tasks, and calls them in a
+ * rate-limited manner.
+ *
+ * This class manages a list of diagnostic tasks. Its update function
+ * should be called frequently. At some predetermined rate, the update
+ * function will cause all the diagnostic tasks to run, and will collate
+ * and publish the resulting diagnostics. The publication rate is
+ * determined by the "~/diagnostic_period" ros parameter.
+ *
+ * The class also allows an update to be forced when something significant
+ * has happened, and allows a single message to be broadcast on all the
+ * diagnostics if normal operation of the node is suspended for some
+ * reason.
+ */
+
 class Updater : public DiagnosticTaskVector
 {
 public:
   bool verbose_;
   
+  /**
+	 * \brief Constructs an updater class.
+	 *
+	 * \param h Node handle from which to get the diagnostic_period
+	 * parameter.
+	 */
+
   Updater(ros::NodeHandle h) : node_handle_(h)
   {
     setup();
   }
   
+  /**
+	 * \brief Causes the diagnostics to update if the inter-update interval
+	 * has been exceeded.
+	 */
+
   void update()
   {
     ros::Time now_time = ros::Time::now();
@@ -288,6 +426,13 @@ public:
 
     force_update();
   }
+
+  /**
+	 * \brief Forces the diagnostics to update.
+	 *
+	 * Useful if the node has undergone a drastic state change that should be
+	 * published immediately.
+	 */
 
   void force_update()
   {
@@ -321,12 +466,16 @@ public:
     }
   }
 
+  /**
+	 * \brief Returns the interval between updates.
+	 */
+
   double getPeriod()
   {
     return period_;
   }
 
-  // Destructor has troble because the node is already shut down.
+  // Destructor has trouble because the node is already shut down.
   /*~Updater()
   {
     // Create a new node handle and publisher because the existing one is 
@@ -338,7 +487,18 @@ public:
     broadcast(2, "Node shut down"); 
   }*/
 
-  void broadcast(int lvl, const std::string msg)
+  /**
+	 * \brief Output a message on all the known DiagnosticStatus.
+	 *
+	 * Useful if something drastic is happening such as shutdown or a
+	 * self-test.
+	 *
+	 * \param lvl Level of the diagnostic being output.
+	 *
+	 * \param msg Status message to output.
+	 */
+
+	void broadcast(int lvl, const std::string msg)
   {
     std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
       
@@ -358,13 +518,19 @@ public:
   }
 
 private:
-  void publish(diagnostic_msgs::DiagnosticStatus &stat)
+  /**
+	 * Publishes a single diagnostic status.
+	 */
+	void publish(diagnostic_msgs::DiagnosticStatus &stat)
   {
     std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
     status_vec.push_back(stat);
     publish(status_vec);
   }
 
+  /**
+	 * Publishes a vector of diagnostic statuses.
+	 */
   void publish(std::vector<diagnostic_msgs::DiagnosticStatus> &status_vec)
   {
     for  (std::vector<diagnostic_msgs::DiagnosticStatus>::iterator 
@@ -378,7 +544,10 @@ private:
     publisher_.publish(msg);
   }
 
-  void setup()
+  /**
+	 * Publishes on /diagnostics and reads the diagnostic_period parameter.
+	 */
+	void setup()
   {
     publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
     private_node_handle_ = ros::NodeHandle("~");
@@ -389,6 +558,10 @@ private:
     verbose_ = false;
   }
 
+	/**
+	 * Causes a placeholder DiagnosticStatus to be published as soon as a
+	 * diagnostic task is added to the Updater.
+	 */
   virtual void addedTaskCallback(DiagnosticTaskInternal &task)
   {
     DiagnosticStatusWrapper stat;
@@ -410,18 +583,8 @@ private:
 };
 
 /**
- *
- * Compatibility class to support the nodes that use the old version of the
- * diagnostic_updater. This is deprecated, so avoid using it.
- *
- */
-
-/**
- *
  * This class is deprecated. Use diagnostic_updater::Updater instead.
- *
  */
-
 
 template <class T>
 class DiagnosticUpdater : public diagnostic_updater::Updater

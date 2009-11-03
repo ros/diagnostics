@@ -34,7 +34,7 @@
 
 # Author: Kevin Watts
 
-PKG = 'diagnostics_analysis'
+PKG = 'diagnostic_analysis'
 
 import roslib; roslib.load_manifest(PKG)
 import rostest
@@ -48,8 +48,8 @@ import tempfile
 import time, os
 import csv
 
-from diagnostics_analysis.exporter import LogExporter
-from diagnostics_analysis.sparse import *
+from diagnostic_analysis.exporter import LogExporter
+from diagnostic_analysis.sparse import *
 
 row_count = 100
 

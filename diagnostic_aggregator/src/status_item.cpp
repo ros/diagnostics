@@ -32,68 +32,65 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Kevin Watts
+/**!< \author Kevin Watts */
 
-#include <diagnostic_aggregator/diagnostic_item.h>
+#include <diagnostic_aggregator/status_item.h>
 
-using namespace diagnostic_item;
+using namespace diagnostic_aggregator;
 using namespace std;
 
-DiagnosticItem::DiagnosticItem(const diagnostic_msgs::DiagnosticStatus *status)
+StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
 {
-  checked_ = false;
-  level_ = status->level;
+  level_ = valToLevel(status->level);
   name_ = status->name;
   message_ = status->message;
   hw_id_ = status->hardware_id;
-  values_ = status->values; // Copy?
-
-  // Replace "/" with "" in name to output
-  output_name_ = name_;
-  string slash_str = "/";
-  string::size_type pos = 0;
-  while ((pos = output_name_.find(slash_str, pos)) != string::npos)
-  {
-    output_name_.replace( pos, slash_str.size(), " ");
-    pos++;
-  }
-
+  values_ = status->values;
+  
+  output_name_ = getOutputName(name_);
+  
+  update_time_ = ros::Time::now();
 }
 
-DiagnosticItem::~DiagnosticItem() {}
+StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
+{
+  name_ = item_name;
+  message_ = message;
+  level_ = level;
+  hw_id_ = "";
+  
+  output_name_ = getOutputName(name_);
 
-void DiagnosticItem::update(const diagnostic_msgs::DiagnosticStatus *status)
+  update_time_ = ros::Time::now();
+}
+
+StatusItem::~StatusItem() {}
+
+bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
 {
   if (name_ != status->name)
-    ROS_ERROR("Incorrect name when updating DiagnosticItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
+  {
+    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
+    return false;
+  }
 
+  double update_interval = (ros::Time::now() - update_time_).toSec();
+  if (update_interval < 0)
+    ROS_WARN("StatusItem is being updated with older data. Negative update time: %f", update_interval);
 
-  level_ = status->level;
+  level_ = valToLevel(status->level);
   message_ = status->message;
   hw_id_ = status->hardware_id;
-  values_ = status->values; // Copy?
+  values_ = status->values;
+
+  update_time_ = ros::Time::now();
+
+  return true;
 }
 
-diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg()
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale) const
 {
-  checked_ = true;
-
-  diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-  status->name = output_name_;
-  status->level = level_;
-  status->message = message_;
-  status->hardware_id = hw_id_;
-  status->values = values_;
-
-  return status;
-}
-
-diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg(std::string prefix, bool stale)
-{
-  checked_ = true;
-
-  diagnostic_msgs::DiagnosticStatus *status = new diagnostic_msgs::DiagnosticStatus();
-  ///\todo Check original name to make sure no "/" characters
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
 
   status->name = prefix + "/" + output_name_;
   status->level = level_;
@@ -102,16 +99,8 @@ diagnostic_msgs::DiagnosticStatus *DiagnosticItem::toStatusMsg(std::string prefi
   status->values = values_;
 
   if (stale)
-    status->level = 3;
+    status->level = Level_Stale;
 
   return status;
 }
 
-
-int8_t DiagnosticItem::getLevel() { return level_; }
-
-string DiagnosticItem::getMessage() { return message_; }
-string DiagnosticItem::getName() { return name_; }
-
-bool DiagnosticItem::hasChecked() {return checked_;}
-  
