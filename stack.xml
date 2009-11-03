@@ -1,9 +1,9 @@
 <stack name="diagnostics" version="0.1">
-  <description brief="diagnostics packages from ros-pkg">
+  <description brief="Diagnostics analysis, processing and display">
     Packages related to gathering, viewing, and analyzing diagnostics data
     from robots.
   </description>
-  <author>Kevin Watts watts@willowgarage.com, Tully Foote tfoote@willowgarage.com</author>
+  <author>Kevin Watts watts@willowgarage.com, Tully Foote tfoote@willowgarage.com, Blaise Gassend blaise@willowgarage.com</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/diagnostics</url>
