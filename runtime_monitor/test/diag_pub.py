@@ -36,7 +36,7 @@
 
 ##\brief Publishes diagnostic messages for robot monitor regression test
 
-PKG = 'robot_monitor'
+PKG = 'runtime_monitor'
 
 import roslib; roslib.load_manifest(PKG)
 
@@ -47,23 +47,28 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 if __name__ == '__main__':
     rospy.init_node('diag_pub')
-    pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
+    pub = rospy.Publisher('/diagnostics', DiagnosticArray)
     
     array = DiagnosticArray()
     array.status = [
-        DiagnosticStatus(1, '/BASE', 'OK', '', []),
-        DiagnosticStatus(0, '/BASE/group1', 'OK', '', []),
-        DiagnosticStatus(1, '/BASE/group1/item1', 'Warning', '', []),
-        DiagnosticStatus(0, '/BASE/group1/item2', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_l_wheel_motor)', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_r_wheel_motor)', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_rotation_motor)', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_l_wheel_motor)', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_r_wheel_motor)', 'OK', '', []),
+        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_rotation_motor)', 'OK', '', []),
 
-        DiagnosticStatus(0, '/BASE/group2', 'OK', '', []),
-        DiagnosticStatus(0, '/BASE/group2/item1', 'OK', '', []),
-        DiagnosticStatus(1, '/BASE/group2/item2', 'Warning', '', []),
+        DiagnosticStatus(0, 'tilt_hokuyo_node: Frequency Status', 'OK', '', []),
+        DiagnosticStatus(0, 'tilt_hokuyo_node: Connection Status', 'OK', '', []),
+        DiagnosticStatus(0, 'base_hokuyo_node: Frequency Status', 'OK', '', []),
+        DiagnosticStatus(0, 'base_hokuyo_node: Connection Status', 'OK', '', []),
 
-        DiagnosticStatus(2, '/BASE2', 'OK', '', []),
-        DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
-        DiagnosticStatus(0, '/BASE2/group3/item1', 'OK', '', []),
-        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', [])]
+        DiagnosticStatus(0, 'Joint (fl_caster_l_wheel_joint)', 'OK', '', []),
+        DiagnosticStatus(0, 'Joint (fl_caster_r_wheel_joint)', 'OK', '', []),
+        DiagnosticStatus(0, 'Joint (fl_caster_rotation_joint)', 'OK', '', []),
+        DiagnosticStatus(0, 'Joint (fr_caster_l_wheel_joint)', 'OK', '', []),
+        DiagnosticStatus(0, 'Joint (fr_caster_r_wheel_joint)', 'OK', '', []),
+        DiagnosticStatus(0, 'Joint (fr_caster_rotation_joint)', 'OK', '', [])]
 
     while not rospy.is_shutdown():
         pub.publish(array)

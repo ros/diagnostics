@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,54 +32,39 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-## A basic node to listen to and display incoming diagnostic messages
+##\author Kevin Watts
 
-import getopt
-import roslib
-roslib.load_manifest('runtime_monitor')
+##\brief Publishes diagnostic messages for robot monitor regression test
 
-import sys
+PKG = 'robot_monitor'
+
+import roslib; roslib.load_manifest(PKG)
+
 import rospy
+from time import sleep
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue, DiagnosticString
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
-
-NAME = 'runtime_monitor_logging'
-
-try:
-    opts, args = getopt.getopt(sys.argv[1:], "f:", ["file"])
-except getopt.GetoptError, err:
-    print str(err)
-    exit
-
-for o, a in opts:
-    if o == "-f":
-        print "Opening %s"%a
-        f = open(a, 'a');
-    else:
-        print "Opening default"
-        f = open('diagnostic.log', 'a');
-
-
-def callback(message):
-##    global f
-    f.write("@%.1f "%message.header.stamp.to_time())
-    for s in message.status:
-        ## @TODO process byte level
-        f.write( "$C %s: %s "%(s.name, s.message))
-        for v in s.strings + s.values:
-            f.write( "$V %s : %s " % (v.label, v.value))
-    f.write("\n")
-    
-def listener():
-    rospy.Subscriber("/diagnostics", DiagnosticArray, callback)
-    rospy.init_node(NAME, anonymous=True)
-    rospy.spin()
-        
 if __name__ == '__main__':
-    try:
-        listener()
-    except KeyboardInterrupt, e:
-        pass
-    f.close()
-    print "exiting"
+    rospy.init_node('diag_agg_pub')
+    pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
+    
+    array = DiagnosticArray()
+    array.status = [
+        DiagnosticStatus(1, '/BASE', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group1/item1', 'Warning', '', []),
+        DiagnosticStatus(0, '/BASE/group1/item2', 'OK', '', []),
+
+        DiagnosticStatus(0, '/BASE/group2', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE/group2/item1', 'OK', '', []),
+        DiagnosticStatus(1, '/BASE/group2/item2', 'Warning', '', []),
+
+        DiagnosticStatus(2, '/BASE2', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
+        DiagnosticStatus(0, '/BASE2/group3/item1', 'OK', '', []),
+        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', [])]
+
+    while not rospy.is_shutdown():
+        pub.publish(array)
+        sleep(1)
