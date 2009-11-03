@@ -25,19 +25,21 @@ $ ./robot_monitor.py
 
 The incoming diagnostics data is parsed by DiagnosticStatus name, and separated by '/'. The names:
 \verbatim
-\Robot
-\Robot\Motors
-\Robot\Motors\Head Motor
+/Robot
+/Robot/Motors
+/Robot/Motors/Head Motor
 \endverbatim
-Form a tree with the trunk 'Robot' and branch 'Motors' with leaf 'Head Motor'. Multiple trunk names, publishing as one or more DiagnosticArray's, can be displayed.
+The robot monitor forms a tree with the trunk 'Robot' and branch 'Motors' with leaf 'Head Motor'. Multiple trunk names, publishing as one or more DiagnosticArray's, can be displayed.
+
+The robot monitor supports display of two or motor robots. Simply give each robot a different base path, ex: "/Robot1" and "/Robot2". Generally this is done by using two
+diagnostic_aggregator aggregator_node's, each subscribing to a remapped "/diagnostics" input. 
+
+When displaying only one robot, it is usually best to leave the "/Robot" prefix empty.
 
 \subsubsection topics ROS topics
 
 Subscribes to:
-- \b "diagnostics": [diagnostics_msgs/DiagnosticArray] Raw input
-
-Publishes to:
-- \b "diagnostics_agg": [diagnostics_msgs/DiagnosticArray] Aggregated output
+- \b "diagnostics_agg": [diagnostics_msgs/DiagnosticArray] Aggregated input
 
 
 
