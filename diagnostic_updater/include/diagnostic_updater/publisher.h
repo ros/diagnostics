@@ -233,9 +233,7 @@ public:
 	 * is needed to collect the timestamp diagnostics. It is defined here to
 	 * prevent the inherited tick method from being used accidentally.
 	 */
-	virtual void tick() { ROS_FATAL("tick(void) has been called on a
-			TopicDiagnostic. This is never correct. Use tick(ros::Time &)
-			instead."); }
+	virtual void tick() { ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead."); }
 
   /**
 	 * \brief Collects statistics and publishes the message.
