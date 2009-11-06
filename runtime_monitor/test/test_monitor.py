@@ -96,7 +96,7 @@ class TestRuntimeMonitor(unittest.TestCase):
         self.runner = RuntimeRunner()
         self.runner.start()
         
-    def test_robot_monitor(self):
+    def test_runtime_monitor(self):
         start = rospy.get_time()
         while not rospy.is_shutdown():
             if rospy.get_time() - start > DURATION:
@@ -104,9 +104,12 @@ class TestRuntimeMonitor(unittest.TestCase):
             self.assert_(self.runner.isAlive(), "Thread running runtime monitor isn't running.")
             sleep(1.0)
             
-        # Hack for closing the app
-        wx.CallAfter(self.runner.app._frame.on_exit(None))
-        self.runner.join(5)
+        try:
+            wx.CallAfter(self.runner.app._frame.on_exit(None))
+            self.runner.join(5)
+        except:
+            import traceback
+            self.assert_(False, "Caught exception closing runtime monitor: %s" % traceback.format_exc())
         
         self.assert_(not self.runner.isAlive(), "Thread running runtime monitor didn't join up.")
         self.assert_(not rospy.is_shutdown(), "Rospy shut down during test.")

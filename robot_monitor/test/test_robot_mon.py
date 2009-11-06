@@ -106,9 +106,13 @@ class TestRobotMonitor(unittest.TestCase):
             sleep(1.0)
             
         # Hack for closing the app
-        wx.CallAfter(self.runner.app._frame.on_exit(None))
-        self.runner.join(5)
-        
+        try:
+            wx.CallAfter(self.runner.app._frame.on_exit(None))
+            self.runner.join(5)
+        except:
+            import traceback
+            self.assert_(False, "Caught exception closing robot monitor: %s" % traceback.format_exc())
+
         self.assert_(not self.runner.isAlive(), "Thread running robot monitor didn't join up")
         self.assert_(not rospy.is_shutdown(), "Rospy shut down")
 

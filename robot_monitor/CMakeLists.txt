@@ -29,4 +29,20 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rospack_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_rostest(test/robot_mon_test.launch)
+# Remove in ROS 0.10
+macro(rosbuild_check_for_display var)
+ execute_process(COMMAND "xdpyinfo"
+                 OUTPUT_VARIABLE _dummy
+                 ERROR_VARIABLE _dummy
+                 RESULT_VARIABLE _xdpyinfo_failed)
+ if(_xdpyinfo_failed)
+   set(${var} 0)
+ else(_xdpyinfo_failed)
+   set(${var} 1)
+ endif(_xdpyinfo_failed)
+endmacro(rosbuild_check_for_display)
+
+rosbuild_check_for_display(disp)
+if(disp)
+  rosbuild_add_rostest(test/robot_mon_test.launch)
+endif(disp)
