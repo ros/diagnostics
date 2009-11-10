@@ -76,6 +76,10 @@ if __name__ == '__main__':
     try:
         app = RobotMonitorApp()
         app.MainLoop()
+    except KeyboardInterrupt, e:
+        pass
+    except rospy.exceptions.ROSInitException, e:
+        print 'Failed to initialize node, master probably isn\'t up.'
     except Exception, e:
         import traceback
         traceback.print_exc()
