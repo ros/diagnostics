@@ -191,6 +191,8 @@ void Aggregator::publishData()
     array.status.push_back(*stat);
   }
 
+  array.header.stamp = ros::Time::now();
+
   agg_pub_.publish(array);
 }
   
