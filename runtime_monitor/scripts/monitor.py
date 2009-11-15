@@ -66,7 +66,6 @@ class MainWindow(wx.Frame):
         self.menubar.Append(self.filemenu,"&File")
         self.menubar.Append(self.monitor_menu, "&Monitor")
         self.SetMenuBar(self.menubar)
-        #wx.EVT_MENU(self, wx.ID_EXIT, self.on_exit)
         self.Bind(wx.EVT_MENU, self.on_menu)
 
         self.panel = MonitorPanel(self)
@@ -110,4 +109,6 @@ if __name__ == '__main__':
         wxmonitor()
     except KeyboardInterrupt, e:
         pass
-    print "exiting"
+    except rospy.exceptions.ROSInitException, e:
+        print 'Failed to initialize node, master probably isn\'t up.'
+

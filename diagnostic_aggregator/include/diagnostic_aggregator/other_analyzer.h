@@ -82,8 +82,16 @@ public:
    */
   bool match(std::string name) const { return true; }
 
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
+  {
+    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
 
-
+    // We don't report anything if there's no "Other" items
+    if (processed.size() == 1)
+      processed.clear();
+    
+    return processed;
+  }
 };
 
 }
