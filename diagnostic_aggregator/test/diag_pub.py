@@ -73,6 +73,7 @@ if __name__ == '__main__':
         DiagnosticStatus(2, 'other1', 'Error', '', []),
         DiagnosticStatus(0, 'other2', 'OK', '', []),
         DiagnosticStatus(0, 'other3', 'OK', '', [])]
+    array.header.stamp = rospy.get_rostime()
 
     while not rospy.is_shutdown():
         pub.publish(array)

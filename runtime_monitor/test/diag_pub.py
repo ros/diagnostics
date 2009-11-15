@@ -69,6 +69,7 @@ if __name__ == '__main__':
         DiagnosticStatus(0, 'Joint (fr_caster_l_wheel_joint)', 'OK', '', []),
         DiagnosticStatus(0, 'Joint (fr_caster_r_wheel_joint)', 'OK', '', []),
         DiagnosticStatus(0, 'Joint (fr_caster_rotation_joint)', 'OK', '', [])]
+    array.header.stamp = rospy.get_rostime()
 
     while not rospy.is_shutdown():
         pub.publish(array)
