@@ -41,11 +41,12 @@
 TEST(SelfTest, runSelfTest)
 {
   ros::NodeHandle nh;
+  ros::NodeHandle nh_private("~");
 
   std::string node_to_test;
   double delay;
-  nh.param("~node_to_test", node_to_test, std::string());
-  nh.param("~delay", delay, 1.);
+  nh_private.param("node_to_test", node_to_test, std::string());
+  nh_private.param("delay", delay, 1.);
   ASSERT_FALSE(node_to_test.empty()) << "selftest_rostest needs the \"node_to_test\" parameter.";
     
   ros::Duration(delay).sleep();
