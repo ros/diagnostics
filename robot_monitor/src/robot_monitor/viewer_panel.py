@@ -70,6 +70,7 @@ class StatusViewer(wx.Panel):
         self.SetSizer(sizer)
  
         self._html_ctrl = xrc.XRCCTRL(self._panel, 'html_ctrl')
+        self._html_ctrl.SetFocus()
 
         self._manager = manager
         self._name = name
@@ -117,5 +118,12 @@ class StatusViewerFrame(wx.Frame):
         
         self.panel = StatusViewer(self, name, manager)
         
-    def on_exit(self, e):
-        self.Close(True)
+        self.Bind(wx.EVT_CHAR, self.on_char)
+        self.panel._html_ctrl.Bind(wx.EVT_CHAR, self.on_char)
+        
+    def on_char(self, evt):
+        if (evt.GetKeyCode() == wx.WXK_ESCAPE):
+          self.Close()
+        else:
+          evt.Skip()
+        
