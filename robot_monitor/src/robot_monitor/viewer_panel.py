@@ -71,16 +71,37 @@ class StatusViewer(wx.Panel):
  
         self._html_ctrl = xrc.XRCCTRL(self._panel, 'html_ctrl')
         self._html_ctrl.SetFocus()
+        
+        self._pause_button = xrc.XRCCTRL(self._panel, 'pause_button')
+        self._pause_button.Bind(wx.EVT_TOGGLEBUTTON, self.on_pause)
 
         self._manager = manager
         self._name = name
         
+        self._paused = False
+        self._last_status = None
+        
     ##\brief Destructor removes viewer from manager's update list
     def __del__(self):
         self._manager.remove_viewer(self._name)
+        
+    def on_pause(self, event):
+        if (event.IsChecked()):
+            self._paused = True
+        else:
+            self._paused = False
+            if (self._last_status is not None):
+                self._write_status(self._last_status)
+
+    def set_status(self, status):
+        self._last_status = status
+        if (self._paused):
+            return
+        
+        self._write_status(status)
 
     ##\brief Write status as HTML, like runtime monitor
-    def write_status(self, status):
+    def _write_status(self, status):
         s = cStringIO.StringIO()
         
         s.write("<html><body>")

@@ -188,6 +188,9 @@ class RobotMonitorPanel(wx.Panel):
         self._error_tree_ctrl.AddRoot("Root")
         self._warning_tree_ctrl = xrc.XRCCTRL(self._panel, 'warning_tree')
         self._warning_tree_ctrl.AddRoot("Root")
+        
+        self._pause_button = xrc.XRCCTRL(self._panel, 'pause_button')
+        self._pause_button.Bind(wx.EVT_TOGGLEBUTTON, self.on_pause)
 
         # Image list for icons
         image_list = wx.ImageList(16, 16)
@@ -222,6 +225,9 @@ class RobotMonitorPanel(wx.Panel):
         
         self._subscriber = rospy.Subscriber('/diagnostics_agg', DiagnosticArray,
                                             self.callback)
+        
+        self._paused = False
+        self._last_msg = None
 
     ##\brief Unregisters subscription from master in destructor
     def __del__(self):
@@ -240,6 +246,10 @@ class RobotMonitorPanel(wx.Panel):
     ## name, and expanded nodes will be expanded again after the tree clear.
     ## 
     def new_message(self, msg):
+        self._last_msg = msg
+        if (self._paused):
+            return
+        
         self._tree_ctrl.Freeze()
         
         # Since we have message, remove empty item
@@ -264,7 +274,7 @@ class RobotMonitorPanel(wx.Panel):
         # Update viewers
         for k,v in self._viewers.iteritems():
             if (all.has_key(k)):
-                v.panel.write_status(all[k].status)
+                v.panel.set_status(all[k].status)
         
         self._update_status_images()
         
@@ -366,6 +376,14 @@ class RobotMonitorPanel(wx.Panel):
     def on_warning_item_activate(self, event):
         self._on_item_activate(event, self._warning_tree_ctrl)
         
+    def on_pause(self, event):
+        if (event.IsChecked()):
+            self._paused = True
+        else:
+            self._paused = False
+            if (self._last_msg is not None):
+                self.new_message(self._last_msg)
+        
     def _on_item_activate(self, event, tree_ctrl):
         id = event.GetItem()
         if id == None:
@@ -381,18 +399,23 @@ class RobotMonitorPanel(wx.Panel):
             return
 
         name = item.status.name
-        title = get_nice_name(name)
         
-        ##\todo Move this viewer somewhere useful
-        viewer = StatusViewerFrame(self._frame, name, self, title)
-        viewer.SetSize(wx.Size(500, 600))
-        viewer.Layout()
-        viewer.Center()
-        viewer.Show(True)
-
-        self._viewers[name] = viewer
-
-        viewer.panel.write_status(item.status)
+        if (self._viewers.has_key(name)):
+            self._viewers[name].Raise()
+        else:
+            title = get_nice_name(name)
+            
+            ##\todo Move this viewer somewhere useful
+            viewer = StatusViewerFrame(self._frame, name, self, title)
+            viewer.SetSize(wx.Size(500, 600))
+            viewer.Layout()
+            viewer.Center()
+            viewer.Show(True)
+            viewer.Raise()
+    
+            self._viewers[name] = viewer
+    
+            viewer.panel.set_status(item.status)
 
     ##\brief Gets the "top level" state of the diagnostics
     ##
