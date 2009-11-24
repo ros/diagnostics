@@ -7,10 +7,77 @@
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
 				<option>1</option>
-				<flag>wxALL|wxEXPAND</flag>
+				<flag>wxEXPAND</flag>
 				<border>5</border>
-				<object class="wxTreeCtrl" name="tree_ctrl">
-					<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+				<object class="wxSplitterWindow" name="m_splitter2">
+					<style>wxSP_3D</style>
+					<sashpos>240</sashpos>
+					<gravity>0.5</gravity>
+					<minsize>100</minsize>
+					<orientation>horizontal</orientation>
+					<object class="wxPanel" name="m_panel3">
+						<style>wxTAB_TRAVERSAL</style>
+						<object class="wxBoxSizer">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxStaticBoxSizer">
+									<orient>wxVERTICAL</orient>
+									<label>Errors</label>
+									<object class="sizeritem">
+										<option>1</option>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>5</border>
+										<object class="wxTreeCtrl" name="error_tree">
+											<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+										</object>
+									</object>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxStaticBoxSizer">
+									<orient>wxVERTICAL</orient>
+									<label>Warnings</label>
+									<object class="sizeritem">
+										<option>1</option>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>5</border>
+										<object class="wxTreeCtrl" name="warning_tree">
+											<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="wxPanel" name="m_panel4">
+						<style>wxTAB_TRAVERSAL</style>
+						<object class="wxBoxSizer">
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxStaticBoxSizer">
+									<orient>wxVERTICAL</orient>
+									<label>All</label>
+									<object class="sizeritem">
+										<option>1</option>
+										<flag>wxALL|wxEXPAND</flag>
+										<border>5</border>
+										<object class="wxTreeCtrl" name="tree_ctrl">
+											<style>wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT</style>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
 				</object>
 			</object>
 		</object>

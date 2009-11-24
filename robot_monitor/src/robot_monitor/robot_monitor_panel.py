@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Kevin Watts
+# Author: Kevin Watts, Josh Faust
 
 PKG = 'robot_monitor'
 
@@ -50,32 +50,109 @@ import threading, time
 
 from robot_monitor.viewer_panel import StatusViewerFrame
 
-##\brief Finds list of first-parent names in msg array
-##\param msg DiagnosticArray : Received array of DiagnosticStatus messages
-def find_parent_names_in_msg(msg):
-    parents = []
-    for status in msg.status:
-        parents.append('/'.join(status.name.split('/')[0:2]))
-    parents = set(parents) # Eliminate duplicates
-    return parents
-
 def get_nice_name(status_name):
     return status_name.split('/')[-1]
 
-##\brief Stores DiagnosticStatus message for all items in tree
-class TreeItem(object):
-    ##\brief status DiagnosticStatus : Message to store
-    ##\brief tree_id wxTreeItemId : Id of tree item
-    def __init__(self, status, tree_id):
-        self.status = status
-        self.tree_id = tree_id
-        self.update_time = rospy.get_time()
-        self.has_updated = True
+def get_parent_name(status_name):
+    return ('/'.join(status_name.split('/')[:-1])).strip()
 
+class StatusItem(object):
+    def __init__(self, status):
+        self.tree_id = None
+        self.warning_id = None
+        self.error_id = None
+        self.update(status)
+        
     def update(self, status):
         self.status = status
-        self.has_updated = True
         self.update_time = rospy.get_time()
+        
+class State(object):
+    def __init__(self):
+        self._items = {}
+        self._msg = None
+        
+    def get_parent(self, item):
+        parent_name = get_parent_name(item.status.name)
+        
+        if (parent_name not in self._items):
+            return None
+        
+        return self._items[parent_name]
+    
+    def get_children(self, item):
+        child_keys = [k for k in self._items.iterkeys() if k.startswith(item.status.name + "/")]
+        children = [self._items[k] for k in child_keys]
+        return children
+    
+    def get_items(self):
+        return self._items
+        
+    def update(self, msg):
+        removed = []
+        added = []
+        items = {}
+        
+        # fill items from new msg, creating new StatusItems for any that don't already exist,
+        # and keeping track of those that have been added new
+        for s in msg.status:
+            if (len(s.name) > 0 and s.name[0] != '/'):
+                s.name = '/' + s.name
+            
+            if (s.name not in self._items):
+                i = StatusItem(s)
+                added.append(i)
+                items[s.name] = i
+            else:
+                i = self._items[s.name]
+                i.update(s)
+                items[s.name] = i
+        
+        # find anything without a parent already in the items, and add it as a dummy
+        # item
+        to_add = []
+        for i in items.itervalues():
+            parent = i.status.name
+            while (len(parent) != 0):
+                parent = get_parent_name(parent)
+                if (len(parent) > 0 and parent not in items):
+                    #print "Adding dummy: '%s'"%(parent)
+                    s = DiagnosticStatus()
+                    s.name = parent
+                    s.message = "Missing item"
+                    pi = StatusItem(s)
+                    to_add.append(pi)
+                  
+        for a in to_add:
+            if (a.status.name not in items):
+                items[a.status.name] = a
+                
+                if (a.status.name not in self._items):
+                    added.append(a)
+        
+        for i in self._items.itervalues():
+            # determine removed items
+            if (i.status.name not in items):
+                removed.append(i)
+                
+        # remove removed items
+        for r in removed:
+            del self._items[r.status.name]
+        
+        self._items = items
+        self._msg = msg
+        
+        # sort so that parents are always added before children
+        added.sort(cmp=lambda l,r: cmp(l.status.name, r.status.name))
+        # sort so that children are always removed before parents
+        removed.sort(cmp=lambda l,r: cmp(l.status.name, r.status.name), reverse=True)
+        
+        #added_keys = [a.status.name for a in added]
+        #if len(added_keys) > 0: print "Added: ", added_keys
+        #removed_keys = [r.status.name for r in removed]
+        #if (len(removed_keys) > 0): print "Removed: ", removed_keys
+        
+        return (added, removed, self._items)
 
 ##\brief Monitor panel for aggregated diagnostics (/diagnostics_agg)
 ##
@@ -96,8 +173,6 @@ class RobotMonitorPanel(wx.Panel):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
 
         self._frame = parent
-        
-        self._mutex = threading.Lock()
 
         xrc_path = os.path.join(roslib.packages.get_pkg_dir(PKG), 'xrc/gui.xrc')
         self._res = xrc.XmlResource(xrc_path)
@@ -107,9 +182,12 @@ class RobotMonitorPanel(wx.Panel):
         self.SetSizer(sizer)
 
         self._tree_ctrl = xrc.XRCCTRL(self._panel, 'tree_ctrl')
-        self._root_id = self._tree_ctrl.AddRoot("Root")
-        self._parent_name_to_id = {} # Parent names by id
-        self._parent_to_name_to_id = {} # id = dict[parent][name]
+        self._tree_ctrl.AddRoot("Root")
+        
+        self._error_tree_ctrl = xrc.XRCCTRL(self._panel, 'error_tree')
+        self._error_tree_ctrl.AddRoot("Root")
+        self._warning_tree_ctrl = xrc.XRCCTRL(self._panel, 'warning_tree')
+        self._warning_tree_ctrl.AddRoot("Root")
 
         # Image list for icons
         image_list = wx.ImageList(16, 16)
@@ -117,174 +195,161 @@ class RobotMonitorPanel(wx.Panel):
         warn_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_WARNING, wx.ART_OTHER, wx.Size(16, 16)))
         ok_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16, 16)))
         stale_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_QUESTION, wx.ART_OTHER, wx.Size(16, 16)))
-        self._tree_ctrl.AssignImageList(image_list)
+        self._tree_ctrl.SetImageList(image_list)
+        self._error_tree_ctrl.SetImageList(image_list)
+        self._warning_tree_ctrl.SetImageList(image_list)
+        self._image_list = image_list
         
         # Tell users we don't have any items yet
-        self._empty_id = self._tree_ctrl.AppendItem(self._root_id, "No data")
+        self._empty_id = self._tree_ctrl.AppendItem(self._tree_ctrl.GetRootItem(), "No data")
         self._tree_ctrl.SetItemImage(self._empty_id, stale_id)
         self._have_message = False
 
         self._image_dict = { 0: ok_id, 1: warn_id, 2: error_id, 3: stale_id }
 
         # Bind double click event
-        self._tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_item_active)
+        self._tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_all_item_activate)
+        self._error_tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_error_item_activate)
+        self._warning_tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_warning_item_activate)
         self._viewers = {}
 
         # Show stale with timer
         self._timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self._assign_tree_status_images)
+        self.Bind(wx.EVT_TIMER, self._update_stale_items)
         self._timer.Start(3000)
+        
+        self._state = State()
         
         self._subscriber = rospy.Subscriber('/diagnostics_agg', DiagnosticArray,
                                             self.callback)
-        self._msg = None
 
     ##\brief Unregisters subscription from master in destructor
     def __del__(self):
         self._subscriber.unregister()
+        
+    def _update_stale_items(self, event):
+        self._update_status_images()
     
     ##\brief Callback for /diagnostics_agg subscription
     def callback(self, msg):
-        self._mutex.acquire()
-        self._msg = msg
-        self._mutex.release()
-        wx.CallAfter(self.new_message)
+        wx.CallAfter(self.new_message, msg)
 
     ##\brief processes new messages, updates tree control
     ##
     ## New messages clear tree under the any names in the message. Selected
     ## name, and expanded nodes will be expanded again after the tree clear.
     ## 
-    def new_message(self):
-        self._mutex.acquire()
+    def new_message(self, msg):
+        self._tree_ctrl.Freeze()
         
         # Since we have message, remove empty item
         if not self._have_message:
             self._have_message = True
             self._tree_ctrl.Delete(self._empty_id)
             self._empty_id = None
-       
-        self._mark_last_update(self._root_id)
-
-        # Find selected item to reselect next round
-        selected_name = None
-        id = self._tree_ctrl.GetSelection()
-        if id is not None:
-            item = self._tree_ctrl.GetPyData(id)
-            if item is not None and item.status is not None:
-                selected_name = item.status.name
-
-        # Search for first parent names in this message
-        parents = find_parent_names_in_msg(self._msg)
-
-        # Find expanded items under first parents
-        # Delete any children under parents
-        # Reset parent names
-        expanded_names = {}
-        for parent in parents:
-            expanded_names[parent] = []
-            if not self._parent_to_name_to_id.has_key(parent):
-                self._parent_to_name_to_id[parent] = {}
-
-            # Find expanded items under existing first parents
-            if self._parent_name_to_id.has_key(parent):
-                self._find_expanded(self._parent_name_to_id[parent], expanded_names[parent])
-                self._tree_ctrl.SetItemText(self._parent_name_to_id[parent], parent.split('/')[-1])
-
-        # Add each status to tree, parents first
-        for status in self._msg.status:
-            name = status.name
-            if not name.startswith('/'):
-                name = '/' + name
-
-            first_parent = '/'.join(name.split('/')[0:2]) ## Ex: '/robot'
-
-            # Update viewers watching this item, if any
-            if self._viewers.has_key(name):
-                self._viewers[name].panel.write_status(status)
-
-            # Update item if we have it already in the tree
-            if self._parent_to_name_to_id[first_parent].has_key(name):
-                self._update_item(self._parent_to_name_to_id[first_parent][name], status)
-                continue
-
-            # Adding first parent to tree is special, since we need to add it
-            # to the _parent_names_to_ids, _parent_to_name_to_id dictionaries
-            if not self._parent_name_to_id.has_key(first_parent):
-                # Add tree item to parent
-                id = self._create_item(first_parent, self._root_id, first_parent)
-                self._parent_name_to_id[first_parent] = id
-                self._parent_to_name_to_id[first_parent][first_parent] = id
-            else:
-                id = self._parent_name_to_id[first_parent]
-
-            # Now add second parents, third parents, etc and item recursively
-            for i in range(3, len(name.split('/')) + 1):
-                next_parent_name = '/'.join(name.split('/')[0:i])
-                if not self._parent_to_name_to_id[first_parent].has_key(next_parent_name):
-                    id = self._create_item(first_parent, id, next_parent_name)
-                else:
-                    id = self._parent_to_name_to_id[first_parent][next_parent_name]
-
-            # Finally, we add the status message to the item
-            self._update_item(id, status)
-
-        # Expand and sort first parents and any items that were
-        # previously expanded 
-        for parent in expanded_names.keys():
-            for expanded in expanded_names[parent]:
-                try:
-                    id = self._parent_to_name_to_id[parent][expanded]
-                    if id.IsOk():
-                        self._tree_ctrl.Expand(id)
-                except:
-                    pass
-
-        # Set selected to previous selection
-        for key in self._parent_to_name_to_id.keys():
-            if self._parent_to_name_to_id[key].has_key(selected_name):
-                id = self._parent_to_name_to_id[key][selected_name]
-                self._tree_ctrl.SelectItem(id)
-
-        # Comb through tree and assign images
-        self._assign_tree_status_images()  
-
-        # Delete any items that should have updated but didn't
-        # Set message, count of children
-        for parent in parents:
-            self._delete_items_not_updated(self._parent_name_to_id[parent])
-            self._set_count_and_message(self._parent_name_to_id[parent])
-
-        self._mutex.release()
-
-    ##\brief Adds ' (Count): Message' to all tree item text
-    ##
-    ## Recursively adds message and child count to items. Count
-    ## is number of immediate children.
-    ##\param tree_id wxTreeItemId : Id to start combing through tree
-    def _set_count_and_message(self, tree_id):
-        item = self._tree_ctrl.GetPyData(tree_id)
-
-        if item and item.status:
-            old_text = self._tree_ctrl.GetItemText(tree_id)
-            if not self._tree_ctrl.ItemHasChildren(tree_id):
-                new_text = '%s: %s' % (get_nice_name(item.status.name), item.status.message)
-            else:
-                child_count = self._tree_ctrl.GetChildrenCount(tree_id, False)
-                new_text = '%s (%d): %s' % (get_nice_name(item.status.name), child_count, item.status.message)
-            self._tree_ctrl.SetItemText(tree_id, new_text)
-
-        if not self._tree_ctrl.ItemHasChildren(tree_id):
-            return
-
-        sibling, cookie = self._tree_ctrl.GetFirstChild(tree_id)
-        while not rospy.is_shutdown():
-            self._set_count_and_message(sibling)
             
-            sibling, cookie = self._tree_ctrl.GetNextChild(tree_id, cookie)
-            if not sibling.IsOk():
-                break
+        (added, removed, all) = self._state.update(msg)
+        
+        for a in added:
+            self._create_tree_item(a)
             
+        for r in removed:
+            if (r.tree_id is not None):
+                self._tree_ctrl.Delete(r.tree_id)
+            if (r.error_id is not None):
+                self._error_tree_ctrl.Delete(r.error_id)
+            if (r.warning_id is not None):
+                self._warning_tree_ctrl.Delete(r.warning_id)
+        
+        # Update viewers
+        for k,v in self._viewers.iteritems():
+            if (all.has_key(k)):
+                v.panel.write_status(all[k].status)
+        
+        self._update_status_images()
+        
+        self._update_error_tree()
+        self._update_warning_tree()
+        
+        self._update_labels()
+            
+        self._tree_ctrl.Thaw()
+        
+    def _update_error_tree(self):
+        for item in self._state.get_items().itervalues():
+            level = item.status.level
+            if (level != 2 and item.error_id is not None):
+                self._error_tree_ctrl.Delete(item.error_id)
+                item.error_id = None
+            elif (level == 2 and item.error_id is None):
+                item.error_id = self._error_tree_ctrl.AppendItem(self._error_tree_ctrl.GetRootItem(), item.status.name)
+                self._error_tree_ctrl.SetItemImage(item.error_id, self._image_dict[level])
+                self._error_tree_ctrl.SetPyData(item.error_id, item)
+                
+        self._error_tree_ctrl.SortChildren(self._error_tree_ctrl.GetRootItem())
+                
+    def _update_warning_tree(self):
+        for item in self._state.get_items().itervalues():
+            level = item.status.level
+            if (level != 1 and item.warning_id is not None):
+                self._warning_tree_ctrl.Delete(item.warning_id)
+                item.warning_id = None
+            elif (level == 1 and item.warning_id is None):
+                item.warning_id = self._warning_tree_ctrl.AppendItem(self._warning_tree_ctrl.GetRootItem(), item.status.name)
+                self._warning_tree_ctrl.SetItemImage(item.warning_id, self._image_dict[level])
+                self._warning_tree_ctrl.SetPyData(item.warning_id, item)
+                
+        self._warning_tree_ctrl.SortChildren(self._warning_tree_ctrl.GetRootItem())
+        
+    def _update_status_images(self):
+        for item in self._state.get_items().itervalues():
+            if (item.tree_id is not None):
+                level = item.status.level
+                # Sets items as stale if >3.0 seconds
+                if rospy.get_time() - item.update_time > 3.0:
+                    level = 3
+            
+                self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
+    
+    def _update_labels(self):
+        for item in self._state.get_items().itervalues():
+            children = self._state.get_children(item)
+            errors = 0
+            warnings = 0
+            for child in children:
+                if (child.status.level == 2):
+                    errors = errors + 1
+                elif (child.status.level == 1):
+                    warnings = warnings + 1
+            
+            base_text = "%s : %s"%(get_nice_name(item.status.name), item.status.message)
+            errwarn_text = "%s : %s"%(item.status.name, item.status.message)
+            
+            if (item.tree_id is not None):
+                text = base_text
+                if (errors > 0 or warnings > 0):
+                    text = "(E: %s, W: %s) %s"%(errors, warnings, base_text)
+                self._tree_ctrl.SetItemText(item.tree_id, text)
+            if (item.error_id is not None):
+                self._error_tree_ctrl.SetItemText(item.error_id, errwarn_text)
+            if (item.warning_id is not None):
+                self._warning_tree_ctrl.SetItemText(item.warning_id, errwarn_text)
+                
+          
+    def _create_tree_item(self, item):
+        # Find parent
+        parent = self._state.get_parent(item)
+        
+        parent_id = self._tree_ctrl.GetRootItem()
+        if (parent is not None):
+            parent_id = parent.tree_id
+        
+        ## Add item to tree as short name
+        short_name = get_nice_name(item.status.name)
+        id = self._tree_ctrl.AppendItem(parent_id, short_name)
+        item.tree_id = id
+        self._tree_ctrl.SetPyData(id, item)
+        self._tree_ctrl.SortChildren(parent_id)
 
     ##\brief Removes StatusViewerFrame from list to update
     ##\param name str : Status name to remove from dictionary
@@ -292,20 +357,25 @@ class RobotMonitorPanel(wx.Panel):
         if self._viewers.has_key(name):
             del self._viewers[name]
 
-    ##\brief Double click on item to popup window
-    ##
-    ## Double click starts StatusViewerFrame with details of status 
-    ## message. Viewer updates with new messages when received.
-    def on_item_active(self, event):
-        id = self._tree_ctrl.GetSelection()
+    def on_all_item_activate(self, event):
+        self._on_item_activate(event, self._tree_ctrl)
+        
+    def on_error_item_activate(self, event):
+        self._on_item_activate(event, self._error_tree_ctrl)
+        
+    def on_warning_item_activate(self, event):
+        self._on_item_activate(event, self._warning_tree_ctrl)
+        
+    def _on_item_activate(self, event, tree_ctrl):
+        id = event.GetItem()
         if id == None:
             event.Skip()
             return
 
-        if self._tree_ctrl.ItemHasChildren(id):
-            self._tree_ctrl.Expand(id)
+        if tree_ctrl.ItemHasChildren(id):
+            tree_ctrl.Expand(id)
 
-        item = self._tree_ctrl.GetPyData(id)
+        item = tree_ctrl.GetPyData(id)
         if not (item and item.status):
             event.Skip()
             return
@@ -322,179 +392,15 @@ class RobotMonitorPanel(wx.Panel):
 
         self._viewers[name] = viewer
 
-        viewer.panel.write_status(item.status)        
+        viewer.panel.write_status(item.status)
 
-    ##\brief Marks all items below id as not updated (item.has_updated = False)
-    def _mark_last_update(self, id):
-        if not self._have_message:
-            return
-
-        # Assign to ID
-        item = self._tree_ctrl.GetPyData(id)
-        if item is not None and item.status is not None:
-            #rospy.loginfo('Marking item as not updated: %s' % item.status.name)
-            item.has_updated = False
-            self._tree_ctrl.SetPyData(id, item)
-
-        if not self._tree_ctrl.ItemHasChildren(id):
-            return
-
-        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
-        while not rospy.is_shutdown():
-            self._mark_last_update(sibling)
-            
-            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
-            if not sibling.IsOk():
-                break
-
-    ##\brief Deletes any tree items below given ID that haven't updated
-    def _delete_items_not_updated(self, id):
-        if not self._have_message:
-            return
-
-        # Assign to ID
-        item = self._tree_ctrl.GetPyData(id)
-        if item is not None and item.status is not None:
-            if not item.has_updated:
-                self._delete_item(id)                
-
-        if not self._tree_ctrl.ItemHasChildren(id):
-            return
-
-        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
-        while not rospy.is_shutdown():
-            self._delete_items_not_updated(sibling)
-            
-            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
-            if not sibling.IsOk():
-                break
-
-    ##\brief Fully deletes tree item from tree and all other class data
-    def _delete_item(self, id):
-        item = self._tree_ctrl.GetPyData(id)
-        if item is None:
-            self._tree_ctrl.Delete(id)
-            return
-
-        # Find first parent
-        first_parent_id = id
-        while not rospy.is_shutdown():
-            parent = self._tree_ctrl.GetItemParent(first_parent_id)
-            if parent == self._root_id:
-                break
-            else:
-                first_parent_id = parent
-                
-        first_parent_item = self._tree_ctrl.GetPyData(first_parent_id)
-        if first_parent_item and first_parent_item.status:
-            first_parent = first_parent_item.status.name
-            if item.status is not None and self._parent_to_name_to_id[first_parent].has_key(item.status.name):
-                del self._parent_to_name_to_id[first_parent][item.status.name]
-
-        if item.status is not None and first_parent == item.status.name and self._parent_name_to_id.has_key(first_parent):
-            del self._parent_name_to_id[first_parent]
-            
-        self._tree_ctrl.Delete(id)
-
-    #\brief Assigns tree status images for entire tree
-    #\param event Event (optional) : Can be called by timer
-    def _assign_tree_status_images(self, event = None):
-        self._assign_status_images(self._root_id)
-        
-    ##\brief Assigns OK/WARN/ERROR/STALE icons to all items by status level
-    ##
-    ## Recursively goes through tree to assign images. Assigns stale images 
-    ## to anything that has been still for >3.0 seconds
-    def _assign_status_images(self, id):
-        if not self._have_message:
-            return
-
-        # Assign to ID
-        item = self._tree_ctrl.GetPyData(id)
-        level = 0
-        if item is not None:
-            if item.status is not None:
-                level = item.status.level
-        # Sets items as stale if >3.0 seconds
-            if rospy.get_time() - item.update_time > 3.0:
-                level = 3
-        
-        image = self._image_dict[level]
-        self._tree_ctrl.SetItemImage(id, image)
-
-        if not self._tree_ctrl.ItemHasChildren(id):
-            return
-
-        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
-        while not rospy.is_shutdown():
-            self._assign_status_images(sibling)
-            
-            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
-            if not sibling.IsOk():
-                break
-                    
-
-    ##\brief Creates an empty tree item, with None for data
-    ## 
-    ##\param first_parent str : Name of first parent
-    ##\param parent_id wxTreeItemId : Id of immediate parent
-    ##\param name str : Name of tree item
-    def _create_item(self, first_parent, parent_id, name):
-        ## Add item to tree as short name
-        #short_name = name.split('/')[-1]
-        short_name = get_nice_name(name)
-
-        id = self._tree_ctrl.AppendItem(parent_id, short_name)
-        item = TreeItem(None, id)
-        self._tree_ctrl.SetPyData(id, item)
-        self._parent_to_name_to_id[first_parent][name] = id
-        self._tree_ctrl.SortChildren(parent_id)
-
-        return id
-
-    ##\brief Updates tree item with new status message
-    ##
-    ##\param id wxTreeItemId : Id to update
-    ##\param status_msg DiagnosticStatus : New message
-    def _update_item(self, id, status_msg):
-        item = self._tree_ctrl.GetPyData(id)
-        if item:
-            item.update(status_msg)
-            #item.update_time = rospy.get_time()
-            #item.has_updated = True
-
-
-    ##\brief Find all tree nodes expanded by parent node
-    ##\param id wxTreeItemId : Id of node to see 
-    def _find_expanded(self, id, expanded_names):
-        if not self._tree_ctrl.ItemHasChildren(id):
-            return
-
-        if self._tree_ctrl.IsExpanded(id):
-            #print 'Found expanded:', self._tree_ctrl.GetItemText(id)
-            item = self._tree_ctrl.GetPyData(id)
-            if item.status:
-                name = item.status.name
-            else:
-                name = '/' + self._tree_ctrl.GetItemText(id)
-            
-            expanded_names.append(name)
-
-        sibling, cookie = self._tree_ctrl.GetFirstChild(id)
-        while not rospy.is_shutdown():
-            self._find_expanded(sibling, expanded_names)
-
-            sibling, cookie = self._tree_ctrl.GetNextChild(id, cookie)
-            if not sibling.IsOk():
-                break
-    
     ##\brief Gets the "top level" state of the diagnostics
     ##
     ## Returns the highest value of any of the root tree items
     ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = Stale
     def get_top_level_state(self):
         level = -1
-        id, cookie = self._tree_ctrl.GetFirstChild(self._root_id)
+        id, cookie = self._tree_ctrl.GetFirstChild(self._tree_ctrl.GetRootItem())
         if id == self._empty_id:
             return level
 
@@ -503,7 +409,7 @@ class RobotMonitorPanel(wx.Panel):
             if item and item.status and item.status.level > level:
                 level = item.status.level
             
-            id, cookie = self._tree_ctrl.GetNextChild(self._root_id, cookie)
+            id, cookie = self._tree_ctrl.GetNextChild(self._tree_ctrl.GetRootItem(), cookie)
             if not id.IsOk():
                 break
               
