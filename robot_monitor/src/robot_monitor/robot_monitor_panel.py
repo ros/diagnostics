@@ -377,8 +377,10 @@ class RobotMonitorPanel(wx.Panel):
         self._on_item_activate(event, self._warning_tree_ctrl)
         
     def on_pause(self, event):
+        self._pause_button.SetBackgroundColour(wx.NullColour)
         if (event.IsChecked()):
             self._paused = True
+            self._pause_button.SetBackgroundColour(wx.Colour(0xff, 0x33, 0x22))
         else:
             self._paused = False
             if (self._last_msg is not None):
