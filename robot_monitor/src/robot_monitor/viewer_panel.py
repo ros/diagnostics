@@ -46,6 +46,9 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 import wx
 from wx import xrc
 from wx import html
+from wx import richtext
+
+import copy
 
 import cStringIO
 
@@ -61,18 +64,17 @@ class StatusViewer(wx.Panel):
     ##\param manager RobotMonitor : Manager updates frame, notified on close
     def __init__(self, parent, name, manager):
         wx.Panel.__init__(self, parent, wx.ID_ANY)
-
-        xrc_path = os.path.join(roslib.packages.get_pkg_dir(PKG), 'xrc/gui.xrc')
-        self._res = xrc.XmlResource(xrc_path)
-        self._panel = self._res.LoadPanel(self, 'status_viewer')
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._panel, 1, wx.EXPAND)
-        self.SetSizer(sizer)
- 
-        self._html_ctrl = xrc.XRCCTRL(self._panel, 'html_ctrl')
-        self._html_ctrl.SetFocus()
         
-        self._pause_button = xrc.XRCCTRL(self._panel, 'pause_button')
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
+        self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
+        self._pause_button = wx.ToggleButton(self, wx.ID_ANY, "Pause")
+        self._sizer.Add(self._pause_button, 0, wx.ALIGN_RIGHT)
+        
+        self.SetSizer(self._sizer)
+        
+        self._text_ctrl.SetFocus()
         self._pause_button.Bind(wx.EVT_TOGGLEBUTTON, self.on_pause)
 
         self._manager = manager
@@ -80,6 +82,13 @@ class StatusViewer(wx.Panel):
         
         self._paused = False
         self._last_status = None
+        
+        self._default_style = self._text_ctrl.GetDefaultStyle()
+        self._basic_style = self._text_ctrl.GetBasicStyle()
+        
+        tabs = [600, 800, 1000]
+        self._default_style.SetFlags(wx.TEXT_ATTR_TABS)
+        self._default_style.SetTabs(tabs)
         
     ##\brief Destructor removes viewer from manager's update list
     def __del__(self):
@@ -101,32 +110,32 @@ class StatusViewer(wx.Panel):
             return
         
         self._write_status(status)
+        
+    def _set_kv(self, key, value):
+        self._text_ctrl.BeginBold()
+        self._text_ctrl.WriteText("%s: "%(key))
+        self._text_ctrl.EndBold()
+        self._text_ctrl.WriteText(value)
+        self._text_ctrl.Newline()
 
     ##\brief Write status as HTML, like runtime monitor
     def _write_status(self, status):
-        s = cStringIO.StringIO()
+        self._text_ctrl.Freeze()
+        self._text_ctrl.Clear()
+        self._text_ctrl.SetBasicStyle(self._basic_style)
+        self._text_ctrl.SetDefaultStyle(self._default_style)
+        self._set_kv("Full name", status.name)
+        self._set_kv("Component", status.name.split('/')[-1])
+        self._set_kv("Hardware ID", status.hardware_id)
+        self._set_kv("Level", stat_dict[status.level])
+        self._set_kv("Message", status.message)
+        self._text_ctrl.Newline()
         
-        s.write("<html><body>")
-        s.write("<b>Full name</b>: %s<br>\n" % (status.name))
-        s.write("<b>Component</b>: %s<br>\n" % (status.name.split('/')[-1]))
-        s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id))
-
-        s.write("<b>Level</b>: %s<br>\n" % (stat_dict[status.level]))
-        s.write("<b>Message</b>: %s<br><br>\n\n" % (status.message))
-
-        s.write('<table border="1" cellpadding="2" cellspacing="0">')
         for value in status.values:
-            value.value = value.value.replace("\n", "<br>")
-            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.key, value.value))
-      
-        s.write("</table></body></html>")
-
-        self._html_ctrl.Freeze()        
-        (x, y) = self._html_ctrl.GetViewStart()
-        self._html_ctrl.SetPage(s.getvalue())
-        self._html_ctrl.Scroll(x, y)
-        
-        self._html_ctrl.Thaw()
+            self._set_kv(value.key, value.value)
+            
+        self._text_ctrl.EndAllStyles()    
+        self._text_ctrl.Thaw()
 
 ##\brief Frame views status messages in separate window
 ##
@@ -142,7 +151,7 @@ class StatusViewerFrame(wx.Frame):
         self.panel = StatusViewer(self, name, manager)
         
         self.Bind(wx.EVT_CHAR, self.on_char)
-        self.panel._html_ctrl.Bind(wx.EVT_CHAR, self.on_char)
+        self.panel._text_ctrl.Bind(wx.EVT_CHAR, self.on_char)
         
     def on_char(self, evt):
         if (evt.GetKeyCode() == wx.WXK_ESCAPE):
