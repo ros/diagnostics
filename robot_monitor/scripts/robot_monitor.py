@@ -54,10 +54,18 @@ class RobotMonitorFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, wx.ID_ANY, title)
 
-        self.panel = RobotMonitorPanel(self)
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self._panel = RobotMonitorPanel(self)
+        self._sizer.Add(self._panel, 1, wx.EXPAND)
+        self.SetSizer(self._sizer)
         
-    def on_exit(self, e):
-        self.Close(True)
+        self._shutdown_timer = wx.Timer()
+        self._shutdown_timer.Bind(wx.EVT_TIMER, self._on_shutdown_timer)
+        self._shutdown_timer.Start(100)
+        
+    def _on_shutdown_timer(self, event):
+        if (rospy.is_shutdown()):
+            self.Close()
 
 ##\brief wxApp of robot monitor
 class RobotMonitorApp(wx.App):
