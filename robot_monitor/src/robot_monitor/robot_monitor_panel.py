@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,11 @@ from wx import xrc
 
 import threading, time
 
-from robot_monitor.viewer_panel import StatusViewerFrame
+from viewer_panel import StatusViewerFrame
+from robot_monitor_generated import MonitorPanelGenerated
+from message_timeline import MessageTimeline
+
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
 
 def get_nice_name(status_name):
     return status_name.split('/')[-1]
@@ -80,7 +84,7 @@ class State(object):
         
         return self._items[parent_name]
     
-    def get_children(self, item):
+    def get_descendants(self, item):
         child_keys = [k for k in self._items.iterkeys() if k.startswith(item.status.name + "/")]
         children = [self._items[k] for k in child_keys]
         return children
@@ -119,7 +123,7 @@ class State(object):
                     #print "Adding dummy: '%s'"%(parent)
                     s = DiagnosticStatus()
                     s.name = parent
-                    s.message = "Missing item"
+                    s.message = ""
                     pi = StatusItem(s)
                     to_add.append(pi)
                   
@@ -167,30 +171,19 @@ class State(object):
 ## not conflict and can "share" the robot monitor. First names like 'PRF' and 
 ## 'PRG' in the above example are known as 'first_parent' names throughout
 ## the class.
-class RobotMonitorPanel(wx.Panel):
+class RobotMonitorPanel(MonitorPanelGenerated):
     ##\param parent RobotMonitorFrame : Parent frame
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+        MonitorPanelGenerated.__init__(self, parent)
 
         self._frame = parent
 
-        xrc_path = os.path.join(roslib.packages.get_pkg_dir(PKG), 'xrc/gui.xrc')
-        self._res = xrc.XmlResource(xrc_path)
-        self._panel = self._res.LoadPanel(self, 'monitor_panel')
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._panel, 1, wx.EXPAND)
-        self.SetSizer(sizer)
-
-        self._tree_ctrl = xrc.XRCCTRL(self._panel, 'tree_ctrl')
         self._tree_ctrl.AddRoot("Root")
-        
-        self._error_tree_ctrl = xrc.XRCCTRL(self._panel, 'error_tree')
         self._error_tree_ctrl.AddRoot("Root")
-        self._warning_tree_ctrl = xrc.XRCCTRL(self._panel, 'warning_tree')
         self._warning_tree_ctrl.AddRoot("Root")
         
-        self._pause_button = xrc.XRCCTRL(self._panel, 'pause_button')
-        self._pause_button.Bind(wx.EVT_TOGGLEBUTTON, self.on_pause)
+        self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
+        self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
 
         # Image list for icons
         image_list = wx.ImageList(16, 16)
@@ -223,22 +216,11 @@ class RobotMonitorPanel(wx.Panel):
         
         self._state = State()
         
-        self._subscriber = rospy.Subscriber('/diagnostics_agg', DiagnosticArray,
-                                            self.callback)
-        
-        self._paused = False
-        self._last_msg = None
-
-    ##\brief Unregisters subscription from master in destructor
-    def __del__(self):
-        self._subscriber.unregister()
-        
     def _update_stale_items(self, event):
+        if (self._timeline.is_paused()):
+            return
+        
         self._update_status_images()
-    
-    ##\brief Callback for /diagnostics_agg subscription
-    def callback(self, msg):
-        wx.CallAfter(self.new_message, msg)
 
     ##\brief processes new messages, updates tree control
     ##
@@ -246,10 +228,6 @@ class RobotMonitorPanel(wx.Panel):
     ## name, and expanded nodes will be expanded again after the tree clear.
     ## 
     def new_message(self, msg):
-        self._last_msg = msg
-        if (self._paused):
-            return
-        
         self._tree_ctrl.Freeze()
         
         # Since we have message, remove empty item
@@ -274,7 +252,7 @@ class RobotMonitorPanel(wx.Panel):
         # Update viewers
         for k,v in self._viewers.iteritems():
             if (all.has_key(k)):
-                v.panel.set_status(all[k].status)
+                v.set_status(all[k].status)
         
         self._update_status_images()
         
@@ -284,6 +262,25 @@ class RobotMonitorPanel(wx.Panel):
         self._update_labels()
             
         self._tree_ctrl.Thaw()
+        
+    def _on_pause(self, paused):
+        if (not paused and len(self._viewers) > 0):
+            msgs = self._timeline.get_messages()
+            states = []
+            for msg in msgs:
+                state = State()
+                state.update(msg)
+                states.append(state)
+        
+        for v in self._viewers.itervalues():
+            if (paused):
+                v.disable_timeline()
+            else:
+                v.enable_timeline()    
+                for state in states:
+                    all = state.get_items()
+                    if (all.has_key(v.get_name())):
+                        v.set_status(all[v.get_name()].status)
         
     def _update_error_tree(self):
         for item in self._state.get_items().itervalues():
@@ -323,7 +320,7 @@ class RobotMonitorPanel(wx.Panel):
     
     def _update_labels(self):
         for item in self._state.get_items().itervalues():
-            children = self._state.get_children(item)
+            children = self._state.get_descendants(item)
             errors = 0
             warnings = 0
             for child in children:
@@ -376,16 +373,6 @@ class RobotMonitorPanel(wx.Panel):
     def on_warning_item_activate(self, event):
         self._on_item_activate(event, self._warning_tree_ctrl)
         
-    def on_pause(self, event):
-        self._pause_button.SetBackgroundColour(wx.NullColour)
-        if (event.IsChecked()):
-            self._paused = True
-            self._pause_button.SetBackgroundColour(wx.Colour(0xff, 0x33, 0x22))
-        else:
-            self._paused = False
-            if (self._last_msg is not None):
-                self.new_message(self._last_msg)
-        
     def _on_item_activate(self, event, tree_ctrl):
         id = event.GetItem()
         if id == None:
@@ -417,7 +404,23 @@ class RobotMonitorPanel(wx.Panel):
     
             self._viewers[name] = viewer
     
-            viewer.panel.set_status(item.status)
+            if (self._timeline.is_paused()):
+                viewer.disable_timeline()
+                viewer.set_status(item.status)
+            else:
+                msgs = self._timeline.get_messages()
+                states = []
+                for msg in msgs:
+                    state = State()
+                    state.update(msg)
+                    states.append(state)
+                    
+                for state in states:
+                    all = state.get_items()
+                    if (all.has_key(item.status.name)):
+                        viewer.set_status(all[item.status.name].status)
+                        
+            
 
     ##\brief Gets the "top level" state of the diagnostics
     ##
@@ -439,3 +442,19 @@ class RobotMonitorPanel(wx.Panel):
                 break
               
         return level
+
+    def get_color_for_message(self, msg):
+        level = 0
+        
+        lookup = {}
+        for status in msg.status:
+            lookup[status.name] = status
+            
+        names = [status.name for status in msg.status]
+        names = [name for name in names if len(get_parent_name(name)) == 0]
+        for name in names:
+            status = lookup[name]
+            if (status.level > level):
+                level = status.level
+                
+        return color_dict[level]

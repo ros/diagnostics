@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Kevin Watts
+# Author: Kevin Watts, Josh Faust
 
 PKG = 'robot_monitor'
 
@@ -52,64 +52,53 @@ import copy
 
 import cStringIO
 
-stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
+from message_timeline import MessageTimeline
 
-##\brief View status messages in pop-up window
+stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
+
+##\brief Frame views status messages in separate window
 ##
-## Allows users to view details of status in popup window
-##\todo Add play/pause buttons, message buffer
-class StatusViewer(wx.Panel):
-    ##\param parent StatusViewerFrame : Parent frame
-    ##\param name str : Full topic name to listen to
-    ##\param manager RobotMonitor : Manager updates frame, notified on close
-    def __init__(self, parent, name, manager):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
+##\todo Don't initialize it on top of main frame somehow
+class StatusViewerFrame(wx.Frame):
+    ##\param parent RobotMonitorFrame : Parent frame
+    ##\param name str : Full topic name
+    ##\param manager RobotMonitor : Manager of frame
+    ##\param title str: Frame title
+    def __init__(self, parent, name, manager, title):
+        wx.Frame.__init__(self, parent, wx.ID_ANY, title)
         
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         
         self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
         self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
-        self._pause_button = wx.ToggleButton(self, wx.ID_ANY, "Pause")
-        self._sizer.Add(self._pause_button, 0, wx.ALIGN_RIGHT)
+        self._timeline = MessageTimeline(self, 30, None, None, self._write_status, self._get_color_for_message, None)
+        self._sizer.Add(self._timeline, 0, wx.EXPAND)
         
         self.SetSizer(self._sizer)
         
         self._text_ctrl.SetFocus()
-        self._pause_button.Bind(wx.EVT_TOGGLEBUTTON, self.on_pause)
 
         self._manager = manager
         self._name = name
         
-        self._paused = False
-        self._last_status = None
-        
         self._default_style = self._text_ctrl.GetDefaultStyle()
         self._basic_style = self._text_ctrl.GetBasicStyle()
         
-        tabs = [600, 800, 1000]
-        self._default_style.SetFlags(wx.TEXT_ATTR_TABS)
-        self._default_style.SetTabs(tabs)
+        self.Bind(wx.EVT_CHAR, self.on_char)
+        self._text_ctrl.Bind(wx.EVT_CHAR, self.on_char)
         
-    ##\brief Destructor removes viewer from manager's update list
-    def __del__(self):
+        self.Bind(wx.EVT_CLOSE, self._on_close)
+        
+    def _on_close(self, event):
+        event.Skip()
         self._manager.remove_viewer(self._name)
-        
-    def on_pause(self, event):
-        self._pause_button.SetBackgroundColour(wx.NullColour)
-        if (event.IsChecked()):
-            self._paused = True
-            self._pause_button.SetBackgroundColour(wx.Colour(0xff, 0x33, 0x22))
-        else:
-            self._paused = False
-            if (self._last_status is not None):
-                self._write_status(self._last_status)
 
     def set_status(self, status):
-        self._last_status = status
-        if (self._paused):
-            return
-        
-        self._write_status(status)
+        if (self._timeline.IsEnabled()):
+            self._timeline.add_msg(status)
+        else:
+            self._write_status(status)
         
     def _set_kv(self, key, value):
         self._text_ctrl.BeginBold()
@@ -118,7 +107,6 @@ class StatusViewer(wx.Panel):
         self._text_ctrl.WriteText(value)
         self._text_ctrl.Newline()
 
-    ##\brief Write status as HTML, like runtime monitor
     def _write_status(self, status):
         self._text_ctrl.Freeze()
         self._text_ctrl.Clear()
@@ -136,26 +124,22 @@ class StatusViewer(wx.Panel):
             
         self._text_ctrl.EndAllStyles()    
         self._text_ctrl.Thaw()
-
-##\brief Frame views status messages in separate window
-##
-##\todo Don't initialize it on top of main frame somehow
-class StatusViewerFrame(wx.Frame):
-    ##\param parent RobotMonitorFrame : Parent frame
-    ##\param name str : Full topic name
-    ##\param manager RobotMonitor : Manager of frame
-    ##\param title str: Frame title
-    def __init__(self, parent, name, manager, title):
-        wx.Frame.__init__(self, parent, wx.ID_ANY, title)
         
-        self.panel = StatusViewer(self, name, manager)
-        
-        self.Bind(wx.EVT_CHAR, self.on_char)
-        self.panel._text_ctrl.Bind(wx.EVT_CHAR, self.on_char)
+    def _get_color_for_message(self, msg):
+        return color_dict[msg.level]
         
     def on_char(self, evt):
         if (evt.GetKeyCode() == wx.WXK_ESCAPE):
           self.Close()
         else:
           evt.Skip()
+          
+    def disable_timeline(self):
+        self._timeline.disable()
+        self._timeline.clear()
         
+    def enable_timeline(self):
+        self._timeline.enable()
+        
+    def get_name(self):
+        return self._name
