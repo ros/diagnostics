@@ -57,6 +57,14 @@ from message_timeline import MessageTimeline
 stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
 color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
 
+class SnapshotFrame(wx.Frame):
+    def __init__(self, parent, name):
+        wx.Frame.__init__(self, parent, wx.ID_ANY, "Snapshot of %s"%(name))
+        
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
+        self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
+
 ##\brief Frame views status messages in separate window
 ##
 ##\todo Don't initialize it on top of main frame somehow
@@ -72,8 +80,16 @@ class StatusViewerFrame(wx.Frame):
         
         self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
         self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
+        
+        bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._timeline = MessageTimeline(self, 30, None, None, self._write_status, self._get_color_for_message, None)
-        self._sizer.Add(self._timeline, 0, wx.EXPAND)
+        bottom_sizer.Add(self._timeline, 1, wx.EXPAND|wx.ALL, 5)
+        
+        self._snapshot_button = wx.Button(self, wx.ID_ANY, "Snapshot")
+        self._snapshot_button.Bind(wx.EVT_BUTTON, self._on_snapshot)
+        bottom_sizer.Add(self._snapshot_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+        
+        self._sizer.Add(bottom_sizer, 0, wx.EXPAND)
         
         self.SetSizer(self._sizer)
         
@@ -96,6 +112,13 @@ class StatusViewerFrame(wx.Frame):
     def _on_close(self, event):
         event.Skip()
         self._manager.remove_viewer(self._name)
+        
+    def _on_snapshot(self, event):
+        snapshot = SnapshotFrame(self, self._name)
+        snapshot._text_ctrl.SetValue(self._text_ctrl.GetValue())
+        snapshot.Show(True)
+        snapshot.Raise()
+        snapshot.Center()
 
     def set_status(self, status):
         if (self._timeline.IsEnabled()):
