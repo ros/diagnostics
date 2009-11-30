@@ -407,7 +407,7 @@ public:
 	 * parameter.
 	 */
 
-  Updater(ros::NodeHandle h) : node_handle_(h)
+  Updater(ros::NodeHandle h = ros::NodeHandle()) : node_handle_(h)
   {
     setup();
   }
@@ -421,6 +421,7 @@ public:
   {
     ros::Time now_time = ros::Time::now();
     if (now_time < next_time_) {
+      update_diagnostic_period(); // Will be checked in force_update otherwise.
       return;
     }
 
@@ -436,7 +437,8 @@ public:
 
   void force_update()
   {
-    private_node_handle_.param("diagnostic_period", period_, 1.0);
+    update_diagnostic_period();
+    
     next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
     
     if (node_handle_.ok())
@@ -519,6 +521,17 @@ public:
 
 private:
   /**
+   * Recheck the diagnostic_period on the parameter server. (Cached)
+   */
+        
+  void update_diagnostic_period()
+  {
+    double old_period = period_;
+    private_node_handle_.getParam("diagnostic_period", period_, true);
+    next_time_ += ros::Duration(period_ - old_period); // Update next_time_
+   }
+
+  /**
 	 * Publishes a single diagnostic status.
 	 */
 	void publish(diagnostic_msgs::DiagnosticStatus &stat)
@@ -553,7 +566,8 @@ private:
     publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
     private_node_handle_ = ros::NodeHandle("~");
 
-    private_node_handle_.param("diagnostic_period", period_, 1.0);
+    period_ = 1.0;
+    update_diagnostic_period();
     next_time_ = ros::Time::now();
 
     verbose_ = false;
