@@ -73,6 +73,14 @@ class MainWindow(wx.Frame):
         
         self.SetSize(wx.Size(750,450))
 
+        self._shutdown_timer = wx.Timer()
+        self._shutdown_timer.Bind(wx.EVT_TIMER, self._on_shutdown_timer)
+        self._shutdown_timer.Start(100)
+
+    def _on_shutdown_timer(self, event):
+        if (rospy.is_shutdown()):
+            self.Close()
+
     def on_menu(self, event):
         if (event.GetEventObject() == self.filemenu):
             if (event.GetId() == wx.ID_EXIT):
