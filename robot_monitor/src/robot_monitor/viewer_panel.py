@@ -90,6 +90,9 @@ class StatusViewerFrame(wx.Frame):
         
         self.Bind(wx.EVT_CLOSE, self._on_close)
         
+        self._last_values = {}
+        self._last_status = None
+        
     def _on_close(self, event):
         event.Skip()
         self._manager.remove_viewer(self._name)
@@ -100,11 +103,19 @@ class StatusViewerFrame(wx.Frame):
         else:
             self._write_status(status)
         
-    def _set_kv(self, key, value):
+    def _set_kv(self, key, value, changed=False):
         self._text_ctrl.BeginBold()
         self._text_ctrl.WriteText("%s: "%(key))
         self._text_ctrl.EndBold()
-        self._text_ctrl.WriteText(value)
+        
+        if (not changed):
+            self._text_ctrl.WriteText(value)
+        else:
+            self._text_ctrl.BeginBold()
+            self._text_ctrl.BeginTextColour(wx.Colour(0xaa, 0x77, 0x00))
+            self._text_ctrl.WriteText(value)
+            self._text_ctrl.EndTextColour()
+            self._text_ctrl.EndBold()
         self._text_ctrl.Newline()
 
     def _write_status(self, status):
@@ -115,15 +126,25 @@ class StatusViewerFrame(wx.Frame):
         self._set_kv("Full name", status.name)
         self._set_kv("Component", status.name.split('/')[-1])
         self._set_kv("Hardware ID", status.hardware_id)
-        self._set_kv("Level", stat_dict[status.level])
-        self._set_kv("Message", status.message)
+        self._set_kv("Level", stat_dict[status.level], self._last_status is not None and self._last_status.level != status.level)
+        self._set_kv("Message", status.message, self._last_status is not None and self._last_status.message != status.message)
         self._text_ctrl.Newline()
         
         for value in status.values:
-            self._set_kv(value.key, value.value)
+            changed = False
+            if (self._last_values.has_key(value.key) and self._last_values[value.key] != value.value):
+                changed = True
+                
+            self._set_kv(value.key, value.value, changed)
+            
+            
+            
+            self._last_values[value.key] = value.value
             
         self._text_ctrl.EndAllStyles()    
         self._text_ctrl.Thaw()
+        
+        self._last_status = status
         
     def _get_color_for_message(self, msg):
         return color_dict[msg.level]
