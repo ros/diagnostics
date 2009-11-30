@@ -567,7 +567,7 @@ private:
   {
     DiagnosticStatusWrapper stat;
     stat.name = task.getName();
-    stat.summary(2, "Node starting up");
+    stat.summary(0, "Node starting up");
     publish(stat);
   }
 
