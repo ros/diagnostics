@@ -17,9 +17,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#genmsg()
+#rosbuild_genmsg()
 #uncomment if you have defined services
-#gensrv()
+#rosbuild_gensrv()
 
 rosbuild_add_boost_directories()
 rosbuild_add_library(diagnostic_aggregator
@@ -29,8 +29,8 @@ rosbuild_add_library(diagnostic_aggregator
 rosbuild_link_boost(diagnostic_aggregator system regex)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
-#rospack_add_boost_directories()
-#rospack_link_boost(${PROJECT_NAME} thread)
+#rosbuild_add_boost_directories()
+#rosbuild_link_boost(${PROJECT_NAME} thread)
 
 rosbuild_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
