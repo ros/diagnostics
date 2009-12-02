@@ -77,8 +77,6 @@ class RobotMonitorFrame(wx.Frame):
 class RobotMonitorApp(wx.App):
     def OnInit(self):
         rospy.init_node('robot_monitor', anonymous=True)
-
-        wx.MessageBox("robot_monitor.py is deprecated, please use robot_monitor instead", "Deprecated", wx.OK|wx.ICON_WARNING)
         
         self._frame = RobotMonitorFrame(None, 'Robot Monitor')
         self._frame.SetSize(wx.Size(500, 700))
