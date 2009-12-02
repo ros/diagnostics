@@ -43,10 +43,16 @@ roslib.load_manifest('robot_monitor')
 
 import rospy
 
-import wx
+WXVER = '2.8'
+import wxversion
+if wxversion.checkInstalled(WXVER):
+  wxversion.select(WXVER)
+else:
+  print >> sys.stderr, "This application requires wxPython version %s"%(WXVER)
+  sys.exit(1)
 
 from robot_monitor.robot_monitor_panel import RobotMonitorPanel
-
+import wx
 
 
 ##\brief Main frame of robot monitor
