@@ -35,7 +35,7 @@ publication. The main parts of diagnostic_updater are:
 
 		 - \ref diagnostic_updater::CombinationDiagnosticTask : A diagnostic
 			 task that merges the results from a list of
-			 diagnostic_updater::ComposableDiagnosticTask classes into a single
+			 diagnostic_updater::DiagnosticTask classes into a single
 			 DiagnosticStatusWrapper.
 
 		 @b Note: Most of the time, user code can just use the appropriate add
@@ -47,7 +47,7 @@ publication. The main parts of diagnostic_updater are:
 
    - \ref diagnostic_updater::FrequencyStatus and 
      \ref diagnostic_updater::TimeStampStatus, two sublcasses of 
-     diagnostic_updater::ComposableDiagnosticTask that respectively
+     diagnostic_updater::DiagnosticTask that respectively
   	 compute frequency statistics, and do checks on intervals between events.
   
    - \ref diagnostic_updater::HeaderlessTopicDiagnostic and
