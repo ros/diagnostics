@@ -42,76 +42,70 @@ class MyNode
 {
 public:
 
-  // The SelfTest must be templated by your node
-  SelfTest<MyNode> self_test_;
+  // self_test::Sequencer is the handles sequencing driver self-tests.
+  self_test::Sequencer self_test_;
 
   // A value showing statefulness of tests
   double some_val;
 
   ros::NodeHandle nh_;
 
-  // During construction, the self_test_ takes a pointer to your node
-  MyNode() : self_test_(this)
+  MyNode() : self_test_()
   {
-    // A pretest can be added which will run before all other tests.
-    // NOTE: It is only run once for the entire test sequence
-    self_test_.setPretest(  &MyNode::pretest );
+    // If any setup work needs to be done before running the tests,
+    // a pretest can be defined. It is just like any other test, but
+    // doesn't actually do any testing.
+    self_test_.add("Pretest", this, &MyNode::pretest );
 
-    // A pretest can be added which will run after all other tests.
-    // NOTE: It is only run once for the entire test sequence
-    self_test_.setPosttest( &MyNode::pretest );
-
-    // This differs philosophically from other testing architectures
-    // such as gtest which would run your setup and teardown on each
-    // test.  I have chosen this approach because we often use tests
-    // in sequence bringing up the hardware device and want to see
-    // the status of each of those stages sequentially.
-
-    // Tests added will be run in the order in which they are added
-    self_test_.addTest(     &MyNode::test1   );
-    self_test_.addTest(     &MyNode::test2   );
-    self_test_.addTest(     &MyNode::test3   );
-    self_test_.addTest(     &MyNode::test4   );
+    // Tests added will be run in the order in which they are added. Each
+    // test has a name that will be automatically be filled in the
+    // DiagnosticStatus message.
+    self_test_.add("ID Lookup",                 this, &MyNode::test1);
+    self_test_.add("Exception generating test", this, &MyNode::test2);
+    self_test_.add("Value generating test",     this, &MyNode::test3);
+    self_test_.add("Value testing test",        this, &MyNode::test4);
+    
+    // If any cleanup work needs to be done after running the tests,
+    // a posttest can be defined. It is just like any other test, but 
+    // doesn't actually do any testing.
+    self_test_.add("Posttest", this, &MyNode::pretest );
   }
 
-  void pretest()
+  void pretest(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
     printf("Doing preparation stuff before we run our test.\n");
+    
+    status.summary(0, "Pretest completed successfully.");
     
     some_val = 1.0;
   }
 
-
-  // All tests take a reference to a DiagnosticStatus message which they should populate
+  // All tests take a reference to a DiagnosticStatusWrapper message which they should populate
   // The default values are status.level = 2 (ERROR), and status.message = "No message was set"
-  void test1(diagnostic_msgs::DiagnosticStatus& status)
+  // The status.name is automatically set to the name that was passed to add.
+  // A DiagnosticStatusWrapper is used instead of a DiagnosticStatus
+  // because it provides useful convenience methods.
+  void test1(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
-    // Good practice is to set the name of the test first
-    status.name = "ID Lookup";
-
     // Look up ID here
     char ID[] = "12345";
     bool lookup_successful = true;
 
     if (lookup_successful)
     {
-      status.level = 0;
-      status.message = "ID Lookup successful";
+      status.summary(0, "ID Lookup successful");
       
       // Using setID on the selftest pushes the ID to an accessible location 
       self_test_.setID(ID);
 
     } else {
-      status.level = 2;
-      status.message = "ID Lookup failed";
+      status.summary(2, "ID Lookup failed");
     }
   }
 
   // Tests do not necessarily need to catch their exceptions.
-  void test2(diagnostic_msgs::DiagnosticStatus& status)
+  void test2(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
-    status.name = "Exception generating test";
-
     // Note, we start setting our status to success.  Since our
     // exception is not caught, however, the SelfTest class will
     // change level to ERROR.  This wouldn't be common practice And I
@@ -124,45 +118,35 @@ public:
     throw std::runtime_error("we did something that threw an exception");
 
     // Here's where we would report success if we'd made it past
-    status.level = 0;
-    status.message = "We made it past the exception throwing statement.";
+    status.summary(0, "We made it past the exception throwing statement.");
   }
 
   // The state of the node can be changed as the tests are operating
-  void test3(diagnostic_msgs::DiagnosticStatus& status)
+  void test3(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
-    status.name = "Value generating test";
-
     // Do something that changes the state of the node
     some_val += 41.0;
 
-    status.set_values_size(1);
-    status.values[0].value = some_val;
-    status.values[0].key = "some value";
-
-    status.level = 0;
-    status.message = "We successfully changed the value.";
+    status.add("some value", some_val);
+    status.summary(0, "We successfully changed the value.");
   }
 
-  void test4(diagnostic_msgs::DiagnosticStatus& status)
+  void test4(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
-    status.name = "Value testing test";
-
     if (some_val == 42.0)
     {
-      status.level = 0;
-      status.message = "We observed the change in value";
+      status.summary(0, "We observed the change in value");
     } 
     else
     {
-      status.level = 2;
-      status.message = "We failed to observe the change in value";
+      status.summaryf(2, "We failed to observe the change in value, it is currently %f.", some_val);
     }
   }
 
-  void posttest()
+  void posttest(diagnostic_updater::DiagnosticStatusWrapper& status)
   {
     printf("Doing cleanup stuff after we run our test.\n");
+    status.summary(0, "Posttest completed successfully.");
   }
 
   bool spin()
@@ -180,7 +164,6 @@ public:
     }
     return true;
   }
-
 };
 
 int
@@ -191,8 +174,6 @@ main(int argc, char** argv)
   MyNode n;
 
   n.spin();
-
-  
 
   return(0);
 }
