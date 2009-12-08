@@ -403,6 +403,8 @@ namespace diagnostic_updater
 
         if (node_handle_.ok())
         {
+          bool warn_nohwid = hwid_.empty();
+          
           std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
           boost::mutex::scoped_lock lock(lock_); // Make sure no adds happen while we are processing here.
@@ -415,14 +417,21 @@ namespace diagnostic_updater
             status.name = iter->getName();
             status.level = 2;
             status.message = "No message was set";
+            status.hardware_id = hwid_;
 
             iter->run(status);
 
             status_vec.push_back(status);
+                                         
+            if (status.level)
+              warn_nohwid = false;
 
             if (verbose_ && status.level)
               ROS_WARN("Non-zero diagnostic status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
           }
+
+          if (warn_nohwid)
+            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to none. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
 
           publish(status_vec);
         }
@@ -477,6 +486,11 @@ namespace diagnostic_updater
         }
 
         publish(status_vec);
+      }
+
+      void setHardwareID(const std::string &hwid)
+      {
+        hwid_ = hwid;
       }
 
     private:
@@ -552,6 +566,7 @@ namespace diagnostic_updater
       ros::Time next_time_;
 
       double period_;
+      std::string hwid_;
 
   };
 
