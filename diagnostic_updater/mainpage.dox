@@ -7,60 +7,18 @@
 \b diagnostic_updater contains assorted C++ classes to assist in diagnostic
 publication. The main parts of diagnostic_updater are:
 
- - DiagnosticStatusWrapper in \ref DiagnosticStatusWrapper.h
- 
-   - \ref diagnostic_updater::DiagnosticStatusWrapper : A class that wraps
-  	 diagnostics_msgs::DiagnosticStatus and provides convenience methods that
-  	 make it easier to fill out non-string data.
+ - \ref DiagnosticStatusWrapper, a wrapper providing convenience functions
+   for working with diagnostics_msgs::DiagnosticStatus.
 
- - Updater in \ref diagnostic_updater.h
-  
-   - \ref diagnostic_updater::Updater : A class that manages a list of
-		 diagnonstic_updater::DiagnosticTask instances, each of which produces
-		 a diagnostic_msgs::DiagnosticStatusWrapper. The client code calls the
-		 Updater's update method whenever is convenient for it. The Updater
-		 rate-limits calls to its update method, calls each DiagnosticTask to
-		 produce a DiagnosticStatusWrapper, and publishes the result to the
-		 diagnostics topic.
+ - \ref Updater, a class for managing periodic publishing of
+   the \ref DiagnosticStatusWrapper output by a set of \ref DiagnosticTask.
 
-	 - A hierarchy of descendents of \ref diagnostic_updater::DiagnosticTask,
-		 which each have a name and a way of producing a
-		 diagnostic_msgs::DiagnosticStatusWrapper, and that can be used to
-		 facilitate the creation of DiagnosticTasks:
+ - \ref TopicDiagnostic and \ref HeaderlessTopicDiagnostic for calculating
+   and publishing statistics on timestamps and publication frequencies, and
+   their corresponding \ref DiagnosedPublisher and \ref
+   HeaderlessDiagnosedPublisher to update the statistics automatically when
+   publications are made to a topic.
 
-		 - \ref diagnostic_updater::DiagnosticTask : The abstract base class
-		 
-		 - \ref diagnostic_updater::GenericFunctionDiagnosticTask : A diagnostic
-			 Task based off a boost::function.
-
-		 - \ref diagnostic_updater::CombinationDiagnosticTask : A diagnostic
-			 task that merges the results from a list of
-			 diagnostic_updater::DiagnosticTask classes into a single
-			 DiagnosticStatusWrapper.
-
-		 @b Note: Most of the time, user code can just use the appropriate add
-		 method for diagnostic_updater::Updater with a pointer to a function, a
-		 pointer to a method or a boost::function.
-  
- - Frequency and Interval statistics in \ref update_functions.h and \ref
-	 publisher.h
-
-   - \ref diagnostic_updater::FrequencyStatus and 
-     \ref diagnostic_updater::TimeStampStatus, two sublcasses of 
-     diagnostic_updater::DiagnosticTask that respectively
-  	 compute frequency statistics, and do checks on intervals between events.
-  
-   - \ref diagnostic_updater::HeaderlessTopicDiagnostic and
-  	 \ref diagnostic_updater::TopicDiagnostic, two subclasses of
-  	 diagnostic_updater::CombinationDiagnosticTask that allow
-  	 diagnostic_updaters::FrequencyStatus and
-  	 diagnostic_updaters::TimeStampStatus to be easily applied to
-  	 publications of a topic.
-  
-   - \ref diagnostic_updaters::HeaderlessDiagnosedPublisher and
-     \ref diagnostic_updaters::DiagnosedPublisher, two classes that make
-  	 diagnostic_updater::HeaderlessTopicDiagnostic and
-  	 diagnostic_updater::TopicDiagnostic even easier to use with a standard
-  	 ros::Publisher.
+Example uses of these classes can be found in \ref example.cpp.
  
  */                                     

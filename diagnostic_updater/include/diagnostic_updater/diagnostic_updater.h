@@ -367,7 +367,7 @@ namespace diagnostic_updater
        * parameter.
        */
 
-      Updater(ros::NodeHandle h = ros::NodeHandle()) : node_handle_(h)
+    Updater()
     {
       setup();
     }
