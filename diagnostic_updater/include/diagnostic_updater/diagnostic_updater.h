@@ -372,6 +372,16 @@ namespace diagnostic_updater
       setup();
     }
 
+    /**
+     * \brief Deprecated. Passing in a NodeHandle was deemed unnecessary.
+     * Object if you disagree.
+     */
+
+    ROSCPP_DEPRECATED Updater(ros::NodeHandle &nh)
+    {
+      setup();
+    }
+
       /**
        * \brief Causes the diagnostics to update if the inter-update interval
        * has been exceeded.
