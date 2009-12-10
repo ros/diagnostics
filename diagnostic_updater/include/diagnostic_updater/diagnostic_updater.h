@@ -128,7 +128,7 @@ namespace diagnostic_updater
    */
 
   template <class T>
-    class GenericFunctionDiagnosticTask : public DiagnosticTask
+  class GenericFunctionDiagnosticTask : public DiagnosticTask
   {
     public:
       /**
@@ -141,7 +141,7 @@ namespace diagnostic_updater
        */
       GenericFunctionDiagnosticTask(const std::string &name, boost::function<void(T&)> fn) : 
         DiagnosticTask(name), fn_(fn)
-    {}
+      {}
 
       virtual void run(DiagnosticStatusWrapper &stat)
       {
@@ -157,21 +157,21 @@ namespace diagnostic_updater
   typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
 
   /**
-   * \brief Merges CombinationDiagnosticTask into a single DiagnosticTask.
+   * \brief Merges CompositeDiagnosticTask into a single DiagnosticTask.
    *
-   * The CombinationDiagnosticTask allows multiple ComposableDiagnosticTask
-   * instances to be combined into a single DiagnosticStatus. The output of
-   * the combination has the max of the status levels, and a concatenation of
-   * the non-zero-level messages.
+   * The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
+   * be combined into a single task that produces a single single
+   * DiagnosticStatusWrapped. The output of the combination has the max of
+   * the status levels, and a concatenation of the non-zero-level messages.
    */
 
-  class CombinationDiagnosticTask : public DiagnosticTask
+  class CompositeDiagnosticTask : public DiagnosticTask
   {
     public:
       /**
-       * \brief Constructs a CombinationDiagnosticTask with the given name.
+       * \brief Constructs a CompositeDiagnosticTask with the given name.
        */
-      CombinationDiagnosticTask(const std::string name) : DiagnosticTask(name)
+      CompositeDiagnosticTask(const std::string name) : DiagnosticTask(name)
       {}
 
       /**
@@ -200,10 +200,10 @@ namespace diagnostic_updater
       }
 
       /**
-       * \brief Adds a child CombinationDiagnosticTask.
+       * \brief Adds a child CompositeDiagnosticTask.
        *
-       * This CombinationDiagnosticTask will be called each time this
-       * CombinationDiagnosticTask is run.
+       * This CompositeDiagnosticTask will be called each time this
+       * CompositeDiagnosticTask is run.
        */
       void addTask(DiagnosticTask *t)
       {
