@@ -47,7 +47,7 @@
 
 #include <boost/thread.hpp>
 
-/* Old main page, now mostly obsolete. Should delete before M3 once ROS API
+/* @todo Old main page, now mostly obsolete. Should delete before M3 once ROS API
    is better documented.
 
    @mainpage
@@ -440,8 +440,11 @@ namespace diagnostic_updater
               ROS_WARN("Non-zero diagnostic status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
           }
 
-          if (warn_nohwid)
+          if (warn_nohwid && !warn_nohwid_done_)
+          {
             ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to none. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            warn_nohwid_done_ = true;
+          }
 
           publish(status_vec);
         }
@@ -496,6 +499,17 @@ namespace diagnostic_updater
         }
 
         publish(status_vec);
+      }
+
+      void setHardwareIDf(const char *format, ...)
+      {
+        va_list va;
+        char buff[1000]; // @todo This could be done more elegantly.
+        va_start(va, format);
+        if (vsnprintf(buff, 1000, format, va) >= 1000)
+          ROS_DEBUG("Really long string in diagnostic_updater::setHardwareIDf.");
+        hwid_ = std::string(buff);
+        va_end(va);
       }
 
       void setHardwareID(const std::string &hwid)
@@ -555,6 +569,7 @@ namespace diagnostic_updater
         next_time_ = ros::Time::now();
 
         verbose_ = false;
+        warn_nohwid_done_ = false;
       }
 
       /**
@@ -577,7 +592,7 @@ namespace diagnostic_updater
 
       double period_;
       std::string hwid_;
-
+      bool warn_nohwid_done_;
   };
 
 };
