@@ -100,7 +100,7 @@ class MainWindow(wx.Frame):
         self.Close(True)
             
     def on_error(self):
-        self.Raise()
+        pass
     
 def wxmonitor():
     app = wx.PySimpleApp()
