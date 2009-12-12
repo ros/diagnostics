@@ -43,10 +43,16 @@ roslib.load_manifest('robot_monitor')
 
 import rospy
 
-import wx
+WXVER = '2.8'
+import wxversion
+if wxversion.checkInstalled(WXVER):
+  wxversion.select(WXVER)
+else:
+  print >> sys.stderr, "This application requires wxPython version %s"%(WXVER)
+  sys.exit(1)
 
 from robot_monitor.robot_monitor_panel import RobotMonitorPanel
-
+import wx
 
 
 ##\brief Main frame of robot monitor
@@ -54,15 +60,25 @@ class RobotMonitorFrame(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, wx.ID_ANY, title)
 
-        self.panel = RobotMonitorPanel(self)
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self._panel = RobotMonitorPanel(self)
+        self._sizer.Add(self._panel, 1, wx.EXPAND)
+        self.SetSizer(self._sizer)
         
-    def on_exit(self, e):
-        self.Close(True)
+        self._shutdown_timer = wx.Timer()
+        self._shutdown_timer.Bind(wx.EVT_TIMER, self._on_shutdown_timer)
+        self._shutdown_timer.Start(100)
+        
+    def _on_shutdown_timer(self, event):
+        if (rospy.is_shutdown()):
+            self.Close()
 
 ##\brief wxApp of robot monitor
 class RobotMonitorApp(wx.App):
     def OnInit(self):
         rospy.init_node('robot_monitor', anonymous=True)
+
+        wx.MessageBox("robot_monitor.py is deprecated, please use robot_monitor instead", "Deprecated", wx.OK|wx.ICON_WARNING)
         
         self._frame = RobotMonitorFrame(None, 'Robot Monitor')
         self._frame.SetSize(wx.Size(500, 700))

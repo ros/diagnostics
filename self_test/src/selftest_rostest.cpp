@@ -44,16 +44,17 @@ TEST(SelfTest, runSelfTest)
   ros::NodeHandle nh_private("~");
 
   std::string node_to_test;
-  double delay;
+  double max_delay;
   nh_private.param("node_to_test", node_to_test, std::string());
-  nh_private.param("delay", delay, 1.);
+  nh_private.param("max_delay", max_delay, 60.);
   ASSERT_FALSE(node_to_test.empty()) << "selftest_rostest needs the \"node_to_test\" parameter.";
     
-  ros::Duration(delay).sleep();
+  std::string service_name = node_to_test+"/self_test";
+  ros::service::waitForService(service_name, max_delay);
 
   diagnostic_msgs::SelfTest srv;
   
-  if (nh.serviceClient<diagnostic_msgs::SelfTest>(node_to_test+"/self_test").call(srv))
+  if (nh.serviceClient<diagnostic_msgs::SelfTest>(service_name).call(srv))
   {
     diagnostic_msgs::SelfTest::Response &res = srv.response;
     

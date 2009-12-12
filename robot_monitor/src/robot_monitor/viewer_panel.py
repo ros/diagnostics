@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Kevin Watts
+# Author: Kevin Watts, Josh Faust
 
 PKG = 'robot_monitor'
 
@@ -46,63 +46,24 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 import wx
 from wx import xrc
 from wx import html
+from wx import richtext
+
+import copy
 
 import cStringIO
 
+from message_timeline import MessageTimeline
+
 stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
 
-##\brief View status messages in pop-up window
-##
-## Allows users to view details of status in popup window
-##\todo Add play/pause buttons, message buffer
-class StatusViewer(wx.Panel):
-    ##\param parent StatusViewerFrame : Parent frame
-    ##\param name str : Full topic name to listen to
-    ##\param manager RobotMonitor : Manager updates frame, notified on close
-    def __init__(self, parent, name, manager):
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
-
-        xrc_path = os.path.join(roslib.packages.get_pkg_dir(PKG), 'xrc/gui.xrc')
-        self._res = xrc.XmlResource(xrc_path)
-        self._panel = self._res.LoadPanel(self, 'status_viewer')
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._panel, 1, wx.EXPAND)
-        self.SetSizer(sizer)
- 
-        self._html_ctrl = xrc.XRCCTRL(self._panel, 'html_ctrl')
-
-        self._manager = manager
-        self._name = name
+class SnapshotFrame(wx.Frame):
+    def __init__(self, parent, name):
+        wx.Frame.__init__(self, parent, wx.ID_ANY, "Snapshot of %s"%(name))
         
-    ##\brief Destructor removes viewer from manager's update list
-    def __del__(self):
-        self._manager.remove_viewer(self._name)
-
-    ##\brief Write status as HTML, like runtime monitor
-    def write_status(self, status):
-        s = cStringIO.StringIO()
-        
-        s.write("<html><body>")
-        s.write("<b>Full name</b>: %s<br>\n" % (status.name))
-        s.write("<b>Component</b>: %s<br>\n" % (status.name.split('/')[-1]))
-        s.write("<b>Hardware ID</b>: %s<br><br>\n\n" % (status.hardware_id))
-
-        s.write("<b>Level</b>: %s<br>\n" % (stat_dict[status.level]))
-        s.write("<b>Message</b>: %s<br><br>\n\n" % (status.message))
-
-        s.write('<table border="1" cellpadding="2" cellspacing="0">')
-        for value in status.values:
-            value.value = value.value.replace("\n", "<br>")
-            s.write("<tr><td><b>%s</b></td> <td>%s</td></tr>\n" % (value.key, value.value))
-      
-        s.write("</table></body></html>")
-
-        self._html_ctrl.Freeze()        
-        (x, y) = self._html_ctrl.GetViewStart()
-        self._html_ctrl.SetPage(s.getvalue())
-        self._html_ctrl.Scroll(x, y)
-        
-        self._html_ctrl.Thaw()
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
+        self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
 
 ##\brief Frame views status messages in separate window
 ##
@@ -115,7 +76,114 @@ class StatusViewerFrame(wx.Frame):
     def __init__(self, parent, name, manager, title):
         wx.Frame.__init__(self, parent, wx.ID_ANY, title)
         
-        self.panel = StatusViewer(self, name, manager)
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
         
-    def on_exit(self, e):
-        self.Close(True)
+        self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
+        self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
+        
+        bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._timeline = MessageTimeline(self, 30, None, None, self._write_status, self._get_color_for_message, None)
+        bottom_sizer.Add(self._timeline, 1, wx.EXPAND|wx.ALL, 5)
+        
+        self._snapshot_button = wx.Button(self, wx.ID_ANY, "Snapshot")
+        self._snapshot_button.Bind(wx.EVT_BUTTON, self._on_snapshot)
+        bottom_sizer.Add(self._snapshot_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
+        
+        self._sizer.Add(bottom_sizer, 0, wx.EXPAND)
+        
+        self.SetSizer(self._sizer)
+        
+        self._text_ctrl.SetFocus()
+
+        self._manager = manager
+        self._name = name
+        
+        self._default_style = self._text_ctrl.GetDefaultStyle()
+        self._basic_style = self._text_ctrl.GetBasicStyle()
+        
+        self.Bind(wx.EVT_CHAR, self.on_char)
+        self._text_ctrl.Bind(wx.EVT_CHAR, self.on_char)
+        
+        self.Bind(wx.EVT_CLOSE, self._on_close)
+        
+        self._last_values = {}
+        self._last_status = None
+        
+    def _on_close(self, event):
+        event.Skip()
+        self._manager.remove_viewer(self._name)
+        
+    def _on_snapshot(self, event):
+        snapshot = SnapshotFrame(self, self._name)
+        snapshot._text_ctrl.SetValue(self._text_ctrl.GetValue())
+        snapshot.Show(True)
+        snapshot.Raise()
+        snapshot.Center()
+
+    def set_status(self, status):
+        if (self._timeline.IsEnabled()):
+            self._timeline.add_msg(status)
+        else:
+            self._write_status(status)
+        
+    def _set_kv(self, key, value, changed=False):
+        self._text_ctrl.BeginBold()
+        self._text_ctrl.WriteText("%s: "%(key))
+        self._text_ctrl.EndBold()
+        
+        if (not changed):
+            self._text_ctrl.WriteText(value)
+        else:
+            self._text_ctrl.BeginBold()
+            self._text_ctrl.BeginTextColour(wx.Colour(0xaa, 0x77, 0x00))
+            self._text_ctrl.WriteText(value)
+            self._text_ctrl.EndTextColour()
+            self._text_ctrl.EndBold()
+        self._text_ctrl.Newline()
+
+    def _write_status(self, status):
+        self._text_ctrl.Freeze()
+        self._text_ctrl.Clear()
+        self._text_ctrl.SetBasicStyle(self._basic_style)
+        self._text_ctrl.SetDefaultStyle(self._default_style)
+        self._set_kv("Full name", status.name)
+        self._set_kv("Component", status.name.split('/')[-1])
+        self._set_kv("Hardware ID", status.hardware_id)
+        self._set_kv("Level", stat_dict[status.level], self._last_status is not None and self._last_status.level != status.level)
+        self._set_kv("Message", status.message, self._last_status is not None and self._last_status.message != status.message)
+        self._text_ctrl.Newline()
+        
+        for value in status.values:
+            changed = False
+            if (self._last_values.has_key(value.key) and self._last_values[value.key] != value.value):
+                changed = True
+                
+            self._set_kv(value.key, value.value, changed)
+            
+            
+            
+            self._last_values[value.key] = value.value
+            
+        self._text_ctrl.EndAllStyles()    
+        self._text_ctrl.Thaw()
+        
+        self._last_status = status
+        
+    def _get_color_for_message(self, msg):
+        return color_dict[msg.level]
+        
+    def on_char(self, evt):
+        if (evt.GetKeyCode() == wx.WXK_ESCAPE):
+          self.Close()
+        else:
+          evt.Skip()
+          
+    def disable_timeline(self):
+        self._timeline.disable()
+        self._timeline.clear()
+        
+    def enable_timeline(self):
+        self._timeline.enable()
+        
+    def get_name(self):
+        return self._name

@@ -1,0 +1,14 @@
+/**
+
+@mainpage self_test
+
+@htmlinclude manifest.html
+
+\b self_test contains the \ref self_test::Sequencer class that can be used
+to sequence a set of tests to be run in order to test a device. It
+advertises a self_test service. When the service is called, the \ref
+self_test::Sequencer calls the tests that have been defined in order, and
+combines the results into a \ref diagnostic_msgs::DiagnosticsArray. A
+detailed example can be found in \ref selftest_example.cpp.
+
+ */                                     

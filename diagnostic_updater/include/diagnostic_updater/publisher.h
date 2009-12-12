@@ -52,7 +52,7 @@ namespace diagnostic_updater
  * that cannot therefore be checked using a TimeStampStatus.
  */
 
-class HeaderlessTopicDiagnostic : public CombinationDiagnosticTask
+class HeaderlessTopicDiagnostic : public CompositeDiagnosticTask
 {
 public:
 /**
@@ -60,7 +60,7 @@ public:
  *
  * \param name The name of the topic that is being diagnosed.
  *
- * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * \param diag The diagnostic_updater that the CompositeDiagnosticTask
  * should add itself to.
  *
  * \param freq The parameters for the FrequencyStatus class that will be
@@ -71,7 +71,7 @@ public:
       std::string name,
       diagnostic_updater::Updater &diag,
       const diagnostic_updater::FrequencyStatusParam &freq) :
-    CombinationDiagnosticTask(name + " topic status"), 
+    CompositeDiagnosticTask(name + " topic status"), 
     freq_(freq)
   {
     addTask(&freq_);
@@ -118,7 +118,7 @@ public:
    *
    * \param pub The publisher on which statistics are being collected.
    *
-   * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+   * \param diag The diagnostic_updater that the CompositeDiagnosticTask
    * should add itself to.
    *
    * \param freq The parameters for the FrequencyStatus class that will be
@@ -204,7 +204,7 @@ public:
  *
  * \param name The name of the topic that is being diagnosed.
  *
- * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * \param diag The diagnostic_updater that the CompositeDiagnosticTask
  * should add itself to.
  *
  * \param freq The parameters for the FrequencyStatus class that will be
@@ -267,7 +267,7 @@ public:
  *
  * \param pub The publisher on which statistics are being collected.
  *
- * \param diag The diagnostic_updater that the CombinationDiagnosticTask
+ * \param diag The diagnostic_updater that the CompositeDiagnosticTask
  * should add itself to.
  *
  * \param freq The parameters for the FrequencyStatus class that will be

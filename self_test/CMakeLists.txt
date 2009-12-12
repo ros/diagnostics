@@ -4,8 +4,6 @@ rosbuild_init()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-rosbuild_gensrv()
-
 rosbuild_add_boost_directories()
 
 rosbuild_add_executable(selftest_rostest src/selftest_rostest.cpp)
