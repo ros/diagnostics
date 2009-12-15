@@ -42,8 +42,8 @@ class MyNode
 {
 public:
 
-  // self_test::Sequencer is the handles sequencing driver self-tests.
-  self_test::Sequencer self_test_;
+  // self_test::TestRunner is the handles sequencing driver self-tests.
+  self_test::TestRunner self_test_;
 
   // A value showing statefulness of tests
   double some_val;
