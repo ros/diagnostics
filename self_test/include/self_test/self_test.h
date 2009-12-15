@@ -54,13 +54,13 @@ namespace self_test
   /**
    * \brief Class to facilitate the creation of component self-tests.
    *
-   * The self_test::Sequencer class advertises the "self_test" service, and
+   * The self_test::TestRunner class advertises the "self_test" service, and
    * maintains a list of pretests and tests. When "self_test" is invoked,
-   * Sequencer waits for a suitable time to interrupt the node and run the
+   * TestRunner waits for a suitable time to interrupt the node and run the
    * tests. Results from the tests are collected and returned to the caller.
    */
 
-  class Sequencer : public DiagnosticTaskVector
+  class TestRunner : public DiagnosticTaskVector
   {        
     private:
       ros::ServiceServer service_server_;
@@ -82,13 +82,13 @@ namespace self_test
        * \param h NodeHandle from which to work. (Currently unused?)
        */
 
-      Sequencer(ros::NodeHandle h = ros::NodeHandle()) : 
+      TestRunner(ros::NodeHandle h = ros::NodeHandle()) : 
         node_handle_(h)
     {
       ROS_DEBUG("Advertising self_test");
       ros::NodeHandle private_node_handle_("~");
       private_node_handle_.setCallbackQueue(&self_test_queue_);
-      service_server_ = private_node_handle_.advertiseService("self_test", &Sequencer::doTest, this);
+      service_server_ = private_node_handle_.advertiseService("self_test", &TestRunner::doTest, this);
       verbose = true;
     }
 
@@ -99,7 +99,7 @@ namespace self_test
 
       void checkTest()
       {
-        self_test_queue_.callAvailable();
+        self_test_queue_.callAvailable(ros::WallDuration(0));
       }
 
       /**
@@ -211,11 +211,11 @@ namespace self_test
   };
 
   /**
-   * \brief Deprecated, use Sequencer instead.
+   * \brief Deprecated, use TestRunner instead.
    */
 
   template <class T>
-    class Dispatcher : public Sequencer
+    class Dispatcher : public TestRunner
   {  
     protected: 
       T *owner_;
@@ -252,7 +252,7 @@ namespace self_test
        * \param h NodeHandle from which to work. (Currently unused?)
        */
 
-      ROSCPP_DEPRECATED Dispatcher(T *owner, ros::NodeHandle h) : Sequencer(h), owner_(owner)
+      ROSCPP_DEPRECATED Dispatcher(T *owner, ros::NodeHandle h) : TestRunner(h), owner_(owner)
       {}
 
       /**
@@ -287,7 +287,7 @@ namespace self_test
        * DiagnosticStatusWrapper.
        */
 
-      using Sequencer::add;
+      using TestRunner::add;
       
       template<class S>
         void add(const std::string name, void (S::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
@@ -301,7 +301,7 @@ namespace self_test
 
 /**
  *
- * This class is deprecated. Use self_test::Sequencer instead.
+ * This class is deprecated. Use self_test::TestRunner instead.
  *
  */
 
@@ -329,7 +329,7 @@ class SelfTest : public self_test::Dispatcher<T>
 
     void complain()
     {
-      //ROS_WARN("SelfTest is deprecated, please use self_test::Sequencer instead.");
+      //ROS_WARN("SelfTest is deprecated, please use self_test::TestRunner instead.");
     }
 
   private:
