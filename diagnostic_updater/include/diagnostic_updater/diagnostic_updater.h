@@ -391,7 +391,7 @@ namespace diagnostic_updater
       {
         ros::Time now_time = ros::Time::now();
         if (now_time < next_time_) {
-          update_diagnostic_period(); // Will be checked in force_update otherwise.
+          // @todo put this back in after fix of #2157 update_diagnostic_period(); // Will be checked in force_update otherwise.
           return;
         }
 
