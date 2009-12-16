@@ -60,6 +60,7 @@ def make_status_msg(count):
     stat.level = 0
     stat.message = 'OK'
     stat.name = 'Unit Test'
+    stat.hardware_id = 'HW ID'
     stat.values = [ 
         KeyValue('Value A', str(count)),
         KeyValue('Value B', str(count)),
@@ -101,12 +102,14 @@ class TestBagToCSV(unittest.TestCase):
         for row in input_reader:
             if count == -1:
                 self.assert_(row[2].strip() == 'Message')
-                self.assert_(row[3].strip() == 'Value A')
+                self.assert_(row[3].strip() == 'Hardware ID')
+                self.assert_(row[4].strip() == 'Value A')
                 count += 1
                 continue
 
             self.assert_(row[2].strip() == 'OK')
-            self.assert_(row[3].strip() == str(count))
+            self.assert_(row[3].strip() == 'HW ID')
+            self.assert_(row[4].strip() == str(count))
             count += 1
       
         self.assert_(count == row_count, "Row count doesn't match")

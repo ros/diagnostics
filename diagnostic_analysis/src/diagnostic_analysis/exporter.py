@@ -2,7 +2,7 @@
 #
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2008, Willow Garage, Inc.
+# Copyright (c) 2009, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 ##\author Kevin Watts
-##\brief LogExporter class does logfile conversion
+##\brief LogExporter class does diagnostics logfile conversion to CSV
 
 PKG = 'diagnostic_analysis'
 
@@ -104,6 +104,7 @@ class LogExporter:
                 
                 self._stats[name]['level'] = status.level
                 self._stats[name]['message'] = status.message
+                self._stats[name]['hardware_id'] = status.hardware_id
 
                 # Use named temp file, will cat this to header on close
                 datafile, tmp_name = tempfile.mkstemp()
@@ -126,10 +127,11 @@ class LogExporter:
             for s in status.values:
                 vals[self._stats[name]['fields'][s.key]] = s.value.replace('\n','  ').replace(',',' ')
         
-            msg = status.message.replace(',',' ')
+            msg = status.message.replace(',',' ').strip()
+            hw_id = status.hardware_id.replace(',', ' ')
         
-            self._stats[name]['data_file'].write(', '.join([time.strftime("%Y/%m/%d %H:%M:%S", t)] + 
-                                            [str(status.level), msg] + vals) + '\n')
+            self._stats[name]['data_file'].write(','.join([time.strftime("%Y/%m/%d %H:%M:%S", t)] + 
+                                            [str(status.level), msg, hw_id] + vals) + '\n')
 
     ##\brief Close logfile, append data to header
     def finish_logfile(self):
@@ -138,7 +140,7 @@ class LogExporter:
             field_dict = sorted(self._stats[name]['fields'].iteritems(), key=operator.itemgetter(1))
             fields = map(operator.itemgetter(0), field_dict)
             
-            header_line = ', '.join(['Timestamp'] + ['Level', 'Message'] + 
+            header_line = ','.join(['Timestamp'] + ['Level', 'Message', 'Hardware ID'] + 
                                     [f.replace(',','').replace('\n', ' ') for f in fields]) + '\n'
             
             file_name = os.path.join(self.output_dir, name.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '__').replace('.', '').replace('#', '') + '.csv')
