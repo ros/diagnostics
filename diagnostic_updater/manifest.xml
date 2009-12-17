@@ -4,7 +4,7 @@
   </description>
   <author>Jeremy Leibs, Blaise Gassend</author>
   <license>BSD</license>
-  <review status="unreviewed" notes="proposal (Jeremy)"/>
+  <review status="API cleared" notes="Dec 2009"/>
   <url>http://www.ros.org/wiki/diagnostic_updater</url>
   <depend package="roscpp" />
   <depend package="diagnostic_msgs" />
