@@ -52,7 +52,7 @@ from viewer_panel import StatusViewerFrame
 from robot_monitor_generated import MonitorPanelGenerated
 from message_timeline import MessageTimeline
 
-color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46), 3: wx.Colour(178, 23, 46)}
 
 def get_nice_name(status_name):
     return status_name.split('/')[-1]
