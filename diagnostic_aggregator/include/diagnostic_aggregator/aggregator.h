@@ -48,8 +48,8 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 #include "XmlRpcValue.h"
-#include "pluginlib/class_loader.h"
 #include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/analyzer_group.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "diagnostic_aggregator/other_analyzer.h"
 
@@ -103,7 +103,7 @@ public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
    */
-   Aggregator();
+  Aggregator();
 
   ~Aggregator();
 
@@ -121,6 +121,7 @@ public:
    *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
    */
   double getPubRate() const { return pub_rate_; }
+
 private:
   ros::NodeHandle n_;
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
@@ -132,18 +133,12 @@ private:
    */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
-  /*!
-   *\brief Loads Analyzer plugins
-   */
-  pluginlib::ClassLoader<Analyzer> analyzer_loader_;
-  
-  std::vector<Analyzer*> analyzers_;
+  AnalyzerGroup* analyzer_group_;
 
   OtherAnalyzer* other_analyzer_;
 
-  std::string base_path_; /**< Prepended to all status names of aggregator. */
+  std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
-  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 };
 
 }

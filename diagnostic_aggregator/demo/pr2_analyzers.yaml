@@ -1,27 +1,38 @@
 analyzers:
   sensors:
-    type: GenericAnalyzer
+    type: AnalyzerGroup
     path: Sensors
-    timeout: 5.0
-    base_hk:
-      name: Base Hokuyo
-      start_name: base_hokuyo_node
-      fields: [
-        'base_hokuyo_node: Connection Status',
-        'base_hokuyo_node: Frequency Status']
-    tilt_hk:
-      name: Tilt Hokuyo
-      start_name: tilt_hokuyo_node
-      fields: [
-        'tilt_hokuyo_node: Connection Status',
-        'tilt_hokuyo_node: Frequency Status']
-    imu:
-      name: IMU
-      start_name: imu_node
-      fields: [
-        'imu_node: Calibration Status',
-        'imu_node: Frequency Status',
-        'imu_node: IMU Status']
+    analyzers:
+      base_hk:
+        type: GenericAnalyzer
+        path: Base Hokuyo
+        timeout: 5.0
+        find_and_remove_prefix: base_hokuyo_node
+        num_items: 3
+      tilt_hk:
+        type: GenericAnalyzer
+        path: Tilt Hokuyo
+        timeout: 5.0
+        find_and_remove_prefix: tilt_hokuyo_node
+        num_items: 3
+      imu:
+        type: GenericAnalyzer
+        path: IMU
+        timeout: 5.0
+        find_and_remove_prefix: imu_node
+        num_items: 3
+      forearm_cam_l:
+        type: GenericAnalyzer
+        path: Forearm Cam (Left)
+        timeout: 5.0
+        find_and_remove_prefix: forearm_camera_l
+        num_items: 4
+      forearm_cam_r:
+        type: GenericAnalyzer
+        path: Forearm Cam (Right)
+        timeout: 5.0
+        find_and_remove_prefix: forearm_camera_r
+        num_items: 4
   computers:
     type: GenericAnalyzer
     path: Computers

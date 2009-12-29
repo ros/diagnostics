@@ -24,6 +24,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_add_boost_directories()
 rosbuild_add_library(diagnostic_aggregator
   src/status_item.cpp
+  src/analyzer_group.cpp
   src/generic_analyzer.cpp
   src/aggregator.cpp)
 rosbuild_link_boost(diagnostic_aggregator system regex)

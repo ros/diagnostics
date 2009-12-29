@@ -32,69 +32,64 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/*!
+/**
  * \author Kevin Watts 
  */
 
-#ifndef OTHER_ANALYZER_H
-#define OTHER_ANALYZER_H
+#ifndef DIAGNOSTIC_ANALYZER_GROUP_H
+#define DIAGNOSTIC_ANALYZER_GROUP_H
 
+#include <map>
+#include <vector>
 #include <string>
 #include <ros/ros.h>
-#include "diagnostic_aggregator/generic_analyzer_base.h"
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/KeyValue.h>
+#include "diagnostic_aggregator/status_item.h"
+#include <boost/shared_ptr.hpp>
+#include "XmlRpcValue.h"
+#include "diagnostic_aggregator/analyzer.h"
+#include "diagnostic_aggregator/status_item.h"
+#include "pluginlib/class_loader.h"
+#include "pluginlib/class_list_macros.h"
 
 namespace diagnostic_aggregator {
 
-/*
- *\brief OtherAnalyzer analyzes any messages that haven't been analyzed by other Analyzers
- *
- * OtherAnalyzer is not loaded as a plugin. It is created by the Aggregator, and called 
- * seperately. The aggregator will call analyze() on any message not handled by other
- * analyzers.
- *
- */
-class OtherAnalyzer : public GenericAnalyzerBase
+class AnalyzerGroup : public Analyzer
 {
 public:
+  AnalyzerGroup();
+  
+  virtual ~AnalyzerGroup();
+
+  virtual bool init(const std::string base_path, const ros::NodeHandle &n);
+
+  virtual bool match(const std::string name);
+
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item);
+
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+
+  std::string getPath() const { return path_; }
+  
+  std::string getName() const { return nice_name_; }
+
+private:
+  std::string path_, nice_name_;
+
   /*!
-   *\brief Default constructor. OtherAnalyzer isn't loaded by pluginlib
+   *\brief Loads Analyzer plugins in "analyzers" namespace
    */
-  OtherAnalyzer() { }
+  pluginlib::ClassLoader<Analyzer> analyzer_loader_;
 
-  ~OtherAnalyzer() { }
+  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 
-  bool init(std::string path)
-  {
-    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0);
-  }
+  std::vector<Analyzer*> analyzers_;
 
-  /*
-   *\brief OtherAnalyzer cannot be initialized with a NodeHandle
-   */
-  bool init(const std::string base_path, const ros::NodeHandle &n)
-  {
-    ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
-    return false;
-  }
+  std::map<const std::string, std::vector<bool> > matched_;
 
-  /*
-   *\brief match() isn't called by aggregator for OtherAnalyzer
-   */
-  bool match(std::string name) { return true; }
-
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
-  {
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
-
-    // We don't report anything if there's no "Other" items
-    if (processed.size() == 1)
-      processed.clear();
-    
-    return processed;
-  }
 };
 
 }
 
-
-#endif // OTHER_ANALYZER_H
+#endif //DIAGNOSTIC_ANALYZER_GROUP_H

@@ -114,7 +114,7 @@ public:
    *\verbatim
    * PowerSystem:
    *   type: GenericAnalyzer
-   *   prefix: Power System
+   *   path: Power System
    *   expected: [ 
    *     'IBPS 0',
    *     'IBPS 1']
@@ -124,8 +124,20 @@ public:
    *     'Power Node 1018']
    *   contains: [
    *     'Battery']
+   *   regex: [
+   *     'Power Board *']
+   *   remove_prefix: [
+   *     'Battery']
+   *   find_and_remove_prefix: [
+   *     'Power Supply']
+   *   num_items: 5
+   *   timeout: 10
    *\endverbatim
-   *   
+   *  The above options for "expected", "startswith", "name", "regex", "remove_prefix" and
+   * "find_and_remove_prefix" all give the analyzer items to look for and analyze.
+   * "num_items" configures it to look for a given number of items. Must be an exact match.
+   * "timeout" sets a timeout for all items under an analyzer. All items must report within the 
+   * timeout, or be marked stale. Default 5 seconds. If timeout < 0, no items will be marked as stale.
    *\param base_path : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
    */
@@ -141,7 +153,7 @@ public:
   /*!
    *\brief Returns true if item matches any of the regex, expected, startswith or contains criteria
    */
-  virtual bool match(const std::string name) const;
+  virtual bool match(const std::string name);
 
 private:
   std::vector<std::string> chaff_; /**< Removed from the start of node names. */

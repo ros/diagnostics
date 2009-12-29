@@ -109,7 +109,7 @@ inline std::string valToMsg(const int val)
   if (val == 3)
     return "Stale";
   
-  ROS_ERROR("Attempting to convert %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}", val);
+  ROS_ERROR("Attempting to convert diagnostic level %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}", val);
   return "Error";
 }
 
@@ -117,7 +117,7 @@ inline std::string valToMsg(const int val)
  *\brief Removes redundant prefixes from status name.
  *
  * Useful for cleaning up status names.
- * Ex: /Hokuyo/Tilt HK/tilt_node: Connection to /Hokuyo/Tilt HK/Connection
+ * Ex: "/Hokuyo/Tilt HK/tilt_node: Connection" to "/Hokuyo/Tilt HK/Connection"
  */
 inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
 {

@@ -74,7 +74,8 @@ public:
    */
   bool init(const std::string path, const ros::NodeHandle &n) = 0;
   
-  bool init(const std::string path, const std::string nice_name, double timeout = -1.0, int num_items_expected = -1)
+  bool init(const std::string path, const std::string nice_name, 
+            double timeout = -1.0, int num_items_expected = -1)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
@@ -162,9 +163,9 @@ public:
   }
   
   /*!
-   *\brief Match isn't implemented by GenericAnalyzerBase
+   *\brief Match function isn't implemented by GenericAnalyzerBase
    */
-  virtual bool match(const std::string name) const = 0;
+  virtual bool match(const std::string name) = 0;
   
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")

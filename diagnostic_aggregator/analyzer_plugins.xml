@@ -4,6 +4,10 @@
       GenericAnalyzer is default diagnostic analyzer.
     </description>
   </class>
+    <class name="AnalyzerGroup" type="diagnostic_aggregator::AnalyzerGroup" base_class_type="diagnostic_aggregator::Analyzer">
+    <description>
+      AnalyzerGroup is a way of grouping diagnostic analyzers. It is used internally by the aggregator, and can also be used as a plugin.
+    </description>
+  </class>
 </library>
 
-</library>

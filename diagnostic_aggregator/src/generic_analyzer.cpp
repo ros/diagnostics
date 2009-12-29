@@ -39,7 +39,8 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, diagnostic_aggregator::Analyzer)
+PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, 
+                         diagnostic_aggregator::Analyzer)
 
 GenericAnalyzer::GenericAnalyzer() { }
 
@@ -119,7 +120,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
 GenericAnalyzer::~GenericAnalyzer() { }
 
 
-bool GenericAnalyzer::match(const string name) const
+bool GenericAnalyzer::match(const string name)
 {
   boost::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i)
