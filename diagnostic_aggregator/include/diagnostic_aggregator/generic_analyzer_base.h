@@ -65,7 +65,10 @@ namespace diagnostic_aggregator {
 class GenericAnalyzerBase : public Analyzer
 {
 public:
-  GenericAnalyzerBase() : nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1), discard_stale_(false) { }
+  GenericAnalyzerBase() : 
+    nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1),
+    discard_stale_(false), has_initialized_(false), has_warned_(false) 
+  { }
   
   virtual ~GenericAnalyzerBase() { items_.clear(); }
   
@@ -74,6 +77,11 @@ public:
    */
   bool init(const std::string path, const ros::NodeHandle &n) = 0;
   
+  /*
+   *\brief Must be initialized with path, and a "nice name"
+   *
+   * Must be initialized in order to prepend the path to all outgoing status messages.
+   */
   bool init(const std::string path, const std::string nice_name, 
             double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
   {
@@ -88,6 +96,8 @@ public:
       ROS_WARN("Cannot discard stale items if no timeout specified. No items will be discarded");
       discard_stale_ = false;
     }
+
+    has_initialized_ = true;
     
     return true;
   }
@@ -99,6 +109,13 @@ public:
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
   {
+    if (!has_initialized_ && !has_warned_)
+    {
+      has_warned_ = true;
+      ROS_ERROR("GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
+    }
+
+
     boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
     header_status->name = path_;
     header_status->level = 0;
@@ -172,8 +189,15 @@ public:
    */
   virtual bool analyze(const boost::shared_ptr<StatusItem> item)
   {
+   if (!has_initialized_ && !has_warned_)
+    {
+      has_warned_ = true;
+      ROS_ERROR("GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
+    }
+
     items_[item->getName()] = item;
-    return true;
+
+    return has_initialized_;
   }
   
   /*!
@@ -209,7 +233,7 @@ private:
    */
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;
 
-  bool discard_stale_;
+  bool discard_stale_, has_initialized_, has_warned_;
 };
 
 }

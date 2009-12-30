@@ -93,7 +93,7 @@ public:
   virtual ~Analyzer() {}
 
   /*!
-   *\brief Analyzer is initialized with first prefix and namespace.
+   *\brief Analyzer is initialized with base path and namespace.
    *
    * The Analyzer initialized with parameters in its given 
    * namespace. The "base_path" is common to all analyzers, and needs to be

@@ -45,22 +45,18 @@ analyzers:
   motors:
     type: GenericAnalyzer
     path: Motors
-    startswith: [
-      'EtherCAT',
-      'Power board']
+    startswith: 'EtherCAT'
   joints:
     type: GenericAnalyzer
     path: Joints
-    startswith: [
-      'Joint']
+    startswith: 'Joint'
   power:
     type: GenericAnalyzer
     path: 'Power System'
     timeout: 5.0
     startswith: [
-      'Smart Battery']
-    name: [
-      'Expected Batteries']
+      'Smart Battery',
+      'Power board']
     expected: [
       'IBPS 1',
       'IBPS 2',

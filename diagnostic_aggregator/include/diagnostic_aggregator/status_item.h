@@ -168,13 +168,12 @@ public:
   /*!
    *\brief Must have same name as original status or it won't update.
    * 
-   * After update, hasChecked() is false until converted toStatusMsg.
    *\return True if update successful, false if error
    */
   bool update(const diagnostic_msgs::DiagnosticStatus *status);
 
   /*!
-   *\brief Sets hasChecked() to true, prepends "prefix/" to name.
+   *\brief Prepends "prefix/" to name.
    *
    *\param prefix : Prepended to name
    *\param stale : If true, status level is 3
@@ -208,6 +207,8 @@ public:
 
   /*!
    *\brief Returns true if item has key in values KeyValues
+   *
+   *\return True if has key
    */
   bool hasKey(const std::string key) const
   {

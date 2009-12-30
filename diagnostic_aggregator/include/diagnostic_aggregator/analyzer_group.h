@@ -55,6 +55,57 @@
 
 namespace diagnostic_aggregator {
 
+/*!
+ *\brief Allows analyzers to be grouped together, or used as sub-analyzers
+ *
+ * The AnalyzerGroup is used by the diagnostic aggregator internally to
+ * load and handle analyzers. It can be used as a normal analyzer plugin to 
+ * allow analyzers to become "sub-analyzers", or move as a group.
+ *
+ * The "sub-analyzers" are initialized using parameters in the "~analyzers" 
+ * namespace of the AnalyzerGroup. The "type" parameters determines the analyzer type.
+ *
+ * Example initialization:
+ *\verbatim
+ *  sensors:
+ *  type: AnalyzerGroup
+ *  path: Sensors
+ *  analyzers:
+ *    base_hk:
+ *      type: GenericAnalyzer
+ *      path: Base Hokuyo
+ *      timeout: 5.0
+ *      find_and_remove_prefix: base_hokuyo_node
+ *      num_items: 3
+ *    tilt_hk:
+ *      type: GenericAnalyzer
+ *      path: Tilt Hokuyo
+ *      timeout: 5.0
+ *      find_and_remove_prefix: tilt_hokuyo_node
+ *      num_items: 3
+ *    imu:
+ *      type: GenericAnalyzer
+ *      path: IMU
+ *      timeout: 5.0
+ *      find_and_remove_prefix: imu_node
+ *      num_items: 3
+ *\endverbatim
+ *
+ * Each namespace below "analyzers" describes a new Analyzer that will be loaded as a 
+ * sub-analyzer. Any analyzer that fails to initialize or loads incorrectly will
+ * generate an error in the console output, and a special diagnostic item in the output
+ * of the AnalyzerGroup that describes the error. 
+ *
+ * In the above example, the AnalyzerGroup will have three sub-analyzers. The 
+ * AnalyzerGroup will report a DiagnosticStatus message in the processed output with
+ * the name "Sensors" (the top-level state). The "Sensors" message will have the 
+ * level of the highest of the sub-analyzers, or the highest of "Sensors/Base Hokuyo",
+ * "Sensors/Tilt Hokuyo" and "Sensors/IMU". The state of any other items, like
+ * "Sensors/IMU/Connection" won't matter to the AnalyzerGroup.
+ *
+ * The Aggregator uses the AnalyzerGroup internally to load and update analyzers.
+ *
+ */
 class AnalyzerGroup : public Analyzer
 {
 public:
@@ -62,17 +113,31 @@ public:
   
   virtual ~AnalyzerGroup();
 
+  /*!
+   *\brief Initialized with base path and namespace.
+   * 
+   * The parameters in its namespace determine 
+   */
   virtual bool init(const std::string base_path, const ros::NodeHandle &n);
 
+  /*!
+   *\brief Match returns true if any sub-analyzers match an item
+   */
   virtual bool match(const std::string name);
 
+  /*!
+   *\brief Analyze returns true if any sub-analyzers will analyze an item
+   */
   virtual bool analyze(const boost::shared_ptr<StatusItem> item);
 
+  /*!
+   *\brief The processed output is the combine output of the sub-analyzers, and the top level status
+   */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
-  std::string getPath() const { return path_; }
+  virtual std::string getPath() const { return path_; }
   
-  std::string getName() const { return nice_name_; }
+  virtual std::string getName() const { return nice_name_; }
 
 private:
   std::string path_, nice_name_;
@@ -82,10 +147,16 @@ private:
    */
   pluginlib::ClassLoader<Analyzer> analyzer_loader_;
 
+  /*!
+   *\brief These items store errors, if any, for analyzers that failed to initialize or load
+   */
   std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 
   std::vector<Analyzer*> analyzers_;
 
+  /*
+   *\brief The map of names to matchings is stored internally. 
+   */
   std::map<const std::string, std::vector<bool> > matched_;
 
 };
