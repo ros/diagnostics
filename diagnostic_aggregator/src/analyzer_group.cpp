@@ -187,6 +187,8 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
   header_status->level = 0;
   header_status->message = "OK";
 
+  bool all_stale = true;
+
   for (unsigned int j = 0; j < analyzers_.size(); ++j)
   {
     string path = analyzers_[j]->getPath();
@@ -206,12 +208,17 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
         diagnostic_msgs::KeyValue kv;
         kv.key = nice_name;
         kv.value = processed[i]->message;
-
+        
+        all_stale = all_stale && (processed[i]->level == 3);
         header_status->level = max(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
     }
   }
+
+  // Report stale as errors unless all stale
+  if (header_status->level == 3 && !all_stale)
+    header_status->level = 2;
 
   header_status->message = valToMsg(header_status->level);
 
