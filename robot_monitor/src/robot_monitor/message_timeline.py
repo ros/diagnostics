@@ -32,9 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Josh Faust
+##\author Josh Faust
 
-PKG="robot_monitor"
+PKG = "robot_monitor"
 
 from collections import deque
 import rospy

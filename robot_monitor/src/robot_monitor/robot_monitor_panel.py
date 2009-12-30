@@ -52,7 +52,7 @@ from viewer_panel import StatusViewerFrame
 from robot_monitor_generated import MonitorPanelGenerated
 from message_timeline import MessageTimeline
 
-color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46), 3: wx.Colour(178, 23, 46)}
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46), 3: wx.Colour(40, 23, 176)}
 
 def get_nice_name(status_name):
     return status_name.split('/')[-1]
@@ -425,26 +425,29 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     ##\brief Gets the "top level" state of the diagnostics
     ##
     ## Returns the highest value of any of the root tree items
-    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = Stale
+    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = All Stale
     def get_top_level_state(self):
         level = -1
-        id, cookie = self._tree_ctrl.GetFirstChild(self._tree_ctrl.GetRootItem())
-        if id == self._empty_id:
+        min_level = 255
+
+        if len(self._state.get_items()) == 0:
             return level
 
-        while not rospy.is_shutdown():
-            item = self._tree_ctrl.GetPyData(id)
-            if item and item.status and item.status.level > level:
+        for item in self._state.get_items().itervalues():
+            if item.status.level > level:
                 level = item.status.level
-            
-            id, cookie = self._tree_ctrl.GetNextChild(self._tree_ctrl.GetRootItem(), cookie)
-            if not id.IsOk():
-                break
+            if item.status.level < min_level:
+                min_level = item.status.level
               
+        # Top level is error if we have stale items, unless all stale
+        if level > 2 and min_level <= 2:
+            level = 2
+
         return level
 
     def get_color_for_message(self, msg):
         level = 0
+        min_level = 255
         
         lookup = {}
         for status in msg.status:
@@ -456,5 +459,12 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             status = lookup[name]
             if (status.level > level):
                 level = status.level
+            if (status.level < min_level):
+                min_level = status.level
+
+        # Stale items should be reported as errors unless all stale
+        if (level > 2 and min_level <= 2):
+            level = 2
+
                 
         return color_dict[level]
