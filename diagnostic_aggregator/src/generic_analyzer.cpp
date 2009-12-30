@@ -111,10 +111,13 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   
   double timeout;
   int num_items_expected;
+  bool discard_stale;
   n.param("timeout", timeout, 5.0);   // Timeout for stale
   n.param("num_items", num_items_expected, -1); // Number of items must match this
+  n.param("discard_stale", discard_stale, false);
 
-  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, timeout, num_items_expected);
+  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, 
+                                   timeout, num_items_expected, discard_stale);
 }
 
 GenericAnalyzer::~GenericAnalyzer() { }

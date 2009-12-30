@@ -65,7 +65,7 @@ public:
 
   bool init(std::string path)
   {
-    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0);
+    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0, true);
   }
 
   /*

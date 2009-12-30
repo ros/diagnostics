@@ -65,7 +65,7 @@ namespace diagnostic_aggregator {
 class GenericAnalyzerBase : public Analyzer
 {
 public:
-  GenericAnalyzerBase() : nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1) { }
+  GenericAnalyzerBase() : nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1), discard_stale_(false) { }
   
   virtual ~GenericAnalyzerBase() { items_.clear(); }
   
@@ -75,12 +75,19 @@ public:
   bool init(const std::string path, const ros::NodeHandle &n) = 0;
   
   bool init(const std::string path, const std::string nice_name, 
-            double timeout = -1.0, int num_items_expected = -1)
+            double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
     nice_name_ = nice_name;
     path_ = path;
+    discard_stale_ = discard_stale;
+
+    if (discard_stale_ and timeout <= 0)
+    {
+      ROS_WARN("Cannot discard stale items if no timeout specified. No items will be discarded");
+      discard_stale_ = false;
+    }
     
     return true;
   }
@@ -120,6 +127,13 @@ public:
       bool stale = false;
       if (timeout_ > 0)
         stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
+
+      // Erase item if its stale
+      if (discard_stale_ and stale)
+      {
+        items_.erase(it);
+        continue;
+      }
       
       all_stale = all_stale && ((level == 3) || stale);
       
@@ -194,6 +208,8 @@ private:
    *\brief Stores items by name. State of analyzer
    */
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;
+
+  bool discard_stale_;
 };
 
 }

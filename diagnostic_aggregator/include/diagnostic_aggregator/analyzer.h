@@ -111,6 +111,9 @@ public:
    */
   virtual bool match(const std::string name) = 0;
 
+  /*!
+   *\brief The const version of the "match" function is deprecated and always returns true.
+   */
   virtual bool match(const std::string name) const
   {
     ROS_WARN("The match(string name) function is no longer const. Please change this function in your code.");
