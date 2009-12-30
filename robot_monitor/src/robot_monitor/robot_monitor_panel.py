@@ -178,10 +178,15 @@ class RobotMonitorPanel(MonitorPanelGenerated):
 
         self._frame = parent
 
+
         self._tree_ctrl.AddRoot("Root")
         self._error_tree_ctrl.AddRoot("Root")
         self._warning_tree_ctrl.AddRoot("Root")
         
+        self._tree_ctrl.SetToolTip(wx.ToolTip("Double click item to view in new window"))
+        self._error_tree_ctrl.SetToolTip(wx.ToolTip("Double click item to view in new window"))
+        self._warning_tree_ctrl.SetToolTip(wx.ToolTip("Double click item to view in new window"))
+
         self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
         self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
 
