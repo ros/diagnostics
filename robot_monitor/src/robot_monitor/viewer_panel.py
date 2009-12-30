@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Kevin Watts, Josh Faust
+##\author Kevin Watts, Josh Faust
 
 PKG = 'robot_monitor'
 
@@ -87,6 +87,7 @@ class StatusViewerFrame(wx.Frame):
         
         self._snapshot_button = wx.Button(self, wx.ID_ANY, "Snapshot")
         self._snapshot_button.Bind(wx.EVT_BUTTON, self._on_snapshot)
+        self._snapshot_button.SetToolTip(wx.ToolTip("Freeze data in new window"))
         bottom_sizer.Add(self._snapshot_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
         
         self._sizer.Add(bottom_sizer, 0, wx.EXPAND)

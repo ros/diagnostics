@@ -162,15 +162,10 @@ class State(object):
 ##
 ## Displays data from DiagnosticArray /diagnostics_agg in a tree structure
 ## by status name. Names are parsed by '/'. Each status name is given
-## an icon by status (ok, warn, error, stale). The robot monitor will mark an item
-## as stale after it is invisible for 3 seconds. Other than that, it does not store
-## state. Any item whose parent is updated but that is not updated in the same message
-## will be deleted.
+## an icon by status (ok, warn, error, stale).
 ## 
-## Two messages with separate first names (ex: '/PRF/...' and '/PRG/...') will 
-## not conflict and can "share" the robot monitor. First names like 'PRF' and 
-## 'PRG' in the above example are known as 'first_parent' names throughout
-## the class.
+## The robot monitor does not store any state, but if it does not get any updates 
+## for 3 seconds, it will mark the tree as stale.
 class RobotMonitorPanel(MonitorPanelGenerated):
     ##\param parent RobotMonitorFrame : Parent frame
     def __init__(self, parent):
