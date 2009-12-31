@@ -76,7 +76,7 @@ public:
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
   bool init(const std::string path, const ros::NodeHandle &n) = 0;
-  
+
   /*
    *\brief Must be initialized with path, and a "nice name"
    *
@@ -101,6 +101,22 @@ public:
     
     return true;
   }
+
+  /*!
+   *\brief Update state with new StatusItem
+   */
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
+  {
+   if (!has_initialized_ && !has_warned_)
+    {
+      has_warned_ = true;
+      ROS_ERROR("GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
+    }
+
+    items_[item->getName()] = item;
+
+    return has_initialized_;
+  }
   
   /*!
    *\brief Reports current state, returns vector of formatted status messages
@@ -114,7 +130,11 @@ public:
       has_warned_ = true;
       ROS_ERROR("GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
-
+    if (!has_initialized_)
+    {
+      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > vec;
+      return vec;
+    }
 
     boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
     header_status->name = path_;
@@ -154,9 +174,9 @@ public:
       
       all_stale = all_stale && ((level == 3) || stale);
       
-      boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
+      //boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
       
-      processed.push_back(stat);
+      processed.push_back(item->toStatusMsg(path_, stale));
 
       if (stale)
         header_status->level = 2;
@@ -184,21 +204,7 @@ public:
     return processed;
   }
   
-  /*!
-   *\brief Update state with new StatusItem
-   */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
-  {
-   if (!has_initialized_ && !has_warned_)
-    {
-      has_warned_ = true;
-      ROS_ERROR("GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
-    }
 
-    items_[item->getName()] = item;
-
-    return has_initialized_;
-  }
   
   /*!
    *\brief Match function isn't implemented by GenericAnalyzerBase

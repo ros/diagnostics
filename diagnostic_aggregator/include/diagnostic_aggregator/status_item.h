@@ -173,22 +173,37 @@ public:
   bool update(const diagnostic_msgs::DiagnosticStatus *status);
 
   /*!
-   *\brief Prepends "prefix/" to name.
+   *\brief Prepends "path/" to name, makes item stale if "stale" true.
+   *
+   * Helper function to convert item back to diagnostic_msgs::DiagnosticStatus
+   * pointer. Prepends path. 
+   * Example: Item with name "Hokuyo" toStatusMsg("Base Path/My Path", false) 
+   * gives "Base Path/My Path/Hokuyo". 
    *
    *\param prefix : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string prefix, const bool stale) const;
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string path, const bool stale = false) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message
    */
   DiagnosticLevel getLevel() const { return level_; }
+
+  /*
+   *\brief Change level of DiagnosticStatus message
+   */
+  void setLevel(const DiagnosticLevel level)  { level_ = level; }
   
   /*!
-   *\brief Message field of DiagnosticStatus 
+   *\brief Get message field of DiagnosticStatus 
    */
   std::string getMessage() const { return message_; }
+
+  /*!
+   *\brief Change message field of DiagnosticStatus 
+   */
+  void setMessage(const std::string message)  { message_ = message; }
   
   /*!
    *\brief Returns name of DiagnosticStatus message
