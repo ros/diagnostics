@@ -85,7 +85,7 @@ pub_rate: 1.0
 analyzers:
   sensors:
     type: GenericAnalyzer
-    path: Sensors/Tilt Hokuyo
+    path: Tilt Hokuyo
     find_and_remove_prefix: tilt_hokuyo_node
   motors:
     type: PR2MotorsAnalyzer

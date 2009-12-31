@@ -49,7 +49,8 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   string nice_name;
   if (!n.getParam("path", nice_name))
   {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\".");
+    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
+              n.getNamespace().c_str());
     return false;
   }
 
@@ -104,9 +105,17 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
       }
       catch (boost::regex_error& e)
       {
-        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. %s", regex_strs[i].c_str(), e.what());
+        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
+                 regex_strs[i].c_str(), e.what());
       }
     }
+  }
+
+  if (startswith_.size() == 0 && name_.size() == 0 && 
+      contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
+  {
+    ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s", nice_name.c_str(), n.getNamespace().c_str());
+    return false;
   }
   
   double timeout;
