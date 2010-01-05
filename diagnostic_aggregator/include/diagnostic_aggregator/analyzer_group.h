@@ -116,7 +116,7 @@ public:
   /*!
    *\brief Initialized with base path and namespace.
    * 
-   * The parameters in its namespace determine 
+   * The parameters in its namespace determine the sub-analyzers.
    */
   virtual bool init(const std::string base_path, const ros::NodeHandle &n);
 

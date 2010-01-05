@@ -190,21 +190,11 @@ public:
    */
   DiagnosticLevel getLevel() const { return level_; }
 
-  /*
-   *\brief Change level of DiagnosticStatus message
-   */
-  void setLevel(const DiagnosticLevel level)  { level_ = level; }
-  
   /*!
    *\brief Get message field of DiagnosticStatus 
    */
   std::string getMessage() const { return message_; }
 
-  /*!
-   *\brief Change message field of DiagnosticStatus 
-   */
-  void setMessage(const std::string message)  { message_ = message; }
-  
   /*!
    *\brief Returns name of DiagnosticStatus message
    */
