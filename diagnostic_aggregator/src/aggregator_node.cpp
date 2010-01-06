@@ -35,6 +35,7 @@
 /**< \author Kevin Watts */
 
 #include <diagnostic_aggregator/aggregator.h>
+#include <exception>
 
 using namespace std;
 
@@ -42,6 +43,8 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "diagnostic_aggregator");
   
+  try
+  {
   diagnostic_aggregator::Aggregator agg;
   
   ros::Rate pub_rate(agg.getPubRate());
@@ -51,6 +54,13 @@ int main(int argc, char **argv)
     agg.publishData();
     pub_rate.sleep();
   }
+  }
+  catch (exception& e)
+  {
+    ROS_FATAL("Diagnostic aggregator node caught exception. Aborting. %s", e.what());
+    ROS_BREAK();
+  }
+  
   exit(0);
   return 0;
 }
