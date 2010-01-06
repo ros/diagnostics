@@ -118,6 +118,11 @@ inline std::string valToMsg(const int val)
  *
  * Useful for cleaning up status names.
  * Ex: "/Hokuyo/Tilt HK/tilt_node: Connection" to "/Hokuyo/Tilt HK/Connection"
+ *
+ * For multiple values of chaff, users will have to run this command for each value.
+ * This function won't work properly if multiple chaff values can be removed.
+ * For example, name "prosilica_camera: Frequency" with chaff ("prosilica", "prosilica_camera")
+ * will become "_camera: Frequency" if "prosilica" is removed first. 
  */
 inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
 {

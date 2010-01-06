@@ -79,6 +79,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
       ROS_ERROR("Namespace %s has no member 'type', unable to initialize analyzer for this namespace.", analyzers_nh.getNamespace().c_str());
       boost::shared_ptr<StatusItem> item(new StatusItem(ns, "No Analyzer type given"));
       aux_items_.push_back(item);
+      init_ok = false;
       continue;
     }
 
@@ -95,6 +96,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
       ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s", ns.c_str(), an_type.c_str(), e.what());
       boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib exception loading analyzer"));
       aux_items_.push_back(item);
+      init_ok = false;
       continue;
     }
 
@@ -103,6 +105,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
       ROS_ERROR("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), analyzers_nh.getNamespace().c_str());
       boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib return NULL Analyzer for " + an_type));
       aux_items_.push_back(item);
+      init_ok = false;
       continue;
     }
     
@@ -111,6 +114,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
       ROS_ERROR("Unable to initialize analyzer NS: %s, type: %s", analyzers_nh.getNamespace().c_str(), an_type.c_str());
       boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
       aux_items_.push_back(item);
+      init_ok = false;
       continue;
     }
     
@@ -123,6 +127,8 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
     ROS_ERROR("No analyzers initialzed in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
   }
 
+  // We return true, since we have at least one analyzer initialized properly
+  //
   return init_ok;
 }
 
@@ -135,6 +141,9 @@ AnalyzerGroup::~AnalyzerGroup()
 
 bool AnalyzerGroup::match(const string name)
 {
+  if (analyzers_.size() == 0)
+    return false;
+
   string my_name = name;
   bool match_name = false;
   if (matched_.count(name))
@@ -186,6 +195,15 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
   header_status->name = path_;
   header_status->level = 0;
   header_status->message = "OK";
+
+  if (analyzers_.size() == 0)
+  {
+    header_status->level = 2;
+    header_status->message = "No analyzers!";
+    output.push_back(header_status);
+    
+    return output;
+  }
 
   bool all_stale = true;
 

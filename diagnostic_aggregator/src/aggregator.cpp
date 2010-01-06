@@ -57,7 +57,6 @@ Aggregator::Aggregator() :
   if (!analyzer_group_->init(base_path_, nh))
   {
     ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
-    analyzer_group_ = NULL;
   }
   
 
@@ -76,7 +75,7 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& 
   {
     analyzed = false;
     boost::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
-    if (analyzer_group_ and analyzer_group_->match(item->getName()))
+    if (analyzer_group_->match(item->getName()))
       analyzed = analyzer_group_->analyze(item);
 
     if (!analyzed)
@@ -89,20 +88,16 @@ Aggregator::~Aggregator()
   if (analyzer_group_) delete analyzer_group_;
 
   if (other_analyzer_) delete other_analyzer_;
-
 }
 
 void Aggregator::publishData()
 {
   diagnostic_msgs::DiagnosticArray diag_array;
 
-  if (analyzer_group_)
-  {
-    vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = analyzer_group_->report();
-    for (unsigned int i = 0; i < processed.size(); ++i)
-      diag_array.status.push_back(*processed[i]);
-  }
-
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = analyzer_group_->report();
+  for (unsigned int i = 0; i < processed.size(); ++i)
+    diag_array.status.push_back(*processed[i]);
+ 
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other = other_analyzer_->report();
   for (unsigned int i = 0; i < processed_other.size(); ++i)
     diag_array.status.push_back(*processed_other[i]);
