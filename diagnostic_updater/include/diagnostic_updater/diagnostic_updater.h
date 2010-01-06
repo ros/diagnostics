@@ -525,7 +525,7 @@ namespace diagnostic_updater
       void update_diagnostic_period()
       {
         double old_period = period_;
-        private_node_handle_.getParam("diagnostic_period", period_, true);
+        private_node_handle_.getParamCached("diagnostic_period", period_);
         next_time_ += ros::Duration(period_ - old_period); // Update next_time_
       }
 
