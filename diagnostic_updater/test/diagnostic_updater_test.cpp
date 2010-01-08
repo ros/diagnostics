@@ -73,17 +73,12 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
   TestClass c;
   ros::NodeHandle nh;
   
-  // Note: Some of this code does nothing in terms of testing, but ensures
-  // that all the constructors compile.
-  DiagnosticUpdater<TestClass> dummy1(&c);
-  //  DiagnosticUpdater<TestClass> dummy2(&c, *nh.getNode());
-  DiagnosticUpdater<TestClass> updater(&c, nh);
+  Updater updater;
   
-  updater.addUpdater(&TestClass::unwrapped);
-  updater.Updater::add("wrapped", &c, &TestClass::wrapped);
+  updater.add("wrapped", &c, &TestClass::wrapped);
   
   classFunction cf;
-  updater.Updater::add(cf);
+  updater.add(cf);
 }
 
 TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)

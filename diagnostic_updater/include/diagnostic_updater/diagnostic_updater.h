@@ -372,16 +372,6 @@ namespace diagnostic_updater
       setup();
     }
 
-    /**
-     * \brief Deprecated. Passing in a NodeHandle was deemed unnecessary.
-     * Object if you disagree.
-     */
-
-    ROSCPP_DEPRECATED Updater(ros::NodeHandle &nh)
-    {
-      setup();
-    }
-
       /**
        * \brief Causes the diagnostics to update if the inter-update interval
        * has been exceeded.
@@ -595,55 +585,6 @@ namespace diagnostic_updater
       bool warn_nohwid_done_;
   };
 
-};
-
-/**
- * This class is deprecated. Use diagnostic_updater::Updater instead.
- */
-
-template <class T>
-class DiagnosticUpdater : public diagnostic_updater::Updater
-{
-  public:
-    ROSCPP_DEPRECATED DiagnosticUpdater(T *n) : diagnostic_updater::Updater(), owner_(n)
-  {
-    complain();
-  }
-
-    // This constructor goes away now that ros::node is gone
-    /*
-       ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::Node &n) : diagnostic_updater::Updater(ros::NodeHandle()), owner_(c)
-       {
-       complain();
-       }
-       */
-
-    ROSCPP_DEPRECATED DiagnosticUpdater(T *c, ros::NodeHandle &h) : diagnostic_updater::Updater(), owner_(c)
-  {
-    complain();
-  }
-
-    using diagnostic_updater::Updater::add;
-
-    void addUpdater(void (T::*f)(diagnostic_msgs::DiagnosticStatus&))
-    {
-      diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, owner_, _1);
-      diagnostic_msgs::DiagnosticStatus stat;
-      f2(stat); // Get the function to fill out its name.
-      boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
-        fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask(stat.name, f2));
-      tasks_vect_.push_back(fcls);
-      add(*fcls);
-    }
-
-  private:
-    void complain()
-    {
-      ROS_WARN("DiagnosticUpdater is deprecated, please use diagnostic_updater::Updater instead.");
-    }
-
-    T *owner_;
-    std::vector<boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> > tasks_vect_;
 };
 
 #endif
