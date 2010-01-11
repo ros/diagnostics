@@ -47,34 +47,6 @@
 
 #include <boost/thread.hpp>
 
-/* @todo Old main page, now mostly obsolete. Should delete before M3 once ROS API
-   is better documented.
-
-   @mainpage
-
-   @htmlinclude manifest.html
-
-   @b diagnostic_updater.h defines the Updater class, which
-   simplifies writing of diagnostic publishing code, by allowing a set of
-   registered callbacks to be published at a fixed rate.
-
-   <hr>
-
-   @section topics ROS topics
-
-   Subscribes to (name/type):
-   - None
-
-   Publishes to (name / type):
-
-   @section parameters ROS parameters
-
-   Reads the following parameters from the parameter server
-
-   - @b "diagnostic_period" : @b [double] period at which diagnostics should be sent in seconds (Default: 1)
-
-*/
-
 namespace diagnostic_updater
 {
 
