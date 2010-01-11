@@ -113,10 +113,12 @@ public:
 
   /*!
    *\brief The const version of the "match" function is deprecated and always returns true.
+   *
+   *\deprecated Replaced by non-const version.
    */
-  virtual bool match(const std::string name) const
+  virtual bool match(const std::string name) const __attribute__ ((deprecated))
   {
-    ROS_WARN("The match(string name) function is no longer const. Please change this function in your code.");
+    ROS_WARN("The match(string name) function is no longer const. Please change this function in your code. This function always returns true.");
 
     return true;
   }
