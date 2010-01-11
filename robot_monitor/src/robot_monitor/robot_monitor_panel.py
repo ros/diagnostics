@@ -220,6 +220,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         
         self._message_status_text.SetLabel("No message received")
         self._message_status_text.SetForegroundColour(color_dict[2])
+        self._is_stale = True
         
         # unfortunately tooltips do not work on static text, so this information has to go into the docs only
         #self._message_status_text.SetToolTip(wx.ToolTip("""Shows the status of the received aggregated diagnostic message.
@@ -246,12 +247,14 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._is_stale = True
         else:
             self._message_status_text.SetLabel("OK")
             self._message_status_text.SetForegroundColour(color_dict[0])
             self._tree_ctrl.SetBackgroundColour(wx.WHITE)
             self._error_tree_ctrl.SetBackgroundColour(wx.WHITE)
             self._warning_tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._is_stale = False
         
     
     ## \brief Called whenever a new message is received by the timeline.  Different from new_message in that it
@@ -463,6 +466,9 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     ## Returns the highest value of any of the root tree items
     ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = All Stale
     def get_top_level_state(self):
+        if (self._is_stale):
+            return 3
+        
         level = -1
         min_level = 255
 
