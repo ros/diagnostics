@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version Aug 28 2009)
+## Python code generated with wxFormBuilder (version Oct 27 2009)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -19,6 +19,17 @@ class MonitorPanelGenerated ( wx.Panel ):
 		wx.Panel.__init__  ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,700 ), style = wx.TAB_TRAVERSAL )
 		
 		bSizer1 = wx.BoxSizer( wx.VERTICAL )
+		
+		sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Diagnostic Message Status" ), wx.VERTICAL )
+		
+		self._message_status_text = wx.StaticText( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self._message_status_text.Wrap( -1 )
+		self._message_status_text.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 92, False, wx.EmptyString ) )
+		self._message_status_text.SetForegroundColour( wx.Colour( 85, 178, 76 ) )
+		
+		sbSizer4.Add( self._message_status_text, 0, wx.ALL, 5 )
+		
+		bSizer1.Add( sbSizer4, 0, wx.EXPAND, 5 )
 		
 		self.m_splitter2 = wx.SplitterWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
 		self.m_splitter2.SetSashGravity( 0.5 )

@@ -170,6 +170,11 @@ class MessageTimeline(wx.Panel):
         self._subscriber = None
         if (topic is not None):
             self._subscriber = rospy.Subscriber(topic, type, self.callback)
+            
+        self._message_receipt_callback = None
+        
+    def set_message_receipt_callback(self, cb):
+        self._message_receipt_callback = cb
         
     def __del__(self):
         if (self._subscriber is not None):
@@ -250,6 +255,8 @@ class MessageTimeline(wx.Panel):
         
     def _new_msg(self, msg):
         self._last_msg = msg
+        if (self._message_receipt_callback is not None):
+            self._message_receipt_callback(msg)
         if (self._paused):
             return
         
