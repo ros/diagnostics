@@ -83,7 +83,6 @@ class RobotMonitorApp(wx.App):
         self._frame = RobotMonitorFrame(None, 'Robot Monitor')
         self._frame.SetSize(wx.Size(500, 700))
         self._frame.Layout()
-        #self._frame.Centre()
         self._frame.Show(True)
         return True
         

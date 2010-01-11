@@ -422,7 +422,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
                         
             
 
-    ##\brief Gets the "top level" state of the diagnostics
+    ##\brief Gets the state of the "top level" diagnostics
     ##
     ## Returns the highest value of any of the root tree items
     ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = All Stale
@@ -434,6 +434,10 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             return level
 
         for item in self._state.get_items().itervalues():
+            # Only look at "top level" items
+            if self._state.get_parent(item) is not None:
+                continue
+
             if item.status.level > level:
                 level = item.status.level
             if item.status.level < min_level:
