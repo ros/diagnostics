@@ -347,7 +347,7 @@ namespace diagnostic_updater
    * should be called frequently. At some predetermined rate, the update
    * function will cause all the diagnostic tasks to run, and will collate
    * and publish the resulting diagnostics. The publication rate is
-   * determined by the "~/diagnostic_period" ros parameter.
+   * determined by the "~diagnostic_period" ros parameter.
    *
    * The class also allows an update to be forced when something significant
    * has happened, and allows a single message to be broadcast on all the
