@@ -125,14 +125,12 @@ namespace self_test
       {
         bool retval = false;
 
-        ROS_INFO("Begining test.\n");
-
         if (node_handle_.ok())
         {
 
           id_ = "";
 
-          ROS_INFO("Entering self-test.  Other operation should be suspended\n");
+          ROS_INFO("Entering self-test.");
 
           std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
