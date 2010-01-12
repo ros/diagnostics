@@ -132,7 +132,7 @@ namespace self_test
 
           id_ = "";
 
-          ROS_INFO("Entering self test.  Other operation should be suspended\n");
+          ROS_INFO("Entering self-test.  Other operation should be suspended\n");
 
           std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
@@ -178,6 +178,8 @@ namespace self_test
           res.set_status_vec(status_vec);
 
           retval = true;
+          
+          ROS_INFO("Self-test complete.");
         }
 
         return retval;
