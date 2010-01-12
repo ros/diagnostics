@@ -116,27 +116,6 @@ namespace self_test
         id_ = id;
       }
 
-    protected:
-      /**
-       * \brief Internal use.
-       *
-       * @todo remove once the deprecated methods are removed.
-       */
-      
-      virtual void doPretest()
-      {
-      }
-
-      /**
-       * \brief Internal use.
-       *
-       * @todo remove once the deprecated methods are removed.
-       */
-      
-      virtual void doPosttest()
-      {
-      }
-
     private:
       /**
        * The service callback for the "self-test" service.
@@ -155,8 +134,6 @@ namespace self_test
 
           ROS_INFO("Entering self test.  Other operation should be suspended\n");
 
-          doPretest();
-          
           std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
           const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
@@ -200,8 +177,6 @@ namespace self_test
 
           res.set_status_vec(status_vec);
 
-          doPosttest();
-          
           retval = true;
         }
 
@@ -209,131 +184,6 @@ namespace self_test
 
       }
   };
-
-  /**
-   * \brief Deprecated, use TestRunner instead.
-   */
-
-  template <class T>
-    class Dispatcher : public TestRunner
-  {  
-    protected: 
-      T *owner_;
-      void (T::*pretest_)(void);
-      void (T::*posttest_)(void);
-
-      virtual void doPretest()
-      {
-          if (pretest_)
-          {
-            (owner_->*pretest_)();
-            ROS_WARN("self_test pretests are obsolete. Please just use a normal test instead of a pretest.");
-            ROS_INFO("Completed pretest");
-          }
-      }
-
-      virtual void doPosttest()
-      {
-          if (posttest_)
-          {
-            (owner_->*posttest_)();
-            ROS_WARN("self_test posttests are obsolete. Please just use a normal test instead of a posttest.");
-            ROS_INFO("Completed posttest");
-          }
-      }
-
-    public:
-      /**
-       * \brief Constructs a legacy dispatcher.
-       *
-       * \param owner Class that owns this dispatcher. This is used as the
-       * default class for tests that are member-functions.
-       *
-       * \param h NodeHandle from which to work. (Currently unused?)
-       */
-
-      ROSCPP_DEPRECATED Dispatcher(T *owner, ros::NodeHandle h) : TestRunner(h), owner_(owner)
-      {}
-
-      /**
-       * \brief Sets a method to call before the tests.
-       *
-       * \param f : Method of the owner class to call.
-       */
-
-      ROSCPP_DEPRECATED void setPretest(void (T::*f)())
-      {
-        pretest_ = f;
-      }
-
-      /**
-       * \brief Sets a method to call after the tests.
-       *
-       * \param f : Method of the owner class to call.
-       */
-
-      ROSCPP_DEPRECATED void setPosttest(void (T::*f)())
-      {
-        posttest_ = f;
-      }
-
-      /**
-       * \brief Add a test that is a method of the owner class.
-       *
-       * \param name : Name of the test. Will be filled into the
-       * DiagnosticStatusWrapper automatically.
-       *
-       * \param f : Method of the owner class that fills out the
-       * DiagnosticStatusWrapper.
-       */
-
-      using TestRunner::add;
-      
-      template<class S>
-        void add(const std::string name, void (S::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
-        {
-          DiagnosticTaskInternal int_task(name, boost::bind(f, owner_, _1));
-          addInternal(int_task);
-        }
-  };
-
-};
-
-/**
- *
- * This class is deprecated. Use self_test::TestRunner instead.
- *
- */
-
-template <class T>
-class SelfTest : public self_test::Dispatcher<T>
-{
-  public:
-    ROSCPP_DEPRECATED SelfTest(T *n) : self_test::Dispatcher<T>(n, ros::NodeHandle())
-  {
-  }
-
-    void addTest(void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
-    {
-      self_test::Dispatcher<T>::add("", f);
-    }
-
-    void addTest(void (T::*f)(diagnostic_msgs::DiagnosticStatus&))
-    {
-      diagnostic_updater::UnwrappedTaskFunction f2 = boost::bind(f, self_test::Dispatcher<T>::owner_, _1);
-      boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> 
-        fcls(new diagnostic_updater::UnwrappedFunctionDiagnosticTask("", f2));
-      tests_vect_.push_back(fcls);
-      self_test::DiagnosticTaskVector::add(*fcls);
-    }
-
-    void complain()
-    {
-      //ROS_WARN("SelfTest is deprecated, please use self_test::TestRunner instead.");
-    }
-
-  private:
-    std::vector<boost::shared_ptr<diagnostic_updater::UnwrappedFunctionDiagnosticTask> > tests_vect_;
 };
 
 #endif

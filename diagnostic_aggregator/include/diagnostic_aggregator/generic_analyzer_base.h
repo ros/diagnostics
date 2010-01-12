@@ -65,7 +65,10 @@ namespace diagnostic_aggregator {
 class GenericAnalyzerBase : public Analyzer
 {
 public:
-  GenericAnalyzerBase() : nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1) { }
+  GenericAnalyzerBase() : 
+    nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1),
+    discard_stale_(false), has_initialized_(false), has_warned_(false) 
+  { }
   
   virtual ~GenericAnalyzerBase() { items_.clear(); }
   
@@ -73,15 +76,46 @@ public:
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
   bool init(const std::string path, const ros::NodeHandle &n) = 0;
-  
-  bool init(const std::string path, const std::string nice_name, double timeout = -1.0, int num_items_expected = -1)
+
+  /*
+   *\brief Must be initialized with path, and a "nice name"
+   *
+   * Must be initialized in order to prepend the path to all outgoing status messages.
+   */
+  bool init(const std::string path, const std::string nice_name, 
+            double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
     nice_name_ = nice_name;
     path_ = path;
+    discard_stale_ = discard_stale;
+
+    if (discard_stale_ and timeout <= 0)
+    {
+      ROS_WARN("Cannot discard stale items if no timeout specified. No items will be discarded");
+      discard_stale_ = false;
+    }
+
+    has_initialized_ = true;
     
     return true;
+  }
+
+  /*!
+   *\brief Update state with new StatusItem
+   */
+  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
+  {
+   if (!has_initialized_ && !has_warned_)
+    {
+      has_warned_ = true;
+      ROS_ERROR("GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
+    }
+
+    items_[item->getName()] = item;
+
+    return has_initialized_;
   }
   
   /*!
@@ -91,6 +125,17 @@ public:
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
   {
+    if (!has_initialized_ && !has_warned_)
+    {
+      has_warned_ = true;
+      ROS_ERROR("GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
+    }
+    if (!has_initialized_)
+    {
+      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > vec;
+      return vec;
+    }
+
     boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
     header_status->name = path_;
     header_status->level = 0;
@@ -119,12 +164,19 @@ public:
       bool stale = false;
       if (timeout_ > 0)
         stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
+
+      // Erase item if its stale
+      if (discard_stale_ and stale)
+      {
+        items_.erase(it);
+        continue;
+      }
       
       all_stale = all_stale && ((level == 3) || stale);
       
-      boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
+      //boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
       
-      processed.push_back(stat);
+      processed.push_back(item->toStatusMsg(path_, stale));
 
       if (stale)
         header_status->level = 2;
@@ -141,7 +193,7 @@ public:
     // If we expect a given number of items, check that we have this number
     if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
     {
-      int8_t lvl = 1;
+      int8_t lvl = 2;
       header_status->level = std::max(lvl, header_status->level);
       std::stringstream expec, item;
       expec << num_items_expected_;
@@ -152,19 +204,12 @@ public:
     return processed;
   }
   
-  /*!
-   *\brief Update state with new StatusItem
-   */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
-  {
-    items_[item->getName()] = item;
-    return true;
-  }
+
   
   /*!
-   *\brief Match isn't implemented by GenericAnalyzerBase
+   *\brief Match function isn't implemented by GenericAnalyzerBase
    */
-  virtual bool match(const std::string name) const = 0;
+  virtual bool match(const std::string name) = 0;
   
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")
@@ -193,6 +238,8 @@ private:
    *\brief Stores items by name. State of analyzer
    */
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;
+
+  bool discard_stale_, has_initialized_, has_warned_;
 };
 
 }

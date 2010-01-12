@@ -32,9 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Josh Faust
+##\author Josh Faust
 
-PKG="robot_monitor"
+PKG = "robot_monitor"
 
 from collections import deque
 import rospy
@@ -71,6 +71,8 @@ class ColoredTimeline(wx.Control):
         self.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse)
         
         self._left_down = False
+
+        self.SetToolTip(wx.ToolTip("Drag to rewind messages"))
         
     def SetValue(self, val):
         self._val = clamp(int(val), self._min, self._max)
@@ -149,6 +151,7 @@ class MessageTimeline(wx.Panel):
         self._timeline = ColoredTimeline(self, 1, 1, 1, self._get_color_for_value)
         sizer.Add(self._timeline, 1, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         self._pause_button = wx.ToggleButton(self, wx.ID_ANY, "Pause")
+        self._pause_button.SetToolTip(wx.ToolTip("Pause message updates"))
         sizer.Add(self._pause_button, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
         self.SetSizer(sizer)
         
@@ -167,6 +170,11 @@ class MessageTimeline(wx.Panel):
         self._subscriber = None
         if (topic is not None):
             self._subscriber = rospy.Subscriber(topic, type, self.callback)
+            
+        self._message_receipt_callback = None
+        
+    def set_message_receipt_callback(self, cb):
+        self._message_receipt_callback = cb
         
     def __del__(self):
         if (self._subscriber is not None):
@@ -194,6 +202,7 @@ class MessageTimeline(wx.Panel):
     def pause(self):
         self._paused = True
         self._pause_button.SetBackgroundColour(wx.Colour(123, 193, 255))
+        self._pause_button.SetToolTip(wx.ToolTip("Resume message updates"))
         
         if (self._pause_callback is not None):
             self._pause_callback(True)
@@ -204,7 +213,8 @@ class MessageTimeline(wx.Panel):
         if (self._pause_callback is not None):
             self._pause_callback(False)
             
-        self._pause_button.SetBackgroundColour(wx.NullColour)    
+        self._pause_button.SetBackgroundColour(wx.NullColour)
+        self._pause_button.SetToolTip(wx.ToolTip("Pause message updates"))
         self._paused = False
         if (self._last_msg is not None):
             self._tracking_latest = True
@@ -245,6 +255,8 @@ class MessageTimeline(wx.Panel):
         
     def _new_msg(self, msg):
         self._last_msg = msg
+        if (self._message_receipt_callback is not None):
+            self._message_receipt_callback(msg)
         if (self._paused):
             return
         

@@ -82,6 +82,20 @@ int main(int argc, char **argv)
   // should be published.
   diagnostic_updater::Updater updater;
 
+  // The diagnostic_updater::Updater class will fill out the hardware_id
+  // field of the diagnostic_msgs::DiagnosticStatus message. You need to
+  // use the setHardwareID() or setHardwareIDf() methods to set the hardware
+  // ID. 
+  //
+  // The hardware ID should be able to identify the specific device you are
+  // working with.  If it is not appropriate to fill out a hardware ID in
+  // your case, you should call setHardwareIDf("none") to avoid warnings.
+  // (A warning will be generated as soon as your node updates with no
+  // non-OK statuses.)
+  updater.setHardwareID("none"); 
+  // Or...
+  updater.setHardwareIDf("Device-%i-%i", 27, 46);
+
   // Diagnostic tasks are added to the Updater. They will later be run when
   // the updater decides to update. The add method is heavily overloaded
   // for convenienc. Check doxygen for the full list of add methods.

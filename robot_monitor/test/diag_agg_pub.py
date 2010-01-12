@@ -63,7 +63,8 @@ if __name__ == '__main__':
         DiagnosticStatus(2, '/BASE2', 'OK', '', []),
         DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
         DiagnosticStatus(0, '/BASE2/group3/item1', 'OK', '', []),
-        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', [])]
+        DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', []),
+        DiagnosticStatus(3, '/BASE2/group3/item3', 'Stale', '', [])]
     array.header.stamp = rospy.get_rostime()
 
     while not rospy.is_shutdown():

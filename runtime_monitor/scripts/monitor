@@ -104,9 +104,6 @@ class MainWindow(wx.Frame):
     
 def wxmonitor():
     app = wx.PySimpleApp()
-
-    wx.MessageBox("Runtime Monitor: \"monitor.py\" is deprecated, please use \"monitor\" instead.", "Deprecated", wx.OK|wx.ICON_WARNING)
-
     rospy.init_node(NAME, anonymous=True)
     
     frame = MainWindow(None, -1, "Runtime Monitor")
@@ -122,7 +119,4 @@ if __name__ == '__main__':
         pass
     except rospy.exceptions.ROSInitException, e:
         print 'Failed to initialize node, master probably isn\'t up.'
-    except Exception, e:
-        import traceback
-        traceback.print_exc()
 

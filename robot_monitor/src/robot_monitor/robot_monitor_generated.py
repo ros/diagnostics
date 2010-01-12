@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version Aug 28 2009)
+## Python code generated with wxFormBuilder (version Oct 27 2009)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -66,6 +66,14 @@ class MonitorPanelGenerated ( wx.Panel ):
 		bSizer4.Fit( self.m_panel4 )
 		self.m_splitter2.SplitHorizontally( self.m_panel3, self.m_panel4, 240 )
 		bSizer1.Add( self.m_splitter2, 1, wx.EXPAND, 5 )
+		
+		self._message_status_text = wx.StaticText( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self._message_status_text.Wrap( -1 )
+		self._message_status_text.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 92, False, wx.EmptyString ) )
+		self._message_status_text.SetForegroundColour( wx.Colour( 85, 178, 76 ) )
+		self._message_status_text.SetToolTipString( u"asdf" )
+		
+		bSizer1.Add( self._message_status_text, 0, wx.ALL, 5 )
 		
 		self.SetSizer( bSizer1 )
 		self.Layout()

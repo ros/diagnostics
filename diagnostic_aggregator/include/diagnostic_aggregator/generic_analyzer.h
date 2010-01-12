@@ -64,7 +64,6 @@ namespace diagnostic_aggregator {
  */
 bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
 {
-  //std::vector<std::string> output;
   XmlRpc::XmlRpcValue::Type type = param.getType();
   if (type == XmlRpc::XmlRpcValue::TypeString)
   {
@@ -81,19 +80,111 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
     }
     return true;
   }
-  else
-    ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
-  
-  return true;
+
+  ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  return false;
 }
 
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
- * GenericAnalyzer analyzes diagnostics from list of topics and returns
+ * GenericAnalyzer analyzes a segment of diagnostics data and reports
  * processed diagnostics data. All analyzed status messages are prepended with
- * 'BasePath/MyPath', where BasePath is common to all analyzers
- * (ex: 'PRE') and MyPath is from this analyzer (ex: 'Power System').
+ * "Base Path/My Path", where "Base Path" is from the parent of this Analyzer,
+ * (ex: 'PRE') and "My Path" is from this analyzer (ex: 'Power System').
+ *
+ * The GenericAnalyzer is initialized as a plugin by the diagnostic Aggregator.
+ * Following is an example of the necessary parameters of the GenericAnalyzer.
+ * See the Aggregator class for more information on loading Analyzer plugins.
+ *\verbatim
+ * my_namespace:
+ *   type: GenericAnalyzer
+ *   path: My Path
+ *\endverbatim
+ * Required Parameters:
+ * - \b type This is the class name of the analyzer, used to load the correct plugin type.
+ * - \b path All diagnostic items analyzed by the GenericAnalyzer will be under "Base Path/My Path". 
+ * 
+ * In the above example, the GenericAnalyzer wouldn't analyze anything. The GenericAnalyzer 
+ * must be configured to listen to diagnostic status names. To do this, optional parameters,
+ * like "contains", will tell the analyzer to analyze an item that contains that value. The 
+ * GenericAnalyzer looks at the name of the income diagnostic_msgs/DiagnosticStatus messages
+ * to determine item matches.
+ * 
+ * Optional Parameters for Matching:
+ * - \b contains Any item that contains these values
+ * - \b startswith Item name must start with this value
+ * - \b name Exact name match
+ * - \b expected Exact name match, will warn if not present
+ * - \b regex Regular expression (regex) match against name
+ * The above parameters can be given as a single string ("tilt_hokuyo_node") or a list
+ * of strings (['Battery', 'Smart Battery']).
+ *
+ * In some cases, it's possible to clean up the processed diagnostic status names.
+ * - \b remove_prefix If these prefix is found in a status name, it will be removed in the output. 
+ * Can be given as a string or list of strings.
+ *
+ * The special parameter '''find_and_remove_prefix''' combines "startswith" and 
+ * "remove_prefix". It can be given as a string or list of strings.
+ * 
+ * If the number of incoming items under a GenericAnalyzer is known, use '''num_items'''
+ * to set an exact value. If the number of items that matches the above parameters is 
+ * incorrect, the GenericAnalyzer will report an error in the top-level status. This is 
+ * "-1" by default. Negative values will not cause a check on the number of items.
+ *
+ * For tracking stale items, use the "timeout" parameter. Any item that doesn't update
+ * within the timeout will be marked as "Stale", and will cause an error in the top-level
+ * status. Default is 5.0 seconds. Any value <0 will cause stale items to be ignored.
+ *
+ * The GenericAnalyzer can discard stale items. Use the "discard_stale" parameter to
+ * remove any items that haven't updated within the timeout. This is "false" by default.
+ *
+ * Example configurations:
+ *\verbatim
+ * hokuyo:
+ *   type: GenericAnalyzer
+ *   path: Hokuyo
+ *   find_and_remove_prefix: hokuyo_node
+ *   num_items: 3
+ *\endverbatim
+ *
+ *\verbatim
+ * power_system:
+ *   type: GenericAnalyzer
+ *   path: Power System
+ *   startswith: [
+ *     'Battery',
+ *     'IBPS']
+ *   expected: Power board 1000
+ *   dicard_stale: true
+ *\endverbatim
+ *
+ * \subsubsection GenericAnalyzer Behavior
+ * 
+ * The GenericAnalyzer will report the latest status of any item that is should analyze.
+ * It will report a separate diagnostic_msgs/DiagnosticStatus with the name 
+ * "Base Path/My Path". This "top-level" status will have the error state of the highest 
+ * of its children. 
+ * 
+ * Stale items are handled differently. A stale child will cause an error
+ * in the top-level status, but if all children are stale, the top-level status will 
+ * be stale.
+ * 
+ * Example analyzer behavior, using the "Hokuyo" configuration above:
+ *\verbatim
+ * Input - (DiagnosticStatus Name, Error State)
+ * hokuyo_node: Connection Status, OK
+ * hokuyo_node: Frequency Status, Warning
+ * hokuyo_node: Driver Status, OK
+ *
+ * Output - (DiagnosticStatus Name, Error State)
+ * Hokuyo, Warning
+ * Hokuyo/Connection Status, OK
+ * Hokuyo/Frequency Status, Warning
+ * Hokuyo/Driver Status, OK
+ *\endverbatim
+ *
+ *
  */
 class GenericAnalyzer : public GenericAnalyzerBase
 {
@@ -105,29 +196,13 @@ public:
   
   virtual ~GenericAnalyzer();
 
+  // Move to class description above
   /*!
-   *\brief Initializes GenericAnalyzer from namespace
+   *\brief Initializes GenericAnalyzer from namespace. Returns true if s
    *
-   * NodeHandle is given private namespace to initialize GenericAnalyzer.
-   * Parameters of NodeHandle must follow this form. See DiagnosticAggregator
-   * for instructions on passing these parameters to the aggregator.
-   *\verbatim
-   * PowerSystem:
-   *   type: GenericAnalyzer
-   *   prefix: Power System
-   *   expected: [ 
-   *     'IBPS 0',
-   *     'IBPS 1']
-   *   startswith: [
-   *     'Smart Battery']
-   *   name: [
-   *     'Power Node 1018']
-   *   contains: [
-   *     'Battery']
-   *\endverbatim
-   *   
    *\param base_path : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
+   *\return True if initialization succeed, false if no errors of 
    */
   bool init(const std::string base_path, const ros::NodeHandle &n);
 
@@ -139,9 +214,10 @@ public:
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
   /*!
-   *\brief Returns true if item matches any of the regex, expected, startswith or contains criteria
+   *\brief Returns true if item matches any of the given criteria
+   * 
    */
-  virtual bool match(const std::string name) const;
+  virtual bool match(const std::string name);
 
 private:
   std::vector<std::string> chaff_; /**< Removed from the start of node names. */
@@ -149,7 +225,7 @@ private:
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
-  std::vector<boost::regex> regex_;
+  std::vector<boost::regex> regex_; /**< Regular expressions to check against diagnostics names. */
 
 };
 

@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Author: Kevin Watts, Josh Faust
+##\author Kevin Watts, Josh Faust
 
 PKG = 'robot_monitor'
 
@@ -55,7 +55,7 @@ import cStringIO
 from message_timeline import MessageTimeline
 
 stat_dict = {0: 'OK', 1: 'Warning', 2: 'Error', 3: 'Stale' }
-color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46), 3: wx.Colour(178, 23, 46)}
 
 class SnapshotFrame(wx.Frame):
     def __init__(self, parent, name):
@@ -87,6 +87,7 @@ class StatusViewerFrame(wx.Frame):
         
         self._snapshot_button = wx.Button(self, wx.ID_ANY, "Snapshot")
         self._snapshot_button.Bind(wx.EVT_BUTTON, self._on_snapshot)
+        self._snapshot_button.SetToolTip(wx.ToolTip("Freeze data in new window"))
         bottom_sizer.Add(self._snapshot_button, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5)
         
         self._sizer.Add(bottom_sizer, 0, wx.EXPAND)

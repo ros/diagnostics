@@ -170,11 +170,11 @@ namespace diagnostic_updater
         }
         else if (freq < *params_.min_freq_ * (1 - params_.tolerance_))
         {
-          stat.summary(2, "Frequency too low.");
+          stat.summary(1, "Frequency too low.");
         }
         else if (freq > *params_.max_freq_ * (1 + params_.tolerance_))
         {
-          stat.summary(2, "Frequency too high.");
+          stat.summary(1, "Frequency too high.");
         }
         else
         {

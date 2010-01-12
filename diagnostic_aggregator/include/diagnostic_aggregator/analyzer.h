@@ -66,7 +66,7 @@ PATH/EtherCAT Device (head_pan_motor)
 PATH/EtherCAT Device (head_tilt_motor)
 PATH/EtherCAT Devices
  * \endverbatim
- * Analyzers should also output another DiagnosticStatus message for the "header", with the
+ * Analyzers generally also output another DiagnosticStatus message for the "header", with the
  * name BASE_PATH/MY_PATH, as in the example above ("PATH/EtherCAT Devices").
  * 
  * For each new DiagnosticStatus name recieved, the analyzer will be asked whether it wants
@@ -93,7 +93,7 @@ public:
   virtual ~Analyzer() {}
 
   /*!
-   *\brief Analyzer is initialized with first prefix and namespace.
+   *\brief Analyzer is initialized with base path and namespace.
    *
    * The Analyzer initialized with parameters in its given 
    * namespace. The "base_path" is common to all analyzers, and needs to be
@@ -109,7 +109,19 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
-  virtual bool match(const std::string name) const = 0;
+  virtual bool match(const std::string name) = 0;
+
+  /*!
+   *\brief The const version of the "match" function is deprecated and always returns true.
+   *
+   *\deprecated Replaced by non-const version.
+   */
+  virtual bool match(const std::string name) const __attribute__ ((deprecated))
+  {
+    ROS_WARN("The match(string name) function is no longer const. Please change this function in your code. This function always returns true.");
+
+    return true;
+  }
 
   /*!
    *\brief Returns true if analyzer will analyze this name

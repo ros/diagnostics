@@ -24,15 +24,21 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_add_boost_directories()
 rosbuild_add_library(diagnostic_aggregator
   src/status_item.cpp
+  src/analyzer_group.cpp
   src/generic_analyzer.cpp
   src/aggregator.cpp)
 rosbuild_link_boost(diagnostic_aggregator system regex)
 
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-
+# Aggregator node 
 rosbuild_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
 
 rosbuild_add_rostest(test/test_agg.launch)
+
+# Analyzer loader allows other users to test that Analyzers load
+rosbuild_add_executable(analyzer_loader test/analyzer_loader.cpp)
+target_link_libraries(analyzer_loader diagnostic_aggregator)
+rosbuild_add_gtest_build_flags(analyzer_loader)
+
+# Test Analyzer loader
+rosbuild_add_rostest(test/test_loader.launch)

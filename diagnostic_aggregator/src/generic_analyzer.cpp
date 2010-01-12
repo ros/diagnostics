@@ -39,7 +39,8 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, diagnostic_aggregator::Analyzer)
+PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, 
+                         diagnostic_aggregator::Analyzer)
 
 GenericAnalyzer::GenericAnalyzer() { }
 
@@ -48,7 +49,8 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   string nice_name;
   if (!n.getParam("path", nice_name))
   {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\".");
+    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
+              n.getNamespace().c_str());
     return false;
   }
 
@@ -103,23 +105,34 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
       }
       catch (boost::regex_error& e)
       {
-        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. %s", regex_strs[i].c_str(), e.what());
+        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
+                 regex_strs[i].c_str(), e.what());
       }
     }
+  }
+
+  if (startswith_.size() == 0 && name_.size() == 0 && 
+      contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
+  {
+    ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s", nice_name.c_str(), n.getNamespace().c_str());
+    return false;
   }
   
   double timeout;
   int num_items_expected;
+  bool discard_stale;
   n.param("timeout", timeout, 5.0);   // Timeout for stale
   n.param("num_items", num_items_expected, -1); // Number of items must match this
+  n.param("discard_stale", discard_stale, false);
 
-  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, timeout, num_items_expected);
+  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, 
+                                   timeout, num_items_expected, discard_stale);
 }
 
 GenericAnalyzer::~GenericAnalyzer() { }
 
 
-bool GenericAnalyzer::match(const string name) const
+bool GenericAnalyzer::match(const string name)
 {
   boost::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i)

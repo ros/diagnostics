@@ -52,7 +52,8 @@ from viewer_panel import StatusViewerFrame
 from robot_monitor_generated import MonitorPanelGenerated
 from message_timeline import MessageTimeline
 
-color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46)}
+color_dict = {0: wx.Colour(85, 178, 76), 1: wx.Colour(222, 213, 17), 2: wx.Colour(178, 23, 46), 3: wx.Colour(40, 23, 176)}
+error_levels = [2, 3]
 
 def get_nice_name(status_name):
     return status_name.split('/')[-1]
@@ -162,15 +163,10 @@ class State(object):
 ##
 ## Displays data from DiagnosticArray /diagnostics_agg in a tree structure
 ## by status name. Names are parsed by '/'. Each status name is given
-## an icon by status (ok, warn, error, stale). The robot monitor will mark an item
-## as stale after it is invisible for 3 seconds. Other than that, it does not store
-## state. Any item whose parent is updated but that is not updated in the same message
-## will be deleted.
+## an icon by status (ok, warn, error, stale).
 ## 
-## Two messages with separate first names (ex: '/PRF/...' and '/PRG/...') will 
-## not conflict and can "share" the robot monitor. First names like 'PRF' and 
-## 'PRG' in the above example are known as 'first_parent' names throughout
-## the class.
+## The robot monitor does not store any state, but if it does not get any updates 
+## for 3 seconds, it will mark the tree as stale.
 class RobotMonitorPanel(MonitorPanelGenerated):
     ##\param parent RobotMonitorFrame : Parent frame
     def __init__(self, parent):
@@ -182,7 +178,12 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         self._error_tree_ctrl.AddRoot("Root")
         self._warning_tree_ctrl.AddRoot("Root")
         
+        self._tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
+        self._error_tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
+        self._warning_tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
+
         self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
+        self._timeline.set_message_receipt_callback(self._on_new_message_received)
         self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
 
         # Image list for icons
@@ -190,7 +191,8 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         error_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_ERROR, wx.ART_OTHER, wx.Size(16, 16)))
         warn_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_WARNING, wx.ART_OTHER, wx.Size(16, 16)))
         ok_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_TICK_MARK, wx.ART_OTHER, wx.Size(16, 16)))
-        stale_id = image_list.AddIcon(wx.ArtProvider.GetIcon(wx.ART_QUESTION, wx.ART_OTHER, wx.Size(16, 16)))
+        stale_icon = wx.Icon(os.path.join(roslib.packages.get_pkg_dir(PKG), 'icons/stale.png'), wx.BITMAP_TYPE_PNG)
+        stale_id = image_list.AddIcon(stale_icon)
         self._tree_ctrl.SetImageList(image_list)
         self._error_tree_ctrl.SetImageList(image_list)
         self._warning_tree_ctrl.SetImageList(image_list)
@@ -211,16 +213,59 @@ class RobotMonitorPanel(MonitorPanelGenerated):
 
         # Show stale with timer
         self._timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self._update_stale_items)
-        self._timer.Start(3000)
+        self.Bind(wx.EVT_TIMER, self._update_message_state)
+        self._timer.Start(1000)
         
         self._state = State()
         
-    def _update_stale_items(self, event):
-        if (self._timeline.is_paused()):
-            return
+        self._message_status_text.SetLabel("No message received")
+        self._message_status_text.SetForegroundColour(color_dict[2])
+        self._is_stale = True
         
-        self._update_status_images()
+        # unfortunately tooltips do not work on static text, so this information has to go into the docs only
+        #self._message_status_text.SetToolTip(wx.ToolTip("""Shows the status of the received aggregated diagnostic message.
+
+#If the robot monitor has not received a diagnostic message in more than 10 seconds, this will show an error and the background of the Errors/Warnings/All views will turn grey."""))
+        self._last_message_time = 0.0
+        self._message_received = False
+        self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+        self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+        self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+        
+    def _update_message_state(self, event):
+        current_time = rospy.get_time()
+        time_diff = current_time - self._last_message_time
+        if (not self._message_received):
+            self._message_status_text.SetLabel("No message received")
+            self._message_status_text.SetForegroundColour(color_dict[2])
+            self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+        elif (time_diff > 10.0):
+            self._message_status_text.SetLabel("Last message received %s seconds ago"%(int(time_diff)))
+            self._message_status_text.SetForegroundColour(color_dict[2])
+            self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._is_stale = True
+        else:
+            seconds_string = "seconds"
+            if (int(time_diff) == 1):
+                seconds_string = "second"
+            self._message_status_text.SetLabel("Last message received %s %s ago"%(int(time_diff), seconds_string))
+            self._message_status_text.SetForegroundColour(color_dict[0])
+            self._tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._error_tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._warning_tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._is_stale = False
+        
+    
+    ## \brief Called whenever a new message is received by the timeline.  Different from new_message in that it
+    ## is called even if the timeline is paused, and only when a new message is received, not when the timeline
+    ## is scrubbed
+    def _on_new_message_received(self, msg):
+        self._last_message_time = rospy.get_time()
+        self._message_received = True
 
     ##\brief processes new messages, updates tree control
     ##
@@ -285,10 +330,10 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     def _update_error_tree(self):
         for item in self._state.get_items().itervalues():
             level = item.status.level
-            if (level != 2 and item.error_id is not None):
+            if (level not in error_levels and item.error_id is not None):
                 self._error_tree_ctrl.Delete(item.error_id)
                 item.error_id = None
-            elif (level == 2 and item.error_id is None):
+            elif (level in error_levels and item.error_id is None):
                 item.error_id = self._error_tree_ctrl.AppendItem(self._error_tree_ctrl.GetRootItem(), item.status.name)
                 self._error_tree_ctrl.SetItemImage(item.error_id, self._image_dict[level])
                 self._error_tree_ctrl.SetPyData(item.error_id, item)
@@ -312,9 +357,6 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         for item in self._state.get_items().itervalues():
             if (item.tree_id is not None):
                 level = item.status.level
-                # Sets items as stale if >3.0 seconds
-                if rospy.get_time() - item.update_time > 3.0:
-                    level = 3
             
                 self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
     
@@ -422,29 +464,39 @@ class RobotMonitorPanel(MonitorPanelGenerated):
                         
             
 
-    ##\brief Gets the "top level" state of the diagnostics
+    ##\brief Gets the state of the "top level" diagnostics
     ##
     ## Returns the highest value of any of the root tree items
-    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = Stale
+    ##\return -1 = No diagnostics yet, 0 = OK, 1 = Warning, 2 = Error, 3 = All Stale
     def get_top_level_state(self):
+        if (self._is_stale):
+            return 3
+        
         level = -1
-        id, cookie = self._tree_ctrl.GetFirstChild(self._tree_ctrl.GetRootItem())
-        if id == self._empty_id:
+        min_level = 255
+
+        if len(self._state.get_items()) == 0:
             return level
 
-        while not rospy.is_shutdown():
-            item = self._tree_ctrl.GetPyData(id)
-            if item and item.status and item.status.level > level:
+        for item in self._state.get_items().itervalues():
+            # Only look at "top level" items
+            if self._state.get_parent(item) is not None:
+                continue
+
+            if item.status.level > level:
                 level = item.status.level
-            
-            id, cookie = self._tree_ctrl.GetNextChild(self._tree_ctrl.GetRootItem(), cookie)
-            if not id.IsOk():
-                break
+            if item.status.level < min_level:
+                min_level = item.status.level
               
+        # Top level is error if we have stale items, unless all stale
+        if level > 2 and min_level <= 2:
+            level = 2
+
         return level
 
     def get_color_for_message(self, msg):
         level = 0
+        min_level = 255
         
         lookup = {}
         for status in msg.status:
@@ -456,5 +508,12 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             status = lookup[name]
             if (status.level > level):
                 level = status.level
+            if (status.level < min_level):
+                min_level = status.level
+
+        # Stale items should be reported as errors unless all stale
+        if (level > 2 and min_level <= 2):
+            level = 2
+
                 
         return color_dict[level]

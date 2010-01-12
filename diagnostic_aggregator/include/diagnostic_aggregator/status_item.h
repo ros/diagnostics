@@ -109,7 +109,7 @@ inline std::string valToMsg(const int val)
   if (val == 3)
     return "Stale";
   
-  ROS_ERROR("Attempting to convert %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}", val);
+  ROS_ERROR("Attempting to convert diagnostic level %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}", val);
   return "Error";
 }
 
@@ -117,7 +117,12 @@ inline std::string valToMsg(const int val)
  *\brief Removes redundant prefixes from status name.
  *
  * Useful for cleaning up status names.
- * Ex: /Hokuyo/Tilt HK/tilt_node: Connection to /Hokuyo/Tilt HK/Connection
+ * Ex: "/Hokuyo/Tilt HK/tilt_node: Connection" to "/Hokuyo/Tilt HK/Connection"
+ *
+ * For multiple values of chaff, users will have to run this command for each value.
+ * This function won't work properly if multiple chaff values can be removed.
+ * For example, name "prosilica_camera: Frequency" with chaff ("prosilica", "prosilica_camera")
+ * will become "_camera: Frequency" if "prosilica" is removed first. 
  */
 inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
 {
@@ -168,29 +173,33 @@ public:
   /*!
    *\brief Must have same name as original status or it won't update.
    * 
-   * After update, hasChecked() is false until converted toStatusMsg.
    *\return True if update successful, false if error
    */
   bool update(const diagnostic_msgs::DiagnosticStatus *status);
 
   /*!
-   *\brief Sets hasChecked() to true, prepends "prefix/" to name.
+   *\brief Prepends "path/" to name, makes item stale if "stale" true.
+   *
+   * Helper function to convert item back to diagnostic_msgs::DiagnosticStatus
+   * pointer. Prepends path. 
+   * Example: Item with name "Hokuyo" toStatusMsg("Base Path/My Path", false) 
+   * gives "Base Path/My Path/Hokuyo". 
    *
    *\param prefix : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string prefix, const bool stale) const;
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string path, const bool stale = false) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message
    */
   DiagnosticLevel getLevel() const { return level_; }
-  
+
   /*!
-   *\brief Message field of DiagnosticStatus 
+   *\brief Get message field of DiagnosticStatus 
    */
   std::string getMessage() const { return message_; }
-  
+
   /*!
    *\brief Returns name of DiagnosticStatus message
    */
@@ -208,6 +217,8 @@ public:
 
   /*!
    *\brief Returns true if item has key in values KeyValues
+   *
+   *\return True if has key
    */
   bool hasKey(const std::string key) const
   {

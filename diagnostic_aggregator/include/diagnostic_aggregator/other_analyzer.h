@@ -52,6 +52,10 @@ namespace diagnostic_aggregator {
  * seperately. The aggregator will call analyze() on any message not handled by other
  * analyzers.
  *
+ * Stale items will be discarded after 5 seconds of no updates.
+ * 
+ * OtherAnalyzer is designed to be used internally by the Aggregator only.
+ *
  */
 class OtherAnalyzer : public GenericAnalyzerBase
 {
@@ -63,13 +67,20 @@ public:
 
   ~OtherAnalyzer() { }
 
+  /*
+   *\brief Initialized with the base path only.
+   *
+   *\param path Base path of Aggregator
+   */
   bool init(std::string path)
   {
-    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0);
+    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0, -1, true);
   }
 
   /*
    *\brief OtherAnalyzer cannot be initialized with a NodeHandle
+   *
+   *\return False, since NodeHandle initialization isn't valid
    */
   bool init(const std::string base_path, const ros::NodeHandle &n)
   {
@@ -79,9 +90,15 @@ public:
 
   /*
    *\brief match() isn't called by aggregator for OtherAnalyzer
+   *
+   *\return True, since match() will never by called by Aggregator
    */
-  bool match(std::string name) const { return true; }
+  bool match(std::string name) { return true; }
 
+  /*
+   *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
+   *
+   */
   std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
   {
     std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();

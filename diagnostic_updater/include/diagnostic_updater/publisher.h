@@ -162,27 +162,9 @@ public:
   }
 
   /**
-	 * Deprecated, use getPublisher instead.
-	 */
-  
-	ROSCPP_DEPRECATED ros::Publisher publisher() const
-  {
-    return publisher_;
-  }
-
-  /**
 	 * \brief Changes the publisher.
 	 */
   void setPublisher(ros::Publisher pub)
-  {
-    publisher_ = pub;
-  }
-
-  /**
-	 * Deprecated, use setPublisher instead.
-	 */
-
-  ROSCPP_DEPRECATED void set_publisher(ros::Publisher pub)
   {
     publisher_ = pub;
   }
@@ -315,27 +297,9 @@ public:
   }
 
   /**
-	 * Deprecated, use getPublisher instead.
-	 */
-  
-	ROSCPP_DEPRECATED ros::Publisher publisher() const
-  {
-    return publisher_;
-  }
-
-  /**
 	 * \brief Changes the publisher.
 	 */
   void setPublisher(ros::Publisher pub)
-  {
-    publisher_ = pub;
-  }
-
-  /**
-	 * Deprecated, use setPublisher instead.
-	 */
-
-  ROSCPP_DEPRECATED void set_publisher(ros::Publisher pub)
   {
     publisher_ = pub;
   }
