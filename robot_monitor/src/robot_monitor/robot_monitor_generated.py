@@ -20,17 +20,6 @@ class MonitorPanelGenerated ( wx.Panel ):
 		
 		bSizer1 = wx.BoxSizer( wx.VERTICAL )
 		
-		sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Diagnostic Message Status" ), wx.VERTICAL )
-		
-		self._message_status_text = wx.StaticText( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self._message_status_text.Wrap( -1 )
-		self._message_status_text.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 92, False, wx.EmptyString ) )
-		self._message_status_text.SetForegroundColour( wx.Colour( 85, 178, 76 ) )
-		
-		sbSizer4.Add( self._message_status_text, 0, wx.ALL, 5 )
-		
-		bSizer1.Add( sbSizer4, 0, wx.EXPAND, 5 )
-		
 		self.m_splitter2 = wx.SplitterWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SP_3D )
 		self.m_splitter2.SetSashGravity( 0.5 )
 		self.m_splitter2.Bind( wx.EVT_IDLE, self.m_splitter2OnIdle )
@@ -77,6 +66,14 @@ class MonitorPanelGenerated ( wx.Panel ):
 		bSizer4.Fit( self.m_panel4 )
 		self.m_splitter2.SplitHorizontally( self.m_panel3, self.m_panel4, 240 )
 		bSizer1.Add( self.m_splitter2, 1, wx.EXPAND, 5 )
+		
+		self._message_status_text = wx.StaticText( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self._message_status_text.Wrap( -1 )
+		self._message_status_text.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 70, 90, 92, False, wx.EmptyString ) )
+		self._message_status_text.SetForegroundColour( wx.Colour( 85, 178, 76 ) )
+		self._message_status_text.SetToolTipString( u"asdf" )
+		
+		bSizer1.Add( self._message_status_text, 0, wx.ALL, 5 )
 		
 		self.SetSizer( bSizer1 )
 		self.Layout()

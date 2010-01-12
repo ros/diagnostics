@@ -242,14 +242,17 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
         elif (time_diff > 10.0):
-            self._message_status_text.SetLabel("Stale (%s seconds old)"%(time_diff))
+            self._message_status_text.SetLabel("Last message received %s seconds ago"%(int(time_diff)))
             self._message_status_text.SetForegroundColour(color_dict[2])
             self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._is_stale = True
         else:
-            self._message_status_text.SetLabel("OK")
+            seconds_string = "seconds"
+            if (int(time_diff) == 1):
+                seconds_string = "second"
+            self._message_status_text.SetLabel("Last message received %s %s ago"%(int(time_diff), seconds_string))
             self._message_status_text.SetForegroundColour(color_dict[0])
             self._tree_ctrl.SetBackgroundColour(wx.WHITE)
             self._error_tree_ctrl.SetBackgroundColour(wx.WHITE)
