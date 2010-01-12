@@ -126,10 +126,10 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   fs.clear();
   fs.run(stat[4]); // Should be good, just cleared it.
 
-  EXPECT_EQ(2, stat[0].level) << "max frequency exceeded but not reported";
+  EXPECT_EQ(1, stat[0].level) << "max frequency exceeded but not reported";
   EXPECT_EQ(0, stat[1].level) << "within max frequency but reported error";
   EXPECT_EQ(0, stat[2].level) << "within min frequency but reported error";
-  EXPECT_EQ(2, stat[3].level) << "min frequency exceeded but not reported";
+  EXPECT_EQ(1, stat[3].level) << "min frequency exceeded but not reported";
   EXPECT_EQ(2, stat[4].level) << "freshly cleared should fail";
   EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by FrequencyStatus";
   EXPECT_STREQ("Frequency Status", fs.getName().c_str()) << "Name should be \"Frequency Status\"";
