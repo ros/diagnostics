@@ -1,6 +1,6 @@
 <package>
-  <description brief="Allows users to easily update diagnostics on a node">
-    diagnostic_updater contains tools for easily updating diagnostics.
+  <description brief="Easily publishes diagnostics for a driver or node">
+    diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.
   </description>
   <author>Jeremy Leibs, Blaise Gassend</author>
   <license>BSD</license>

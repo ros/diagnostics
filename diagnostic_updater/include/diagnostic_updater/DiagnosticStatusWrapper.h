@@ -55,14 +55,14 @@ namespace diagnostic_updater
   /**
    *
    * \brief Wrapper for the diagnostic_msgs::DiagnosticStatus message that
-   * makes it easier to fill out.
+   * makes it easier to update.
    *
    * This class handles common string formatting and vector handling issues
-   * for the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
+   * for filling the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
    * diagnostic_msgs::DiagnosticStatus, so it can be passed directly to
    * diagnostic publish calls.
+   * 
    */
-
   class DiagnosticStatusWrapper : public diagnostic_msgs::DiagnosticStatus
   {
     public:
@@ -73,7 +73,6 @@ namespace diagnostic_updater
        * \param lvl Numerical level to assign to this Status (OK, Warn, Err).
        * \param s Descriptive status message.
        */
-
       void summary(unsigned char lvl, const std::string s)
       {
         level = lvl;
@@ -81,9 +80,9 @@ namespace diagnostic_updater
       }
 
       /**
-       * \brief Merges a level and message with the existing ones.
+       * \brief Merges a level and message with the existing ones. 
        *
-       * It is sometimes useful to merge two DiagnosticStatuses. In that case,
+       * It is sometimes useful to merge two DiagnosticStatus messages. In that case,
        * the key value pairs can be unioned, but the level and summary message
        * have to be merged more intelligently. This function does the merge in
        * an intelligent manner, combining the summary in *this, with the one
@@ -161,7 +160,6 @@ namespace diagnostic_updater
        * \param ... Values to be formatted by the format string.
        *
        */
-
       void summaryf(unsigned char lvl, const char *format, ...)
       {
         va_list va;
@@ -178,18 +176,16 @@ namespace diagnostic_updater
        * \brief clears the summary, setting the level to zero and the
        * message to "".
        */
-
       void clearSummary()
       {
         summary(0, "");
       }
       
       /**
-       * \brief copies the summary from another StatusWrapper.
+       * \brief copies the summary from a DiagnosticStatus message
        *
        * \param src StatusWrapper to copy the summary from.
        */
-
       void summary(const diagnostic_msgs::DiagnosticStatus &src)
       {
         summary(src.level, src.message);
@@ -204,7 +200,6 @@ namespace diagnostic_updater
        *
        * \param key Key to be added.  \param value Value to be added.
        */
-
       template<class T>
         void add(const std::string &key, const T &val)
         {
