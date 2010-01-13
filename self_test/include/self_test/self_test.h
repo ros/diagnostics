@@ -138,12 +138,11 @@ namespace self_test
           {
             diagnostic_updater::DiagnosticStatusWrapper status;
 
-            status.name = "None";
             status.level = 2;
             status.message = "No message was set";
 
             try {
-
+              ROS_INFO("Starting test: %s", iter->getName().c_str());
               iter->run(status);
 
             } catch (std::exception& e)
