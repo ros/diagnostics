@@ -1,6 +1,6 @@
 <package>
   <description brief="Allows users to run a self test on a node">
-    self_test contains a class for easily constructing a self test. This is used by nodes to allow users to quickly check that a device or process is working.
+    self_test contains a class for allowing a node to run a self test. This is used by nodes to allow users to quickly check that a device or process is working. 
   </description>
   <author>Jeremy Leibs</author>
   <license>BSD</license>

@@ -59,7 +59,6 @@ namespace self_test
    * TestRunner waits for a suitable time to interrupt the node and run the
    * tests. Results from the tests are collected and returned to the caller.
    */
-
   class TestRunner : public DiagnosticTaskVector
   {        
     private:
@@ -81,7 +80,6 @@ namespace self_test
        *
        * \param h NodeHandle from which to work. (Currently unused?)
        */
-
       TestRunner(ros::NodeHandle h = ros::NodeHandle()) : 
         node_handle_(h)
     {
