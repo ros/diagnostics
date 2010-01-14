@@ -78,7 +78,7 @@ if __name__ == '__main__':
         DiagnosticStatus(2, '/BASE2/group3', 'OK', '', []),
         DiagnosticStatus(2, '/BASE2/group3/item2', 'Error', '', []),
 
-        DiagnosticStatus(0, '/BASE3', 'OK', '', []),
+        #DiagnosticStatus(0, '/BASE3', 'OK', '', []),
         DiagnosticStatus(0, '/BASE3/group1', 'OK', '', []),
         DiagnosticStatus(0, '/BASE3/group1/item2', 'Error', '', [])
         ]
