@@ -171,12 +171,78 @@ bool GenericAnalyzer::match(const string name)
 vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::report()
 {
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+
+  // Check and make sure our expected names haven't been removed ...
+  vector<string> expected_names_missing;
+  bool has_name = false;
+  bool all_stale = true;
   
+  for (unsigned int i = 0; i < expected_.size(); ++i)
+  {
+    has_name = false;
+    for (unsigned int j = 0; j < processed.size(); ++j)
+    {
+      if (!processed[j]->level == 3)
+        all_stale = false;
+
+      size_t last_slash = processed[j]->name.rfind("/");
+      string nice_name = processed[j]->name.substr(last_slash + 1);
+      if (nice_name == expected_[i])
+      {
+        has_name = true;
+        break;
+      }
+    }
+    if (!has_name)
+      expected_names_missing.push_back(expected_[i]);
+  }  
+  
+  // Add missing names to header ...
+  for (unsigned int i = 0; i < expected_names_missing.size(); ++i)
+  {
+    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+    processed.push_back(item->toStatusMsg(path_, true));
+  } 
+
+  // Check that all processed items aren't stale
   for (unsigned int j = 0; j < processed.size(); ++j)
   {
+    if (processed[j]->level != 3)
+      all_stale = false;
+  }
+
+  for (unsigned int j = 0; j < processed.size(); ++j)
+  {
+  // Remove all leading name chaff
     for (unsigned int i = 0; i < chaff_.size(); ++i)
       processed[j]->name = removeLeadingNameChaff(processed[j]->name, chaff_[i]);
+
+    // If we're missing any items, set the header status to error or stale
+    if (expected_names_missing.size() > 0 && processed[j]->name == path_)
+    {
+      if (!all_stale)
+      {
+        processed[j]->level = 2;
+        processed[j]->message = "Error";
+      }
+      else
+      {
+        processed[j]->level = 3;
+        processed[j]->message = "All Stale";
+      }
+
+      // Add all missing items to header item
+      for (unsigned int k = 0; k < expected_names_missing.size(); ++k)
+      {
+        diagnostic_msgs::KeyValue kv;
+        kv.key = expected_names_missing[k];
+        kv.value = "Missing";
+        processed[j]->values.push_back(kv);
+      }
+    }
   }
+
+  
   
   return processed;
 }

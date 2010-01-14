@@ -112,18 +112,6 @@ public:
   virtual bool match(const std::string name) = 0;
 
   /*!
-   *\brief The const version of the "match" function is deprecated and always returns true.
-   *
-   *\deprecated Replaced by non-const version.
-   */
-  virtual bool match(const std::string name) const __attribute__ ((deprecated))
-  {
-    ROS_WARN("The match(string name) function is no longer const. Please change this function in your code. This function always returns true.");
-
-    return true;
-  }
-
-  /*!
    *\brief Returns true if analyzer will analyze this name
    *
    * This is called with every new item that an analyzer matches.
@@ -136,7 +124,7 @@ public:
    *\brief Analysis function, output processed data.
    *
    * report is called at 1Hz intervals. Analyzers should return a vector 
-   * of fully processed DiagnosticStatus messages. 
+   * of processed DiagnosticStatus messages. 
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */

@@ -88,11 +88,11 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
   return true;
 }
 
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(std::string prefix, bool stale) const
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(const std::string &path, bool stale) const
 {
   boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
 
-  status->name = prefix + "/" + output_name_;
+  status->name = path + "/" + output_name_;
   status->level = level_;
   status->message = message_;
   status->hardware_id = hw_id_;

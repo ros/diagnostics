@@ -6,32 +6,11 @@
 
 \section codeapi Code API
 
-The Aggregator class loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized according to the private parameters of the Aggregator.
-
-The Aggregator groups diagnostics data by name. Each group is pushed into a namespace using '/'. For example:
-\verbatim
-/Robot
-/Robot/Motors
-/Robot/Motors/EtherCAT Device (head_tilt_motor)
-\endverbatim
-
-Forms a tree with the trunk "Robot" and the child branch "Motors" and the grandchild "EtherCAT Device (head_tilt_motor)". This allows hierarchical graphical display of diagnostics data in the '''Robot Monitor'''.
-
-The aggregator will publish the diagnostic_msgs/DiagnosticArray message on the /diagnostics_agg topic at 1 Hz.
+The Aggregator class loads "analyzers" which perform analysis on the incoming diagnostics data. Each analyzer is initialized according to the private parameters of the Aggregator. The aggregator will publish the diagnostic_msgs/DiagnosticArray message on the /diagnostics_agg topic at 1 Hz.
 
 \subsection analyzers Analyzers
 
 The Aggregator will create analyzers to store and process the diagnostic data. Each analyzer inherits from the pure virtual base class '''Analyzer'''. Analyzers should be in packages that depend directly on "pluginlib" and "diagnostic_aggregator".
-
-The base analyzer class is the Analyzer. All derived classes must implement these methods as specified by the Analyzer:
-- \b init
-- \b match
-- \b analyze
-- \b report
-- \b getPrefix
-- \b getName
-
-Analyzers can choose the error state for any DiagnosticStatus message they analyzer. Generally, the "parent" of an analyzer has an error state of the maximum of its children, but it can follow any rule. The header ("/Robot" above) will have the diagnostic level of the greatest of its immediate children, so an error in "Motors" will give an error in "Robot".
 
 See Analyzer for more information on the base class.
 
@@ -39,88 +18,21 @@ See Analyzer for more information on the base class.
 
 \b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the Analyzer's. It is used by the diagnostic_aggregator/Aggregator to store, process and republish diagnostics data. The GenericAnalyzer is loaded by the pluginlib as a Analyzer plugin. It is the most basic of all Analyzer's. 
 
-The following YAML parameters will create a GenericAnalyzer to motor a PR2 power system.
-\verbatim
-powersystem:
-  type: GenericAnalyzer
-  path: Power System
-  expected: [ 
-    'IBPS 0',
-    'IBPS 1']
-  startswith: [
-    'Smart Battery']
-  name: [
-    'Power Node 1018']
-  contains: [
-    'Battery']
-\endverbatim
-That would create an GenericAnalyzer that will process any DiagnosticStatus message that has a name that matches the given criteria ("startswith", "contains", "name", or "expected"). See the GenericAnalyzer class for more details.
-
 \subsubsection analyzer_group AnalyzerGroup
 
 \b analyzer_group holds the AnalyzerGroup class, which can hold a group of diagnostic analyzers. These "sub-analyzers" are loaded in the same way that the Aggregator loads analyzers.
-
-\verbatim
-sensors_group:
-  type: AnalyzerGroup
-  path: Sensors
-  analyzers:
-    hokuyo:
-      type: GenericAnalyzer
-      path: Hokuyo
-      contains: hokuyo
-    imu:
-      type: GenericAnalyzer
-      path: IMU
-      startswith: IMU
-\endverbatim
-
-The output diagnostic names of the "Hokuyo" analyzer would be prepended with "/Sensors/Hokuyo". 
-
-See the AnalyzerGroup for more information.
 
 \section rosapi ROS API
 
 Nodes:
 - \b aggregator_node
+- \b analyzer_loader
 
 <hr>
 
 \subsection aggregator_node aggregator_node
 
 aggregator_node subscribes to "/diagnostics" and publishes an aggregated set of data to "/diagnostics_agg". The aggregator will load diagnostic analyzers (like the GenericAnalyzer above) as plugins. The analyzers are specified in the launch file as private parameters in the "~analyzers" namespace.
-
-\subsubsection Usage
-The aggregator is initialized with the prefix as an argument, and YAML to create the analyzers as a private parameter.
-\verbatim
-<node 
-      pkg="diagnostic_aggregator" type="aggregator_node"
-      name="diag_agg" >
-  <rosparam command="load" 
-            file="$(find diagnostic_aggregator)/test/analyzers.yaml" />
-</node>
-\endverbatim
-
-\par Example
-
-Using the above usage, the diagnostic aggregator will spawn analyzers that group the robot's data by category. The analyzer parameter YAML file might look like:
-\verbatim
-pub_rate: 1.0
-base_path: My Robot
-analyzers:
-  sensors:
-    type: GenericAnalyzer
-    prefix: Sensors
-    contains: [
-      'hokuyo']
-  motors: # This is an example of another type of plugin
-    type: PR2MotorsAnalyzer
-  joints: 
-    type: PR2JointsAnalyzer
-\endverbatim
-Each analyzer is started with a namespace, and must have the parameter "type" in that namespace. Analyzers are loaded as plugins with "pluginlib" and inherit from the base class diagnostic_analyzer/Analyzer.
-
-If any analyzer is not properly specified, or returns false on initialization, the aggregator will report a diagnostic status with an error message.
 
 \subsubsection topics ROS topics
 
@@ -136,7 +48,17 @@ Reads the following parameters from the parameter server
 
 - \b "~pub_rate" : \b double [optional] Rate that output diagnostics published
 - \b "~base_path" : \b double [optional] Prepended to all analyzed output
-- \b "~analyzers" : \b [YAML instructions] Instructions, like in the above example, for loading analyzers.
+- \b "~analyzers" : \b {} Configuration for loading analyzers
+
+\subsection analyzer_loader analyzer_loader
+
+analyzer_loader loads diagnostic analyzers and verifies that they have initialized. It is used as a unit or regression test to verify that analyzer parameters work.
+
+\subsubsection parameters ROS parameters
+
+Reads the following parameters from the parameter server
+
+- \b "~analyzers" : \b {} Configuration for loading and testing analyzers
 
 
 */

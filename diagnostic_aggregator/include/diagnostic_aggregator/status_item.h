@@ -124,7 +124,7 @@ inline std::string valToMsg(const int val)
  * For example, name "prosilica_camera: Frequency" with chaff ("prosilica", "prosilica_camera")
  * will become "_camera: Frequency" if "prosilica" is removed first. 
  */
-inline std::string removeLeadingNameChaff(const std::string input_name, const std::string chaff)
+inline std::string removeLeadingNameChaff(const std::string &input_name, const std::string &chaff)
 {
   std::string output_name = input_name;
 
@@ -185,10 +185,10 @@ public:
    * Example: Item with name "Hokuyo" toStatusMsg("Base Path/My Path", false) 
    * gives "Base Path/My Path/Hokuyo". 
    *
-   *\param prefix : Prepended to name
+   *\param path : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string path, const bool stale = false) const;
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string &path, const bool stale = false) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message
@@ -220,13 +220,14 @@ public:
    *
    *\return True if has key
    */
-  bool hasKey(const std::string key) const
+  bool hasKey(const std::string &key) const
   {
     for (unsigned int i = 0; i < values_.size(); ++i)
     {
       if (values_[i].key == key)
         return true;
     }
+
     return false;
   }
 
@@ -235,7 +236,7 @@ public:
    *
    *\return Value if key present, "" if not
    */
-  std::string getValue(const std::string key) const
+  std::string getValue(const std::string &key) const
   {
     for (unsigned int i = 0; i < values_.size(); ++i)
     {
