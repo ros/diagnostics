@@ -66,6 +66,7 @@ class StatusItem(object):
         self.tree_id = None
         self.warning_id = None
         self.error_id = None
+        self.last_level = None
         self.update(status)
         
     def update(self, status):
@@ -357,8 +358,10 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         for item in self._state.get_items().itervalues():
             if (item.tree_id is not None):
                 level = item.status.level
-            
-                self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
+                
+                if (item.status.level != item.last_level):
+                    self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
+                    item.last_level = level
     
     def _update_labels(self):
         for item in self._state.get_items().itervalues():
