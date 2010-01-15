@@ -49,28 +49,36 @@ if __name__ == '__main__':
     rospy.init_node('diag_pub')
     pub = rospy.Publisher('/diagnostics', DiagnosticArray)
     
-    array = DiagnosticArray()
-    array.status = [
-        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_l_wheel_motor)', 'OK', '', []),
-        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_r_wheel_motor)', 'OK', '', []),
-        DiagnosticStatus(0, 'EtherCAT Device (fl_caster_rotation_motor)', 'OK', '', []),
-        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_l_wheel_motor)', 'OK', '', []),
-        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_r_wheel_motor)', 'OK', '', []),
-        DiagnosticStatus(0, 'EtherCAT Device (fr_caster_rotation_motor)', 'OK', '', []),
-
-        DiagnosticStatus(0, 'tilt_hokuyo_node: Frequency Status', 'OK', '', []),
-        DiagnosticStatus(0, 'tilt_hokuyo_node: Connection Status', 'OK', '', []),
-        DiagnosticStatus(0, 'base_hokuyo_node: Frequency Status', 'OK', '', []),
-        DiagnosticStatus(0, 'base_hokuyo_node: Connection Status', 'OK', '', []),
-
-        DiagnosticStatus(0, 'Joint (fl_caster_l_wheel_joint)', 'OK', '', []),
-        DiagnosticStatus(0, 'Joint (fl_caster_r_wheel_joint)', 'OK', '', []),
-        DiagnosticStatus(0, 'Joint (fl_caster_rotation_joint)', 'OK', '', []),
-        DiagnosticStatus(0, 'Joint (fr_caster_l_wheel_joint)', 'OK', '', []),
-        DiagnosticStatus(0, 'Joint (fr_caster_r_wheel_joint)', 'OK', '', []),
-        DiagnosticStatus(0, 'Joint (fr_caster_rotation_joint)', 'OK', '', [])]
-    array.header.stamp = rospy.get_rostime()
+    start_time = rospy.get_time()
 
     while not rospy.is_shutdown():
+        array = DiagnosticArray()
+        array.status = [
+            DiagnosticStatus(0, 'EtherCAT Device (fl_caster_l_wheel_motor)', 'OK', '', []),
+            DiagnosticStatus(0, 'EtherCAT Device (fl_caster_r_wheel_motor)', 'OK', '', []),
+            DiagnosticStatus(0, 'EtherCAT Device (fl_caster_rotation_motor)', 'OK', '', []),
+            DiagnosticStatus(2, 'EtherCAT Device (fr_caster_l_wheel_motor)', 'Motor model', '', []),
+            DiagnosticStatus(1, 'EtherCAT Device (fr_caster_r_wheel_motor)', 'High temperature', '', []),
+            DiagnosticStatus(0, 'EtherCAT Device (fr_caster_rotation_motor)', 'OK', '', []),
+            
+            DiagnosticStatus(0, 'tilt_hokuyo_node: Frequency Status', 'OK', '', []),
+            DiagnosticStatus(0, 'tilt_hokuyo_node: Connection Status', 'OK', '', []),
+            DiagnosticStatus(0, 'base_hokuyo_node: Frequency Status', 'OK', '', []),
+            DiagnosticStatus(0, 'base_hokuyo_node: Connection Status', 'OK', '', []),
+            
+            DiagnosticStatus(0, 'Joint (fl_caster_l_wheel_joint)', 'OK', '', []),
+            DiagnosticStatus(0, 'Joint (fl_caster_r_wheel_joint)', 'OK', '', []),
+            DiagnosticStatus(1, 'Joint (fl_caster_rotation_joint)', 'Uncalibrated', '', []),
+            DiagnosticStatus(1, 'Joint (fr_caster_l_wheel_joint)', 'Uncalibrated', '', []),
+            DiagnosticStatus(0, 'Joint (fr_caster_r_wheel_joint)', 'OK', '', []),
+            DiagnosticStatus(0, 'Joint (fr_caster_rotation_joint)', 'OK', '', [])]
+        array.header.stamp = rospy.get_rostime()
+
+        # Test that runtime monitor can handle an item changing levels
+        if rospy.get_time() - start_time > 5:
+            array.status.append(DiagnosticStatus(2, 'EtherCAT Device (fr_caster_l_wheel_motor)', 'Motor model', '', []))
+        else:
+            array.status.append(DiagnosticStatus(0, 'EtherCAT Device (fr_caster_l_wheel_motor)', 'OK', '', []))
+
         pub.publish(array)
         sleep(1)
