@@ -3,6 +3,8 @@
     A self_test is a service call provided by a node that triggers a
     test of the driver and any associated hardware. This service call can
     be used by users to quickly verify that a device or process is working.
+    Currently self-tests are mainly used with drivers, but nothing
+    precludes non-driver nodes using them.
     <br>
     The self_test package contains tools to for calling the self-test
     service from the command-line, or from a regression test. It also
