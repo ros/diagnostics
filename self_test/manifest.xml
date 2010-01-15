@@ -15,7 +15,7 @@
   </description>
   <author>Jeremy Leibs and Blaise Gassend</author>
   <license>BSD</license>
-  <review status="API cleared" notes="Dec 2009"/>
+  <review status="Doc reviewed" notes="Jan 15 2010"/>
   <url>http://www.ros.org/wiki/self_test</url>
   <depend package="roscpp" />
   <depend package="diagnostic_updater" />
