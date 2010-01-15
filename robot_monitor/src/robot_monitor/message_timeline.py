@@ -233,6 +233,9 @@ class MessageTimeline(wx.Panel):
         if (val == self._last_val):
             return
         
+        if (val >= len(self._queue)):
+            return
+        
         self._last_val = val
         
         if (not self._paused and self._pause_callback is not None):
