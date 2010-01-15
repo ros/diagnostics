@@ -64,6 +64,16 @@ class SnapshotFrame(wx.Frame):
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self._text_ctrl = richtext.RichTextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY)
         self._sizer.Add(self._text_ctrl, 1, wx.EXPAND)
+        
+class Item():
+    def __init__(self):
+        self.name = None
+    
+    def __cmp__(self, other):
+        if (isinstance(other, str)):
+            return cmp(self.name, other)
+        else:
+            return cmp(self.name, other.name)
 
 ##\brief Frame views status messages in separate window
 ##
@@ -110,6 +120,8 @@ class StatusViewerFrame(wx.Frame):
         self._last_values = {}
         self._last_status = None
         
+        self._items = []
+        
     def _on_close(self, event):
         event.Skip()
         self._manager.remove_viewer(self._name)
@@ -144,7 +156,9 @@ class StatusViewerFrame(wx.Frame):
 
     def _write_status(self, status):
         self._text_ctrl.Freeze()
-        self._text_ctrl.Clear()
+        
+        self._text_ctrl.SetCaretPosition(0)
+        
         self._text_ctrl.SetBasicStyle(self._basic_style)
         self._text_ctrl.SetDefaultStyle(self._default_style)
         self._set_kv("Full name", status.name)
@@ -160,12 +174,12 @@ class StatusViewerFrame(wx.Frame):
                 changed = True
                 
             self._set_kv(value.key, value.value, changed)
-            
-            
-            
             self._last_values[value.key] = value.value
             
-        self._text_ctrl.EndAllStyles()    
+        self._text_ctrl.EndAllStyles()
+        
+        self._text_ctrl.Remove(self._text_ctrl.GetCaretPosition(), self._text_ctrl.GetLastPosition())
+            
         self._text_ctrl.Thaw()
         
         self._last_status = status
