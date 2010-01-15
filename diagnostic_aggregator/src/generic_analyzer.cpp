@@ -241,8 +241,6 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
       }
     }
   }
-
-  
   
   return processed;
 }

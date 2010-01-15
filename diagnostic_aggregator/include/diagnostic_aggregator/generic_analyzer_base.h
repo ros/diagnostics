@@ -107,11 +107,14 @@ public:
    */
   virtual bool analyze(const boost::shared_ptr<StatusItem> item)
   {
-   if (!has_initialized_ && !has_warned_)
+    if (!has_initialized_ && !has_warned_)
     {
       has_warned_ = true;
       ROS_ERROR("GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
+
+    if (!has_initialized_)
+      return false;
 
     items_[item->getName()] = item;
 
@@ -151,6 +154,17 @@ public:
     {
       std::string name = it->first;
       boost::shared_ptr<StatusItem> item = it->second;
+
+      bool stale = false;
+      if (timeout_ > 0)
+        stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
+
+      // Erase item if its stale and we're discarding items
+      if (discard_stale_ and stale)
+      {
+        items_.erase(it);
+        continue;
+      }
       
       int8_t level = item->getLevel();
       header_status->level = std::max(header_status->level, level);
@@ -161,17 +175,6 @@ public:
       
       header_status->values.push_back(kv);
       
-      bool stale = false;
-      if (timeout_ > 0)
-        stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
-
-      // Erase item if its stale
-      if (discard_stale_ and stale)
-      {
-        items_.erase(it);
-        continue;
-      }
-      
       all_stale = all_stale && ((level == 3) || stale);
       
       //boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
@@ -179,7 +182,7 @@ public:
       processed.push_back(item->toStatusMsg(path_, stale));
 
       if (stale)
-        header_status->level = 2;
+        header_status->level = 3;
     }
     
     // Header is not stale unless all subs are
