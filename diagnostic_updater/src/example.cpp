@@ -54,10 +54,10 @@ void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   // summary and summaryf set the level and message.
   if (time_to_launch < 10)
     // summaryf for formatted text.
-    stat.summaryf(2, "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
+    stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
   else
     // summary for unformatted text.
-    stat.summary(0, "Launch is in a long time. Have a soda.");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Launch is in a long time. Have a soda.");
 
   // add and addf are used to append key-value pairs.
   stat.add("Diagnostic Name", "dummy");
@@ -73,7 +73,7 @@ class DummyClass
 public:
   void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(1, "This is a silly updater.");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is a silly updater.");
 
     stat.add("Stupidicity of this updater", 1000.);
   }
@@ -87,7 +87,7 @@ public:
 
   void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(1, "This is another silly updater.");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is another silly updater.");
     stat.add("Stupidicity of this updater", 2000.);
   }
 };
@@ -95,9 +95,9 @@ public:
 void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   if (time_to_launch > 5)
-    stat.summary(0, "Lower-bound OK");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Lower-bound OK");
   else
-    stat.summary(2, "Too low");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Too low");
 
   stat.add("Low-Side Margin", time_to_launch - 5);
 }
@@ -105,9 +105,9 @@ void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   if (time_to_launch < 10)
-    stat.summary(0, "Upper-bound OK");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Upper-bound OK");
   else
-    stat.summary(1, "Too high");
+    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Too high");
 
   stat.add("Top-Side Margin", 10 - time_to_launch);
 }
@@ -125,8 +125,8 @@ int main(int argc, char **argv)
 
   // The diagnostic_updater::Updater class will fill out the hardware_id
   // field of the diagnostic_msgs::DiagnosticStatus message. You need to
-  // use the setHardwareID() or setHardwareIDf() methods to set the hardware
-  // ID. 
+  // use the setHardwareID() or setHardwareIDf() methods to set the
+  // hardware ID. 
   //
   // The hardware ID should be able to identify the specific device you are
   // working with.  If it is not appropriate to fill out a hardware ID in
@@ -152,7 +152,8 @@ int main(int argc, char **argv)
   
   // Alternatively, a FunctionDiagnosticTask is a derived class from
   // DiagnosticTask that can be used to create a DiagnosticTask from
-  // a function:
+  // a function. This will be useful when combining multiple diagnostic
+  // tasks using a CompositeDiagnosticTask.
   diagnostic_updater::FunctionDiagnosticTask lower("Lower-bound check",
       boost::bind(&check_lower_bound, _1));
   diagnostic_updater::FunctionDiagnosticTask upper("Upper-bound check",
@@ -190,7 +191,15 @@ int main(int argc, char **argv)
   // Usually you would instantiate them via a HeaderlessTopicDiagnostic
   // (FrequencyStatus only, for topics that do not contain a header) or a
   // TopicDiagnostic (FrequencyStatus and TimestampStatus, for topics that
-  // do contain a header).
+  // do contain a header). 
+  //
+  // Some values are passed to the constructor as pointers. If these values
+  // are changed, the FrequencyStatus/TimestampStatus will start operating
+  // with the new values. 
+  //
+  // Refer to diagnostic_updater::FrequencyStatusParam and
+  // diagnostic_updater::TimestampStatusParam documentation for details on
+  // what the parameters mean:
   double min_freq = 0.5; // If you update these values, the
   double max_freq = 2; // HeaderlessTopicDiagnostic will use the new values.
   diagnostic_updater::HeaderlessTopicDiagnostic pub1_freq("topic1", updater,
@@ -208,6 +217,9 @@ int main(int argc, char **argv)
   // HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
   // CompositeDiagnosticTask, so you can add your own fields to them using
   // the addTask method.
+  //
+  // Each time pub1_freq is updated, lower will also get updated and its
+  // output will be merged with the output from pub1_freq.
   pub1_freq.addTask(&lower); // (This wouldn't work if lower was stateful).
 
   // If we know that the state of the node just changed, we can force an

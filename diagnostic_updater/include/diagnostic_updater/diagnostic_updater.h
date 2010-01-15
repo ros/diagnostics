@@ -404,7 +404,7 @@ namespace diagnostic_updater
 
           if (warn_nohwid && !warn_nohwid_done_)
           {
-            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to none. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
             warn_nohwid_done_ = true;
           }
 
