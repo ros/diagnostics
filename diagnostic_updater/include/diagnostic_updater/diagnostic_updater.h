@@ -54,10 +54,9 @@ namespace diagnostic_updater
   typedef boost::function<void(diagnostic_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
 
   /**
-   * \brief DiagnosticTask is an abstract base class for diagnostic tasks.
+   * \brief DiagnosticTask is an abstract base class for collecting diagnostic data.
    *
-   * Subclasses will be provided for generating common diagnostic
-   * information.
+   * Subclasses are provided for generating common diagnostic information.
    *
    * A DiagnosticTask has a name, and a function that is called to cleate a
    * DiagnosticStatusWrapper.
@@ -97,8 +96,13 @@ namespace diagnostic_updater
 
   /**
    * \brief a DiagnosticTask based on a boost::function.
+   *
+   * The GenericFunctionDiagnosticTask calls the function when it updates. The function 
+   * updates the DiagnosticStatusWrapper and collects data. 
+   * 
+   * This is useful for gathering information about a device or driver, like temperature,
+   * calibration, etc.
    */
-
   template <class T>
   class GenericFunctionDiagnosticTask : public DiagnosticTask
   {
@@ -135,8 +139,10 @@ namespace diagnostic_updater
    * be combined into a single task that produces a single single
    * DiagnosticStatusWrapped. The output of the combination has the max of
    * the status levels, and a concatenation of the non-zero-level messages.
+   *
+   * For instance, this could be used to combine the calibration and offset data from an 
+   * IMU driver.
    */
-
   class CompositeDiagnosticTask : public DiagnosticTask
   {
     public:
@@ -194,7 +200,6 @@ namespace diagnostic_updater
    * common functionality used for producing diagnostic updates and for
    * self-tests.
    */
-
   class DiagnosticTaskVector
   {
     protected:
@@ -202,7 +207,6 @@ namespace diagnostic_updater
        * \brief Class used to represent a diagnostic task internally in
        * DiagnosticTaskVector.
        */
-
       class DiagnosticTaskInternal
       {
         public:
@@ -326,7 +330,6 @@ namespace diagnostic_updater
    * diagnostics if normal operation of the node is suspended for some
    * reason.
    */
-
   class Updater : public DiagnosticTaskVector
   {
     public:
@@ -338,7 +341,6 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-
     Updater()
     {
       setup();
@@ -348,7 +350,6 @@ namespace diagnostic_updater
        * \brief Causes the diagnostics to update if the inter-update interval
        * has been exceeded.
        */
-
       void update()
       {
         ros::Time now_time = ros::Time::now();
@@ -366,7 +367,6 @@ namespace diagnostic_updater
        * Useful if the node has undergone a drastic state change that should be
        * published immediately.
        */
-
       void force_update()
       {
         update_diagnostic_period();
@@ -404,7 +404,7 @@ namespace diagnostic_updater
 
           if (warn_nohwid && !warn_nohwid_done_)
           {
-            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to none. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
             warn_nohwid_done_ = true;
           }
 

@@ -5,7 +5,7 @@
 @htmlinclude manifest.html
 
 \b \ref diagnostic_updater contains assorted C++ classes to assist in diagnostic
-publication. The main parts of diagnostic_updater are:
+publication. These libraries are commonly used by device drivers as part of the diagnostics toolchain. The main parts of diagnostic_updater are:
 
  - \ref diagnostic_updater::DiagnosticStatusWrapper, a wrapper providing
    convenience functions for working with \ref

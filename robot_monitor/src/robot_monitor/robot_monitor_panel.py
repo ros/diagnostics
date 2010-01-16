@@ -66,6 +66,7 @@ class StatusItem(object):
         self.tree_id = None
         self.warning_id = None
         self.error_id = None
+        self.last_level = None
         self.update(status)
         
     def update(self, status):
@@ -116,17 +117,23 @@ class State(object):
         # find anything without a parent already in the items, and add it as a dummy
         # item
         to_add = []
+        dummy_names = []
         for i in items.itervalues():
             parent = i.status.name
             while (len(parent) != 0):
                 parent = get_parent_name(parent)
-                if (len(parent) > 0 and parent not in items):
-                    #print "Adding dummy: '%s'"%(parent)
-                    s = DiagnosticStatus()
-                    s.name = parent
-                    s.message = ""
-                    pi = StatusItem(s)
+                if (len(parent) > 0 and parent not in items and parent not in dummy_names):
+                    pi = None
+                    if (parent not in self._items):
+                        s = DiagnosticStatus()
+                        s.name = parent
+                        s.message = ""
+                        pi = StatusItem(s)
+                    else:
+                        pi = self._items[parent]
+                        
                     to_add.append(pi)
+                    dummy_names.append(pi.status.name)
                   
         for a in to_add:
             if (a.status.name not in items):
@@ -139,7 +146,7 @@ class State(object):
             # determine removed items
             if (i.status.name not in items):
                 removed.append(i)
-                
+        
         # remove removed items
         for r in removed:
             del self._items[r.status.name]
@@ -357,8 +364,10 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         for item in self._state.get_items().itervalues():
             if (item.tree_id is not None):
                 level = item.status.level
-            
-                self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
+                
+                if (item.status.level != item.last_level):
+                    self._tree_ctrl.SetItemImage(item.tree_id, self._image_dict[level])
+                    item.last_level = level
     
     def _update_labels(self):
         for item in self._state.get_items().itervalues():

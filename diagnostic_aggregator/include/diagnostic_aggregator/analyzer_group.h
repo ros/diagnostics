@@ -131,7 +131,7 @@ public:
   virtual bool analyze(const boost::shared_ptr<StatusItem> item);
 
   /*!
-   *\brief The processed output is the combine output of the sub-analyzers, and the top level status
+   *\brief The processed output is the combined output of the sub-analyzers, and the top level status
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 

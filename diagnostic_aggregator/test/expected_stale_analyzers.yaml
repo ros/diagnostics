@@ -1,0 +1,12 @@
+analyzers:
+  my_path:
+    type: GenericAnalyzer
+    path: My Path
+    discard_stale: true
+    expected: [
+      'expected1',
+      'expected2',
+      'expected3',
+      'expected4',
+      'expected5']
+    startswith: 'startsw'

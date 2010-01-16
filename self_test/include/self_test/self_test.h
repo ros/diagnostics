@@ -58,6 +58,11 @@ namespace self_test
    * maintains a list of pretests and tests. When "self_test" is invoked,
    * TestRunner waits for a suitable time to interrupt the node and run the
    * tests. Results from the tests are collected and returned to the caller.
+   *
+   * self_test::TestRunner's is a derived class from <a
+   * href="../../diagnostic_updater/html/classdiagnostic__updater_1_1DiagnosticTaskVector.html">diagnostic_updater::DiagnosticTaskVector</a>.
+   * For documentation of the add() methods you will have to refer to the
+   * base class's documentation.
    */
 
   class TestRunner : public DiagnosticTaskVector
@@ -81,7 +86,6 @@ namespace self_test
        *
        * \param h NodeHandle from which to work. (Currently unused?)
        */
-
       TestRunner(ros::NodeHandle h = ros::NodeHandle()) : 
         node_handle_(h)
     {
@@ -124,15 +128,14 @@ namespace self_test
           diagnostic_msgs::SelfTest::Response &res)
       {
         bool retval = false;
-
-        ROS_INFO("Begining test.\n");
+        bool ignore_set_id_warn = false;
 
         if (node_handle_.ok())
         {
 
-          id_ = "";
+          id_ = "unspecified";
 
-          ROS_INFO("Entering self test.  Other operation should be suspended\n");
+          ROS_INFO("Entering self-test.");
 
           std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
 
@@ -142,22 +145,25 @@ namespace self_test
           {
             diagnostic_updater::DiagnosticStatusWrapper status;
 
-            status.name = "None";
             status.level = 2;
             status.message = "No message was set";
 
             try {
-
+              ROS_INFO("Starting test: %s", iter->getName().c_str());
               iter->run(status);
 
             } catch (std::exception& e)
             {
               status.level = 2;
               status.message = std::string("Uncaught exception: ") + e.what();
+              ignore_set_id_warn = true;
             }
 
             status_vec.push_back(status);
           }
+
+          if (!ignore_set_id_warn && id_.empty())
+            ROS_WARN("setID was not called by any self-test. The node author should be notified. If there is no suitable ID for this node, an ID of 'none' should be used.");
 
           //One of the test calls should use setID
           res.id = id_;
@@ -178,6 +184,8 @@ namespace self_test
           res.set_status_vec(status_vec);
 
           retval = true;
+          
+          ROS_INFO("Self-test complete.");
         }
 
         return retval;

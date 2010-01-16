@@ -39,16 +39,23 @@
 PKG = 'robot_monitor'
 import roslib; roslib.load_manifest(PKG)
 
+WXVER = '2.8'
+import wxversion
+if wxversion.checkInstalled(WXVER):
+  wxversion.select(WXVER)
+else:
+  print >> sys.stderr, "This application requires wxPython version %s"%(WXVER)
+  sys.exit(1)
+
+from robot_monitor.robot_monitor_panel import RobotMonitorPanel
 import wx
+
+import threading
 import unittest
 import rospy, rostest
 from time import sleep
 import sys
 from optparse import OptionParser
-
-from robot_monitor.robot_monitor_panel import RobotMonitorPanel
-
-import threading
 
 DURATION = 10
 

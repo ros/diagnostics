@@ -47,7 +47,6 @@ namespace diagnostic_updater
    * \brief A structure that holds the constructor parameters for the
    * FrequencyStatus class.
    */
-
   struct FrequencyStatusParam
   {
     /**
@@ -96,7 +95,9 @@ namespace diagnostic_updater
    * \brief A diagnostic task that monitors the frequency of an event.
    *
    * This diagnostic task monitors the frequency of calls to its tick method,
-   * and creates corresponding diagnostics.
+   * and creates corresponding diagnostics. It will report a warning if the frequency is
+   * outside acceptable bounds, and report an error if there have been no events in the latest
+   * window.
    */
 
   class FrequencyStatus : public DiagnosticTask
@@ -144,7 +145,6 @@ namespace diagnostic_updater
       /**
        * \brief Signals that an event has occurred.
        */
-
       void tick()
       {
         boost::mutex::scoped_lock lock(lock_);
