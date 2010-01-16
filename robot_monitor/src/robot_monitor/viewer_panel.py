@@ -158,7 +158,12 @@ class StatusViewerFrame(wx.Frame):
         self._text_ctrl.Freeze()
         
         # SetCaretPosition and GetCaretPosition was only added to wxPython in 2.8.10 apparently, even though they've been in wx for ages
-        has_caret_accessors = getattr(self._text_ctrl, 'SetCaretPosition')
+        has_caret_accessors = True
+        try:
+            getattr(self._text_ctrl, 'SetCaretPosition')
+        except:
+            has_caret_accessors = False
+
         if (has_caret_accessors):
             self._text_ctrl.SetCaretPosition(0)
         else:
