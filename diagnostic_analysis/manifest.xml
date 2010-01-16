@@ -6,7 +6,7 @@
   </description>
   <author>Eric Berger, Kevin Watts</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="Doc reviewed" notes="2010/01/15"/>
   <depend package="rosrecord" />
   <depend package="rostest" />
   <depend package="diagnostic_msgs"/>

@@ -6,7 +6,7 @@
     </description>
   <author>Kevin Watts</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <review status="Doc reviewed" notes=""/>
   <url>http://www.ros.org/wiki/diagnostic_aggregator</url>
   <depend package="diagnostic_msgs" />
   <depend package="roscpp" />
