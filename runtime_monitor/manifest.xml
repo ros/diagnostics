@@ -1,11 +1,11 @@
 <package>
-  <description brief="A program to moniter diagnostics on a robot">
+  <description brief="Monitor diagnostics on a robot">
     The runtime monitor displays raw diagnostics data in an easy to read GUI.
   </description>
   <author>Tully Foote</author>
   <license>BSD</license>
-  <review status="proposal cleared" notes=""/>
-  <url>http://www.ros.org/wiki/runtime_monitor</url>
+  <review status="Doc reviewed" notes=""/>
+  <url>http://ros.org/wiki/runtime_monitor</url>
   <export>
     <cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
   </export>

@@ -59,7 +59,6 @@ if __name__=='__main__':
     parser.add_option("-m", "--max", dest="max", 
                       help="Make largest possible file for Open Office (65k lines). If selected, other options ignored.",
                       metavar="MAX", default=False, action="store_true")
-    options, args = parser.parse_args()
 
     options, args = parser.parse_args()
 
