@@ -74,5 +74,5 @@ if __name__ == '__main__':
         print 'Finished processing files.'
     except:
         import traceback
-        print "Caught exceptiong processing log file"
+        print "Caught exception processing log file"
         traceback.print_exc()
