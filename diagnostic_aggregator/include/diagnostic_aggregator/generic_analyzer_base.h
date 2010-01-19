@@ -198,10 +198,15 @@ public:
     {
       int8_t lvl = 2;
       header_status->level = std::max(lvl, header_status->level);
+
       std::stringstream expec, item;
       expec << num_items_expected_;
       item << items_.size();
-      header_status->message = "Expected " + expec.str() + ", found " + item.str();
+
+      if (items_.size() > 0)
+        header_status->message = "Expected " + expec.str() + ", found " + item.str();
+      else
+        header_status->message = "No items, expected " + expec.str();
     }
     
     return processed;
