@@ -187,11 +187,22 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
 
       size_t last_slash = processed[j]->name.rfind("/");
       string nice_name = processed[j]->name.substr(last_slash + 1);
-      if (nice_name == expected_[i])
+      if (nice_name == expected_[i] || nice_name == getOutputName(expected_[i]))
       {
         has_name = true;
         break;
       }
+
+      // Remove chaff, check names
+      for (unsigned int k = 0; k < chaff_.size(); ++k)
+      {     
+        if (nice_name == removeLeadingNameChaff(expected_[i], chaff_[k]))
+        {
+          has_name = true;
+          break;
+        }
+      }
+
     }
     if (!has_name)
       expected_names_missing.push_back(expected_[i]);
@@ -213,7 +224,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
 
   for (unsigned int j = 0; j < processed.size(); ++j)
   {
-  // Remove all leading name chaff
+    // Remove all leading name chaff
     for (unsigned int i = 0; i < chaff_.size(); ++i)
       processed[j]->name = removeLeadingNameChaff(processed[j]->name, chaff_[i]);
 
