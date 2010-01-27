@@ -125,7 +125,16 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   n.param("num_items", num_items_expected, -1); // Number of items must match this
   n.param("discard_stale", discard_stale, false);
 
-  return GenericAnalyzerBase::init(base_path + "/" + nice_name, nice_name, 
+  string my_path;
+  if (base_path == "/")
+    my_path = nice_name;
+  else
+    my_path = base_path + "/" + nice_name;
+
+  if (my_path.find("/") != 0)
+    my_path = "/" + my_path;
+
+  return GenericAnalyzerBase::init(my_path, nice_name, 
                                    timeout, num_items_expected, discard_stale);
 }
 

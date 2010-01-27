@@ -52,10 +52,14 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 {
   n.param("path", nice_name_, string(""));
   
-  if (base_path.size() > 0)
+  if (base_path.size() > 0 && base_path != "/")
     path_ = base_path + "/" + nice_name_;
   else
     path_ = nice_name_;
+
+
+  if (path_.find("/") != 0)
+    path_ = "/" + path_;
 
   ros::NodeHandle analyzers_nh = ros::NodeHandle(n, "analyzers");
     
@@ -127,8 +131,6 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
     ROS_ERROR("No analyzers initialzed in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
   }
 
-  // We return true, since we have at least one analyzer initialized properly
-  //
   return init_ok;
 }
 
@@ -144,24 +146,24 @@ bool AnalyzerGroup::match(const string name)
   if (analyzers_.size() == 0)
     return false;
 
-  string my_name = name;
   bool match_name = false;
   if (matched_.count(name))
   {
     vector<bool> &mtch_vec = matched_[name];
     for (unsigned int i = 0; i < mtch_vec.size(); ++i)
     {
-      match_name = match_name || mtch_vec[i];
+      if (mtch_vec[i])
+        return true;
     }
-    return match_name;
+    return false;
   }
 
-  matched_[my_name].resize(analyzers_.size());
+  matched_[name].resize(analyzers_.size());
   for (unsigned int i = 0; i < analyzers_.size(); ++i)
   {
     bool mtch = analyzers_[i]->match(name);
     match_name = mtch || match_name;
-    matched_[my_name].at(i) = mtch;
+    matched_[name].at(i) = mtch;
   }
 
   return match_name;
@@ -199,7 +201,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
   if (analyzers_.size() == 0)
   {
     header_status->level = 2;
-    header_status->message = "No analyzers!";
+    header_status->message = "No analyzers";
     output.push_back(header_status);
     
     return output;
@@ -240,7 +242,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
 
   header_status->message = valToMsg(header_status->level);
 
-  if (path_ != "") // No header if we don't have a base path
+  if (path_ != "" && path_ != "/") // No header if we don't have a base path
   {
     output.push_back(header_status);
   }
