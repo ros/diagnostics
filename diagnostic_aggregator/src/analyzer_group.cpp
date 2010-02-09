@@ -204,6 +204,9 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
     header_status->message = "No analyzers";
     output.push_back(header_status);
     
+    if (header_status->name == "" || header_status->name == "/")
+      header_status->name = "/AnalyzerGroup";
+
     return output;
   }
 
