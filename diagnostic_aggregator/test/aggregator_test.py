@@ -204,10 +204,12 @@ class TestAggregator(unittest.TestCase):
         with self._mutex:
             all_headers = {}
 
+            for name, msg in self.agg_msgs.iteritems():
+                self.assert_(name.startswith('/'), "Aggregated name %s doesn't start with \"/\"" % name)
+
             # Go through all messages and check that we have them in aggregate
             for name, msg in self.diag_msgs.iteritems():
                 agg_name = name_to_agg_name(name, self.params)
-            #rospy.loginfo('Name: %s, agg_name: %s', name, agg_name)
                 
                 self.assert_(agg_name is not None, 'Aggregated name is None for %s' % name)
                 self.assert_(self.agg_msgs.has_key(agg_name), 'No matching name found for name: %s, aggregated name: %s' % (name, agg_name))
