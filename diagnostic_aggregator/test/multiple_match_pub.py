@@ -56,27 +56,13 @@ if __name__ == '__main__':
         array = DiagnosticArray()
         array.status = [
             # GenericAnalyzer my_path
-            DiagnosticStatus(0, 'expected1', 'OK', '', []),
-            DiagnosticStatus(1, 'expected2', 'OK', '', []),
-            DiagnosticStatus(2, 'expected3', 'OK', '', []),
-            
-            DiagnosticStatus(0, 'startswith1', 'OK', '', []),
-            DiagnosticStatus(0, 'startswith2', 'OK', '', []),
-            DiagnosticStatus(1, 'startswith3', 'OK', '', []),
+            DiagnosticStatus(0, 'multi', 'OK', '', []),
+            DiagnosticStatus(1, 'Something', 'OK', '', []),
+            DiagnosticStatus(2, 'Something Else', 'OK', '', []),
             
             # OtherAnalyzer for Other
             DiagnosticStatus(2, 'other2', 'OK', '', []),
             DiagnosticStatus(0, 'other3', 'OK', '', [])]
         
-        array.header.stamp = rospy.get_rostime()
-
-        if rospy.get_time() - start_time < 5:
-            # Shouldn't disappear
-            array.status.append(DiagnosticStatus(0, 'expected4', 'I will be stale', '', []))
-            array.status.append(DiagnosticStatus(0, 'expected5', 'I will be stale', '', []))
-
-            # Should disappear
-            array.status.append(DiagnosticStatus(2, 'other1', 'Error', '', [])) 
-
         pub.publish(array)
         sleep(1)

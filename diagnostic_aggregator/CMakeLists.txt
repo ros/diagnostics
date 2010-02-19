@@ -42,3 +42,5 @@ rosbuild_add_gtest_build_flags(analyzer_loader)
 
 # Test Analyzer loader
 rosbuild_add_rostest(test/test_loader.launch)
+rosbuild_add_rostest(test/test_expected_stale.launch)
+rosbuild_add_rostest(test/test_multiple_match.launch)
