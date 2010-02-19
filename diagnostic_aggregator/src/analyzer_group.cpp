@@ -157,7 +157,7 @@ bool AnalyzerGroup::match(const string name)
     }
     return false;
   }
-
+  
   matched_[name].resize(analyzers_.size());
   for (unsigned int i = 0; i < analyzers_.size(); ++i)
   {
@@ -171,19 +171,14 @@ bool AnalyzerGroup::match(const string name)
 
 bool AnalyzerGroup::analyze(const boost::shared_ptr<StatusItem> item)
 {
-  if (!matched_.count(item->getName()))
-  {
-    ROS_ERROR("AnalyzerGroup %s was asked to analyze item %s that it hadn't matched", nice_name_.c_str(), item->getName().c_str());
-    return false;
-  }
+  BOOST_ASSERT(matched_.count(item->getName()) && "AnalyzerGroup was asked to analyze an item it hadn't matched.");
 
   bool analyzed = false;
-
   vector<bool> &mtch_vec = matched_[item->getName()];
   for (unsigned int i = 0; i < mtch_vec.size(); ++i)
   {
     if (mtch_vec[i])
-      analyzed = analyzed || analyzers_[i]->analyze(item);
+      analyzed = analyzers_[i]->analyze(item) || analyzed;
   }
   
   return analyzed;
