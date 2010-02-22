@@ -1,0 +1,14 @@
+<launch>
+  <node pkg="diagnostic_aggregator" type="aggregator_node"
+        name="diag_agg" output="screen" >
+    <rosparam command="load" 
+              file="$(find diagnostic_aggregator)/test/multiple_match_analyzers.yaml" />
+  </node>
+
+  <node pkg="diagnostic_aggregator" type="multiple_match_pub.py"
+        name="diag_pub" />
+
+  <test test-name="multiple_matched_item_checked_twice"  
+        pkg="diagnostic_aggregator" type="multiple_match_test.py"
+        name="multiple_match_tester" />
+</launch>

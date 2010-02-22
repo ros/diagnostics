@@ -36,6 +36,7 @@
 
 ##\brief Tests receipt of /diagnostics_agg from diagnostic aggregator
 
+from __future__ import with_statement
 PKG = 'diagnostic_aggregator'
 
 import roslib; roslib.load_manifest(PKG)
@@ -181,16 +182,15 @@ class TestAggregator(unittest.TestCase):
         self._mutex = threading.Lock()
 
     def diag_cb(self, msg):
-        self._mutex.acquire()
-        for stat in msg.status:
-            self.diag_msgs[stat.name] = stat
-        self._mutex.release()
+        with self._mutex:
+            for stat in msg.status:
+                self.diag_msgs[stat.name] = stat
+
 
     def cb(self, msg):
-        self._mutex.acquire()
-        for stat in msg.status:
-            self.agg_msgs[stat.name] = stat
-        self._mutex.release()
+        with self._mutex:
+            for stat in msg.status:
+                self.agg_msgs[stat.name] = stat
 
     def test_agg(self):
         start = rospy.get_time()
@@ -201,52 +201,52 @@ class TestAggregator(unittest.TestCase):
 
         self.assert_(not rospy.is_shutdown(), "Rospy shutdown")
 
-        self._mutex.acquire()
+        with self._mutex:
+            all_headers = {}
 
-        all_headers = {}
+            for name, msg in self.agg_msgs.iteritems():
+                self.assert_(name.startswith('/'), "Aggregated name %s doesn't start with \"/\"" % name)
 
-        # Go through all messages and check that we have them in aggregate
-        for name, msg in self.diag_msgs.iteritems():
-            agg_name = name_to_agg_name(name, self.params)
-            #rospy.loginfo('Name: %s, agg_name: %s', name, agg_name)
-
-            self.assert_(agg_name is not None, 'Aggregated name is None for %s' % name)
-            self.assert_(self.agg_msgs.has_key(agg_name), 'No matching name found for name: %s, aggregated name: %s' % (name, agg_name))
-            self.assert_(msg.level == self.agg_msgs[agg_name].level, 'Status level of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s.' % (name, agg_name))
-            self.assert_(msg.message == self.agg_msgs[agg_name].message, 'Status message of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s' % (name, agg_name))
-
-            # This is because the analyzers only reports stale if 
-            # all messages underneath it are stale
-            if self.agg_msgs[agg_name].level == 3: # Stale
-                self.agg_msgs[agg_name].level = -1
+            # Go through all messages and check that we have them in aggregate
+            for name, msg in self.diag_msgs.iteritems():
+                agg_name = name_to_agg_name(name, self.params)
+                
+                self.assert_(agg_name is not None, 'Aggregated name is None for %s' % name)
+                self.assert_(self.agg_msgs.has_key(agg_name), 'No matching name found for name: %s, aggregated name: %s' % (name, agg_name))
+                self.assert_(msg.level == self.agg_msgs[agg_name].level, 'Status level of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s.' % (name, agg_name))
+                self.assert_(msg.message == self.agg_msgs[agg_name].message, 'Status message of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s' % (name, agg_name))
+                
+                # This is because the analyzers only reports stale if 
+                # all messages underneath it are stale
+                if self.agg_msgs[agg_name].level == 3: # Stale
+                    self.agg_msgs[agg_name].level = -1
             
-            header = name_to_agg_header(name, self.params)
-            if all_headers.has_key(header):
-                all_headers[header] = max(all_headers[header], self.agg_msgs[agg_name].level)
-            else:
-                all_headers[header] = self.agg_msgs[agg_name].level
+                header = name_to_agg_header(name, self.params)
+                if all_headers.has_key(header):
+                    all_headers[header] = max(all_headers[header], self.agg_msgs[agg_name].level)
+                else:
+                    all_headers[header] = self.agg_msgs[agg_name].level
 
-            del self.agg_msgs[agg_name]
+                del self.agg_msgs[agg_name]
             
-        # Check that we have all_headers
-        for header, lvl in all_headers.iteritems():
-            # If everything is stale, report stale. Otherwise, it should report an error
-            if lvl == -1: 
-                lvl = 3
+            # Check that we have all_headers
+            for header, lvl in all_headers.iteritems():
+                # If everything is stale, report stale. Otherwise, it should report an error
+                if lvl == -1: 
+                    lvl = 3
 
-            self.assert_(self.agg_msgs.has_key(header), "Header %s not found in messages" % header)
-            self.assert_(self.agg_msgs[header].level == lvl, "Level of header %s doesn't match expected value." % header)
-            del self.agg_msgs[header]
+                self.assert_(self.agg_msgs.has_key(header), "Header %s not found in messages" % header)
+                self.assert_(self.agg_msgs[header].level == lvl, "Level of header %s doesn't match expected value." % header)
+                del self.agg_msgs[header]
 
         # Check that we have the main header message
-        if len(prefix) > 0:
-            self.assert_(len(self.agg_msgs) == 1, "Incorrect number of messages remaining: %d. Messages: %s" % (len(self.agg_msgs), str(self.agg_msgs)))
-            
-            self.assert_(self.agg_msgs.has_key(prefix), "Global prefix not found in messages: %s. Messages: %s" % (prefix, str(self.agg_msgs)))
-        else:
-            self.assert_(len(self.agg_msgs) == 0, "Incorrect number of messages remaining: %d. Messages: %s. Expected 0." % (len(self.agg_msgs), str(self.agg_msgs)))
-
-        self._mutex.release()
+            if len(prefix) > 0:
+                self.assert_(len(self.agg_msgs) == 1, "Incorrect number of messages remaining: %d. Messages: %s" % (len(self.agg_msgs), str(self.agg_msgs)))
+                
+                self.assert_(self.agg_msgs.has_key(prefix), "Global prefix not found in messages: %s. Messages: %s" % (prefix, str(self.agg_msgs)))
+            else:
+                self.assert_(len(self.agg_msgs) == 0, "Incorrect number of messages remaining: %d. Messages: %s. Expected 0." % (len(self.agg_msgs), str(self.agg_msgs)))
+                
 
 
 if __name__ == '__main__':

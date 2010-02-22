@@ -132,8 +132,7 @@ namespace self_test
 
         if (node_handle_.ok())
         {
-
-          id_ = "unspecified";
+          const std::string unspecified_id("unspecified");
 
           ROS_INFO("Entering self-test.");
 
@@ -180,6 +179,9 @@ namespace self_test
                 ROS_WARN("Non-zero self-test test status. Name: '%s', status %i: '%s'", status_iter->name.c_str(), status_iter->level, status_iter->message.c_str());
             }
           }
+
+          if (res.passed && id_ == unspecified_id)
+            ROS_WARN("Self-test passed, but setID was not called. This is a bug in the driver. Please report it.");
 
           res.set_status_vec(status_vec);
 
