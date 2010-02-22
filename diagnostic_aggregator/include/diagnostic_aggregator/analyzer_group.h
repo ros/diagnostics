@@ -52,7 +52,6 @@
 #include "diagnostic_aggregator/status_item.h"
 #include "pluginlib/class_loader.h"
 #include "pluginlib/class_list_macros.h"
-#include <boost/assert.hpp>
 
 namespace diagnostic_aggregator {
 

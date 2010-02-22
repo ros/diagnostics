@@ -171,7 +171,7 @@ bool AnalyzerGroup::match(const string name)
 
 bool AnalyzerGroup::analyze(const boost::shared_ptr<StatusItem> item)
 {
-  BOOST_ASSERT(matched_.count(item->getName()) && "AnalyzerGroup was asked to analyze an item it hadn't matched.");
+  ROS_ASSERT_MSG(matched_.count(item->getName()), "AnalyzerGroup was asked to analyze an item it hadn't matched.");
 
   bool analyzed = false;
   vector<bool> &mtch_vec = matched_[item->getName()];
