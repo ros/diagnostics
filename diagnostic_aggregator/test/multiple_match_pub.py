@@ -54,6 +54,7 @@ if __name__ == '__main__':
     
     while not rospy.is_shutdown():
         array = DiagnosticArray()
+        array.header.stamp = rospy.get_rostime()
         array.status = [
             # GenericAnalyzer my_path
             DiagnosticStatus(0, 'multi', 'OK', '', []),
