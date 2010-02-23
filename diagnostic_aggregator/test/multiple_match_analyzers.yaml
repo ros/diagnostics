@@ -1,0 +1,10 @@
+analyzers:
+  my_path:
+    type: GenericAnalyzer
+    path: Header1
+    expected: 'multi'
+    startswith: 'Something'
+  other_path:
+    type: GenericAnalyzer
+    path: Header2
+    expected: 'multi'

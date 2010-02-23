@@ -68,8 +68,31 @@ Aggregator::Aggregator() :
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
 }
 
+void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
+{
+  if (diag_msg->header.stamp.toSec() != 0)
+    return;
+
+  string stamp_warn = "Warning: No timestamp set for diagnostic message. Message names: ";
+  vector<diagnostic_msgs::DiagnosticStatus>::const_iterator it;
+  for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it)
+  {
+    if (it != diag_msg->status.begin())
+      stamp_warn += ", ";
+    stamp_warn += it->name;
+  }
+  
+  if (!ros_warnings_.count(stamp_warn))
+  {
+    ROS_WARN(stamp_warn.c_str());
+    ros_warnings_.insert(stamp_warn);
+  }
+}
+
 void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
 {
+  checkTimestamp(diag_msg);  
+
   bool analyzed = false;
   for (unsigned int j = 0; j < diag_msg->status.size(); ++j)
   {

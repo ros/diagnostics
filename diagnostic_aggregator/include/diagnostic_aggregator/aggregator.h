@@ -43,6 +43,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 #include <boost/shared_ptr.hpp>
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
@@ -138,6 +139,13 @@ private:
   OtherAnalyzer* other_analyzer_;
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
+
+  std::set<std::string> ros_warnings_;  /**< \brief Records all ROS warnings. No warnings are repeated. */
+
+  /*
+   *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
+   */
+  void checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
 
 };
 

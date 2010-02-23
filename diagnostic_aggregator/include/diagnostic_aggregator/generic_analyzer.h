@@ -75,6 +75,13 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
   {
     for (int i = 0; i < param.size(); ++i)
     {
+      if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString)
+      {
+        ROS_WARN("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s", param.toXml().c_str());
+        output.clear();
+        return false;
+      }
+
       std::string find = param[i];
       output.push_back(find);
     }
@@ -82,6 +89,7 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
   }
 
   ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  output.clear();
   return false;
 }
 
