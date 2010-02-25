@@ -1,0 +1,9 @@
+analyzers:
+  something:
+    type: GenericAnalyzer
+    path: Something
+    startswith: 'Something'
+  match:
+    type: MatchNoAnalyzeAnalyzer
+    path: Matcher
+    my_item: Match Item
