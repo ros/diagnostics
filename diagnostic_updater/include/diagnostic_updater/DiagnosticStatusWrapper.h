@@ -251,18 +251,6 @@ inline void DiagnosticStatusWrapper::add<bool>(const std::string &key, const boo
   values.push_back(ds);
 }
 
-///\brief For uint8_t (ROS bool value), diagnostic value is "True" or "False"
-template<>
-inline void DiagnosticStatusWrapper::add<uint8_t>(const std::string &key, const uint8_t &b)
-{
-  diagnostic_msgs::KeyValue ds;
-  ds.key = key;
-  ds.value = b ? "True" : "False";
-
-  values.push_back(ds);
-}
-
-
   // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
   // gcc complains that the specialization occurs after instatiation.
   inline void DiagnosticStatusWrapper::addf(const std::string &key, const char *format, ...) // In practice format will always be a char *
