@@ -8,9 +8,11 @@
   <url>http://ros.org/wiki/runtime_monitor</url>
   <export>
     <cpp cflags="-I${prefix}/include " lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib"/>
+    <rxbag plugin="runtime_monitor.rxbag_plugins"/>
   </export>
   <depend package="rospy"/>
   <depend package="diagnostic_msgs"/>
+  <depend package="rxbag"/>
   <rosdep name="wxwidgets"/>
   <rosdep name="wxpython"/>
 </package>

@@ -58,7 +58,7 @@ class TreeItem(object):
     self.tree_id = tree_id
         
 class MonitorPanel(wx.Panel):
-  def __init__(self, parent, topic="/diagnostics"): # Topic is HACK for ROS #1702
+  def __init__(self, parent, topic="/diagnostics", subscribe=True):
     wx.Panel.__init__(self, parent, wx.ID_ANY)
     
     self._mutex = threading.Lock()
@@ -95,25 +95,26 @@ class MonitorPanel(wx.Panel):
     self._timer = wx.Timer(self)
     self.Bind(wx.EVT_TIMER, self.on_timer)
     self._timer.Start(5000)
-    
-    # 'topic' is HACK for ROS #1702
-    self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
+
+    if subscribe:
+      self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
     
     self._messages = []
     self._used_items = 0
     
   def __del__(self):
-    self._subscriber.unregister()
+    if self._subscriber is not None:
+      self._subscriber.unregister()
       
   def change_diagnostic_topic(self, topic):
     if len(topic) == 0:
       self.reset_monitor()
       return
 
-    self._subscriber.unregister()
-    self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
+    if self._subscriber is not None:
+      self._subscriber.unregister()
+      self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
     self.reset_monitor()
-
 
   def reset_monitor(self):
     self._name_to_item = {} # Reset all stale topics
