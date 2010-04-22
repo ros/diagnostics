@@ -49,13 +49,15 @@ from rxbag import bag_index, msg_view
 
 import monitor_panel
 
+
+
 class RuntimeMonitorView(msg_view.TopicMsgView):
     name = 'Runtime Monitor'
     
     def __init__(self, timeline, parent, title, x, y, width, height, max_repaint=None):
         msg_view.TopicMsgView.__init__(self, timeline, parent, title, x, y, width, height, max_repaint)
 
-        self.monitor_panel = monitor_panel.MonitorPanel(self.parent, subscribe=False)
+        self.monitor_panel = monitor_panel.MonitorPanel(self.parent, rxbag=True)
         self.monitor_panel.SetPosition((1, 0))
         
     def message_viewed(self, bag_file, bag_index, topic, stamp, datatype, msg_index, msg):
@@ -64,9 +66,7 @@ class RuntimeMonitorView(msg_view.TopicMsgView):
         if not msg:
             pass
         else:
-            self.monitor_panel.reset_monitor()
-            self.monitor_panel._messages.append(msg)
-            self.monitor_panel.new_message()
+            self.monitor_panel.add_rxbag_msg(msg, stamp)
 
     def message_cleared(self):
         msg_view.TopicMsgView.message_cleared(self)
@@ -82,9 +82,15 @@ class RuntimeMonitorView(msg_view.TopicMsgView):
     def on_right_down(self, event):
         self.parent.PopupMenu(RuntimeMonitorPopupMenu(self.parent, self), event.GetPosition())
 
+    def clear_monitor(self):
+        self.monitor_panel.reset_monitor()
+
 class RuntimeMonitorPopupMenu(wx.Menu):
-    def __init__(self, parent, image_view):
+    def __init__(self, parent, runtime_view):
         wx.Menu.__init__(self)
 
-        #self.AppendItem(wx.MenuItem(self, wx.NewId(), 'Reset Size'))
-        #self.Bind(wx.EVT_MENU, lambda e: self.image_view.reset_size(), id=reset_item.GetId())
+        self.runtime_view = runtime_view
+
+        clear_item = wx.MenuItem(self, wx.NewId(), 'Clear Monitor')
+        self.AppendItem(clear_item)
+        self.Bind(wx.EVT_MENU, lambda e: self.runtime_view.clear_monitor(), id=clear_item.GetId())
