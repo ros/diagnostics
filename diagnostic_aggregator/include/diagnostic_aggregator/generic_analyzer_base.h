@@ -206,7 +206,7 @@ public:
       if (items_.size() > 0)
         header_status->message = "Expected " + expec.str() + ", found " + item.str();
       else
-        header_status->message = "No items, expected " + expec.str();
+        header_status->message = "No items found, expected " + expec.str();
     }
     
     return processed;
