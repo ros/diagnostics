@@ -35,6 +35,7 @@
 #include <gtest/gtest.h>
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/update_functions.h>
+#include <diagnostic_updater/DiagnosticStatusWrapper.h>
 #include <unistd.h>
 
 using namespace diagnostic_updater;
@@ -67,6 +68,7 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
       s.add("Floating", 5.55);
       s.add("Integer", 5);
       s.addf("Formatted %s %i", "Hello", 5);
+      s.add("Bool", true);
     }
   };
   
@@ -94,6 +96,9 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
   stat.addf("toto", "%.1f", 5.0);
   stat.add("baba", 5);
   stat.addf("foo", "%05i", 27);
+
+  stat.add("bool", true);
+  stat.add("bool2", false);
   
   EXPECT_STREQ("5.0", stat.values[0].value.c_str()) << "Bad value, adding a value with addf";
   EXPECT_STREQ("5", stat.values[1].value.c_str()) << "Bad value, adding a string with add";
@@ -101,6 +106,12 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
   EXPECT_STREQ("toto", stat.values[0].key.c_str()) << "Bad label, adding a value with add";
   EXPECT_STREQ("baba", stat.values[1].key.c_str()) << "Bad label, adding a string with add";
   EXPECT_STREQ("foo", stat.values[2].key.c_str()) << "Bad label, adding a string with addf";
+
+  EXPECT_STREQ("bool", stat.values[3].key.c_str()) << "Bad label, adding a true bool key with add";
+  EXPECT_STREQ("True", stat.values[3].value.c_str()) << "Bad label, adding a true bool with add";
+
+  EXPECT_STREQ("bool2", stat.values[4].key.c_str()) << "Bad label, adding a false bool key with add";
+  EXPECT_STREQ("False", stat.values[4].value.c_str()) << "Bad label, adding a false bool with add";
 }
 
 TEST(DiagnosticUpdater, testFrequencyStatus)
