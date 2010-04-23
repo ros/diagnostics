@@ -29,13 +29,13 @@ analyzers:
         type: GenericAnalyzer
         path: Forearm Cam (Left)
         timeout: 5.0
-        find_and_remove_prefix: forearm_camera_l
+        find_and_remove_prefix: l_forearm_cam
         num_items: 4
       forearm_cam_r:
         type: GenericAnalyzer
         path: Forearm Cam (Right)
         timeout: 5.0
-        find_and_remove_prefix: forearm_camera_r
+        find_and_remove_prefix: r_forearm_cam
         num_items: 4
   computers:
     type: GenericAnalyzer

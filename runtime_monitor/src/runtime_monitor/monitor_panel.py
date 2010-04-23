@@ -51,14 +51,15 @@ import cStringIO
 import copy
 
 class TreeItem(object):
-  def __init__(self, status, tree_id):
+  def __init__(self, status, tree_id, stamp = None):
     self.status = status
     self.mark = False
     self.stale = False
     self.tree_id = tree_id
+    self.stamp = stamp
         
 class MonitorPanel(wx.Panel):
-  def __init__(self, parent, topic="/diagnostics"): # Topic is HACK for ROS #1702
+  def __init__(self, parent, topic="/diagnostics", rxbag=False):
     wx.Panel.__init__(self, parent, wx.ID_ANY)
     
     self._mutex = threading.Lock()
@@ -92,28 +93,30 @@ class MonitorPanel(wx.Panel):
     
     self._new_errors_callback = None
     
-    self._timer = wx.Timer(self)
-    self.Bind(wx.EVT_TIMER, self.on_timer)
-    self._timer.Start(5000)
-    
-    # 'topic' is HACK for ROS #1702
-    self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
-    
+    if not rxbag:
+      self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
+      self._timer = wx.Timer(self)
+      self.Bind(wx.EVT_TIMER, self.on_timer)
+      self._timer.Start(5000)
+    else:
+      self._subscriber = None
+
     self._messages = []
     self._used_items = 0
     
   def __del__(self):
-    self._subscriber.unregister()
+    if self._subscriber is not None:
+      self._subscriber.unregister()
       
   def change_diagnostic_topic(self, topic):
     if len(topic) == 0:
       self.reset_monitor()
       return
 
-    self._subscriber.unregister()
-    self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
+    if self._subscriber is not None:
+      self._subscriber.unregister()
+      self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
     self.reset_monitor()
-
 
   def reset_monitor(self):
     self._name_to_item = {} # Reset all stale topics
@@ -126,6 +129,37 @@ class MonitorPanel(wx.Panel):
     self._tree_control.DeleteChildren(self._warnings_id)
     self._tree_control.DeleteChildren(self._ok_id)
 
+  def add_rxbag_msg(self, msg, stamp):
+    self._messages.append(msg)
+    self.new_message(stamp)
+
+    # Clear stale messages
+    self.clear_old_rxbag_msgs(stamp)
+    
+  def _delete_item(self, item):
+    self._tree_control.Delete(item.tree_id)
+    del self._name_to_item[item.status.name]
+  
+  def clear_old_rxbag_msgs(self, now_stamp):
+    to_delete = []
+    for name, item in self._name_to_item.iteritems():
+      if (item != None):
+        # No future messages
+        if item.stamp > now_stamp:
+          to_delete.append(item)
+          continue
+
+        if (now_stamp - item.stamp).to_sec() > 15.0:
+          print 'Stale item: %s. Stamp difference: %.2f' % (name, (now_stamp - item.stamp).to_sec())
+          to_delete.append(item)
+          continue
+
+    for item in to_delete:
+      self._delete_item(item)
+          
+
+    self.update_root_labels()
+
   def diagnostics_callback(self, message):
     self._mutex.acquire()
     
@@ -135,7 +169,7 @@ class MonitorPanel(wx.Panel):
     
     wx.CallAfter(self.new_message)
       
-  def new_message(self):
+  def new_message(self, stamp = None):
     # The panel can have messages in the queue after it's destroyed
     # If it's been destroyed, just ignore it
     try:
@@ -157,10 +191,10 @@ class MonitorPanel(wx.Panel):
           
           if (item.status.level == 2 and status.level != 2):
             had_errors = True
-            
-          self.update_item(item, status, was_selected)
+          
+          self.update_item(item, status, was_selected, stamp)
         else:
-          self.create_item(status, was_selected, True)
+          self.create_item(status, was_selected, True, stamp)
           if (status.level == 2):
               had_errors = True
     
@@ -173,7 +207,7 @@ class MonitorPanel(wx.Panel):
         
     self.Refresh()
       
-  def update_item(self, item, status, was_selected):
+  def update_item(self, item, status, was_selected, stamp):
     change_parent = False
     if (item.status.level != status.level):
       change_parent = True
@@ -192,6 +226,7 @@ class MonitorPanel(wx.Panel):
       
       id = self._tree_control.AppendItem(parent_id, status.name + ": " + status.message)
       item.tree_id = id
+      item.stamp = stamp
       self._tree_control.SetPyData(id, item)
       
       if (status.level > 1 or status.level == -1):
@@ -212,7 +247,7 @@ class MonitorPanel(wx.Panel):
       
     item.mark = True
     
-  def create_item(self, status, select, expand_if_error):
+  def create_item(self, status, select, expand_if_error, stamp):
     if (status.level == 0):
       parent_id = self._ok_id
     elif (status.level == 1):
@@ -223,7 +258,7 @@ class MonitorPanel(wx.Panel):
       parent_id = self._errors_id
     
     id = self._tree_control.AppendItem(parent_id, status.name + ": " + status.message)
-    item = TreeItem(status, id)
+    item = TreeItem(status, id, stamp)
     self._tree_control.SetPyData(id, item)
     
     self._name_to_item[status.name] = item

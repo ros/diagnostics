@@ -1,0 +1,5 @@
+analyzers:
+  match:
+    type: MatchNoAnalyzeAnalyzer
+    path: Match Me
+    my_item: Matcher
