@@ -153,7 +153,6 @@ class MonitorPanel(wx.Panel):
           continue
 
         if (now_stamp - item.stamp).to_sec() > 15.0:
-          print 'Stale item: %s. Stamp difference: %.2f' % (name, (now_stamp - item.stamp).to_sec())
           to_delete.append(item)
           continue
 
