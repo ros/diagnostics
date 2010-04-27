@@ -51,6 +51,9 @@ import cStringIO
 import copy
 
 class TreeItem(object):
+  ##\param status DiagnosticsStatus : Diagnostic data of item
+  ##\param tree_id wxTreeItemId : Tree ID of item in display
+  ##\param stamp ros::Time : Stamp when message was received
   def __init__(self, status, tree_id, stamp = None):
     self.status = status
     self.mark = False
@@ -150,7 +153,6 @@ class MonitorPanel(wx.Panel):
           continue
 
         if (now_stamp - item.stamp).to_sec() > 15.0:
-          print 'Stale item: %s. Stamp difference: %.2f' % (name, (now_stamp - item.stamp).to_sec())
           to_delete.append(item)
           continue
 
@@ -167,7 +169,7 @@ class MonitorPanel(wx.Panel):
     
     self._mutex.release()
     
-    wx.CallAfter(self.new_message)
+    wx.CallAfter(self.new_message, rospy.get_rostime())
       
   def new_message(self, stamp = None):
     # The panel can have messages in the queue after it's destroyed
@@ -226,7 +228,7 @@ class MonitorPanel(wx.Panel):
       
       id = self._tree_control.AppendItem(parent_id, status.name + ": " + status.message)
       item.tree_id = id
-      item.stamp = stamp
+      item.stamp = stamp 
       self._tree_control.SetPyData(id, item)
       
       if (status.level > 1 or status.level == -1):
@@ -339,7 +341,7 @@ class MonitorPanel(wx.Panel):
           
           new_status = copy.deepcopy(item.status)
           new_status.level = -1
-          self.update_item(item, new_status, was_selected)
+          self.update_item(item, new_status, was_selected, item.stamp)
             
         item.mark = False
     
