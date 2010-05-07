@@ -226,6 +226,10 @@ int main(int argc, char **argv)
   // immediate update.
   updater.force_update();
 
+  // We can remove a task by refering to its name.
+  if (!updater.removeByName("Bound check"))
+    ROS_ERROR("The Bound check task was not found when trying to remove it.");
+
   while (nh.ok())
   {
     std_msgs::Bool msg;
