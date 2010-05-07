@@ -69,7 +69,13 @@ public:
     self_test_.add("Exception generating test", this, &MyNode::test2);
     self_test_.add("Value generating test",     this, &MyNode::test3);
     self_test_.add("Value testing test",        this, &MyNode::test4);
+    self_test_.add("Value testing test2",        this, &MyNode::test4);
     
+    // You can remove a test by using its name (documented in
+    // diagnostic_updater).
+    if (!self_test_.removeByName("Value testing test2"))
+      ROS_ERROR("Value testing test2 was not found when trying to remove it.");
+
     // If any cleanup work needs to be done after running the tests,
     // a posttest can be defined. It is just like any other test, but 
     // doesn't actually do any testing.
