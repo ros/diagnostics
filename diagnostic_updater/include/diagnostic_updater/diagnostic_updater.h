@@ -298,7 +298,7 @@ namespace diagnostic_updater
          * \brief Remove a task based on its name.
          *
          * Removes the first task that matches the specified name. (New in
-         * version 1.1.0)
+         * version 1.1.2)
          *
          * \param name Name of the task to remove.
          *
