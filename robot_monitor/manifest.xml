@@ -16,6 +16,9 @@ Some icons from the Silk icon pack are used, which is available from <a href="ht
   <depend package="diagnostic_msgs" />
   <rosdep name="wxwidgets"/>
   <rosdep name="wxpython"/>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
 </package>
 
 

@@ -16,6 +16,9 @@
          lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltestdiagnostic_aggregator `rosboost-cfg --lflags regex`"/>
        <diagnostic_aggregator plugin="${prefix}/test_diagnostic_aggregator_plugin.xml" />
   </export>  
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
 </package>
 
 
