@@ -47,6 +47,7 @@ from time import sleep
 import sys
 from optparse import OptionParser
 import threading
+import types
 
 from diagnostic_msgs.msg import DiagnosticArray
 
