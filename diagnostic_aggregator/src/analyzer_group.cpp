@@ -39,7 +39,8 @@
 using namespace std;
 using namespace diagnostic_aggregator;
 
-PLUGINLIB_REGISTER_CLASS(AnalyzerGroup, diagnostic_aggregator::AnalyzerGroup, 
+PLUGINLIB_REGISTER_CLASS(AnalyzerGroup, 
+                         diagnostic_aggregator::AnalyzerGroup, 
                          diagnostic_aggregator::Analyzer)
 
 AnalyzerGroup::AnalyzerGroup() :
@@ -213,6 +214,10 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
     string nice_name = analyzers_[j]->getName();
 
     vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = analyzers_[j]->report();
+
+    // Do not report anything in the header values for analyzers that don't report
+    if (processed.size() == 0)
+      continue;
 
     // Look through processed data for header, append it to header_status
     // Ex: Look for /Robot/Power and append (Power, OK) to header

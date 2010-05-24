@@ -39,8 +39,10 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, diagnostic_aggregator::GenericAnalyzer, 
+PLUGINLIB_REGISTER_CLASS(GenericAnalyzer, 
+                         diagnostic_aggregator::GenericAnalyzer, 
                          diagnostic_aggregator::Analyzer)
+
 
 GenericAnalyzer::GenericAnalyzer() { }
 
