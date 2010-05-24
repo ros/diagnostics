@@ -27,3 +27,6 @@ analyzers:
     path: Third
     contains: [
       'nocontains']
+  prefix4:
+    type: IgnoreAnalyzer
+    path: Fourth

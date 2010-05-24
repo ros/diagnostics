@@ -25,8 +25,9 @@ rosbuild_add_boost_directories()
 rosbuild_add_library(diagnostic_aggregator
   src/status_item.cpp
   src/analyzer_group.cpp
-  src/discard_analyzer.cpp
   src/generic_analyzer.cpp
+  src/discard_analyzer.cpp
+  src/ignore_analyzer.cpp
   src/aggregator.cpp)
 rosbuild_link_boost(diagnostic_aggregator system regex)
 
@@ -34,7 +35,7 @@ rosbuild_link_boost(diagnostic_aggregator system regex)
 rosbuild_add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node diagnostic_aggregator)
 
-rosbuild_add_rostest(test/test_agg.launch)
+rosbuild_add_rostest(test/launch/test_agg.launch)
 
 # Analyzer loader allows other users to test that Analyzers load
 rosbuild_add_executable(analyzer_loader test/analyzer_loader.cpp)
@@ -42,6 +43,6 @@ target_link_libraries(analyzer_loader diagnostic_aggregator)
 rosbuild_add_gtest_build_flags(analyzer_loader)
 
 # Test Analyzer loader
-rosbuild_add_rostest(test/test_loader.launch)
-rosbuild_add_rostest(test/test_expected_stale.launch)
-rosbuild_add_rostest(test/test_multiple_match.launch)
+rosbuild_add_rostest(test/launch/test_loader.launch)
+rosbuild_add_rostest(test/launch/test_expected_stale.launch)
+rosbuild_add_rostest(test/launch/test_multiple_match.launch)
