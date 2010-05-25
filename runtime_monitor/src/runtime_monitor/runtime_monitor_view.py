@@ -29,8 +29,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Revision $Id$
 
 PKG = 'runtime_monitor'
 import roslib; roslib.load_manifest(PKG)
@@ -45,23 +43,21 @@ else:
     sys.exit(1)
 import wx
 
-from rxbag import bag_index, message_view
+from rxbag.message_view import TopicMessageView
 
 import monitor_panel
 
-
-
-class RuntimeMonitorView(message_view.TopicMessageView):
+class RuntimeMonitorView(TopicMessageView):
     name = 'Runtime Monitor'
     
     def __init__(self, timeline, parent, title, x, y, width, height):
-        message_view.TopicMessageView.__init__(self, timeline, parent, title, x, y, width, height)
+        TopicMessageView.__init__(self, timeline, parent, title, x, y, width, height)
 
         self.monitor_panel = monitor_panel.MonitorPanel(self.parent, rxbag=True)
         self.monitor_panel.SetPosition((1, 0))
         
     def message_viewed(self, bag, msg_details):
-        message_view.TopicMessageView.message_viewed(self, bag, msg_details)
+        TopicMessageView.message_viewed(self, bag, msg_details)
         
         if msg_details:
             topic, msg, t = msg_details
@@ -69,9 +65,9 @@ class RuntimeMonitorView(message_view.TopicMessageView):
             self.monitor_panel.add_rxbag_msg(msg, t)
 
     def message_cleared(self):
-        msg_view.TopicMsgView.message_cleared(self)
+        TopicMessageView.message_cleared(self)
         
-        self.monitor_panel._messages = []
+        wx.CallAfter(self.monitor_panel.reset_monitor)
 
     def close(self):
         pass

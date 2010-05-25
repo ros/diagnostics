@@ -138,6 +138,7 @@ class MonitorPanel(wx.Panel):
     self._tree_control.DeleteChildren(self._errors_id)
     self._tree_control.DeleteChildren(self._warnings_id)
     self._tree_control.DeleteChildren(self._ok_id)
+    self.update_root_labels()
 
   def add_rxbag_msg(self, msg, stamp):
     self._messages.append(msg)
