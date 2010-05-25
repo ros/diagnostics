@@ -45,33 +45,36 @@ else:
     sys.exit(1)
 import wx
 
-from rxbag import bag_index, msg_view
+from rxbag import bag_index, message_view
 
 import monitor_panel
 
 
 
-class RuntimeMonitorView(msg_view.TopicMsgView):
+class RuntimeMonitorView(message_view.TopicMessageView):
     name = 'Runtime Monitor'
     
-    def __init__(self, timeline, parent, title, x, y, width, height, max_repaint=None):
-        msg_view.TopicMsgView.__init__(self, timeline, parent, title, x, y, width, height, max_repaint)
+    def __init__(self, timeline, parent, title, x, y, width, height):
+        message_view.TopicMessageView.__init__(self, timeline, parent, title, x, y, width, height)
 
         self.monitor_panel = monitor_panel.MonitorPanel(self.parent, rxbag=True)
         self.monitor_panel.SetPosition((1, 0))
         
-    def message_viewed(self, bag_file, bag_index, topic, stamp, datatype, msg_index, msg):
-        msg_view.TopicMsgView.message_viewed(self, bag_file, bag_index, topic, stamp, datatype, msg_index, msg)
+    def message_viewed(self, bag, msg_details):
+        message_view.TopicMessageView.message_viewed(self, bag, msg_details)
         
-        if not msg:
-            pass
-        else:
-            self.monitor_panel.add_rxbag_msg(msg, stamp)
+        if msg_details:
+            topic, msg, t = msg_details
+
+            self.monitor_panel.add_rxbag_msg(msg, t)
 
     def message_cleared(self):
         msg_view.TopicMsgView.message_cleared(self)
         
         self.monitor_panel._messages = []
+
+    def close(self):
+        pass
 
     def on_size(self, event):
         size = self.parent.GetClientSize()

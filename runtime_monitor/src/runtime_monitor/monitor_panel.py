@@ -88,7 +88,10 @@ class MonitorPanel(wx.Panel):
     self._errors_id = self._tree_control.AppendItem(self._root_id, "Errors (0)", self._error_image_id)
     self._warnings_id = self._tree_control.AppendItem(self._root_id, "Warnings (0)", self._warning_image_id)
     self._ok_id = self._tree_control.AppendItem(self._root_id, "Ok (0)", self._ok_image_id)
-    
+
+    if rxbag:
+      wx.CallAfter(self.set_splitter_position)
+
     self._tree_control.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_item_selected)
     self._tree_control.Bind(wx.EVT_TREE_KEY_DOWN, self.on_item_key_down)
     
@@ -106,6 +109,10 @@ class MonitorPanel(wx.Panel):
 
     self._messages = []
     self._used_items = 0
+    
+  def set_splitter_position(self):
+    self._splitter_control = xrc.XRCCTRL(self._real_panel, "m_splitter1")
+    self._splitter_control.SetSashPosition(350)
     
   def __del__(self):
     if self._subscriber is not None:
@@ -134,10 +141,11 @@ class MonitorPanel(wx.Panel):
 
   def add_rxbag_msg(self, msg, stamp):
     self._messages.append(msg)
-    self.new_message(stamp)
+
+    wx.CallAfter(self.new_message, stamp)
 
     # Clear stale messages
-    self.clear_old_rxbag_msgs(stamp)
+    wx.CallAfter(self.clear_old_rxbag_msgs, stamp)
     
   def _delete_item(self, item):
     self._tree_control.Delete(item.tree_id)
