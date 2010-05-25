@@ -1,5 +1,5 @@
 analyzers:
   match:
-    type: MatchNoAnalyzeAnalyzer
+    type: test_diagnostic_aggregator/MatchNoAnalyzeAnalyzer
     path: Match Me
     my_item: Matcher

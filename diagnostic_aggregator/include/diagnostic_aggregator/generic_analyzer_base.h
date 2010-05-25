@@ -194,7 +194,12 @@ public:
     header_status->message = valToMsg(header_status->level);
     
     // If we expect a given number of items, check that we have this number
-    if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
+    if (num_items_expected_ == 0 && items_.size() == 0)
+    {
+      header_status->level = 0;
+      header_status->message = "OK";
+    }
+    else if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
     {
       int8_t lvl = 2;
       header_status->level = std::max(lvl, header_status->level);

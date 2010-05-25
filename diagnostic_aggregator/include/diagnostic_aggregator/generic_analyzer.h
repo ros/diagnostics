@@ -36,8 +36,8 @@
  * \author Kevin Watts 
  */
 
-#ifndef GENERIC_ANALYZER_H
-#define GENERIC_ANALYZER_H
+#ifndef DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
+#define DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
 
 #include <map>
 #include <ros/ros.h>
@@ -62,7 +62,7 @@ namespace diagnostic_aggregator {
  * Given an XmlRpcValue, gives vector of strings of that parameter
  *\return False if XmlRpcValue is not string or array of strings
  */
-bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
+inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
 {
   XmlRpc::XmlRpcValue::Type type = param.getType();
   if (type == XmlRpc::XmlRpcValue::TypeString)
@@ -77,7 +77,7 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
     {
       if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString)
       {
-        ROS_WARN("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s", param.toXml().c_str());
+        ROS_ERROR("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s", param.toXml().c_str());
         output.clear();
         return false;
       }
@@ -88,10 +88,11 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
     return true;
   }
 
-  ROS_WARN("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  ROS_ERROR("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
   output.clear();
   return false;
 }
+
 
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
@@ -99,7 +100,7 @@ bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
  * GenericAnalyzer analyzes a segment of diagnostics data and reports
  * processed diagnostics data. All analyzed status messages are prepended with
  * "Base Path/My Path", where "Base Path" is from the parent of this Analyzer,
- * (ex: 'PRE') and "My Path" is from this analyzer (ex: 'Power System').
+ * (ex: 'PR2') and "My Path" is from this analyzer (ex: 'Power System').
  *
  * The GenericAnalyzer is initialized as a plugin by the diagnostic Aggregator.
  * Following is an example of the necessary parameters of the GenericAnalyzer.
@@ -238,4 +239,4 @@ private:
 };
 
 }
-#endif //GENERIC_ANALYZER_H
+#endif //DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H

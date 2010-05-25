@@ -23,7 +23,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_boost_directories()
 rosbuild_add_library(test_diagnostic_aggregator
-  src/match_no_analyze_analyzer.cpp)
+  src/match_no_analyze_analyzer.cpp
+  src/fail_init_analyzer.cpp)
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
@@ -33,10 +34,16 @@ rosbuild_add_library(test_diagnostic_aggregator
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_rostest(test/test_match_no_analyze_analyzer_load.launch)
+rosbuild_add_rostest(test/launch/test_match_no_analyze_analyzer_load.launch)
 
 # Tests that an item can be matched, not analyzed, and reported in "Other"
-rosbuild_add_rostest(test/test_match_no_analyze.launch)
+rosbuild_add_rostest(test/launch/test_match_no_analyze.launch)
 
 # Tests that item can be matched, not analyzed, but analyzed by another Analyzer
-rosbuild_add_rostest(test/test_match_then_analyze.launch)
+rosbuild_add_rostest(test/launch/test_match_then_analyze.launch)
+
+# Tests that analyzers that fail to load will report an error in the diagnostics
+rosbuild_add_rostest(test/launch/test_fail_init.launch)
+
+# Tests that analyzers specified both with and without package name load correctly
+rosbuild_add_rostest(test/launch/test_dual_analyzer_load.launch)

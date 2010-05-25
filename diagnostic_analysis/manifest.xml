@@ -11,4 +11,7 @@
   <depend package="rostest" />
   <depend package="diagnostic_msgs"/>
   <url>http://www.ros.org/wiki/diagnostics_analysis</url>
+  <platform os="ubuntu" version="9.04"/>
+  <platform os="ubuntu" version="9.10"/>
+  <platform os="ubuntu" version="10.04"/>
 </package>

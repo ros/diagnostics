@@ -71,10 +71,13 @@ class StatusItem(object):
         
     def update(self, status):
         self.status = status
-        self.update_time = rospy.get_time()
         
 class State(object):
     def __init__(self):
+        self._items = {}
+        self._msg = None
+
+    def reset(self):
         self._items = {}
         self._msg = None
         
@@ -176,10 +179,11 @@ class State(object):
 ## for 3 seconds, it will mark the tree as stale.
 class RobotMonitorPanel(MonitorPanelGenerated):
     ##\param parent RobotMonitorFrame : Parent frame
-    def __init__(self, parent):
+    def __init__(self, parent, rxbag = False):
         MonitorPanelGenerated.__init__(self, parent)
 
         self._frame = parent
+        self._rxbag = rxbag
 
         self._tree_ctrl.AddRoot("Root")
         self._error_tree_ctrl.AddRoot("Root")
@@ -188,10 +192,6 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         self._tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
         self._error_tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
         self._warning_tree_ctrl.SetToolTip(wx.ToolTip("Double click an item for details"))
-
-        self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
-        self._timeline.set_message_receipt_callback(self._on_new_message_received)
-        self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
 
         # Image list for icons
         image_list = wx.ImageList(16, 16)
@@ -206,10 +206,6 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         self._image_list = image_list
         
         # Tell users we don't have any items yet
-        self._empty_id = self._tree_ctrl.AppendItem(self._tree_ctrl.GetRootItem(), "No data")
-        self._tree_ctrl.SetItemImage(self._empty_id, stale_id)
-        self._have_message = False
-
         self._image_dict = { 0: ok_id, 1: warn_id, 2: error_id, 3: stale_id }
 
         # Bind double click event
@@ -218,37 +214,59 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         self._warning_tree_ctrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_warning_item_activate)
         self._viewers = {}
 
+        self._state = State()
+
+        # Reset monitor to starting configuration
+        self._have_message = False
+        self._empty_id = None
+        self.reset_monitor()
+
         # Show stale with timer
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._update_message_state)
         self._timer.Start(1000)
-        
-        self._state = State()
-        
-        self._message_status_text.SetLabel("No message received")
-        self._message_status_text.SetForegroundColour(color_dict[2])
-        self._is_stale = True
+
+        self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
+        self._timeline.set_message_receipt_callback(self._on_new_message_received)
+        self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
         
         # unfortunately tooltips do not work on static text, so this information has to go into the docs only
         #self._message_status_text.SetToolTip(wx.ToolTip("""Shows the status of the received aggregated diagnostic message.
 
 #If the robot monitor has not received a diagnostic message in more than 10 seconds, this will show an error and the background of the Errors/Warnings/All views will turn grey."""))
-        self._last_message_time = 0.0
-        self._message_received = False
-        self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
-        self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
-        self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
-        
-    def _update_message_state(self, event):
-        current_time = rospy.get_time()
-        time_diff = current_time - self._last_message_time
-        if (not self._message_received):
+
+    ##\brief Sets robot monitor messages status in default start configuration
+    def _set_initial_message_state(self):
+        if self._rxbag:
+            self._message_status_text.SetLabel("No message received")
+            self._message_status_text.SetForegroundColour(color_dict[1])
+            self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+            self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
+        else:
             self._message_status_text.SetLabel("No message received")
             self._message_status_text.SetForegroundColour(color_dict[2])
             self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._error_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
             self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
-        elif (time_diff > 10.0):
+
+    ##\brief Updates status bar with status of diagnostics_agg topic
+    def _update_message_state(self, event = None):
+        if not self._have_message:
+            self._set_initial_message_state()
+            return
+        if self._rxbag:
+            self._message_status_text.SetLabel("Receiving rxbag messages")
+            self._message_status_text.SetForegroundColour(color_dict[0])
+            self._tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._error_tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._warning_tree_ctrl.SetBackgroundColour(wx.WHITE)
+            self._is_stale = False
+            return # Return so we don't call get_time
+
+        current_time = rospy.get_time()
+        time_diff = current_time - self._last_message_time
+        if (time_diff > 10.0):
             self._message_status_text.SetLabel("Last message received %s seconds ago"%(int(time_diff)))
             self._message_status_text.SetForegroundColour(color_dict[2])
             self._tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
@@ -272,7 +290,28 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     ## is scrubbed
     def _on_new_message_received(self, msg):
         self._last_message_time = rospy.get_time()
-        self._message_received = True
+
+    ##\brief Clears messages at startup, or for rxbag plugin
+    def reset_monitor(self):
+        # Reset tree control
+        if self._have_message:
+            self._tree_ctrl.DeleteChildren(self._tree_ctrl.GetRootItem())
+            self._error_tree_ctrl.DeleteChildren(self._error_tree_ctrl.GetRootItem())
+            self._warning_tree_ctrl.DeleteChildren(self._warning_tree_ctrl.GetRootItem())
+            self._state.reset()
+
+        if not self._empty_id:
+            self._empty_id = self._tree_ctrl.AppendItem(self._tree_ctrl.GetRootItem(), "No data")
+            self._tree_ctrl.SetItemImage(self._empty_id, self._image_dict[3])        
+
+        self._is_stale = True
+
+        self._have_message = False
+
+        self._last_message_time = 0.0
+        self._have_message = False
+
+        self._set_initial_message_state()
 
     ##\brief processes new messages, updates tree control
     ##
@@ -287,6 +326,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             self._have_message = True
             self._tree_ctrl.Delete(self._empty_id)
             self._empty_id = None
+            #wx.CallAfter(self._update_message_state)
             
         (added, removed, all) = self._state.update(msg)
         
@@ -455,7 +495,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     
             self._viewers[name] = viewer
     
-            if (self._timeline.is_paused()):
+            if (self._timeline.is_paused() or self._rxbag):
                 viewer.disable_timeline()
                 viewer.set_status(item.status)
             else:

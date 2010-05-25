@@ -1,0 +1,7 @@
+<launch>
+  <test pkg="diagnostic_aggregator" type="analyzer_loader"
+        name="loader" test-name="dual_analyzer_load_test" >
+    <rosparam command="load" 
+              file="$(find test_diagnostic_aggregator)/test/dual_spec_load.yaml" />
+  </test>
+</launch>

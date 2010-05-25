@@ -293,6 +293,35 @@ namespace diagnostic_updater
           addInternal(int_task);
         }
 
+
+        /**
+         * \brief Remove a task based on its name.
+         *
+         * Removes the first task that matches the specified name. (New in
+         * version 1.1.2)
+         *
+         * \param name Name of the task to remove.
+         *
+         * \return Returns true if a task matched and was removed.
+         */
+         
+         bool removeByName(const std::string name)
+         {
+           boost::mutex::scoped_lock lock(lock_); 
+           for (std::vector<DiagnosticTaskInternal>::iterator iter = tasks_.begin();
+               iter != tasks_.end(); iter++)
+           {
+             if (iter->getName() == name)
+             {
+               tasks_.erase(iter);
+               return true;
+             }
+
+             diagnostic_updater::DiagnosticStatusWrapper status;
+           }
+           return false;
+         }
+
     private:
       /**
        * Allows an action to be taken when a task is added. The Updater class

@@ -68,6 +68,7 @@ if __name__ == '__main__':
         # GenericAnalyzer prefix2
         DiagnosticStatus(0, 'contain2a', 'OK', '', []),
         DiagnosticStatus(0, 'contain2b', 'OK', '', []),
+        DiagnosticStatus(0, 'name2', 'OK', '', []),
 
         # OtherAnalyzer for Other
         DiagnosticStatus(2, 'other1', 'Error', '', []),

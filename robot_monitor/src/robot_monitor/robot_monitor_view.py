@@ -1,6 +1,6 @@
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2009, Willow Garage, Inc.
+# Copyright (c) 2010, Willow Garage, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-PKG = 'runtime_monitor'
+##\brief rxbag plugin as robot_monitor
+
+PKG = 'robot_monitor'
 import roslib; roslib.load_manifest(PKG)
 import rospy
 
@@ -45,15 +47,15 @@ import wx
 
 from rxbag import TopicMessageView
 
-import monitor_panel
+import robot_monitor_panel
 
-class RuntimeMonitorView(TopicMessageView):
-    name = 'Runtime Monitor'
+class RobotMonitorView(TopicMessageView):
+    name = 'Robot Monitor'
     
     def __init__(self, timeline, parent, title, x, y, width, height):
         TopicMessageView.__init__(self, timeline, parent, title, x, y, width, height)
 
-        self.monitor_panel = monitor_panel.MonitorPanel(self.parent, rxbag=True)
+        self.monitor_panel = robot_monitor_panel.RobotMonitorPanel(self.parent, rxbag=True)
         self.monitor_panel.SetPosition((1, 0))
         
     def message_viewed(self, bag, msg_details):
@@ -62,7 +64,7 @@ class RuntimeMonitorView(TopicMessageView):
         if msg_details:
             topic, msg, t = msg_details
 
-            self.monitor_panel.add_rxbag_msg(msg, t)
+            wx.CallAfter(self.monitor_panel.new_message, msg)
 
     def message_cleared(self):
         TopicMessageView.message_cleared(self)
@@ -71,6 +73,7 @@ class RuntimeMonitorView(TopicMessageView):
 
     def close(self):
         pass
+
 
     def on_size(self, event):
         size = self.parent.GetClientSize()
@@ -81,15 +84,12 @@ class RuntimeMonitorView(TopicMessageView):
     def on_right_down(self, event):
         self.parent.PopupMenu(RuntimeMonitorPopupMenu(self.parent, self), event.GetPosition())
 
-    def clear_monitor(self):
-        self.monitor_panel.reset_monitor()
-
-class RuntimeMonitorPopupMenu(wx.Menu):
-    def __init__(self, parent, runtime_view):
+class RobotMonitorPopupMenu(wx.Menu):
+    def __init__(self, parent, robot_view):
         wx.Menu.__init__(self)
 
-        self.runtime_view = runtime_view
+        self.robot_view = robot_view
 
         clear_item = wx.MenuItem(self, wx.NewId(), 'Clear Monitor')
         self.AppendItem(clear_item)
-        self.Bind(wx.EVT_MENU, lambda e: self.runtime_view.clear_monitor(), id=clear_item.GetId())
+        self.Bind(wx.EVT_MENU, lambda e: self.robot_view.reset_monitor(), id=clear_item.GetId())
