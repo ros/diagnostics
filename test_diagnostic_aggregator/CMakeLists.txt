@@ -44,3 +44,6 @@ rosbuild_add_rostest(test/launch/test_match_then_analyze.launch)
 
 # Tests that analyzers that fail to load will report an error in the diagnostics
 rosbuild_add_rostest(test/launch/test_fail_init.launch)
+
+# Tests that analyzers specified both with and without package name load correctly
+rosbuild_add_rostest(test/launch/test_dual_analyzer_load.launch)
