@@ -218,6 +218,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
 
         # Reset monitor to starting configuration
         self._have_message = False
+        self._empty_id = None
         self.reset_monitor()
 
         # Show stale with timer
@@ -250,7 +251,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             self._warning_tree_ctrl.SetBackgroundColour(wx.LIGHT_GREY)
 
     ##\brief Updates status bar with status of diagnostics_agg topic
-    def _update_message_state(self, event):
+    def _update_message_state(self, event = None):
         if not self._have_message:
             self._set_initial_message_state()
             return
@@ -294,14 +295,17 @@ class RobotMonitorPanel(MonitorPanelGenerated):
     def reset_monitor(self):
         # Reset tree control
         if self._have_message:
-            self._tree_ctrl.DeleteAllItems()
+            self._tree_ctrl.DeleteChildren(self._tree_ctrl.GetRootItem())
+            self._error_tree_ctrl.DeleteChildren(self._error_tree_ctrl.GetRootItem())
+            self._warning_tree_ctrl.DeleteChildren(self._warning_tree_ctrl.GetRootItem())
             self._state.reset()
-        
+
+        if not self._empty_id:
+            self._empty_id = self._tree_ctrl.AppendItem(self._tree_ctrl.GetRootItem(), "No data")
+            self._tree_ctrl.SetItemImage(self._empty_id, self._image_dict[3])        
+
         self._is_stale = True
 
-        # Reset the empty tree ID
-        self._empty_id = self._tree_ctrl.AppendItem(self._tree_ctrl.GetRootItem(), "No data")
-        self._tree_ctrl.SetItemImage(self._empty_id, self._image_dict[3])
         self._have_message = False
 
         self._last_message_time = 0.0
@@ -322,6 +326,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
             self._have_message = True
             self._tree_ctrl.Delete(self._empty_id)
             self._empty_id = None
+            #wx.CallAfter(self._update_message_state)
             
         (added, removed, all) = self._state.update(msg)
         
