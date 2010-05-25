@@ -42,7 +42,8 @@ using namespace diagnostic_aggregator;
 using namespace test_diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(MatchNoAnalyzeAnalyzer,
+PLUGINLIB_DECLARE_CLASS(test_diagnostic_aggregator,
+                         MatchNoAnalyzeAnalyzer,
                          test_diagnostic_aggregator::MatchNoAnalyzeAnalyzer,
                          diagnostic_aggregator::Analyzer)
 

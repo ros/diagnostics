@@ -40,9 +40,10 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(DiscardAnalyzer, 
-                         diagnostic_aggregator::DiscardAnalyzer, 
-                         diagnostic_aggregator::Analyzer)
+PLUGINLIB_DECLARE_CLASS(diagnostic_aggregator,
+                        DiscardAnalyzer, 
+                        diagnostic_aggregator::DiscardAnalyzer, 
+                        diagnostic_aggregator::Analyzer)
 
 
 DiscardAnalyzer::DiscardAnalyzer() { }

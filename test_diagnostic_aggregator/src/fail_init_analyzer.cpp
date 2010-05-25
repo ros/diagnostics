@@ -42,9 +42,10 @@ using namespace diagnostic_aggregator;
 using namespace test_diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(FailInitAnalyzer,
-                         test_diagnostic_aggregator::FailInitAnalyzer,
-                         diagnostic_aggregator::Analyzer)
+PLUGINLIB_DECLARE_CLASS(test_diagnostic_aggregator,
+                        FailInitAnalyzer,
+                        test_diagnostic_aggregator::FailInitAnalyzer,
+                        diagnostic_aggregator::Analyzer)
 
 FailInitAnalyzer::FailInitAnalyzer() :
   path_(""),

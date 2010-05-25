@@ -39,9 +39,10 @@
 using namespace std;
 using namespace diagnostic_aggregator;
 
-PLUGINLIB_REGISTER_CLASS(AnalyzerGroup, 
-                         diagnostic_aggregator::AnalyzerGroup, 
-                         diagnostic_aggregator::Analyzer)
+PLUGINLIB_DECLARE_CLASS(diagnostic_aggregator,
+                        AnalyzerGroup, 
+                        diagnostic_aggregator::AnalyzerGroup, 
+                        diagnostic_aggregator::Analyzer)
 
 AnalyzerGroup::AnalyzerGroup() :
   path_(""),
@@ -94,6 +95,30 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
     Analyzer* analyzer = NULL;
     try
     {
+      // Look for non-fully qualified class name for Analyzer type
+      if (!analyzer_loader_.isClassAvailable(an_type))
+      {
+        bool have_class = false;
+        vector<string> classes = analyzer_loader_.getDeclaredClasses();
+        for(unsigned int i = 0; i < classes.size(); ++i)
+        {
+          if(an_type == analyzer_loader_.getName(classes[i]))
+          {
+            //if we've found a match... we'll get the fully qualified name and break out of the loop
+            ROS_WARN("Analyzer specification should now include the package name. You are using a deprecated API. Please switch from %s to %s in your Analyzer specification.",
+                     an_type.c_str(), classes[i].c_str());
+            an_type = classes[i];
+            have_class = true;
+            break;
+          }
+        }
+        if (!have_class)
+        {
+          ROS_ERROR("Unable to find Analyzer class %s. Check that Analyzer is fully declared.", an_type.c_str());
+          continue;
+        }
+      }
+
       analyzer = analyzer_loader_.createClassInstance(an_type);
     }
     catch (pluginlib::LibraryLoadException& e)
