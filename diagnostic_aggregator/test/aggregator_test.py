@@ -131,7 +131,7 @@ def name_to_agg_name(name, params):
         if not value.has_key('path') or not value.has_key('type'):
             return None
         my_prefix = value['path']
-        if value['type'] == 'GenericAnalyzer':
+        if value['type'] == 'GenericAnalyzer' or value['type'] == 'diagnostic_aggregator/GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value)
             if generic_name is not None:
                 return generic_name
@@ -147,7 +147,7 @@ def name_to_agg_header(name, params):
         if not value.has_key('path') or not value.has_key('type'):
             return None
         my_prefix = value['path']
-        if value['type'] == 'GenericAnalyzer':
+        if value['type'] == 'GenericAnalyzer' or value['type'] == 'diagnostic_aggregator/GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value, header=True)
             if generic_name is not None:
                 return generic_name

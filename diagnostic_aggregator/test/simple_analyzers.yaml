@@ -1,6 +1,6 @@
 analyzers:
   prefix1:
-    type: GenericAnalyzer
+    type: diagnostic_aggregator/GenericAnalyzer
     path: First
     remove_prefix: [ 'prefix1' ]
     find_and_remove_prefix: [ 'find1_items'] 
@@ -17,7 +17,7 @@ analyzers:
       'prefix1: expected1c',
       'prefix1: expected1d' ]
   prefix2:
-    type: GenericAnalyzer
+    type: 'diagnostic_aggregator/GenericAnalyzer'
     path: Second
     contains: [
       'contain2a',
