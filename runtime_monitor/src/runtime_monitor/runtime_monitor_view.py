@@ -43,7 +43,7 @@ else:
     sys.exit(1)
 import wx
 
-from rxbag.message_view import TopicMessageView
+from rxbag import TopicMessageView
 
 import monitor_panel
 
