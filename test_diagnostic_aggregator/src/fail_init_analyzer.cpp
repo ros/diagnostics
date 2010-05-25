@@ -36,33 +36,27 @@
  * \author Kevin Watts 
  */
 
-#include "test_diagnostic_aggregator/match_no_analyze_analyzer.h"
+#include "test_diagnostic_aggregator/fail_init_analyzer.h"
 
 using namespace diagnostic_aggregator;
 using namespace test_diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_REGISTER_CLASS(MatchNoAnalyzeAnalyzer,
-                         test_diagnostic_aggregator::MatchNoAnalyzeAnalyzer,
+PLUGINLIB_REGISTER_CLASS(FailInitAnalyzer,
+                         test_diagnostic_aggregator::FailInitAnalyzer,
                          diagnostic_aggregator::Analyzer)
 
-MatchNoAnalyzeAnalyzer::MatchNoAnalyzeAnalyzer() :
+FailInitAnalyzer::FailInitAnalyzer() :
   path_(""),
-  nice_name_(""), 
-  my_item_name_(""),
-  has_initialized_(false)
+  nice_name_("")
 { }
 
-MatchNoAnalyzeAnalyzer::~MatchNoAnalyzeAnalyzer() { }
+FailInitAnalyzer::~FailInitAnalyzer() { }
 
 
-bool MatchNoAnalyzeAnalyzer::init(const string base_name, const ros::NodeHandle &n)
+bool FailInitAnalyzer::init(const string base_name, const ros::NodeHandle &n)
 { 
-  if (!n.getParam("path", nice_name_))
-  {
-     ROS_ERROR("No power board name was specified in MatchNoAnalyzeAnalyzer! Power board must be \"Power board 10XX\". Namespace: %s", n.getNamespace().c_str());
-     return false;
-  }
+  nice_name_ = "Fail Init";
 
   // path_ = BASE_NAME/Motors
   if (base_name == "/")
@@ -70,31 +64,22 @@ bool MatchNoAnalyzeAnalyzer::init(const string base_name, const ros::NodeHandle 
   else
     path_ = base_name + "/" + nice_name_;
 
-  if (!n.getParam("my_item", my_item_name_))
-  {
-    ROS_ERROR("No parameter \"my_item\" found. Unable to initialize MatchNoAnalyzeAnalyzer!");
-    return false;
-  }
-
-  has_initialized_ = true;
-  
-  return true;
-}
-
-
-bool MatchNoAnalyzeAnalyzer::match(const std::string name)
-{
-  return has_initialized_ && name == my_item_name_;
-}
-
-bool MatchNoAnalyzeAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
-{
-  ROS_ASSERT_MSG(item->getName() == my_item_name_, "Asked to analyze item that wasn't mine! My name: %s, item: %s", my_item_name_.c_str(), item->getName().c_str());
-
+  ROS_INFO("FailInitAnalyzer is returning false. Fails to initialize on purpose");
   return false;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > MatchNoAnalyzeAnalyzer::report()
+
+bool FailInitAnalyzer::match(const std::string name)
+{
+  return false;
+}
+
+bool FailInitAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
+{
+  return false;
+}
+
+vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > FailInitAnalyzer::report()
 {
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > output;
 

@@ -1,0 +1,8 @@
+analyzers:
+  fail_init_path:
+    type: FailInitAnalyzer
+    path: no_way
+  my_path: # Good analyzer loads
+    type: GenericAnalyzer
+    path: Motors
+    startswith: 'EtherCAT'

@@ -4,4 +4,9 @@
       MatchNoAnalyzeAnalyze is a diagnostic Analyzer that matches one item, but doesn't analyze it.
     </description>
   </class>
+    <class name="FailInitAnalyzer" type="test_diagnostic_aggregator::FailInitAnalyzer" base_class_type="diagnostic_aggregator::Analyzer">
+    <description>
+      FailInitAnalyze is a diagnostic Analyzer that fails to initialize.
+    </description>
+  </class>
 </library>

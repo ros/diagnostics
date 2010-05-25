@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="diagnostic_aggregator" type="aggregator_node"
+        name="diag_agg" output="screen" >
+    <rosparam command="load" 
+              file="$(find test_diagnostic_aggregator)/test/fail_init_analyze.yaml" />
+  </node>
+
+   <test test-name="fail_init_test"
+        pkg="test_diagnostic_aggregator" type="fail_init_test.py"
+        name="fail_init_test"
+        args="--ns=fail_init_path" />
+</launch>
