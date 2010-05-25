@@ -14,11 +14,15 @@ Some icons from the Silk icon pack are used, which is available from <a href="ht
   <url>http://www.ros.org/wiki/robot_monitor</url>
   <depend package="rospy" />
   <depend package="diagnostic_msgs" />
+  <depend package="rxbag" />
   <rosdep name="wxwidgets"/>
   <rosdep name="wxpython"/>
   <platform os="ubuntu" version="9.04"/>
   <platform os="ubuntu" version="9.10"/>
   <platform os="ubuntu" version="10.04"/>
+  <export>
+    <rxbag plugin="robot_monitor.rxbag_plugins"/>
+  </export>
 </package>
 
 
