@@ -73,44 +73,51 @@ def combine_name_prefix(my_prefix, name, remove_prefixes):
 def header_name(my_prefix):
     return '/'.join([prefix, my_prefix])
 
+def _get_params_list(params):
+    out = []
+    if type(params) in (list, tuple):
+        for p in params:
+            out.append(str(p))
+        return out
+    return [ str(params) ]
+
 def name_to_full_generic(name, my_prefix, value, header=False):
     remove_prefixes = []
     if value.has_key('remove_prefix'):
-        for rp in value['remove_prefix']:
-            remove_prefixes.append(rp)
+        remove_prefixes = _get_params_list(value['remove_prefix'])
 
     if value.has_key('find_and_remove_prefix'):
-        for rp in value['find_and_remove_prefix']:
-            remove_prefixes.append(rp)
-        for sw in value['find_and_remove_prefix']:
+        for rp in _get_params_list(value['find_and_remove_prefix']):
+            remove_prefixes.extend(_get_params_list(value['find_and_remove_prefix']))
+        for sw in _get_params_list(value['find_and_remove_prefix']):
             if name.startswith(sw):
                 if header:
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
 
     if value.has_key('startswith'):
-        for sw in value['startswith']:
+        for sw in _get_params_list(value['startswith']):
             if name.startswith(sw):
                 if header:
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
+
     if value.has_key('contains'):
-        for con in value['contains']:
+        for con in _get_params_list(value['contains']):
             if name.find(con) >= 0:
                 if header:
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
 
-
     if value.has_key('name'):
-        for nm in value['name']:
+        for nm in _get_params_list(value['name']):
             if name == nm:
                 if header:
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
 
     if value.has_key('expected'):
-        for nm in value['expected']:
+        for nm in _get_params_list(value['expected']):
             if name == nm:
                 if header:
                     return header_name(my_prefix)
