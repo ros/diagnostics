@@ -92,7 +92,11 @@ boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(con
 {
   boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
 
-  status->name = path + "/" + output_name_;
+  if (path == "/")
+    status->name = "/" + output_name_;
+  else
+    status->name = path + "/" + output_name_;
+
   status->level = level_;
   status->message = message_;
   status->hardware_id = hw_id_;
