@@ -542,7 +542,7 @@ namespace diagnostic_updater
             ros::this_node::getName().substr(1) + std::string(": ") + iter->name;
         }
         diagnostic_msgs::DiagnosticArray msg;
-        msg.set_status_vec(status_vec);
+        msg.status = status_vec;
         msg.header.stamp = ros::Time::now(); // Add timestamp for ROS 0.10
         publisher_.publish(msg);
       }
