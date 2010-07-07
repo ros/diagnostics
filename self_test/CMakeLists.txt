@@ -15,3 +15,10 @@ rosbuild_link_boost(run_selftest thread)
 
 rosbuild_add_executable(selftest_example src/selftest_example.cpp)
 rosbuild_link_boost(selftest_example thread)
+
+add_subdirectory(test EXCLUDE_FROM_ALL)
+
+rosbuild_add_rostest(test/launch/nominal_test.launch)
+rosbuild_add_rostest(test/launch/no_id_test.launch)
+rosbuild_add_rostest(test/launch/error_test.launch)
+rosbuild_add_rostest(test/launch/exception_test.launch)

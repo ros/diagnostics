@@ -73,7 +73,7 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr
   if (diag_msg->header.stamp.toSec() != 0)
     return;
 
-  string stamp_warn = "Warning: No timestamp set for diagnostic message. Message names: ";
+  string stamp_warn = "No timestamp set for diagnostic message. Message names: ";
   vector<diagnostic_msgs::DiagnosticStatus>::const_iterator it;
   for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it)
   {
@@ -84,7 +84,7 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr
   
   if (!ros_warnings_.count(stamp_warn))
   {
-    ROS_WARN(stamp_warn.c_str());
+    ROS_WARN("%s", stamp_warn.c_str());
     ros_warnings_.insert(stamp_warn);
   }
 }

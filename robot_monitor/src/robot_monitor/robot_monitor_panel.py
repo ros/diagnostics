@@ -76,6 +76,7 @@ class State(object):
     def __init__(self):
         self._items = {}
         self._msg = None
+        self._has_warned_no_name = False
 
     def reset(self):
         self._items = {}
@@ -105,9 +106,17 @@ class State(object):
         # fill items from new msg, creating new StatusItems for any that don't already exist,
         # and keeping track of those that have been added new
         for s in msg.status:
+            # DiagnosticStatus messages without a name are invalid #3806
+            if not s.name and not self._has_warned_no_name:
+                rospy.logwarn('DiagnosticStatus message with no "name". Unable to add to robot monitor. Message: %s, hardware ID: %s, level: %d' % (s.message, s.hardware_id, s.level))
+                self._has_warned_no_name = True
+
+            if not s.name:
+                continue
+                
             if (len(s.name) > 0 and s.name[0] != '/'):
                 s.name = '/' + s.name
-            
+
             if (s.name not in self._items):
                 i = StatusItem(s)
                 added.append(i)

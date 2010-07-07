@@ -32,6 +32,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
+from __future__ import with_statement
+
 PKG = 'runtime_monitor'
 
 import roslib
@@ -90,19 +92,19 @@ class MonitorPanel(wx.Panel):
     self._ok_id = self._tree_control.AppendItem(self._root_id, "Ok (0)", self._ok_image_id)
 
     if rxbag:
-      wx.CallAfter(self.set_splitter_position)
+      wx.CallAfter(self._set_splitter_position)
 
-    self._tree_control.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_item_selected)
-    self._tree_control.Bind(wx.EVT_TREE_KEY_DOWN, self.on_item_key_down)
+    self._tree_control.Bind(wx.EVT_TREE_SEL_CHANGED, self._on_item_selected)
+    self._tree_control.Bind(wx.EVT_TREE_KEY_DOWN, self._on_item_key_down)
     
     self._name_to_item = {}
     
     self._new_errors_callback = None
     
     if not rxbag:
-      self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self.diagnostics_callback)
+      self._subscriber = rospy.Subscriber(topic, DiagnosticArray, self._diagnostics_callback)
       self._timer = wx.Timer(self)
-      self.Bind(wx.EVT_TIMER, self.on_timer)
+      self.Bind(wx.EVT_TIMER, self._on_timer)
       self._timer.Start(5000)
     else:
       self._subscriber = None
@@ -110,7 +112,7 @@ class MonitorPanel(wx.Panel):
     self._messages = []
     self._used_items = 0
     
-  def set_splitter_position(self):
+  def _set_splitter_position(self):
     self._splitter_control = xrc.XRCCTRL(self._real_panel, "m_splitter1")
     self._splitter_control.SetSashPosition(350)
     
@@ -118,41 +120,62 @@ class MonitorPanel(wx.Panel):
     if self._subscriber is not None:
       self._subscriber.unregister()
       
+
+  def shutdown(self):
+    """
+    Unregisters diagnostics subscriber for clean shutdown
+    """
+    if rospy.is_shutdown():
+      return
+
+    if self._subscriber is not None:
+      self._subscriber.unregister()
+      self._subscriber = None
+      
   def change_diagnostic_topic(self, topic):
+    """
+    Changes diagnostics topic name. Must be of type diagnostic_msgs/DiagnosticArray
+    """
     if len(topic) == 0:
       self.reset_monitor()
       return
 
     if self._subscriber is not None:
       self._subscriber.unregister()
-      self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self.diagnostics_callback)
+      self._subscriber = rospy.Subscriber(str(topic), DiagnosticArray, self._diagnostics_callback)
     self.reset_monitor()
 
   def reset_monitor(self):
+    """
+    Removes all values from monitor display, resets buffers
+    """
     self._name_to_item = {} # Reset all stale topics
     self._messages = []
-    self.clear_tree()
+    self._clear_tree()
 
-  def clear_tree(self):
+  def _clear_tree(self):
     self._tree_control.DeleteChildren(self._stale_id)
     self._tree_control.DeleteChildren(self._errors_id)
     self._tree_control.DeleteChildren(self._warnings_id)
     self._tree_control.DeleteChildren(self._ok_id)
-    self.update_root_labels()
+    self._update_root_labels()
 
   def add_rxbag_msg(self, msg, stamp):
+    """
+    Add message from rxbag player
+    """
     self._messages.append(msg)
 
     wx.CallAfter(self.new_message, stamp)
 
     # Clear stale messages
-    wx.CallAfter(self.clear_old_rxbag_msgs, stamp)
+    wx.CallAfter(self._clear_old_rxbag_msgs, stamp)
     
   def _delete_item(self, item):
     self._tree_control.Delete(item.tree_id)
     del self._name_to_item[item.status.name]
   
-  def clear_old_rxbag_msgs(self, now_stamp):
+  def _clear_old_rxbag_msgs(self, now_stamp):
     to_delete = []
     for name, item in self._name_to_item.iteritems():
       if (item != None):
@@ -167,58 +190,45 @@ class MonitorPanel(wx.Panel):
 
     for item in to_delete:
       self._delete_item(item)
-          
 
-    self.update_root_labels()
+    self._update_root_labels()
 
-  def diagnostics_callback(self, message):
-    self._mutex.acquire()
-    
-    self._messages.append(message)
-    
-    self._mutex.release()
-    
+  def _diagnostics_callback(self, message):
+    with self._mutex:
+      self._messages.append(message)
+        
     wx.CallAfter(self.new_message, rospy.get_rostime())
       
   def new_message(self, stamp = None):
-    # The panel can have messages in the queue after it's destroyed
-    # If it's been destroyed, just ignore it
-    try:
-      self._mutex.acquire()
-    except:
-      return
-
-    had_errors = False
+    with self._mutex:
+      had_errors = False
     
-    for message in self._messages:
-      for status in message.status:
-        was_selected = False
-        had_item = False
-        if (self._name_to_item.has_key(status.name)):
-          item = self._name_to_item[status.name]
-          had_item = True
-          if (self._tree_control.GetSelection() == item.tree_id):
-            was_selected = True
+      for message in self._messages:
+        for status in message.status:
+          was_selected = False
+          had_item = False
+          if (self._name_to_item.has_key(status.name)):
+            item = self._name_to_item[status.name]
+            had_item = True
+            if (self._tree_control.GetSelection() == item.tree_id):
+              was_selected = True
+            if (item.status.level == 2 and status.level != 2):
+              had_errors = True
           
-          if (item.status.level == 2 and status.level != 2):
-            had_errors = True
-          
-          self.update_item(item, status, was_selected, stamp)
-        else:
-          self.create_item(status, was_selected, True, stamp)
-          if (status.level == 2):
+            self._update_item(item, status, was_selected, stamp)
+          else:
+            self._create_item(status, was_selected, True, stamp)
+            if (status.level == 2):
               had_errors = True
     
-    self._messages = []
-    
-    self._mutex.release()
+      self._messages = []
     
     if (had_errors and self._new_errors_callback != None):
       self._new_errors_callback()
         
     self.Refresh()
       
-  def update_item(self, item, status, was_selected, stamp):
+  def _update_item(self, item, status, was_selected, stamp):
     change_parent = False
     if (item.status.level != status.level):
       change_parent = True
@@ -254,11 +264,11 @@ class MonitorPanel(wx.Panel):
     item.status = status
     
     if (was_selected):
-      self.fillout_info(item.tree_id)
+      self._fillout_info(item.tree_id)
       
     item.mark = True
     
-  def create_item(self, status, select, expand_if_error, stamp):
+  def _create_item(self, status, select, expand_if_error, stamp):
     if (status.level == 0):
       parent_id = self._ok_id
     elif (status.level == 1):
@@ -282,13 +292,13 @@ class MonitorPanel(wx.Panel):
     if (expand_if_error and (status.level > 1 or status.level == -1)):
       self._tree_control.Expand(parent_id)
         
-    self.update_root_labels()
+    self._update_root_labels()
     
     item.mark = True
     
     return item
           
-  def fillout_info(self, id):
+  def _fillout_info(self, id):
     item = self._tree_control.GetPyData(id)
     if (item == None):
       return
@@ -316,10 +326,10 @@ class MonitorPanel(wx.Panel):
         
     self._html_control.Thaw()
           
-  def on_item_selected(self, event):
-    self.fillout_info(event.GetItem())
+  def _on_item_selected(self, event):
+    self._fillout_info(event.GetItem())
       
-  def on_item_key_down(self, event):
+  def _on_item_key_down(self, event):
     id = self._tree_control.GetSelection()
     if (id == None):
       event.Skip()
@@ -335,11 +345,11 @@ class MonitorPanel(wx.Panel):
     else:
       event.Skip()
       
-    self.update_root_labels()
+    self._update_root_labels()
     self.Refresh()
       
       
-  def on_timer(self, event):
+  def _on_timer(self, event):
     for name, item in self._name_to_item.iteritems():
       id = item.tree_id
       if (item != None):
@@ -350,12 +360,12 @@ class MonitorPanel(wx.Panel):
           
           new_status = copy.deepcopy(item.status)
           new_status.level = -1
-          self.update_item(item, new_status, was_selected, item.stamp)
+          self._update_item(item, new_status, was_selected, item.stamp)
             
         item.mark = False
     
         
-    self.update_root_labels()
+    self._update_root_labels()
     self.Refresh()
       
   def set_new_errors_callback(self, callback):
@@ -370,7 +380,7 @@ class MonitorPanel(wx.Panel):
   def get_num_ok(self):
     return self._tree_control.GetChildrenCount(self._ok_id, False)
 
-  def update_root_labels(self):
+  def _update_root_labels(self):
     self._tree_control.SetItemText(self._ok_id, "Ok (%s)" % (self._tree_control.GetChildrenCount(self._ok_id, False)))
     self._tree_control.SetItemText(self._warnings_id, "Warnings (%s)" % (self._tree_control.GetChildrenCount(self._warnings_id, False)))
     self._tree_control.SetItemText(self._errors_id, "Errors (%s)" % (self._tree_control.GetChildrenCount(self._errors_id, False)))
