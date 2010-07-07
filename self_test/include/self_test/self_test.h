@@ -183,7 +183,7 @@ namespace self_test
           if (res.passed && id_ == unspecified_id)
             ROS_WARN("Self-test passed, but setID was not called. This is a bug in the driver. Please report it.");
 
-          res.status_vec = status_vec;
+          res.status = status_vec;
 
           retval = true;
           

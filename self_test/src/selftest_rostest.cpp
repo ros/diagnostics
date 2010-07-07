@@ -69,9 +69,9 @@ TEST(SelfTest, runSelfTest)
 
     printf("Self test %s for device with id: [%s]\n", passfail.c_str(), res.id.c_str());
 
-    for (size_t i = 0; i < res.get_status_size(); i++)
+    for (size_t i = 0; i < res.status.size(); i++)
     {
-      printf("%2d) %s\n", i + 1, res.status[i].name.c_str());
+      printf("%2d) %s\n", ((int) i + 1), res.status[i].name.c_str());
       if (res.status[i].level == 0)
         printf("     [OK]: ");
       else if (res.status[i].level == 1)
@@ -83,7 +83,7 @@ TEST(SelfTest, runSelfTest)
     
       EXPECT_EQ(0, res.status[i].level) << res.status[i].name << " did not PASS: " << res.status[i].message;
 
-      for (size_t j = 0; j < res.status[i].get_values_size(); j++)
+      for (size_t j = 0; j < res.status[i].values.size(); j++)
         printf("      [%s] %s\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value.c_str());
 
       printf("\n");
