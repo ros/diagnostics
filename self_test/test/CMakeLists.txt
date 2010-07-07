@@ -1,0 +1,11 @@
+rosbuild_add_executable(nominal_selftest nominal_selftest.cpp)
+rosbuild_add_gtest_build_flags(nominal_selftest)
+
+rosbuild_add_executable(exception_selftest exception_selftest.cpp)
+rosbuild_add_gtest_build_flags(exception_selftest)
+
+rosbuild_add_executable(error_selftest error_selftest.cpp)
+rosbuild_add_gtest_build_flags(error_selftest)
+
+rosbuild_add_executable(no_id_selftest no_id_selftest.cpp)
+rosbuild_add_gtest_build_flags(no_id_selftest)
