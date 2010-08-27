@@ -91,8 +91,6 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  ROS_WARN("run_selftest is deprecated. Use \"rosservice call\" instead");
-
   ros::NodeHandle nh(argv[1]);
   doTest(nh);
   
