@@ -142,6 +142,12 @@ namespace self_test
           for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
               iter != tasks.end(); iter++)
           {
+            if (ros::isShuttingDown())
+            {
+              ROS_ERROR("ROS has shut down. Exiting.");
+              return false;
+            }
+            
             diagnostic_updater::DiagnosticStatusWrapper status;
 
             status.level = 2;
