@@ -56,9 +56,9 @@ bool doTest(ros::NodeHandle nh)
     printf("Self test %s for device with id: [%s]\n", passfail.c_str(), res.id.c_str());
 
 
-    for (size_t i = 0; i < res.get_status_size(); i++)
+    for (size_t i = 0; i < res.status.size(); i++)
     {
-      printf("%2d) %s\n", i + 1, res.status[i].name.c_str());
+      printf("%2zd) %s\n", i + 1, res.status[i].name.c_str());
       if (res.status[i].level == 0)
         printf("     [OK]: ");
       else if (res.status[i].level == 1)
@@ -68,12 +68,12 @@ bool doTest(ros::NodeHandle nh)
 
       printf("%s\n", res.status[i].message.c_str());
 
-      for (size_t j = 0; j < res.status[i].get_values_size(); j++)
+      for (size_t j = 0; j < res.status[i].values.size(); j++)
         printf("      [%s] %s\n", res.status[i].values[j].key.c_str(), res.status[i].values[j].value.c_str());
 
       printf("\n");
     }
-    return true;
+    return res.passed;
   }
   else
   {
@@ -92,8 +92,6 @@ int main(int argc, char **argv)
   }
 
   ros::NodeHandle nh(argv[1]);
-  doTest(nh);
-  
-  return 0;
+  return !doTest(nh);
 }
 
