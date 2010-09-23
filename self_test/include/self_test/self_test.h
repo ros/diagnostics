@@ -164,6 +164,10 @@ namespace self_test
               ignore_set_id_warn = true;
             }
 
+            if (status.level >= 1)
+              if (verbose)
+                ROS_WARN("Non-zero self-test test status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
+            
             status_vec.push_back(status);
           }
 
@@ -179,11 +183,7 @@ namespace self_test
               status_iter++)
           {
             if (status_iter->level >= 2)
-            {
               res.passed = false;
-              if (verbose)
-                ROS_WARN("Non-zero self-test test status. Name: '%s', status %i: '%s'", status_iter->name.c_str(), status_iter->level, status_iter->message.c_str());
-            }
           }
 
           if (res.passed && id_ == unspecified_id)
