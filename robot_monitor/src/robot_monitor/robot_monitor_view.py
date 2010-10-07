@@ -52,8 +52,8 @@ import robot_monitor_panel
 class RobotMonitorView(TopicMessageView):
     name = 'Robot Monitor'
     
-    def __init__(self, timeline, parent, title, x, y, width, height):
-        TopicMessageView.__init__(self, timeline, parent, title, x, y, width, height)
+    def __init__(self, timeline, parent):
+        TopicMessageView.__init__(self, timeline, parent)
 
         self.monitor_panel = robot_monitor_panel.RobotMonitorPanel(self.parent, rxbag=True)
         self.monitor_panel.SetPosition((1, 0))
