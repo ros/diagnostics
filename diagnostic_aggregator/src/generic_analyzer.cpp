@@ -108,7 +108,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
       }
       catch (boost::regex_error& e)
       {
-        ROS_WARN("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
+        ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
                  regex_strs[i].c_str(), e.what());
       }
     }
