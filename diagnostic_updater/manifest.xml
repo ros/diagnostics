@@ -8,6 +8,7 @@
   <url>http://www.ros.org/wiki/diagnostic_updater</url>
   <depend package="roscpp" />
   <depend package="diagnostic_msgs" />
+  <depend package="std_msgs" />
   <export>
     <cpp cflags="-I${prefix}/include"/>
   </export>
