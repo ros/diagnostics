@@ -38,7 +38,7 @@
 PKG = 'diagnostic_analysis'
 
 import roslib; roslib.load_manifest(PKG)
-import rosrecord
+import rosbag
 import diagnostic_msgs.msg
 import time, sys, os
 import operator, tempfile, subprocess
@@ -79,7 +79,8 @@ class LogExporter:
 
     ##\brief Use rosrecord to play back bagfile
     def process_log(self):
-        for (topic, msg, t) in rosrecord.logplayer(self.logfile, raw=False):
+        bag = rosbag.Bag(self.logfile)
+        for (topic, msg, t) in bag.read_messages():
             self._update(topic, msg)
 
     ##\brief Creates and updates data files with new messages

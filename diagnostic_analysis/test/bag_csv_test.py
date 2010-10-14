@@ -40,7 +40,7 @@ import roslib; roslib.load_manifest(PKG)
 import rostest
 import unittest
 
-import rosrecord
+import rosbag
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 import random
@@ -74,9 +74,9 @@ class TestBagToCSV(unittest.TestCase):
         # Make logfile with bogus messages
         self.bag = tempfile.NamedTemporaryFile()
 
-        rebagger = rosrecord.Rebagger(self.bag.name)
+        rebagger = rosbag.Bag(self.bag.name, 'w')
         for i in range(0, row_count):
-            rebagger.add("/diagnostics", make_status_msg(i))
+            rebagger.write("/diagnostics", make_status_msg(i))
         rebagger.close()
 
         # Make CSV
