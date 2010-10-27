@@ -10,5 +10,5 @@
   <depend stack="common" /> <!-- pluginlib -->
   <depend stack="common_msgs" /> <!-- diagnostic_msgs -->
   <depend stack="ros" /> <!-- xmlrpcpp, rostest, rospy, roscpp, rosrecord -->
-
+  <depend stack="rx" />
 </stack>
