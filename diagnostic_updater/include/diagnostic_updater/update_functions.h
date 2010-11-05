@@ -181,8 +181,8 @@ namespace diagnostic_updater
           stat.summary(0, "Desired frequency met");
         }
 
-        stat.addf("Events in window", "%f", events);
-        stat.addf("Events since startup", "%f", count_);
+        stat.addf("Events in window", "%d", events);
+        stat.addf("Events since startup", "%d", count_);
         stat.addf("Duration of window (s)", "%f", window);
         stat.addf("Actual frequency (Hz)", "%f",freq);
         if (*params_.min_freq_ == *params_.max_freq_)
