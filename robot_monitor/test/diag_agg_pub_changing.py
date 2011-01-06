@@ -47,7 +47,7 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 if __name__ == '__main__':
     rospy.init_node('diag_agg_pub')
-    pub = rospy.Publisher('/diagnostics_agg', DiagnosticArray)
+    pub = rospy.Publisher('diagnostics_agg', DiagnosticArray)
     
     statuses = [
         [

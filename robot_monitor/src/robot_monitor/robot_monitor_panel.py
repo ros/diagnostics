@@ -178,9 +178,9 @@ class State(object):
         
         return (added, removed, self._items)
 
-##\brief Monitor panel for aggregated diagnostics (/diagnostics_agg)
+##\brief Monitor panel for aggregated diagnostics (diagnostics_agg)
 ##
-## Displays data from DiagnosticArray /diagnostics_agg in a tree structure
+## Displays data from DiagnosticArray diagnostics_agg in a tree structure
 ## by status name. Names are parsed by '/'. Each status name is given
 ## an icon by status (ok, warn, error, stale).
 ## 
@@ -235,7 +235,7 @@ class RobotMonitorPanel(MonitorPanelGenerated):
         self.Bind(wx.EVT_TIMER, self._update_message_state)
         self._timer.Start(1000)
 
-        self._timeline = MessageTimeline(self, 30, "/diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
+        self._timeline = MessageTimeline(self, 30, "diagnostics_agg", DiagnosticArray, self.new_message, self.get_color_for_message, self._on_pause)
         self._timeline.set_message_receipt_callback(self._on_new_message_received)
         self.GetSizer().Add(self._timeline, 0, wx.EXPAND)
         
