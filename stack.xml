@@ -1,14 +1,12 @@
 <stack>
-  <description brief="Diagnostics analysis, processing and display">
-    Packages related to gathering, viewing, and analyzing diagnostics data
-    from robots.
-  </description>
-  <author>Kevin Watts watts@willowgarage.com, Tully Foote tfoote@willowgarage.com, Blaise Gassend blaise@willowgarage.com, Josh Faust jfaust@willowgarage.com</author>
+  <description brief="Robot diagnostics and instrumentation tools.">Packages related to gathering, viewing, and analyzing diagnostics data from robots.</description>
+  <author>Maintained by Kevin Watts</author>
   <license>BSD</license>  
-  <review status="Doc reviewed" notes=""/>
+  <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/diagnostics</url>
-  <depend stack="common" /> <!-- pluginlib -->
   <depend stack="common_msgs" /> <!-- diagnostic_msgs -->
-  <depend stack="ros" /> <!-- xmlrpcpp, rostest, rospy, roscpp, rosrecord -->
-  <depend stack="rx" />
+  <depend stack="pluginlib" /> <!-- pluginlib -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- roscpp, xmlrpcpp, std_msgs, rostest, rospy, rosbag -->
+
 </stack>
