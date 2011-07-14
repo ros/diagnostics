@@ -205,14 +205,6 @@ int main(int argc, char **argv)
   diagnostic_updater::HeaderlessTopicDiagnostic pub1_freq("topic1", updater,
       diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
 
-  // For extra convenience, you can get your Publisher wrapped in with a
-  // TopicDiagnostic or HeaderlessTopicDiagnostic, as a DiagnosedPublisher
-  // or HeaderlessDiagnosedPublisher. Calling the publish method on a
-  // DiagnosedPublisher or HeaderlessDiagnosedPublisher will collect
-  // statistics and publish on the associated topic.
-  diagnostic_updater::HeaderlessDiagnosedPublisher pub2(pub2_temp, updater, 
-      diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0, 10));
-
   // Note that TopicDiagnostic, HeaderlessDiagnosedPublisher,
   // HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
   // CompositeDiagnosticTask, so you can add your own fields to them using
@@ -240,11 +232,6 @@ int main(int argc, char **argv)
     msg.data = false;
     pub1.publish(msg);
     pub1_freq.tick();
-
-    // Calls to pub2 automatically combine the statistics gathering and the
-    // publishing.
-    msg.data = true;
-    pub2.publish(msg);
 
     // We can call updater.update whenever is convenient. It will take care
     // of rate-limiting the updates.
