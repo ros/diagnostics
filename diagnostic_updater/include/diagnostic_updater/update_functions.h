@@ -76,7 +76,7 @@ namespace diagnostic_updater
     /**
      * \brief Tolerance with which bounds must be satisfied.
      *
-     * Acceptable values are from *min_freq_ * (1 + torelance_) to *max_freq_ *
+     * Acceptable values are from *min_freq_ * (1 - torelance_) to *max_freq_ *
      * (1 + tolerance_). 
      *
      * Common use cases are to set tolerance_ to zero, or to assign the same
