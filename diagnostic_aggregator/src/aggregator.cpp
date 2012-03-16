@@ -66,6 +66,7 @@ Aggregator::Aggregator() :
 
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
+  toplevel_state_pub_ = n_.advertise<diagnostic_msgs::DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 }
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
@@ -117,17 +118,42 @@ void Aggregator::publishData()
 {
   diagnostic_msgs::DiagnosticArray diag_array;
 
+  diagnostic_msgs::DiagnosticStatus diag_toplevel_state;
+  diag_toplevel_state.name = "toplevel_state";
+  diag_toplevel_state.level = -1;
+  int min_level = 255;
+
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = analyzer_group_->report();
   for (unsigned int i = 0; i < processed.size(); ++i)
+  {
     diag_array.status.push_back(*processed[i]);
+
+    if (processed[i]->level > diag_toplevel_state.level)
+      diag_toplevel_state.level = processed[i]->level;
+    if (processed[i]->level < min_level)
+      min_level = processed[i]->level;
+  }
  
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other = other_analyzer_->report();
   for (unsigned int i = 0; i < processed_other.size(); ++i)
+  {
     diag_array.status.push_back(*processed_other[i]);
+
+    if (processed[i]->level > diag_toplevel_state.level)
+      diag_toplevel_state.level = processed[i]->level;
+    if (processed[i]->level < min_level)
+      min_level = processed[i]->level;
+  }
 
   diag_array.header.stamp = ros::Time::now();
 
   agg_pub_.publish(diag_array);
+
+  // Top level is error if we have stale items, unless all stale
+  if (diag_toplevel_state.level > 2 and min_level <= 2)
+    diag_toplevel_state.level = 2;
+
+  toplevel_state_pub_.publish(diag_toplevel_state);
 }
   
 
