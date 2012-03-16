@@ -127,6 +127,7 @@ private:
   ros::NodeHandle n_;
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
+  ros::Publisher toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
   double pub_rate_;
 
   /*!
