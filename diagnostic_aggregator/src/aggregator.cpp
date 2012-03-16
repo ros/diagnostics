@@ -139,10 +139,10 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed_other[i]);
 
-    if (processed[i]->level > diag_toplevel_state.level)
-      diag_toplevel_state.level = processed[i]->level;
-    if (processed[i]->level < min_level)
-      min_level = processed[i]->level;
+    if (processed_other[i]->level > diag_toplevel_state.level)
+      diag_toplevel_state.level = processed_other[i]->level;
+    if (processed_other[i]->level < min_level)
+      min_level = processed_other[i]->level;
   }
 
   diag_array.header.stamp = ros::Time::now();
