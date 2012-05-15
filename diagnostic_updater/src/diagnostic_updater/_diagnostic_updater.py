@@ -37,10 +37,10 @@ class DiagnosticTask:
 
 
 
-class GenericFunctionDiagnosticTask(DiagnosticTask):
+class FunctionDiagnosticTask(DiagnosticTask):
     """A DiagnosticTask based on a function.
 
-    The GenericFunctionDiagnosticTask calls the function when it updates. The
+    The FunctionDiagnosticTask calls the function when it updates. The
     function updates the DiagnosticStatusWrapper and collects data.
 
     This is useful for gathering information about a device or driver, like temperature,

@@ -2,7 +2,7 @@
   <description brief="Easily publishes diagnostics for a driver or node">
     diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.
   </description>
-  <author>Jeremy Leibs, Blaise Gassend</author>
+  <author>Jeremy Leibs, Blaise Gassend, Brice Rebsamen</author>
   <license>BSD</license>
   <review status="Doc reviewed" notes="Jan 15 2010"/>
   <url>http://www.ros.org/wiki/diagnostic_updater</url>
