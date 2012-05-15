@@ -1,6 +1,6 @@
 <stack>
   <description brief="Robot diagnostics and instrumentation tools.">Packages related to gathering, viewing, and analyzing diagnostics data from robots.</description>
-  <author>Maintained by Kevin Watts</author>
+  <author>Maintained by Brice Rebsamen</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/diagnostics</url>
