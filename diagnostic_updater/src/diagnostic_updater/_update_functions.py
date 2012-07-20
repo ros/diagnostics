@@ -65,7 +65,6 @@ class FrequencyStatus(DiagnosticTask):
     def tick(self):
         """Signals that an event has occurred."""
         with self.lock:
-            #rospy.logdebug("TICK %i" % self.count)
             self.count += 1
 
     def run(self, stat):
@@ -83,7 +82,7 @@ class FrequencyStatus(DiagnosticTask):
                 stat.summary(2, "No events recorded.")
             elif freq < self.params.freq_bound['min'] * (1 - self.params.tolerance):
                 stat.summary(1, "Frequency too low.")
-            elif freq > self.params.freq_bound['max'] * (1 + self.params.tolerance):
+            elif self.params.freq_bound.has_key('max') and freq > self.params.freq_bound['max'] * (1 + self.params.tolerance):
                 stat.summary(1, "Frequency too high.")
             else:
                 stat.summary(0, "Desired frequency met")
@@ -92,11 +91,11 @@ class FrequencyStatus(DiagnosticTask):
             stat.add("Events since startup", "%d" % self.count)
             stat.add("Duration of window (s)", "%f" % window)
             stat.add("Actual frequency (Hz)", "%f" % freq)
-            if self.params.freq_bound['min'] == self.params.freq_bound['max']:
+            if self.params.freq_bound.has_key('max') and self.params.freq_bound['min'] == self.params.freq_bound['max']:
                 stat.add("Target frequency (Hz)", "%f" % self.params.freq_bound['min'])
             if self.params.freq_bound['min'] > 0:
                 stat.add("Minimum acceptable frequency (Hz)", "%f" % (self.params.freq_bound['min'] * (1 - self.params.tolerance)))
-            if self.params.freq_bound['max']:
+            if self.params.freq_bound.has_key('max'):
                 stat.add("Maximum acceptable frequency (Hz)", "%f" % (self.params.freq_bound['max'] * (1 + self.params.tolerance)))
 
         return stat
@@ -144,7 +143,7 @@ class TimeStampStatus(DiagnosticTask):
         @param stamp The timestamp of the event that will be used in computing
         intervals. Can be either a double or a ros::Time.
         """
-        if isinstance(stamp, rospy.Time):
+        if not isinstance(stamp, float):
             stamp = stamp.to_sec()
 
         with self.lock:

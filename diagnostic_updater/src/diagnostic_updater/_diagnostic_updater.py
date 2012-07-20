@@ -7,7 +7,7 @@
 import roslib
 roslib.load_manifest('diagnostic_updater')
 import rospy
-import threading
+import threading, httplib
 from diagnostic_msgs.msg import DiagnosticArray
 
 from ._diagnostic_status_wrapper import *
@@ -198,8 +198,9 @@ class Updater(DiagnosticTaskVector):
         DiagnosticTaskVector.__init__(self)
         self.publisher = rospy.Publisher("/diagnostics", DiagnosticArray)
 
-        self.period = 1.0
-        self.next_time = rospy.Time.now()
+        self.last_time = rospy.Time.now()
+        self.last_time_period_checked = self.last_time
+        self.period = 1
 
         self.verbose = False
         self.hwid = ""
@@ -209,10 +210,8 @@ class Updater(DiagnosticTaskVector):
         """Causes the diagnostics to update if the inter-update interval
         has been exceeded.
         """
-        if rospy.Time.now() < self.next_time:
-            # @todo put this back in after fix of #2157 update_diagnostic_period(); // Will be checked in force_update otherwise.
-            pass
-        else:
+        self._check_diagnostic_period()
+        if rospy.Time.now() >= self.last_time + rospy.Duration(self.period):
             self.force_update()
 
     def force_update(self):
@@ -221,8 +220,7 @@ class Updater(DiagnosticTaskVector):
         Useful if the node has undergone a drastic state change that should be
         published immediately.
         """
-        self.update_diagnostic_period()
-        self.next_time = rospy.Time.now() + rospy.Duration.from_sec(self.period)
+        self.last_time = rospy.Time.now()
 
         warn_nohwid = len(self.hwid)==0
 
@@ -253,10 +251,6 @@ class Updater(DiagnosticTaskVector):
 
         self.publish(status_vec)
 
-    def getPeriod(self):
-        """Returns the interval between updates."""
-        return self.period
-
     def broadcast(self, lvl, msg):
         """Outputs a message on all the known DiagnosticStatus.
 
@@ -279,11 +273,22 @@ class Updater(DiagnosticTaskVector):
     def setHardwareID(self, hwid):
         self.hwid = hwid
 
-    def update_diagnostic_period(self):
-        """Recheck the diagnostic_period on the parameter server. (Cached)"""
-        old_period = self.period
-        self.period = rospy.get_param("~diagnostic_period", 1)
-        self.next_time += rospy.Duration(self.period - old_period) # Update next_time
+    def _check_diagnostic_period(self):
+        """Recheck the diagnostic_period on the parameter server."""
+
+        # This was getParamCached() call in the cpp code. i.e. it would throttle
+        # the actual call to the parameter server using a notification of change
+        # mechanism.
+        # This is not available in rospy. Hence I throttle the call to the
+        # parameter server using a standard timeout mechanism (4Hz)
+
+        now = rospy.Time.now()
+        if  now >= self.last_time_period_checked + rospy.Duration(0.25):
+            try:
+                self.period = rospy.get_param("~diagnostic_period", 1)
+                self.last_time_period_checked = now
+            except (httplib.CannotSendRequest, httplib.ResponseNotReady):
+                pass
 
     def publish(self, msg):
         """Publishes a single diagnostic status or a vector of diagnostic statuses."""
