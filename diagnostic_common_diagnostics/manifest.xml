@@ -1,0 +1,21 @@
+<package>
+  <description brief="diagnostic_common_diagnostics">
+
+     diagnostic_common_diagnostics
+
+  </description>
+  <author>brice rebsamen</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/diagnostic_common_diagnostics</url>
+
+  <depend package="diagnostic_updater" />
+  <depend package="rospy" />
+  <depend package="tf" />
+
+  <rosdep name="hddtemp" />
+  <rosdep name="ntpdate" />
+
+</package>
+
+

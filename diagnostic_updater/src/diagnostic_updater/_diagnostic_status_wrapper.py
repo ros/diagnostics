@@ -9,7 +9,9 @@ roslib.load_manifest('diagnostic_updater')
 import rospy
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
-
+OK = DiagnosticStatus.OK
+WARN = DiagnosticStatus.WARN
+ERROR = DiagnosticStatus.ERROR
 
 class DiagnosticStatusWrapper(DiagnosticStatus):
     """ Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it
