@@ -6,9 +6,8 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 rosbuild_add_boost_directories()
 
-rosbuild_add_executable(selftest_rostest src/selftest_rostest.cpp)
+rosbuild_add_gtest(selftest_rostest src/selftest_rostest.cpp)
 rosbuild_link_boost(selftest_rostest thread)
-rosbuild_add_gtest_build_flags(selftest_rostest)
 # Following line needed because of #ros3178.
 set_target_properties(selftest_rostest PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
