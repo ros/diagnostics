@@ -41,3 +41,8 @@ add_rostest(test/launch/nominal_test.launch)
 add_rostest(test/launch/no_id_test.launch)
 add_rostest(test/launch/error_test.launch)
 add_rostest(test/launch/exception_test.launch)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+

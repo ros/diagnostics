@@ -43,3 +43,10 @@ set_target_properties(analyzer_loader PROPERTIES EXCLUDE_FROM_ALL FALSE)
 add_rostest(test/launch/test_loader.launch)
 add_rostest(test/launch/test_expected_stale.launch)
 add_rostest(test/launch/test_multiple_match.launch)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+install(FILES analyzer_plugins.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

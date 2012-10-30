@@ -15,3 +15,10 @@ target_link_libraries(example ${catkin_LIBRARIES})
 catkin_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
 add_rostest(test/diagnostic_updater_test.xml)
 
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+install(FILES diagnostic_updater.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+

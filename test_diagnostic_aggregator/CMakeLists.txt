@@ -29,3 +29,10 @@ add_rostest(test/launch/test_fail_init.launch)
 
 # Tests that analyzers specified both with and without package name load correctly
 add_rostest(test/launch/test_dual_analyzer_load.launch)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+install(FILES test_diagnostic_aggregator_plugin.xml
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
