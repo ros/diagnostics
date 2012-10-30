@@ -1,0 +1,4 @@
+hddtemp:
+    ubuntu: hddtemp
+ntpdate:
+    ubuntu: ntpdate
