@@ -1,15 +1,17 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(diagnostic_updater)
 
-set(ROS_BUILD_TYPE RelWithDebInfo)
-rosbuild_init()
+# Load catkin and all dependencies required for this package
+find_package(catkin REQUIRED diagnostic_msgs roscpp std_msgs)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+catkin_package(DEPENDS diagnostic_msgs roscpp std_msgs
+               INCLUDE_DIRS include
+)
 
-rosbuild_add_boost_directories()
+include_directories(include)
+add_executable(example src/example.cpp)
+target_link_libraries(example ${catkin_LIBRARIES})
 
-rosbuild_add_executable(example src/example.cpp)
-
-rosbuild_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
-rosbuild_add_rostest(test/diagnostic_updater_test.xml)
+catkin_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
+add_rostest(test/diagnostic_updater_test.xml)
 

@@ -1,0 +1,33 @@
+<package>
+  <name>diagnostic_updater</name>
+  <version>1.7.0</version>
+  <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
+  <author>Kevin Watts</author>
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.ros.org/wiki/diagnostic_updater</url>
+<!-- <url type="bugtracker"></url> -->
+
+  <author>Jeremy Leibs</author>
+  <author>Blaise Gassend</author>
+
+  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <run_depend>diagnostic_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>diagnostic_msgs</test_depend> -->
+  <!-- <test_depend>std_msgs</test_depend> -->
+
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+    <architecture_independent/>
+  </export>
+</package>

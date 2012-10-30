@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 2.8.3)
+project(diagnostic_analysis)
 
-set(ROS_BUILD_TYPE RelWithDebInfo)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-rosbuild_init()
+# Load catkin and all dependencies required for this package
+find_package(catkin REQUIRED diagnostic_msgs rosbag roslib rostest)
 
-rosbuild_add_pyunit(test/bag_csv_test.py)
+catkin_package(DEPENDS diagnostic_msgs rosbag roslib)
+
+catkin_add_nosetests(test/bag_csv_test.py)

@@ -35,9 +35,7 @@
 ##\author Kevin Watts
 ##\brief LogExporter class does diagnostics logfile conversion to CSV
 
-PKG = 'diagnostic_analysis'
-
-import roslib; roslib.load_manifest(PKG)
+import roslib
 import rosbag
 import diagnostic_msgs.msg
 import time, sys, os

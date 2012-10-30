@@ -1,25 +1,43 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
-rosbuild_init()
+include_directories(${Boost_INCLUDE_DIRS})
+cmake_minimum_required(VERSION 2.8.3)
+project(self_test)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+# Load catkin and all dependencies required for this package
+find_package(catkin REQUIRED diagnostic_msgs diagnostic_updater roscpp)
 
-rosbuild_add_boost_directories()
+catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
+    INCLUDE_DIRS include
+    LIBRARIES ${PROJECT_NAME})
 
-rosbuild_add_gtest(selftest_rostest src/selftest_rostest.cpp)
-rosbuild_link_boost(selftest_rostest thread)
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
+include_directories(include)
+
+catkin_add_gtest(selftest_rostest src/selftest_rostest.cpp)
+find_package(Boost REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
+                                       ${catkin_LIBRARIES}
+)
 # Following line needed because of #ros3178.
 set_target_properties(selftest_rostest PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
-rosbuild_add_executable(run_selftest src/run_selftest.cpp)
-rosbuild_link_boost(run_selftest thread)
+add_executable(run_selftest src/run_selftest.cpp)
+find_package(Boost REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(run_selftest ${Boost_LIBRARIES}
+                                   ${catkin_LIBRARIES}
+)
 
-rosbuild_add_executable(selftest_example src/selftest_example.cpp)
-rosbuild_link_boost(selftest_example thread)
+add_executable(selftest_example src/selftest_example.cpp)
+find_package(Boost REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(selftest_example ${Boost_LIBRARIES}
+                                       ${catkin_LIBRARIES}
+)
 
 add_subdirectory(test EXCLUDE_FROM_ALL)
 
-rosbuild_add_rostest(test/launch/nominal_test.launch)
-rosbuild_add_rostest(test/launch/no_id_test.launch)
-rosbuild_add_rostest(test/launch/error_test.launch)
-rosbuild_add_rostest(test/launch/exception_test.launch)
+add_rostest(test/launch/nominal_test.launch)
+add_rostest(test/launch/no_id_test.launch)
+add_rostest(test/launch/error_test.launch)
+add_rostest(test/launch/exception_test.launch)

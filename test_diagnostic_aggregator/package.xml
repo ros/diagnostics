@@ -1,0 +1,39 @@
+<package>
+  <name>test_diagnostic_aggregator</name>
+  <version>1.7.0</version>
+  <description>Basic diagnostic_aggregator tests are  in the</description>
+  <author>Kevin Watts</author>
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/test_diagnostic_aggregator</url>
+<!-- <url type="bugtracker"></url> -->
+
+  <author>Kevin Watts</author>
+
+  <build_depend>diagnostic_aggregator</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+
+  <run_depend>diagnostic_aggregator</run_depend>
+  <run_depend>diagnostic_msgs</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+
+  <!-- <test_depend>pluginlib</test_depend> -->
+  <!-- <test_depend>diagnostic_msgs</test_depend> -->
+  <!-- <test_depend>diagnostic_aggregator</test_depend> -->
+  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>rospy</test_depend> -->
+
+  <export>
+    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ltestdiagnostic_aggregator `rosboost-cfg --lflags regex`" cflags="-I${prefix}/include `rosboost-cfg --cflags`"/>
+    <diagnostic_aggregator plugin="${prefix}/test_diagnostic_aggregator_plugin.xml"/>
+    <architecture_independent/>
+  </export>
+</package>
