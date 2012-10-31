@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(self_test)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs diagnostic_updater roscpp)
+find_package(catkin REQUIRED diagnostic_msgs diagnostic_updater roscpp rostest)
 
 catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
     INCLUDE_DIRS include

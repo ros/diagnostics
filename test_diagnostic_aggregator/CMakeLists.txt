@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(test_diagnostic_aggregator)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_aggregator diagnostic_msgs pluginlib roscpp rospy)
+find_package(catkin REQUIRED diagnostic_aggregator diagnostic_msgs pluginlib roscpp rospy rostest)
 
 catkin_package(DEPENDS diagnostic_aggregator diagnostic_msgs pluginlib roscpp rospy
                INCLUDE_DIRS include
