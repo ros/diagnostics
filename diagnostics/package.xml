@@ -1,6 +1,6 @@
 <package>
   <name>diagnostics</name>
-  <version>1.7.3</version>
+  <version>1.7.4</version>
   <description>diagnostics</description>
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
@@ -17,6 +17,7 @@
   <run_depend>diagnostic_analysis</run_depend>
   <run_depend>diagnostic_common_diagnostics</run_depend>
   <run_depend>diagnostic_updater</run_depend>
+  <run_depend>self_test</run_depend>
 
   <export>
     <metapackage/>
