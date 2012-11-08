@@ -6,8 +6,8 @@ project(self_test)
 find_package(catkin REQUIRED diagnostic_msgs diagnostic_updater roscpp rostest)
 
 catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME})
+               INCLUDE_DIRS include
+)
 
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 include_directories(include)
