@@ -8,7 +8,7 @@ catkin_package(DEPENDS diagnostic_msgs roscpp std_msgs
                INCLUDE_DIRS include
 )
 
-include_directories(include)
+include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(example src/example.cpp)
 target_link_libraries(example ${catkin_LIBRARIES})
 
