@@ -12,7 +12,7 @@ catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp
 find_package(Boost REQUIRED COMPONENTS system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-include_directories(include)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
