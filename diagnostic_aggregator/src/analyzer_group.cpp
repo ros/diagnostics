@@ -92,7 +92,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
     XmlRpc::XmlRpcValue analyzer_type = analyzer_value["type"];
     string an_type = analyzer_type;
     
-    Analyzer* analyzer = NULL;
+    boost::shared_ptr<Analyzer> analyzer;
     try
     {
       // Look for non-fully qualified class name for Analyzer type
@@ -119,7 +119,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
         }
       }
 
-      analyzer = analyzer_loader_.createClassInstance(an_type);
+      analyzer = analyzer_loader_.createInstance(an_type);
     }
     catch (pluginlib::LibraryLoadException& e)
     {
@@ -130,7 +130,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
       continue;
     }
 
-    if (analyzer == NULL)
+    if (!analyzer)
     {
       ROS_ERROR("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), analyzers_nh.getNamespace().c_str());
       boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib return NULL Analyzer for " + an_type));
@@ -162,8 +162,6 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 
 AnalyzerGroup::~AnalyzerGroup()
 {
-  for (unsigned int i = 0; i < analyzers_.size(); ++i)
-    delete analyzers_[i];
   analyzers_.clear();
 }
 

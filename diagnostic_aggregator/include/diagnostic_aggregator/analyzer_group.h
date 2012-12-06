@@ -152,7 +152,7 @@ private:
    */
   std::vector<boost::shared_ptr<StatusItem> > aux_items_;
 
-  std::vector<Analyzer*> analyzers_;
+  std::vector<boost::shared_ptr<Analyzer> > analyzers_;
 
   /*
    *\brief The map of names to matchings is stored internally. 
