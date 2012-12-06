@@ -15,6 +15,7 @@ include_directories(include)
 add_library(test_diagnostic_aggregator
   src/match_no_analyze_analyzer.cpp
   src/fail_init_analyzer.cpp)
+add_dependencies(test_diagnostic_aggregator diagnostic_msgs_gencpp)
 
 add_rostest(test/launch/test_match_no_analyze_analyzer_load.launch)
 
