@@ -10,6 +10,8 @@
   <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
 <!-- <url type="bugtracker"></url> -->
 
+  <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>rospy</build_depend>
 
   <run_depend>diagnostic_updater</run_depend>

@@ -13,6 +13,8 @@
 
   <author>Kevin Watts</author>
 
+  <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
