@@ -13,6 +13,8 @@
 
   <author>Kevin Watts</author>
 
+  <buildtool_depend>catkin</buildtool_depend>
+
   <run_depend>diagnostic_aggregator</run_depend>
   <run_depend>diagnostic_analysis</run_depend>
   <run_depend>diagnostic_common_diagnostics</run_depend>
