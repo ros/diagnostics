@@ -16,7 +16,7 @@
   <author>Eric Berger</author>
   <author>Kevin Watts</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>rosbag</build_depend>
