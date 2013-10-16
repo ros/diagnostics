@@ -31,18 +31,20 @@ target_link_libraries(aggregator_node ${catkin_LIBRARIES}
                                       ${PROJECT_NAME}
 )
 
-add_rostest(test/launch/test_agg.launch)
+if(CATKIN_ENABLE_TESTING)
+  add_rostest(test/launch/test_agg.launch)
 
-# Analyzer loader allows other users to test that Analyzers load
-catkin_add_gtest(analyzer_loader test/analyzer_loader.cpp)
-target_link_libraries(analyzer_loader diagnostic_aggregator)
-set_target_properties(analyzer_loader PROPERTIES EXCLUDE_FROM_ALL FALSE)
+  # Analyzer loader allows other users to test that Analyzers load
+  catkin_add_gtest(analyzer_loader test/analyzer_loader.cpp)
+  target_link_libraries(analyzer_loader diagnostic_aggregator)
+  set_target_properties(analyzer_loader PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
 
-# Test Analyzer loader
-add_rostest(test/launch/test_loader.launch)
-add_rostest(test/launch/test_expected_stale.launch)
-add_rostest(test/launch/test_multiple_match.launch)
+  # Test Analyzer loader
+  add_rostest(test/launch/test_loader.launch)
+  add_rostest(test/launch/test_expected_stale.launch)
+  add_rostest(test/launch/test_multiple_match.launch)
+endif()
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
