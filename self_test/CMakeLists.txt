@@ -1,4 +1,3 @@
-include_directories(${Boost_INCLUDE_DIRS})
 cmake_minimum_required(VERSION 2.8.3)
 project(self_test)
 
@@ -11,6 +10,7 @@ catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
 
 include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 include_directories(include)
+include_directories(${Boost_INCLUDE_DIRS})
 
 catkin_add_gtest(selftest_rostest src/selftest_rostest.cpp)
 find_package(Boost REQUIRED COMPONENTS thread)
