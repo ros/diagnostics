@@ -71,6 +71,7 @@ namespace self_test
       ros::ServiceServer service_server_;
       ros::CallbackQueue self_test_queue_;
       ros::NodeHandle node_handle_;
+      ros::NodeHandle private_node_handle_;
       std::string id_;
 
       bool verbose;
@@ -86,13 +87,15 @@ namespace self_test
        *
        * \param h NodeHandle from which to work. (Currently unused?)
        */
-      TestRunner(ros::NodeHandle h = ros::NodeHandle()) : 
-        node_handle_(h)
+      TestRunner(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~")) : 
+        node_handle_(h),
+        private_node_handle_(h)
     {
       ROS_DEBUG("Advertising self_test");
-      ros::NodeHandle private_node_handle_("~");
-      private_node_handle_.setCallbackQueue(&self_test_queue_);
-      service_server_ = private_node_handle_.advertiseService("self_test", &TestRunner::doTest, this);
+      ros::AdvertiseServiceOptions ops;//use options so that we can set callback queue directly
+      ops.init<diagnostic_msgs::SelfTest::Request, diagnostic_msgs::SelfTest::Response>("self_test", boost::bind(&TestRunner::doTest, this, _1, _2));
+      ops.callback_queue = &self_test_queue_;
+      service_server_ = private_node_handle_.advertiseService(ops);
       verbose = true;
     }
 
