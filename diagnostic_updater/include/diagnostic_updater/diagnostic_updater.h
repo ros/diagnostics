@@ -370,7 +370,7 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-    Updater()
+    Updater(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~")) : private_node_handle_(ph), node_handle_(h)
     {
       setup();
     }
@@ -553,7 +553,6 @@ namespace diagnostic_updater
       void setup()
       {
         publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
-        private_node_handle_ = ros::NodeHandle("~");
 
         period_ = 1.0;
         update_diagnostic_period();
