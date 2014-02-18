@@ -370,7 +370,7 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-    Updater()
+    Updater(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~"), std::string node_name = ros::this_node::getName()) : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
     {
       setup();
     }
@@ -539,7 +539,7 @@ namespace diagnostic_updater
             iter = status_vec.begin(); iter != status_vec.end(); iter++)
         {
           iter->name = 
-            ros::this_node::getName().substr(1) + std::string(": ") + iter->name;
+            node_name_.substr(1) + std::string(": ") + iter->name;
         }
         diagnostic_msgs::DiagnosticArray msg;
         msg.status = status_vec;
@@ -553,7 +553,6 @@ namespace diagnostic_updater
       void setup()
       {
         publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
-        private_node_handle_ = ros::NodeHandle("~");
 
         period_ = 1.0;
         update_diagnostic_period();
@@ -583,6 +582,7 @@ namespace diagnostic_updater
 
       double period_;
       std::string hwid_;
+      std::string node_name_;
       bool warn_nohwid_done_;
   };
 
