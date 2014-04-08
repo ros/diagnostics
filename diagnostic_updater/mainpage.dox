@@ -22,6 +22,6 @@ publication. These libraries are commonly used by device drivers as part of the 
    diagnostic_updater::HeaderlessDiagnosedPublisher to update the
    statistics automatically when publications are made to a topic.
 
-Example uses of these classes can be found in \ref example.cpp.
+Example uses of these classes can be found in \ref src/example.cpp.
  
  */                                     
