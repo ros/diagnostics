@@ -35,7 +35,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_agg.launch)
 
   # Analyzer loader allows other users to test that Analyzers load
-  catkin_add_gtest(analyzer_loader test/analyzer_loader.cpp)
+  add_executable(analyzer_loader test/analyzer_loader.cpp)
   target_link_libraries(analyzer_loader diagnostic_aggregator)
   set_target_properties(analyzer_loader PROPERTIES EXCLUDE_FROM_ALL FALSE)
 

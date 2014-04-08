@@ -15,7 +15,7 @@ add_executable(example src/example.cpp)
 target_link_libraries(example ${catkin_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
+  add_executable(diagnostic_updater_test test/diagnostic_updater_test.cpp)
   target_link_libraries(diagnostic_updater_test ${catkin_LIBRARIES})
   add_rostest(test/diagnostic_updater_test.xml)
 endif()

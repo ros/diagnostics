@@ -8,21 +8,10 @@ catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
                INCLUDE_DIRS include
 )
 
-include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
-include_directories(include)
-include_directories(${Boost_INCLUDE_DIRS})
-
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(selftest_rostest src/selftest_rostest.cpp)
-endif()
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
-                                       ${catkin_LIBRARIES}
-)
-# Following line needed because of #ros3178.
-set_target_properties(selftest_rostest PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
 add_executable(run_selftest src/run_selftest.cpp)
 find_package(Boost REQUIRED COMPONENTS thread)
@@ -39,6 +28,13 @@ target_link_libraries(selftest_example ${Boost_LIBRARIES}
 )
 
 if(CATKIN_ENABLE_TESTING)
+  add_executable(selftest_rostest src/selftest_rostest.cpp)
+  target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
+                                         ${catkin_LIBRARIES}
+  )
+  # Following line needed because of #ros3178.
+  set_target_properties(selftest_rostest PROPERTIES EXCLUDE_FROM_ALL FALSE)
+
   add_subdirectory(test EXCLUDE_FROM_ALL)
 
   add_rostest(test/launch/nominal_test.launch)
