@@ -27,13 +27,13 @@ target_link_libraries(selftest_example ${Boost_LIBRARIES}
                                        ${catkin_LIBRARIES}
 )
 
-if(CATKIN_ENABLE_TESTING)
-  add_executable(selftest_rostest src/selftest_rostest.cpp)
-  target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
-                                         ${catkin_LIBRARIES}
-                                         gtest
-  )
+add_executable(selftest_rostest src/selftest_rostest.cpp)
+target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
+                                       ${catkin_LIBRARIES}
+                                       gtest
+)
 
+if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 
   add_rostest(test/launch/nominal_test.launch)
@@ -46,7 +46,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(TARGETS run_selftest selftest_example
+install(TARGETS run_selftest selftest_example selftest_rostest
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
