@@ -40,7 +40,6 @@ from __future__ import with_statement
 
 DURATION = 5
 PKG = 'test_diagnostic_aggregator'
-import roslib; roslib.load_manifest(PKG)
 import rospy, rostest, unittest
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 from time import sleep
