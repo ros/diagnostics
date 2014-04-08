@@ -17,19 +17,21 @@ add_library(test_diagnostic_aggregator
   src/fail_init_analyzer.cpp)
 add_dependencies(test_diagnostic_aggregator diagnostic_msgs_gencpp)
 
-add_rostest(test/launch/test_match_no_analyze_analyzer_load.launch)
+if(CATKIN_ENABLE_TESTING)
+  add_rostest(test/launch/test_match_no_analyze_analyzer_load.launch)
 
-# Tests that an item can be matched, not analyzed, and reported in "Other"
-add_rostest(test/launch/test_match_no_analyze.launch)
+  # Tests that an item can be matched, not analyzed, and reported in "Other"
+  add_rostest(test/launch/test_match_no_analyze.launch)
 
-# Tests that item can be matched, not analyzed, but analyzed by another Analyzer
-add_rostest(test/launch/test_match_then_analyze.launch)
+  # Tests that item can be matched, not analyzed, but analyzed by another Analyzer
+  add_rostest(test/launch/test_match_then_analyze.launch)
 
-# Tests that analyzers that fail to load will report an error in the diagnostics
-add_rostest(test/launch/test_fail_init.launch)
+  # Tests that analyzers that fail to load will report an error in the diagnostics
+  add_rostest(test/launch/test_fail_init.launch)
 
-# Tests that analyzers specified both with and without package name load correctly
-add_rostest(test/launch/test_dual_analyzer_load.launch)
+  # Tests that analyzers specified both with and without package name load correctly
+  add_rostest(test/launch/test_dual_analyzer_load.launch)
+endif()
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

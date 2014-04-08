@@ -12,7 +12,10 @@ include_directories(SYSTEM ${catkin_INCLUDE_DIRS})
 include_directories(include)
 include_directories(${Boost_INCLUDE_DIRS})
 
-catkin_add_gtest(selftest_rostest src/selftest_rostest.cpp)
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(selftest_rostest src/selftest_rostest.cpp)
+endif()
+
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
@@ -35,12 +38,14 @@ target_link_libraries(selftest_example ${Boost_LIBRARIES}
                                        ${catkin_LIBRARIES}
 )
 
-add_subdirectory(test EXCLUDE_FROM_ALL)
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test EXCLUDE_FROM_ALL)
 
-add_rostest(test/launch/nominal_test.launch)
-add_rostest(test/launch/no_id_test.launch)
-add_rostest(test/launch/error_test.launch)
-add_rostest(test/launch/exception_test.launch)
+  add_rostest(test/launch/nominal_test.launch)
+  add_rostest(test/launch/no_id_test.launch)
+  add_rostest(test/launch/error_test.launch)
+  add_rostest(test/launch/exception_test.launch)
+endif()
 
 install(DIRECTORY include/${PROJECT_NAME}/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
