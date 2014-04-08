@@ -36,8 +36,7 @@ if(CATKIN_ENABLE_TESTING)
 
   # Analyzer loader allows other users to test that Analyzers load
   add_executable(analyzer_loader test/analyzer_loader.cpp)
-  target_link_libraries(analyzer_loader diagnostic_aggregator)
-  set_target_properties(analyzer_loader PROPERTIES EXCLUDE_FROM_ALL FALSE)
+  target_link_libraries(analyzer_loader diagnostic_aggregator gtest)
 
 
   # Test Analyzer loader

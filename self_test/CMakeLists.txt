@@ -31,11 +31,10 @@ if(CATKIN_ENABLE_TESTING)
   add_executable(selftest_rostest src/selftest_rostest.cpp)
   target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
                                          ${catkin_LIBRARIES}
+                                         gtest
   )
-  # Following line needed because of #ros3178.
-  set_target_properties(selftest_rostest PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
-  add_subdirectory(test EXCLUDE_FROM_ALL)
+  add_subdirectory(test)
 
   add_rostest(test/launch/nominal_test.launch)
   add_rostest(test/launch/no_id_test.launch)
