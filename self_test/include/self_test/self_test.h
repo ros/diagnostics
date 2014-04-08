@@ -89,7 +89,7 @@ namespace self_test
        */
       TestRunner(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~")) : 
         node_handle_(h),
-        private_node_handle_(h)
+        private_node_handle_(ph)
     {
       ROS_DEBUG("Advertising self_test");
       ros::AdvertiseServiceOptions ops;//use options so that we can set callback queue directly
