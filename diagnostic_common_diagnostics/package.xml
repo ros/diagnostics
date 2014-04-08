@@ -3,6 +3,7 @@
   <version>1.8.0</version>
   <description>diagnostic_common_diagnostics</description>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
 
   <license>BSD</license>
