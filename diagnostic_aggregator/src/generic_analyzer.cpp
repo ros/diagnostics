@@ -187,16 +187,12 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
   // Check and make sure our expected names haven't been removed ...
   vector<string> expected_names_missing;
   bool has_name = false;
-  bool all_stale = true;
   
   for (unsigned int i = 0; i < expected_.size(); ++i)
   {
     has_name = false;
     for (unsigned int j = 0; j < processed.size(); ++j)
     {
-      if (!processed[j]->level == 3)
-        all_stale = false;
-
       size_t last_slash = processed[j]->name.rfind("/");
       string nice_name = processed[j]->name.substr(last_slash + 1);
       if (nice_name == expected_[i] || nice_name == getOutputName(expected_[i]))
@@ -228,6 +224,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
   } 
 
   // Check that all processed items aren't stale
+  bool all_stale = true;
   for (unsigned int j = 0; j < processed.size(); ++j)
   {
     if (processed[j]->level != 3)
