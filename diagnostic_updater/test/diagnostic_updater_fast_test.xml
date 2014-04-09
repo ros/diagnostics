@@ -1,0 +1,6 @@
+<launch>
+  <test pkg="diagnostic_updater" type="diagnostic_updater_test" test-name="diagnostic_updater_test">
+    <param name="diagnostic_period" value="0.1"/>
+  </test>
+</launch>
+
