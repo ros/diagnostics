@@ -555,8 +555,8 @@ namespace diagnostic_updater
         publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
 
         period_ = 1.0;
+        next_time_ = ros::Time::now() + ros::Duration(period_);
         update_diagnostic_period();
-        next_time_ = ros::Time::now();
 
         verbose_ = false;
         warn_nohwid_done_ = false;
