@@ -194,7 +194,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
     has_name = false;
     for (unsigned int j = 0; j < processed.size(); ++j)
     {
-      if (!processed[j]->level == 3)
+      if ((!processed[j]->level) == 3)
         all_stale = false;
 
       size_t last_slash = processed[j]->name.rfind("/");
