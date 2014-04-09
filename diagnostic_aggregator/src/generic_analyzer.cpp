@@ -216,19 +216,19 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
       expected_names_missing.push_back(expected_[i]);
   }  
   
-  // Add missing names to header ...
-  for (unsigned int i = 0; i < expected_names_missing.size(); ++i)
-  {
-    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
-    processed.push_back(item->toStatusMsg(path_, true));
-  } 
-
   // Check that all processed items aren't stale
   bool all_stale = true;
   for (unsigned int j = 0; j < processed.size(); ++j)
   {
     if (processed[j]->level != 3)
       all_stale = false;
+  }
+
+  // Add missing names to header ...
+  for (unsigned int i = 0; i < expected_names_missing.size(); ++i)
+  {
+    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+    processed.push_back(item->toStatusMsg(path_, true));
   }
 
   for (unsigned int j = 0; j < processed.size(); ++j)
