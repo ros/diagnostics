@@ -9,3 +9,10 @@ catkin_python_setup()
 catkin_package()
 
 catkin_python_setup()
+
+install(PROGRAMS
+  src/diagnostic_common_diagnostics/hd_monitor.py
+  src/diagnostic_common_diagnostics/ntp_monitor.py
+  src/diagnostic_common_diagnostics/sensors_monitor.py
+  src/diagnostic_common_diagnostics/tf_monitor.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
