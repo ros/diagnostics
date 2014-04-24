@@ -28,8 +28,4 @@
   <!-- <test_depend>roscpp</test_depend> -->
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>diagnostic_msgs</test_depend> -->
-
-  <export>
-    <architecture_independent/>
-  </export>
 </package>
