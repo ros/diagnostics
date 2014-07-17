@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
                                             ${catkin_LIBRARIES}
 )
+add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
 # Aggregator node 
 add_executable(aggregator_node src/aggregator_node.cpp)
