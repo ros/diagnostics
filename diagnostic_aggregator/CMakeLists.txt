@@ -32,13 +32,12 @@ target_link_libraries(aggregator_node ${catkin_LIBRARIES}
                                       ${PROJECT_NAME}
 )
 
+# Analyzer loader allows other users to test that Analyzers load
+add_executable(analyzer_loader test/analyzer_loader.cpp)
+target_link_libraries(analyzer_loader diagnostic_aggregator gtest)
+
 if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_agg.launch)
-
-  # Analyzer loader allows other users to test that Analyzers load
-  add_executable(analyzer_loader test/analyzer_loader.cpp)
-  target_link_libraries(analyzer_loader diagnostic_aggregator gtest)
-
 
   # Test Analyzer loader
   add_rostest(test/launch/test_loader.launch)
@@ -55,6 +54,6 @@ install(FILES analyzer_plugins.xml
 install(TARGETS ${PROJECT_NAME}
         DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
-install(TARGETS aggregator_node
+install(TARGETS aggregator_node analyzer_loader
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
