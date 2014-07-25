@@ -4,6 +4,8 @@ project(diagnostic_analysis)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED diagnostic_msgs rosbag roslib rostest)
 
+catkin_python_setup()
+
 catkin_package(DEPENDS diagnostic_msgs rosbag roslib)
 
 catkin_add_nosetests(test/bag_csv_test.py)
