@@ -1,6 +1,6 @@
 <package>
   <name>diagnostics</name>
-  <version>1.7.10</version>
+  <version>1.7.11</version>
   <description>
     Packages related to gathering, viewing, and analyzing diagnostics data from robots.
   </description>
