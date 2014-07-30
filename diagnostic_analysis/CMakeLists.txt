@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(diagnostic_analysis)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs rosbag roslib rostest)
+find_package(catkin REQUIRED diagnostic_msgs rosbag roslib)
 
 catkin_package(DEPENDS diagnostic_msgs rosbag roslib)
 
