@@ -9,10 +9,14 @@ catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME})
 
+if(NOT GTEST_FOUND)
+  message(FATAL_ERROR "GTEST not found. diagnostics_aggregator requires gtest to build")
+endif()
+
 find_package(Boost REQUIRED COMPONENTS system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
@@ -34,7 +38,7 @@ target_link_libraries(aggregator_node ${catkin_LIBRARIES}
 
 # Analyzer loader allows other users to test that Analyzers load
 add_executable(analyzer_loader test/analyzer_loader.cpp)
-target_link_libraries(analyzer_loader diagnostic_aggregator gtest)
+target_link_libraries(analyzer_loader diagnostic_aggregator ${GTEST_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_agg.launch)

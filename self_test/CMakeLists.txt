@@ -8,7 +8,11 @@ catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
                INCLUDE_DIRS include
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+if(NOT GTEST_FOUND)
+  message(FATAL_ERROR "GTEST not found. diagnostics_aggregator requires gtest to build")
+endif()
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -30,7 +34,7 @@ target_link_libraries(selftest_example ${Boost_LIBRARIES}
 add_executable(selftest_rostest src/selftest_rostest.cpp)
 target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
                                        ${catkin_LIBRARIES}
-                                       gtest
+                                       ${GTEST_LIBRARIES}
 )
 
 if(CATKIN_ENABLE_TESTING)
