@@ -228,7 +228,7 @@ class Updater(DiagnosticTaskVector):
     def __init__(self):
         """Constructs an updater class."""
         DiagnosticTaskVector.__init__(self)
-        self.publisher = rospy.Publisher("/diagnostics", DiagnosticArray)
+        self.publisher = rospy.Publisher("/diagnostics", DiagnosticArray, queue_size=10)
 
         self.last_time = rospy.Time.now()
         self.last_time_period_checked = self.last_time
