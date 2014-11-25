@@ -38,13 +38,15 @@
  */
 
 #include <stdlib.h>
+#include <algorithm>
 #include <ros/ros.h>
 #include <boost/foreach.hpp>
 #include <diagnostic_common_diagnostics/libsensors_chip.h>
 
 #define NAME_BUFFER_SIZE 250
 
-SensorChip::SensorChip(sensors_chip_name const *chip_name) :
+SensorChip::SensorChip(sensors_chip_name const *chip_name,
+    const std::vector<std::string> &ignore) :
   internal_name_(chip_name)
 {
   char name_buffer[NAME_BUFFER_SIZE];
@@ -52,7 +54,33 @@ SensorChip::SensorChip(sensors_chip_name const *chip_name) :
   name_ = name_buffer;
 
   ROS_DEBUG("Found Sensor: %s", getName().c_str());
-  enumerate_features();
+
+  // enumerate the features of this sensor
+  sensors_feature const *feature;
+  int number = 0;
+
+  while ((feature = sensors_get_features(internal_name_, &number)) != NULL) {
+    sensors_feature_type type = feature->type;
+    SensorChipFeaturePtr feature_ptr;
+    switch(type){
+    case SENSORS_FEATURE_FAN:
+      feature_ptr.reset(new FanSensor(*this, feature));
+      break;
+    case SENSORS_FEATURE_TEMP:
+      feature_ptr.reset(new TempSensor(*this, feature));
+      break;
+    default:
+      feature_ptr.reset(new OtherSensor(*this, feature));
+      break;
+    }
+
+    if( std::count(ignore.begin(), ignore.end(),
+          feature_ptr->getSensorName()) > 0 ) {
+      ROS_INFO_STREAM("Ignoring sensor " << feature_ptr->getSensorName());
+    } else {
+      features_.push_back(feature_ptr);
+    }
+  }
 
   std::stringstream info_msg;
   info_msg << "Found sensor " << getName();
@@ -70,27 +98,6 @@ SensorChip::SensorChip(sensors_chip_name const *chip_name) :
   ROS_INFO_STREAM(info_msg.str());
 }
 
-void SensorChip::enumerate_features(){
-  features_.clear();
-
-  sensors_feature const *feature;
-  int number = 0;
-
-  while ((feature = sensors_get_features(internal_name_, &number)) != NULL) {
-    sensors_feature_type type = feature->type;
-    switch(type){
-    case SENSORS_FEATURE_FAN:
-      features_.push_back(SensorChipFeaturePtr(new FanSensor(*this, feature)));
-      break;
-    case SENSORS_FEATURE_TEMP:
-      features_.push_back(SensorChipFeaturePtr(new TempSensor(*this, feature)));
-      break;
-    default:
-      features_.push_back(SensorChipFeaturePtr(new OtherSensor(*this, feature)));
-      break;
-    }
-  }
-}
 
 
 SensorChipFeature::SensorChipFeature(const SensorChip& chip,
@@ -122,7 +129,9 @@ void SensorChipFeature::enumerate_subfeatures(){
   int number = 0;
 
   while ((subfeature = sensors_get_all_subfeatures(chip_.internal_name_, feature_, &number)) != NULL) {
-    sub_features_.push_back(SensorChipSubFeaturePtr(new SensorChipSubFeature(*this, subfeature)));
+    SensorChipSubFeaturePtr subfeature_ptr(new SensorChipSubFeature(*this,
+          subfeature));
+    sub_features_.push_back(subfeature_ptr);
   }
 }
 

@@ -63,9 +63,9 @@ class SensorChip{
 private:
   std::string name_;
   sensors_chip_name const * internal_name_;
-  void enumerate_features();
 public:
-  SensorChip(sensors_chip_name const *chip_name);
+  SensorChip(sensors_chip_name const *chip_name,
+      const std::vector<std::string> &ignore);
   const std::string &getName() const {return name_;}
   std::vector<SensorChipFeaturePtr> features_;
 

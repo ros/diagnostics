@@ -50,13 +50,14 @@
 // All of the enumerated sensor chips
 std::vector<SensorChipPtr> sensor_chips_;
 // Enumerate all of the sensor chips that exist on the system
-void enumerate_sensors(){
+void enumerate_sensors(const std::vector<std::string> &ignore){
   sensor_chips_.clear();
 
   sensors_chip_name const *chip_name;
   int number = 0;
   while ((chip_name = sensors_get_detected_chips(NULL, &number)) != NULL){
-    sensor_chips_.push_back(SensorChipPtr(new SensorChip(chip_name)));
+    SensorChipPtr sensor(new SensorChip(chip_name, ignore));
+    sensor_chips_.push_back(sensor);
   }
 }
 
@@ -83,7 +84,7 @@ int main(int argc, char** argv){
 
 
   ros::NodeHandle nh;
-  ros::NodeHandle pnh;
+  ros::NodeHandle pnh("~");
   diagnostic_updater::Updater updater(nh, pnh);
   if(!hostname.empty()) {
     updater.setHardwareID(hostname);
@@ -99,7 +100,9 @@ int main(int argc, char** argv){
     return 1;
   }
 
-  enumerate_sensors();
+  std::vector<std::string> ignore_sensors;
+  pnh.getParam("ignore_sensors", ignore_sensors);
+  enumerate_sensors(ignore_sensors);
 
   if(sensor_chips_.size() <= 0) {
     ROS_ERROR("No sensors detected");
