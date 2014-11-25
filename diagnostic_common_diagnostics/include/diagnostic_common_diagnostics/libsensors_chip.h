@@ -23,11 +23,11 @@ typedef boost::shared_ptr<SensorChipSubFeature> SensorChipSubFeaturePtr;
 class SensorChip{
 private:
   std::string name_;
-  sensors_chip_name const *internal_name_;
+  sensors_chip_name const * internal_name_;
   void enumerate_features();
 public:
   SensorChip(sensors_chip_name const *chip_name);
-  std::string getName(){return name_;}
+  const std::string &getName() const {return name_;}
   std::vector<SensorChipFeaturePtr> features_;
 
   friend class SensorChipFeature;
@@ -43,18 +43,18 @@ private:
   std::string name_;
   std::string label_;
   std::string sensor_name_;
-  SensorChip& chip_;
+  const SensorChip& chip_;
   sensors_feature const *feature_;
   void enumerate_subfeatures();
+
 public:
   std::vector<SensorChipSubFeaturePtr> sub_features_;
-  SensorChipFeature(SensorChip& chip, sensors_feature const *feature);
+  SensorChipFeature(const SensorChip& chip, sensors_feature const *feature);
   SensorChipSubFeaturePtr getSubFeatureByType(sensors_subfeature_type type);
 
-  std::string getName(){return name_;};
-  std::string getLabel(){return label_;};
-  virtual std::string getSensorName(){return sensor_name_;};
-  virtual std::string getSensorLabel(){return getLabel();};
+  const std::string &getName() const {return name_;};
+  const std::string &getLabel() const {return label_;};
+  const std::string &getSensorName() const {return sensor_name_;};
   sensors_feature_type getType(){return feature_->type;};
   std::string getChipName(){return chip_.getName();};
 
@@ -74,27 +74,29 @@ public:
 class SensorChipSubFeature {
 private:
   std::string name_;
-  SensorChipFeature& feature_;
+  const SensorChipFeature& feature_;
   sensors_subfeature const *subfeature_;
 public:
-  SensorChipSubFeature(SensorChipFeature& feature, sensors_subfeature const *subfeature);
-  std::string getName();
-  sensors_subfeature_type getType();
+  SensorChipSubFeature(const SensorChipFeature& feature,
+      sensors_subfeature const *subfeature);
+  const std::string &getName() { return name_; }
+  sensors_subfeature_type getType() { return subfeature_->type; }
   double getValue();
 };
 
 
-
 class FanSensor : public SensorChipFeature{
  public:
-  FanSensor(SensorChip& chip, sensors_feature const *feature);
+  FanSensor(const SensorChip& chip, sensors_feature const *feature) :
+    SensorChipFeature(chip, feature) {}
   virtual void buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
 };
 
 
 class TempSensor : public SensorChipFeature{
  public:
-  TempSensor(SensorChip& chip, sensors_feature const *feature);
+  TempSensor(const SensorChip& chip, sensors_feature const *feature) :
+    SensorChipFeature(chip, feature) {}
   virtual void buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
 };
 
@@ -104,7 +106,8 @@ class TempSensor : public SensorChipFeature{
  */
 class OtherSensor : public SensorChipFeature{
  public:
-  OtherSensor(SensorChip& chip, sensors_feature const *feature);
+  OtherSensor(const SensorChip& chip, sensors_feature const *feature) :
+    SensorChipFeature(chip, feature) {}
   virtual void buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
 };
 

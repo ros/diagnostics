@@ -55,9 +55,16 @@ int main(int argc, char** argv){
 
   // Reset the libsensors library
   sensors_cleanup();
-  sensors_init(NULL);
+  if( sensors_init(NULL) != 0 ) {
+    ROS_FATAL("Failed to initialize sensors library");
+    return 1;
+  }
 
   enumerate_sensors();
+
+  if(sensor_chips_.size() <= 0) {
+    ROS_ERROR("No sensors detected");
+  }
 
   // Add each sensor to the diagnostic updater
   BOOST_FOREACH(SensorChipPtr sensor_chip, sensor_chips_){
@@ -74,5 +81,7 @@ int main(int argc, char** argv){
   }
 
   sensors_cleanup();
+
+  return 0;
 }
 
