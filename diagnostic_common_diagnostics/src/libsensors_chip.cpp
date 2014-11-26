@@ -69,6 +69,9 @@ SensorChip::SensorChip(sensors_chip_name const *chip_name,
     case SENSORS_FEATURE_TEMP:
       feature_ptr.reset(new TempSensor(*this, feature));
       break;
+    case SENSORS_FEATURE_IN:
+      feature_ptr.reset(new VoltageSensor(*this, feature));
+      break;
     default:
       feature_ptr.reset(new OtherSensor(*this, feature));
       break;
@@ -217,6 +220,99 @@ void TempSensor::buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat){
     stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "NO TEMP Input!!!");
 }
 
+void VoltageSensor::buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat){
+  SensorChipSubFeaturePtr voltage = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_INPUT);
+  SensorChipSubFeaturePtr min = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_MIN);
+  SensorChipSubFeaturePtr max = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_MAX);
+  SensorChipSubFeaturePtr lcrit = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_LCRIT);
+  SensorChipSubFeaturePtr crit = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_CRIT);
+
+  // alarm inputs are nonzero on alarm
+  SensorChipSubFeaturePtr alarm = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_ALARM);
+  SensorChipSubFeaturePtr min_alarm = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_MIN_ALARM);
+  SensorChipSubFeaturePtr max_alarm = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_MAX_ALARM);
+  SensorChipSubFeaturePtr lcrit_alarm = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_LCRIT_ALARM);
+  SensorChipSubFeaturePtr crit_alarm = getSubFeatureByType(
+      SENSORS_SUBFEATURE_IN_CRIT_ALARM);
+
+  if(voltage){
+    double voltage_val = voltage->getValue();
+    stat.add("Voltage (V)", voltage_val);
+
+    bool low_warn = false;
+    bool low_err = false;
+    bool high_warn = false;
+    bool high_err = false;
+
+    // max voltage (warning)
+    if(max) {
+      stat.add("Max Voltage (V)", max->getValue());
+      if(max_alarm && max_alarm->getValue()!=0) {
+        high_warn = true;
+      } else if(voltage_val >= max->getValue()) {
+        high_warn = true;
+      }
+    }
+
+    // min voltage (warning)
+    if(min) {
+      stat.add("Min Voltage (V)", min->getValue());
+      if(min_alarm && min_alarm->getValue()!=0) {
+        low_warn = true;
+      } else if(voltage_val <= min->getValue()) {
+        low_warn = true;
+      }
+    }
+
+    if(crit) {
+      stat.add("Critical Max Voltage (V)", crit->getValue());
+      if(crit_alarm && crit_alarm->getValue()!=0) {
+        high_err = true;
+      } else if(voltage_val >= crit->getValue()) {
+        high_err = true;
+      }
+    }
+
+    if(lcrit) {
+      stat.add("Critical Min Voltage (V)", lcrit->getValue());
+      if(lcrit_alarm && lcrit_alarm->getValue()!=0) {
+        low_err = true;
+      } else if(voltage_val <= lcrit->getValue()) {
+        low_err = true;
+      }
+    }
+
+    // check for alarms and set summary
+    if(high_err) {
+      stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR,
+          "High Voltage CRITICAL (%.2fV)", voltage_val);
+    } else if(low_err) {
+      stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR,
+          "Low Voltage CRITICAL (%.2fV)", voltage_val);
+    } else if(high_warn) {
+      stat.summaryf(diagnostic_msgs::DiagnosticStatus::WARN,
+          "High Voltage ALARM (%.2fV)", voltage_val);
+    } else if(low_warn) {
+      stat.summaryf(diagnostic_msgs::DiagnosticStatus::WARN,
+          "Low Voltage ALARM (%.2fV)", voltage_val);
+    } else {
+      stat.summaryf(diagnostic_msgs::DiagnosticStatus::OK,
+          "Voltage OK (%.2fV)", voltage_val);
+    }
+  } else {
+    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR,
+        "NO Voltage Input!!!");
+  }
+}
 
 void OtherSensor::buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat){
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Unkown sensor type");

@@ -140,6 +140,14 @@ class TempSensor : public SensorChipFeature{
 };
 
 
+class VoltageSensor : public SensorChipFeature{
+ public:
+  VoltageSensor(const SensorChip& chip, sensors_feature const *feature) :
+    SensorChipFeature(chip, feature) {}
+  virtual void buildStatus(diagnostic_updater::DiagnosticStatusWrapper &stat);
+};
+
+
 /**
  * Default case for presenting sensor feature status
  */
