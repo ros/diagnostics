@@ -28,8 +28,4 @@
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
   <!-- <test_depend>tf</test_depend> -->
-
-  <export>
-    <architecture_independent/>
-  </export>
 </package>
