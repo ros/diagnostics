@@ -12,7 +12,7 @@ catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp
 find_package(Boost REQUIRED COMPONENTS system regex)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
-include_directories(include ${catkin_INCLUDE_DIRS} gtest-1.6.0/include)
+include_directories(include ${catkin_INCLUDE_DIRS} gtest-1.7.0/include gtest-1.7.0)
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
@@ -26,7 +26,7 @@ target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
 )
 add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
-# Aggregator node 
+# Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${catkin_LIBRARIES}
                                       ${PROJECT_NAME}
@@ -34,7 +34,7 @@ target_link_libraries(aggregator_node ${catkin_LIBRARIES}
 
 # Analyzer loader allows other users to test that Analyzers load
 add_executable(analyzer_loader test/analyzer_loader.cpp
-                               gtest-1.6.0/gtest-all.cc)
+                               gtest-1.7.0/src/gtest-all.cc)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 
 if(CATKIN_ENABLE_TESTING)
