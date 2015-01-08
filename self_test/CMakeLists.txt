@@ -8,7 +8,7 @@ catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
                INCLUDE_DIRS include
 )
 
-include_directories(include gtest-1.6.0/include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(include gtest-1.7.0/include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -28,7 +28,7 @@ target_link_libraries(selftest_example ${Boost_LIBRARIES}
 )
 
 add_executable(selftest_rostest src/selftest_rostest.cpp
-                                gtest-1.6.0/gtest-all.cc)
+                                gtest-1.7.0/gtest-all.cc)
 target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
                                        ${catkin_LIBRARIES}
 )
