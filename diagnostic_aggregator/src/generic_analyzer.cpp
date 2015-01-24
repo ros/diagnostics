@@ -120,6 +120,11 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
     ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s", nice_name.c_str(), n.getNamespace().c_str());
     return false;
   }
+
+  // convert chaff_ to output name format. Fixes #17
+  for(size_t i=0; i<chaff_.size(); i++) {
+    chaff_[i] = getOutputName(chaff_[i]);
+  }
   
   double timeout;
   int num_items_expected;
