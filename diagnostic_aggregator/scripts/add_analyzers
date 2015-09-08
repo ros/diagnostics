@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+
+NAME='add_analyzers'
+
+import sys
+import argparse
+from bondpy import bondpy
+from diagnostic_msgs.srv import AddDiagnostics
+import rosparam
+import rospy
+
+class AddAnalyzers:
+
+    def __init__(self, args):
+        rospy.on_shutdown(self.remove_group)
+        self.bond = None
+        self.add_analyzers(args)
+
+    def remove_group(self):
+        if self.bond:
+            self.bond.shutdown()
+
+    def add_analyzers(self, myargv):
+        usage = """
+        allows you to dynamically add a group to the diagnostic aggregator,
+        which is automatically removed when this node dies. Analyzer configurations
+        can either be provided directly, or assumed that they are already can be
+        found on the ros parameter server (where roslaunch may have loaded them).
+        """
+        parser = argparse.ArgumentParser(description=usage)
+        parser.add_argument('analyzer_yaml', nargs='?', default=None)
+        parser.add_argument('-t', '--timeout', type=float, dest='timeout', default=None, help='time in seconds to wait for the diagnostic_agg service to come up before timing out. Default waits indefinitely')
+        args = parser.parse_args(myargv[1:])
+
+        namespace = rospy.resolve_name(rospy.get_name())
+
+        if args.analyzer_yaml is None:
+            # nothing to do - it will assume parameters are already loaded on
+            # the parameter server (usually via roslaunch)
+            pass
+        else:
+            paramlist = rosparam.load_file(args.analyzer_yaml, default_namespace=namespace)
+            for params, ns in paramlist:
+                rosparam.upload_params(ns, params)
+
+        self.bond = bondpy.Bond("/diagnostics_agg/bond", namespace)
+        self.bond.start()
+
+        try:
+            rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=args.timeout)
+            add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)
+            resp = add_diagnostics(load_namespace=namespace)
+            if resp.success:
+                rospy.loginfo(NAME + ' successfully added analyzers to diagnostic aggregator')
+            else:
+                rospy.logerr(NAME + ' did not add any analyzers to diagnostic aggregator: ' + resp.message)
+                rospy.signal_shutdown('')
+        except rospy.service.ServiceException:
+            rospy.logerr(NAME + ' service returned failure - missing aggregator or failed init of analyzer group?')
+            rospy.signal_shutdown('')
+        except rospy.ROSException:
+            rospy.logerr(NAME + ' add timed out while waiting for diagnostics_agg service, or ROS shutdown')
+            rospy.signal_shutdown('')
+
+        rospy.spin()
+
+if __name__ == '__main__':
+    rospy.init_node(NAME)
+    AddAnalyzers(rospy.myargv())

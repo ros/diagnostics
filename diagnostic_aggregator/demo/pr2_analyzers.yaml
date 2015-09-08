@@ -1,44 +1,44 @@
 analyzers:
   motors:
-    type: GenericAnalyzer
+    type: diagnostic_aggregator/GenericAnalyzer
     path: Motors
     startswith: 'EtherCAT'
   sensors:
-    type: AnalyzerGroup
+    type: diagnostic_aggregator/AnalyzerGroup
     path: Sensors
     analyzers:
       base_hk:
-        type: GenericAnalyzer
+        type: diagnostic_aggregator/GenericAnalyzer
         path: Base Hokuyo
         timeout: 5.0
         find_and_remove_prefix: base_hokuyo_node
         num_items: 3
       tilt_hk:
-        type: GenericAnalyzer
+        type: diagnostic_aggregator/GenericAnalyzer
         path: Tilt Hokuyo
         timeout: 5.0
         find_and_remove_prefix: tilt_hokuyo_node
         num_items: 3
       imu:
-        type: GenericAnalyzer
+        type: diagnostic_aggregator/GenericAnalyzer
         path: IMU
         timeout: 5.0
         find_and_remove_prefix: imu_node
         num_items: 3
       forearm_cam_l:
-        type: GenericAnalyzer
+        type: diagnostic_aggregator/GenericAnalyzer
         path: Forearm Cam (Left)
         timeout: 5.0
         find_and_remove_prefix: l_forearm_cam
         num_items: 4
       forearm_cam_r:
-        type: GenericAnalyzer
+        type: diagnostic_aggregator/GenericAnalyzer
         path: Forearm Cam (Right)
         timeout: 5.0
         find_and_remove_prefix: r_forearm_cam
         num_items: 4
   computers:
-    type: GenericAnalyzer
+    type: diagnostic_aggregator/GenericAnalyzer
     path: Computers
     contains: [
       'HD Temp',
@@ -47,11 +47,11 @@ analyzers:
       'HD Usage',
       'NFS']
   joints:
-    type: GenericAnalyzer
+    type: diagnostic_aggregator/GenericAnalyzer
     path: Joints
     startswith: 'Joint'
   power:
-    type: GenericAnalyzer
+    type: diagnostic_aggregator/GenericAnalyzer
     path: 'Power System'
     timeout: 5.0
     startswith: [

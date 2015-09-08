@@ -42,6 +42,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <ros/ros.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
@@ -110,20 +111,35 @@ class AnalyzerGroup : public Analyzer
 {
 public:
   AnalyzerGroup();
-  
+
   virtual ~AnalyzerGroup();
 
   /*!
    *\brief Initialized with base path and namespace.
-   * 
+   *
    * The parameters in its namespace determine the sub-analyzers.
    */
   virtual bool init(const std::string base_path, const ros::NodeHandle &n);
+
+  /**!
+   *\brief Add an analyzer to this analyzerGroup
+   */
+  virtual bool addAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+
+  /**!
+   *\brief Remove an analyzer from this analyzerGroup
+   */
+  virtual bool removeAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
    */
   virtual bool match(const std::string name);
+
+  /*!
+   *\brief Clear match arrays. Used when analyzers are added or removed
+   */
+  void resetMatches();
 
   /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
@@ -136,7 +152,7 @@ public:
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
   virtual std::string getPath() const { return path_; }
-  
+
   virtual std::string getName() const { return nice_name_; }
 
 private:
@@ -155,7 +171,7 @@ private:
   std::vector<boost::shared_ptr<Analyzer> > analyzers_;
 
   /*
-   *\brief The map of names to matchings is stored internally. 
+   *\brief The map of names to matchings is stored internally.
    */
   std::map<const std::string, std::vector<bool> > matched_;
 

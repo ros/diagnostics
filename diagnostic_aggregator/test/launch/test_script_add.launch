@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="diagnostic_aggregator" type="add_analyzers" name="add_analyzers" args="$(find diagnostic_aggregator)/test/multiple_match_analyzers.yaml"/>
+</launch>
