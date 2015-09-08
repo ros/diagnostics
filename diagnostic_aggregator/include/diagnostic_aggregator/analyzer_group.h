@@ -42,6 +42,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <ros/ros.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
@@ -119,6 +120,31 @@ public:
    * The parameters in its namespace determine the sub-analyzers.
    */
   virtual bool init(const std::string base_path, const ros::NodeHandle &n);
+
+  /*!
+   *\brief Initialized with base path and user-specified namespace rather than
+   * a nodehandle-specified one.
+   * 
+   * The parameters in its namespace determine the sub-analyzers.
+   */
+  virtual bool init(const std::string base_path, const std::string namespc);
+
+  /**!
+   *\brief Add an analyzer to this analyzerGroup
+   */
+  virtual bool addAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+
+  /**!
+   *\brief Recursively delete all analyzers from this analyzer group whose
+   * path is in the given namespace
+   */
+  virtual bool deleteAnalyzers(const std::string namespc);
+
+  /**!
+   *\brief Get the path for this analyzer and the paths of all analyzers that
+   * it contains.
+   */
+  virtual std::vector<std::string> listAnalyzers() const;
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item

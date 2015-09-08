@@ -50,6 +50,11 @@ AnalyzerGroup::AnalyzerGroup() :
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 { }
 
+bool AnalyzerGroup::init(const std::string base_path, const std::string namespc)
+{
+  return init(base_path, ros::NodeHandle(namespc));
+}
+
 bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 {
   n.param("path", nice_name_, string(""));
@@ -163,6 +168,50 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 AnalyzerGroup::~AnalyzerGroup()
 {
   analyzers_.clear();
+}
+
+bool AnalyzerGroup::addAnalyzer(boost::shared_ptr<Analyzer>& analyzer)
+{
+  analyzers_.push_back(analyzer);
+  return true;
+}
+
+bool AnalyzerGroup::deleteAnalyzers(const string namespc)
+{
+  if (analyzers_.size() == 0)
+    return false;
+
+  bool deleted = false;
+  for (std::vector<boost::shared_ptr<Analyzer> >::iterator it = analyzers_.begin(); it != analyzers_.end();)
+  {
+    // if any of the analyzer groups below this one have something matching the
+    // namespace, or if we match something to the namespace at this level, then
+    // something has been deleted
+    deleted = (*it)->deleteAnalyzers(namespc) || deleted;
+    ROS_DEBUG("Checking %s against deletion request %s", (*it)->getPath().c_str(), namespc.c_str());
+    if ((*it)->getPath().find(namespc) == 0)
+    {
+      deleted = true;
+      ROS_DEBUG("%s matches namespace %s - deleting", (*it)->getPath().c_str(), namespc.c_str());
+      it = analyzers_.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+  return deleted;
+}
+
+vector<string> AnalyzerGroup::listAnalyzers() const
+{
+  vector<string> analyzer_names;
+  analyzer_names.push_back(path_);
+  for (unsigned int i = 0; i < analyzers_.size(); i++) {
+    vector<string> sub_analyzer_names = analyzers_[i]->listAnalyzers();
+    analyzer_names.insert(analyzer_names.end(), sub_analyzer_names.begin(), sub_analyzer_names.end());
+  }
+  return analyzer_names;
 }
 
 bool AnalyzerGroup::match(const string name)
