@@ -130,10 +130,30 @@ public:
    */
   virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report() = 0;
 
+  /**!
+   *\brief Used by Analyzers which can contain other analyzers to recursively
+   * delete those analyzers whose paths contain given strings. Returns false by
+   * default for all other types.
+   */
+  virtual bool deleteAnalyzers(const std::string namespc) { return false; }
+  
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')
    */
   virtual std::string getPath() const = 0;
+
+  /**!
+   *\brief Return a vector containing the path of this analyzer if it is one
+   * which does not have sub-analyzers, or if it has sub-analyzers, recursively
+   * return the paths of its analyzers
+   */
+  virtual std::vector<std::string> listAnalyzers() const 
+  {
+    std::string path = getPath();
+    std::vector<std::string> path_vec = std::vector<std::string>();
+    path_vec.push_back(path);
+    return path_vec;
+  }
   
   /*!
    *\brief Returns nice name for display. (ex: 'Sensors')
