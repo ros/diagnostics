@@ -216,9 +216,7 @@ public:
     
     return processed;
   }
-  
 
-  
   /*!
    *\brief Match function isn't implemented by GenericAnalyzerBase
    */

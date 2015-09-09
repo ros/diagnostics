@@ -48,6 +48,9 @@
 #include <diagnostic_msgs/DiagnosticArray.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
+#include <diagnostic_msgs/AddDiagnostics.h>
+#include <diagnostic_msgs/RemoveDiagnostics.h>
+#include <diagnostic_msgs/ListDiagnostics.h>
 #include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/analyzer_group.h"
@@ -125,6 +128,9 @@ public:
 
 private:
   ros::NodeHandle n_;
+  ros::ServiceServer add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
+  ros::ServiceServer rem_srv_; /**< RemoveDiagnostics, /diagnostics_agg/remove_diagnostics */
+  ros::ServiceServer list_srv_; /**< ListDiagnostics, /diagnostics_agg/list_diagnostics */
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
   ros::Publisher toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
@@ -134,6 +140,15 @@ private:
    *\brief Callback for incoming "/diagnostics"
    */
   void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
+
+  bool addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
+		      diagnostic_msgs::AddDiagnostics::Response &res);
+  
+  bool removeDiagnostics(diagnostic_msgs::RemoveDiagnostics::Request &req,
+			 diagnostic_msgs::RemoveDiagnostics::Response &res);
+  
+  bool listDiagnostics(diagnostic_msgs::ListDiagnostics::Request &req,
+		       diagnostic_msgs::ListDiagnostics::Response &res);
 
   AnalyzerGroup* analyzer_group_;
 

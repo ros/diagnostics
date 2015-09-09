@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+NAME='modify_diagnostics'
+
+import sys
+import optparse
+import roslib; roslib.load_manifest('rosparam')
+import rosparam
+import rospy
+
+from diagnostic_msgs.srv import AddDiagnostics, RemoveDiagnostics, ListDiagnostics
+
+def do_add():
+    usage = """Usage: %prog add [options] analyzer_yaml namespace
+
+    analyzer_yaml contains the definitions for analyzers to be added to the
+                  aggregator
+    
+    namespace     string defining the namespace which the parameters will be
+                  loaded into for reading by the aggregator."""
+    
+    parser = optparse.OptionParser(usage=usage, prog=NAME)
+    parser.add_option('-t', '--timeout', action='store', type='float', dest='timeout', default=None, help='time in seconds to wait for the diagnostic_agg service to come up before timing out. Default waits indefinitely')
+    options, args = parser.parse_args(myargv[2:])
+
+    if len(args) == 0:
+        parser.error('Invalid arguments. You must specify a yaml file to load from and a namespace to load into')
+    elif len(args) == 1:
+        parser.error('Invalid arguments. You must specify a namespace into which to load parameters')
+    elif len(args) > 2:
+        parser.error('Too many arguments')
+        
+    paramlist = rosparam.load_file(args[0])
+    namespace = args[1]
+    for params, ns in paramlist:
+        rosparam.upload_params(namespace + '/' + ns, params)
+        
+    try:
+        rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=options.timeout)
+        add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)
+        resp = add_diagnostics(namespc=namespace)
+        if resp.success:
+            rospy.loginfo('Successfully added analyzers to diagnostics')
+        else:
+            rospy.loginfo('Did not add any analyzers to diagnostics')
+    except rospy.ROSException:
+        rospy.logerr('Modify diagnostics add timed out while waiting for diagnostics_agg service')
+
+def do_delete():
+    usage = """Usage: %prog delete namespace
+    
+    namespace string defining the namespace to delete in the aggregator,
+              e.g. /Core/Navigation will delete all aggregators which
+              have a name beginning with that path."""
+    
+    parser = optparse.OptionParser(usage=usage, prog=NAME)
+    parser.add_option('-t', '--timeout', action='store', type='float', dest='timeout', default=None, help='time in seconds to wait for the diagnostic_agg service to come up before timing out. Default waits indefinitely')
+    
+    options, args = parser.parse_args(myargv[2:])
+    namespace = args[0]
+    try:
+        rospy.wait_for_service('/diagnostics_agg/remove_diagnostics', timeout=options.timeout)
+        remove_diagnostics = rospy.ServiceProxy('/diagnostics_agg/remove_diagnostics', RemoveDiagnostics)
+        resp = remove_diagnostics(namespc=namespace)
+        if resp.success:
+            rospy.loginfo('Successfully removed analyzers from diagnostics')
+        else:
+            rospy.loginfo('Did not remove any analyzers from diagnostics')
+    except rospy.ROSException:
+        rospy.logerr('Modify diagnostics delete timed out while waiting for diagnostics_agg service')
+
+def do_list():
+    try:
+        rospy.wait_for_service('/diagnostics_agg/remove_diagnostics')
+        list_diagnostics = rospy.ServiceProxy('/diagnostics_agg/list_diagnostics', ListDiagnostics)
+        resp = list_diagnostics()
+        for name in resp.names:
+            print(name)
+            
+    except rospy.ROSException:
+        rospy.logerr('Modify diagnostics list imed out while waiting for diagnostics_agg service')
+    
+    
+def print_usage():
+    print """modify_groups allows you to dynamically add or remove groups from the diagnostic aggregator
+Commands:
+\tmodify_groups add                  add analyzers to the aggregator
+\tmodify_groups delete               remove a namespace from the aggregator
+\tmodify_groups list                 list the paths of analyzers currently in the aggregator
+Type modify_groups <command> -h for more detailed usage, e.g. 'modify_groups add -h'
+"""
+    sys.exit(1)
+    
+if __name__ == '__main__':
+    # We don't need a node since the ServiceProxy can run without one, but then
+    # we lose logging information, so we lose out if we don't use one. It will
+    # be a short-lived node.
+    rospy.init_node('modify_diagnostics')
+    
+    myargv = rospy.myargv()
+    if len(myargv) == 1:
+        print_usage()
+    else:
+        cmd = myargv[1]
+        try:
+            if cmd == 'add':
+                do_add()
+            elif cmd == 'delete':
+                do_delete()
+            elif cmd == 'list':
+                do_list()
+            else:
+                print_usage()
+        except rospy.exceptions.ROSInterruptException:
+            pass

@@ -63,7 +63,10 @@ Aggregator::Aggregator() :
   // Last analyzer handles remaining data
   other_analyzer_ = new OtherAnalyzer();
   other_analyzer_->init(base_path_); // This always returns true
-
+  
+  add_srv_ = n_.advertiseService("/diagnostics_agg/add_diagnostics", &Aggregator::addDiagnostics, this);
+  rem_srv_ = n_.advertiseService("/diagnostics_agg/remove_diagnostics", &Aggregator::removeDiagnostics, this);
+  list_srv_ = n_.advertiseService("/diagnostics_agg/list_diagnostics", &Aggregator::listDiagnostics, this);
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ = n_.advertise<diagnostic_msgs::DiagnosticStatus>("/diagnostics_toplevel_state", 1);
@@ -107,11 +110,52 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& 
   }
 }
 
-Aggregator::~Aggregator() 
+Aggregator::~Aggregator()
 {
   if (analyzer_group_) delete analyzer_group_;
 
   if (other_analyzer_) delete other_analyzer_;
+}
+
+bool Aggregator::addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
+				diagnostic_msgs::AddDiagnostics::Response &res)
+{
+  ROS_DEBUG("Service got add request");
+  boost::shared_ptr<Analyzer> group(new AnalyzerGroup());
+    
+  if (group->init(base_path_, req.namespc))
+  {
+    analyzer_group_->addAnalyzer(group);
+    res.success = true;
+  }
+  else
+  {
+    res.success = false;
+  }
+  return true;
+}
+  
+bool Aggregator::removeDiagnostics(diagnostic_msgs::RemoveDiagnostics::Request &req,
+				   diagnostic_msgs::RemoveDiagnostics::Response &res)
+{
+  ROS_DEBUG("Service got delete request");
+  if (analyzer_group_->deleteAnalyzers(req.namespc))
+  {
+    res.success = true;
+  }
+  else
+  {
+    res.success = false;
+  }
+  return true;
+}
+  
+bool Aggregator::listDiagnostics(diagnostic_msgs::ListDiagnostics::Request &req,
+				 diagnostic_msgs::ListDiagnostics::Response &res)
+{
+  ROS_DEBUG("Service got list request");
+  res.names = analyzer_group_->listAnalyzers();
+  return true;
 }
 
 void Aggregator::publishData()
