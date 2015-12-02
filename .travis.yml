@@ -14,7 +14,7 @@ install:
   - sudo `which rosdep` init
   - rosdep update
   # use rosdep to install dependencies
-  - rosdep install --default-yes --from-paths ./ --rosdistro $CI_ROS_DISTRO
+  - rosdep install --default-yes --from-paths ./ --ignore-src --rosdistro $CI_ROS_DISTRO
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - catkin_init_workspace
