@@ -154,7 +154,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
   if (analyzers_.size() == 0)
   {
     init_ok = false;
-    ROS_ERROR("No analyzers initialzed in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
+    ROS_ERROR("No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
   }
 
   return init_ok;
@@ -163,6 +163,23 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 AnalyzerGroup::~AnalyzerGroup()
 {
   analyzers_.clear();
+}
+
+bool AnalyzerGroup::addAnalyzer(boost::shared_ptr<Analyzer>& analyzer)
+{
+  analyzers_.push_back(analyzer);
+  return true;
+}
+
+bool AnalyzerGroup::removeAnalyzer(boost::shared_ptr<Analyzer>& analyzer)
+{
+  vector<boost::shared_ptr<Analyzer> >::iterator it = find(analyzers_.begin(), analyzers_.end(), analyzer);
+  if (it != analyzers_.end())
+  {
+    analyzers_.erase(it);
+    return true;
+  }
+  return false;
 }
 
 bool AnalyzerGroup::match(const string name)
@@ -192,6 +209,12 @@ bool AnalyzerGroup::match(const string name)
 
   return match_name;
 }
+
+void AnalyzerGroup::resetMatches()
+{
+  matched_.clear();
+}
+
 
 bool AnalyzerGroup::analyze(const boost::shared_ptr<StatusItem> item)
 {

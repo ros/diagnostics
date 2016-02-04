@@ -20,12 +20,17 @@
   <build_depend>rospy</build_depend>
   <build_depend>rostest</build_depend>
   <build_depend>xmlrpcpp</build_depend>
+  <build_depend>bondcpp</build_depend>
+  <build_depend>bondpy</build_depend>
 
   <run_depend>diagnostic_msgs</run_depend>
   <run_depend>pluginlib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>xmlrpcpp</run_depend>
+  <run_depend>bondcpp</run_depend>
+  <run_depend>bondpy</run_depend>
+
 
   <!-- <test_depend>diagnostic_msgs</test_depend> -->
   <!-- <test_depend>roscpp</test_depend> -->

@@ -148,9 +148,9 @@ public:
     processed.push_back(header_status);
     
     bool all_stale = true;
-    
-    std::map<std::string, boost::shared_ptr<StatusItem> >::iterator it;
-    for (it = items_.begin(); it != items_.end(); it++)
+
+    std::map<std::string, boost::shared_ptr<StatusItem> >::iterator it = items_.begin();
+    while(it != items_.end())
     {
       std::string name = it->first;
       boost::shared_ptr<StatusItem> item = it->second;
@@ -162,7 +162,7 @@ public:
       // Erase item if its stale and we're discarding items
       if (discard_stale_ and stale)
       {
-        items_.erase(it);
+        items_.erase(it++);
         continue;
       }
       
@@ -183,6 +183,8 @@ public:
 
       if (stale)
         header_status->level = 3;
+
+      ++it;
     }
     
     // Header is not stale unless all subs are
@@ -216,9 +218,7 @@ public:
     
     return processed;
   }
-  
 
-  
   /*!
    *\brief Match function isn't implemented by GenericAnalyzerBase
    */
