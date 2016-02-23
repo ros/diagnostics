@@ -138,8 +138,13 @@ public:
   virtual std::string getPath() const { return path_; }
   
   virtual std::string getName() const { return nice_name_; }
-
 private:
+  /*
+   *\brief The map of names to matchings is stored internally. 
+   */
+  std::map<const std::string, std::vector<bool> > matched_;
+
+protected:
   std::string path_, nice_name_;
 
   /*!
@@ -154,10 +159,6 @@ private:
 
   std::vector<boost::shared_ptr<Analyzer> > analyzers_;
 
-  /*
-   *\brief The map of names to matchings is stored internally. 
-   */
-  std::map<const std::string, std::vector<bool> > matched_;
 
 };
 

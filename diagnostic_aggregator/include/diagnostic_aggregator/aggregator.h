@@ -123,7 +123,7 @@ public:
    */
   double getPubRate() const { return pub_rate_; }
 
-private:
+protected:
   ros::NodeHandle n_;
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
