@@ -8,6 +8,17 @@ catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp b
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME})
 
+set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
+set(REQUIRED_diagnostic_msgs_VERSION_Jade "1.12.4")
+if( ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Indigo})
+  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Indigo} or newer is required to build diagnotic_aggregator on ROS Indigo")
+endif()
+if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
+    (${diagnostic_msgs_VERSION} VERSION_GREATER "1.12.0" AND
+     ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Jade}))
+  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Jade} or newer is required to build diagnotic_aggregator on ROS Jade")
+endif()
+
 find_package(Boost REQUIRED COMPONENTS system)
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
 
