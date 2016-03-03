@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.9 (2016-03-02)
+------------------
 * Add version dependencies in package.xml
 * Add version check in cmake
 * Add functionality for dynamically adding analyzers

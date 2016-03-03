@@ -2,8 +2,8 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.9 (2016-03-02)
+------------------
 * Add version dependencies in package.xml
 * Contributors: trainman419
 
