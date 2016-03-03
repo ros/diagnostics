@@ -14,7 +14,7 @@
 
   <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
-  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend version_gte="1.11.9">diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
@@ -23,7 +23,7 @@
   <build_depend>bondcpp</build_depend>
   <build_depend>bondpy</build_depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
+  <run_depend version_gte="1.11.9">diagnostic_msgs</run_depend>
   <run_depend>pluginlib</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
@@ -31,15 +31,7 @@
   <run_depend>bondcpp</run_depend>
   <run_depend>bondpy</run_depend>
 
-
-  <!-- <test_depend>diagnostic_msgs</test_depend> -->
-  <!-- <test_depend>roscpp</test_depend> -->
-  <!-- <test_depend>xmlrpcpp</test_depend> -->
-  <!-- <test_depend>pluginlib</test_depend> -->
-  <!-- <test_depend>rospy</test_depend> -->
-
   <export>
-    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -ldiagnostic_aggregator `rosboost-cfg --lflags regex`" cflags="-I${prefix}/include `rosboost-cfg --cflags`"/>
     <diagnostic_aggregator plugin="${prefix}/analyzer_plugins.xml"/>
   </export>
 </package>
