@@ -44,10 +44,10 @@ class AddAnalyzers:
                 rosparam.upload_params(ns, params)
 
         self.bond = bondpy.Bond("/diagnostics_agg/bond", namespace)
-        self.bond.start()
 
         try:
             rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=args.timeout)
+            self.bond.start()
             add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)
             resp = add_diagnostics(load_namespace=namespace)
             if resp.success:
