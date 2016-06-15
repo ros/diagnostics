@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.8.10 (2016-06-14)
+-------------------
 * Start bond after add_diagnostics service is available
 * Contributors: Mustafa Safri
 
