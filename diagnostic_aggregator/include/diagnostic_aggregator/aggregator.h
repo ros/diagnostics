@@ -78,11 +78,11 @@ Output:
   /Robot/Sensors/Tilt Hokuyo/Frequency
   /Robot/Sensors/Tilt Hokuyo/Connection
 \endverbatim
- * The analyzer should always output a DiagnosticStatus with the name of the 
+ * The analyzer should always output a DiagnosticStatus with the name of the
  * prefix. Any other data output is up to the analyzer developer.
- * 
+ *
  * Analyzer's are loaded by specifying the private parameters of the
- * aggregator. 
+ * aggregator.
 \verbatim
 base_path: My Robot
 pub_rate: 1.0
@@ -102,7 +102,7 @@ analyzers:
  * the aggregator will report the error and publish it in the aggregated output.
  */
 class Aggregator
-{ 
+{
 public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
@@ -127,6 +127,11 @@ public:
   double getPubRate() const { return pub_rate_; }
 
 private:
+  typedef boost::shared_ptr<Analyzer> AnalyzerPtr;
+  typedef boost::shared_ptr<bond::Bond> BondPtr;
+  typedef std::pair<BondPtr, AnalyzerPtr> BondAnalyzerPair;
+  typedef std::vector<BondAnalyzerPair> BondAnalyzerPairs;
+
   ros::NodeHandle n_;
   ros::ServiceServer add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
@@ -153,7 +158,7 @@ private:
 
   OtherAnalyzer* other_analyzer_;
 
-  std::vector<boost::shared_ptr<bond::Bond> > bonds_; /**< \brief Contains all bonds for additional diagnostics. */
+  BondAnalyzerPairs bonds_; /**< \brief Contains all bonds for additional diagnostics. */
 
   /*
    *!\brief called when a bond between the aggregator and a node is broken
@@ -161,10 +166,8 @@ private:
    * Modifies the contents of added_analyzers_ and analyzer_group, removing the
    * diagnostics that had been brought up by that bond.
    *!\param bond_id The bond id (namespace) from which the analyzer was created
-   *!\param analyzer Shared pointer to the analyzer group that was added
    */
-  void bondBroken(std::string bond_id,
-		  boost::shared_ptr<Analyzer> analyzer);
+  void bondBroken(std::string bond_id);
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.
@@ -193,7 +196,7 @@ private:
 struct BondIDMatch
 {
   BondIDMatch(const std::string s) : s(s) {}
-  bool operator()(const boost::shared_ptr<bond::Bond>& b){ return s == b->getId(); }
+  bool operator()(const std::pair< boost::shared_ptr<bond::Bond>, boost::shared_ptr<Analyzer> > & p){ return s == p.first->getId(); }
   const std::string s;
 };
 
