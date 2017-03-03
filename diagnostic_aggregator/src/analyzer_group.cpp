@@ -39,9 +39,7 @@
 using namespace std;
 using namespace diagnostic_aggregator;
 
-PLUGINLIB_DECLARE_CLASS(diagnostic_aggregator,
-                        AnalyzerGroup, 
-                        diagnostic_aggregator::AnalyzerGroup, 
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup, 
                         diagnostic_aggregator::Analyzer)
 
 AnalyzerGroup::AnalyzerGroup() :
