@@ -40,10 +40,8 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_DECLARE_CLASS(diagnostic_aggregator,
-                        IgnoreAnalyzer, 
-                        diagnostic_aggregator::IgnoreAnalyzer, 
-                        diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, 
+                       diagnostic_aggregator::Analyzer)
 
 
 IgnoreAnalyzer::IgnoreAnalyzer() { }
