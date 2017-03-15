@@ -83,7 +83,7 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
   updater.add(cf);
 }
 
-TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
+TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs)
 {
   DiagnosticStatusWrapper stat;
   
@@ -112,6 +112,31 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapper)
 
   EXPECT_STREQ("bool2", stat.values[4].key.c_str()) << "Bad label, adding a false bool key with add";
   EXPECT_STREQ("False", stat.values[4].value.c_str()) << "Bad label, adding a false bool with add";
+}
+
+TEST(DiagnosticUpdater, testDiagnosticStatusWrapperMergeSummary)
+{
+  DiagnosticStatusWrapper stat;
+
+  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
+  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::OK, "New");
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::OK, stat.level) << "Bad level, merging levels (OK,OK)";
+  EXPECT_STREQ("Old", stat.message.c_str()) << "Bad summary, merging levels (OK,OK)";
+
+  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
+  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (OK,WARN)";
+  EXPECT_STREQ("New", stat.message.c_str()) << "Bad summary, merging levels (OK,WARN)";
+
+  stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
+  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (WARN,WARN)";
+  EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,WARN)";
+
+  stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
+  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "New");
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::ERROR, stat.level) << "Bad level, merging levels (WARN,ERROR)";
+  EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,ERROR)";
 }
 
 TEST(DiagnosticUpdater, testFrequencyStatus)
@@ -175,4 +200,3 @@ int main(int argc, char **argv){
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
