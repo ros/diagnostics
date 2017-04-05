@@ -171,7 +171,16 @@ bool Aggregator::addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
       {
         ROS_WARN("Tried to remove an analyzer which didn't exist.");
       }
-      bonds_.erase(existing_bond_analyzer_iter);
+
+      // erase might delete the last bond reference triggering bondBroken(string bond_id)
+      // leading to a deadlock because of mutex_ lock, so create a temp reference
+      {
+        BondPtr temp_bond_reference = existing_bond_analyzer_iter->first;
+        bonds_.erase(existing_bond_analyzer_iter);
+        lock.unlock();
+        //destroy temp_bond_reference reference
+      }
+
       res.message = "Unloaded from namespace '" + req.load_namespace + "'";
       res.success = true;
       return true;
