@@ -65,11 +65,11 @@ class AddAnalyzers:
 
         try:
             rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=args.timeout)
-            self.bond.start()
             self.add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)
             resp = self.add_diagnostics(load_namespace=self.namespace)
             if resp.success:
                 rospy.loginfo('Add Analyzers: successfully added analyzers to diagnostic aggregator [{0}]'.format(self.name))
+                self.bond.start()
             else:
                 rospy.logerr('Add Analyzers: did not add any analyzers to diagnostic aggregator [{0}][{1}]'.format(self.name, resp.message))
                 rospy.signal_shutdown('')
