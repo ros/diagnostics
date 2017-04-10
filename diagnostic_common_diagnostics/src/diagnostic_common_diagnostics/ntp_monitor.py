@@ -115,7 +115,7 @@ class NTPMonitor:
         self.self_stat.values = []
 
         self.mutex = threading.Lock()
-        self.pub = rospy.Publisher("/diagnostics", DIAG.DiagnosticArray)
+        self.pub = rospy.Publisher("/diagnostics", DIAG.DiagnosticArray, queue_size=10)
 
         # we need to periodically republish this
         self.current_msg = None
