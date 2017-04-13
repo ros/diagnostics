@@ -42,16 +42,16 @@ using namespace std;
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "diagnostic_aggregator");
-  
+
   try
   {
   diagnostic_aggregator::Aggregator agg;
-  
+
   ros::Rate pub_rate(agg.getPubRate());
-  while (agg.ok())
+  while (ros::ok() && agg.ok())
   {
-    ros::spinOnce();
     agg.publishData();
+    ros::spinOnce();
     pub_rate.sleep();
   }
   }
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
     ROS_FATAL("Diagnostic aggregator node caught exception. Aborting. %s", e.what());
     ROS_BREAK();
   }
-  
+
   exit(0);
   return 0;
 }
-  
+

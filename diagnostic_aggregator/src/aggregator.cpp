@@ -134,14 +134,12 @@ void Aggregator::bondBroken(string bond_id)
     }
     bonds_.erase(elem);
   }
-  analyzer_group_->resetMatches();
 }
 
 void Aggregator::bondFormed(boost::shared_ptr<Analyzer> group){
   ROS_DEBUG("Bond formed");
   boost::mutex::scoped_lock lock(mutex_);
   analyzer_group_->addAnalyzer(group);
-  analyzer_group_->resetMatches();
 }
 /*
  * This will load diagnostics if they are not already loaded
@@ -171,7 +169,16 @@ bool Aggregator::addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
       {
         ROS_WARN("Tried to remove an analyzer which didn't exist.");
       }
-      bonds_.erase(existing_bond_analyzer_iter);
+
+      // erase might delete the last bond reference triggering bondBroken(string bond_id)
+      // leading to a deadlock because of mutex_ lock, so create a temp reference
+      {
+        BondPtr temp_bond_reference = existing_bond_analyzer_iter->first;
+        bonds_.erase(existing_bond_analyzer_iter);
+        lock.unlock();
+        //destroy temp_bond_reference reference
+      }
+
       res.message = "Unloaded from namespace '" + req.load_namespace + "'";
       res.success = true;
       return true;

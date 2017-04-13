@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /**
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef DIAGNOSTIC_ANALYZER_GROUP_H
@@ -60,10 +60,10 @@ namespace diagnostic_aggregator {
  *\brief Allows analyzers to be grouped together, or used as sub-analyzers
  *
  * The AnalyzerGroup is used by the diagnostic aggregator internally to
- * load and handle analyzers. It can be used as a normal analyzer plugin to 
+ * load and handle analyzers. It can be used as a normal analyzer plugin to
  * allow analyzers to become "sub-analyzers", or move as a group.
  *
- * The "sub-analyzers" are initialized using parameters in the "~analyzers" 
+ * The "sub-analyzers" are initialized using parameters in the "~analyzers"
  * namespace of the AnalyzerGroup. The "type" parameters determines the analyzer type.
  *
  * Example initialization:
@@ -92,14 +92,14 @@ namespace diagnostic_aggregator {
  *      num_items: 3
  *\endverbatim
  *
- * Each namespace below "analyzers" describes a new Analyzer that will be loaded as a 
+ * Each namespace below "analyzers" describes a new Analyzer that will be loaded as a
  * sub-analyzer. Any analyzer that fails to initialize or loads incorrectly will
  * generate an error in the console output, and a special diagnostic item in the output
- * of the AnalyzerGroup that describes the error. 
+ * of the AnalyzerGroup that describes the error.
  *
- * In the above example, the AnalyzerGroup will have three sub-analyzers. The 
+ * In the above example, the AnalyzerGroup will have three sub-analyzers. The
  * AnalyzerGroup will report a DiagnosticStatus message in the processed output with
- * the name "Sensors" (the top-level state). The "Sensors" message will have the 
+ * the name "Sensors" (the top-level state). The "Sensors" message will have the
  * level of the highest of the sub-analyzers, or the highest of "Sensors/Base Hokuyo",
  * "Sensors/Tilt Hokuyo" and "Sensors/IMU". The state of any other items, like
  * "Sensors/IMU/Connection" won't matter to the AnalyzerGroup.
@@ -137,11 +137,6 @@ public:
   virtual bool match(const std::string name);
 
   /*!
-   *\brief Clear match arrays. Used when analyzers are added or removed
-   */
-  void resetMatches();
-
-  /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
    */
   virtual bool analyze(const boost::shared_ptr<StatusItem> item);
@@ -156,6 +151,11 @@ public:
   virtual std::string getName() const { return nice_name_; }
 
 private:
+  /*!
+   *\brief Clear match arrays. Used when analyzers are added or removed
+   */
+  void resetMatches();
+
   std::string path_, nice_name_;
 
   /*!
