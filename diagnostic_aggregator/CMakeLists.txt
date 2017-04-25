@@ -4,7 +4,7 @@ project(diagnostic_aggregator)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
-catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp bondpy
+catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME})
 
