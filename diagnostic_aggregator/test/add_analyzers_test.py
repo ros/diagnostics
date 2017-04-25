@@ -124,6 +124,7 @@ class TestAddAnalyzer(unittest.TestCase):
                 
 
         self.bond.shutdown()
+        rospy.sleep(rospy.Duration(3)) # wait a bit for the analyzers to unload
         self.wait_for_agg()
         # the aggregator data should no longer contain the paths once the bond is shut down
         with self._mutex:
