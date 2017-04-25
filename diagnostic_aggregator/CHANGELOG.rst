@@ -2,6 +2,15 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Longer settling time
+* Fix race condition in unload
+* Fix cmake warnings
+* make rostest in CMakeLists optional (`ros/rosdistro#3010 <https://github.com/ros/rosdistro/issues/3010>`_)
+* Changed all deprecated PLUGINLIB_DECLARE_CLASS to PLUGINLIB_EXPORT_CLASS macros
+* Contributors: Aris Synodinos, Lukas Bulwahn, trainman419
+
 1.8.10 (2016-06-14)
 -------------------
 * Start bond after add_diagnostics service is available

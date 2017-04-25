@@ -2,6 +2,12 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* make rostest in CMakeLists optional (`ros/rosdistro#3010 <https://github.com/ros/rosdistro/issues/3010>`_)
+* Fixed bug with merge summary in status wrapper
+* Contributors: Lukas Bulwahn, pAIgn10
+
 1.8.10 (2016-06-14)
 -------------------
 
