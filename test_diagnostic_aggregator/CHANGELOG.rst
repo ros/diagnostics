@@ -2,8 +2,8 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2017-04-25)
+------------------
 * Fix cmake warnings
 * Changed all deprecated PLUGINLIB_DECLARE_CLASS to PLUGINLIB_EXPORT_CLASS macros
 * Contributors: Aris Synodinos, trainman419

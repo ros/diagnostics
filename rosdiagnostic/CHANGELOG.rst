@@ -2,8 +2,8 @@
 Changelog for package rosdiagnostic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2017-04-25)
+------------------
 * Initial release
 * Created a command to print rosdiagnostics to the console.
   Works very much like rostopic echo but instead automatically connects to the aggregated diagnostics and output in a friendly format the content of the diagnostic report.

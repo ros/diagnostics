@@ -2,8 +2,8 @@
 Changelog for package diagnostic_analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2017-04-25)
+------------------
 * Install diagnostic_analysis nodes
   Fixes `#51 <https://github.com/ros/diagnostics/issues/51>`_
 * make rostest in CMakeLists optional (`ros/rosdistro#3010 <https://github.com/ros/rosdistro/issues/3010>`_)

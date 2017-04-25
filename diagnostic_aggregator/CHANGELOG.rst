@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.0 (2017-04-25)
+------------------
 * Longer settling time
 * Fix race condition in unload
 * Fix cmake warnings
