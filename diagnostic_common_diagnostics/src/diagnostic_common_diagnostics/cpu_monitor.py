@@ -33,15 +33,19 @@ class CpuTask(DiagnosticTask):
         return stat
 
 
-if __name__ == '__main__':
+def main():
     hostname = socket.gethostname()
     rospy.init_node('cpu_monitor_%s' % hostname.replace("-", "_"))
 
     updater = Updater()
     updater.setHardwareID(hostname)
-    updater.add(CpuTask(rospy.get_param("warning_percentage", 90)))
+    updater.add(CpuTask(rospy.get_param("~warning_percentage", 90)))
 
     rate = rospy.Rate(rospy.get_param("~rate", 1))
     while not rospy.is_shutdown():
         rate.sleep()
         updater.update()
+
+
+if __name__ == '__main__':
+    main()
