@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>diagnostics</name>
   <version>1.9.0</version>
   <description>diagnostics</description>
@@ -14,15 +14,16 @@
 
   <author>Kevin Watts</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament</buildtool_depend>
 
-  <run_depend>diagnostic_aggregator</run_depend>
-  <run_depend>diagnostic_analysis</run_depend>
-  <run_depend>diagnostic_common_diagnostics</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>self_test</run_depend>
+  <exec_depend>diagnostic_aggregator</exec_depend>
+  <exec_depend>diagnostic_analysis</exec_depend>
+  <exec_depend>diagnostic_common_diagnostics</exec_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>self_test</exec_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <metapackage/>
   </export>
 </package>

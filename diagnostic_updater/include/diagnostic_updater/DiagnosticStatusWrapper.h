@@ -45,25 +45,25 @@
 #include <stdarg.h>
 #include <cstdio>
 
-#include "ros/ros.h"
+#include "rclcpp/rclcpp.hpp"
 
-#include "diagnostic_msgs/DiagnosticStatus.h"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
 namespace diagnostic_updater
 {
 
   /**
    *
-   * \brief Wrapper for the diagnostic_msgs::DiagnosticStatus message that
+   * \brief Wrapper for the diagnostic_msgs::msg::DiagnosticStatus message that
    * makes it easier to update.
    *
    * This class handles common string formatting and vector handling issues
-   * for filling the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
-   * diagnostic_msgs::DiagnosticStatus, so it can be passed directly to
+   * for filling the diagnostic_msgs::msg::DiagnosticStatus message. It is a subclass of
+   * diagnostic_msgs::msg::DiagnosticStatus, so it can be passed directly to
    * diagnostic publish calls.
    * 
    */
-  class DiagnosticStatusWrapper : public diagnostic_msgs::DiagnosticStatus
+  class DiagnosticStatusWrapper : public diagnostic_msgs::msg::DiagnosticStatus
   {
     public:
 
@@ -120,7 +120,7 @@ namespace diagnostic_updater
        * \param src DiagnosticStatus from which to merge the summary.
        */
       
-      void mergeSummary(const diagnostic_msgs::DiagnosticStatus &src)
+      void mergeSummary(const diagnostic_msgs::msg::DiagnosticStatus &src)
       {
         mergeSummary(src.level, src.message);
       }
@@ -142,8 +142,8 @@ namespace diagnostic_updater
         va_list va;
         char buff[1000]; // @todo This could be done more elegantly.
         va_start(va, format);
-        if (vsnprintf(buff, 1000, format, va) >= 1000)
-          ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+        //if (vsnprintf(buff, 1000, format, va) >= 1000)
+        //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
         std::string value = std::string(buff);
         mergeSummary(lvl, value);
         va_end(va);
@@ -165,8 +165,8 @@ namespace diagnostic_updater
         va_list va;
         char buff[1000]; // @todo This could be done more elegantly.
         va_start(va, format);
-        if (vsnprintf(buff, 1000, format, va) >= 1000)
-          ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+        //if (vsnprintf(buff, 1000, format, va) >= 1000)
+        //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
         std::string value = std::string(buff);
         summary(lvl, value);
         va_end(va);
@@ -186,7 +186,7 @@ namespace diagnostic_updater
        *
        * \param src StatusWrapper to copy the summary from.
        */
-      void summary(const diagnostic_msgs::DiagnosticStatus &src)
+      void summary(const diagnostic_msgs::msg::DiagnosticStatus &src)
       {
         summary(src.level, src.message);
       }
@@ -234,7 +234,7 @@ namespace diagnostic_updater
   template<>
     inline void DiagnosticStatusWrapper::add<std::string>(const std::string &key, const std::string &s)
     {
-      diagnostic_msgs::KeyValue ds;
+      diagnostic_msgs::msg::KeyValue ds;
       ds.key = key;
       ds.value = s;
       values.push_back(ds);
@@ -244,7 +244,7 @@ namespace diagnostic_updater
 template<>
 inline void DiagnosticStatusWrapper::add<bool>(const std::string &key, const bool &b)
 {
-  diagnostic_msgs::KeyValue ds;
+  diagnostic_msgs::msg::KeyValue ds;
   ds.key = key;
   ds.value = b ? "True" : "False";
 
@@ -258,8 +258,8 @@ inline void DiagnosticStatusWrapper::add<bool>(const std::string &key, const boo
     va_list va;
     char buff[1000]; // @todo This could be done more elegantly.
     va_start(va, format);
-    if (vsnprintf(buff, 1000, format, va) >= 1000)
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+    //if (vsnprintf(buff, 1000, format, va) >= 1000)
+    //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
     std::string value = std::string(buff);
     add(key, value);
     va_end(va);

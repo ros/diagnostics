@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>diagnostic_common_diagnostics</name>
   <version>1.9.0</version>
   <description>diagnostic_common_diagnostics</description>
@@ -11,21 +11,22 @@
   <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
 <!-- <url type="bugtracker"></url> -->
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament</buildtool_depend>
 
   <build_depend>rospy</build_depend>
   <build_depend>diagnostic_updater</build_depend>
 
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>hddtemp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>tf</run_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>hddtemp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>tf</exec_depend>
 
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
   <!-- <test_depend>tf</test_depend> -->
 
   <export>
+    <build_type>ament_cmake</build_type>
     <architecture_independent/>
   </export>
 </package>

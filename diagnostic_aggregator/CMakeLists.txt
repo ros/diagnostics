@@ -2,25 +2,36 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(diagnostic_aggregator)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
-catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME})
+# Support C++11
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
-set(REQUIRED_diagnostic_msgs_VERSION_Jade "1.12.4")
-if( ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Indigo})
-  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Indigo} or newer is required to build diagnotic_aggregator on ROS Indigo")
-endif()
-if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
-    (${diagnostic_msgs_VERSION} VERSION_GREATER "1.12.0" AND
-     ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Jade}))
-  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Jade} or newer is required to build diagnotic_aggregator on ROS Jade")
-endif()
+# Load catkin and all dependencies required for this package
+#find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
+find_package(ament_cmake REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+#find_package(rospy REQUIRED)
+find_package(xmlrpcpp REQUIRED)
+find_package(bondcpp REQUIRED)
+
+# catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
+#    INCLUDE_DIRS include
+#    LIBRARIES ${PROJECT_NAME})
+
+#set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
+#set(REQUIRED_diagnostic_msgs_VERSION_Jade "1.12.4")
+#if( ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Indigo})
+#  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Indigo} or newer is required to build diagnotic_aggregator on ROS Indigo")
+#endif()
+#if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
+#    (${diagnostic_msgs_VERSION} VERSION_GREATER "1.12.0" AND
+#     ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Jade}))
+#  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Jade} or newer is required to build diagnotic_aggregator on ROS Jade")
+#endif()
 
 find_package(Boost REQUIRED COMPONENTS system)
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
+include_directories(include ${diagnostic_msgs_INCLUDE_DIRS} ${pluginlib_INCLUDE_DIRS} ${rclcpp_INCLUDE_DIRS} ${xmlrpcpp_INCLUDE_DIRS} ${boncpp_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
@@ -30,9 +41,13 @@ add_library(${PROJECT_NAME}
   src/ignore_analyzer.cpp
   src/aggregator.cpp)
 target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
-                                            ${catkin_LIBRARIES}
+                                            ${diagnostic_msgs_LIBRARIES}
+					    ${pluginlib}
+					    ${rclcpp}
+					    ${xmlrpcpp}
+					    ${bondcpp}
 )
-add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
+#add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
 # Aggregator node 
 add_executable(aggregator_node src/aggregator_node.cpp)
@@ -56,19 +71,21 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_multiple_match.launch)
 endif()
 
-catkin_install_python(
-        PROGRAMS scripts/add_analyzers
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+#catkin_install_python(
+#        PROGRAMS scripts/add_analyzers
+#        DESTINATION bin
+#)
 install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        DESTINATION include
 )
 install(FILES analyzer_plugins.xml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        DESTINATION share
 )
 install(TARGETS ${PROJECT_NAME}
-        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        DESTINATION lib
 )
 install(TARGETS aggregator_node analyzer_loader
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        DESTINATION bin
 )
+
+ament_package()

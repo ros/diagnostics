@@ -40,6 +40,8 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <math.h>
 
+#include <ros2_time/time.hpp>
+
 namespace diagnostic_updater
 {
 
@@ -106,7 +108,7 @@ namespace diagnostic_updater
       const FrequencyStatusParam params_;
 
       int count_;
-      std::vector <ros::Time> times_;
+      std::vector <ros2_time::Time> times_;
       std::vector <int> seq_nums_;
       int hist_indx_;
       boost::mutex lock_;
@@ -130,7 +132,7 @@ namespace diagnostic_updater
       void clear()
       {
         boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
+        ros2_time::Time curtime = ros2_time::Time::now();
         count_ = 0;
 
         for (int i = 0; i < params_.window_size_; i++)
@@ -155,7 +157,7 @@ namespace diagnostic_updater
       virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
       {
         boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
+        ros2_time::Time curtime = ros2_time::Time::now();
         int curseq = count_;
         int events = curseq - seq_nums_[hist_indx_];
         double window = (curtime - times_[hist_indx_]).toSec();
@@ -296,7 +298,7 @@ namespace diagnostic_updater
         }
         else
         {
-          double delta = ros::Time::now().toSec() - stamp;
+          double delta = ros2_time::Time::now().toSec() - stamp;
 
           if (!deltas_valid_ || delta > max_delta_)
             max_delta_ = delta;
@@ -315,7 +317,7 @@ namespace diagnostic_updater
        * intervals.
        */
 
-      void tick(const ros::Time t)
+      void tick(const ros2_time::Time t)
       {
         tick(t.toSec());
       }

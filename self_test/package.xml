@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>self_test</name>
   <version>1.9.0</version>
   <description>self_test</description>
@@ -14,18 +14,21 @@
 
   <author>Jeremy Leibs and Blaise Gassend</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament</buildtool_depend>
 
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>diagnostic_updater</build_depend>
-  <build_depend>roscpp</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>rostest</build_depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>roscpp</run_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
 
-  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>rclcpp</test_depend> -->
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>diagnostic_msgs</test_depend> -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

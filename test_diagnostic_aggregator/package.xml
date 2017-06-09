@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>test_diagnostic_aggregator</name>
   <version>1.9.0</version>
   <description>Basic diagnostic_aggregator tests are  in the</description>
@@ -14,28 +14,29 @@
 
   <author>Kevin Watts</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament</buildtool_depend>
 
   <build_depend version_gte="1.8.9">diagnostic_aggregator</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
-  <build_depend>roscpp</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>rostest</build_depend>
 
-  <run_depend version_gte="1.8.9">diagnostic_aggregator</run_depend>
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>pluginlib</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
+  <exec_depend version_gte="1.8.9">diagnostic_aggregator</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>pluginlib</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
 
   <!-- <test_depend>pluginlib</test_depend> -->
   <!-- <test_depend>diagnostic_msgs</test_depend> -->
   <!-- <test_depend>diagnostic_aggregator</test_depend> -->
-  <!-- <test_depend>roscpp</test_depend> -->
+  <!-- <test_depend>rclcpp</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
 
   <export>
+    <build_type>ament_cmake</build_type>
     <diagnostic_aggregator plugin="${prefix}/test_diagnostic_aggregator_plugin.xml"/>
     <architecture_independent/>
   </export>

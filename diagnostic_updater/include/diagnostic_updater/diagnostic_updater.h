@@ -39,10 +39,11 @@
 #include <vector>
 #include <string>
 
-#include "ros/node_handle.h"
-#include "ros/this_node.h"
+#include "ros2_time/time.hpp"
+#include "rclcpp/node.hpp"
+#include "rclcpp/parameter_client.hpp"
 
-#include "diagnostic_msgs/DiagnosticArray.h"
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_updater/DiagnosticStatusWrapper.h"
 
 #include <boost/thread.hpp>
@@ -51,7 +52,7 @@ namespace diagnostic_updater
 {
 
   typedef boost::function<void(DiagnosticStatusWrapper&)> TaskFunction;
-  typedef boost::function<void(diagnostic_msgs::DiagnosticStatus&)> UnwrappedTaskFunction;
+  typedef boost::function<void(diagnostic_msgs::msg::DiagnosticStatus&)> UnwrappedTaskFunction;
 
   /**
    * \brief DiagnosticTask is an abstract base class for collecting diagnostic data.
@@ -129,7 +130,7 @@ namespace diagnostic_updater
       const TaskFunction fn_;
   };
 
-  typedef GenericFunctionDiagnosticTask<diagnostic_msgs::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
+  typedef GenericFunctionDiagnosticTask<diagnostic_msgs::msg::DiagnosticStatus> UnwrappedFunctionDiagnosticTask;
   typedef GenericFunctionDiagnosticTask<DiagnosticStatusWrapper> FunctionDiagnosticTask;
 
   /**
@@ -370,8 +371,9 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-    Updater(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~"), std::string node_name = ros::this_node::getName()) : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
+    Updater(rclcpp::node::Node::SharedPtr h = rclcpp::node::Node::make_shared("test"), rclcpp::node::Node::SharedPtr ph = rclcpp::node::Node::make_shared("~"), std::string node_name = "test") : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
     {
+      // TODO: how to deal with default node?
       setup();
     }
 
@@ -381,7 +383,7 @@ namespace diagnostic_updater
        */
       void update()
       {
-        ros::Time now_time = ros::Time::now();
+        ros2_time::Time now_time = ros2_time::Time::now();
         if (now_time < next_time_) {
           // @todo put this back in after fix of #2157 update_diagnostic_period(); // Will be checked in force_update otherwise.
           return;
@@ -400,13 +402,13 @@ namespace diagnostic_updater
       {
         update_diagnostic_period();
 
-        next_time_ = ros::Time::now() + ros::Duration().fromSec(period_);
+        next_time_ = ros2_time::Time::now() + ros2_time::Duration(period_);
 
-        if (node_handle_.ok())
+        if (rclcpp::ok())
         {
           bool warn_nohwid = hwid_.empty();
           
-          std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
+          std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
 
           boost::mutex::scoped_lock lock(lock_); // Make sure no adds happen while we are processing here.
           const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
@@ -427,13 +429,13 @@ namespace diagnostic_updater
             if (status.level)
               warn_nohwid = false;
 
-            if (verbose_ && status.level)
-              ROS_WARN("Non-zero diagnostic status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
+            //if (verbose_ && status.level)
+            //  ROS_WARN("Non-zero diagnostic status. Name: '%s', status %i: '%s'", status.name.c_str(), status.level, status.message.c_str());
           }
 
           if (warn_nohwid && !warn_nohwid_done_)
           {
-            ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            //ROS_WARN("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
             warn_nohwid_done_ = true;
           }
 
@@ -458,7 +460,7 @@ namespace diagnostic_updater
 
       ros::NodeHandle newnh; 
       node_handle_ = newnh; 
-      publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
+      publisher_ = node_handle_.advertise<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", 1);
       broadcast(2, "Node shut down"); 
       }*/
 
@@ -475,7 +477,7 @@ namespace diagnostic_updater
 
       void broadcast(int lvl, const std::string msg)
       {
-        std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
+        std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
 
         const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
         for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
@@ -497,8 +499,8 @@ namespace diagnostic_updater
         va_list va;
         char buff[1000]; // @todo This could be done more elegantly.
         va_start(va, format);
-        if (vsnprintf(buff, 1000, format, va) >= 1000)
-          ROS_DEBUG("Really long string in diagnostic_updater::setHardwareIDf.");
+        //if (vsnprintf(buff, 1000, format, va) >= 1000)
+        //  ROS_DEBUG("Really long string in diagnostic_updater::setHardwareIDf.");
         hwid_ = std::string(buff);
         va_end(va);
       }
@@ -516,16 +518,17 @@ namespace diagnostic_updater
       void update_diagnostic_period()
       {
         double old_period = period_;
-        private_node_handle_.getParamCached("diagnostic_period", period_);
-        next_time_ += ros::Duration(period_ - old_period); // Update next_time_
+        rclcpp::parameter_client::SyncParametersClient client(private_node_handle_);
+        period_ = client.get_parameter("diagnostic_period", period_);
+        next_time_ += ros2_time::Duration(period_ - old_period); // Update next_time_
       }
 
       /**
        * Publishes a single diagnostic status.
        */
-      void publish(diagnostic_msgs::DiagnosticStatus &stat)
+      void publish(diagnostic_msgs::msg::DiagnosticStatus &stat)
       {
-        std::vector<diagnostic_msgs::DiagnosticStatus> status_vec;
+        std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
         status_vec.push_back(stat);
         publish(status_vec);
       }
@@ -533,18 +536,20 @@ namespace diagnostic_updater
       /**
        * Publishes a vector of diagnostic statuses.
        */
-      void publish(std::vector<diagnostic_msgs::DiagnosticStatus> &status_vec)
+      void publish(std::vector<diagnostic_msgs::msg::DiagnosticStatus> &status_vec)
       {
-        for  (std::vector<diagnostic_msgs::DiagnosticStatus>::iterator 
+        for  (std::vector<diagnostic_msgs::msg::DiagnosticStatus>::iterator 
             iter = status_vec.begin(); iter != status_vec.end(); iter++)
         {
           iter->name = 
             node_name_.substr(1) + std::string(": ") + iter->name;
         }
-        diagnostic_msgs::DiagnosticArray msg;
+        diagnostic_msgs::msg::DiagnosticArray msg;
         msg.status = status_vec;
-        msg.header.stamp = ros::Time::now(); // Add timestamp for ROS 0.10
-        publisher_.publish(msg);
+        ros2_time::Time now = ros2_time::Time::now();
+        msg.header.stamp.sec = now.toSec(); // Add timestamp for ROS 0.10
+        msg.header.stamp.nanosec = now.toNSec(); // Add timestamp for ROS 0.10
+        publisher_->publish(msg);
       }
 
       /**
@@ -552,10 +557,10 @@ namespace diagnostic_updater
        */
       void setup()
       {
-        publisher_ = node_handle_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
+        publisher_ = node_handle_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", 1);
 
         period_ = 1.0;
-        next_time_ = ros::Time::now() + ros::Duration(period_);
+        next_time_ = ros2_time::Time::now() + ros2_time::Duration(period_);
         update_diagnostic_period();
 
         verbose_ = false;
@@ -574,11 +579,11 @@ namespace diagnostic_updater
         publish(stat);
       }
 
-      ros::NodeHandle private_node_handle_;
-      ros::NodeHandle node_handle_;
-      ros::Publisher publisher_;
+      rclcpp::node::Node::SharedPtr private_node_handle_;
+      rclcpp::node::Node::SharedPtr node_handle_;
+      rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
 
-      ros::Time next_time_;
+      ros2_time::Time next_time_;
 
       double period_;
       std::string hwid_;
