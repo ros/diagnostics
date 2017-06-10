@@ -547,8 +547,7 @@ namespace diagnostic_updater
         diagnostic_msgs::msg::DiagnosticArray msg;
         msg.status = status_vec;
         ros2_time::Time now = ros2_time::Time::now();
-        msg.header.stamp.sec = now.toSec(); // Add timestamp for ROS 0.10
-        msg.header.stamp.nanosec = now.toNSec(); // Add timestamp for ROS 0.10
+        msg.header.stamp = now.toStamp(); // Add timestamp for ROS 0.10
         publisher_->publish(msg);
       }
 
