@@ -19,11 +19,11 @@
   <exec_depend>diagnostic_updater</exec_depend>
   <exec_depend>hddtemp</exec_depend>
   <exec_depend>rospy</exec_depend>
-  <exec_depend>tf</exec_depend>
+  <exec_depend>tf2</exec_depend>
 
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
-  <!-- <test_depend>tf</test_depend> -->
+  <!-- <test_depend>tf2</test_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>

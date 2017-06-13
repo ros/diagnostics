@@ -17,8 +17,7 @@
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>rclcpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>rostest</build_depend>
+  <build_depend>rclpy</build_depend>
   <build_depend>xmlrpcpp</build_depend>
   <build_depend>bondcpp</build_depend>
   <build_depend>bondpy</build_depend>
@@ -26,7 +25,7 @@
   <exec_depend>diagnostic_msgs</exec_depend>
   <exec_depend>pluginlib</exec_depend>
   <exec_depend>rclcpp</exec_depend>
-  <exec_depend>rospy</exec_depend>
+  <exec_depend>rclpy</exec_depend>
   <exec_depend>xmlrpcpp</exec_depend>
   <exec_depend>bondcpp</exec_depend>
   <exec_depend>bondpy</exec_depend>

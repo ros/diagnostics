@@ -20,13 +20,8 @@
   <buildtool_depend>ament</buildtool_depend>
 
   <build_depend>diagnostic_msgs</build_depend>
-  <build_depend>rosbag</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>rostest</build_depend>
 
   <exec_depend>diagnostic_msgs</exec_depend>
-  <exec_depend>rosbag</exec_depend>
-  <exec_depend>roslib</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
