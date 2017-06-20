@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(diagnostic_aggregator)
 
 # Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy rostest xmlrpcpp bondcpp)
-catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp bondpy
+find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
+catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME})
 
@@ -46,6 +46,7 @@ add_executable(analyzer_loader test/analyzer_loader.cpp
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 
 if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
   add_rostest(test/launch/test_agg.launch)
   add_rostest(test/launch/test_add_agg.launch)
 

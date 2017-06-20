@@ -2,6 +2,11 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.0 (2017-04-25)
+------------------
+* Remove warning for missing queue size specification
+* Contributors: sandeep
+
 1.8.10 (2016-06-14)
 -------------------
 

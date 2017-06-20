@@ -15,7 +15,7 @@ include_directories(include)
 add_library(test_diagnostic_aggregator
   src/match_no_analyze_analyzer.cpp
   src/fail_init_analyzer.cpp)
-add_dependencies(test_diagnostic_aggregator diagnostic_msgs_gencpp)
+add_dependencies(test_diagnostic_aggregator ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_diagnostic_aggregator ${catkin_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
