@@ -35,24 +35,10 @@
 # \author Rein Appeldoorn
 
 
-import sys
 import unittest
 import rospy
 import rostest
 from diagnostic_msgs.msg import DiagnosticArray
-from argparse import ArgumentParser
-
-CPU_PERCENTAGE = 0
-
-
-class PSUtilMock:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def cpu_percent(percpu=False):
-        if percpu:
-            return [CPU_PERCENTAGE] * 4
 
 
 class TestCPUMonitor(unittest.TestCase):
@@ -88,15 +74,4 @@ class TestCPUMonitor(unittest.TestCase):
 PKG = 'diagnostics_common_diagnostics'
 NAME = 'test_cpu_monitor'
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('--mock', action="store_true", default=False)
-    parser.add_argument('--percentage', default=50, type=int)
-    args = parser.parse_known_args()[0]
-
-    if args.mock:
-        sys.modules['psutil'] = PSUtilMock
-        from diagnostic_common_diagnostics import cpu_monitor
-        CPU_PERCENTAGE = args.percentage
-        cpu_monitor.main()
-    else:
-        rostest.unitrun(PKG, NAME, TestCPUMonitor)
+    rostest.unitrun(PKG, NAME, TestCPUMonitor)
