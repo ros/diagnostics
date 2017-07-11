@@ -371,7 +371,7 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-    Updater(rclcpp::node::Node::SharedPtr h = rclcpp::node::Node::make_shared("test"), rclcpp::node::Node::SharedPtr ph = rclcpp::node::Node::make_shared("~"), std::string node_name = "test") : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
+    Updater(rclcpp::node::Node::SharedPtr h = rclcpp::node::Node::make_shared("test"), rclcpp::node::Node::SharedPtr ph = rclcpp::node::Node::make_shared("test"), std::string node_name = "test") : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
     {
       // TODO: how to deal with default node?
       setup();
@@ -518,8 +518,10 @@ namespace diagnostic_updater
       void update_diagnostic_period()
       {
         double old_period = period_;
+#if 0 // TODO: nodes don't automatically have a parameter service yet...disable for now
         rclcpp::parameter_client::SyncParametersClient client(private_node_handle_);
         period_ = client.get_parameter("diagnostic_period", period_);
+#endif
         next_time_ += ros2_time::Duration(period_ - old_period); // Update next_time_
       }
 
