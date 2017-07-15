@@ -2,8 +2,8 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.1 (2017-07-15)
+------------------
 * Add queue size parameters on Publishers
 * Contributors: trainman419
 

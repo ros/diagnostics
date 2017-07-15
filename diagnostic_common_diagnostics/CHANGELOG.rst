@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.1 (2017-07-15)
+------------------
 * Add queue size parameters on Publishers
 * Minor python updates
 * Added CPU percentage monitor

@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.1 (2017-07-15)
+------------------
 * Add queue size parameters on Publishers
 * Minor python updates
 * Contributors: trainman419
