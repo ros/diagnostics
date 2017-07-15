@@ -125,7 +125,7 @@ Aggregator::~Aggregator()
 void Aggregator::bondBroken(string bond_id, boost::shared_ptr<Analyzer> analyzer)
 {
   boost::mutex::scoped_lock lock(mutex_); // Possibility of multiple bonds breaking at once
-  ROS_DEBUG("Bond for namespace %s was broken", bond_id.c_str());
+  ROS_WARN("Bond for namespace %s was broken", bond_id.c_str());
   std::vector<boost::shared_ptr<bond::Bond> >::iterator elem;
   elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
   if (elem == bonds_.end()){
@@ -172,8 +172,11 @@ bool Aggregator::addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
       return true;
     }
 
+    // Use a different topic for each bond to help control the message queue
+    // length. Bond has a fixed size subscriber queue, so we can easily miss
+    // bond heartbeats if there are too many bonds on the same topic.
     boost::shared_ptr<bond::Bond> req_bond = boost::make_shared<bond::Bond>(
-      "/diagnostics_agg/bond", req.load_namespace,
+      "/diagnostics_agg/bond" + req.load_namespace, req.load_namespace,
       boost::function<void(void)>(boost::bind(&Aggregator::bondBroken, this, req.load_namespace, group)),
       boost::function<void(void)>(boost::bind(&Aggregator::bondFormed, this, group))
 									    );
