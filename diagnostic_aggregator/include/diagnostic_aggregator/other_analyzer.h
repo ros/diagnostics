@@ -63,7 +63,9 @@ public:
   /*!
    *\brief Default constructor. OtherAnalyzer isn't loaded by pluginlib
    */
-  OtherAnalyzer() { }
+  explicit OtherAnalyzer(bool other_as_errors = false)
+  : other_as_errors_(other_as_errors)
+  { }
 
   ~OtherAnalyzer() { }
 
@@ -105,10 +107,29 @@ public:
 
     // We don't report anything if there's no "Other" items
     if (processed.size() == 1)
+    {
       processed.clear();
+    }
+    // "Other" items are considered an error.
+    else if (other_as_errors_ && processed.size() > 1)
+    {
+      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> >::iterator it = processed.begin();
+      for (; it != processed.end(); ++it)
+      {
+        if ((*it)->name == path_)
+        {
+          (*it)->level = 2;
+          (*it)->message = "Unanalyzed items found in \"Other\"";
+          break;
+        }
+      }
+    }
     
     return processed;
   }
+
+private:
+  bool other_as_errors_;
 };
 
 }

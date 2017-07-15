@@ -52,6 +52,9 @@ Aggregator::Aggregator() :
 
   nh.param("pub_rate", pub_rate_, pub_rate_);
 
+  bool other_as_errors = false;
+  nh.param("other_as_errors", other_as_errors, false);
+
   analyzer_group_ = new AnalyzerGroup();
 
   if (!analyzer_group_->init(base_path_, nh))
@@ -60,7 +63,7 @@ Aggregator::Aggregator() :
   }
 
   // Last analyzer handles remaining data
-  other_analyzer_ = new OtherAnalyzer();
+  other_analyzer_ = new OtherAnalyzer(other_as_errors);
   other_analyzer_->init(base_path_); // This always returns true
   add_srv_ = n_.advertiseService("/diagnostics_agg/add_diagnostics", &Aggregator::addDiagnostics, this);
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
