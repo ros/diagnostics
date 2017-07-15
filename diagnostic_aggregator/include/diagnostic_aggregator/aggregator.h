@@ -86,6 +86,7 @@ Output:
 \verbatim
 base_path: My Robot
 pub_rate: 1.0
+other_as_errors: false
 analyzers:
   sensors:
     type: GenericAnalyzer
@@ -97,7 +98,7 @@ analyzers:
     type: PR2JointsAnalyzer
 \endverbatim
  * Each analyzer is created according to the "type" parameter in its namespace.
- * Any other parametes in the namespace can by used to specify the analyzer. If
+ * Any other parameters in the namespace can by used to specify the analyzer. If
  * any analyzer is not properly specified, or returns false on initialization,
  * the aggregator will report the error and publish it in the aggregated output.
  */

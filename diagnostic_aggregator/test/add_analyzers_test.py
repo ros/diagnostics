@@ -71,7 +71,8 @@ class TestAddAnalyzer(unittest.TestCase):
     def add_analyzer(self):
         """Start a bond to the aggregator
         """
-        self.bond = bondpy.Bond("/diagnostics_agg/bond", rospy.resolve_name(rospy.get_name()))
+        namespace = rospy.resolve_name(rospy.get_name())
+        self.bond = bondpy.Bond("/diagnostics_agg/bond" + namespace, namespace)
         self.bond.start()
         rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=10)
         add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)

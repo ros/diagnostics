@@ -140,7 +140,7 @@ class hd_monitor():
             rospy.logwarn('Not warning for HD temperatures is deprecated. This will be removed in D-turtle')
         self._home_dir = home_dir
 
-        self._diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray)
+        self._diag_pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
 
         self._last_temp_time = 0
         self._last_usage_time = 0

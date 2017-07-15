@@ -36,8 +36,6 @@
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-import roslib
-roslib.load_manifest('diagnostic_updater')
 import rospy
 from ._diagnostic_updater import *
 
