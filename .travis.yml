@@ -1,6 +1,7 @@
 sudo: required
 dist: trusty
 language: generic
+group: deprecated-2017Q3
 compiler:
   - gcc
 # install dependencies
