@@ -2,6 +2,9 @@
 Changelog for package rosdiagnostic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.9.0 (2017-04-25)
 ------------------
 * Initial release

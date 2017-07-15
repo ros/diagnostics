@@ -2,6 +2,15 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add queue size parameters on Publishers
+* add_analyzers improvements
+  * Warning message when bond is broken
+  * Per-bond topics to avoid queue length issues
+* Option to make diagnostics in Other an error
+* Contributors: trainman419
+
 1.9.0 (2017-04-25)
 ------------------
 * Longer settling time

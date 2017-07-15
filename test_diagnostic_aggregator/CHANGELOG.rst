@@ -2,6 +2,11 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add queue size parameters on Publishers
+* Contributors: trainman419
+
 1.9.0 (2017-04-25)
 ------------------
 * Fix cmake warnings

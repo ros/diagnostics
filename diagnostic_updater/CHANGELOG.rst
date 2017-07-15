@@ -2,6 +2,12 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add queue size parameters on Publishers
+* Minor python updates
+* Contributors: trainman419
+
 1.9.0 (2017-04-25)
 ------------------
 * make rostest in CMakeLists optional (`ros/rosdistro#3010 <https://github.com/ros/rosdistro/issues/3010>`_)

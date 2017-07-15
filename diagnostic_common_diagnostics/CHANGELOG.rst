@@ -2,6 +2,16 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add queue size parameters on Publishers
+* Minor python updates
+* Added CPU percentage monitor
+  CPU monitor that outputs the average CPU percentage and a percentage per
+  CPU. The user can specify the warning CPU percentage. When one CPU exceeds
+  this percentage, the diagnostics status is set to WARN.
+* Contributors: Rein Appeldoorn, trainman419
+
 1.9.0 (2017-04-25)
 ------------------
 * Remove warning for missing queue size specification
