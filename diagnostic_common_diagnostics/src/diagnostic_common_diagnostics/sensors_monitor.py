@@ -42,6 +42,7 @@ import socket, string
 import subprocess
 import math
 import re
+import sys
 from StringIO import StringIO
 
 class Sensor(object):
