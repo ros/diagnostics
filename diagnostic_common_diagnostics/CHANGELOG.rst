@@ -2,6 +2,11 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* FIX: add missing dependency
+* Contributors: trainman419
+
 1.9.1 (2017-07-15)
 ------------------
 * Add queue size parameters on Publishers

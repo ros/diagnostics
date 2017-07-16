@@ -2,6 +2,9 @@
 Changelog for package diagnostic_analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.9.1 (2017-07-15)
 ------------------
 
