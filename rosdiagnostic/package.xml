@@ -8,7 +8,7 @@
   <maintainer email="gautran@clearpath.ai">Guillaume Autran</maintainer>
   <license>BSD</license>
 
-  <buildtool_depend>ament</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>diagnostic_msgs</exec_depend>
 

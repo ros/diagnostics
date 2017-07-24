@@ -12,7 +12,7 @@
   <url type="website">http://www.ros.org/wiki/diagnostic_aggregator</url>
 <!-- <url type="bugtracker"></url> -->
 
-  <buildtool_depend>ament</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>

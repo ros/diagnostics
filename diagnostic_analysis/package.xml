@@ -17,7 +17,7 @@
   <author>Eric Berger</author>
   <author>Kevin Watts</author>
 
-  <buildtool_depend>ament</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>diagnostic_msgs</build_depend>
 
