@@ -21,6 +21,7 @@ endif()
 
 install(PROGRAMS
   src/diagnostic_common_diagnostics/cpu_monitor.py
+  src/diagnostic_common_diagnostics/gpu_monitor.py
   src/diagnostic_common_diagnostics/hd_monitor.py
   src/diagnostic_common_diagnostics/ntp_monitor.py
   src/diagnostic_common_diagnostics/sensors_monitor.py
