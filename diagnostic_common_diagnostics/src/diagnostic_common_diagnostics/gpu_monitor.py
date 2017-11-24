@@ -33,55 +33,53 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # \author Rein Appeldoorn
-# TODO
+
+# This file is an edited copy of the cpu_monitor.py
+# \author Roel Smallegoor
 
 import rospy
 from diagnostic_updater import DiagnosticTask, Updater
 from diagnostic_msgs.msg import DiagnosticStatus
 
-#import psutil
+try:
+    from pynvml import *
+except:
+    raise Exception, 'Needs python NVML module (https://pypi.python.org/pypi/nvidia-ml-py)'
 import socket
-from pynvml import *
 
 
 class GpuTask(DiagnosticTask):
-    def __init__(self, warning_percentage):
+    deviceCount = 0
+
+    def __init__(self, warning_percentage, warning_percentage_mem):
         DiagnosticTask.__init__(self, "GPU Information")
         self._warning_percentage = int(warning_percentage)
+        self._warning_percentage_mem = int(warning_percentage_mem)
         try:
             nvmlInit()
-            deviceCount = nvmlDeviceGetCount()
+            self.deviceCount = nvmlDeviceGetCount()
         except NVMLError as err:
-            #TODO #strResult += 'nvidia_smi.py: ' + err.__str__() + '\n'
-            deviceCout = 0
+            self.deviceCount = 0
+            print(err)
+            sys.exit(0)
 
     def run(self, stat):
-            for i in range(0, deviceCount):
-                handle = nvmlDeviceGetHandleByIndex(i)
-                try:
-                    util = nvmlDeviceGetUtilizationRates(handle)
-                    gpu_util = str(util.gpu)
-                    mem_util = str(util.memory)
-                except NVMLError as err:
-                    error = handleError(err)
-                    gpu_util = error
-                    mem_util = error
+        gpu_percentages = []
+        for i in range(0, self.deviceCount):
+            handle = nvmlDeviceGetHandleByIndex(i)
+            try:
+                util_rates = nvmlDeviceGetUtilizationRates(handle)
+                gpu_percentages.append(util_rates.gpu)
+                gpu_mem_percentages.append(util_rates.memory)
+            except NVMLError as err:
+                stat.summary(DiagnosticStatus.ERROR, err)
+                return stat
 
-                try:
-                    memInfo = nvmlDeviceGetMemoryInfo(handle)
-                    mem_total = str(memInfo.total / 1024 / 1024) + ' MB'
-                    mem_used = str(memInfo.used / 1024 / 1024) + ' MB'
-                    mem_free = str(memInfo.free / 1024 / 1024) + ' MB'
-                except NVMLError as err:
-                    error = handleError(err)
-                    mem_total = error
-                    mem_used = error
-                    mem_free = error
-
-        gpu_percentages = 0 #psutil.gpu_percent(pergpu=True)
-        gpu_average = sum(gpu_percentages) / len(gpu_percentages)
+        gpu_average = sum(gpu_percentages) / self.deviceCount
+        gpu_mem_average = sum(gpu_mem_percentages) / self.deviceCount
 
         stat.add("GPU Load Average", gpu_average)
+        stat.add("GPU Mem Load Average", gpu_mem_average)
 
         warn = False
         for idx, val in enumerate(gpu_percentages):
@@ -89,10 +87,20 @@ class GpuTask(DiagnosticTask):
             if val > self._warning_percentage:
                 warn = True
 
+        warn_mem = False
+        for idx, val in enumerate(gpu_mem_percentages):
+            stat.add("GPU Memory {} Load".format(idx), "{}".format(val))
+            if val > self._warning_percentage:
+                warn_mem = True
+            
         if warn:
-            stat.summary(DiagnosticStatus.WARN, "At least one GPU exceeds %d percent" % self._warning_percentage)
+            stat.summary(DiagnosticStatus.WARN, "At least one GPU exceeds %d percent\n GPU memory Average %.1f percent" % (self._warning_percentage_mem, gpu_mem_average) )
+        elif warn_mem:
+            stat.summary(DiagnosticStatus.WARN, "At least one GPU memory exceeds %d percent\n GPU Average %.1f percent" % (self._warning_percentage_mem, gpu_average) )
+        elif warn and warn_mem:
+            stat.summary(DiagnosticStatus.WARN, "At least one GPU exceeds %d percent\n At least one GPU memory exceeds %d percent" % (self._warning_percentage_mem, self._warning_percentage_mem) )
         else:
-            stat.summary(DiagnosticStatus.OK, "GPU Average %.1f percent" % gpu_average)
+            stat.summary(DiagnosticStatus.OK, "GPU Average %.1f percent\n GPU memory Average %.1f percent" % (gpu_average, gpu_mem_average) )
 
         return stat
 
@@ -103,7 +111,7 @@ def main():
 
     updater = Updater()
     updater.setHardwareID(hostname)
-    updater.add(GpuTask(rospy.get_param("~warning_percentage", 90)))
+    updater.add(GpuTask(rospy.get_param("~warning_percentage", 90), rospy.get_param("~warning_percentage_mem", 90)))
 
     rate = rospy.Rate(rospy.get_param("~rate", 1))
     while not rospy.is_shutdown():
