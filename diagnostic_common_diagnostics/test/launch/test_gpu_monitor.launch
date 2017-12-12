@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="diagnostic_common_diagnostics" type="gpu_monitor.py" name="gpu_monitor" output="screen">
+  </node>
+
+  <test test-name="test_gpu_monitor_output" pkg="diagnostic_common_diagnostics" type="test_gpu_monitor.py"/>
+</launch>

@@ -17,10 +17,14 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_cpu_monitor.launch)
   add_rostest(test/launch/test_cpu_monitor_level_ok.launch)
   add_rostest(test/launch/test_cpu_monitor_level_warn.launch)
+
+  # Test GPU Monitor
+  add_rostest(test/launch/test_gpu_monitor.launch)
 endif()
 
 install(PROGRAMS
   src/diagnostic_common_diagnostics/cpu_monitor.py
+  src/diagnostic_common_diagnostics/gpu_monitor.py
   src/diagnostic_common_diagnostics/hd_monitor.py
   src/diagnostic_common_diagnostics/ntp_monitor.py
   src/diagnostic_common_diagnostics/sensors_monitor.py
