@@ -22,6 +22,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>python-psutil</run_depend>
+  <run_depend>python-nvidia-ml-py-pip</run_depend>
 
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
