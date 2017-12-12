@@ -35,7 +35,7 @@
 # \author Rein Appeldoorn
 
 # This file is an edited copy of the cpu_monitor.py
-# \author Roel Smallegoor
+# \contributer Roel Smallegoor
 
 import rospy
 from diagnostic_updater import DiagnosticTask, Updater
