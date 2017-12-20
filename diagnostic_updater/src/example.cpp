@@ -115,7 +115,7 @@ void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::node::Node::SharedPtr node = rclcpp::node::Node::make_shared("diagnostic_updater_example");
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("diagnostic_updater_example");
   
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 
   auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 1);
   auto pub2_temp = node->create_publisher<std_msgs::msg::Bool>("topic2", 1);
-  rclcpp::rate::Rate(2).sleep(); // It isn't important if it doesn't take time.
+  rclcpp::Rate(2).sleep(); // It isn't important if it doesn't take time.
 
   // Some diagnostic tasks are very common, such as checking the rate
   // at which a topic is publishing, or checking that timestamps are
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
   while (rclcpp::ok())
   {
     std_msgs::msg::Bool msg;
-    rclcpp::rate::Rate(0.1).sleep();
+    rclcpp::Rate(0.1).sleep();
     
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.

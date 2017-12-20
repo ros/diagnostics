@@ -371,7 +371,7 @@ namespace diagnostic_updater
        * \param h Node handle from which to get the diagnostic_period
        * parameter.
        */
-    Updater(rclcpp::node::Node::SharedPtr h = rclcpp::node::Node::make_shared("test"), rclcpp::node::Node::SharedPtr ph = rclcpp::node::Node::make_shared("test"), std::string node_name = "test") : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
+    Updater(rclcpp::Node::SharedPtr h = rclcpp::Node::make_shared("test"), rclcpp::Node::SharedPtr ph = rclcpp::Node::make_shared("test"), std::string node_name = "test") : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
     {
       // TODO: how to deal with default node?
       setup();
@@ -580,8 +580,8 @@ namespace diagnostic_updater
         publish(stat);
       }
 
-      rclcpp::node::Node::SharedPtr private_node_handle_;
-      rclcpp::node::Node::SharedPtr node_handle_;
+      rclcpp::Node::SharedPtr private_node_handle_;
+      rclcpp::Node::SharedPtr node_handle_;
       rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
 
       ros2_time::Time next_time_;
