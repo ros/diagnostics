@@ -52,7 +52,7 @@
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "diagnostic_aggregator/generic_analyzer_base.h"
-#include "XmlRpcValue.h"
+#include "xmlrpcpp/XmlRpcValue.h"
 
 namespace diagnostic_aggregator {
 
