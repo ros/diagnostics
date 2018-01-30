@@ -48,7 +48,7 @@
 #include <diagnostic_msgs/KeyValue.h>
 #include "diagnostic_aggregator/status_item.h"
 #include <boost/shared_ptr.hpp>
-#include "XmlRpcValue.h"
+#include "xmlrpcpp/XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "pluginlib/class_loader.h"
