@@ -218,3 +218,18 @@ class TimeStampStatus(DiagnosticTask):
             self.zero_seen = False
 
         return stat
+
+
+class Heartbeat(DiagnosticTask):
+    """Diagnostic task to monitor whether a node is alive
+
+    This diagnostic task always reports as OK and 'Alive' when it runs
+    """
+
+    def __init__(self):
+        """Constructs a HeartBeat"""
+        DiagnosticTask.__init__(self, "Heartbeat")
+
+    def run(self, stat):
+        stat.summary(0, "Alive")
+        return stat
