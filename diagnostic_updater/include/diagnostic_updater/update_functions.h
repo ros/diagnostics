@@ -376,6 +376,29 @@ namespace diagnostic_updater
       boost::mutex lock_;
   };
 
+ /**
+ * \brief Diagnostic task to monitor whether a node is alive
+ *
+ * This diagnostic task always reports as OK and 'Alive' when it runs
+ */
+
+  class Heartbeat : public DiagnosticTask
+  {
+  public:
+    /**
+     * \brief Constructs a HeartBeat
+     */
+
+    Heartbeat() :
+      DiagnosticTask("Heartbeat")
+    {
+    }
+
+    virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+    {
+      stat.summary(0, "Alive");
+    }
+  };
 };
 
 #endif
