@@ -19,6 +19,9 @@ install:
 script:
   - source /opt/ros/$CI_ROS_DISTRO/setup.bash
   - catkin_init_workspace
+  - dpkg -L python-catkin-pkg  # Debugging travis
+  - apt depends ros-kinetic-catkin  # Debugging travis
+  - python -c "from catkin_pkg.package import parse_package"  # Debugging travis
   - mkdir build
   - cd build
   - cmake .. -DCMAKE_INSTALL_PREFIX=./install
