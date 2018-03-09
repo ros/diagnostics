@@ -53,7 +53,10 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
   n.param("path", nice_name_, string(""));
   
   if (base_path.size() > 0 && base_path != "/")
-    path_ = base_path + "/" + nice_name_;
+    if (nice_name_.size() > 0)
+      path_ = base_path + "/" + nice_name_;
+    else
+      path_ = base_path;
   else
     path_ = nice_name_;
 
