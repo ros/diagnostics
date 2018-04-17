@@ -44,7 +44,7 @@
 #include <sstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include "diagnostic_msgs/DiagnosticStatus.h"
 #include "diagnostic_msgs/KeyValue.h"
 #include "diagnostic_aggregator/analyzer.h"
