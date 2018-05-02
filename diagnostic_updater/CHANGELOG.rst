@@ -2,6 +2,14 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge pull request `#73 <https://github.com/ros/diagnostics/issues/73>`_ from tue-robotics/indigo-devel
+  Add a simple Heartbeat-DiagnosticTask
+* Add Python version of Heartbeat DiagnosticTask
+* Add a very very simple Heartbeat DiagnosticTask
+* Contributors: Austin, Loy van Beek, loy
+
 1.9.2 (2017-07-15)
 ------------------
 
