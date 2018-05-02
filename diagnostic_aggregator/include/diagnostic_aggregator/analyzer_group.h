@@ -51,8 +51,8 @@
 #include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
-#include "pluginlib/class_loader.h"
-#include "pluginlib/class_list_macros.h"
+#include "pluginlib/class_loader.hpp"
+#include "pluginlib/class_list_macros.hpp"
 
 namespace diagnostic_aggregator {
 
