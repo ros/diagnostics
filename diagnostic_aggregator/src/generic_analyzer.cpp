@@ -55,11 +55,11 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
     return false;
   }
 
-  XmlRpc::XmlRpcValue findRemove;
-  if (n.getParam("find_and_remove_prefix", findRemove))
+  XmlRpc::XmlRpcValue find_remove;
+  if (n.getParam("find_and_remove_prefix", find_remove))
   {
     vector<string> output;
-    getParamVals(findRemove, output);
+    getParamVals(find_remove, output);
     chaff_ = output;
     startswith_ = output;
   }
