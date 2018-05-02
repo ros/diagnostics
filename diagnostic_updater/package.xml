@@ -1,6 +1,6 @@
 <package>
   <name>diagnostic_updater</name>
-  <version>1.9.2</version>
+  <version>1.9.3</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>

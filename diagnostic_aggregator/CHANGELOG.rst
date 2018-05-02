@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.3 (2018-05-02)
+------------------
 * Merge pull request `#79 <https://github.com/ros/diagnostics/issues/79>`_ from nlamprian/indigo-devel
   Fixed base_path handling
 * Merge pull request `#82 <https://github.com/ros/diagnostics/issues/82>`_ from moriarty/fix-pluginlib-deprecated-headers
