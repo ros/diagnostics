@@ -230,7 +230,7 @@ class Updater(DiagnosticTaskVector):
 
         self.last_time = rospy.Time.now()
         self.last_time_period_checked = self.last_time
-        self.period = 1
+        self.period = rospy.get_param("~diagnostic_period", 1)
 
         self.verbose = False
         self.hwid = ""
@@ -240,7 +240,6 @@ class Updater(DiagnosticTaskVector):
         """Causes the diagnostics to update if the inter-update interval
         has been exceeded.
         """
-        self._check_diagnostic_period()
         if rospy.Time.now() >= self.last_time + rospy.Duration(self.period):
             self.force_update()
 
@@ -302,23 +301,6 @@ class Updater(DiagnosticTaskVector):
 
     def setHardwareID(self, hwid):
         self.hwid = hwid
-
-    def _check_diagnostic_period(self):
-        """Recheck the diagnostic_period on the parameter server."""
-
-        # This was getParamCached() call in the cpp code. i.e. it would throttle
-        # the actual call to the parameter server using a notification of change
-        # mechanism.
-        # This is not available in rospy. Hence I throttle the call to the
-        # parameter server using a standard timeout mechanism (4Hz)
-
-        now = rospy.Time.now()
-        if  now >= self.last_time_period_checked + rospy.Duration(0.25):
-            try:
-                self.period = rospy.get_param("~diagnostic_period", 1)
-                self.last_time_period_checked = now
-            except (httplib.CannotSendRequest, httplib.ResponseNotReady):
-                pass
 
     def publish(self, msg):
         """Publishes a single diagnostic status or a vector of diagnostic statuses."""
