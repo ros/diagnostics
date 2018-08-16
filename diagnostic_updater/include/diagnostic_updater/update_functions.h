@@ -125,7 +125,7 @@ namespace diagnostic_updater
 
       /**
        * \brief Constructs a FrequencyStatus class with the given parameters.
-       *        Uses a default name "Frequency Status" for the diagnostic task.
+       *        Uses a default diagnostic task name of "Frequency Status".
        */
 
       FrequencyStatus(const FrequencyStatusParam &params) :
@@ -279,7 +279,7 @@ namespace diagnostic_updater
 
       /**
        * \brief Constructs the TimeStampStatus with the given parameters.
-       *        Uses a default name "Timestamp Status" for the diagnostic task.
+       *        Uses a default diagnostic task name of "Timestamp Status".
        */
 
       TimeStampStatus(const TimeStampStatusParam &params) :
@@ -287,7 +287,7 @@ namespace diagnostic_updater
 
       /**
        * \brief Constructs the TimeStampStatus with the default parameters.
-       *        Uses a default name "Timestamp Status" for the diagnostic task.
+       *        Uses a default diagnostic task name of "Timestamp Status".
        */
 
       TimeStampStatus() :
