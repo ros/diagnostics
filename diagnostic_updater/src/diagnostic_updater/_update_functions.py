@@ -76,9 +76,9 @@ class FrequencyStatus(DiagnosticTask):
     been no events in the latest window.
     """
 
-    def __init__(self, params):
+    def __init__(self, params, name = "FrequencyStatus"):
         """Constructs a FrequencyStatus class with the given parameters."""
-        DiagnosticTask.__init__(self, "Frequency Status")
+        DiagnosticTask.__init__(self, name)
         self.params = params
         self.lock = threading.Lock()
         self.clear()
@@ -155,9 +155,9 @@ class TimeStampStatus(DiagnosticTask):
     in a more persistent way.
     """
 
-    def __init__(self, params = TimeStampStatusParam()):
+    def __init__(self, params = TimeStampStatusParam(), name = "Timestamp Status"):
         """Constructs the TimeStampStatus with the given parameters."""
-        DiagnosticTask.__init__(self, "Timestamp Status")
+        DiagnosticTask.__init__(self, name)
         self.params = params
         self.lock = threading.Lock()
         self.early_count = 0

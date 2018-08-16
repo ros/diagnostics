@@ -77,7 +77,7 @@ namespace diagnostic_updater
      * \brief Tolerance with which bounds must be satisfied.
      *
      * Acceptable values are from *min_freq_ * (1 - torelance_) to *max_freq_ *
-     * (1 + tolerance_). 
+     * (1 + tolerance_).
      *
      * Common use cases are to set tolerance_ to zero, or to assign the same
      * value to *max_freq_ and min_freq_.
@@ -102,7 +102,7 @@ namespace diagnostic_updater
 
   class FrequencyStatus : public DiagnosticTask
   {
-    private:                                         
+    private:
       const FrequencyStatusParam params_;
 
       int count_;
@@ -116,23 +116,20 @@ namespace diagnostic_updater
        * \brief Constructs a FrequencyStatus class with the given parameters.
        */
 
-      FrequencyStatus(const FrequencyStatusParam &params) : 
-        DiagnosticTask("Frequency Status"), params_(params), 
+      FrequencyStatus(const FrequencyStatusParam &params, std::string name) :
+        DiagnosticTask(name), params_(params),
         times_(params_.window_size_), seq_nums_(params_.window_size_)
-    {
-      clear();
-    }
+      {
+        clear();
+      }
 
       /**
        * \brief Constructs a FrequencyStatus class with the given parameters.
+       *        Uses a default name "Frequency Status" for the diagnostic task.
        */
 
-      FrequencyStatus(const FrequencyStatusParam &params, const std::string name) :
-        DiagnosticTask(name), params_(params),
-        times_(params_.window_size_), seq_nums_(params_.window_size_)
-    {
-      clear();
-    }
+      FrequencyStatus(const FrequencyStatusParam &params) :
+        FrequencyStatus(params, "Frequency Status") {}
 
       /**
        * \brief Resets the statistics.
@@ -273,22 +270,31 @@ namespace diagnostic_updater
        * \brief Constructs the TimeStampStatus with the given parameters.
        */
 
-      TimeStampStatus(const TimeStampStatusParam &params) : 
-        DiagnosticTask("Timestamp Status"), 
+      TimeStampStatus(const TimeStampStatusParam &params, std::string name) :
+        DiagnosticTask(name),
         params_(params)
-    {
-      init();
-    }
+      {
+        init();
+      }
+
+      /**
+       * \brief Constructs the TimeStampStatus with the given parameters.
+       *        Uses a default name "Timestamp Status" for the diagnostic task.
+       */
+
+      TimeStampStatus(const TimeStampStatusParam &params) :
+        TimeStampStatus(params, "Timestamp Status") {}
 
       /**
        * \brief Constructs the TimeStampStatus with the default parameters.
+       *        Uses a default name "Timestamp Status" for the diagnostic task.
        */
 
-      TimeStampStatus() : 
-        DiagnosticTask("Timestamp Status") 
-    {
-      init();
-    }
+      TimeStampStatus() :
+        DiagnosticTask("Timestamp Status")
+      {
+        init();
+      }
 
       /**
        * \brief Signals an event. Timestamp stored as a double.
@@ -340,7 +346,7 @@ namespace diagnostic_updater
         {
           stat.summary(1, "No data since last update.");
         }
-        else 
+        else
         {
           if (min_delta_ < params_.min_acceptable_)
           {
@@ -365,9 +371,9 @@ namespace diagnostic_updater
         stat.addf("Latest timestamp delay:", "%f", max_delta_);
         stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
         stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
-        stat.add("Late diagnostic update count:", late_count_); 
-        stat.add("Early diagnostic update count:", early_count_); 
-        stat.add("Zero seen diagnostic update count:", zero_count_); 
+        stat.add("Late diagnostic update count:", late_count_);
+        stat.add("Early diagnostic update count:", early_count_);
+        stat.add("Zero seen diagnostic update count:", zero_count_);
 
         deltas_valid_ = false;
         min_delta_ = 0;
