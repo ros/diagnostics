@@ -129,7 +129,11 @@ namespace diagnostic_updater
        */
 
       FrequencyStatus(const FrequencyStatusParam &params) :
-        FrequencyStatus(params, "Frequency Status") {}
+        DiagnosticTask("Frequency Status"), params_(params),
+        times_(params_.window_size_), seq_nums_(params_.window_size_)
+      {
+        clear();
+      }
 
       /**
        * \brief Resets the statistics.
@@ -283,7 +287,11 @@ namespace diagnostic_updater
        */
 
       TimeStampStatus(const TimeStampStatusParam &params) :
-        TimeStampStatus(params, "Timestamp Status") {}
+        DiagnosticTask("Timestamp Status"),
+        params_(params)
+      {
+        init();
+      }
 
       /**
        * \brief Constructs the TimeStampStatus with the default parameters.
