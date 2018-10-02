@@ -240,7 +240,8 @@ namespace diagnostic_updater
         return tasks_;
       }
 
-    public:    
+    public:
+      virtual ~DiagnosticTaskVector() {}
       /**
        * \brief Add a DiagnosticTask embodied by a name and function to the
        * DiagnosticTaskVector
