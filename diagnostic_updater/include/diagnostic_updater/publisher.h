@@ -36,8 +36,8 @@
 #ifndef __DIAGNOSTIC_UPDATER__DRIVER_H__
 #define __DIAGNOSTIC_UPDATER__DRIVER_H__
 
-#include <ros/publisher.h>
-#include <ros/subscription.h>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/subscription.hpp>
 #include <diagnostic_updater/update_functions.h>
 
 namespace diagnostic_updater
@@ -145,7 +145,9 @@ public:
 	 * is needed to collect the timestamp diagnostics. It is defined here to
 	 * prevent the inherited tick method from being used accidentally.
 	 */
-	virtual void tick() { ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead."); }
+	virtual void tick() {
+            // ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(rclcpp::Time &) instead.");
+        }
 
   /**
 	 * \brief Collects statistics and publishes the message.
@@ -153,7 +155,7 @@ public:
 	 * \param stamp Timestamp to use for interval computation by the
 	 * TimeStampStatus class.
 	 */
-  virtual void tick(const ros::Time &stamp)
+  virtual void tick(const rclcpp::Time &stamp)
   {
     stamp_.tick(stamp);
     HeaderlessTopicDiagnostic::tick();
@@ -189,11 +191,11 @@ public:
  * computing statistics.
  */
 	
-  DiagnosedPublisher(const ros::Publisher &pub,
+  DiagnosedPublisher(const rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr &pub,
       diagnostic_updater::Updater &diag, 
       const diagnostic_updater::FrequencyStatusParam &freq, 
       const diagnostic_updater::TimeStampStatusParam &stamp) : 
-    TopicDiagnostic(pub.getTopic(), diag, freq, stamp),
+    TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp),
     publisher_(pub)
   {}
 
@@ -206,8 +208,8 @@ public:
 	 * The timestamp to be used by the TimeStampStatus class will be
 	 * extracted from message.header.stamp.
 	 */
-	virtual void publish(const boost::shared_ptr<T>& message) {
-		tick(message->header.stamp); publisher_.publish(message); }
+	virtual void publish(const std::shared_ptr<T>& message) {
+		tick(message->header.stamp); publisher_->publish(message); }
  
   /**
 	 * \brief Collects statistics and publishes the message.
@@ -216,12 +218,12 @@ public:
 	 * extracted from message.header.stamp.
 	 */
 	virtual void publish(const T& message) { tick(message.header.stamp);
-		publisher_.publish(message); }
+		publisher_->publish(message); }
 
   /**
 	 * \brief Returns the publisher.
 	 */
-  ros::Publisher getPublisher() const
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr getPublisher() const
   {
     return publisher_;
   }
@@ -229,13 +231,13 @@ public:
   /**
 	 * \brief Changes the publisher.
 	 */
-  void setPublisher(ros::Publisher pub)
+  void setPublisher(rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub)
   {
     publisher_ = pub;
   }
 
 private:
-  ros::Publisher publisher_;
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
 };
 
 };

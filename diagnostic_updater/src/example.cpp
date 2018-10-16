@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include <diagnostic_updater/diagnostic_updater.h>
-#include <std_msgs/Bool.h>
+#include <std_msgs/msg/bool.hpp>
 #include <diagnostic_updater/publisher.h>
 
 double time_to_launch;
@@ -54,10 +54,10 @@ void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
   // summary and summaryf set the level and message.
   if (time_to_launch < 10)
     // summaryf for formatted text.
-    stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
+    stat.summaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
   else
     // summary for unformatted text.
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Launch is in a long time. Have a soda.");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Launch is in a long time. Have a soda.");
 
   // add and addf are used to append key-value pairs.
   stat.add("Diagnostic Name", "dummy");
@@ -73,7 +73,7 @@ class DummyClass
 public:
   void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is a silly updater.");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "This is a silly updater.");
 
     stat.add("Stupidicity of this updater", 1000.);
   }
@@ -87,7 +87,7 @@ public:
 
   void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
   {
-    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is another silly updater.");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "This is another silly updater.");
     stat.add("Stupidicity of this updater", 2000.);
   }
 };
@@ -95,9 +95,9 @@ public:
 void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   if (time_to_launch > 5)
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Lower-bound OK");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Lower-bound OK");
   else
-    stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Too low");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "Too low");
 
   stat.add("Low-Side Margin", time_to_launch - 5);
 }
@@ -105,18 +105,17 @@ void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
   if (time_to_launch < 10)
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Upper-bound OK");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Upper-bound OK");
   else
-    stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Too high");
+    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Too high");
 
   stat.add("Top-Side Margin", 10 - time_to_launch);
 }
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "diagnostic_updater_example");
-  
-  ros::NodeHandle nh;
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("diagnostic_updater_example");
   
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
@@ -155,9 +154,9 @@ int main(int argc, char **argv)
   // a function. This will be useful when combining multiple diagnostic
   // tasks using a CompositeDiagnosticTask.
   diagnostic_updater::FunctionDiagnosticTask lower("Lower-bound check",
-      boost::bind(&check_lower_bound, _1));
+      std::bind(&check_lower_bound, _1));
   diagnostic_updater::FunctionDiagnosticTask upper("Upper-bound check",
-      boost::bind(&check_upper_bound, _1));
+      std::bind(&check_upper_bound, _1));
 
   // If you want to merge the outputs of two diagnostic tasks together, you
   // can create a CompositeDiagnosticTask, also a derived class from
@@ -179,9 +178,9 @@ int main(int argc, char **argv)
   // is in a special state.
   updater.broadcast(0, "Doing important initialization stuff.");
 
-  ros::Publisher pub1 = nh.advertise<std_msgs::Bool>("topic1", 1);
-  ros::Publisher pub2_temp = nh.advertise<std_msgs::Bool>("topic2", 1);
-  ros::Duration(2).sleep(); // It isn't important if it doesn't take time.
+  auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 1);
+  auto pub2_temp = node->create_publisher<std_msgs::msg::Bool>("topic2", 1);
+  rclcpp::Rate(2).sleep(); // It isn't important if it doesn't take time.
 
   // Some diagnostic tasks are very common, such as checking the rate
   // at which a topic is publishing, or checking that timestamps are
@@ -220,17 +219,17 @@ int main(int argc, char **argv)
 
   // We can remove a task by refering to its name.
   if (!updater.removeByName("Bound check"))
-    ROS_ERROR("The Bound check task was not found when trying to remove it.");
+  ;//  ROS_ERROR("The Bound check task was not found when trying to remove it.");
 
-  while (nh.ok())
+  while (rclcpp::ok())
   {
-    std_msgs::Bool msg;
-    ros::Duration(0.1).sleep();
+    std_msgs::msg::Bool msg;
+    rclcpp::Rate(0.1).sleep();
     
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.
     msg.data = false;
-    pub1.publish(msg);
+    pub1->publish(msg);
     pub1_freq.tick();
 
     // We can call updater.update whenever is convenient. It will take care

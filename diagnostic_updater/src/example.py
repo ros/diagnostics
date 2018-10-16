@@ -190,8 +190,8 @@ if __name__=='__main__':
     # is in a special state.
     updater.broadcast(0, "Doing important initialization stuff.")
 
-    pub1 = rospy.Publisher("topic1", std_msgs.msg.Bool, queue_size=10)
-    pub2_temp = rospy.Publisher("topic2", std_msgs.msg.Bool, queue_size=10)
+    pub1 = rospy.Publisher("topic1", std_msgs.msg.Bool)
+    pub2_temp = rospy.Publisher("topic2", std_msgs.msg.Bool)
     rospy.sleep(2) # It isn't important if it doesn't take time.
 
     # Some diagnostic tasks are very common, such as checking the rate

@@ -106,10 +106,10 @@ namespace diagnostic_updater
       const FrequencyStatusParam params_;
 
       int count_;
-      std::vector <ros::Time> times_;
+      std::vector < rclcpp::Time> times_;
       std::vector <int> seq_nums_;
       int hist_indx_;
-      boost::mutex lock_;
+      std::mutex lock_;
 
     public:
       /**
@@ -141,8 +141,8 @@ namespace diagnostic_updater
 
       void clear()
       {
-        boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
+    	std::unique_lock<std::mutex> lock(lock_);
+        rclcpp::Time curtime = rclcpp::Clock().now();
         count_ = 0;
 
         for (int i = 0; i < params_.window_size_; i++)
@@ -159,18 +159,19 @@ namespace diagnostic_updater
        */
       void tick()
       {
-        boost::mutex::scoped_lock lock(lock_);
+    	std::unique_lock<std::mutex> lock(lock_);
         //ROS_DEBUG("TICK %i", count_);
         count_++;
       }
 
       virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
       {
-        boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
+    	std::unique_lock<std::mutex> lock(lock_);
+    	rclcpp::Time curtime = rclcpp::Clock().now();
+
         int curseq = count_;
         int events = curseq - seq_nums_[hist_indx_];
-        double window = (curtime - times_[hist_indx_]).toSec();
+        double window = (curtime - times_[hist_indx_]).seconds();
         double freq = events / window;
         seq_nums_[hist_indx_] = curseq;
         times_[hist_indx_] = curtime;
@@ -313,7 +314,7 @@ namespace diagnostic_updater
 
       void tick(double stamp)
       {
-        boost::mutex::scoped_lock lock(lock_);
+    	  std::unique_lock<std::mutex> lock(lock_);
 
         if (stamp == 0)
         {
@@ -321,7 +322,7 @@ namespace diagnostic_updater
         }
         else
         {
-          double delta = ros::Time::now().toSec() - stamp;
+          double delta = rclcpp::Clock().now().seconds() - stamp;
 
           if (!deltas_valid_ || delta > max_delta_)
             max_delta_ = delta;
@@ -339,15 +340,14 @@ namespace diagnostic_updater
        * \param t The timestamp of the event that will be used in computing
        * intervals.
        */
-
-      void tick(const ros::Time t)
+      void tick(const rclcpp::Time t)
       {
-        tick(t.toSec());
+    	tick(t.seconds());
       }
 
       virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
       {
-        boost::mutex::scoped_lock lock(lock_);
+        std::unique_lock<std::mutex> lock(lock_);
 
         stat.summary(0, "Timestamps are reasonable.");
         if (!deltas_valid_)
@@ -398,7 +398,7 @@ namespace diagnostic_updater
       double max_delta_;
       double min_delta_;
       bool deltas_valid_;
-      boost::mutex lock_;
+      std::mutex lock_;
   };
 
  /**

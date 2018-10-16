@@ -43,7 +43,7 @@ using namespace diagnostic_updater;
 class TestClass 
 {
 public: 
-  void unwrapped(diagnostic_msgs::DiagnosticStatus &s)
+  void unwrapped(diagnostic_msgs::msg::DiagnosticStatus &s)
   {
   }
 
@@ -73,7 +73,6 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
   };
   
   TestClass c;
-  ros::NodeHandle nh;
   
   Updater updater;
   
@@ -118,24 +117,24 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapperMergeSummary)
 {
   DiagnosticStatusWrapper stat;
 
-  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
-  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::OK, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::OK, stat.level) << "Bad level, merging levels (OK,OK)";
+  stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Old");
+  stat.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::OK, "New");
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::OK, stat.level) << "Bad level, merging levels (OK,OK)";
   EXPECT_STREQ("Old", stat.message.c_str()) << "Bad summary, merging levels (OK,OK)";
 
-  stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
-  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (OK,WARN)";
+  stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Old");
+  stat.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "New");
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (OK,WARN)";
   EXPECT_STREQ("New", stat.message.c_str()) << "Bad summary, merging levels (OK,WARN)";
 
-  stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
-  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (WARN,WARN)";
+  stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Old");
+  stat.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "New");
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (WARN,WARN)";
   EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,WARN)";
 
-  stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
-  stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::ERROR, stat.level) << "Bad level, merging levels (WARN,ERROR)";
+  stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Old");
+  stat.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "New");
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::ERROR, stat.level) << "Bad level, merging levels (WARN,ERROR)";
   EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,ERROR)";
 }
 
@@ -177,13 +176,13 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
 
   DiagnosticStatusWrapper stat[5];
   ts.run(stat[0]);
-  ts.tick(ros::Time::now().toSec() + 2);
+  ts.tick(rclcpp::Clock().now().seconds() + 2);
   ts.run(stat[1]);
-  ts.tick(ros::Time::now());
+  ts.tick(rclcpp::Clock().now());
   ts.run(stat[2]);
-  ts.tick(ros::Time::now().toSec() - 4);
+  ts.tick(rclcpp::Clock().now().seconds() - 4);
   ts.run(stat[3]);
-  ts.tick(ros::Time::now().toSec() - 6);
+  ts.tick(rclcpp::Clock().now().seconds() - 6);
   ts.run(stat[4]);
  
   EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
@@ -196,7 +195,8 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
 }
 
 int main(int argc, char **argv){
-  ros::init(argc, argv, "test_node");
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("test_node");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
