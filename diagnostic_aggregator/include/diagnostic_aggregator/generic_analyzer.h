@@ -40,19 +40,30 @@
 #define DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
 
 #include <map>
-#include <ros/ros.h>
+/*#include <ros/ros.h>*/
+#include "rclcpp/rclcpp.hpp"
+
 #include <vector>
 #include <string>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
-#include <boost/regex.hpp>
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory>
+/*#include <boost/regex.hpp>*/
+#include <regex>
 #include <pluginlib/class_list_macros.hpp>
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/KeyValue.h"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "diagnostic_aggregator/generic_analyzer_base.h"
 #include "XmlRpcValue.h"
+
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -97,7 +108,7 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
- * GenericAnalyzer analyzes a segment of diagnostics data and reports
+ *  GenericAnalyzer analyzes a segment of diagnostics data and reports
  * processed diagnostics data. All analyzed status messages are prepended with
  * "Base Path/My Path", where "Base Path" is from the parent of this Analyzer,
  * (ex: 'PR2') and "My Path" is from this analyzer (ex: 'Power System').
@@ -213,14 +224,14 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of 
    */
-  bool init(const std::string base_path, const ros::NodeHandle &n);
+  bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
    * 
    *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report();
 
   /*!
    *\brief Returns true if item matches any of the given criteria
@@ -234,7 +245,7 @@ private:
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
-  std::vector<boost::regex> regex_; /**< Regular expressions to check against diagnostics names. */
+  std::vector<std::regex> regex_; /**< Regular expressions to check against diagnostics names. */
 
 };
 

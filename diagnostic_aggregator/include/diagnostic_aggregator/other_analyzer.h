@@ -40,8 +40,15 @@
 #define OTHER_ANALYZER_H
 
 #include <string>
-#include <ros/ros.h>
+/*#include <ros/ros.h>*/
+#include "rclcpp/rclcpp.hpp"
 #include "diagnostic_aggregator/generic_analyzer_base.h"
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -63,9 +70,10 @@ public:
   /*!
    *\brief Default constructor. OtherAnalyzer isn't loaded by pluginlib
    */
-  explicit OtherAnalyzer(bool other_as_errors = false)
+ /* explicit OtherAnalyzer(bool other_as_errors = false)
   : other_as_errors_(other_as_errors)
-  { }
+  { }*/
+   OtherAnalyzer() { }
 
   ~OtherAnalyzer() { }
 
@@ -84,7 +92,7 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string base_path, const ros::NodeHandle &n)
+  bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n)
   {
     ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;
@@ -101,9 +109,9 @@ public:
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
    *
    */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report()
   {
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+    std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
 
     // We don't report anything if there's no "Other" items
     if (processed.size() == 1)
@@ -113,7 +121,7 @@ public:
     // "Other" items are considered an error.
     else if (other_as_errors_ && processed.size() > 1)
     {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> >::iterator it = processed.begin();
+      std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> >::iterator it = processed.begin();
       for (; it != processed.end(); ++it)
       {
         if ((*it)->name == path_)

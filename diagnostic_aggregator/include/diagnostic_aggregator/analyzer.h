@@ -41,10 +41,16 @@
 
 #include <map>
 #include <vector>
-#include <ros/ros.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
+/*#include <ros/ros.h>*/
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
 #include "diagnostic_aggregator/status_item.h"
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -101,7 +107,8 @@ public:
    *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(const std::string base_path, const ros::NodeHandle &n) = 0;
+ // virtual bool init(const std::string base_path, const ros::NodeHandle &n) = 0;
+  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
@@ -109,7 +116,7 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
-  virtual bool match(const std::string name) = 0;
+ virtual bool match(const std::string name) = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
@@ -118,7 +125,7 @@ public:
    * Analyzers should only return "true" if they will report the value of this 
    * item. If it is only looking at an item, it should return false.
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item) = 0;
+  virtual bool analyze(const std::shared_ptr<StatusItem> item) = 0;
 
   /*!
    *\brief Analysis function, output processed data.
@@ -128,7 +135,7 @@ public:
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report() = 0;
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report() = 0;
 
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')

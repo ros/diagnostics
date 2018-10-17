@@ -48,14 +48,15 @@ IgnoreAnalyzer::IgnoreAnalyzer() { }
 
 IgnoreAnalyzer::~IgnoreAnalyzer() { }
 
-bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)
+/*bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)*/
+bool IgnoreAnalyzer::init(const std::string base_name, const rclcpp::Node::SharedPtr &n)
 {
   return true;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > IgnoreAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > IgnoreAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed;
 
   return processed;
 }

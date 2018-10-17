@@ -13,7 +13,7 @@
  *   * Redistributions in binary form must reproduce the above
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
+ *      with the distribution.
  *   * Neither the name of the Willow Garage nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
@@ -41,8 +41,16 @@
 
 #include "diagnostic_aggregator/generic_analyzer.h"
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <diagnostic_msgs/DiagnosticStatus.h>
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory>
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -78,7 +86,7 @@ public:
   /*
    *\brief Always reports an empty vector
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report();
 };
 
 }

@@ -43,17 +43,26 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <ros/ros.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
+/*#include <ros/ros.h>*/
+#include "rclcpp/rclcpp.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
 #include "diagnostic_aggregator/status_item.h"
-#include <boost/shared_ptr.hpp>
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory>
 #include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
 
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
+#define ROS_ASSERT_MSG printf
 namespace diagnostic_aggregator {
 
 /*!
@@ -119,17 +128,18 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
-  virtual bool init(const std::string base_path, const ros::NodeHandle &n);
+/*  virtual bool init(const std::string base_path, const ros::NodeHandle &n);*/
+  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
    */
-  virtual bool addAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+  virtual bool addAnalyzer(std::shared_ptr<Analyzer>& analyzer);
 
   /**!
    *\brief Remove an analyzer from this analyzerGroup
    */
-  virtual bool removeAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+  virtual bool removeAnalyzer(std::shared_ptr<Analyzer>& analyzer);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
@@ -144,12 +154,12 @@ public:
   /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item);
+  virtual bool analyze(const std::shared_ptr<StatusItem> item);
 
   /*!
    *\brief The processed output is the combined output of the sub-analyzers, and the top level status
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report();
 
   virtual std::string getPath() const { return path_; }
 
@@ -166,9 +176,9 @@ private:
   /*!
    *\brief These items store errors, if any, for analyzers that failed to initialize or load
    */
-  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
+  std::vector<std::shared_ptr<StatusItem> > aux_items_;
 
-  std::vector<boost::shared_ptr<Analyzer> > analyzers_;
+  std::vector<std::shared_ptr<Analyzer> > analyzers_;
 
   /*
    *\brief The map of names to matchings is stored internally.

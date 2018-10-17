@@ -50,9 +50,9 @@ DiscardAnalyzer::~DiscardAnalyzer() { }
 
 
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > DiscardAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > DiscardAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed;
 
   return processed;
 }

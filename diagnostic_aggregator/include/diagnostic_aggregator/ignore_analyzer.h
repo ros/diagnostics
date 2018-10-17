@@ -42,9 +42,17 @@
 #include "diagnostic_aggregator/generic_analyzer.h"
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <ros/ros.h>
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory>
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+/*#include <ros/ros.h>*/
+#include "rclcpp/rclcpp.hpp"
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -74,16 +82,16 @@ public:
   
   virtual ~IgnoreAnalyzer();
 
-  bool init(const std::string base_name, const ros::NodeHandle &n);
+  bool init(const std::string base_name, const rclcpp::Node::SharedPtr &n );
 
   bool match(const std::string name) { return false; }
 
-  bool analyze(boost::shared_ptr<StatusItem> item) { return false; }
+  bool analyze(std::shared_ptr<StatusItem> item) { return false; }
 
   /*
    *\brief Always reports an empty vector
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report();
 
   std::string getPath() const { return ""; }
   std::string getName() const { return ""; }

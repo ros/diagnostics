@@ -45,13 +45,88 @@ PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
 
 GenericAnalyzer::GenericAnalyzer() { }
 
-bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
+bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr &n)
 { 
-  string nice_name;
+  	string nice_name;
+  auto private_parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
+   if (private_parameters_client->has_parameter("path")) {
+	nice_name = private_parameters_client->get_parameter<string>("path");
+   }else{
+	return false;
+   }		   
+	
+   if (private_parameters_client->has_parameter("find_and_remove_prefix")) {
+        XmlRpc::XmlRpcValue find_remove;
+       find_remove = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("find_and_remove_prefix");
+       vector<string> output;
+       getParamVals(find_remove, output);
+       chaff_ = output;
+       startswith_ = output;
+   }
+
+   if (private_parameters_client->has_parameter("remove_prefix")) {
+        XmlRpc::XmlRpcValue removes;
+       removes = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("remove_prefix");
+	 getParamVals(removes, chaff_);
+ 	}	 
+     
+    if (private_parameters_client->has_parameter("startswith")) {
+        XmlRpc::XmlRpcValue startswith;
+       startswith = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("startswith");
+         getParamVals(startswith, startswith_);
+        }
+
+      if (private_parameters_client->has_parameter("name")) {
+        XmlRpc::XmlRpcValue name_val;
+        name_val = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("name");
+         getParamVals(name_val, name_);
+        }
+
+      if (private_parameters_client->has_parameter("contains")) {
+        XmlRpc::XmlRpcValue contains;
+        contains = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("contains");
+         getParamVals(contains, contains_);
+        }
+
+	if (private_parameters_client->has_parameter("expected")) {
+        XmlRpc::XmlRpcValue expected;
+        expected = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("expected");
+         getParamVals(expected,expected_);
+	  for (unsigned int i = 0; i < expected_.size(); ++i)
+	    {
+	      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+	      addItem(expected_[i], item);
+	    }
+
+        }
+	
+        if (private_parameters_client->has_parameter("regex")) {
+        XmlRpc::XmlRpcValue regexes;
+        regexes = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("regex");
+	vector<string> regex_strs;
+	getParamVals(regexes, regex_strs);
+
+	    for (unsigned int i = 0; i < regex_strs.size(); ++i)
+	    {
+	      try
+	      {
+		std::regex re(regex_strs[i]);
+		regex_.push_back(re);
+	      }
+	      catch (std::regex_error& e)
+	      {
+		ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
+			 regex_strs[i].c_str(), e.what());
+	      }
+	    }
+	  }
+
+
+#if 0
   if (!n.getParam("path", nice_name))
   {
     ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
-              n.getNamespace().c_str());
+              n->get_namespace());
     return false;
   }
 
@@ -86,7 +161,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
     getParamVals(expected, expected_);
     for (unsigned int i = 0; i < expected_.size(); ++i)
     {
-      boost::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
       addItem(expected_[i], item);
     }
  }
@@ -101,21 +176,21 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
     {
       try
       {
-        boost::regex re(regex_strs[i]);
+        std::regex re(regex_strs[i]);
         regex_.push_back(re);
       }
-      catch (boost::regex_error& e)
+      catch (std::regex_error& e)
       {
         ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
                  regex_strs[i].c_str(), e.what());
       }
     }
   }
-
+#endif // ROS 1 code 
   if (startswith_.size() == 0 && name_.size() == 0 && 
       contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
   {
-    ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s", nice_name.c_str(), n.getNamespace().c_str());
+    ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace:", nice_name.c_str());
     return false;
   }
 
@@ -127,9 +202,14 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   double timeout;
   int num_items_expected;
   bool discard_stale;
+  timeout = private_parameters_client->get_parameter<double>("timeout");
+  num_items_expected=private_parameters_client->get_parameter<int>("num_items");
+  discard_stale= private_parameters_client->get_parameter<bool>("discard_stale");
+#if 0
   n.param("timeout", timeout, 5.0);   // Timeout for stale
   n.param("num_items", num_items_expected, -1); // Number of items must match this
   n.param("discard_stale", discard_stale, false);
+#endif 
 
   string my_path;
   if (base_path == "/")
@@ -149,10 +229,10 @@ GenericAnalyzer::~GenericAnalyzer() { }
 
 bool GenericAnalyzer::match(const string name)
 {
-  boost::cmatch what;
+  std::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i)
   {
-    if (boost::regex_match(name.c_str(), what, regex_[i]))
+    if (std::regex_match(name.c_str(), what, regex_[i]))
       return true;
   }
   
@@ -183,9 +263,9 @@ bool GenericAnalyzer::match(const string name)
   return false;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > GenericAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
 
   // Check and make sure our expected names haven't been removed ...
   vector<string> expected_names_missing;
@@ -230,7 +310,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
   // Add missing names to header ...
   for (unsigned int i = 0; i < expected_names_missing.size(); ++i)
   {
-    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+    std::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
     processed.push_back(item->toStatusMsg(path_, true));
   }
 
@@ -257,7 +337,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
       // Add all missing items to header item
       for (unsigned int k = 0; k < expected_names_missing.size(); ++k)
       {
-        diagnostic_msgs::KeyValue kv;
+        diagnostic_msgs::msg::KeyValue kv;
         kv.key = expected_names_missing[k];
         kv.value = "Missing";
         processed[j]->values.push_back(kv);

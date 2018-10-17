@@ -38,17 +38,26 @@
 #define GENERIC_ANALYZER_BASE_H
 
 #include <map>
-#include <ros/ros.h>
+/*#include <ros/ros.h>*/
+#include "rclcpp/rclcpp.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
-#include <boost/regex.hpp>
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory>
+/*#include <boost/regex.hpp>*/
+#include <regex>
 #include <pluginlib/class_list_macros.hpp>
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/KeyValue.h"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
+
+// TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
 
 namespace diagnostic_aggregator {
 
@@ -75,7 +84,7 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string path, const ros::NodeHandle &n) = 0;
+  bool init(const std::string path, const rclcpp::Node::SharedPtr & n) = 0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
@@ -105,7 +114,7 @@ public:
   /*!
    *\brief Update state with new StatusItem
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
+  virtual bool analyze(const std::shared_ptr<StatusItem> item)
   {
     if (!has_initialized_ && !has_warned_)
     {
@@ -126,7 +135,7 @@ public:
    *
    *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > report()
   {
     if (!has_initialized_ && !has_warned_)
     {
@@ -135,29 +144,32 @@ public:
     }
     if (!has_initialized_)
     {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > vec;
+      std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > vec;
       return vec;
     }
 
-    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
+    std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> header_status(new diagnostic_msgs::msg::DiagnosticStatus());
     header_status->name = path_;
     header_status->level = 0;
     header_status->message = "OK";
     
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+    std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed;
     processed.push_back(header_status);
     
     bool all_stale = true;
 
-    std::map<std::string, boost::shared_ptr<StatusItem> >::iterator it = items_.begin();
+    std::map<std::string, std::shared_ptr<StatusItem> >::iterator it = items_.begin();
     while(it != items_.end())
     {
       std::string name = it->first;
-      boost::shared_ptr<StatusItem> item = it->second;
+      std::shared_ptr<StatusItem> item = it->second;
 
       bool stale = false;
       if (timeout_ > 0)
-        stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
+      {
+	 rclcpp::Time update_time_now1_ = ros_clock.now();	      
+         stale = (((update_time_now1_ - item->getLastUpdateTime()).nanoseconds())*1e-9) > timeout_;
+      }
 
       // Erase item if its stale and we're discarding items
       if (discard_stale_ and stale)
@@ -166,10 +178,10 @@ public:
         continue;
       }
       
-      int8_t level = item->getLevel();
+      uint8_t level = item->getLevel();
       header_status->level = std::max(header_status->level, level);
       
-      diagnostic_msgs::KeyValue kv;
+      diagnostic_msgs::msg::KeyValue kv;
       kv.key = name;
       kv.value = item->getMessage();
       
@@ -203,7 +215,7 @@ public:
     }
     else if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
     {
-      int8_t lvl = 2;
+      uint8_t lvl = 2;
       header_status->level = std::max(lvl, header_status->level);
 
       std::stringstream expec, item;
@@ -244,13 +256,13 @@ protected:
   /*!
    *\brief Subclasses can add items to analyze 
    */
-  void addItem(std::string name, boost::shared_ptr<StatusItem> item)  { items_[name] = item; }
+  void addItem(std::string name, std::shared_ptr<StatusItem> item)  { items_[name] = item; }
 
 private:
   /*!
    *\brief Stores items by name. State of analyzer
    */
-  std::map<std::string, boost::shared_ptr<StatusItem> > items_;
+  std::map<std::string, std::shared_ptr<StatusItem> > items_;
 
   bool discard_stale_, has_initialized_, has_warned_;
 };

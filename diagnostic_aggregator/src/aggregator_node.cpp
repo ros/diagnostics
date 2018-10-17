@@ -36,21 +36,24 @@
 
 #include <diagnostic_aggregator/aggregator.h>
 #include <exception>
+#include "rclcpp/rclcpp.hpp"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "diagnostic_aggregator");
-  
+ // ros::init(argc, argv, "diagnostic_aggregator");
+  rclcpp::init(argc, argv);
   try
   {
   diagnostic_aggregator::Aggregator agg;
-  
-  ros::Rate pub_rate(agg.getPubRate());
+
+  //ros::Rate pub_rate(agg.getPubRate());
+   rclcpp::Rate  pub_rate(agg.getPubRate());
   while (agg.ok())
   {
-    ros::spinOnce();
+   // ros::spinOnce();
+    rclcpp::spin_some(std::make_shared<"diagnostic_aggregator">());
     agg.publishData();
     pub_rate.sleep();
   }

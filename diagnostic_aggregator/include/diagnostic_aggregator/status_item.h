@@ -41,11 +41,27 @@
 
 #include <map>
 #include <string>
-#include <vector>
-#include <ros/ros.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
-#include <boost/shared_ptr.hpp>
+#include <algorithm>
+#include <chrono>
+#include <limits>
+/*#include <ros/ros.h>*/
+#include "rclcpp/clock.hpp"
+#include "rclcpp/time.hpp"
+#include "rclcpp/duration.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
+/*#include <boost/shared_ptr.hpp>*/
+#include <memory> 
+
+
+//TODO(tfoote replace these terrible macros)
+#define ROS_ERROR printf
+#define ROS_FATAL printf
+#define ROS_WARN printf
+#define ROS_INFO printf
+
+rclcpp::Clock ros_clock(RCL_ROS_TIME);
 
 namespace diagnostic_aggregator {
 
@@ -71,9 +87,9 @@ inline std::string getOutputName(const std::string item_name)
  */
 enum DiagnosticLevel
 {
-  Level_OK = diagnostic_msgs::DiagnosticStatus::OK,
-  Level_Warn = diagnostic_msgs::DiagnosticStatus::WARN,
-  Level_Error = diagnostic_msgs::DiagnosticStatus::ERROR,
+  Level_OK = diagnostic_msgs::msg::DiagnosticStatus::OK,
+  Level_Warn = diagnostic_msgs::msg::DiagnosticStatus::WARN,
+  Level_Error = diagnostic_msgs::msg::DiagnosticStatus::ERROR,
   Level_Stale = 3
 };
 
@@ -82,11 +98,11 @@ enum DiagnosticLevel
  */
 inline DiagnosticLevel valToLevel(const int val)
 {
-  if (val == diagnostic_msgs::DiagnosticStatus::OK)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::OK)
     return Level_OK;
-  if (val == diagnostic_msgs::DiagnosticStatus::WARN)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::WARN)
     return Level_Warn;
-  if (val == diagnostic_msgs::DiagnosticStatus::ERROR)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR)
     return Level_Error;
   if (val == 3)
     return Level_Stale;
@@ -100,11 +116,11 @@ inline DiagnosticLevel valToLevel(const int val)
  */
 inline std::string valToMsg(const int val)
 {
-  if (val == diagnostic_msgs::DiagnosticStatus::OK)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::OK)
     return "OK";
-  if (val == diagnostic_msgs::DiagnosticStatus::WARN)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::WARN)
     return "Warning";
-  if (val == diagnostic_msgs::DiagnosticStatus::ERROR)
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR)
     return "Error";
   if (val == 3)
     return "Stale";
@@ -153,7 +169,7 @@ inline std::string removeLeadingNameChaff(const std::string &input_name, const s
  *
  * The StatusItem class is used by the Aggregator to store incoming 
  * DiagnosticStatus messages. Helper messages make it easy to calculate update
- * intervals, and extract KeyValue pairs.
+ * intervals, and extract key_value pairs.
  */
 class StatusItem
 {
@@ -161,7 +177,7 @@ public:
   /*!
    *\brief Constructed from const DiagnosticStatus*
    */
-  StatusItem(const diagnostic_msgs::DiagnosticStatus *status);
+  StatusItem(const diagnostic_msgs::msg::DiagnosticStatus *status);
 
    /*!
    *\brief Constructed from string of item name
@@ -175,7 +191,7 @@ public:
    * 
    *\return True if update successful, false if error
    */
-  bool update(const diagnostic_msgs::DiagnosticStatus *status);
+  bool update(const diagnostic_msgs::msg::DiagnosticStatus *status);
 
   /*!
    *\brief Prepends "path/" to name, makes item stale if "stale" true.
@@ -188,7 +204,7 @@ public:
    *\param path : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(const std::string &path, const bool stale = false) const;
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> toStatusMsg(const std::string &path, const bool stale = false) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message
@@ -213,8 +229,8 @@ public:
   /*!
    *\brief Returns the time since last update for this item
    */
-  const ros::Time getLastUpdateTime() const { return update_time_; }
-
+  /*const ros::Time getLastUpdateTime() const { return update_time_; }*/
+  const rclcpp::Time getLastUpdateTime() const { return update_time_; }
   /*!
    *\brief Returns true if item has key in values KeyValues
    *
@@ -248,14 +264,14 @@ public:
   }
 
 private:
-  ros::Time update_time_;
+  rclcpp::Time update_time_;
 
   DiagnosticLevel level_;
   std::string output_name_; /**< name_ w/o "/" */
   std::string name_;
   std::string message_;
   std::string hw_id_;
-  std::vector<diagnostic_msgs::KeyValue> values_;
+  std::vector<diagnostic_msgs::msg::KeyValue> values_;
 };
 
 }
