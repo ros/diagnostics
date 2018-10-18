@@ -67,13 +67,11 @@ class WirelessTask(DiagnosticTask):
         output = self._execute_command('iwconfig {}'.format(self._interface))
         result = parse_iwconfig_output(output)
 
-        for k, v in result.iteritems():
-            stat.add(k, v)
-
         if 'Link Quality' in result:
             # Rewrite Link Quality because we want to do logic on this variable
             numerator, denominator = result['Link Quality'].split("/")
-            link_quality_percentage = float(numerator) / float(denominator) * 100
+            link_quality_percentage = float(numerator) / float(denominator)
+            result['Link Quality'] = link_quality_percentage
 
             if link_quality_percentage > self._signal_quality_warning_percentage:
                 stat.summary(DiagnosticStatus.OK, "Link quality OK")
@@ -81,6 +79,9 @@ class WirelessTask(DiagnosticTask):
                 stat.summary(DiagnosticStatus.WARN, "Link quality low")
         else:
             stat.summary(DiagnosticStatus.ERROR, "Link quality unknown")
+
+        for k, v in result.iteritems():
+            stat.add(k, v)
 
     def _update_with_sar_status(self, stat):
         output = self._execute_command('sar -n DEV 1 1'.format(self._interface))
@@ -106,7 +107,7 @@ def main():
     updater.setHardwareID(interface)
     updater.add(WirelessTask(
         interface,
-        rospy.get_param("~link_quality_warning_percentage", 50)
+        rospy.get_param("~link_quality_warning_percentage", 0.5)
     ))
 
     rate = rospy.Rate(rospy.get_param("~rate", 1))
