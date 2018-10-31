@@ -35,6 +35,9 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <std_msgs/Bool.h>
 #include <diagnostic_updater/publisher.h>
+#ifdef ERROR
+#undef ERROR
+#endif
 
 double time_to_launch;
 
