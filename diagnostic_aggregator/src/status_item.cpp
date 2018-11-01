@@ -49,8 +49,7 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus *status)
   values_ = status->values;
   
   output_name_ = getOutputName(name_);
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
-  update_time_ = ros_clock.now();
+  rclcpp::Time update_time_ = ros_clock.now();
 
   /*builtin_interfaces::msg::Time update_time_ = ros_clock.now();
   update_time_ = ros::Time::now();*/
@@ -64,8 +63,7 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
   hw_id_ = "";
   
   output_name_ = getOutputName(name_);
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
-   update_time_ = ros_clock.now();
+  rclcpp::Time update_time_ = ros_clock.now();
  /* builtin_interfaces::msg::Time update_time_ = ros_clock.now();
   update_time_ = ros::Time::now();*/
 }
@@ -80,7 +78,6 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus *status)
     return false;
   }
 
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
   rclcpp::Time update_time_now_ = ros_clock.now();
   /*builtin_interfaces::msg::Time update_time_now_ = ros_clock.now();
   builtin_interfaces::msg::Duration update_interval_now = (update_time_now_ - update_time_)

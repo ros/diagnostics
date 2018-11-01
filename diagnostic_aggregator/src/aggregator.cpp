@@ -40,6 +40,13 @@
 
 using namespace std;
 using namespace diagnostic_aggregator;
+#if 1
+void  addDiagnostics_ros2( const std::shared_ptr<rmw_request_id_t> request_header , const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res){
+
+return ;
+
+}
+#endif
 
 Aggregator::Aggregator() :
   pub_rate_(1.0),
@@ -47,129 +54,43 @@ Aggregator::Aggregator() :
   other_analyzer_(NULL),
   base_path_("")
 {
-	cout<< "Vaibhava Aggregator const called " << endl;
   auto context = rclcpp::contexts::default_context::get_global_default_context();
   const std::vector<std::string> arguments = {};
   const std::vector<rclcpp::Parameter> initial_values = {
        rclcpp::Parameter("base_path",""),
-       rclcpp::Parameter("pub_rate", pub_rate_),
+       rclcpp::Parameter("pub_rate", "pub_rate_"),
      };
-   const bool use_global_arguments = true;
-   const bool use_intra_process = true;
+   const bool use_global_arguments = false;
+   const bool use_intra_process = false;
 
-   cout<<"paramter set " << endl;
    // ros::NodeHandle nh = ros::NodeHandle("~");
-    nh = std::make_shared<rclcpp::Node>("diagnostic_aggregator", "/", context, arguments, initial_values, use_global_arguments, use_intra_process);
-   //auto  n_ = std::make_shared<rclcpp::Node>("agg_node_2");
+   auto nh = std::make_shared<rclcpp::Node>("agg_node", "~", context, arguments, initial_values, use_global_arguments, use_intra_process);
+        n_ = std::make_shared<rclcpp::Node>("agg_node_2");
    // nh.param(string("base_path"), base_path_, string(""));
-
   if (base_path_.size() > 0 && base_path_.find("/") != 0)
      base_path_ = "/" + base_path_;
 
    //nh.param("pub_rate", pub_rate_, pub_rate_);
-       
- auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(nh);
-  while (!parameters_client->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(nh->get_logger(), "Interrupted while waiting for the service. Exiting.")
-    }
-    RCLCPP_INFO(nh->get_logger(), "service not available, waiting again...")
-  }
-
-    RCLCPP_INFO(nh->get_logger(), "service is  available Now ")
-#if 0
-           auto parameters = parameters_client->get_parameters({"type"});
-  if (parameters_client->has_parameter("analyzer_params")){
-            analyzer_params = parameters_client->get_parameter<XmlRpc::XmlRpcValue>("analyzer_params");
- 
- // ROS_DEBUG("Analyzer params: %s.", analyzer_params.toXml().c_str());
-        cout<<"Vaibhav: Analyzer params: ."<<  analyzer_params.toXml();
-   } 
-            if (rclcpp::spin_until_future_complete(nh, parameters) !=
-            rclcpp::executor::FutureReturnCode::SUCCESS)
-          {
-            RCLCPP_ERROR(nh->get_logger(), "get_parameters service call failed. Exiting tutorial.")
-            return -1;
-          }
-
-#endif
-
-                 std::stringstream ss;
-  for (auto & parameter : parameters_client->get_parameters({"type"})) {
-          cout<< "hello" ;
-    ss << "\nParameter name: " << parameter.get_name();
-    ss << "\nParameter value (" << parameter.get_type_name() << "): " <<
-      parameter.value_to_string();
-  }
-  RCLCPP_INFO(nh->get_logger(), ss.str().c_str())
-
-
-
 
   analyzer_group_ = new AnalyzerGroup();
-  cout<<"Anlyazer group called"<<endl;
-    cout<<"Node created with base path ="<< base_path_<< "and ns =" << nh->get_namespace() << endl;
 
-
-
-  if (!analyzer_group_->init(base_path_, nh->get_namespace(),nh))
+  if (!analyzer_group_->init(base_path_, nh))
     {
      ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
      }
   // Last analyzer handles remaining data
   other_analyzer_ = new OtherAnalyzer();
-  cout << "other_analyzer_ doen "<< endl;
   other_analyzer_->init(base_path_); // This always returns true
-  cout << "other_analyzer_ init doen "<< endl;
- auto handle_add_agreegator =
-      [this](const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
-        std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res) -> bool
-      {
-        (void)request_header;
-	#if 1
-        ROS_DEBUG("Got load request for namespace %s", req->load_namespace.c_str());
-        // Don't currently support relative or private namespace definitions
-        if (req->load_namespace[0] != '/')
-        {
-                res->message = "Requested load from non-global namespace. Private and relative namespaces are not supported.";
-                res->success = false;
-                return true;
-        }
-	#endif
-        std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
-
-        //  if (group->init(base_path_, ros::NodeHandle(req.load_namespace)))
-        rclcpp::Node::SharedPtr nh_temp;
-        if (group->init(base_path_, req->load_namespace.c_str(),nh_temp))
-        {
-                res->message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
-                res->success = true;
-                return true;
-        }
-        else
-        {
-                res->message = "Failed to initialise AnalyzerGroup.";
-                res->success = false;
-                return true;
-        }
-
-      };
-
-
-
-
 /*      add_srv_ = n_.advertiseService("/diagnostics_agg/add_diagnostics", &Aggregator::addDiagnostics, this);
         diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
         agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
         toplevel_state_pub_ = n_.advertise<diagnostic_msgs::DiagnosticStatus>("/diagnostics_toplevel_state", 1);*/
 	std::function<void(diagnostic_msgs::msg::DiagnosticArray::ConstSharedPtr)> cb_std_function= std::bind( &Aggregator::diagCallback,this,std::placeholders::_1);
 //	std::function<void(diagnostic_msgs::srv::AddDiagnostics)> cb_std_function_1= std::bind( &Aggregator::addDiagnostics,this, std::placeholders::_1);
-   add_srv_ = nh->create_service<diagnostic_msgs::srv::AddDiagnostics>("/diagnostics_agg/add_diagnostics", handle_add_agreegator);
-   diag_sub_ = nh->create_subscription<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", cb_std_function,rmw_qos_profile_default);
-   agg_pub_ = nh->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg");
-   toplevel_state_pub_ = nh->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>("/diagnostics_toplevel_state");
-   cout<<" constructor initalization doen "<< endl;
+   add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>("/diagnostics_agg/add_diagnostics", addDiagnostics_ros2);
+   diag_sub_ = n_->create_subscription<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", cb_std_function,rmw_qos_profile_default);
+   agg_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg");
+   toplevel_state_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>("/diagnostics_toplevel_state");
 }
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::ConstSharedPtr& diag_msg)
@@ -341,7 +262,6 @@ void Aggregator::publishData()
   }
 
 /*  diag_array.header.stamp = ros::Time::now();*/
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
   using builtin_interfaces::msg::Time;
    Time ros_now = ros_clock.now();
   diag_array.header.stamp.sec = ros_now.sec;

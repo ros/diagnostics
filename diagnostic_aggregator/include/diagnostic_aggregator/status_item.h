@@ -61,6 +61,7 @@
 #define ROS_WARN printf
 #define ROS_INFO printf
 
+rclcpp::Clock ros_clock(RCL_ROS_TIME);
 
 namespace diagnostic_aggregator {
 

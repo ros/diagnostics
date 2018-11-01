@@ -50,23 +50,10 @@ AnalyzerGroup::AnalyzerGroup() :
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 { }
 
-bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::Node::SharedPtr &nh)
+bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr &n)
 {
-   auto context = rclcpp::contexts::default_context::get_global_default_context();
-  const std::vector<std::string> arguments = {};
-  const std::vector<rclcpp::Parameter> initial_values = {
-       rclcpp::Parameter("an_base_path",base_path),
-       rclcpp::Parameter("an_pub_rate", 1.0),
-     };
-   const bool use_global_arguments = true;
-   const bool use_intra_process = true;
-
- 	
-    analyzers_nh  = std::make_shared<rclcpp::Node>("analyzers","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
-   // analyzers_nh  = std::make_shared<rclcpp::Node>("analyzers");
   //n.param("path", nice_name_, string(""));
 
-    cout<<"analyzers Node created "<< nsp  << endl;
   if (base_path.size() > 0 && base_path != "/")
     path_ = base_path + "/" + nice_name_;
   else
@@ -76,61 +63,25 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
   if (path_.find("/") != 0)
     path_ = "/" + path_;
 
-
-    rclcpp::Parameter bp = analyzers_nh->get_parameter("an_base_path");
-    cout << "rclcpp::Parameter bp =" << bp <<endl;
-    rclcpp::Parameter bp1 = analyzers_nh->get_parameter("an_pub_rate");
-    cout << "rclcpp::Parameter bp =" << bp1 <<endl;
   //ros::NodeHandle analyzers_nh = ros::NodeHandle(n, "analyzers");
+    auto analyzers_nh  = std::make_shared<rclcpp::Node>("analyzers");
  # if 1
   XmlRpc::XmlRpcValue analyzer_params;
  // analyzers_nh.getParam("", analyzer_params);
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(analyzers_nh);
-  while (!parameters_client->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(analyzers_nh->get_logger(), "Interrupted while waiting for the service. Exiting.")
-      return 0;
-    }
-    RCLCPP_INFO(analyzers_nh->get_logger(), "service not available, waiting again...")
-  }
-
-    RCLCPP_INFO(analyzers_nh->get_logger(), "service is  available Now ")
-#if 0
-           auto parameters = parameters_client->get_parameters({"type"});
-  if (parameters_client->has_parameter("analyzer_params")){
-            analyzer_params = parameters_client->get_parameter<XmlRpc::XmlRpcValue>("analyzer_params");
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
+  if (parameters_client->has_parameter("")){
+            analyzer_params = parameters_client->get_parameter<XmlRpc::XmlRpcValue>("");
  
  // ROS_DEBUG("Analyzer params: %s.", analyzer_params.toXml().c_str());
- 	cout<<"Vaibhav: Analyzer params: ."<<  analyzer_params.toXml();
-   } 
-	    if (rclcpp::spin_until_future_complete(analyzers_nh, parameters) !=
-	    rclcpp::executor::FutureReturnCode::SUCCESS)
-	  {
-	    RCLCPP_ERROR(analyzers_nh->get_logger(), "get_parameters service call failed. Exiting tutorial.")
-	    return -1;
-	  }
-
-#endif 
-
-                 std::stringstream ss;
-  for (auto & parameter : parameters_client->get_parameters({"prefix2.type"})) {
-	  cout<< "hello" ;
-    ss << "\nParameter name: " << parameter.get_name();
-    ss << "\nParameter value (" << parameter.get_type_name() << "): " <<
-      parameter.value_to_string();
-  }
-  RCLCPP_INFO(analyzers_nh->get_logger(), ss.str().c_str())
-
+   }
   bool init_ok = true;
 
-  cout<<"parameters_client->get_parameters called "<<endl;
   XmlRpc::XmlRpcValue::iterator xml_it;
   for (xml_it = analyzer_params.begin(); xml_it != analyzer_params.end(); ++xml_it)
   {
     XmlRpc::XmlRpcValue analyzer_name = xml_it->first;
-   // RCLCPP_INFO("Got analyzer name: %s", analyzer_name.toXml().c_str());
-   // ROS_DEBUG("Got analyzer name: %s", analyzer_name.toXml().c_str());
-     cout<<"Vaibhav: Got analyzer name"<<  analyzer_name.toXml().c_str() << endl;
+    //RCLCPP_INFO("Got analyzer name: %s", analyzer_name.toXml().c_str());
+    //ROS_DEBUG("Got analyzer name: %s", analyzer_name.toXml().c_str());
     XmlRpc::XmlRpcValue analyzer_value = xml_it->second;
 
     string ns = analyzer_name;
@@ -138,7 +89,6 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
     if (!analyzer_value.hasMember("type"))
     {
    //   ROS_ERROR("Namespace %s has no member 'type', unable to initialize analyzer for this namespace.", analyzers_nh.getNamespace().c_str());
-   cout<<" Vaibhav : Namespace %s has no member 'type', unable to initialize analyzer for this namespace."<< endl;
       std::shared_ptr<StatusItem> item(new StatusItem(ns, "No Analyzer type given"));
       aux_items_.push_back(item);
       init_ok = false;
@@ -181,7 +131,6 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
     catch (pluginlib::LibraryLoadException& e)
     {
       ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s", ns.c_str(), an_type.c_str(), e.what());
-      cout<<"failed to load analyzer";
       std::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib exception loading analyzer"));
       aux_items_.push_back(item);
       init_ok = false;
@@ -191,7 +140,6 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
     if (!analyzer)
     {
       //ROS_ERROR("Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(), analyzers_nh.getNamespace().c_str());
-      cout<<"Pluginlib returned a null analyzer for , namespace."<< an_type.c_str();
       std::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib return NULL Analyzer for " + an_type));
       aux_items_.push_back(item);
       init_ok = false;
@@ -199,80 +147,24 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
     }
     
     //if (!analyzer->init(path_, ros::NodeHandle(analyzers_nh, ns)))
-    if (!analyzer->init(path_, analyzers_nh->get_namespace(),analyzers_nh))
+    if (!analyzer->init(path_, analyzers_nh))
     {
       //ROS_ERROR("Unable to initialize analyzer NS: %s, type: %s", analyzers_nh.getNamespace().c_str(), an_type.c_str());
-      cout<<" Vaibhav: Unable to initialize analyzer NS" <<endl;
       std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
       aux_items_.push_back(item);
       init_ok = false;
       continue;
     }
+    
     analyzers_.push_back(analyzer);
   }
-    
  #endif
-#if 0
-  std::shared_ptr<Analyzer> analyzer;
-    try
-    {
-      // Look for non-fully qualified class name for Analyzer type
-      if (!analyzer_loader_.isClassAvailable(an_type))
-      {
-        bool have_class = false;
-        vector<string> classes = analyzer_loader_.getDeclaredClasses();
-        for(unsigned int i = 0; i < classes.size(); ++i)
-        {
-          if(an_type == analyzer_loader_.getName(classes[i]))
-          {
-            //if we've found a match... we'll get the fully qualified name and break out of the loop
-            ROS_WARN("Analyzer specification should now include the package name. You are using a deprecated API. Please switch from %s to %s in your Analyzer specification.",
-                     an_type.c_str(), classes[i].c_str());
-            an_type = classes[i];
-            have_class = true;
-            break;
-          }
-        }
-        if (!have_class)
-        {
-          ROS_ERROR("Unable to find Analyzer class %s. Check that Analyzer is fully declared.", an_type.c_str());
-          continue;
-        }
-      }
-
-	//analyzer = analyzer_loader_.createInstance(an_type);
-      analyzer = analyzer_loader_.createSharedInstance(an_type);
-    }
-    catch (pluginlib::LibraryLoadException& e)
-    {
-      ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s", ns.c_str(), an_type.c_str(), e.what());
-      cout<<"failed to load analyzer";
-      std::shared_ptr<StatusItem> item(new StatusItem(ns, "Pluginlib exception loading analyzer"));
-      aux_items_.push_back(item);
-      init_ok = false;
-      continue;
-    }
-
-
-  if (!analyzer->init(path_, analyzers_nh->get_namespace(),analyzers_nh))
-    {
-      //ROS_ERROR("Unable to initialize analyzer NS: %s, type: %s", analyzers_nh.getNamespace().c_str(), an_type.c_str());
-      cout<<" Vaibhav: Unable to initialize analyzer NS" <<endl;
-      std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
-      aux_items_.push_back(item);
-      init_ok = false;
-      continue;
-    }
-    analyzers_.push_back(analyzer);
-#endif 
   if (analyzers_.size() == 0)
   {
     init_ok = false;
-    //ROS_ERROR(" Vaibhav: No analyzers initialized in AnalyzerGroups");
-    cout<<" Vaibhav: No analyzers initialized in AnalyzerGroup " << endl;
+    //ROS_ERROR("No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
   }
 
-     cout<<"analyzer created and push back " << analyzers_.size() << endl; 
   return init_ok;
 }
 

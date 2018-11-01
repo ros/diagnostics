@@ -108,9 +108,7 @@ public:
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
  // virtual bool init(const std::string base_path, const ros::NodeHandle &n) = 0;
-//  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n) = 0;
-  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n) =0;
-
+  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
