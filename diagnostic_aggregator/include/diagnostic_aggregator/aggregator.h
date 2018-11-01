@@ -60,7 +60,6 @@
 #include "diagnostic_aggregator/analyzer_group.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "diagnostic_aggregator/other_analyzer.h"
-
 //TODO(tfoote replace these terrible macros)
 #define ROS_ERROR printf
 #define ROS_FATAL printf
@@ -135,10 +134,12 @@ public:
    *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
    */
   double getPubRate() const { return pub_rate_; }
-
+  rclcpp::Node::SharedPtr get_node() { return nh ;}
 private:
    //ros::NodeHandle n_;
   rclcpp::Node::SharedPtr  n_;
+  rclcpp::Node::SharedPtr  nh;
+
  // ros::ServiceServer add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
  // ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
  // ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
@@ -167,6 +168,7 @@ private:
   bool addDiagnostics(diagnostic_msgs::srv::AddDiagnostics::Request req,
 		      diagnostic_msgs::srv::AddDiagnostics::Response res);
 //  bool  Aggregator::addDiagnostics( const std::shared_ptr<rmw_request_id_t> request_header,  const std::shared_ptr <diagnostic_msgs::srv::AddDiagnostics_Request_::ConstSharedPtr> req, std::shared_ptr <diagnostic_msgs::srv::AddDiagnostics_Response_::ConstSharedPtr> res);
+  bool addDiagnostics_ros2( const std::shared_ptr<rmw_request_id_t> request_header , const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res);
   AnalyzerGroup* analyzer_group_;
 
   OtherAnalyzer* other_analyzer_;

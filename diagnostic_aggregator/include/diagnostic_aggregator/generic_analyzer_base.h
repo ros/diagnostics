@@ -84,14 +84,15 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string path, const rclcpp::Node::SharedPtr & n) = 0;
+  //bool init(const std::string path, const rclcpp::Node::SharedPtr & n) = 0;
+  bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n) =0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
    *
    * Must be initialized in order to prepend the path to all outgoing status messages.
    */
-  bool init(const std::string path, const std::string nice_name, 
+  bool init_v(const std::string path, const std::string nice_name, 
             double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
@@ -167,6 +168,7 @@ public:
       bool stale = false;
       if (timeout_ > 0)
       {
+  	 rclcpp::Clock ros_clock(RCL_ROS_TIME);
 	 rclcpp::Time update_time_now1_ = ros_clock.now();	      
          stale = (((update_time_now1_ - item->getLastUpdateTime()).nanoseconds())*1e-9) > timeout_;
       }

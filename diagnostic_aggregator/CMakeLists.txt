@@ -14,7 +14,7 @@ find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(xmlrpcpp REQUIRED)
+#find_package(xmlrpcpp REQUIRED)
 
 
 #catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
@@ -31,18 +31,21 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
-  ${xmlrpcpp_INCLUDE_DIRS}
+  # ${xmlrpcpp_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/include/xmlrpcpp/
+  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/include/
 )
 
 set(LIBS
   ${diagnostic_msgs_LIBRARIES}
   ${builtin_interfaces_LIBRARIES}
   ${rclcpp_LIBRARIES}
-  ${rclpy_INCLUDE_DIRS}
-  ${pluginlib_INCLUDE_DIRS}
-  ${xmlrpcpp_INCLUDE_DIRS}
+  ${rclpy_LIBRARIES}
+  ${pluginlib_LIBRARIES}
+  ${xmlrpcpp_LIBRARIES}
   ${Boost_LIBRARIES}
+ /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/install/xmlrpcpp/lib/libxmlrpcpp.a 
 )
 
 #set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
@@ -73,16 +76,25 @@ target_link_libraries(diagnostic_aggregator ${LIBS}
 #add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
 # Aggregator node 
-#add_executable(aggregator_node src/aggregator_node.cpp)
-#target_link_libraries(aggregator_node ${catkin_LIBRARIES}
-#                                      ${PROJECT_NAME}
-#)
+add_executable(aggregator_node src/aggregator_node.cpp)
+target_link_libraries(aggregator_node ${PROJECT_NAME})
+install(
+	TARGETS aggregator_node
+  	DESTINATION lib/${PROJECT_NAME})
+
 
 # Analyzer loader allows other users to test that Analyzers load
-#add_executable(analyzer_loader test/analyzer_loader.cpp
-#                               gtest-1.7.0/gtest-all.cc)
-#target_link_libraries(analyzer_loader diagnostic_aggregator)
+find_package(ament_cmake_gtest REQUIRED)
 
+  # TODO: need to support rostest
+  #find_package(rostest REQUIRED)
+  ament_add_gtest(analyzer_loader test/analyzer_loader.cpp)
+  #add_executable(analyzer_loader test/analyzer_loader.cpp)
+	#                               gtest-1.7.0/gtest-all.cc)
+target_link_libraries(analyzer_loader diagnostic_aggregator)
+if(BUILD_TESTING)
+	# add_rostest(test/launch/test_agg.launch)
+   endif()
 #if(CATKIN_ENABLE_TESTING)
 #  find_package(rostest REQUIRED)
 #  add_rostest(test/launch/test_agg.launch)
@@ -116,10 +128,16 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "DAIGNOSTICCPP_BUILDING_DLL")
 # Define installation rules
 
 install(
-  TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  TARGETS ${PROJECT_NAME} aggregator_node analyzer_loader
+  DESTINATION lib/${PROJECT_NAME}
+  # ARCHIVE DESTINATION lib
+  #LIBRARY DESTINATION lib
+  #RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 # Export include dependencies, directories, and libraries

@@ -45,10 +45,22 @@ PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
 
 GenericAnalyzer::GenericAnalyzer() { }
 
-bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr &n)
+//bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr &nh)
+bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp::Node::SharedPtr &nh)
 { 
+	   auto context = rclcpp::contexts::default_context::get_global_default_context();
+  const std::vector<std::string> arguments = {};
+  const std::vector<rclcpp::Parameter> initial_values = {
+       rclcpp::Parameter("base_path_ga",base_path),
+     };
+   const bool use_global_arguments = false;
+   const bool use_intra_process = false;
+
+
+    auto n  = std::make_shared<rclcpp::Node>("gen_analyzers", nsp, context, arguments, initial_values, use_global_arguments, use_intra_process);
+
   	string nice_name;
-  auto private_parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
+  auto private_parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n,nh->get_name());
    if (private_parameters_client->has_parameter("path")) {
 	nice_name = private_parameters_client->get_parameter<string>("path");
    }else{
@@ -220,7 +232,7 @@ bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr 
   if (my_path.find("/") != 0)
     my_path = "/" + my_path;
 
-  return GenericAnalyzerBase::init(my_path, nice_name, 
+  return GenericAnalyzerBase::init_v(my_path, nice_name, 
                                    timeout, num_items_expected, discard_stale);
 }
 
