@@ -35,10 +35,7 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 
-  # TODO: need to support rostest
-  #find_package(rostest REQUIRED)
   ament_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
-  # add_rostest(test/diagnostic_updater_fast_test.xml)
   target_link_libraries(diagnostic_updater_test ${LIBS})
 endif()
 
@@ -47,7 +44,6 @@ endif()
 #
 
 install(
-  #TARGETS ${PROJECT_NAME}
   TARGETS example
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

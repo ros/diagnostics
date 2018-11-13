@@ -2,6 +2,17 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.4 (2018-11-05)
+------------------
+* Ported diagnostics_updater to ros 2.
+* Removed missing packages.
+* Modified Time/Clock stuff and remove Boost library Etc
+* Modified .cpp and .hpp files as per ament_cpplint.
+* Add Copyright header and rename .h to hpp as per ROS2 guideline.
+* Added ignore files to un-ported packages 
+* Updated to use cmake 3.5
+* Contributors: Brett, Rohit Agrawal
+
 1.9.3 (2018-05-02)
 ------------------
 * Merge pull request `#73 <https://github.com/ros/diagnostics/issues/73>`_ from tue-robotics/indigo-devel
