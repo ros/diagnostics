@@ -1,12 +1,28 @@
+gen_analyzers:
+        ros__parameters:
+                analyzers_params:
+                          my_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: My Path
+                            discard_stale: true
+                            expected: [
+                              'expected1',
+                              'expected2',
+                              'expected3',
+                              'expected4',
+                              'expected5']
+                            startswith: 'startsw'
 analyzers:
-  my_path:
-    type: diagnostic_aggregator/GenericAnalyzer
-    path: My Path
-    discard_stale: true
-    expected: [
-      'expected1',
-      'expected2',
-      'expected3',
-      'expected4',
-      'expected5']
-    startswith: 'startsw'
+        ros__parameters:
+                analyzers_params:
+                          my_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: My Path
+                            discard_stale: true
+                            expected: [
+                              'expected1',
+                              'expected2',
+                              'expected3',
+                              'expected4',
+                              'expected5']
+                            startswith: 'startsw'

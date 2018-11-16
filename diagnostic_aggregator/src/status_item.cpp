@@ -38,7 +38,6 @@
 
 using namespace diagnostic_aggregator;
 using namespace std;
-/*rclcpp::Clock ros_clock(RCL_ROS_TIME);*/
 
 StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus *status)
 {
@@ -52,8 +51,6 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus *status)
   rclcpp::Clock ros_clock(RCL_ROS_TIME);
   update_time_ = ros_clock.now();
 
-  /*builtin_interfaces::msg::Time update_time_ = ros_clock.now();
-  update_time_ = ros::Time::now();*/
 }
 
 StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
@@ -62,12 +59,11 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
   message_ = message;
   level_ = level;
   hw_id_ = "";
-  
+
+  cout<< "StatusItem name is =  " << name_ <<endl;  
   output_name_ = getOutputName(name_);
   rclcpp::Clock ros_clock(RCL_ROS_TIME);
    update_time_ = ros_clock.now();
- /* builtin_interfaces::msg::Time update_time_ = ros_clock.now();
-  update_time_ = ros::Time::now();*/
 }
 
 StatusItem::~StatusItem() {}
@@ -82,9 +78,6 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus *status)
 
   rclcpp::Clock ros_clock(RCL_ROS_TIME);
   rclcpp::Time update_time_now_ = ros_clock.now();
-  /*builtin_interfaces::msg::Time update_time_now_ = ros_clock.now();
-  builtin_interfaces::msg::Duration update_interval_now = (update_time_now_ - update_time_)
-  builtin_interfaces::msg::Duration update_interval = update_interval_now.sec;*/
   rclcpp::Duration update_interval_now =  update_time_now_ - update_time_ ;
   double update_interval = (update_interval_now.nanoseconds())*1e-9;
   if ( update_interval < 0 )
@@ -96,8 +89,6 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus *status)
   values_ = status->values;
   rclcpp::Time update_time_ = ros_clock.now();
  
- /* builtin_interfaces::msg::Time update_time_ = ros_clock.now();
-  update_time_ = ros::Time::now();*/
 
   return true;
 }

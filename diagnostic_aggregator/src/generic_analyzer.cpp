@@ -39,166 +39,138 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer, 
-                       diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,diagnostic_aggregator::Analyzer)
+                       
 
 
 GenericAnalyzer::GenericAnalyzer() { }
 
-//bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr &nh)
-bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp::Node::SharedPtr &nh)
+bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp::Node::SharedPtr &n)
 { 
-	   auto context = rclcpp::contexts::default_context::get_global_default_context();
-  const std::vector<std::string> arguments = {};
-  const std::vector<rclcpp::Parameter> initial_values = {
-       rclcpp::Parameter("base_path_ga",base_path),
-     };
-   const bool use_global_arguments = false;
-   const bool use_intra_process = false;
+	auto context = rclcpp::contexts::default_context::get_global_default_context();
+	const std::vector<std::string> arguments = {};
+	const std::vector<rclcpp::Parameter> initial_values = {
+		rclcpp::Parameter("base_path_ga",base_path),
+	};
+	const bool use_global_arguments = true;
+	const bool use_intra_process = true;
+
+	string gen_an_name = nsp;
+	gen_an_name.erase(gen_an_name.end()-5,gen_an_name.end()) ;
+
+	gen_nh  = std::make_shared<rclcpp::Node>("gen_analyzers","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
+
+	string nice_name;
+	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh);
+	while (!parameters_client->wait_for_service(1s)) {
+		if (!rclcpp::ok()) {
+			RCLCPP_ERROR(gen_nh->get_logger(), "Interrupted while waiting for the service. Exiting.")
+				return 0;
+		}
+		RCLCPP_INFO(gen_nh->get_logger(), "service not available, waiting again...")
+	}
+
+	std::stringstream ss;
+	std::stringstream ss1;
+	RCLCPP_INFO(gen_nh->get_logger(), "service of gen analyzer is  available Now ")
+		for (auto & parameter : parameters_client->get_parameters({"startswith"})) {
+			ss << "\nParameter name: " << parameter.get_name();
+			ss << "\nParameter value (" << parameter.get_type_name() << "): " <<
+				parameter.value_to_string();
+		}
+	RCLCPP_INFO(gen_nh->get_logger(), ss.str().c_str())
 
 
-    auto n  = std::make_shared<rclcpp::Node>("gen_analyzers", nsp, context, arguments, initial_values, use_global_arguments, use_intra_process);
+		map <string, string> anl_param;
+	auto parameters_and_prefixes = parameters_client->list_parameters({gen_an_name.c_str()}, 10);
 
-  	string nice_name;
-  auto private_parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n,nh->get_name());
-   if (private_parameters_client->has_parameter("path")) {
-	nice_name = private_parameters_client->get_parameter<string>("path");
-   }else{
-	return false;
-   }		   
-	
-   if (private_parameters_client->has_parameter("find_and_remove_prefix")) {
-        XmlRpc::XmlRpcValue find_remove;
-       find_remove = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("find_and_remove_prefix");
-       vector<string> output;
-       getParamVals(find_remove, output);
-       chaff_ = output;
-       startswith_ = output;
-   }
+	ss << "\nParameter names:";
+	for (auto & name : parameters_and_prefixes.names) {
+		for (auto & parameter : parameters_client->get_parameters({name})) {
+			ss1 << "\nParameter name: " << parameter.get_name();
+			ss1 << "\nParameter value (" << parameter.get_type_name() << "): " <<
+				parameter.value_to_string();
+			anl_param[parameter.get_name()]=parameter.value_to_string();
+		}
+	}
+	RCLCPP_INFO(gen_nh->get_logger(), ss1.str().c_str())
+		map<string, string>::iterator anl_it;
+	anl_it = anl_param.find(gen_an_name + ".path");
+	if (anl_it != anl_param.end()){
+		nice_name=anl_it->second;
+	} else{
+		return false; 
+	}
+	anl_it = anl_param.find(gen_an_name +".find_and_remove_prefix");
+	if (anl_it != anl_param.end()){
+		string find_remove =  anl_it->second;
+		vector<string> output;
+		if(getParamVals(find_remove, output))
+		{	       
+			chaff_ = output;
+			startswith_ = output;
+		}else{
+		}
+	}		
 
-   if (private_parameters_client->has_parameter("remove_prefix")) {
-        XmlRpc::XmlRpcValue removes;
-       removes = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("remove_prefix");
-	 getParamVals(removes, chaff_);
- 	}	 
-     
-    if (private_parameters_client->has_parameter("startswith")) {
-        XmlRpc::XmlRpcValue startswith;
-       startswith = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("startswith");
-         getParamVals(startswith, startswith_);
+	anl_it = anl_param.find(gen_an_name +".remove_prefix");
+	if (anl_it != anl_param.end()){
+                string remove =  anl_it->second;
+		getParamVals(remove, chaff_);
+          }
+
+	 anl_it = anl_param.find(gen_an_name +".startswith");
+        if (anl_it != anl_param.end()){
+                string startswith =  anl_it->second;
+                getParamVals(startswith, startswith_);
+          }
+
+	 anl_it = anl_param.find(gen_an_name +".name");
+        if (anl_it != anl_param.end()){
+                string name =  anl_it->second;
+                getParamVals(name, name_);
+          }
+
+	 anl_it = anl_param.find(gen_an_name +".contains");
+        if (anl_it != anl_param.end()){
+                string contains =  anl_it->second;
+                getParamVals(contains, contains_);
+          }
+
+	anl_it = anl_param.find(gen_an_name +".expected");
+        if (anl_it != anl_param.end()){
+                string expected =  anl_it->second;
+                 getParamVals(expected,expected_);
+          for (unsigned int i = 0; i < expected_.size(); ++i)
+            {
+              std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+	      cout<<"expected added to item" << expected_[i] << endl;
+              addItem(expected_[i], item);
+            }
+
         }
 
-      if (private_parameters_client->has_parameter("name")) {
-        XmlRpc::XmlRpcValue name_val;
-        name_val = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("name");
-         getParamVals(name_val, name_);
-        }
+	anl_it = anl_param.find(gen_an_name +".regex");
+	if (anl_it != anl_param.end()){
+		string regexes =  anl_it->second;
+		vector<string> regex_strs;
+		getParamVals(regexes, regex_strs);
 
-      if (private_parameters_client->has_parameter("contains")) {
-        XmlRpc::XmlRpcValue contains;
-        contains = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("contains");
-         getParamVals(contains, contains_);
-        }
+		for (unsigned int i = 0; i < regex_strs.size(); ++i)
+		{
+			try
+			{
+				std::regex re(regex_strs[i]);
+				regex_.push_back(re);
+			}
+			catch (std::regex_error& e)
+			{
+				ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
+						regex_strs[i].c_str(), e.what());
+			}
+		}
+	}
 
-	if (private_parameters_client->has_parameter("expected")) {
-        XmlRpc::XmlRpcValue expected;
-        expected = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("expected");
-         getParamVals(expected,expected_);
-	  for (unsigned int i = 0; i < expected_.size(); ++i)
-	    {
-	      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
-	      addItem(expected_[i], item);
-	    }
-
-        }
-	
-        if (private_parameters_client->has_parameter("regex")) {
-        XmlRpc::XmlRpcValue regexes;
-        regexes = private_parameters_client->get_parameter<XmlRpc::XmlRpcValue>("regex");
-	vector<string> regex_strs;
-	getParamVals(regexes, regex_strs);
-
-	    for (unsigned int i = 0; i < regex_strs.size(); ++i)
-	    {
-	      try
-	      {
-		std::regex re(regex_strs[i]);
-		regex_.push_back(re);
-	      }
-	      catch (std::regex_error& e)
-	      {
-		ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
-			 regex_strs[i].c_str(), e.what());
-	      }
-	    }
-	  }
-
-
-#if 0
-  if (!n.getParam("path", nice_name))
-  {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
-              n->get_namespace());
-    return false;
-  }
-
-  XmlRpc::XmlRpcValue find_remove;
-  if (n.getParam("find_and_remove_prefix", find_remove))
-  {
-    vector<string> output;
-    getParamVals(find_remove, output);
-    chaff_ = output;
-    startswith_ = output;
-  }
-  
-  XmlRpc::XmlRpcValue removes;
-  if (n.getParam("remove_prefix", removes))
-    getParamVals(removes, chaff_);
-    
-  XmlRpc::XmlRpcValue startswith;
-  if (n.getParam("startswith", startswith))
-    getParamVals(startswith, startswith_);
-
-  XmlRpc::XmlRpcValue name_val;
-  if (n.getParam("name", name_val))
-    getParamVals(name_val, name_);
-
-  XmlRpc::XmlRpcValue contains;
-  if (n.getParam("contains", contains))
-    getParamVals(contains, contains_);
-
-  XmlRpc::XmlRpcValue expected;
-  if (n.getParam("expected", expected))
-  {
-    getParamVals(expected, expected_);
-    for (unsigned int i = 0; i < expected_.size(); ++i)
-    {
-      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
-      addItem(expected_[i], item);
-    }
- }
- 
-  XmlRpc::XmlRpcValue regexes;
-  if (n.getParam("regex", regexes))
-  {
-    vector<string> regex_strs;
-    getParamVals(regexes, regex_strs);
-  
-    for (unsigned int i = 0; i < regex_strs.size(); ++i)
-    {
-      try
-      {
-        std::regex re(regex_strs[i]);
-        regex_.push_back(re);
-      }
-      catch (std::regex_error& e)
-      {
-        ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
-                 regex_strs[i].c_str(), e.what());
-      }
-    }
-  }
-#endif // ROS 1 code 
   if (startswith_.size() == 0 && name_.size() == 0 && 
       contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
   {
@@ -214,14 +186,31 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
   double timeout;
   int num_items_expected;
   bool discard_stale;
-  timeout = private_parameters_client->get_parameter<double>("timeout");
-  num_items_expected=private_parameters_client->get_parameter<int>("num_items");
-  discard_stale= private_parameters_client->get_parameter<bool>("discard_stale");
-#if 0
-  n.param("timeout", timeout, 5.0);   // Timeout for stale
-  n.param("num_items", num_items_expected, -1); // Number of items must match this
-  n.param("discard_stale", discard_stale, false);
-#endif 
+
+   anl_it = anl_param.find(gen_an_name + ".timeout");
+  if (anl_it != anl_param.end()){
+          timeout= stod(anl_it->second);
+  } else{
+	  timeout = 5.0;
+    }
+   anl_it = anl_param.find(gen_an_name + ".num_items");
+  if (anl_it != anl_param.end()){
+          num_items_expected=stod(anl_it->second);
+  } else{
+          num_items_expected = -1;
+    }
+
+    anl_it = anl_param.find(gen_an_name + ".discard_stale");
+  if (anl_it != anl_param.end()){
+	  if (anl_it->second == "true")
+          	discard_stale=true;
+  } else{
+          discard_stale =false;
+    }
+
+
+  cout<<"Trying to get params in generic analyzer "<< endl;
+
 
   string my_path;
   if (base_path == "/")
@@ -231,6 +220,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 
   if (my_path.find("/") != 0)
     my_path = "/" + my_path;
+
 
   return GenericAnalyzerBase::init_v(my_path, nice_name, 
                                    timeout, num_items_expected, discard_stale);

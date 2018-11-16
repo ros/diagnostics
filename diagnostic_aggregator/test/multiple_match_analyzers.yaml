@@ -1,10 +1,24 @@
 analyzers:
-  my_path:
-    type: diagnostic_aggregator/GenericAnalyzer
-    path: Header1
-    expected: 'multi'
-    startswith: 'Something'
-  other_path:
-    type: diagnostic_aggregator/GenericAnalyzer
-    path: Header2
-    expected: 'multi'
+        ros__parameters:
+                analyzers_params:
+                         my_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: Header3
+                            expected: 'multi'
+                            startswith: 'Something'
+                         other_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: Header4
+gen_analyzers:
+        ros__parameters:
+                analyzers_params:
+                         my_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: Header5
+                            expected: 'multi'
+                            startswith: 'Something'
+                         other_path:
+                            type: diagnostic_aggregator/GenericAnalyzer
+                            path: Header6
+                            expected: 'multi'
+                        

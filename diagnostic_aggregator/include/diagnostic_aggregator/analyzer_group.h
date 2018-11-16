@@ -50,7 +50,6 @@
 #include "diagnostic_aggregator/status_item.h"
 /*#include <boost/shared_ptr.hpp>*/
 #include <memory>
-#include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "pluginlib/class_loader.hpp"

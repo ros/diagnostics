@@ -1,7 +1,0 @@
-<launch>
-  <test pkg="diagnostic_aggregator" type="analyzer_loader" name="loader"
-        test-name="analyzer-loader-test" >
-    <rosparam command="load" 
-              file="$(find diagnostic_aggregator)/test/all_basic_analyzers.yaml" />
-  </test>
-</launch>

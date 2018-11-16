@@ -55,7 +55,6 @@
 #include "diagnostic_msgs/msg/key_value.hpp"
 //#include "diagnostic_msgs/msg/add_diagnostics.h"
 #include "diagnostic_msgs/srv/add_diagnostics.hpp"
-#include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/analyzer_group.h"
 #include "diagnostic_aggregator/status_item.h"

@@ -34,22 +34,33 @@
 
 ##\author Kevin Watts
 
-##\brief Tests that two analyzers can match and analyze a single item
+##\brief Tests receipt of /diagnostics_agg from diagnostic aggregator
 
 from __future__ import with_statement
-DURATION = 10
 PKG = 'diagnostic_aggregator'
-import roslib; roslib.load_manifest(PKG)
-import rospy, rostest, unittest
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+
+#import roslib; roslib.load_manifest(PKG)
+
+import unittest
+import rclpy
+from rclpy.node import Node
+#from rclpy.parameter import Parameter
+#import rospy, rostest
 from time import sleep
 import sys
+from optparse import OptionParser
 import threading
+import types
+import time
+from diagnostic_msgs.msg import DiagnosticArray
+DURATION = 15
 
+go_1 = 0
+go_2 = 0
+prefix = ""
 MULTI_NAME = 'multi'
 HEADER1 = 'Header1'
 HEADER2 = 'Header2'
-
 def get_raw_name(agg_name):
     return agg_name.split('/')[-1]
 
@@ -63,56 +74,72 @@ class DiagnosticItem:
         self.level = msg.level
         self.message = msg.message
 
-        self.update_time = rospy.get_time()
+        self.update_time = time.time()
 
     def is_stale(self):
-        return rospy.get_time() - self.update_time > 5
+        return time.time() - self.update_time > 5
 
     def update(self, msg):
         self.level = msg.level
         self.message = msg.message
 
-        self.update_time = rospy.get_time()
+        self.update_time = time.time()
 
-class TestMultipleMatch(unittest.TestCase):
-    def __init__(self, *args):
-        super(TestMultipleMatch, self).__init__(*args)
 
+##\brief Uses aggregator parameters to compare diagnostics with aggregated output
+class TestAggregator(Node):
+    def __init__(self):
+        super().__init__('test_multiple_match')
         self._mutex = threading.Lock()
-
+        self._starttime = time.time()
         self._multi_items = {}
+        global prefix
+        
+        print("Hellow going create subcription")
+        self.sub = self.create_subscription(DiagnosticArray, 'diagnostics_agg', self.diag_agg_cb)
 
-        rospy.init_node('test_multiple_match')
-        self._starttime = rospy.get_time()
-
-        sub_agg = rospy.Subscriber("/diagnostics_agg", DiagnosticArray, self.diag_agg_cb)
- 
     def diag_agg_cb(self, msg):
+        print("we recived ",msg)
         with self._mutex:
             for stat in msg.status:
                 if stat.name.find(MULTI_NAME) > 0:
                     self._multi_items[get_header_name(stat.name)] = DiagnosticItem(stat)
-
-    def test_multiple_match(self):
-        while not rospy.is_shutdown():
-            sleep(1.0)
-            if rospy.get_time() - self._starttime > DURATION:
-                break
         
-        self.assert_(not rospy.is_shutdown(), "Rospy shutdown!")
+            #assert(self._multi_items.has_key(HEADER1))#, "Didn't have item under %s. Items: %s" % (HEADER1, self._multi_items))
+            assert(self._multi_items[HEADER1].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER1, MULTI_NAME))
+            #assert(self._multi_items.has_key(HEADER2)) #, "Didn't have item under %s" % HEADER2)
+            assert(self._multi_items[HEADER2].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER2, MULTI_NAME))
 
+
+    def test_agg(self):
+        start = time.time()
+        while 1:
+            sleep(1.0)
+            if time.time() - start > DURATION:
+               break
+
+        print("Test cases start ")    
+        #self.assert_(not rospy.is_shutdown(), "Rospy shutdown")
         with self._mutex:
-            self.assert_(self._multi_items.has_key(HEADER1), "Didn't have item under %s. Items: %s" % (HEADER1, self._multi_items))
-            self.assert_(self._multi_items[HEADER1].name == MULTI_NAME, "Item name under %s didn't match %s" % (HEADER1, MULTI_NAME))
+            assert(len(self._expecteds) > 0) #, "No expected items found in raw data!")
 
-            self.assert_(self._multi_items.has_key(HEADER2), "Didn't have item under %s" % HEADER2)
-            self.assert_(self._multi_items[HEADER2].name == MULTI_NAME, "Item name under %s didn't match %s" % (HEADER2, MULTI_NAME))
-         
+            for name, item in self._expecteds.items():
+                assert(self._agg_expecteds.has_key(name)) #, "Item %s not found in aggregated diagnostics output" % name)
+                if item.is_stale():
+                    assert(self._agg_expecteds[name].level == 3) #, "Stale item in diagnostics, but aggregated didn't report as stale. Item: %s, state: %d" %(name, self._agg_expecteds[name].level))
+                else:
+                    assert(self._agg_expecteds[name].level == item.level) #, "Diagnostic level of aggregated, raw item don't match for %s" % name)
+        print("Test cases pass ")    
+                        
+def main(args=None):
+    rclpy.init(args=args)
+    node = TestAggregator()
+ #   node.test_agg()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
-    if False:
-        suite = unittest.TestSuite()
-        suite.addTest(TestMultipleMatch('test_multiple_match'))
-        unittest.TextTestRunner(verbosity = 2).run(suite)
-    else:
-        rostest.run(PKG, sys.argv[0], TestMultipleMatch, sys.argv)
+   # print 'SYS ARGS:', sys.argv
+   # rostest.run(PKG, sys.argv[0], TestAggregator, sys.argv)
+   main()

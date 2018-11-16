@@ -7,7 +7,6 @@ project(diagnostic_aggregator)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # Load catkin and all dependencies required for this package
-#find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
@@ -18,9 +17,6 @@ find_package(rclpy REQUIRED)
 
 
 #catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
-#    INCLUDE_DIRS include
-#    LIBRARIES ${PROJECT_NAME})
-# Include boost
 find_package(Boost REQUIRED system)
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -31,10 +27,7 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
-  # ${xmlrpcpp_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/include/xmlrpcpp/
-  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/include/
 )
 
 set(LIBS
@@ -45,26 +38,11 @@ set(LIBS
   ${pluginlib_LIBRARIES}
   ${xmlrpcpp_LIBRARIES}
   ${Boost_LIBRARIES}
- /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/install/xmlrpcpp/lib/libxmlrpcpp.a 
 )
 
-#set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
-#set(REQUIRED_diagnostic_msgs_VERSION_Jade "1.12.4")
-#if( ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Indigo})
-#  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Indigo} or newer is required to build diagnotic_aggregator #on ROS Indigo")
-#endif()
-#if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
-#    (${diagnostic_msgs_VERSION} VERSION_GREATER "1.12.0" AND
-#     ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Jade}))
-#  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Jade} or newer is required to build diagnotic_aggregator on #ROS Jade")
-#endif()
-
-#find_package(Boost REQUIRED COMPONENTS system)
-
-#include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
 include_directories(${INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/status_item.cpp
   src/analyzer_group.cpp
   src/generic_analyzer.cpp
@@ -73,9 +51,7 @@ add_library(${PROJECT_NAME}
   src/aggregator.cpp)
 target_link_libraries(diagnostic_aggregator ${LIBS}
 )
-#add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
-# Aggregator node 
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${PROJECT_NAME})
 install(
@@ -88,53 +64,45 @@ find_package(ament_cmake_gtest REQUIRED)
 
   # TODO: need to support rostest
   #find_package(rostest REQUIRED)
-  ament_add_gtest(analyzer_loader test/analyzer_loader.cpp)
-  #add_executable(analyzer_loader test/analyzer_loader.cpp)
-	#                               gtest-1.7.0/gtest-all.cc)
+  add_executable(analyzer_loader test/analyzer_loader.cpp)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
-if(BUILD_TESTING)
-	# add_rostest(test/launch/test_agg.launch)
-   endif()
-#if(CATKIN_ENABLE_TESTING)
-#  find_package(rostest REQUIRED)
-#  add_rostest(test/launch/test_agg.launch)
-#  add_rostest(test/launch/test_add_agg.launch)
+install(
+	TARGETS analyzer_loader
+  	DESTINATION lib/${PROJECT_NAME})
 
-  # Test Analyzer loader
-#  add_rostest(test/launch/test_loader.launch)
-#  add_rostest(test/launch/test_expected_stale.launch)
-#  add_rostest(test/launch/test_multiple_match.launch)
-#endif()
+ add_executable(multi_match_pub test/multi_match_pub.cpp)
+ target_link_libraries(multi_match_pub ${LIBS})
+ install(
+        TARGETS multi_match_pub
+        DESTINATION lib/${PROJECT_NAME})
 
-#catkin_install_python(
-#        PROGRAMS scripts/add_analyzers
-#        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
-#install(DIRECTORY include/${PROJECT_NAME}/
-#        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#)
-#install(FILES analyzer_plugins.xml
-#        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
-#install(TARGETS ${PROJECT_NAME}
-#        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#)
-#install(TARGETS aggregator_node analyzer_loader
-#        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+ add_executable(diag_pub test/diag_pub.cpp)
+ target_link_libraries(diag_pub ${LIBS})
+ install(
+        TARGETS diag_pub
+        DESTINATION lib/${PROJECT_NAME})
+ add_executable(add_analyzers_test  test/add_analyzers_test.cpp)
+ target_link_libraries(add_analyzers_test  ${LIBS})
+ install(
+        TARGETS add_analyzers_test
+        DESTINATION lib/${PROJECT_NAME})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE "DAIGNOSTICCPP_BUILDING_DLL")
 ############################################################
 # Define installation rules
 
 install(
   TARGETS ${PROJECT_NAME} aggregator_node analyzer_loader
   DESTINATION lib/${PROJECT_NAME}
-  # ARCHIVE DESTINATION lib
-  #LIBRARY DESTINATION lib
-  #RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
+install(
+	FILES analyzer_plugins.xml 
+	DESTINATION share/${PROJECT_NAME}
+)
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
@@ -146,9 +114,12 @@ ament_export_dependencies(builtin_interfaces)
 ament_export_dependencies(diagnostic_msgs)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclpy)
+ament_export_dependencies(${PROJECT_NAME})
 ament_export_dependencies(pluginlib)
 ament_export_dependencies(xmlrpcpp)
 ament_export_include_directories(${INCLUDE_DIRS})
+pluginlib_export_plugin_description_file(${PROJECT_NAME} analyzer_plugins.xml)
+
 
 # Must be at the bottom
 ament_package()

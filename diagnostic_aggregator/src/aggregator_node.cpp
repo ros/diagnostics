@@ -41,18 +41,12 @@
 using namespace std;
 int main(int argc, char **argv)
 {
- // ros::init(argc, argv, "diagnostic_aggregator");
-  cout<< "Vaibhav diagnostic_aggregator init done "<< endl;
   rclcpp::init(argc, argv);
   try
   {
-  cout<< "Vaibhav diagnostic_aggregator exception hit 1 "<< endl;
   diagnostic_aggregator::Aggregator agg;
 
-  //ros::Rate pub_rate(agg.getPubRate());
    rclcpp::Rate  pub_rate(agg.getPubRate());
-  cout<< "Vaibhav diagnostic_aggregator exception hit 2 "<< endl;
-  //ros::Rate pub_rate(agg.getPubRate());
   while (agg.ok())
   {
    // ros::spinOnce();
@@ -63,9 +57,7 @@ int main(int argc, char **argv)
   }
   catch (exception& e)
   {
-  cout<< "Vaibhav diagnostic_aggregator exception hit  "<< endl;
-   // ROS_FATAL("Diagnostic aggregator node caught exception. Aborting. %s", e.what());
-   // ROS_BREAK();
+  cout<< "diagnostic_aggregator exception hit  "<< endl;
   }
   
  rclcpp::shutdown();

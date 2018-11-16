@@ -38,28 +38,51 @@
 
 //#include <diagnostic_aggregator/aggregator.h>
 #include <diagnostic_aggregator/analyzer_group.h>
-#include <ros/ros.h>
+//#include <ros/ros.h>
 #include <string>
 #include <gtest/gtest.h>
+#include <iostream>
 
-//using namespace std;
+using namespace std;
 //using namespace diagnostic_aggregator;
 
 // Uses AnalyzerGroup to load analyzers
-TEST(AnalyzerLoader, analyzerLoading)
+void v_TEST( )
 {
-  ros::NodeHandle nh = ros::NodeHandle("~");
+ // ros::NodeHandle nh = ros::NodeHandle("~");
+  auto context = rclcpp::contexts::default_context::get_global_default_context();
+  const std::vector<std::string> arguments = {};
+  const std::vector<rclcpp::Parameter> initial_values = {
+	  rclcpp::Parameter("analyzer_params","")
+     };
+   const bool use_global_arguments = true;
+   const bool use_intra_process = true;
+
+   // ros::NodeHandle nh = ros::NodeHandle("~");
+   auto nh = std::make_shared<rclcpp::Node>("analyzer_loader", "/", context, arguments, initial_values, use_global_arguments, use_intra_process);
 
   diagnostic_aggregator::AnalyzerGroup analyzer_group;
   std::string path = "base_path";
   // = new diagnostic_aggregator::AnalyzerGroup();
-  EXPECT_TRUE(analyzer_group.init(path, nh));
+  if(analyzer_group.init(path, nh->get_namespace(),nh)){
+
+cout<< "test passed" <<endl;	   
+   }else{
+
+cout<< "test failed" <<endl;	   
+   }	  
+  assert(analyzer_group.init(path, nh->get_namespace(),nh));
 }
 
 int main(int argc, char **argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "analyzer_loader");
+   rclcpp::init(argc, argv);
+   v_TEST( );
+ // rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("analyzer_loader");	
+ // testing::InitGoogleTest(&argc, argv);
+ 
+ // ros::init(argc, argv, "analyzer_loader");
   
-  return RUN_ALL_TESTS();
+  return 0;
+
 }

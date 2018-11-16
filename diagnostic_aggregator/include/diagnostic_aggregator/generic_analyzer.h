@@ -56,7 +56,6 @@
 #include "diagnostic_aggregator/analyzer.h"
 #include "diagnostic_aggregator/status_item.h"
 #include "diagnostic_aggregator/generic_analyzer_base.h"
-#include "XmlRpcValue.h"
 
 
 //TODO(tfoote replace these terrible macros)
@@ -73,36 +72,27 @@ namespace diagnostic_aggregator {
  * Given an XmlRpcValue, gives vector of strings of that parameter
  *\return False if XmlRpcValue is not string or array of strings
  */
-inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
-{
-  XmlRpc::XmlRpcValue::Type type = param.getType();
-  if (type == XmlRpc::XmlRpcValue::TypeString)
-  {
-    std::string find = param;
-    output.push_back(find);
-    return true;
-  }
-  else if (type == XmlRpc::XmlRpcValue::TypeArray)
-  {
-    for (int i = 0; i < param.size(); ++i)
-    {
-      if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString)
-      {
-        ROS_ERROR("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s", param.toXml().c_str());
-        output.clear();
-        return false;
-      }
+inline bool getParamVals(std::string& subject, std::vector<std::string> &container){
 
-      std::string find = param[i];
-      output.push_back(find);
-    }
-    return true;
-  }
+container.clear();
+  char chars[] = "[]";
 
-  ROS_ERROR("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
-  output.clear();
-  return false;
-}
+   for (unsigned int i = 0; i < strlen(chars); ++i)
+   {
+      // you need include <algorithm> to use general algorithms like std::remove()
+      subject.erase (std::remove(subject.begin(), subject.end(), chars[i]), subject.end());
+   }
+  size_t len = subject.length() + 1;
+  char* s = new char[ len ];
+  memset(s, 0, len*sizeof(char));
+  memcpy(s, subject.c_str(), (len - 1)*sizeof(char));
+  for (char *p = strtok(s, ","); p != NULL; p = strtok(NULL, ","))
+  {
+    container.push_back( p );
+  }
+  delete[] s;
+
+}	
 
 
 /*!
@@ -248,6 +238,7 @@ private:
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
   std::vector<std::regex> regex_; /**< Regular expressions to check against diagnostics names. */
+  rclcpp::Node::SharedPtr  gen_nh;
 
 };
 
