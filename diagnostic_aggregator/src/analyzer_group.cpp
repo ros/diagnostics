@@ -53,7 +53,7 @@ AnalyzerGroup::AnalyzerGroup() :
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 { }
 
-bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::Node::SharedPtr &nh)
+bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr &n)
 {
 	auto context = rclcpp::contexts::default_context::get_global_default_context();
 	const std::vector<std::string> arguments = {};

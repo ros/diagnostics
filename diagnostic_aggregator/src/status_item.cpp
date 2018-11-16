@@ -48,8 +48,7 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus *status)
   values_ = status->values;
   
   output_name_ = getOutputName(name_);
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
-  update_time_ = ros_clock.now();
+  rclcpp::Time update_time_ = ros_clock.now();
 
 }
 
@@ -76,7 +75,6 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus *status)
     return false;
   }
 
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
   rclcpp::Time update_time_now_ = ros_clock.now();
   rclcpp::Duration update_interval_now =  update_time_now_ - update_time_ ;
   double update_interval = (update_interval_now.nanoseconds())*1e-9;

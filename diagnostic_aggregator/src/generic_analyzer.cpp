@@ -147,7 +147,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	      cout<<"expected added to item" << expected_[i] << endl;
               addItem(expected_[i], item);
             }
-
         }
 
 	anl_it = anl_param.find(gen_an_name +".regex");

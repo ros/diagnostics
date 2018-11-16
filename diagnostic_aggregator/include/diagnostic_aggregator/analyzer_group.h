@@ -128,9 +128,7 @@ public:
    * The parameters in its namespace determine the sub-analyzers.
    */
 /*  virtual bool init(const std::string base_path, const ros::NodeHandle &n);*/
-
-  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n);
-//virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n); //change to remove dependecy of copy constructor
+  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
@@ -185,7 +183,6 @@ private:
    *\brief The map of names to matchings is stored internally.
    */
   std::map<const std::string, std::vector<bool> > matched_;
-  rclcpp::Node::SharedPtr analyzers_nh;
 
 };
 

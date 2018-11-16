@@ -13,7 +13,7 @@ find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-#find_package(xmlrpcpp REQUIRED)
+find_package(xmlrpcpp REQUIRED)
 
 
 #catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
@@ -27,6 +27,10 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
+<<<<<<< HEAD
+=======
+  ${xmlrpcpp_INCLUDE_DIRS}
+>>>>>>> 047dc018b54f390ad712df23f4308b7c15774390
   ${Boost_INCLUDE_DIRS}
 )
 
@@ -34,9 +38,9 @@ set(LIBS
   ${diagnostic_msgs_LIBRARIES}
   ${builtin_interfaces_LIBRARIES}
   ${rclcpp_LIBRARIES}
-  ${rclpy_LIBRARIES}
-  ${pluginlib_LIBRARIES}
-  ${xmlrpcpp_LIBRARIES}
+  ${rclpy_INCLUDE_DIRS}
+  ${pluginlib_INCLUDE_DIRS}
+  ${xmlrpcpp_INCLUDE_DIRS}
   ${Boost_LIBRARIES}
 )
 

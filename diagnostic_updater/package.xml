@@ -1,16 +1,15 @@
 <package format="2">
   <name>diagnostic_updater</name>
-  <version>1.9.3</version>
+  <version>1.9.4</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
 
-  <license>BSD</license>
+  <license>Apache License 2.0</license>
 
   <url type="website">http://www.ros.org/wiki/diagnostic_updater</url>
-<!-- <url type="bugtracker"></url> -->
 
   <author>Jeremy Leibs</author>
   <author>Blaise Gassend</author>
@@ -30,13 +29,7 @@
   <test_depend>ament_cmake_gtest</test_depend> 
   <test_depend>ament_cmake_cppcheck</test_depend>
   <test_depend>ament_cppcheck</test_depend>
-  <test_depend>ament_clang_format</test_depend>
- 
-<!--  <test_depend>ament_cmake_cpplint</test_depend>  
   
-   <test_depend>ament_cmake_copyright</test_depend> 
-   <test_depend>ament_lint_common</test_depend> -->
-
   <export>
     <build_type>ament_cmake</build_type>
     <architecture_independent/>

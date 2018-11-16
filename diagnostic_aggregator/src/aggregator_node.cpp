@@ -39,6 +39,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 using namespace std;
+
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
@@ -50,17 +51,16 @@ int main(int argc, char **argv)
   while (agg.ok())
   {
    // ros::spinOnce();
-    rclcpp::spin_some(agg.get_node());
+    rclcpp::spin_some(std::make_shared<"diagnostic_aggregator">());
     agg.publishData();
     pub_rate.sleep();
   }
   }
   catch (exception& e)
   {
-  cout<< "diagnostic_aggregator exception hit  "<< endl;
   }
   
- rclcpp::shutdown();
+  exit(0);
   return 0;
 }
   

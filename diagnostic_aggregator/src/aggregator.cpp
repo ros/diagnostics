@@ -40,6 +40,13 @@
 
 using namespace std;
 using namespace diagnostic_aggregator;
+#if 1
+void  addDiagnostics_ros2( const std::shared_ptr<rmw_request_id_t> request_header , const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res){
+
+return ;
+
+}
+#endif
 
 Aggregator::Aggregator() :
 	pub_rate_(1.0),
