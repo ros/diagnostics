@@ -61,9 +61,8 @@ install(
 # Analyzer loader allows other users to test that Analyzers load
 find_package(ament_cmake_gtest REQUIRED)
 
-  # TODO: need to support rostest
-  #find_package(rostest REQUIRED)
-  add_executable(analyzer_loader test/analyzer_loader.cpp)
+  
+add_executable(analyzer_loader test/analyzer_loader.cpp)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 install(
 	TARGETS analyzer_loader
