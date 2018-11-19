@@ -26,10 +26,6 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
-<<<<<<< HEAD
-=======
-  ${xmlrpcpp_INCLUDE_DIRS}
->>>>>>> 047dc018b54f390ad712df23f4308b7c15774390
   ${Boost_INCLUDE_DIRS}
 )
 
