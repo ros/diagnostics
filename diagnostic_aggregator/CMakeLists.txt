@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-#cmake_minimum_required(VERSION 2.8.3)
 project(diagnostic_aggregator)
 
 # Support C++14
@@ -67,11 +66,8 @@ install(
 # Analyzer loader allows other users to test that Analyzers load
 find_package(ament_cmake_gtest REQUIRED)
 
-  # TODO: need to support rostest
-  #find_package(rostest REQUIRED)
-  #  ament_add_gtest(analyzer_loader test/analyzer_loader.cpp)
-  add_executable(analyzer_loader test/analyzer_loader.cpp)
-	#                               gtest-1.7.0/gtest-all.cc)
+  
+add_executable(analyzer_loader test/analyzer_loader.cpp)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 install(
 	TARGETS analyzer_loader
