@@ -45,6 +45,7 @@ PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,diagnostic_aggrega
 
 GenericAnalyzer::GenericAnalyzer() { }
 
+//bool GenericAnalyzer::init(const string base_path,const rclcpp::Node::SharedPtr &gen_nh)
 bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp::Node::SharedPtr &n)
 { 
 	auto context = rclcpp::contexts::default_context::get_global_default_context();
@@ -58,8 +59,11 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	string gen_an_name = nsp;
 	gen_an_name.erase(gen_an_name.end()-5,gen_an_name.end()) ;
 
+	cout<< " generic analyzer path is " << gen_an_name <<endl;
+	cout<<"Trying to create node  in generic analyzer with base_path = "<< nsp <<endl;
 	gen_nh  = std::make_shared<rclcpp::Node>("gen_analyzers","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
 
+	cout<<"Trying to create handle params in generic analyzer "<< endl;
 	string nice_name;
 	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh);
 	while (!parameters_client->wait_for_service(1s)) {
@@ -86,12 +90,14 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 
 	ss << "\nParameter names:";
 	for (auto & name : parameters_and_prefixes.names) {
+		//  ss << "\n " << name;
 		for (auto & parameter : parameters_client->get_parameters({name})) {
 			ss1 << "\nParameter name: " << parameter.get_name();
 			ss1 << "\nParameter value (" << parameter.get_type_name() << "): " <<
 				parameter.value_to_string();
 			anl_param[parameter.get_name()]=parameter.value_to_string();
 		}
+		//anl_param.insert(std::pair<string, string>(ss,ss1)); 
 	}
 	RCLCPP_INFO(gen_nh->get_logger(), ss1.str().c_str())
 		map<string, string>::iterator anl_it;
@@ -99,6 +105,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	if (anl_it != anl_param.end()){
 		nice_name=anl_it->second;
 	} else{
+		cout<< "return as path is not found for analyzer "<< gen_an_name  << endl;
 		return false; 
 	}
 	anl_it = anl_param.find(gen_an_name +".find_and_remove_prefix");
@@ -110,6 +117,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 			chaff_ = output;
 			startswith_ = output;
 		}else{
+			cout<<" getParamVals(find_remove, output failed" <<endl;
 		}
 	}		
 
@@ -140,6 +148,8 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	anl_it = anl_param.find(gen_an_name +".expected");
         if (anl_it != anl_param.end()){
                 string expected =  anl_it->second;
+		// expected.erase(expected.begin() + 0);
+		// expected.erase(expected.end() + 0) ;
                  getParamVals(expected,expected_);
           for (unsigned int i = 0; i < expected_.size(); ++i)
             {
@@ -147,6 +157,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	      cout<<"expected added to item" << expected_[i] << endl;
               addItem(expected_[i], item);
             }
+
         }
 
 	anl_it = anl_param.find(gen_an_name +".regex");
@@ -170,6 +181,80 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 		}
 	}
 
+#if 0
+   if (private_parameters_client->has_parameter("path")) {
+	nice_name = private_parameters_client->get_parameter<string>("path");
+   }else{
+	return false;
+   }		   
+	
+   if (private_parameters_client->has_parameter("find_and_remove_prefix")) {
+        string find_remove;
+       find_remove = private_parameters_client->get_parameter<string>("find_and_remove_prefix");
+       vector<string> output;
+       getParamVals(find_remove, output);
+       chaff_ = output;
+       startswith_ = output;
+   }
+
+   if (private_parameters_client->has_parameter("remove_prefix")) {
+        string removes;
+       removes = private_parameters_client->get_parameter<string>("remove_prefix");
+	 getParamVals(removes, chaff_);
+ 	}	 
+     
+    if (private_parameters_client->has_parameter("startswith")) {
+        string startswith;
+       startswith = private_parameters_client->get_parameter<string>("startswith");
+         getParamVals(startswith, startswith_);
+        }
+
+      if (private_parameters_client->has_parameter("name")) {
+        string name_val;
+        name_val = private_parameters_client->get_parameter<string>("name");
+         getParamVals(name_val, name_);
+        }
+
+      if (private_parameters_client->has_parameter("contains")) {
+        string contains;
+        contains = private_parameters_client->get_parameter<string>("contains");
+         getParamVals(contains, contains_);
+        }
+
+	if (private_parameters_client->has_parameter("expected")) {
+        string expected;
+        expected = private_parameters_client->get_parameter<string>("expected");
+         getParamVals(expected,expected_);
+	  for (unsigned int i = 0; i < expected_.size(); ++i)
+	    {
+	      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+	      addItem(expected_[i], item);
+	    }
+
+        }
+	
+        if (private_parameters_client->has_parameter("regex")) {
+        string regexes;
+        regexes = private_parameters_client->get_parameter<string>("regex");
+	vector<string> regex_strs;
+	getParamVals(regexes, regex_strs);
+
+	    for (unsigned int i = 0; i < regex_strs.size(); ++i)
+	    {
+	      try
+	      {
+		std::regex re(regex_strs[i]);
+		regex_.push_back(re);
+	      }
+	      catch (std::regex_error& e)
+	      {
+		ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
+			 regex_strs[i].c_str(), e.what());
+	      }
+	    }
+	  }
+
+#endif 
   if (startswith_.size() == 0 && name_.size() == 0 && 
       contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
   {
@@ -209,7 +294,14 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 
 
   cout<<"Trying to get params in generic analyzer "<< endl;
-
+#if 0
+  timeout = parameters_client->get_parameter<double>("timeout");
+  num_items_expected=parameters_client->get_parameter<int>("num_items");
+  discard_stale= parameters_client->get_parameter<bool>("discard_stale");
+  n.param("timeout", timeout, 5.0);   // Timeout for stale
+  n.param("num_items", num_items_expected, -1); // Number of items must match this
+  n.param("discard_stale", discard_stale, false);
+#endif 
 
   string my_path;
   if (base_path == "/")
@@ -221,6 +313,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
     my_path = "/" + my_path;
 
 
+  cout<< " ====== generic analyzer base created with path nice name is " << my_path << nice_name << endl;
   return GenericAnalyzerBase::init_v(my_path, nice_name, 
                                    timeout, num_items_expected, discard_stale);
 }

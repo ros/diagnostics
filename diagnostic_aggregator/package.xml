@@ -1,4 +1,3 @@
-
 <package format="2">
   <name>diagnostic_aggregator</name>
   <version>1.9.3</version>
@@ -23,7 +22,6 @@
   <build_depend>rclpy</build_depend>
   <build_depend>builtin_interfaces</build_depend>
   <!-- <build_depend>rostest</build_depend> -->
-  <build_depend>xmlrpcpp</build_depend>
   <!-- <build_depend>bondcpp</build_depend> -->
   <!-- <build_depend>bondpy</build_depend> -->
 
@@ -33,7 +31,6 @@
   <exec_depend>pluginlib</exec_depend> 
   <exec_depend>rclcpp</exec_depend>
   <exec_depend>rclpy</exec_depend>
-  <exec_depend>xmlrpcpp</exec_depend>
  <!-- <run_depend>bondcpp</run_depend> -->
   <!-- <run_depend>bondpy</run_depend> -->
 

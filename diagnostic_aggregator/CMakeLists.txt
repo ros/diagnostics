@@ -7,16 +7,19 @@ project(diagnostic_aggregator)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 # Load catkin and all dependencies required for this package
+#find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(xmlrpcpp REQUIRED)
 
 
 #catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
+#    INCLUDE_DIRS include
+#    LIBRARIES ${PROJECT_NAME})
+# Include boost
 find_package(Boost REQUIRED system)
 link_directories(${Boost_LIBRARY_DIRS})
 
@@ -27,10 +30,6 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
-<<<<<<< HEAD
-=======
-  ${xmlrpcpp_INCLUDE_DIRS}
->>>>>>> 047dc018b54f390ad712df23f4308b7c15774390
   ${Boost_INCLUDE_DIRS}
 )
 
@@ -38,10 +37,11 @@ set(LIBS
   ${diagnostic_msgs_LIBRARIES}
   ${builtin_interfaces_LIBRARIES}
   ${rclcpp_LIBRARIES}
-  ${rclpy_INCLUDE_DIRS}
-  ${pluginlib_INCLUDE_DIRS}
-  ${xmlrpcpp_INCLUDE_DIRS}
+  ${rclpy_LIBRARIES}
+  ${pluginlib_LIBRARIES}
+  ${xmlrpcpp_LIBRARIES}
   ${Boost_LIBRARIES}
+  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/install/xmlrpcpp/lib/libxmlrpcpp.so
 )
 
 include_directories(${INCLUDE_DIRS})
@@ -56,6 +56,7 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(diagnostic_aggregator ${LIBS}
 )
 
+# Aggregator node 
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${PROJECT_NAME})
 install(
@@ -68,7 +69,9 @@ find_package(ament_cmake_gtest REQUIRED)
 
   # TODO: need to support rostest
   #find_package(rostest REQUIRED)
+  #  ament_add_gtest(analyzer_loader test/analyzer_loader.cpp)
   add_executable(analyzer_loader test/analyzer_loader.cpp)
+	#                               gtest-1.7.0/gtest-all.cc)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 install(
 	TARGETS analyzer_loader
@@ -85,12 +88,18 @@ install(
  install(
         TARGETS diag_pub
         DESTINATION lib/${PROJECT_NAME})
- add_executable(add_analyzers_test  test/add_analyzers_test.cpp)
- target_link_libraries(add_analyzers_test  ${LIBS})
- install(
-        TARGETS add_analyzers_test
-        DESTINATION lib/${PROJECT_NAME})
+# add_executable(add_analyzers_test  test/add_analyzers_test.cpp)
+# target_link_libraries(add_analyzers_test  ${LIBS})
+# install(
+#        TARGETS add_analyzers_test
+#        DESTINATION lib/${PROJECT_NAME})
 
+
+if(BUILD_TESTING)
+	# add_rostest(test/launch/test_agg.launch)
+   endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE "DAIGNOSTICCPP_BUILDING_DLL")
 ############################################################
 # Define installation rules
 

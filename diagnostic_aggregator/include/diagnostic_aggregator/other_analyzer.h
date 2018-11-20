@@ -84,7 +84,7 @@ public:
    */
   bool init(std::string path)
   {
-    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0, -1, true);
+    return GenericAnalyzerBase::init_v(path + "/Other", "Other", 5.0, -1, true);
   }
 
   /*
@@ -92,7 +92,8 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n)
+  //bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n)
+  bool init(const std::string base_path, const char *nsp,const rclcpp::Node::SharedPtr &n)
   {
     ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;

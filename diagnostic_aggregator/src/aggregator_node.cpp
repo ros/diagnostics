@@ -39,28 +39,36 @@
 #include "rclcpp/rclcpp.hpp"
 
 using namespace std;
-
 int main(int argc, char **argv)
 {
+ // ros::init(argc, argv, "diagnostic_aggregator");
+  cout<< "Vaibhav diagnostic_aggregator init done "<< endl;
   rclcpp::init(argc, argv);
   try
   {
+  cout<< "Vaibhav diagnostic_aggregator exception hit 1 "<< endl;
   diagnostic_aggregator::Aggregator agg;
 
+  //ros::Rate pub_rate(agg.getPubRate());
    rclcpp::Rate  pub_rate(agg.getPubRate());
+  cout<< "Vaibhav diagnostic_aggregator exception hit 2 "<< endl;
+  //ros::Rate pub_rate(agg.getPubRate());
   while (agg.ok())
   {
    // ros::spinOnce();
-    rclcpp::spin_some(std::make_shared<"diagnostic_aggregator">());
+    rclcpp::spin_some(agg.get_node());
     agg.publishData();
     pub_rate.sleep();
   }
   }
   catch (exception& e)
   {
+  cout<< "Vaibhav diagnostic_aggregator exception hit  "<< endl;
+   // ROS_FATAL("Diagnostic aggregator node caught exception. Aborting. %s", e.what());
+   // ROS_BREAK();
   }
   
-  exit(0);
+ rclcpp::shutdown();
   return 0;
 }
   

@@ -95,6 +95,7 @@ container.clear();
 }	
 
 
+
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
  * 
@@ -214,7 +215,9 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of 
    */
-  bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n);
+//  bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n);
+  bool init(const std::string base_path, const char * nsp ,const rclcpp::Node::SharedPtr &nh);
+
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
