@@ -51,7 +51,6 @@ int main(int argc, char **argv)
 
   //ros::Rate pub_rate(agg.getPubRate());
    rclcpp::Rate  pub_rate(agg.getPubRate());
-  cout<< "Vaibhav diagnostic_aggregator exception hit 2 "<< endl;
   //ros::Rate pub_rate(agg.getPubRate());
   while (agg.ok())
   {
@@ -68,6 +67,7 @@ int main(int argc, char **argv)
    // ROS_BREAK();
   }
   
+  cout<< "Vaibhav diagnostic_aggregator is going to shutdown  "<< endl;
  rclcpp::shutdown();
   return 0;
 }

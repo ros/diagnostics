@@ -93,7 +93,7 @@ public:
    *\return False, since NodeHandle initialization isn't valid
    */
   //bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n)
-  bool init(const std::string base_path, const char *nsp,const rclcpp::Node::SharedPtr &n)
+  bool init(const std::string base_path, const char *nsp,const rclcpp::Node::SharedPtr &n,const char *)
   {
     ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;

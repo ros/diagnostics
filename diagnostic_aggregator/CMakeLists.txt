@@ -84,11 +84,17 @@ install(
  install(
         TARGETS diag_pub
         DESTINATION lib/${PROJECT_NAME})
-# add_executable(add_analyzers_test  test/add_analyzers_test.cpp)
-# target_link_libraries(add_analyzers_test  ${LIBS})
-# install(
-#        TARGETS add_analyzers_test
-#        DESTINATION lib/${PROJECT_NAME})
+ add_executable(add_analyze_pub test/add_analyze_pub.cpp)
+ target_link_libraries(add_analyze_pub ${LIBS})
+ install(
+        TARGETS add_analyze_pub
+        DESTINATION lib/${PROJECT_NAME})
+
+ add_executable(aggregator_test_pub  test/aggregator_test_pub.cpp)
+ target_link_libraries(aggregator_test_pub  ${LIBS})
+ install(
+        TARGETS aggregator_test_pub
+        DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)

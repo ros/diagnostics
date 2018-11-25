@@ -109,7 +109,7 @@ public:
    */
  // virtual bool init(const std::string base_path, const ros::NodeHandle &n) = 0;
 //  virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n) = 0;
-  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n) =0;
+  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n, const char *) =0;
 
 
   /*!

@@ -24,6 +24,8 @@
 #include "std_msgs/msg/string.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
+#include "diagnostic_msgs/srv/add_diagnostics.hpp"
 
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -41,13 +43,13 @@ void print_usage()
   printf("-t topic_name : Specify the topic on which to publish. Defaults to chatter.\n");
 }
 
-// Create a Talker class that subclasses the generic rclcpp::Node base class.
+// Create a AddAnalyzerPub class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class Talker : public rclcpp::Node
+class AddAnalyzerPub : public rclcpp::Node
 {
 public:
-  explicit Talker(const std::string & topic_name)
-  : Node("dia_pub")
+  explicit AddAnalyzerPub(const std::string & topic_name)
+  : Node("test_add_analyzer")
   {
    // msg_ = std::make_shared<std_msgs::msg::String>();
     msg_ = std::make_shared<diagnostic_msgs::msg::DiagnosticArray>();
@@ -57,16 +59,16 @@ public:
     msg_->header.stamp = clock->now();
     msg_s->name="vebs";
     diagnostic_msgs::msg::DiagnosticStatus msg1,msg2,msg3,msg4,msg5,msg6,msg7,msg8,msg9;
-    msg1.name="pref1a";
+    msg1.name="primary";
     msg1.level=0;
     msg1.message="OK";
 
-    msg2.name="pref1a";
-    msg2.level=2;
+    msg2.name="secondary";
+    msg2.level=1;
     msg2.message="Warning";
 
 
-    msg3.name="contains1a";
+    msg3.name="secondary";
     msg3.level=0;
     msg3.message="OK";
 
@@ -112,7 +114,7 @@ public:
       {
 //msg_->name = "Hello World: " + std::to_string(count_++);
         //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg_->status)
-        RCLCPP_INFO(this->get_logger(), "Publishing:")
+        RCLCPP_INFO(this->get_logger(), "Publishing: namespce %s and name is %s ",this->get_namespace(), this->get_name())
 
         // Put the message into a queue to be processed by the middleware.
         // This call is non-blocking.
@@ -126,6 +128,9 @@ public:
 
     // Use a timer to schedule periodic message publishing.
     timer_ = this->create_wall_timer(3s, publish_message);
+
+    	
+
   }
 
 private:
@@ -136,6 +141,23 @@ private:
 //rclcpp::Publisher<std_msgs::msg::String>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
+
+diagnostic_msgs::srv::AddDiagnostics::Response::SharedPtr send_request(
+  rclcpp::Node::SharedPtr node,
+  rclcpp::Client<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr client,
+  diagnostic_msgs::srv::AddDiagnostics::Request::SharedPtr request)
+{
+  auto result = client->async_send_request(request);
+  // Wait for the result.
+  if (rclcpp::spin_until_future_complete(node, result) ==
+    rclcpp::executor::FutureReturnCode::SUCCESS)
+  {
+    return result.get();
+  } else {
+    return NULL;
+  }
+}
+
 
 int main(int argc, char * argv[])
 {
@@ -154,15 +176,37 @@ int main(int argc, char * argv[])
   // This should be called once per process.
   rclcpp::init(argc, argv);
 
-  // Parse the command line options.
-  auto topic = std::string("chatter");
-  char * cli_option = rcutils_cli_get_option(argv, argv + argc, "-t");
+  // Create a node.
+  
+   auto topic = std::string("/diagnostics_agg/add_diagnostics");
+  char * cli_option = rcutils_cli_get_option(argv, argv + argc, "-s");
   if (nullptr != cli_option) {
     topic = std::string(cli_option);
   }
 
-  // Create a node.
-  auto node = std::make_shared<Talker>(topic);
+  auto node = std::make_shared<AddAnalyzerPub>(topic);
+  auto client = node->create_client<diagnostic_msgs::srv::AddDiagnostics>(topic);
+
+  auto request = std::make_shared<diagnostic_msgs::srv::AddDiagnostics::Request>();
+	request->load_namespace="/test_add_analyzer";
+  while (!client->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      return 0;
+    }
+    RCLCPP_INFO(node->get_logger(), "service not available, waiting again...");
+  }
+
+  // TODO(wjwwood): make it like `client->send_request(node, request)->sum`
+  // TODO(wjwwood): consider error condition
+  auto result = send_request(node, client, request);
+  if (result) {
+    RCLCPP_INFO(node->get_logger(), "Result of add_two_ints: %s", result->message);
+  } else {
+    RCLCPP_ERROR(node->get_logger(), "Interrupted while waiting for response. Exiting.");
+  }
+
+
 
   // spin will block until work comes in, execute work as it becomes available, and keep blocking.
   // It will only be interrupted by Ctrl-C.

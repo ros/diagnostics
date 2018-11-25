@@ -64,14 +64,14 @@ void v_TEST( )
   diagnostic_aggregator::AnalyzerGroup analyzer_group;
   std::string path = "base_path";
   // = new diagnostic_aggregator::AnalyzerGroup();
-  if(analyzer_group.init(path, nh->get_namespace(),nh)){
+  if(analyzer_group.init(path, nh->get_namespace(),nh,"gen_analyzers")){
 
 cout<< "test passed" <<endl;	   
    }else{
 
 cout<< "test failed" <<endl;	   
    }	  
-  assert(analyzer_group.init(path, nh->get_namespace(),nh));
+  assert(analyzer_group.init(path, nh->get_namespace(),nh,"gen_analyzers"));
 }
 
 int main(int argc, char **argv)

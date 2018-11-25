@@ -83,7 +83,7 @@ public:
   virtual ~IgnoreAnalyzer();
 
   //bool init(const std::string base_name, const rclcpp::Node::SharedPtr &n );
-  bool init(const std::string base_name, const char *nsp ,const rclcpp::Node::SharedPtr &n);
+  bool init(const std::string base_name, const char *nsp ,const rclcpp::Node::SharedPtr &n,const char *);
 
   bool match(const std::string name) { return false; }
 

@@ -50,7 +50,7 @@ IgnoreAnalyzer::~IgnoreAnalyzer() { }
 
 /*bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)*/
 //bool IgnoreAnalyzer::init(const std::string base_name, const rclcpp::Node::SharedPtr &n)
-bool IgnoreAnalyzer::init(const std::string base_name, const char * nsp,const rclcpp::Node::SharedPtr &n)
+bool IgnoreAnalyzer::init(const std::string base_name, const char * nsp,const rclcpp::Node::SharedPtr &n, const char * rnsp)
 {
   return true;
 }

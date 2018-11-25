@@ -1,0 +1,12 @@
+test_add_analyzer:
+        ros__parameters:
+                analyzers_params:
+                        primary:
+                                type: 'diagnostic_aggregator/GenericAnalyzer'
+                                path: Primary
+                                startswith: 'primary'
+                        secondary:
+                                type: 'diagnostic_aggregator/GenericAnalyzer'
+                                path: Secondary
+                                startswith: 'secondary'      
+                          

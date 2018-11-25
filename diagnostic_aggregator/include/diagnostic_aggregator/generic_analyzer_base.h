@@ -85,7 +85,7 @@ public:
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
   //bool init(const std::string path, const rclcpp::Node::SharedPtr & n) = 0;
-  bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n) =0;
+  bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n,const char *) =0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"

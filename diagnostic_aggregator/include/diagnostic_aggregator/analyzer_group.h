@@ -129,7 +129,7 @@ public:
    */
 /*  virtual bool init(const std::string base_path, const ros::NodeHandle &n);*/
 
-  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n);
+  virtual bool init(const std::string base_path, const char *,const rclcpp::Node::SharedPtr &n,const char *);
 //virtual bool init(const std::string base_path, const rclcpp::Node::SharedPtr &n); //change to remove dependecy of copy constructor
 
   /**!
@@ -186,6 +186,7 @@ private:
    */
   std::map<const std::string, std::vector<bool> > matched_;
   rclcpp::Node::SharedPtr analyzers_nh;
+  rclcpp::Node::SharedPtr analyzers_nh1;
 
 };
 

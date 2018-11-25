@@ -51,23 +51,24 @@ Aggregator::Aggregator() :
   auto context = rclcpp::contexts::default_context::get_global_default_context();
   const std::vector<std::string> arguments = {};
   const std::vector<rclcpp::Parameter> initial_values = {
-       rclcpp::Parameter("base_path",""),
+       rclcpp::Parameter("base_path","/"),
        rclcpp::Parameter("pub_rate", pub_rate_),
      };
    const bool use_global_arguments = true;
    const bool use_intra_process = true;
 
-   cout<<"paramter set " << endl;
    // ros::NodeHandle nh = ros::NodeHandle("~");
-    nh = std::make_shared<rclcpp::Node>("diagnostic_aggregator", "/", context, arguments, initial_values, use_global_arguments, use_intra_process);
    //auto  n_ = std::make_shared<rclcpp::Node>("agg_node_2");
    // nh.param(string("base_path"), base_path_, string(""));
 
   if (base_path_.size() > 0 && base_path_.find("/") != 0)
      base_path_ = "/" + base_path_;
+  else
+	  base_path_ = "/";
 
    //nh.param("pub_rate", pub_rate_, pub_rate_);
        
+    nh = std::make_shared<rclcpp::Node>("diagnostic_aggregator",base_path_, context, arguments, initial_values, use_global_arguments, use_intra_process);
  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(nh);
   while (!parameters_client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
@@ -92,41 +93,14 @@ Aggregator::Aggregator() :
   analyzer_group_ = new AnalyzerGroup();
 
   cout<<"Anlyazer group called"<<endl;
-    cout<<"Node created with base path ="<< base_path_<< "and ns =" << nh->get_namespace() << endl;
+    cout<<"Node created with base path ="<< base_path_<< "and ns =" << nh->get_name() << endl;
 
 
 
-#if 0
-   
-   map <string, string> anl_param;
-  auto parameters_and_prefixes = parameters_client->list_parameters({"analyzers_params"}, 10);
-
-  ss << "\nParameter names:";
-  for (auto & name : parameters_and_prefixes.names) {
-  //  ss << "\n " << name;
-    for (auto & parameter : parameters_client->get_parameters({name})) {
-    ss1 << "\nParameter name: " << parameter.get_name();
-    ss1 << "\nParameter value (" << parameter.get_type_name() << "): " <<
-      parameter.value_to_string();
-      anl_param[parameter.get_name()]=parameter.value_to_string();
-  }
-    //anl_param.insert(std::pair<string, string>(ss,ss1)); 
-  }
-    RCLCPP_INFO(nh->get_logger(), ss1.str().c_str())
-
-for(map<string, string>::iterator anl_it = anl_param.begin(); anl_it != anl_param.end(); ++anl_it ){
-       string analyzer_name = anl_it->first;
-       string ns = anl_it->second;
-       cout<< analyzer_name  << "::"<<ns <<endl;
-               std::shared_ptr<Analyzer> analyzer;
-               string an_type= anl_it->second ;
-      // if(std::string::npos != analyzer_name.find("type"))
-     cout<<" istance to be checked in analyzer  "<< an_type << endl;
-}
-#endif  
-  if (!analyzer_group_->init(base_path_, nh->get_namespace(),nh))
+  if (!analyzer_group_->init(base_path_,"analyzers" ,nh,"gen_analyzers"))
     {
      ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
+     cout<< "Analyzer group for diagnostic aggregator failed to initialize!" <<endl;
      }
   // Last analyzer handles remaining data
   other_analyzer_ = new OtherAnalyzer();
@@ -154,7 +128,7 @@ for(map<string, string>::iterator anl_it = anl_param.begin(); anl_it != anl_para
 
         //  if (group->init(base_path_, ros::NodeHandle(req.load_namespace)))
         rclcpp::Node::SharedPtr nh_temp;
-        if (group->init(base_path_, req->load_namespace.c_str(),nh_temp))
+        if (group->init(base_path_, req->load_namespace.c_str(),nh_temp,req->load_namespace.c_str()))
         {
                 res->message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
                 res->success = true;
@@ -181,8 +155,11 @@ for(map<string, string>::iterator anl_it = anl_param.begin(); anl_it != anl_para
 	std::function<void(diagnostic_msgs::msg::DiagnosticArray::ConstSharedPtr)> cb_std_function= std::bind( &Aggregator::diagCallback,this,std::placeholders::_1);
 //	std::function<void(diagnostic_msgs::srv::AddDiagnostics)> cb_std_function_1= std::bind( &Aggregator::addDiagnostics,this, std::placeholders::_1);
    add_srv_ = nh->create_service<diagnostic_msgs::srv::AddDiagnostics>("/diagnostics_agg/add_diagnostics", handle_add_agreegator);
+	cout<<"/diagnostics_agg/add_diagnostics created "<< endl;
    diag_sub_ = nh->create_subscription<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", cb_std_function,rmw_qos_profile_default);
+	cout<<"/diagnostics created  "<< endl;
    agg_pub_ = nh->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg");
+	cout<<"/diagnostics_agg publishe created  "<< endl;
    toplevel_state_pub_ = nh->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>("/diagnostics_toplevel_state");
    cout<<" constructor initalization doen "<< endl;
 }
@@ -243,91 +220,11 @@ Aggregator::~Aggregator()
 }
 
 
-/*void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
-{
-  //std::mutex::scoped_lock lock(mutex_); // Possibility of multiple bonds breaking at once
-  std::unique_lock<std::mutex> lock(mutex_); // Possibility of multiple bonds breaking at once
-  ROS_WARN("Bond for namespace %s was broken", bond_id.c_str());
-  std::vector<std::shared_ptr<bond::Bond> >::iterator elem;
-  elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
-  if (elem == bonds_.end()){
-    ROS_WARN("Broken bond tried to erase a bond which didn't exist.");
-  } else {
-    bonds_.erase(elem);
-  }
-  if (!analyzer_group_->removeAnalyzer(analyzer))
-  {
-    ROS_WARN("Broken bond tried to remove an analyzer which didn't exist.");
-  }
-
-  analyzer_group_->resetMatches();
-}*/
-
-/*void Aggregator::bondFormed(std::shared_ptr<Analyzer> group){
-  ROS_DEBUG("Bond formed");
-  //std::mutex::scoped_lock lock(mutex_);
-  std::unique_lock<std::mutex> lock(mutex_);
-  analyzer_group_->addAnalyzer(group);
-  analyzer_group_->resetMatches();
-}*/
-#if 0
-bool Aggregator::addDiagnostics(diagnostic_msgs::srv::AddDiagnostics_Request_ &req,
-				diagnostic_msgs::srv::AddDiagnostics_Response_ &res)
-{
-  ROS_DEBUG("Got load request for namespace %s", req.load_namespace.c_str());
-  // Don't currently support relative or private namespace definitions
-  if (req.load_namespace[0] != '/')
-  {
-    res.message = "Requested load from non-global namespace. Private and relative namespaces are not supported.";
-    res.success = false;
-    return true;
-  }
-
-  std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
-  { // lock here ensures that bonds from the same namespace aren't added twice.
-    // Without it, possibility of two simultaneous calls adding two objects.
-    std::unique_lock<std::mutex> lock(mutex_);
-    // rebuff attempts to add things from the same namespace twice
-/*    if (std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(req.load_namespace)) != bonds_.end())
-    {
-      res.message = "Requested load from namespace " + req.load_namespace + " which is already in use";
-      res.success = false;
-      return true;
-    } bond removed by vaibhav*/
-
-    // Use a different topic for each bond to help control the message queue
-    // length. Bond has a fixed size subscriber queue, so we can easily miss
-    // bond heartbeats if there are too many bonds on the same topic.
-    /* std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
-      "/diagnostics_agg/bond" + req.load_namespace, req.load_namespace,
-      std::function<void(void)>(std::bind(&Aggregator::bondBroken, this, req.load_namespace, group)),
-      std::function<void(void)>(std::bind(&Aggregator::bondFormed, this, group))
-									    );
-    req_bond->start();
-
-    bonds_.push_back(req_bond); // bond formed, keep track of it  Bond removed by vaibhav */
-  }
-
-//  if (group->init(base_path_, ros::NodeHandle(req.load_namespace)))
-     rclcpp::Node::SharedPtr nh_temp;
-    if (group->init(base_path_, nh_temp))	
-  {
-    res.message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
-    res.success = true;
-    return true;
-  }
-  else
-  {
-    res.message = "Failed to initialise AnalyzerGroup.";
-    res.success = false;
-    return true;
-  }
-}
-#endif 
 void Aggregator::publishData()
 {
  // diagnostic_msgs::msg::DiagnosticArray diag_array;
 
+   cout << "published data is = "  << endl;
   diagnostic_msgs::msg::DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = -1;
@@ -370,7 +267,6 @@ void Aggregator::publishData()
   diag_array->header.stamp.sec = ros_now.sec;
   diag_array->header.stamp.nanosec = ros_now.nanosec;
   agg_pub_->publish(diag_array);
-//   cout << "published data is = " << diag_array->status << endl;
   // Top level is error if we have stale items, unless all stale
   if (diag_toplevel_state.level > 2 && min_level <= 2)
     diag_toplevel_state.level = 2;
