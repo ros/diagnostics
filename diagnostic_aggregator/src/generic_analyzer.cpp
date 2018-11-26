@@ -59,14 +59,12 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	string gen_an_name = nsp;
 	gen_an_name.erase(gen_an_name.end()-5,gen_an_name.end()) ;
 
-	cout<< " generic analyzer path is " << gen_an_name <<endl;
-	cout<<"Trying to create node  in generic analyzer with base_path = "<< base_path << n->get_name() << endl;
 	gen_nh  = std::make_shared<rclcpp::Node>("gen_analyzers",base_path, context, arguments, initial_values, use_global_arguments, use_intra_process);
+	// gen_nh = n;
 
-	cout<<"Trying to create handle params in generic analyzer "<< endl;
 	string nice_name;
-//	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh,rnsp);
-	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
+	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh,rnsp);
+//	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
 	while (!parameters_client->wait_for_service(1s)) {
 		if (!rclcpp::ok()) {
 			RCLCPP_ERROR(gen_nh->get_logger(), "Interrupted while waiting for the service. Exiting.")
@@ -105,7 +103,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	if (anl_it != anl_param.end()){
 		nice_name=anl_it->second;
 	} else{
-		cout<< "return as path is not found for analyzer "<< gen_an_name  << endl;
 		return false; 
 	}
 	anl_it = anl_param.find(gen_an_name +".find_and_remove_prefix");
@@ -117,7 +114,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 			chaff_ = output;
 			startswith_ = output;
 		}else{
-			cout<<" getParamVals(find_remove, output failed" <<endl;
 		}
 	}		
 
@@ -154,7 +150,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
           for (unsigned int i = 0; i < expected_.size(); ++i)
             {
               std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
-	      cout<<"expected added to item" << expected_[i] << endl;
               addItem(expected_[i], item);
             }
 
@@ -219,7 +214,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
     }
 
 
-  cout<<"Trying to get params in generic analyzer "<< endl;
 
   string my_path;
   if (base_path == "/")
@@ -231,7 +225,6 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
     my_path = "/" + my_path;
 
 
-  cout<< " ====== generic analyzer base created with path nice name is " << my_path << "and nice name "  << nice_name << "discard stale is " << discard_stale <<  endl;
   return GenericAnalyzerBase::init_v(my_path, nice_name, 
                                    timeout, num_items_expected, discard_stale);
 }

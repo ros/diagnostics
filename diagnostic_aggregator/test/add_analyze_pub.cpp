@@ -127,7 +127,7 @@ public:
     pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", custom_qos_profile);
 
     // Use a timer to schedule periodic message publishing.
-    timer_ = this->create_wall_timer(3s, publish_message);
+    timer_ = this->create_wall_timer(1s, publish_message);
 
     	
 
@@ -189,7 +189,7 @@ int main(int argc, char * argv[])
 
   auto request = std::make_shared<diagnostic_msgs::srv::AddDiagnostics::Request>();
 	request->load_namespace="/test_add_analyzer";
-  while (!client->wait_for_service(1s)) {
+  while (!client->wait_for_service(3s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(node->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return 0;
