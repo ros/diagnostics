@@ -1,34 +1,26 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
   <name>diagnostic_analysis</name>
-  <version>1.9.3</version>
-  <description>The diagnostic_analysis package can convert a log of diagnostics data
-    into a series of CSV files. Robot logs are recorded with rosbag, and
-    can be processed offline using the scripts in this package.</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <version>0.5.1</version>
+  <description>
+    Python nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
+  </description>
+  <maintainer email="mikael@osrfoundation.org">Mikael Arguedas</maintainer>
+  <license>Apache License 2.0</license>
 
-  <license>BSD</license>
+  <author email="esteve@osrfoundation.org">Esteve Fernandez</author>
 
-  <url type="website">http://www.ros.org/wiki/diagnostics_analysis</url>
-<!-- <url type="bugtracker"></url> -->
+  <exec_depend>example_interfaces</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
 
-  <author>Eric Berger</author>
-  <author>Kevin Watts</author>
-
-  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
-
-  <build_depend>diagnostic_msgs</build_depend>
-  <build_depend>rosbag</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>rostest</build_depend>
-
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>rosbag</run_depend>
-  <run_depend>roslib</run_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
-    <architecture_independent/>
+    <build_type>ament_python</build_type>
   </export>
 </package>

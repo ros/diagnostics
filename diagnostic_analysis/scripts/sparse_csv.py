@@ -39,15 +39,64 @@
 
 
 PKG = 'diagnostic_analysis'
-import roslib
-roslib.load_manifest(PKG)
+#import roslib
+#roslib.load_manifest(PKG)
 
 import csv, os, sys
 from optparse import OptionParser
 
-from diagnostic_analysis.sparse import make_sparse_skip, make_sparse_length
+#from diagnostic_analysis.sparse import make_sparse_skip, make_sparse_length
+import csv, os, sys
 
-if __name__=='__main__':
+##\brief Makes sparse CSV by skipping every nth value
+##\param csv_file str : CSV filename
+##\param skip int : Write every nth row to sparse CSV
+##\return Path of output file
+def make_sparse_skip(csv_file, skip):
+    output_file = csv_file[:-4] + '_sparse.csv'
+
+    input_reader = csv.reader(open(csv_file, 'rb'))
+
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
+
+    skip_count = skip
+    for row in input_reader:
+        if skip_count == skip:
+            output_writer.writerow(row)
+            skip_count = 0
+            
+        skip_count = skip_count + 1
+
+    return output_file
+
+##\brief Makes sparse CSV with the given number of rows
+##\param csv_file str : CSV filename
+##\param length int : Desired number of rows in CSV
+##\return Path of output file
+def make_sparse_length(csv_file, length):
+    output_file = csv_file[:-4] + '_sprs_len.csv'
+
+    input_reader = csv.reader(open(csv_file, 'rb'))
+
+    f = open(output_file, 'wb')
+    output_writer = csv.writer(f)
+
+    # Calculate skip count for file
+    orig_len = len(open(csv_file, 'r').read().split('\n'))
+    skip = max(int(orig_len / length), 1)
+
+    skip_count = skip
+    for row in input_reader:
+        if skip_count >= skip:
+            output_writer.writerow(row)
+            skip_count = 0
+            
+        skip_count = skip_count + 1
+
+    return output_file
+
+def main():
     # Allow user to set output directory
     parser = OptionParser()
     parser.add_option("-l", "--length", dest="length",
@@ -64,13 +113,13 @@ if __name__=='__main__':
 
     # Get CSV file
     if len(args) < 1:
-        print 'No CSV file given.'
+        print("No CSV file given.")
         sys.exit(0)
 
     csv_file = args[0]
 
     if not csv_file.endswith('.csv'):
-        print 'File %s is not a CSV file. Aborting.' % csv_file
+        print("File %s is not a CSV file. Aborting.", csv_file)
         sys.exit(0)    
     
     if options.max:
@@ -80,4 +129,7 @@ if __name__=='__main__':
     else:
         output_file = make_sparse_length(csv_file, int(options.length))
 
-    print 'Created sparse CSV %s' % output_file
+    print("Created sparse CSV %s",output_file)
+
+if __name__=='__main__':
+    main()
