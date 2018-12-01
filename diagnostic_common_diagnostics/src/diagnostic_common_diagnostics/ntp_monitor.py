@@ -32,9 +32,9 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import roslib
-roslib.load_manifest('diagnostic_common_diagnostics')
-import rospy
+#import roslib
+#roslib.load_manifest('diagnostic_common_diagnostics')
+import rclpy
 import diagnostic_updater as DIAG
 
 import sys
@@ -50,7 +50,8 @@ def ntp_diag(st, host, off, error_offset):
         p = Popen(["ntpdate", "-q", host], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         res = p.wait()
         (o,e) = p.communicate()
-    except OSError, (errno, msg):
+    #except OSError as errno, msg:
+    except OSError as errno:
         if errno == 4:
             return None #ctrl-c interrupt
         else:

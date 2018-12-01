@@ -12,6 +12,7 @@ find_package(builtin_interfaces REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(bondcpp REQUIRED)
 find_package(rclpy REQUIRED)
 
 
@@ -30,6 +31,7 @@ set(INCLUDE_DIRS
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${bondcpp_INCLUDE_DIRS}
 )
 
 set(LIBS
@@ -40,7 +42,7 @@ set(LIBS
   ${pluginlib_LIBRARIES}
   ${xmlrpcpp_LIBRARIES}
   ${Boost_LIBRARIES}
-  /home/root-pc/ros2_dev/diagnostics/xmlrpcpp/install/xmlrpcpp/lib/libxmlrpcpp.so
+  ${bondcpp_LIBRARIES}
 )
 
 include_directories(${INCLUDE_DIRS})

@@ -77,12 +77,12 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
 	string anz_name;
 	string an_name = nsp; 
 
-	if (an_name.compare("analyzers") !=0)
-		path_ = nsp;
+//	if (an_name.compare("analyzers") !=0)
+//		path_ = nsp;
 
 
-	    analyzers_nh  = std::make_shared<rclcpp::Node>("analyzers",path_, context, arguments, initial_values, use_global_arguments, use_intra_process);
-	//analyzers_nh = nh;
+	  //  analyzers_nh  = std::make_shared<rclcpp::Node>("analyzers",path_, context, arguments, initial_values, use_global_arguments, use_intra_process);
+	analyzers_nh = nh;
 
 
 	rclcpp::SyncParametersClient::SharedPtr parameters_client_analyzer = std::make_shared<rclcpp::SyncParametersClient>(analyzers_nh,nsp);
@@ -103,8 +103,18 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
 	bool init_ok = true;
 
 	map <string, string> anl_param;
-	//auto parameters_and_prefixes = parameters_client_analyzer->list_parameters({"analyzers_params"}, 10);
-	auto parameters_and_prefixes = parameters_client_analyzer->list_parameters({ }, 10);
+	string params_anz,r_nsp;
+	if(rnsp != NULL){
+	r_nsp = rnsp;
+	r_nsp.erase(r_nsp.end()-5,r_nsp.end()) ;
+	params_anz = r_nsp +".analyzers_params";		
+        }else{
+	params_anz = "analyzers_params"; 
+	}
+	
+	cout <<" path of analyzers_params is " << params_anz <<endl;
+	//auto parameters_and_prefixes = parameters_client_analyzer->list_parameters({}, 10);
+	auto parameters_and_prefixes = parameters_client_analyzer->list_parameters({params_anz}, 10);
 
 	ss << "\nParameter names:";
 	for (auto & name : parameters_and_prefixes.names) {
@@ -127,9 +137,18 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
 			cout<< analyzer_name  << "::"<<ns <<endl;
 			std::shared_ptr<Analyzer> analyzer;
 			string an_type= anl_it->second ;
- 	
 			if(std::string::npos != analyzer_name.find("type"))
 			{
+                        cout<< "===>> " << analyzer_name << endl; 	
+				string params_anz_ = params_anz + ".";
+				string p_name = analyzer_name;
+				string::size_type i = p_name.find(params_anz_);
+				if (i != std::string::npos)
+	   			p_name.erase(i, params_anz_.length());
+				if(std::string::npos != p_name.find("analyzers_params")){
+				cout<< "++++++++ skipping the analyzer ======= " << analyzer_name << "and p_name after erase is "<<  p_name <<  endl;
+				continue; 
+				}
 				try
 				{
 					// Look for non-fully qualified class name for Analyzer type
@@ -183,7 +202,9 @@ bool AnalyzerGroup::init(const string base_path, const char * nsp,const rclcpp::
 				continue;
 			}
 
-			if (!analyzer->init(path_, analyzer_name.c_str(),nh,rnsp))
+				cout<<" Vaibhav: initialize analyzer NS is === "<<  analyzer_name.c_str()  <<endl;
+			//if (!analyzer->init(path_, analyzer_name.c_str(),nh,rnsp))
+			if (!analyzer->init(path_, nsp,nh,analyzer_name.c_str()))
 			{
 				//ROS_ERROR("Unable to initialize analyzer NS: %s, type: %s", analyzers_nh.getNamespace().c_str(), an_type.c_str());
 				cout<<" Vaibhav: Unable to initialize analyzer NS"<<  analyzer_name.c_str()  <<endl;

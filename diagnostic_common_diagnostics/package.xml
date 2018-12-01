@@ -1,33 +1,25 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
   <name>diagnostic_common_diagnostics</name>
-  <version>1.9.3</version>
-  <description>diagnostic_common_diagnostics</description>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <version>0.5.1</version>
+  <description>
+    Python nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
+  </description>
+  <maintainer email="mikael@osrfoundation.org">Mikael Arguedas</maintainer>
+  <license>Apache License 2.0</license>
 
-  <license>BSD</license>
+  <author email="esteve@osrfoundation.org">Esteve Fernandez</author>
 
-  <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
-<!-- <url type="bugtracker"></url> -->
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>hddtemp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>python-psutil</exec_depend>
 
-  <build_depend>rospy</build_depend>
-  <build_depend>diagnostic_updater</build_depend>
-  <build_depend>rostest</build_depend>
-
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>hddtemp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>python-psutil</run_depend>
-
-  <!-- <test_depend>diagnostic_updater</test_depend> -->
-  <!-- <test_depend>rospy</test_depend> -->
-  <!-- <test_depend>tf</test_depend> -->
-
-  <export>
-    <architecture_independent/>
+ <export>
+    <build_type>ament_python</build_type>
   </export>
+
 </package>

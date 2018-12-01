@@ -12,8 +12,10 @@ find_package(std_msgs REQUIRED)
 set(INCLUDE_DIRS
   include
   ${diagnostic_msgs_INCLUDE_DIRS}
-  ${rclcpp_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
+  /home/root-pc/ros2_ws_lr/install/rclcpp/include
+  #/home/root-pc/ros2_ws_lr/install/builtin_interfaces/include/ 
+  ${rclcpp_INCLUDE_DIRS}
 )
 
 set(LIBS

@@ -41,6 +41,7 @@
 using namespace std;
 using namespace diagnostic_aggregator;
 
+
 Aggregator::Aggregator() :
   pub_rate_(1.0),
   analyzer_group_(NULL),
@@ -63,7 +64,8 @@ Aggregator::Aggregator() :
 		base_path_ = "/";
 
 
-	nh = std::make_shared<rclcpp::Node>("diagnostic_aggregator","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
+	nh = std::make_shared<rclcpp::Node>("analyzers","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
+	nh_an = std::make_shared<rclcpp::Node>("diagnostic_aggregator","/", context, arguments, initial_values, use_global_arguments, use_intra_process);
 	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(nh);
 	while (!parameters_client->wait_for_service(1s)) {
 		if (!rclcpp::ok()) {
@@ -82,7 +84,8 @@ Aggregator::Aggregator() :
 
 
 
-	if (!analyzer_group_->init(base_path_,"analyzers",nh,"gen_analyzers"))
+	if (!analyzer_group_->init(base_path_,nh_an->get_name(),nh_an,NULL))
+	//if (!analyzer_group_->init(base_path_,"analyzers",nh,"gen_analyzers"))
 	{
 		ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
 	}
@@ -93,6 +96,7 @@ Aggregator::Aggregator() :
 		[this](const std::shared_ptr<rmw_request_id_t> request_header,
 				const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
 				std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res) -> bool
+
 		{
 			(void)request_header;
 			// Don't currently support relative or private namespace definitions
@@ -103,9 +107,35 @@ Aggregator::Aggregator() :
 				return true;
 			}
 			std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
+			{ // lock here ensures that bonds from the same namespace aren't added twice.
+				// Without it, possibility of two simultaneous calls adding two objects.
+				//boost::mutex::scoped_lock lock(mutex_);
+				 std::unique_lock<std::mutex> lock(mutex_);
+				// rebuff attempts to add things from the same namespace twice
+				if (std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(req->load_namespace)) != bonds_.end())
+				{
+					res->message = "Requested load from namespace " + req->load_namespace + " which is already in use";
+					res->success = false;
+					return true;
+				}
+				cout<< "Name space pass to bond is " << req->load_namespace << endl;
+				std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
+						"/diagnostics_agg/bond", req->load_namespace,nh,
+						std::function<void(void)>(std::bind(&Aggregator::bondBroken, this, req->load_namespace, group)),
+						std::function<void(void)>(std::bind(&Aggregator::bondFormed, this, group))
+						);
+
+				//req_bond->setFormedCallback(std::bind(&Aggregator::bondBroken));
+				//req_bond->setBrokenCallback(std::bind(&Aggregator::bondFormed));
+				req_bond->start();
+
+				bonds_.push_back(req_bond); // bond formed, keep track of it
+			}
+
 
 			rclcpp::Node::SharedPtr nh_temp;
-			if (group->init(base_path_, req->load_namespace.c_str(),nh_temp,req->load_namespace.c_str()))
+			if (group->init(base_path_, req->load_namespace.c_str(),nh_an,NULL))
+			//if (group->init(base_path_, req->load_namespace.c_str(),nh_temp,req->load_namespace.c_str()))
 			{
 				res->message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
 				res->success = true;
@@ -184,6 +214,35 @@ Aggregator::~Aggregator()
 	if (other_analyzer_) delete other_analyzer_;
 }
 
+void Aggregator::bondBroken(string bond_id,std::shared_ptr<Analyzer> analyzer)
+{
+	// boost::mutex::scoped_lock lock(mutex_); // Possibility of multiple bonds breaking at once
+	std::unique_lock<std::mutex> lock(mutex_);
+	ROS_DEBUG("Bond for namespace %s was broken", bond_id.c_str());
+	cout<<"=============================== Bond broken =============================" << endl;
+	std::vector<std::shared_ptr<bond::Bond> >::iterator elem;
+	elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
+	if (elem == bonds_.end()){
+		ROS_WARN("Broken bond tried to erase a bond which didn't exist.");
+	} else {
+		bonds_.erase(elem);
+	}
+	if (!analyzer_group_->removeAnalyzer(analyzer))
+	{
+		ROS_WARN("Broken bond tried to remove an analyzer which didn't exist.");
+	}
+
+	analyzer_group_->resetMatches();
+}
+
+void Aggregator::bondFormed(std::shared_ptr<Analyzer> group){
+	ROS_DEBUG("Bond formed");
+	cout<<"=============================== Bond formed =============================" << endl;
+	// boost::mutex::scoped_lock lock(mutex_);
+	std::unique_lock<std::mutex> lock(mutex_);
+	analyzer_group_->addAnalyzer(group);
+	analyzer_group_->resetMatches();
+}
 
 void Aggregator::publishData()
 {
@@ -231,6 +290,7 @@ void Aggregator::publishData()
 	diag_array->header.stamp.sec = ros_now.sec;
 	diag_array->header.stamp.nanosec = ros_now.nanosec;
 	agg_pub_->publish(diag_array);
+	cout<<"Publsih array is =" << endl;
 	// Top level is error if we have stale items, unless all stale
 	if (diag_toplevel_state.level > 2 && min_level <= 2)
 		diag_toplevel_state.level = 2;

@@ -20,6 +20,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
+#include <bondcpp/bond.h>
 
 #include "std_msgs/msg/string.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
@@ -127,7 +128,7 @@ public:
     pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics", custom_qos_profile);
 
     // Use a timer to schedule periodic message publishing.
-    timer_ = this->create_wall_timer(1s, publish_message);
+    timer_ = this->create_wall_timer(4s, publish_message);
 
     	
 
@@ -187,15 +188,19 @@ int main(int argc, char * argv[])
   auto node = std::make_shared<AddAnalyzerPub>(topic);
   auto client = node->create_client<diagnostic_msgs::srv::AddDiagnostics>(topic);
 
+  bond::Bond a("/diagnostics_agg/bond","/test_add_analyzer", node);
+  a.start();
+
   auto request = std::make_shared<diagnostic_msgs::srv::AddDiagnostics::Request>();
 	request->load_namespace="/test_add_analyzer";
-  while (!client->wait_for_service(3s)) {
+  while (!client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(node->get_logger(), "Interrupted while waiting for the service. Exiting.");
       return 0;
     }
     RCLCPP_INFO(node->get_logger(), "service not available, waiting again...");
   }
+
 
   // TODO(wjwwood): make it like `client->send_request(node, request)->sum`
   // TODO(wjwwood): consider error condition

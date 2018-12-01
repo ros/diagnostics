@@ -56,15 +56,15 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 	const bool use_global_arguments = true;
 	const bool use_intra_process = true;
 
-	string gen_an_name = nsp;
+	string gen_an_name = rnsp;
 	gen_an_name.erase(gen_an_name.end()-5,gen_an_name.end()) ;
 
-	gen_nh  = std::make_shared<rclcpp::Node>("gen_analyzers",base_path, context, arguments, initial_values, use_global_arguments, use_intra_process);
-	// gen_nh = n;
+//	gen_nh  = std::make_shared<rclcpp::Node>("gen_analyzers",base_path, context, arguments, initial_values, use_global_arguments, use_intra_process);
+	gen_nh = n;
 
 	string nice_name;
-	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh,rnsp);
-//	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
+	auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(gen_nh,nsp);
+	//auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(n);
 	while (!parameters_client->wait_for_service(1s)) {
 		if (!rclcpp::ok()) {
 			RCLCPP_ERROR(gen_nh->get_logger(), "Interrupted while waiting for the service. Exiting.")
@@ -75,15 +75,16 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 
 	std::stringstream ss;
 	std::stringstream ss1;
-	RCLCPP_INFO(gen_nh->get_logger(), "service of gen analyzer is  available Now ")
+//	RCLCPP_INFO(gen_nh->get_logger(), "service of gen analyzer is  available Now for rnsp is  %s", rnsp)
 		for (auto & parameter : parameters_client->get_parameters({"startswith"})) {
 			ss << "\nParameter name: " << parameter.get_name();
 			ss << "\nParameter value (" << parameter.get_type_name() << "): " <<
 				parameter.value_to_string();
 		}
-	RCLCPP_INFO(gen_nh->get_logger(), ss.str().c_str())
+//	RCLCPP_INFO(gen_nh->get_logger(), ss.str().c_str())
 
 		map <string, string> anl_param;
+//	cout<< " gen analyzer param to search path  is  " << gen_an_name.c_str() << endl;
 	auto parameters_and_prefixes = parameters_client->list_parameters({gen_an_name.c_str()}, 10);
 
 	ss << "\nParameter names:";
@@ -97,7 +98,7 @@ bool GenericAnalyzer::init(const string base_path,const char * nsp,const rclcpp:
 		}
 		//anl_param.insert(std::pair<string, string>(ss,ss1)); 
 	}
-	RCLCPP_INFO(gen_nh->get_logger(), ss1.str().c_str())
+//	RCLCPP_INFO(gen_nh->get_logger(), ss1.str().c_str())
 		map<string, string>::iterator anl_it;
 	anl_it = anl_param.find(gen_an_name + ".path");
 	if (anl_it != anl_param.end()){

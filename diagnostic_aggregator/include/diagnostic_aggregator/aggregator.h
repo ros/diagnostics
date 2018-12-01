@@ -49,7 +49,7 @@
 #include <memory>
 /*#include <boost/thread/mutex.hpp>*/
 #include <mutex>
-/*#include <bondcpp/bond.h>*/
+#include <bondcpp/bond.h>
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
@@ -138,6 +138,7 @@ private:
    //ros::NodeHandle n_;
   rclcpp::Node::SharedPtr  n_;
   rclcpp::Node::SharedPtr  nh;
+  rclcpp::Node::SharedPtr  nh_an;
 
  // ros::ServiceServer add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
  // ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
@@ -172,7 +173,7 @@ private:
 
   OtherAnalyzer* other_analyzer_;
 
- // std::vector<boost::shared_ptr<bond::Bond> > bonds_; /**< \brief Contains all bonds for additional diagnostics. */
+  std::vector<std::shared_ptr<bond::Bond> > bonds_; /**< \brief Contains all bonds for additional diagnostics. */
 
   /*
    *!\brief called when a bond between the aggregator and a node is broken
@@ -182,8 +183,8 @@ private:
    *!\param bond_id The bond id (namespace) from which the analyzer was created
    *!\param analyzer Shared pointer to the analyzer group that was added
    */
-/*  void bondBroken(std::string bond_id,
-		  std::shared_ptr<Analyzer> analyzer); removed by vaibhav */
+  void bondBroken(std::string bond_id,
+		  std::shared_ptr<Analyzer> analyzer); 
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.
@@ -193,7 +194,7 @@ private:
    *!\param group Shared pointer to the analyzer group that is to be added,
    *  which was created in the addDiagnostics function
    */
-/*  void bondFormed(std::shared_ptr<Analyzer> group); removed by vaibhav */
+  void bondFormed(std::shared_ptr<Analyzer> group);
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
@@ -209,12 +210,12 @@ private:
 /*
  *!\brief Functor for checking whether a bond has the same ID as the given string
  */
-/*struct BondIDMatch
+struct BondIDMatch
 {
   BondIDMatch(const std::string s) : s(s) {}
   bool operator()(const std::shared_ptr<bond::Bond>& b){ return s == b->getId(); }
   const std::string s;
-}; removed by vaibhav */
+};
 
 }
 

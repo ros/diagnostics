@@ -43,8 +43,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-             'export_csv = scripts.export_csv:main',
-             'sparse_csv = scripts.sparse_csv:main',
+             'export_csv = diagnostic_analysis.export_csv:main',
+             'sparse_csv = diagnostic_analysis.sparse_csv:main',
              'bag_csv_test = test.bag_csv_test:main'
              #'listener = demo_nodes_py.topics.listener:main',
         ],

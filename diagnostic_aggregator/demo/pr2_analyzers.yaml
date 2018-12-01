@@ -40,3 +40,4 @@ diagnostic_aggregator:
                                                 timeout: 5.0
                                                 find_and_remove_prefix: base_hokuyo_node
                                                 num_items: 3
+                                                startswith: 'Sensor'

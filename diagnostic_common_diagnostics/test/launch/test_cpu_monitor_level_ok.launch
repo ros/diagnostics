@@ -1,3 +1,4 @@
+""" 
 <launch>
   <node pkg="diagnostic_common_diagnostics" type="cpu_monitor_psutil_mock.py" name="cpu_monitor" args="--percentage 50">
     <param name="warning_percentage" value="60" />
@@ -7,3 +8,23 @@
     <param name="expected_level" value="0" />
   </test>
 </launch>
+"""
+
+from launch import LaunchDescription
+import launch_ros.actions
+import os
+import yaml
+from launch.substitutions import EnvironmentVariable
+import pathlib
+
+def generate_launch_description():
+    os.environ['MY_ENV_VAR'] = 'my_env_value'
+    print(" i am here after os.environ")
+    return LaunchDescription([
+        launch_ros.actions.Node(
+            package='diagnostic_common_diagnostics', node_executable='cpu_monitor_psutil_mock', output='screen'),
+        launch_ros.actions.Node(
+           package='diagnostic_common_diagnostics', node_executable='test_cpu_monitor', node_name='test_cpu_monitor',output='screen',
+           ),
+    ])
+

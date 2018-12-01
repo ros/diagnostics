@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.6
 #
 # Software License Agreement (BSD License)
 #
@@ -33,10 +33,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # \author Rein Appeldoorn
-
-import rospy
-from diagnostic_updater import DiagnosticTask, Updater
+from sys import path
+print(path)
+import rclpy
+import diagnostic_analysis 
 from diagnostic_msgs.msg import DiagnosticStatus
+from diagnostic_updater import DiagnosticTask, Updater
 
 import psutil
 import socket

@@ -36,8 +36,8 @@
 
 PKG = 'diagnostic_analysis'
 
-import roslib; roslib.load_manifest(PKG)
-import rostest
+#import roslib; roslib.load_manifest(PKG)
+#import rostest
 import unittest
 
 import rosbag
@@ -74,7 +74,8 @@ class TestBagToCSV(unittest.TestCase):
         # Make logfile with bogus messages
         self.bag = tempfile.NamedTemporaryFile()
 
-        rebagger = rosbag.Bag(self.bag.name, 'w')
+        #rebagger = rosbag.Bag(self.bag.name, 'w')
+        rebagger = open(self.bag.name, 'w')
         for i in range(0, row_count):
             rebagger.write("/diagnostics", make_status_msg(i))
         rebagger.close()

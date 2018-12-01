@@ -1,37 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>diagnostic_updater</name>
-  <version>1.9.4</version>
-  <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-
+  <version>0.5.1</version>
+  <description>
+    Python nodes which were previously in the ros2/examples repository but are now just used for demo purposes.
+  </description>
+  <maintainer email="mikael@osrfoundation.org">Mikael Arguedas</maintainer>
   <license>Apache License 2.0</license>
 
-  <url type="website">http://www.ros.org/wiki/diagnostic_updater</url>
-
-  <author>Jeremy Leibs</author>
-  <author>Blaise Gassend</author>
-
-  <buildtool_depend>ament_cmake</buildtool_depend>
-
-  <build_depend>diagnostic_msgs</build_depend>
-  <build_depend>rclcpp</build_depend>
-  <build_depend>std_msgs</build_depend>
+  <author email="esteve@osrfoundation.org">Esteve Fernandez</author>
 
   <exec_depend>diagnostic_msgs</exec_depend>
-  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
-  
-  <test_depend>ament_lint_auto</test_depend>
-  
-  <test_depend>ament_cmake_gtest</test_depend> 
-  <test_depend>ament_cmake_cppcheck</test_depend>
-  <test_depend>ament_cppcheck</test_depend>
-  
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
   <export>
-    <build_type>ament_cmake</build_type>
-    <architecture_independent/>
+    <build_type>ament_python</build_type>
   </export>
 </package>
