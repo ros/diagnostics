@@ -104,7 +104,6 @@ def name_to_full_generic(name, my_prefix, value, header=False):
         for sw in _get_params_list(value['startswith']):
             if name.startswith(sw):
                 if header:
-                    print(header_name(my_prefix))
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
 
@@ -233,13 +232,18 @@ class TestAggregator(Node):
                     if header in self.agg_msgs:#, "Header %s not found in messages" % header)
                         assert(self.agg_msgs[header].level == lvl)#, "Level of header %s doesn't match expected value." % header)
                     del self.agg_msgs[header]
-
+                test_pass = True;
+                print("Test case Pass")
+                self.destroy_node()
+                rclpy.shutdown()
             
                
 def main(args=None):
     rclpy.init(args=args)
     node = TestAggregator()
-    rclpy.spin(node)
+    test_pass = False;
+    while test_pass == False: 
+        rclpy.spin_once(node)
     node.destroy_node()
     rclpy.shutdown()
 
