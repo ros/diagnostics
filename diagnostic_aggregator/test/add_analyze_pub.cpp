@@ -20,7 +20,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
-#include <bondcpp/bond.h>
+#include <bondcpp/bond.hpp>
 
 #include "std_msgs/msg/string.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
@@ -115,7 +115,7 @@ public:
       {
 //msg_->name = "Hello World: " + std::to_string(count_++);
         //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg_->status)
-        RCLCPP_INFO(this->get_logger(), "Publishing: namespce %s and name is %s ",this->get_namespace(), this->get_name())
+        RCLCPP_INFO(this->get_logger(), "Publishing: namespce %s and name is %s ",this->get_namespace(), this->get_name());
 
         // Put the message into a queue to be processed by the middleware.
         // This call is non-blocking.

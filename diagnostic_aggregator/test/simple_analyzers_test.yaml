@@ -1,0 +1,16 @@
+diagnostic_aggregator:
+        ros__parameters:
+                analyzers_params:
+                  prefix1:
+                    type: diagnostic_aggregator/GenericAnalyzer
+                    path: First
+                    remove_prefix: [ 'prefix1' ]
+                    find_and_remove_prefix: [ 'find1_items'] 
+                    startswith: [
+                      'pref1' ]
+                    contains: [
+                      'contains1a',
+                      'contains1b' ]
+                    name: [
+                      'name1' ]
+                   

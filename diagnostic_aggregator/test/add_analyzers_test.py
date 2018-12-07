@@ -39,6 +39,16 @@ import unittest
 from unittest.mock import Mock
 from diagnostic_msgs.srv import AddDiagnostics
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+import pathlib
+import os
+from launch import LaunchDescription
+from launch import LaunchService
+from launch import LaunchIntrospector
+from launch_ros import get_default_launch_description
+from launch.substitutions import EnvironmentVariable
+import launch_ros.actions.node
+from time import sleep
+
 
 TEST_NODE = 'test_add_analyzer'
 TEST_NAMESPACE = '/my_ns'
@@ -56,14 +66,56 @@ class TestAddAnalyzer(unittest.TestCase):
         cls.node.destroy_node()
         rclpy.shutdown()
 
+
+    def _assert_launch_no_errors_1(self, actions):
+        ld1 = LaunchDescription(actions)
+        self.ls1 = LaunchService()
+        self.ls1.include_launch_description(ld1)
+        self.t1 = threading.Thread(target=self.ls1.run, kwargs={'shutdown_when_idle': False})
+        self.t1.start()
+
+    def _assert_launch_no_errors(self, actions):
+        ld = LaunchDescription(actions)
+        self.ls = LaunchService()
+        self.ls.include_launch_description(ld)
+        self.t = threading.Thread(target=self.ls.run, kwargs={'shutdown_when_idle': False})
+        self.t.start()
+
     def test_create_subscription(self):
         self.Test_pass = False
         self.expected = {'/Primary', '/Primary/primary', '/Secondary', '/Secondary/secondary',}
+        parameters_file_dir = pathlib.Path(__file__).resolve().parent
+        parameters_file_path = parameters_file_dir / 'simple_analyzers_test.yaml'
+        parameters_file_path_1 = parameters_file_dir / 'add_analyzers.yaml'
+        os.environ['FILE_PATH'] = str(parameters_file_dir)
+
+        node_action1 = launch_ros.actions.Node(
+            package='diagnostic_aggregator', node_executable='aggregator_node', output='screen',
+            parameters=[
+                parameters_file_path,
+                str(parameters_file_path),
+                [EnvironmentVariable(name='FILE_PATH'), os.sep, 'simple_analyzers_test.yaml'],
+                    ],
+            )
+        node_action = launch_ros.actions.Node(
+            package='diagnostic_aggregator', node_executable='add_analyze_pub', output='screen',
+            parameters=[
+                parameters_file_path_1,
+                str(parameters_file_path_1),
+                [EnvironmentVariable(name='FILE_PATH'), os.sep, 'add_analyzers.yaml'],
+                    ],
+            
+            )
+        self._assert_launch_no_errors([node_action1])
+        self._assert_launch_no_errors_1([node_action])
+        sleep(10)
         self.node.create_subscription(DiagnosticArray,'/diagnostics_agg',self.cb_test_add_agg)
+
         while self.Test_pass ==False:
             rclpy.spin_once(self.node)
 
     def cb_test_add_agg(self,msg):
+        print(msg)
         self._mutex = threading.Lock()
         self.agg_msgs = {}
         with self._mutex:
@@ -75,6 +127,7 @@ class TestAddAnalyzer(unittest.TestCase):
         # hasn't been fully formed
         with self._mutex:
             agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
+            print(agg_paths)
             self.assertTrue(all(expected in agg_paths for expected in self.expected))
 
        
@@ -86,6 +139,9 @@ class TestAddAnalyzer(unittest.TestCase):
             self.assertTrue(all(expected in agg_paths for expected in self.expected))
                 
         self.Test_pass =True 
+        self.node.destroy_node()
+        self.ls.shutdown()
+        self.ls1.shutdown()
         
 if __name__ == '__main__':
     unittest.main()

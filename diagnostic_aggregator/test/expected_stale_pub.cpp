@@ -93,7 +93,7 @@ public:
     auto publish_message =
       [this]() -> void
       {
-        RCLCPP_INFO(this->get_logger(), "Publishing:")
+        RCLCPP_INFO(this->get_logger(), "Publishing:");
         pub_->publish(msg_);
       };
     rmw_qos_profile_t custom_qos_profile = rmw_qos_profile_default;

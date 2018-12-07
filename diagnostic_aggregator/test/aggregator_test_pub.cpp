@@ -112,7 +112,7 @@ public:
       {
 //msg_->name = "Hello World: " + std::to_string(count_++);
         //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg_->status)
-        RCLCPP_INFO(this->get_logger(), "Publishing:")
+        RCLCPP_INFO(this->get_logger(), "Publishing:");
 
         // Put the message into a queue to be processed by the middleware.
         // This call is non-blocking.

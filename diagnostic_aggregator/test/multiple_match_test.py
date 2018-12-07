@@ -38,6 +38,8 @@
 
 from __future__ import with_statement
 PKG = 'diagnostic_aggregator'
+TEST_NODE = 'test_multi_match'
+TEST_NAMESPACE = '/my_ns'
 
 #import roslib; roslib.load_manifest(PKG)
 
@@ -52,6 +54,22 @@ from optparse import OptionParser
 import threading
 import types
 import time
+from rclpy.task import Future
+from rclpy.task import Task
+import pathlib
+import os
+
+
+
+from launch import LaunchDescription
+from launch import LaunchService
+from launch import LaunchIntrospector
+from launch_ros import get_default_launch_description
+from launch.substitutions import EnvironmentVariable
+import launch_ros.actions.node
+
+
+
 from diagnostic_msgs.msg import DiagnosticArray
 DURATION = 15
 
@@ -86,60 +104,82 @@ class DiagnosticItem:
         self.update_time = time.time()
 
 
-##\brief Uses aggregator parameters to compare diagnostics with aggregated output
-class TestAggregator(Node):
-    def __init__(self):
-        super().__init__('test_multiple_match')
+
+class TestAggregator(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+         rclpy.init()
+         cls.node = rclpy.create_node(TEST_NODE, namespace=TEST_NAMESPACE)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.node.destroy_node()
+        rclpy.shutdown()
+
+    def _assert_launch_errors(self, actions):
+        ld = LaunchDescription(actions)
+        self.ls = LaunchService()
+        self.ls.include_launch_description(ld)
+        assert 0 != self.ls.run()
+    def _assert_launch_no_errors_1(self, actions):
+        ld1 = LaunchDescription(actions)
+        self.ls1 = LaunchService()
+        self.ls1.include_launch_description(ld1)
+        self.t1 = threading.Thread(target=self.ls1.run, kwargs={'shutdown_when_idle': False})
+        self.t1.start()
+     
+    def _assert_launch_no_errors(self, actions):
+        ld = LaunchDescription(actions)
+        self.ls = LaunchService()
+        self.ls.include_launch_description(ld)
+        self.t = threading.Thread(target=self.ls.run, kwargs={'shutdown_when_idle': False})
+        self.t.start()
+        #assert 0 == self.ls.run()
+
+    def test_multi_match(self):    
         self._mutex = threading.Lock()
         self._starttime = time.time()
         self._multi_items = {}
-        global prefix
-        
-        print("Hellow going create subcription")
-        self.sub = self.create_subscription(DiagnosticArray, 'diagnostics_agg', self.diag_agg_cb)
+        self.Test_pass = False 
+        parameters_file_dir = pathlib.Path(__file__).resolve().parent
+        parameters_file_path = parameters_file_dir / 'multiple_match_analyzers.yaml'
+        os.environ['FILE_PATH'] = str(parameters_file_dir)
+
+        node_action1 = launch_ros.actions.Node(
+            package='diagnostic_aggregator', node_executable='aggregator_node', output='screen',
+            parameters=[
+                parameters_file_path,
+                str(parameters_file_path),
+                [EnvironmentVariable(name='FILE_PATH'), os.sep, 'multiple_match_analyzers.yaml'],
+                    ],
+            )
+        node_action = launch_ros.actions.Node(
+            package='diagnostic_aggregator', node_executable='multi_match_pub', output='screen')
+        self._assert_launch_no_errors_1([node_action])
+        self._assert_launch_no_errors([node_action1])
+        sleep(10)
+        self.sub = self.node.create_subscription(DiagnosticArray, '/diagnostics_agg', self.diag_agg_cb)
+
+        while self.Test_pass ==False:
+            print("spining")
+            rclpy.spin_once(self.node)
 
     def diag_agg_cb(self, msg):
-        print("we recived ",msg)
         with self._mutex:
             for stat in msg.status:
                 if stat.name.find(MULTI_NAME) > 0:
                     self._multi_items[get_header_name(stat.name)] = DiagnosticItem(stat)
         
-            #assert(self._multi_items.has_key(HEADER1))#, "Didn't have item under %s. Items: %s" % (HEADER1, self._multi_items))
             assert(self._multi_items[HEADER1].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER1, MULTI_NAME))
-            #assert(self._multi_items.has_key(HEADER2)) #, "Didn't have item under %s" % HEADER2)
             assert(self._multi_items[HEADER2].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER2, MULTI_NAME))
+            self.Test_pass =True
+            self.node.destroy_node()
+            self.ls.shutdown()
+            self.ls1.shutdown()
 
 
-    def test_agg(self):
-        start = time.time()
-        while 1:
-            sleep(1.0)
-            if time.time() - start > DURATION:
-               break
 
-        print("Test cases start ")    
-        #self.assert_(not rospy.is_shutdown(), "Rospy shutdown")
-        with self._mutex:
-            assert(len(self._expecteds) > 0) #, "No expected items found in raw data!")
-
-            for name, item in self._expecteds.items():
-                assert(self._agg_expecteds.has_key(name)) #, "Item %s not found in aggregated diagnostics output" % name)
-                if item.is_stale():
-                    assert(self._agg_expecteds[name].level == 3) #, "Stale item in diagnostics, but aggregated didn't report as stale. Item: %s, state: %d" %(name, self._agg_expecteds[name].level))
-                else:
-                    assert(self._agg_expecteds[name].level == item.level) #, "Diagnostic level of aggregated, raw item don't match for %s" % name)
-        print("Test cases pass ")    
-                        
-def main(args=None):
-    rclpy.init(args=args)
-    node = TestAggregator()
- #   node.test_agg()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+                           
 
 if __name__ == '__main__':
-   # print 'SYS ARGS:', sys.argv
-   # rostest.run(PKG, sys.argv[0], TestAggregator, sys.argv)
-   main()
+    unittest.main()
