@@ -1,63 +1,58 @@
 #!/usr/bin/env python
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Software License Agreement (BSD License)
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Copyright (c) 2017, TNO IVS, Helmond, Netherlands
-# All rights reserved.
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of the TNO IVS nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # \author Rein Appeldoorn
 
-
+import os
+import pathlib
 import unittest
-import rospy
-import rostest
+import rclpy
 from diagnostic_msgs.msg import DiagnosticArray
+from unittest.mock import Mock
+from time import sleep
+from rclpy.task import Future
+from rclpy.task import Task
 
+from launch import LaunchDescription
+from launch import LaunchService
+from launch import LaunchIntrospector
+from launch_ros import get_default_launch_description
+from launch.substitutions import EnvironmentVariable
+import launch_ros.actions.node
+import yaml
+import threading
+
+TEST_NODE = 'my_node_cpu'
+TEST_NAMESPACE = '/'
 
 class TestCPUMonitor(unittest.TestCase):
+        
+    @classmethod
+    def setUpClass(cls):
+        rclpy.init()
+        cls.node = rclpy.create_node(TEST_NODE, namespace=TEST_NAMESPACE)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.node.destroy_node()
+        rclpy.shutdown()
 
     def diagnostics_callback(self, msg):
         self._msg = msg
-
-    def test_cpu_monitor_diagnostics(self):
-        rospy.init_node('test_cpu_monitor')
-        self._expected_level = None
-        if rospy.has_param('~expected_level'):
-            self._expected_level = rospy.get_param('~expected_level')
-
-        self._subscriber = rospy.Subscriber('diagnostics', DiagnosticArray, self.diagnostics_callback)
-        self._msg = None
-
-        while not self._msg:
-            rospy.sleep(.1)
-        self._subscriber.unregister()
+        print("diagnostics_callback called",msg)
+        #self.node._subscriber.unregister()
 
         self.assertEqual(len(self._msg.status), 1)
         status = self._msg.status[0]
@@ -71,7 +66,68 @@ class TestCPUMonitor(unittest.TestCase):
             self.assertEqual(self._expected_level, status.level)
 
 
+        self.node.destroy_node()
+        self.ls.shutdown()
+    
+
+    def _assert_launch_errors(self, actions):
+        ld = LaunchDescription(actions)
+        self.ls = LaunchService()
+        self.ls.include_launch_description(ld)
+        assert 0 != self.ls.run()
+
+    def _assert_launch_no_errors(self, actions):
+        ld = LaunchDescription(actions)
+        self.ls = LaunchService()
+        self.ls.include_launch_description(ld)
+        t = threading.Thread(target=self.ls.run, kwargs={'shutdown_when_idle': False})
+        t.start()
+        #assert 0 == self.ls.run()
+
+    def test_cpu_monitor_diagnostics(self):
+       # rospy.init_node('test_cpu_monitor')
+        #rclpy.init()
+        #self.node = rclpy.create_node( TEST_NODE)
+        self._expected_level = None
+        self._msg = None
+        self._subscriber = self.node.create_subscription(DiagnosticArray,'diagnostics', self.diagnostics_callback)
+        self._expected_level = b'\x00'
+        node_action = launch_ros.actions.Node(
+            package='diagnostic_common_diagnostics', node_executable='cpu_monitor', output='screen')
+        self._assert_launch_no_errors([node_action])
+        print("will go for spining once")
+        rclpy.spin_once(self.node)
+        #self._subscriber = rospy.Subscriber('diagnostics', DiagnosticArray, self.diagnostics_callback)
+
+
+'''
+    def test_diagnostics_callback(self):
+        ld = LaunchDescription([
+        launch_ros.actions.Node(
+            package='demo_nodes_cpp', node_executable='talker', output='screen',
+            remappings=[('chatter', 'my_chatter')]),
+        launch_ros.actions.Node(
+            package='diagnostic_common_diagnostics', node_executable='cpu_monitor', output='screen',
+            ),
+        ])
+
+        print('Starting introspection of launch description...')
+        print('')
+
+        print(LaunchIntrospector().format_launch_description(ld))
+
+        print('')
+        print('Starting launch of launch description...')
+        print('')
+
+        # ls = LaunchService(debug=True)
+        ls = LaunchService()
+        ls.include_launch_description(get_default_launch_description(prefix_output_with_name=False))
+        ls.include_launch_description(ld)
+        print("After launch service ")
+        assert 0 == ls.run()
+'''
 PKG = 'diagnostics_common_diagnostics'
 NAME = 'test_cpu_monitor'
 if __name__ == '__main__':
-    rostest.unitrun(PKG, NAME, TestCPUMonitor)
+    unittest.main()

@@ -11,7 +11,7 @@ def generate_launch_description():
         launch_ros.actions.Node(
             package='diagnostic_common_diagnostics', node_executable='cpu_monitor', output='screen'),
         launch_ros.actions.Node(
-           package='diagnostic_common_diagnostics', node_executable='test_cpu_monitor', node_name='test_cpu_monitor',output='screen',
+           package='diagnostic_common_diagnostics', node_executable='test_cpu_monitor',output='screen',
            ),
     ])
 
