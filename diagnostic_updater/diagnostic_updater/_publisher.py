@@ -1,49 +1,32 @@
-# Software License Agreement (BSD License)
+#! /usr/bin/env python3
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Copyright (c) 2012, Willow Garage, Inc.
-# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of Willow Garage, Inc. nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # -*- coding: utf-8 -*-
 
-""" diagnostic_updater for Python.
+"""
+Diagnostic_updater for Python.
+
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
-
 import rclpy
 import threading
 from ._update_functions import *
 
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
-    """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus.
+    """
+    A class to facilitate making diagnostics for a topic using a FrequencyStatus.
 
     The word "headerless" in the class name refers to the fact that it is
     mainly designed for use with messages that do not have a header, and
@@ -51,7 +34,8 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
     """
 
     def __init__(self, name, diag, freq):
-        """Constructs a HeaderlessTopicDiagnostic.
+        """
+        Construct a HeaderlessTopicDiagnostic.
 
         @param name The name of the topic that is being diagnosed.
 
@@ -72,17 +56,20 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
         self.freq.tick()
 
     def clear_window(self):
-        """Clears the frequency statistics."""
+        """Clear the frequency statistics."""
         self.freq.clear()
 
 
 class TopicDiagnostic(HeaderlessTopicDiagnostic):
-    """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus and TimeStampStatus.
+    """
+    A class to facilitate making diagnostics for a topic using.
+    
+    a FrequencyStatus and TimeStampStatus.
     """
 
     def __init__(self, name, diag, freq, stamp):
-        """Constructs a TopicDiagnostic.
+        """
+        Construct a TopicDiagnostic.
 
         @param name The name of the topic that is being diagnosed.
 
@@ -95,13 +82,13 @@ class TopicDiagnostic(HeaderlessTopicDiagnostic):
         @param stamp The parameters for the TimeStampStatus class that will be
         computing statistics.
         """
-
         HeaderlessTopicDiagnostic.__init__(self, name, diag, freq)
         self.stamp = TimeStampStatus(stamp)
         self.addTask(self.stamp)
 
     def tick(self, stamp):
-        """Collects statistics and publishes the message.
+        """
+        Collect statistics and publishes the message.
 
         @param stamp Timestamp to use for interval computation by the
         TimeStampStatus class.
@@ -111,14 +98,16 @@ class TopicDiagnostic(HeaderlessTopicDiagnostic):
 
 
 class DiagnosedPublisher(TopicDiagnostic):
-    """A TopicDiagnostic combined with a ros::Publisher.
+    """
+    A TopicDiagnostic combined with a ros::Publisher.
 
     For a standard ros::Publisher, this class allows the ros::Publisher and
     the TopicDiagnostic to be combined for added convenience.
     """
 
     def __init__(self, pub, diag, freq, stamp):
-        """Constructs a DiagnosedPublisher.
+        """
+        Construct a DiagnosedPublisher.
 
         @param pub The publisher on which statistics are being collected.
 
@@ -135,7 +124,8 @@ class DiagnosedPublisher(TopicDiagnostic):
         self.publisher = pub
 
     def publish(self, message):
-        """Collects statistics and publishes the message.
+        """
+        Collect statistics and publishes the message.
 
         The timestamp to be used by the TimeStampStatus class will be
         extracted from message.header.stamp.

@@ -5,16 +5,18 @@ project(diagnostic_updater)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(rclpy REQUIRED)
 
 set(INCLUDE_DIRS
   include
   ${diagnostic_msgs_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS}
   /home/root-pc/ros2_ws_lr/install/rclcpp/include
-  #/home/root-pc/ros2_ws_lr/install/builtin_interfaces/include/ 
+  #/home/root-pc/ros2_ws_lr/install/builtin_interfaces/include/
   ${rclcpp_INCLUDE_DIRS}
 )
 
@@ -39,11 +41,15 @@ if(BUILD_TESTING)
 
   ament_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
   target_link_libraries(diagnostic_updater_test ${LIBS})
-endif()
 
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
+  ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_DiagnosticStatusWrapper.py")
+endif()
 ############################################################
 # Define installation rules
 #
+ament_python_install_package(${PROJECT_NAME})
 
 install(
   TARGETS example
@@ -61,9 +67,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 # Export include dependencies, directories, and libraries
 ament_export_dependencies(ament_cmake)
+ament_export_dependencies(ament_cmake_python)
 ament_export_dependencies(diagnostic_msgs)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(std_msgs)
+ament_export_dependencies(rclpy)
 ament_export_include_directories(${INCLUDE_DIRS})
 
 # Must be at the bottom

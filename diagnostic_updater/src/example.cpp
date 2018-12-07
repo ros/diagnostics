@@ -25,21 +25,23 @@ double time_to_launch;
  * class.
  */
 
-void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat) {
+void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper & stat)
+{
   // DiagnosticStatusWrapper are a derived class of
   // diagnostic_msgs::DiagnosticStatus provides a set of convenience
   // methods.
 
   // summary and summaryf set the level and message.
-  if (time_to_launch < 10)
+  if (time_to_launch < 10) {
     // summaryf for formatted text.
     stat.summaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR,
-                  "Buckle your seat belt. Launch in %f seconds!",
-                  time_to_launch);
-  else
+      "Buckle your seat belt. Launch in %f seconds!",
+      time_to_launch);
+  } else {
     // summary for unformatted text.
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK,
-                 "Launch is in a long time. Have a soda.");
+      "Launch is in a long time. Have a soda.");
+  }
 
   // add and addf are used to append key-value pairs.
   stat.add("Diagnostic Name", "dummy");
@@ -47,52 +49,62 @@ void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat) {
   stat.add("Time to Launch", time_to_launch);
   // addf allows arbitrary printf style formatting.
   stat.addf("Geeky thing to say", "The square of the time to launch %f is %f",
-            time_to_launch, time_to_launch * time_to_launch);
+    time_to_launch, time_to_launch * time_to_launch);
 }
 
-class DummyClass {
+class DummyClass
+{
 public:
-  void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat) {
+  void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & stat)
+  {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN,
-                 "This is a silly updater.");
+      "This is a silly updater.");
 
     stat.add("Stupidicity of this updater", 1000.);
   }
 };
 
-class DummyTask : public diagnostic_updater::DiagnosticTask {
+class DummyTask : public diagnostic_updater::DiagnosticTask
+{
 public:
-  DummyTask() : DiagnosticTask("Updater Derived from DiagnosticTask") {}
+  DummyTask()
+  : DiagnosticTask("Updater Derived from DiagnosticTask") {}
 
-  void run(diagnostic_updater::DiagnosticStatusWrapper &stat) {
+  void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
+  {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN,
-                 "This is another silly updater.");
+      "This is another silly updater.");
     stat.add("Stupidicity of this updater", 2000.);
   }
 };
 
-void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat) {
-  if (time_to_launch > 5)
+void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper & stat)
+{
+  if (time_to_launch > 5) {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Lower-bound OK");
-  else
+  } else {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "Too low");
+  }
 
   stat.add("Low-Side Margin", time_to_launch - 5);
 }
 
-void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper &stat) {
-  if (time_to_launch < 10)
+void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper & stat)
+{
+  if (time_to_launch < 10) {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Upper-bound OK");
-  else
+  } else {
     stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Too high");
+  }
 
   stat.add("Top-Side Margin", 10 - time_to_launch);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv)
+{
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node =
-      rclcpp::Node::make_shared("diagnostic_updater_example");
+    rclcpp::Node::make_shared("diagnostic_updater_example");
 
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
@@ -131,9 +143,9 @@ int main(int argc, char **argv) {
   // a function. This will be useful when combining multiple diagnostic
   // tasks using a CompositeDiagnosticTask.
   diagnostic_updater::FunctionDiagnosticTask lower(
-      "Lower-bound check", std::bind(&check_lower_bound, std::placeholders::_1));
+    "Lower-bound check", std::bind(&check_lower_bound, std::placeholders::_1));
   diagnostic_updater::FunctionDiagnosticTask upper(
-      "Upper-bound check", std::bind(&check_upper_bound, std::placeholders::_1));
+    "Upper-bound check", std::bind(&check_upper_bound, std::placeholders::_1));
 
   // If you want to merge the outputs of two diagnostic tasks together, you
   // can create a CompositeDiagnosticTask, also a derived class from
@@ -179,8 +191,8 @@ int main(int argc, char **argv) {
   double min_freq = 0.5;  // If you update these values, the
   double max_freq = 2;  // HeaderlessTopicDiagnostic will use the new values.
   diagnostic_updater::HeaderlessTopicDiagnostic pub1_freq(
-      "topic1", updater,
-      diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
+    "topic1", updater,
+    diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
 
   // Note that TopicDiagnostic, HeaderlessDiagnosedPublisher,
   // HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
@@ -196,9 +208,10 @@ int main(int argc, char **argv) {
   updater.force_update();
 
   // We can remove a task by refering to its name.
-  if (!updater.removeByName("Bound check"))
-    ;  //  ROS_ERROR("The Bound check task was not found when trying to remove
-      //  it.");
+  if (!updater.removeByName("Bound check")) {
+    //  ROS_ERROR("The Bound check task was not found when trying to remove
+  }
+  //  it.");
 
   while (rclcpp::ok()) {
     std_msgs::msg::Bool msg;

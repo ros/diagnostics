@@ -1,38 +1,22 @@
-# Software License Agreement (BSD License)
+#! /usr/bin/env python3
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Copyright (c) 2012, Willow Garage, Inc.
-# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of Willow Garage, Inc. nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # -*- coding: utf-8 -*-
 
-""" diagnostic_updater for Python.
+"""
+Diagnostic_updater for Python.
+
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
@@ -48,7 +32,8 @@ from test_msgs.msg import Builtins
 from ._diagnostic_status_wrapper import *
 
 class DiagnosticTask:
-    """DiagnosticTask is an abstract base class for collecting diagnostic data.
+    """
+    DiagnosticTask is an abstract base class for collecting diagnostic data.
 
     Subclasses are provided for generating common diagnostic information.
     A DiagnosticTask has a name, and a function that is called to cleate a
@@ -56,24 +41,26 @@ class DiagnosticTask:
     """
 
     def __init__(self, name):
-        """Constructs a DiagnosticTask setting its name in the process."""
+        """Construct a DiagnosticTask setting its name in the process."""
         self.name = name
 
     def getName(self):
-        """Returns the name of the DiagnosticTask."""
+        """Return the name of the DiagnosticTask."""
         return self.name
 
     def run(self, stat):
-        """Fills out this Task's DiagnosticStatusWrapper.
+        """
+        Fill out this Task's DiagnosticStatusWrapper.
+
         @param stat: the DiagnosticStatusWrapper to fill
         @return the filled DiagnosticStatusWrapper
         """
         return stat
 
 
-
 class FunctionDiagnosticTask(DiagnosticTask):
-    """A DiagnosticTask based on a function.
+    """
+    A DiagnosticTask based on a function.
 
     The FunctionDiagnosticTask calls the function when it updates. The
     function updates the DiagnosticStatusWrapper and collects data.
@@ -83,7 +70,9 @@ class FunctionDiagnosticTask(DiagnosticTask):
     """
 
     def __init__(self, name, fn):
-        """Constructs a GenericFunctionDiagnosticTask based on the given name and function.
+        """
+        Construct a GenericFunctionDiagnosticTask based on the given name and function.
+
         @param name Name of the function.
         @param fn Function to be called when run is called.
         """
@@ -94,9 +83,9 @@ class FunctionDiagnosticTask(DiagnosticTask):
         return self.fn(stat)
 
 
-
 class CompositeDiagnosticTask(DiagnosticTask):
-    """Merges CompositeDiagnosticTask into a single DiagnosticTask.
+    """
+    Merge CompositeDiagnosticTask into a single DiagnosticTask.
 
     The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
     be combined into a single task that produces a single single
@@ -108,12 +97,12 @@ class CompositeDiagnosticTask(DiagnosticTask):
     """
 
     def __init__(self, name):
-        """Constructs a CompositeDiagnosticTask with the given name."""
+        """Construct a CompositeDiagnosticTask with the given name."""
         DiagnosticTask.__init__(self, name)
         self.tasks = []
 
     def run(self, stat):
-        """Runs each child and merges their outputs."""
+        """Run each child and merges their outputs."""
         combined_summary = DiagnosticStatusWrapper()
         original_summary = DiagnosticStatusWrapper()
 
@@ -133,7 +122,8 @@ class CompositeDiagnosticTask(DiagnosticTask):
         return stat
 
     def addTask(self, t):
-        """Adds a child CompositeDiagnosticTask.
+        """
+        Add a child CompositeDiagnosticTask.
 
         This CompositeDiagnosticTask will be called each time this
         CompositeDiagnosticTask is run.
@@ -143,7 +133,8 @@ class CompositeDiagnosticTask(DiagnosticTask):
 
 
 class DiagnosticTaskVector:
-    """Internal use only.
+    """
+    Internal use only.
 
     Base class for diagnostic_updater::Updater and self_test::Dispatcher.
     The class manages a collection of diagnostic updaters. It contains the
@@ -152,9 +143,7 @@ class DiagnosticTaskVector:
     """
 
     class DiagnosticTaskInternal:
-        """Class used to represent a diagnostic task internally in
-        DiagnosticTaskVector.
-        """
+        """Class used to represent a diagnostic task internally in DiagnosticTaskVector."""
 
         def __init__(self, name, fn):
             self.name = name
@@ -170,14 +159,18 @@ class DiagnosticTaskVector:
         self.lock = threading.Lock()
 
     def addedTaskCallback(self, task):
-        """Allows an action to be taken when a task is added. The Updater class
+        """
+        Allow an action to be taken when a task is added.
+        
+        The Updater class
         uses this to immediately publish a diagnostic that says that the node
         is loading.
         """
         pass
 
     def add(self, *args):
-        """Add a task to the DiagnosticTaskVector.
+        """
+        Add a task to the DiagnosticTaskVector.
 
         Usage:
         add(task): where task is a DiagnosticTask
@@ -194,7 +187,8 @@ class DiagnosticTaskVector:
             print(task)
 
     def removeByName(self, name):
-        """Removes a task based on its name.
+        """
+        Remove a task based on its name.
 
         Removes the first task that matches the specified name. (New in
         version 1.1.2)
@@ -215,7 +209,8 @@ class DiagnosticTaskVector:
 
 
 class Updater(DiagnosticTaskVector):
-    """Manages a list of diagnostic tasks, and calls them in a rate-limited manner.
+    """
+    Manage a list of diagnostic tasks, and calls them in a rate-limited manner.
 
     This class manages a list of diagnostic tasks. Its update function
     should be called frequently. At some predetermined rate, the update
@@ -230,17 +225,15 @@ class Updater(DiagnosticTaskVector):
     """
 
     def __init__(self,node):
-        """Constructs an updater class."""
+        """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
         self.publisher = self.node.create_publisher(DiagnosticArray, "/diagnostics")
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
-        print("Time now === ", now)
 
         self.last_time = now
 
-        #self.last_time = rospy.Time.now()
         self.last_time_period_checked = self.last_time
         self.period = 1
 
@@ -249,25 +242,22 @@ class Updater(DiagnosticTaskVector):
         self.warn_nohwid_done = False
 
     def update(self):
-        """Causes the diagnostics to update if the inter-update interval
-        has been exceeded.
-        """
+        """Causes the diagnostics to update if the inter-update interval has been exceeded."""
         self._check_diagnostic_period()
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
         if now >= self.last_time:
-        #if now >= self.last_time + Duration(self.period):
             self.force_update()
 
     def force_update(self):
-        """Forces the diagnostics to update.
+        """
+        Force the diagnostics to update.
 
         Useful if the node has undergone a drastic state change that should be
         published immediately.
         """
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         self.last_time = clock.now()
-        #self.last_time = rospy.Time.now()
 
         warn_nohwid = len(self.hwid)==0
 
@@ -299,14 +289,14 @@ class Updater(DiagnosticTaskVector):
         self.publish(status_vec)
 
     def broadcast(self, lvl, msg):
-        """Outputs a message on all the known DiagnosticStatus.
+        """
+        Output a message on all the known DiagnosticStatus.
 
         Useful if something drastic is happening such as shutdown or a self-test.
 
         @param lvl Level of the diagnostic being output.
         @param msg Status message to output.
         """
-
         status_vec = []
 
         for task in self.tasks:
@@ -322,26 +312,21 @@ class Updater(DiagnosticTaskVector):
 
     def _check_diagnostic_period(self):
         """Recheck the diagnostic_period on the parameter server."""
-
         # This was getParamCached() call in the cpp code. i.e. it would throttle
         # the actual call to the parameter server using a notification of change
         # mechanism.
         # This is not available in rospy. Hence I throttle the call to the
         # parameter server using a standard timeout mechanism (4Hz)
-
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
-        #now = rospy.Time.now()
         if  now >= self.last_time_period_checked:
-        #if  now >= self.last_time_period_checked + Duration(0.25):
             try:
-                #self.period = rospy.get_param("~diagnostic_period", 1)
                 self.last_time_period_checked = now
             except (httplib.CannotSendRequest, httplib.ResponseNotReady):
                 pass
 
     def publish(self, msg):
-        """Publishes a single diagnostic status or a vector of diagnostic statuses."""
+        """Publish a single diagnostic status or a vector of diagnostic statuses."""
         if not type(msg) is list:
             msg = [msg]
 
@@ -359,7 +344,6 @@ class Updater(DiagnosticTaskVector):
         db.name=stat.name 
         da.status.append(db)
         da.header.stamp =  builtins_msg.time_value# Add timestamp for ROS 0.10
-        print(da)
 
         self.publisher.publish(da)
 

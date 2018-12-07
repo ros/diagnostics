@@ -1,51 +1,32 @@
-# Software License Agreement (BSD License)
+#!/usr/bin/env python3
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Copyright (c) 2012, Willow Garage, Inc.
-# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of Willow Garage, Inc. nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-# -*- coding: utf-8 -*-
+"""
+Diagnostic_updater for Python.
 
-""" diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
-
 import rclpy
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 OK = DiagnosticStatus.OK
 WARN = DiagnosticStatus.WARN
 ERROR = DiagnosticStatus.ERROR
-
 class DiagnosticStatusWrapper(DiagnosticStatus):
-    """ Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it
-    easier to update.
+    """
+    Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it easier to update.
 
     This class handles common string formatting and vector handling issues
     for filling the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
@@ -55,7 +36,9 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
     def __init__(self, *args, **kwds):
         """
-        Constructor. Any message fields that are implicitly/explicitly
+        Constructor.
+
+        Any message fields that are implicitly/explicitly
         set to None will be assigned a default value. The recommend
         use is keyword arguments as this is more robust to future message
         changes.  You cannot mix in-order arguments and keyword arguments.
@@ -71,7 +54,8 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
 
     def summary(self, *args):
-        """ Fills out the level and message fields of the DiagnosticStatus.
+        """
+        Fill out the level and message fields of the DiagnosticStatus.
 
         Usage:
         summary(diagnostic_status): Copies the summary from a DiagnosticStatus message
@@ -86,13 +70,13 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
 
     def clearSummary(self):
-        """ Clears the summary, setting the level to zero and the message to "".
-        """
-        self.summary(0, "")
+        """Clear the summary, setting the level to zero and the message to."""
+        self.summary(b'0', "")
 
 
     def mergeSummary(self, *args):
-        """ Merges a level and message with the existing ones.
+        """
+        Merge a level and message with the existing ones.
 
         It is sometimes useful to merge two DiagnosticStatus messages. In that case,
         the key value pairs can be unioned, but the level and summary message
@@ -117,7 +101,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
             lvl = args[0]
             msg = args[1]
 
-        if (lvl>0) == (self.level>0):
+        if (lvl>b'0') == (self.level>b'0'):
             if len(self.message)>0:
                 self.message += "; "
             self.message += msg
@@ -129,7 +113,8 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
 
     def add(self, key, val):
-        """ Add a key-value pair.
+        """
+        Add a key-value pair.
 
         This method adds a key-value pair. Any type that has a << stream
         operator can be passed as the second argument.  Formatting is done
@@ -140,6 +125,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         @type value string
         @param value Value to be added.
         """
-        KeyValue.key = key
-        KeyValue.val = val 
-        self.values.append(KeyValue)
+        key_ = KeyValue()
+        key_.key = key
+        key_.value = val
+        self.values.append(key_)

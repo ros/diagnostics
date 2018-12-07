@@ -1,51 +1,30 @@
-#!/usr/bin/env python
-
-# Software License Agreement (BSD License)
+#!/usr/bin/env python3
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Copyright (c) 2012, Willow Garage, Inc.
-# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of Willow Garage, Inc. nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # -*- coding: utf-8 -*-
 
-"""
-@author Brice Rebsamen <brice [dot] rebsamen [gmail]>
-"""
+"""@author Brice Rebsamen <brice [dot] rebsamen [gmail]>."""
 
-import roslib
-roslib.load_manifest('diagnostic_updater')
-import rospy
+#import roslib
+#roslib.load_manifest('diagnostic_updater')
+#import rospy
+import rclpy
 import diagnostic_updater
 import diagnostic_msgs
 import std_msgs
-
-
+import time
+from time import sleep
 time_to_launch = 0
 
 '''Used as a tutorial for loading and using diagnostic updater.
@@ -77,7 +56,7 @@ def dummy_diagnostic(stat):
     # argument is always converted to a str using the str() function.
     stat.add("Diagnostic Name", "dummy")
     # add transparently handles conversion to string (using str()).
-    stat.add("Time to Launch", time_to_launch)
+    stat.add("Time to Launch", "time_to_launch")
     # add allows arbitrary printf style formatting.
     stat.add("Geeky thing to say", "The square of the time to launch %f is %f" % \
         (time_to_launch, time_to_launch * time_to_launch) )
@@ -90,7 +69,7 @@ def dummy_diagnostic(stat):
 class DummyClass:
     def produce_diagnostics(self, stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, "This is a silly updater.")
-        stat.add("Stupidicity of this updater", 1000.)
+        stat.add("Stupidicity of this updater", "1000")
         return stat
 
 
@@ -102,7 +81,7 @@ class DummyTask(diagnostic_updater.DiagnosticTask):
     def run(self, stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN,
             "This is another silly updater.")
-        stat.add("Stupidicity of this updater", 2000.)
+        stat.add("Stupidicity of this updater", "2000")
         return stat
 
 
@@ -111,7 +90,7 @@ def check_lower_bound(stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, "Lower-bound OK")
     else:
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.ERROR, "Too low")
-    stat.add("Low-Side Margin", time_to_launch - 5)
+    stat.add("Low-Side Margin", "time_to_launch - 5")
     return stat
 
 
@@ -120,17 +99,20 @@ def check_upper_bound(stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, "Upper-bound OK")
     else:
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, "Too high")
-    stat.add("Top-Side Margin", 10 - time_to_launch)
+    stat.add("Top-Side Margin", "10 - time_to_launch")
     return stat
 
 
-if __name__=='__main__':
-    rospy.init_node("diagnostic_updater_example")
+#if __name__=='__main__':
 
+def main():
+    #rospy.init_node("diagnostic_updater_example")
+    rclpy.init()
+    node = rclpy.create_node("diagnostic_updater_example")
     # The Updater class advertises to /diagnostics, and has a
     # ~diagnostic_period parameter that says how often the diagnostics
     # should be published.
-    updater = diagnostic_updater.Updater()
+    updater = diagnostic_updater.Updater(node)
 
     # The diagnostic_updater.Updater class will fill out the hardware_id
     # field of the diagnostic_msgs.msg.DiagnosticStatus message. You need to
@@ -188,11 +170,14 @@ if __name__=='__main__':
 
     # You can broadcast a message in all the DiagnosticStatus if your node
     # is in a special state.
-    updater.broadcast(0, "Doing important initialization stuff.")
+    updater.broadcast(b'0', "Doing important initialization stuff.")
 
-    pub1 = rospy.Publisher("topic1", std_msgs.msg.Bool)
-    pub2_temp = rospy.Publisher("topic2", std_msgs.msg.Bool)
-    rospy.sleep(2) # It isn't important if it doesn't take time.
+    #pub1 = rospy.Publisher("topic1", std_msgs.msg.Bool)
+    pub1 = node.create_publisher(std_msgs.msg.Bool, "topic1")
+    #pub2_temp = rospy.Publisher("topic2", std_msgs.msg.Bool)
+    pub2_temp = node.create_publisher(std_msgs.msg.Bool, "topic2")
+    #rospy.sleep(2) # It isn't important if it doesn't take time.
+    sleep(2) # It isn't important if it doesn't take time.
 
     # Some diagnostic tasks are very common, such as checking the rate
     # at which a topic is publishing, or checking that timestamps are
@@ -233,9 +218,11 @@ if __name__=='__main__':
     if not updater.removeByName("Bound check"):
         rospy.logerr("The Bound check task was not found when trying to remove it.")
 
-    while not rospy.is_shutdown():
+    #while not rospy.is_shutdown():
+    while rclpy.ok():
         msg = std_msgs.msg.Bool()
-        rospy.sleep(0.1)
+        #rospy.sleep(0.1)
+        sleep(0.1)
 
         # Calls to pub1 have to be accompanied by calls to pub1_freq to keep
         # the statistics up to date.
@@ -246,3 +233,6 @@ if __name__=='__main__':
         # We can call updater.update whenever is convenient. It will take care
         # of rate-limiting the updates.
         updater.update()
+
+if __name__ == '__main__':
+    main()

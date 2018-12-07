@@ -22,7 +22,8 @@
 #include <string>
 #include <memory>
 
-namespace diagnostic_updater {
+namespace diagnostic_updater
+{
 
 /**
  * \brief A class to facilitate making diagnostics for a topic using a
@@ -33,7 +34,8 @@ namespace diagnostic_updater {
  * that cannot therefore be checked using a TimeStampStatus.
  */
 
-class HeaderlessTopicDiagnostic : public CompositeDiagnosticTask {
+class HeaderlessTopicDiagnostic : public CompositeDiagnosticTask
+{
 public:
   /**
    * \brief Constructs a HeaderlessTopicDiagnostic.
@@ -48,9 +50,10 @@ public:
    */
 
   HeaderlessTopicDiagnostic(
-      std::string name, diagnostic_updater::Updater &diag,
-      const diagnostic_updater::FrequencyStatusParam &freq)
-      : CompositeDiagnosticTask(name + " topic status"), freq_(freq) {
+    std::string name, diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq)
+  : CompositeDiagnosticTask(name + " topic status"), freq_(freq)
+  {
     addTask(&freq_);
     diag.add(*this);
   }
@@ -61,13 +64,13 @@ public:
          * \brief Signals that a publication has occurred.
          */
 
-  virtual void tick() { freq_.tick(); }
+  virtual void tick() {freq_.tick();}
 
   /**
          * \brief Clears the frequency statistics.
          */
 
-  virtual void clear_window() { freq_.clear(); }
+  virtual void clear_window() {freq_.clear();}
 
 private:
   diagnostic_updater::FrequencyStatus freq_;
@@ -78,7 +81,8 @@ private:
  * FrequencyStatus and TimeStampStatus.
  */
 
-class TopicDiagnostic : public HeaderlessTopicDiagnostic {
+class TopicDiagnostic : public HeaderlessTopicDiagnostic
+{
 public:
   /**
    * \brief Constructs a TopicDiagnostic.
@@ -95,10 +99,12 @@ public:
    * computing statistics.
    */
 
-  TopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
-                  const diagnostic_updater::FrequencyStatusParam &freq,
-                  const diagnostic_updater::TimeStampStatusParam &stamp)
-      : HeaderlessTopicDiagnostic(name, diag, freq), stamp_(stamp) {
+  TopicDiagnostic(
+    std::string name, diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq,
+    const diagnostic_updater::TimeStampStatusParam & stamp)
+  : HeaderlessTopicDiagnostic(name, diag, freq), stamp_(stamp)
+  {
     addTask(&stamp_);
   }
 
@@ -110,7 +116,8 @@ public:
          * is needed to collect the timestamp diagnostics. It is defined here to
          * prevent the inherited tick method from being used accidentally.
          */
-  virtual void tick() {
+  virtual void tick()
+  {
     // ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never
     // correct. Use tick(rclcpp::Time &) instead.");
   }
@@ -121,7 +128,8 @@ public:
          * \param stamp Timestamp to use for interval computation by the
          * TimeStampStatus class.
          */
-  virtual void tick(const rclcpp::Time &stamp) {
+  virtual void tick(const rclcpp::Time & stamp)
+  {
     stamp_.tick(stamp);
     HeaderlessTopicDiagnostic::tick();
   }
@@ -137,7 +145,9 @@ private:
  * the TopicDiagnostic to be combined for added convenience.
  */
 
-template <class T> class DiagnosedPublisher : public TopicDiagnostic {
+template<class T>
+class DiagnosedPublisher : public TopicDiagnostic
+{
 public:
   /**
    * \brief Constructs a DiagnosedPublisher.
@@ -154,13 +164,14 @@ public:
    * computing statistics.
    */
 
-  DiagnosedPublisher(const rclcpp::Publisher<
-                         diagnostic_msgs::msg::DiagnosticArray>::SharedPtr &pub,
-                     diagnostic_updater::Updater &diag,
-                     const diagnostic_updater::FrequencyStatusParam &freq,
-                     const diagnostic_updater::TimeStampStatusParam &stamp)
-      : TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp),
-        publisher_(pub) {}
+  DiagnosedPublisher(
+    const rclcpp::Publisher<
+      diagnostic_msgs::msg::DiagnosticArray>::SharedPtr & pub,
+    diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq,
+    const diagnostic_updater::TimeStampStatusParam & stamp)
+  : TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp),
+    publisher_(pub) {}
 
   virtual ~DiagnosedPublisher() {}
 
@@ -170,7 +181,8 @@ public:
          * The timestamp to be used by the TimeStampStatus class will be
          * extracted from message.header.stamp.
          */
-  virtual void publish(const std::shared_ptr<T> &message) {
+  virtual void publish(const std::shared_ptr<T> & message)
+  {
     tick(message->header.stamp);
     publisher_->publish(message);
   }
@@ -181,7 +193,8 @@ public:
          * The timestamp to be used by the TimeStampStatus class will be
          * extracted from message.header.stamp.
          */
-  virtual void publish(const T &message) {
+  virtual void publish(const T & message)
+  {
     tick(message.header.stamp);
     publisher_->publish(message);
   }
@@ -190,7 +203,8 @@ public:
          * \brief Returns the publisher.
          */
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr
-  getPublisher() const {
+  getPublisher() const
+  {
     return publisher_;
   }
 
@@ -198,14 +212,15 @@ public:
          * \brief Changes the publisher.
          */
   void setPublisher(
-      rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub) {
+    rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub)
+  {
     publisher_ = pub;
   }
 
 private:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr
-      publisher_;
+    publisher_;
 };
-};  // namespace diagnostic_updater
+}   // namespace diagnostic_updater
 
 #endif  // DIAGNOSTIC_UPDATER__PUBLISHER_HPP_

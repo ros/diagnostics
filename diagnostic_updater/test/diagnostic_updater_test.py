@@ -1,13 +1,27 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.5
+# Copyright 2015 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # -*- coding: utf-8 -*-
 
-"""
-@author Brice Rebsamen <brice [dot] rebsamen [gmail]>
-"""
+"""@author Brice Rebsamen <brice [dot] rebsamen [gmail]>."""
 
-import roslib
-roslib.load_manifest('diagnostic_updater')
-import rospy
+import rclpy
+from rclpy.clock import ClockType
+from rclpy.clock import Clock
+from rclpy.duration import Duration
+from rclpy.time import Time
+import diagnostic_updater
 from diagnostic_updater import *
 import unittest
 import time
@@ -17,7 +31,7 @@ class ClassFunction(DiagnosticTask):
         DiagnosticTask.__init__(self, "classFunction")
 
     def run(self, stat):
-        stat.summary(0, "Test is running")
+        stat.summary(b'0', "Test is running")
         stat.add("Value", "%f" % 5)
         stat.add("String", "Toto")
         stat.add("Floating", 5.55)
@@ -34,7 +48,9 @@ class TestClass:
 class TestDiagnosticStatusWrapper(unittest.TestCase):
 
     def testDiagnosticUpdater(self):
-        updater = Updater()
+        rclpy.init()
+        node = rclpy.create_node("test_node")
+        updater = Updater(node)
 
         c = TestClass()
         updater.add("wrapped", c.wrapped)
@@ -47,17 +63,16 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         stat = DiagnosticStatusWrapper()
 
         message = "dummy"
-        level = 1
+        level = b'1'
         stat.summary(level, message)
         self.assertEqual(message, stat.message, "DiagnosticStatusWrapper::summary failed to set message")
         self.assertEqual(level, stat.level, "DiagnosticStatusWrapper::summary failed to set level")
 
         stat.add("toto", "%.1f" % 5.0)
-        stat.add("baba", 5)
+        stat.add("baba", "5")
         stat.add("foo", "%05i" % 27)
-        stat.add("bool", True)
-        stat.add("bool2", False)
-
+        stat.add("bool", "True")
+        stat.add("bool2", "False")
         self.assertEqual("5.0", stat.values[0].value, "Bad value, adding a value with addf")
         self.assertEqual("5", stat.values[1].value, "Bad value, adding a string with add")
         self.assertEqual("00027", stat.values[2].value, "Bad value, adding a string with addf")
@@ -93,13 +108,13 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         fs.clear()
         stat[4] = fs.run(stat[4]) # Should be good, just cleared it.
 
-        self.assertEqual(1, stat[0].level, "max frequency exceeded but not reported")
-        self.assertEqual(0, stat[1].level, "within max frequency but reported error")
-        self.assertEqual(0, stat[2].level, "within min frequency but reported error")
-        self.assertEqual(1, stat[3].level, "min frequency exceeded but not reported")
-        self.assertEqual(2, stat[4].level, "freshly cleared should fail")
+        self.assertEqual(b'1', stat[0].level, "max frequency exceeded but not reported")
+        self.assertEqual(b'0', stat[1].level, "within max frequency but reported error")
+        self.assertEqual(b'0', stat[2].level, "within min frequency but reported error")
+        self.assertEqual(b'1', stat[3].level, "min frequency exceeded but not reported")
+        self.assertEqual(b'2', stat[4].level, "freshly cleared should fail")
         self.assertEqual("", stat[0].name, "Name should not be set by FrequencyStatus")
-        self.assertEqual("Frequency Status", fs.getName(), "Name should be \"Frequency Status\"")
+        self.assertEqual("FrequencyStatus", fs.getName(), "Name should be \"Frequency Status\"")
 
 
     def testTimeStampStatus(self):
@@ -107,24 +122,35 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
 
         stat = [DiagnosticStatusWrapper() for i in range(5)]
         stat[0] = ts.run(stat[0])
-        ts.tick(rospy.Time.now().to_sec() + 2)
+        clock = Clock(clock_type=ClockType.STEADY_TIME)
+        now = clock.now()
+        ts.tick((now.nanoseconds*1e-9) + 2)
+        #ts.tick(rospy.Time.now().to_sec() + 2)
         stat[1] = ts.run(stat[1])
-        ts.tick(rospy.Time.now())
+        now = clock.now()
+        ts.tick((now.nanoseconds*1e-9))
+        #ts.tick(rospy.Time.now())
         stat[2] = ts.run(stat[2])
-        ts.tick(rospy.Time.now().to_sec() - 4)
+        now = clock.now()
+        ts.tick((now.nanoseconds*1e-9) - 4)
+        #ts.tick(rospy.Time.now().to_sec() - 4)
         stat[3] = ts.run(stat[3])
-        ts.tick(rospy.Time.now().to_sec() - 6)
+        now = clock.now()
+        ts.tick((now.nanoseconds*1e-9) - 6)
+        #ts.tick(rospy.Time.now().to_sec() - 6)
         stat[4] = ts.run(stat[4])
 
-        self.assertEqual(1, stat[0].level, "no data should return a warning")
-        self.assertEqual(2, stat[1].level, "too far future not reported")
-        self.assertEqual(0, stat[2].level, "now not accepted")
-        self.assertEqual(0, stat[3].level, "4 seconds ago not accepted")
-        self.assertEqual(2, stat[4].level, "too far past not reported")
+        self.assertEqual(b'1', stat[0].level, "no data should return a warning")
+        self.assertEqual(b'2', stat[1].level, "too far future not reported")
+        self.assertEqual(b'0', stat[2].level, "now not accepted")
+        self.assertEqual(b'0', stat[3].level, "4 seconds ago not accepted")
+        self.assertEqual(b'2', stat[4].level, "too far past not reported")
         self.assertEqual("", stat[0].name, "Name should not be set by TimeStapmStatus")
         self.assertEqual("Timestamp Status", ts.getName(), "Name should be \"Timestamp Status\"")
 
 
 if __name__ == '__main__':
-    rospy.init_node("test_node")
+    rclpy.init()
+    node = rclpy.create_node("test_node")
+    ###rospy.init_node("test_node")
     unittest.main()

@@ -25,8 +25,8 @@
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
-namespace diagnostic_updater {
-
+namespace diagnostic_updater
+{
 /**
  *
  * \brief Wrapper for the diagnostic_msgs::msg::DiagnosticStatus message that
@@ -39,7 +39,8 @@ namespace diagnostic_updater {
  * diagnostic publish calls.
  *
  */
-class DiagnosticStatusWrapper : public diagnostic_msgs::msg::DiagnosticStatus {
+class DiagnosticStatusWrapper : public diagnostic_msgs::msg::DiagnosticStatus
+{
 public:
   /**
    * \brief Fills out the level and message fields of the DiagnosticStatus.
@@ -47,7 +48,8 @@ public:
    * \param lvl Numerical level to assign to this Status (OK, Warn, Err).
    * \param s Descriptive status message.
    */
-  void summary(unsigned char lvl, const std::string s) {
+  void summary(unsigned char lvl, const std::string s)
+  {
     level = lvl;
     message = s;
   }
@@ -72,16 +74,19 @@ public:
    * \param s Descriptive status message for the merged-in summary.
    */
 
-  void mergeSummary(unsigned char lvl, const std::string s) {
+  void mergeSummary(unsigned char lvl, const std::string s)
+  {
     if ((lvl > 0) && (level > 0)) {
-      if (!message.empty())
+      if (!message.empty()) {
         message += "; ";
-      message += s;
+        message += s;
+      }
     } else if (lvl > level) {
       message = s;
     }
-    if (lvl > level)
+    if (lvl > level) {
       level = lvl;
+    }
   }
 
   /**
@@ -91,7 +96,8 @@ public:
    * \param src DiagnosticStatus from which to merge the summary.
    */
 
-  void mergeSummary(const diagnostic_msgs::msg::DiagnosticStatus &src) {
+  void mergeSummary(const diagnostic_msgs::msg::DiagnosticStatus & src)
+  {
     mergeSummary(src.level, src.message);
   }
 
@@ -107,13 +113,15 @@ public:
    * \param ... Values to be formatted by the format string.
    */
 
-  void mergeSummaryf(unsigned char lvl, const char *format, ...) {
+  void mergeSummaryf(unsigned char lvl, const char * format, ...)
+  {
     va_list va;
     char buff[1000];  //  @todo This could be done more elegantly.
     va_start(va, format);
-    if (vsnprintf(buff, sizeof(buff), format, va) >= 1000)
-      ;  //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it
-        //  was truncated.");
+    if (vsnprintf(buff, sizeof(buff), format, va) >= 1000) {
+      //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it
+      //  was truncated.");
+    }
     std::string value = std::string(buff);
     mergeSummary(lvl, value);
     va_end(va);
@@ -130,13 +138,15 @@ public:
    * \param ... Values to be formatted by the format string.
    *
    */
-  void summaryf(unsigned char lvl, const char *format, ...) {
+  void summaryf(unsigned char lvl, const char * format, ...)
+  {
     va_list va;
     char buff[1000];  // @todo This could be done more elegantly.
     va_start(va, format);
-    if (vsnprintf(buff, sizeof(buff), format, va) >= 1000)
-      ;  //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it
-        //  was truncated.");
+    if (vsnprintf(buff, sizeof(buff), format, va) >= 1000) {
+      //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it
+      //  was truncated.");
+    }
     std::string value = std::string(buff);
     summary(lvl, value);
     va_end(va);
@@ -146,14 +156,15 @@ public:
    * \brief clears the summary, setting the level to zero and the
    * message to "".
    */
-  void clearSummary() { summary(0, ""); }
+  void clearSummary() {summary(0, "");}
 
   /**
    * \brief copies the summary from a DiagnosticStatus message
    *
    * \param src StatusWrapper to copy the summary from.
    */
-  void summary(const diagnostic_msgs::msg::DiagnosticStatus &src) {
+  void summary(const diagnostic_msgs::msg::DiagnosticStatus & src)
+  {
     summary(src.level, src.message);
   }
 
@@ -166,7 +177,9 @@ public:
    *
    * \param key Key to be added.  \param value Value to be added.
    */
-  template <class T> void add(const std::string &key, const T &val) {
+  template<class T>
+  void add(const std::string & key, const T & val)
+  {
     std::stringstream ss;
     ss << val;
     std::string sval = ss.str();
@@ -181,8 +194,9 @@ public:
    * in length.
    */
 
-  void addf(const std::string &key, const char *format,
-            ...);  // In practice format will always be a char *
+  void addf(
+    const std::string & key, const char * format,
+    ...);          // In practice format will always be a char *
 
   /**
    * \brief Clear the key-value pairs.
@@ -190,12 +204,14 @@ public:
    * The values vector containing the key-value pairs is cleared.
    */
 
-  void clear() { values.clear(); }
+  void clear() {values.clear();}
 };
 
-template <>
-inline void DiagnosticStatusWrapper::add<std::string>(const std::string &key,
-                                                      const std::string &s) {
+template<>
+inline void DiagnosticStatusWrapper::add<std::string>(
+  const std::string & key,
+  const std::string & s)
+{
   diagnostic_msgs::msg::KeyValue ds;
   ds.key = key;
   ds.value = s;
@@ -203,9 +219,11 @@ inline void DiagnosticStatusWrapper::add<std::string>(const std::string &key,
 }
 
 //  /\brief For bool, diagnostic value is "True" or "False"
-template <>
-inline void DiagnosticStatusWrapper::add<bool>(const std::string &key,
-                                               const bool &b) {
+template<>
+inline void DiagnosticStatusWrapper::add<bool>(
+  const std::string & key,
+  const bool & b)
+{
   diagnostic_msgs::msg::KeyValue ds;
   ds.key = key;
   ds.value = b ? "True" : "False";
@@ -216,16 +234,17 @@ inline void DiagnosticStatusWrapper::add<bool>(const std::string &key,
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
 // gcc complains that the specialization occurs after instatiation.
 inline void
-DiagnosticStatusWrapper::addf(const std::string &key, const char *format,
-                              ...)  // In practice format will always be a char *
+DiagnosticStatusWrapper::addf(
+  const std::string & key, const char * format,
+  ...)                              // In practice format will always be a char *
 {
   va_list va;
   char buff[1000];  // @todo This could be done more elegantly.
   va_start(va, format);
-  if (vsnprintf(buff, sizeof(buff), format, va) >= 1000)
-    ;  //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was
-      //  truncated.");
-
+  if (vsnprintf(buff, sizeof(buff), format, va) >= 1000) {
+    //  ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was
+    //  truncated.");
+  }
   std::string value = std::string(buff);
   add(key, value);
   va_end(va);
