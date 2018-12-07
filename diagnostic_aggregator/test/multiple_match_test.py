@@ -80,7 +80,6 @@ class DiagnosticItem:
     def update(self, msg):
         self.level = msg.level
         self.message = msg.message
-
         self.update_time = time.time()
 
 
@@ -146,6 +145,9 @@ class TestAggregator(unittest.TestCase):
 
     def diag_agg_cb(self, msg):
         with self._mutex:
+            self.node.destroy_node()
+            self.ls.shutdown()
+            self.ls1.shutdown()
             for stat in msg.status:
                 if stat.name.find(MULTI_NAME) > 0:
                     self._multi_items[get_header_name(stat.name)] = DiagnosticItem(stat)
@@ -153,13 +155,7 @@ class TestAggregator(unittest.TestCase):
             assert(self._multi_items[HEADER1].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER1, MULTI_NAME))
             assert(self._multi_items[HEADER2].name == MULTI_NAME)#, "Item name under %s didn't match %s" % (HEADER2, MULTI_NAME))
             self.Test_pass =True
-            self.node.destroy_node()
-            self.ls.shutdown()
-            self.ls1.shutdown()
 
-
-
-                           
 
 if __name__ == '__main__':
     unittest.main()

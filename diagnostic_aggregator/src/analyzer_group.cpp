@@ -61,7 +61,6 @@ bool AnalyzerGroup::init(
 
   string anz_name;
   string an_name = nsp;
-
   analyzers_nh = nh;
 
   rclcpp::SyncParametersClient::SharedPtr parameters_client_analyzer =
@@ -113,11 +112,9 @@ bool AnalyzerGroup::init(
   {
     string analyzer_name = anl_it->first;
     string ns = anl_it->second;
-    cout << analyzer_name << "::" << ns << endl;
     std::shared_ptr<Analyzer> analyzer;
     string an_type = anl_it->second;
     if (std::string::npos != analyzer_name.find("type")) {
-      cout << "===>> " << analyzer_name << endl;
       string params_anz_ = params_anz + ".";
       string p_name = analyzer_name;
       string::size_type i = p_name.find(params_anz_);
@@ -144,7 +141,6 @@ bool AnalyzerGroup::init(
               have_class = true;
               break;
             }
-            cout << "available clase is " << classes[i] << endl;
           }
           if (!have_class) {
             ROS_ERROR("Unable to find Analyzer class %s. Check that Analyzer "
@@ -153,7 +149,6 @@ bool AnalyzerGroup::init(
             continue;
           }
         }
-
         analyzer = analyzer_loader_.createSharedInstance(an_type);
       } catch (pluginlib::LibraryLoadException & e) {
         ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s",
@@ -164,7 +159,6 @@ bool AnalyzerGroup::init(
         init_ok = false;
         continue;
       }
-
     } else {
       continue;
     }

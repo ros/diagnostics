@@ -35,6 +35,7 @@ TEST_NODE = 'test_add_analyzer'
 TEST_NAMESPACE = '/my_ns'
 PKG = 'diagnostic_aggregator'
 
+
 class TestAddAnalyzer(unittest.TestCase):
 
     @classmethod
@@ -53,6 +54,7 @@ class TestAddAnalyzer(unittest.TestCase):
         self.ls1 = LaunchService()
         self.ls1.include_launch_description(ld1)
         self.t1 = threading.Thread(target=self.ls1.run, kwargs={'shutdown_when_idle': False})
+        print("self.t1 is = ",self.t1)
         self.t1.start()
 
     def _assert_launch_no_errors(self, actions):
@@ -60,6 +62,7 @@ class TestAddAnalyzer(unittest.TestCase):
         self.ls = LaunchService()
         self.ls.include_launch_description(ld)
         self.t = threading.Thread(target=self.ls.run, kwargs={'shutdown_when_idle': False})
+        print("self.t is = ",self.t)
         self.t.start()
 
     def test_create_subscription(self):
@@ -91,10 +94,10 @@ class TestAddAnalyzer(unittest.TestCase):
         self._assert_launch_no_errors_1([node_action])
         sleep(10)
         self.node.create_subscription(DiagnosticArray,'/diagnostics_agg',self.cb_test_add_agg)
-
+            
         while self.Test_pass ==False:
             rclpy.spin_once(self.node)
-
+    
     def cb_test_add_agg(self,msg):
         print(msg)
         self._mutex = threading.Lock()
@@ -106,6 +109,9 @@ class TestAddAnalyzer(unittest.TestCase):
         # the new aggregator data should contain the extra paths. At this point
         # the paths are probably still in the 'Other' group because the bond
         # hasn't been fully formed
+        self.ls.shutdown()
+        self.ls1.shutdown()
+        self.node.destroy_node()
         with self._mutex:
             agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
             print(agg_paths)
@@ -120,9 +126,6 @@ class TestAddAnalyzer(unittest.TestCase):
             self.assertTrue(all(expected in agg_paths for expected in self.expected))
                 
         self.Test_pass =True 
-        self.node.destroy_node()
-        self.ls.shutdown()
-        self.ls1.shutdown()
         
 if __name__ == '__main__':
     unittest.main()

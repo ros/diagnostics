@@ -136,6 +136,10 @@ class TestAggregator(unittest.TestCase):
     def diag_agg_cb(self, msg):
         with self._mutex:
             if len(self._expecteds) > 0:
+                self.t.stop()
+                self.t1.stop()
+                self.ls.shutdown()
+                self.ls1.shutdown()        
                 for stat in msg.status:
                     if stat.name.find('expected') > 0:
                         self._agg_expecteds[get_raw_name(stat.name)] = DiagnosticItem(stat)
@@ -146,8 +150,6 @@ class TestAggregator(unittest.TestCase):
                     else:
                         assert(self._agg_expecteds[name].level == item.level) #, "Diagnostic level of aggregated, raw item don't match for %s" % name)
                 self.node.destroy_node()
-                self.ls.shutdown()
-                self.ls1.shutdown()        
                 self.Test_pass =True            
             else:
                 print("self._expecteds is less than 0")

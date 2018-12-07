@@ -42,7 +42,6 @@ bool GenericAnalyzer::init(
   gen_an_name.erase(gen_an_name.end() - 5, gen_an_name.end());
 
   gen_nh = n;
-
   string nice_name;
   auto parameters_client =
     std::make_shared<rclcpp::SyncParametersClient>(gen_nh, nsp);
@@ -55,18 +54,19 @@ bool GenericAnalyzer::init(
     RCLCPP_INFO(gen_nh->get_logger(),
       "service not available, waiting again...");
   }
-
   std::stringstream ss;
   std::stringstream ss1;
+#if 0
   for (auto & parameter : parameters_client->get_parameters({"startswith"})) {
     ss << "\nParameter name: " << parameter.get_name();
     ss << "\nParameter value (" << parameter.get_type_name() <<
       "): " << parameter.value_to_string();
   }
-
+#endif
   map<string, string> anl_param;
+
   auto parameters_and_prefixes =
-    parameters_client->list_parameters({gen_an_name.c_str()}, 10);
+    parameters_client->list_parameters({gen_an_name}, 10);
 
   ss << "\nParameter names:";
   for (auto & name : parameters_and_prefixes.names) {
@@ -200,7 +200,6 @@ bool GenericAnalyzer::init(
   if (my_path.find("/") != 0) {
     my_path = "/" + my_path;
   }
-
   return GenericAnalyzerBase::init_v(my_path, nice_name, timeout,
            num_items_expected, discard_stale);
 }

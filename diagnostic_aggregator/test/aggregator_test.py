@@ -236,6 +236,10 @@ class TestAggregator(unittest.TestCase):
                         length = len(self.agg_msgs)
 
                     all_headers = {}
+                    self.node.destroy_node()
+                    self.ls.shutdown()
+                    self.ls1.shutdown()
+                    self.destroy_node()
                     for name, msg in self.agg_msgs.items():
                         assert(name.startswith('/'))#, "Aggregated name %s doesn't start with \"/\"" % name)
 
@@ -270,10 +274,6 @@ class TestAggregator(unittest.TestCase):
                         del self.agg_msgs[header]
                     self.Test_pass = True    
                     print("Test case Pass")
-                    self.node.destroy_node()
-                    self.ls.shutdown()
-                    self.ls1.shutdown()
-                    self.destroy_node()
                     rclpy.shutdown()
             
                
