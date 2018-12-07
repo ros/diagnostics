@@ -21,7 +21,6 @@ find_package(rclpy REQUIRED)
 #    LIBRARIES ${PROJECT_NAME})
 # Include boost
 find_package(Boost REQUIRED system)
-link_directories(${Boost_LIBRARY_DIRS})
 
 set(INCLUDE_DIRS
   include
@@ -30,7 +29,6 @@ set(INCLUDE_DIRS
   ${rclcpp_INCLUDE_DIRS}
   ${rclpy_INCLUDE_DIRS}
   ${pluginlib_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${bondcpp_INCLUDE_DIRS}
 )
 
@@ -40,8 +38,6 @@ set(LIBS
   ${rclcpp_LIBRARIES}
   ${rclpy_LIBRARIES}
   ${pluginlib_LIBRARIES}
-  ${xmlrpcpp_LIBRARIES}
-  ${Boost_LIBRARIES}
   ${bondcpp_LIBRARIES}
 )
 
@@ -108,6 +104,13 @@ if(BUILD_TESTING)
   # add_rostest(test/launch/test_agg.launch)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
+  find_package(ament_cmake_pytest REQUIRED)
+  #  Below test cases will faile due to bug  LaunchService.shutdown() fails to terminate run loop
+  #  ament_add_pytest_test(aggregator_test.py  "test/aggregator_test.py")
+  #  ament_add_pytest_test(add_analyzers_test.py  "test/add_analyzers_test.py")
+  #  ament_add_pytest_test(expected_stale_test.py  "test/expected_stale_test.py")
+  #  ament_add_pytest_test(multiple_match_test.py  "test/multiple_match_test.py")
+
 endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE "DAIGNOSTICCPP_BUILDING_DLL")
@@ -140,7 +143,6 @@ ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclpy)
 ament_export_dependencies(${PROJECT_NAME})
 ament_export_dependencies(pluginlib)
-ament_export_dependencies(xmlrpcpp)
 ament_export_include_directories(${INCLUDE_DIRS})
 pluginlib_export_plugin_description_file(${PROJECT_NAME} analyzer_plugins.xml)
 
