@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "diagnostic_aggregator/discard_analyzer.h"
-
+#include <vector>
+#include <memory>
+#include "diagnostic_aggregator/discard_analyzer.hpp"
 
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer, 
-                        diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer,
+  diagnostic_aggregator::Analyzer)
 
+DiscardAnalyzer::DiscardAnalyzer() {}
 
-DiscardAnalyzer::DiscardAnalyzer() { }
+DiscardAnalyzer::~DiscardAnalyzer() {}
 
-DiscardAnalyzer::~DiscardAnalyzer() { }
-
-
-
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > DiscardAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+DiscardAnalyzer::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
 
   return processed;
 }

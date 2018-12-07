@@ -57,51 +57,58 @@ add_library(${PROJECT_NAME} SHARED
 target_link_libraries(diagnostic_aggregator ${LIBS}
 )
 
-# Aggregator node 
+# Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${PROJECT_NAME})
 install(
-	TARGETS aggregator_node
-  	DESTINATION lib/${PROJECT_NAME})
+  TARGETS aggregator_node
+  DESTINATION lib/${PROJECT_NAME})
 
 
 # Analyzer loader allows other users to test that Analyzers load
 find_package(ament_cmake_gtest REQUIRED)
 
-  
 add_executable(analyzer_loader test/analyzer_loader.cpp)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 install(
-	TARGETS analyzer_loader
-  	DESTINATION lib/${PROJECT_NAME})
+  TARGETS analyzer_loader
+  DESTINATION lib/${PROJECT_NAME})
 
- add_executable(multi_match_pub test/multi_match_pub.cpp)
- target_link_libraries(multi_match_pub ${LIBS})
- install(
-        TARGETS multi_match_pub
-        DESTINATION lib/${PROJECT_NAME})
+add_executable(multi_match_pub test/multi_match_pub.cpp)
+target_link_libraries(multi_match_pub ${LIBS})
+install(
+  TARGETS multi_match_pub
+  DESTINATION lib/${PROJECT_NAME})
 
- add_executable(diag_pub test/diag_pub.cpp)
- target_link_libraries(diag_pub ${LIBS})
- install(
-        TARGETS diag_pub
-        DESTINATION lib/${PROJECT_NAME})
- add_executable(add_analyze_pub test/add_analyze_pub.cpp)
- target_link_libraries(add_analyze_pub ${LIBS})
- install(
-        TARGETS add_analyze_pub
-        DESTINATION lib/${PROJECT_NAME})
+add_executable(expected_stale_pub test/expected_stale_pub.cpp)
+target_link_libraries(expected_stale_pub ${LIBS})
+install(
+  TARGETS expected_stale_pub
+  DESTINATION lib/${PROJECT_NAME})
 
- add_executable(aggregator_test_pub  test/aggregator_test_pub.cpp)
- target_link_libraries(aggregator_test_pub  ${LIBS})
- install(
-        TARGETS aggregator_test_pub
-        DESTINATION lib/${PROJECT_NAME})
+add_executable(diag_pub test/diag_pub.cpp)
+target_link_libraries(diag_pub ${LIBS})
+install(
+  TARGETS diag_pub
+  DESTINATION lib/${PROJECT_NAME})
+add_executable(add_analyze_pub test/add_analyze_pub.cpp)
+target_link_libraries(add_analyze_pub ${LIBS})
+install(
+  TARGETS add_analyze_pub
+  DESTINATION lib/${PROJECT_NAME})
+
+add_executable(aggregator_test_pub  test/aggregator_test_pub.cpp)
+target_link_libraries(aggregator_test_pub  ${LIBS})
+install(
+  TARGETS aggregator_test_pub
+  DESTINATION lib/${PROJECT_NAME})
 
 
 if(BUILD_TESTING)
-	# add_rostest(test/launch/test_agg.launch)
-   endif()
+  # add_rostest(test/launch/test_agg.launch)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE "DAIGNOSTICCPP_BUILDING_DLL")
 ############################################################
@@ -117,8 +124,8 @@ install(
 )
 
 install(
-	FILES analyzer_plugins.xml 
-	DESTINATION share/${PROJECT_NAME}
+  FILES analyzer_plugins.xml
+  DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY
   launch

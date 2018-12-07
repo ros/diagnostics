@@ -12,30 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "diagnostic_aggregator/ignore_analyzer.h"
-
+#include <string>
+#include <vector>
+#include <memory>
+#include "diagnostic_aggregator/ignore_analyzer.hpp"
 
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, 
-                       diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
+  diagnostic_aggregator::Analyzer)
 
+IgnoreAnalyzer::IgnoreAnalyzer() {}
 
-IgnoreAnalyzer::IgnoreAnalyzer() { }
+IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-IgnoreAnalyzer::~IgnoreAnalyzer() { }
-
-/*bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)*/
-//bool IgnoreAnalyzer::init(const std::string base_name, const rclcpp::Node::SharedPtr &n)
-bool IgnoreAnalyzer::init(const std::string base_name, const char * nsp,const rclcpp::Node::SharedPtr &n, const char * rnsp)
+bool IgnoreAnalyzer::init(
+  const std::string base_name, const char * nsp,
+  const rclcpp::Node::SharedPtr & n, const char * rnsp)
 {
   return true;
 }
 
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > IgnoreAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+IgnoreAnalyzer::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> > processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
 
   return processed;
 }
