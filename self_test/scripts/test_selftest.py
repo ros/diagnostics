@@ -36,22 +36,21 @@
 ##\brief Tests for valid self test calls
 
 PKG = 'self_test'
-import roslib; roslib.load_manifest(PKG)
 
-SRV_NAME = 'my_node/self_test'
+SRV_NAME = 'self_test'
 
 import unittest
-import rospy, rostest
+import rclpy
 
 import sys
 from optparse import OptionParser
 
-from diagnostic_msgs.srv import SelfTest, SelfTestRequest, SelfTestResponse
+from diagnostic_msgs.srv import SelfTest
+#from diagnostic_msgs.srv import SelfTest, SelfTestRequest, SelfTestResponse
 
 class TestSelfTest(unittest.TestCase):
-    def __init__(self, *args):
-        super(TestSelfTest, self).__init__(*args)
 
+    def test_self_test(self):
         parser = OptionParser(usage="usage ./%prog [options]", prog="test_selftest.py")
         parser.add_option('--no-id', action="store_true",
                           dest="no_id", default=False,
@@ -68,43 +67,43 @@ class TestSelfTest(unittest.TestCase):
 
         options, args = parser.parse_args()
 
-        self.no_id = options.no_id
+        self.no_id = "--no-id" 
         self.expect_fail = options.expect_fail
         self.exception = options.exception
+        rclpy.init(args=args)
         
-
-    def test_self_test(self):
-        proxy = rospy.ServiceProxy(SRV_NAME, SelfTest)
-
-        try:
-            rospy.wait_for_service(SRV_NAME, 15)
-        except Exception, e:
-            self.assert_(False, "Service %s did not respond. Unable to test self_test" % SRV_NAME)
-
-        try:
-            res = proxy()
-        except Exception, e:
-            import traceback
-            self.assert_(False, "Error calling self_test service. Exception: %s" % traceback.format_exc())
+        node = rclpy.create_node('SelfTest_node_cli')
+        cli = node.create_client(SelfTest,SRV_NAME)
+        while not cli.wait_for_service(timeout_sec=1.0):
+            print('service not available, waiting again...')
+        req = SelfTest.Request()
+        future = cli.call_async(req)
+        rclpy.spin_until_future_complete(node, future)
+        if future.result() is not None:
+            #node.get_logger().info('Result of add_two_ints: %s' % future.result())
+            res = future.result();
+        else:
+            node.get_logger().error('Exception while calling service: %r' % future.exception())
 
         if self.no_id:
-            self.assert_(res.id == '', "Result had node ID even though ID was not expected. ID: %s" % res.id)
+            assert str(res.id) == '', 'Result had node ID even though ID was not expected. ID: %s' % res.id
         else:
-            self.assert_(res.id != '', "Result had no node ID")
+            assert res.id != '', 'Result had no node ID'
 
         if self.expect_fail or self.exception:
-            self.assert_(res.passed == 0, "Self test passed, but it shouldn't have. Result: %d" % res.passed)
+            assert res.passed == 0, 'Self test passed, but it shouldnt have. Result: %d' % res.passed
 
             max_val = 0
             for tst in res.status:
                 max_val = max(max_val, tst.level)
 
-            self.assert_(max_val > 0, "Self test failed, but no sub tests reported a failure or warning")
+            assert max_val > 0, 'self test failed, but no sub tests reported a failure or warning'
         else:
-            self.assert_(res.passed, "Self test failed, but we expected a pass")
+            assert res.passed, 'Self test failed, but we expected a pass'
 
             for tst in res.status:
-                self.assert_(tst.level == 0, "Self test subtest failed, but we marked it as a pass")
+                print(tst)
+                assert tst.level == b'\x00', 'Self test subtest failed, but we marked it as a pass'
                 
 
         if self.exception:
@@ -113,8 +112,9 @@ class TestSelfTest(unittest.TestCase):
                 if tst.message.find('exception') > -1:
                     found_ex = True
 
-            self.assert_(found_ex, "Self test threw and exception, but we didn't catch it and report it")
+            assert found_ex, 'Self test threw and exception, but we didnt catch it and report it'
 
-            
+    
+
 if __name__ == '__main__':
-    rostest.run(PKG, sys.argv[0], TestSelfTest, sys.argv)
+    unittest.main()

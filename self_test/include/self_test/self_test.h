@@ -38,13 +38,16 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
-
-#include <boost/thread.hpp>
-#include <ros/callback_queue.h>
-
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/SelfTest.h"
-#include "diagnostic_updater/diagnostic_updater.h"
+#include <functional>
+#include <thread>
+#include<iostream>
+//#include <boost/thread.hpp>
+//#include <ros/callback_queue.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rcutils/cmdline_parser.h"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/srv/self_test.hpp"
+#include "diagnostic_updater/diagnostic_updater.hpp"
 
 namespace self_test
 {
@@ -68,10 +71,14 @@ namespace self_test
   class TestRunner : public DiagnosticTaskVector
   {        
     private:
-      ros::ServiceServer service_server_;
-      ros::CallbackQueue self_test_queue_;
-      ros::NodeHandle node_handle_;
-      ros::NodeHandle private_node_handle_;
+       
+      rclcpp::Service<diagnostic_msgs::srv::SelfTest>::SharedPtr service_server_;
+      //ros::ServiceServer service_server_;
+      //ros::CallbackQueue self_test_queue_;
+      rclcpp::Node::SharedPtr node_handle_;
+      rclcpp::Node::SharedPtr private_node_handle_;
+      //ros::NodeHandle node_handle_;
+      //ros::NodeHandle private_node_handle_;
       std::string id_;
 
       bool verbose;
@@ -87,27 +94,101 @@ namespace self_test
        *
        * \param h NodeHandle from which to work. (Currently unused?)
        */
-      TestRunner(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~")) : 
+      /*TestRunner(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~")) : 
         node_handle_(h),
-        private_node_handle_(ph)
-    {
-      ROS_DEBUG("Advertising self_test");
-      ros::AdvertiseServiceOptions ops;//use options so that we can set callback queue directly
-      ops.init<diagnostic_msgs::SelfTest::Request, diagnostic_msgs::SelfTest::Response>("self_test", boost::bind(&TestRunner::doTest, this, _1, _2));
-      ops.callback_queue = &self_test_queue_;
-      service_server_ = private_node_handle_.advertiseService(ops);
-      verbose = true;
-    }
+        private_node_handle_(ph)*/
+      TestRunner(rclcpp::Node::SharedPtr ph) {
+      //ROS_DEBUG("Advertising self_test");
+      private_node_handle_=  ph;
+     
+      auto serviceCB =
+      [this](std::shared_ptr<diagnostic_msgs::srv::SelfTest::Request> request,
+        std::shared_ptr<diagnostic_msgs::srv::SelfTest::Response> response) -> bool
+        {
+          bool retval = false;
+          bool ignore_set_id_warn = false;
+	  std::cout << "I am in service callback" << std::endl;
 
+          if (rclcpp::ok())
+            {
+              const std::string unspecified_id("unspecified");
+
+              //ROS_INFO("Entering self-test.");
+	      std::cout << "Entering self-test." << std::endl;
+
+              std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
+
+              const std::vector<DiagnosticTaskInternal> &tasks = getTasks();
+              for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+                  iter != tasks.end(); iter++) {
+                 diagnostic_updater::DiagnosticStatusWrapper status;
+
+                 status.level = 2;
+                 status.message = "No message was set";
+
+                 try {
+                   // ROS_INFO("Starting test: %s", iter->getName().c_str());
+	           std::cout << "Starting test: %s" << iter->getName().c_str()<< std::endl;
+                   iter->run(status); 
+		 } catch (std::exception& e) {
+                   status.level = 2;
+                   status.message = std::string("Uncaught exception: ") + e.what();
+                   ignore_set_id_warn = true;
+                 }
+
+                 if (status.level >= 1) {
+                    if (verbose) {
+	                std::cout << "Non-zero self-test test status. Name:" << status.name.c_str() << "status %i: '%s"<< status.level <<"msg is"<< status.message <<std::endl;
+                  }
+	        }	
+               status_vec.push_back(status);
+         	} 
+               if (!ignore_set_id_warn && id_.empty()) {
+	          std::cout << "setID was not called by any self-test. The node author should be notified. If there is no suitable ID for this node, an ID of 'none' should be used." << std::endl;
+               }
+          //One of the test calls should use setID
+               response->id = id_;
+
+               response->passed = true;
+               for (std::vector<diagnostic_msgs::msg::DiagnosticStatus>::iterator status_iter = status_vec.begin();
+                  status_iter != status_vec.end();
+                   status_iter++) {
+                 if (status_iter->level >= 2) {
+                   response->passed = false;
+                  }
+		}
+
+
+               if (response->passed && id_ == unspecified_id) {
+	         std::cout << "Self-test passed, but setID was not called. This is a bug in the driver. Please report it." << std::endl;
+               }
+              response->status = status_vec;
+ 
+              retval = true;
+          
+	std::cout << "Self-test complete." << std::endl;
+        }
+
+        return retval;
+      };
+
+      //ros::AdvertiseServiceOptions ops;//use options so that we can set callback queue directly
+      //ops.init<diagnostic_msgs::SelfTest::Request, diagnostic_msgs::SelfTest::Response>("self_test", boost::bind(&TestRunner::doTest, this, _1, _2));
+      //ops.callback_queue = &self_test_queue_;
+      //service_server_ = private_node_handle_.advertiseService(ops);
+      service_server_ = private_node_handle_->create_service<diagnostic_msgs::srv::SelfTest>("self_test", serviceCB);
+      verbose = true;
+      //TODO rclcpp::spin(private_node_handle_);
+     }    
       /**
        * \brief Check if a self-test is pending. If so, start it and wait for it
        * to complete.
        */
 
-      void checkTest()
+     /* void checkTest()
       {
         self_test_queue_.callAvailable(ros::WallDuration(0));
-      }
+      }*/
 
       /**
        * \brief Sets the ID of the part being tested.
@@ -123,11 +204,11 @@ namespace self_test
         id_ = id;
       }
 
-    private:
+  //  private:
       /**
        * The service callback for the "self-test" service.
        */
-      bool doTest(diagnostic_msgs::SelfTest::Request &req,
+    /*  bool doTest(diagnostic_msgs::SelfTest::Request &req,
           diagnostic_msgs::SelfTest::Response &res)
       {
         bool retval = false;
@@ -201,7 +282,7 @@ namespace self_test
 
         return retval;
 
-      }
+      }*/
   };
 };
 

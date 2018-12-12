@@ -1,31 +1,42 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>self_test</name>
   <version>1.9.3</version>
   <description>self_test</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/self_test</url>
-<!-- <url type="bugtracker"></url> -->
+  <!-- <url type="bugtracker"></url> -->
 
   <author>Jeremy Leibs and Blaise Gassend</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>builtin_interfaces</build_depend>
   <build_depend>diagnostic_msgs</build_depend>
   <build_depend>diagnostic_updater</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rostest</build_depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>rcutils</build_depend>
+  <!-- <build_depend>rostest</build_depend> -->
+  
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rcutils</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>diagnostic_updater</exec_depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>roscpp</run_depend>
-
-  <!-- <test_depend>roscpp</test_depend> -->
-  <!-- <test_depend>diagnostic_updater</test_depend> -->
-  <!-- <test_depend>diagnostic_msgs</test_depend> -->
+  <test_depend>rclcpp</test_depend> 
+  <test_depend>rcutils</test_depend> 
+  <test_depend>builtin_interfaces</test_depend>
+  <test_depend>diagnostic_updater</test_depend> 
+  <test_depend>diagnostic_msgs</test_depend> 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>  
+ 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

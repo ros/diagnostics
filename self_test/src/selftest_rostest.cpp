@@ -32,31 +32,53 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 
-#include "ros/ros.h"
-#include "diagnostic_msgs/SelfTest.h"
+//#include "ros/ros.h"
+//#include "diagnostic_msgs/SelfTest.h"
+
+#include "rclcpp/rclcpp.hpp"
+#include "diagnostic_msgs/srv/self_test.hpp"
 
 #include <gtest/gtest.h>
 #include <string>
 
-TEST(SelfTest, runSelfTest)
-{
-  ros::NodeHandle nh;
-  ros::NodeHandle nh_private("~");
 
+class SelfTest : public ::testing::Test
+{
+protected:
+  static void SetUpTestCase()
+  {
+    rclcpp::init(0, NULL);
+  }
+
+  static void TearDownTestCase()
+  {
+    rclcpp::shutdown();
+  }
+};
+
+TEST_F(SelfTest, runSelfTest)
+{
+  //ros::NodeHandle nh;
+  //ros::NodeHandle nh_private("~");
+  auto nh = std::make_shared<rclcpp::Node>();
+  auto nh_private = std::make_shared<rclcpp::Node>();
   std::string node_to_test;
   double max_delay;
-  nh_private.param("node_to_test", node_to_test, std::string());
-  nh_private.param("max_delay", max_delay, 60.);
+  //nh_private.param("node_to_test", node_to_test, std::string());
+  //nh_private -> get_parameter_or("node_to_test", node_to_test, std::string());
+  //nh_private.param("max_delay", max_delay, 60.);
+  //nh_private->get_parameter_or("max_delay", max_delay, 60.);
+   max_delay = 60;
   ASSERT_FALSE(node_to_test.empty()) << "selftest_rostest needs the \"node_to_test\" parameter.";
     
   std::string service_name = node_to_test+"/self_test";
   ros::service::waitForService(service_name, max_delay);
 
-  diagnostic_msgs::SelfTest srv;
+  diagnostic_msgs::srv::SelfTest srv;
   
-  if (nh.serviceClient<diagnostic_msgs::SelfTest>(service_name).call(srv))
+  if (nh.serviceClient<diagnostic_msgs::srv::SelfTest>(service_name).call(srv))
   {
-    diagnostic_msgs::SelfTest::Response &res = srv.response;
+	  diagnostic_msgs::srv::SelfTest::Response &res = srv.response;
     
     std::string passfail;
 
@@ -96,10 +118,10 @@ TEST(SelfTest, runSelfTest)
   }
 }
 
-int main(int argc, char **argv)
+/*int main(int argc, char **argv)
 {
   ros::init(argc, argv, "selftest_nodetest");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-}
+}*/
 
