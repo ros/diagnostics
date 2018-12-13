@@ -14,7 +14,7 @@ env:
 
 # command to install dependencies
 install:
-  - sudo apt update && sudo apt install curl gnupg2 python3-vcstool
+  - sudo apt update && sudo apt install curl gnupg2 python3-colcon-common-extensions 
   - curl http://repo.ros2.org/repos.key | sudo apt-key add -
   - mkdir -p ~/ros2_ws/src
   - cd ~/ros2_ws
