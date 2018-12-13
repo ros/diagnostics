@@ -14,12 +14,9 @@ env:
 
 # command to install dependencies
 install:
-  - sudo apt update && sudo apt install curl gnupg2 python3-colcon-common-extensions 
+  - sudo apt update && sudo apt install curl gnupg2
   - curl http://repo.ros2.org/repos.key | sudo apt-key add -
-  - mkdir -p ~/ros2_ws/src
-  - cd ~/ros2_ws
-  - wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
-  - vcs import src < ros2.repos
+  - sudo sh -c 'echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list'
   - export ROS_DISTRO=bouncy
   - sudo apt update && sudo apt install -y python3-rosdep ros-$ROS_DISTRO-ros-base
   - sudo apt install python3-argcomplete
