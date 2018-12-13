@@ -1,7 +1,7 @@
 idist: bionic
 sudo: enabled
 #language: c++, python
-language: generic
+language: C++ 
 #c++:
 #  - "c++14"
 python:
