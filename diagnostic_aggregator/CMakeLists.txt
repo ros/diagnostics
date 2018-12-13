@@ -130,10 +130,6 @@ install(
   FILES analyzer_plugins.xml
   DESTINATION share/${PROJECT_NAME}
 )
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}/
-)
 
 # Export include dependencies, directories, and libraries
 ament_export_dependencies(ament_cmake)
