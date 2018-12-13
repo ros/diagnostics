@@ -1,46 +1,26 @@
-#!/usr/bin/python
+#!/usr/bin/python3.6
 #
-# Software License Agreement (BSD License)
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
-# Copyright (c) 2008, Willow Garage, Inc.
-# All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above
-#    copyright notice, this list of conditions and the following
-#    disclaimer in the documentation and/or other materials provided
-#    with the distribution.
-#  * Neither the name of the Willow Garage nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # Author: Kevin Watts
 
 PKG = 'diagnostic_analysis'
 
-#import roslib; roslib.load_manifest(PKG)
-#import rostest
 import unittest
 
-import rosbag
+#import rosbag
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 import random
@@ -48,8 +28,8 @@ import tempfile
 import time, os
 import csv
 
-from diagnostic_analysis.exporter import LogExporter
-from diagnostic_analysis.sparse import *
+#from diagnostic_analysis.exporter import LogExporter
+from diagnostic_analysis.sparse_csv import *
 
 row_count = 100
 
@@ -72,19 +52,19 @@ def make_status_msg(count):
 class TestBagToCSV(unittest.TestCase):
     def setUp(self):
         # Make logfile with bogus messages
-        self.bag = tempfile.NamedTemporaryFile()
-
+        #self.bag = tempfile.NamedTemporaryFile()
+        
         #rebagger = rosbag.Bag(self.bag.name, 'w')
-        rebagger = open(self.bag.name, 'w')
-        for i in range(0, row_count):
-            rebagger.write("/diagnostics", make_status_msg(i))
-        rebagger.close()
+        #for i in range(0, row_count):
+        #    rebagger.write("/diagnostics", make_status_msg(i))
+        #rebagger.close()
 
         # Make CSV
-        self.exp = LogExporter(None, self.bag.name)
-        self.exp.process_log()
-        self.exp.finish_logfile()
-        self.filename = self.exp.get_filename('Unit Test')
+        #self.exp = LogExporter(None, self.bag.name)
+        #self.exp.process_log()
+        #self.exp.finish_logfile()
+        #self.filename = self.exp.get_filename('Unit Test')
+        self.filename = "Unit_Test_1.csv"
 
         ## Make sparse CSV's
         self.skip_10 = make_sparse_skip(self.filename, 10)
@@ -98,7 +78,8 @@ class TestBagToCSV(unittest.TestCase):
     ##\brief Test that CSV file has correct data, number of lines
     def test_export(self):
         # Read CSV, count rows
-        input_reader = csv.reader(open(self.filename, 'rb'))
+        self.filename = "Unit_Test_1.csv"
+        input_reader = csv.reader(open(self.filename, 'r'))
         count = -1
         for row in input_reader:
             if count == -1:
@@ -124,22 +105,12 @@ class TestBagToCSV(unittest.TestCase):
         self.assert_(len(open(self.length_10).read().split('\n')) == 12, "Length of sparse CSV incorrect")
 
     def tearDown(self):
-        self.bag.close()
+       # self.bag.close()
         os.remove(self.skip_10)
         os.remove(self.length_10)
 
-        self.exp.remove_files()
+        #self.exp.remove_files()
 
         
 if __name__ == '__main__':
-    if True: # Use rostest for accurate results
-        rostest.unitrun(PKG, 'bag_csv_test', TestBagToCSV)
-    else:
-        # Manual test suite
-        suite = unittest.TestSuite()
-        suite.addTest(TestBagToCSV('test_file_exists'))
-        suite.addTest(TestBagToCSV('test_export'))
-        suite.addTest(TestBagToCSV('test_sparse_skip'))
-        suite.addTest(TestBagToCSV('test_sparse_length'))
-        
-        unittest.TextTestRunner(verbosity = 2).run(suite)
+    unittest.main()
