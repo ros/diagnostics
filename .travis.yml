@@ -1,11 +1,6 @@
 idist: bionic
 sudo: enabled
-#language: c++, python
 language: generic 
-#c++:
-#  - "c++14"
-python:
-  - "3.6"
 
 env:
   global:
