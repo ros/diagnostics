@@ -1,6 +1,6 @@
 idist: bionic
 sudo: enabled
-language: python
+language: generic 
 python:
   # - "3.5"
   - "3.6"
