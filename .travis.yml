@@ -1,4 +1,4 @@
-idist: bionic
+dist: bionic
 sudo: enabled
 language: generic 
 python:
