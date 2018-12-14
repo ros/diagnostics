@@ -1,4 +1,4 @@
-dist: bionic
+dist: Xenial
 sudo: enabled
 language: generic 
 python:
