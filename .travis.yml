@@ -2,8 +2,6 @@ dist: Xenial
 sudo: enabled
 language: python 
 python:
-  # - "3.5"
-  - "3.6"
 
 env:
   global:
