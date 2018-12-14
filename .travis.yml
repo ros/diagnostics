@@ -1,6 +1,6 @@
 dist: Xenial
 sudo: enabled
-language: generic 
+language: python 
 python:
   # - "3.5"
   - "3.6"
