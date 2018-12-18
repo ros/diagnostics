@@ -75,7 +75,6 @@ public:
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
-    
     msg_->status = v_msg;
 
     // Create a function for when messages are to be sent.
