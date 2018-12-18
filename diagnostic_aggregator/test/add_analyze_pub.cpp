@@ -29,8 +29,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
 
-using namespace std;
-using namespace std::chrono_literals;
+//  using namespace std;
+//  using namespace std::chrono_literals;
 
 void print_usage()
 {
@@ -71,7 +71,7 @@ public:
     msg3.level = 0;
     msg3.message = "OK";
 
-    vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
@@ -96,6 +96,7 @@ public:
       "/diagnostics", custom_qos_profile);
 
     // Use a timer to schedule periodic message publishing.
+    using namespace std::chrono_literals;
     timer_ = this->create_wall_timer(4s, publish_message);
   }
 
@@ -159,6 +160,7 @@ int main(int argc, char * argv[])
   auto request =
     std::make_shared<diagnostic_msgs::srv::AddDiagnostics::Request>();
   request->load_namespace = "/test_add_analyzer";
+  using namespace std::chrono_literals;
   while (!client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(node->get_logger(),

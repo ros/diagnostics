@@ -26,8 +26,8 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/time_source.hpp"
 
-using namespace std;
-using namespace std::chrono_literals;
+//  using namespace std;
+//  using namespace std::chrono_literals;
 
 void print_usage()
 {
@@ -39,12 +39,12 @@ void print_usage()
     "chatter.\n");
 }
 
-// Create a Talker class that subclasses the generic rclcpp::Node base class.
+// Create a aggregator_test_pub class that subclasses the generic rclcpp::Node base class.
 // The main function below will instantiate the class as a ROS node.
-class Talker : public rclcpp::Node
+class aggregator_test_pub : public rclcpp::Node
 {
 public:
-  explicit Talker(const std::string & topic_name)
+  explicit aggregator_test_pub(const std::string & topic_name)
   : Node("dia_pub")
   {
     // msg_ = std::make_shared<std_msgs::msg::String>();
@@ -92,7 +92,7 @@ public:
     msg9.name = "other1";
     msg9.level = 2;
     msg9.message = "Error";
-    vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
@@ -123,6 +123,7 @@ public:
       "/diagnostics", custom_qos_profile);
 
     // Use a timer to schedule periodic message publishing.
+    using namespace std::chrono_literals;
     timer_ = this->create_wall_timer(3s, publish_message);
   }
 
@@ -160,7 +161,7 @@ int main(int argc, char * argv[])
   }
 
   // Create a node.
-  auto node = std::make_shared<Talker>(topic);
+  auto node = std::make_shared<aggregator_test_pub>(topic);
 
   // spin will block until work comes in, execute work as it becomes available,
   // and keep blocking. It will only be interrupted by Ctrl-C.

@@ -26,8 +26,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
 
-using namespace std;
-using namespace std::chrono_literals;
+//  using namespace std;
+//  using namespace std::chrono_literals;
 
 class expected_pub : public rclcpp::Node
 {
@@ -75,7 +75,7 @@ public:
     msg9.name = "other3";
     msg9.level = 2;
     msg9.message = "OK";
-    vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
@@ -95,6 +95,7 @@ public:
     custom_qos_profile.depth = 7;
     pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
       "/diagnostics", custom_qos_profile);
+    using namespace std::chrono_literals;
     timer_ = this->create_wall_timer(3s, publish_message);
   }
 

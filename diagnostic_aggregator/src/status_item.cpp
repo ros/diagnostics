@@ -16,10 +16,10 @@
 #include <memory>
 #include "diagnostic_aggregator/status_item.hpp"
 
-using namespace diagnostic_aggregator;
-using namespace std;
+//  using namespace diagnostic_aggregator;
+//  using namespace std;
 
-StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
+diagnostic_aggregator::StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   level_ = valToLevel(status->level);
   name_ = status->name;
@@ -32,8 +32,8 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
   update_time_ = ros_clock.now();
 }
 
-StatusItem::StatusItem(
-  const string item_name, const string message,
+diagnostic_aggregator::StatusItem::StatusItem(
+  const std::string item_name, const std::string message,
   const DiagnosticLevel level)
 {
   name_ = item_name;
@@ -41,15 +41,16 @@ StatusItem::StatusItem(
   level_ = level;
   hw_id_ = "";
 
-  cout << "StatusItem name is =  " << name_ << endl;
+  std::cout << "StatusItem name is =  " << name_ << std::endl;
   output_name_ = getOutputName(name_);
   rclcpp::Clock ros_clock(RCL_ROS_TIME);
   update_time_ = ros_clock.now();
 }
 
-StatusItem::~StatusItem() {}
+diagnostic_aggregator::StatusItem::~StatusItem() {}
 
-bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
+bool diagnostic_aggregator::StatusItem::
+update(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   if (name_ != status->name) {
     ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s",
@@ -76,7 +77,7 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
 }
 
 std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>
-StatusItem::toStatusMsg(const std::string & path, bool stale) const
+diagnostic_aggregator::StatusItem::toStatusMsg(const std::string & path, bool stale) const
 {
   std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> status(
     new diagnostic_msgs::msg::DiagnosticStatus());

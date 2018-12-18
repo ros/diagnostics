@@ -21,7 +21,7 @@
 #include <vector>
 #include "diagnostic_aggregator/analyzer_group.hpp"
 
-using namespace std;
+//  using namespace std;
 //  using namespace diagnostic_aggregator;
 
 //  Uses AnalyzerGroup to load analyzers
@@ -46,9 +46,9 @@ void v_TEST()
   std::string path = "base_path";
   //  = new diagnostic_aggregator::AnalyzerGroup();
   if (analyzer_group.init(path, nh->get_namespace(), nh, "gen_analyzers")) {
-    cout << "test passed" << endl;
+   std::cout << "test passed" << std::endl;
   } else {
-    cout << "test failed" << endl;
+   std::cout << "test failed" << std::endl;
   }
   assert(analyzer_group.init(path, nh->get_namespace(), nh, "gen_analyzers"));
 }
@@ -57,11 +57,5 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   v_TEST();
-  //  rclcpp::Node::SharedPtr node =
-  //  rclcpp::Node::make_shared("analyzer_loader");
-  //  testing::InitGoogleTest(&argc, argv);
-
-  //  ros::init(argc, argv, "analyzer_loader");
-
   return 0;
 }

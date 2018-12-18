@@ -28,8 +28,8 @@
 #include "rclcpp/clock.hpp"
 #include "rclcpp/time_source.hpp"
 
-using namespace std;
-using namespace std::chrono_literals;
+//  using namespace std;
+//  using namespace std::chrono_literals;
 
 void print_usage()
 {
@@ -94,7 +94,7 @@ public:
     msg9.name = "other1";
     msg9.level = 2;
     msg9.message = "Error";
-    vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
@@ -125,6 +125,7 @@ public:
       "/diagnostics", custom_qos_profile);
 
     // Use a timer to schedule periodic message publishing.
+    using namespace std::chrono_literals;
     timer_ = this->create_wall_timer(3s, publish_message);
   }
 

@@ -26,13 +26,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
 
-using namespace std;
-using namespace std::chrono_literals;
+//  using namespace std;
+//  using namespace std::chrono_literals;
 
 class expected_pub : public rclcpp::Node
 {
 public:
-  explicit expected_pub(const string & topic_name)
+  explicit expected_pub(const std::string & topic_name)
   : Node("dia_pub")
   {
     // msg_ = std::make_shared<std_msgs::msg::String>();
@@ -75,7 +75,7 @@ public:
     msg9.name = "other3";
     msg9.level = 2;
     msg9.message = "OK";
-    vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
@@ -95,13 +95,14 @@ public:
     custom_qos_profile.depth = 7;
     pub_ = this->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
       "/diagnostics", custom_qos_profile);
+    using namespace std::chrono_literals;
     timer_ = this->create_wall_timer(3s, publish_message);
   }
 
 private:
   size_t count_ = 1;
-  shared_ptr<diagnostic_msgs::msg::DiagnosticArray> msg_;
-  shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> msg_s;
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticArray> msg_;
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> msg_s;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
@@ -109,7 +110,7 @@ private:
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  auto topic = string("chatter");
+  auto topic = std::string("chatter");
   auto node = std::make_shared<expected_pub>(topic);
   rclcpp::spin(node);
   rclcpp::shutdown();

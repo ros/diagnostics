@@ -15,9 +15,6 @@
 #include <exception>
 #include "rclcpp/rclcpp.hpp"
 #include "diagnostic_aggregator/aggregator.hpp"
-using namespace std;
-//  namespace std
-//  {
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
@@ -30,11 +27,10 @@ int main(int argc, char ** argv)
       agg.publishData();
       pub_rate.sleep();
     }
-  } catch (exception & e) {
-    cout << "Vaibhav diagnostic_aggregator exception hit  " << endl;
+  } catch (std::exception & e) {
+  std::cout << "Vaibhav diagnostic_aggregator exception hit  " << std::endl;
   }
 
   rclcpp::shutdown();
   return 0;
 }
-//  }  // namespace std
