@@ -183,14 +183,17 @@ class TestAggregator(unittest.TestCase):
         self.diag_msgs = {}
         self.agg_msgs = {}
         
-        self.params = { 'prefix1': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'First','remove_prefix': 'prefix1' , 'find_and_remove_prefix': 'find1_items', 'startswith': 'pref1a', 'contains': 'contains1a', 'name': 'name1' } }
+        self.params = { 'prefix1': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'First','remove_prefix': 'prefix1' , 'find_and_remove_prefix': 'find1_items', 'startswith': 'pref1a', 'contains': 'contains1a', 'name': 'name1' }, 'primary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Primary','startswith': 'primary' }, 'secondary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Secondary','startswith': 'secondary' } }
         
+       # self.params = { 'primary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Primary','startswith': 'primary' }, 'secondary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Secondary','startswith': 'secondary' } }
+        
+
         global prefix
         global cb_1
         self.Test_pass = False
         self._mutex = threading.Lock()
         parameters_file_dir = pathlib.Path(__file__).resolve().parent
-        parameters_file_path = parameters_file_dir / 'simple_analyzers.yaml'
+        parameters_file_path = parameters_file_dir / 'add_analyzers_init.yaml'
         parameters_file_path_1 = parameters_file_dir / 'add_analyzers.yaml'
         os.environ['FILE_PATH'] = str(parameters_file_dir)
 
@@ -199,7 +202,7 @@ class TestAggregator(unittest.TestCase):
             parameters=[
                 parameters_file_path,
                 str(parameters_file_path),
-                [EnvironmentVariable(name='FILE_PATH'), os.sep, 'simple_analyzers.yaml'],
+                [EnvironmentVariable(name='FILE_PATH'), os.sep, 'add_analyzers_init.yaml'],
                     ],
             )
         node_action = launch_ros.actions.Node(
@@ -239,12 +242,14 @@ class TestAggregator(unittest.TestCase):
                     self.node.destroy_node()
                     self.ls.shutdown()
                     self.ls1.shutdown()
-                    self.destroy_node()
+                    #self.destroy_node()
                     for name, msg in self.agg_msgs.items():
                         assert(name.startswith('/'))#, "Aggregated name %s doesn't start with \"/\"" % name)
 
                     for name, msg in self.diag_msgs.items():
+                        print(name)
                         agg_name = name_to_agg_name(name, self.params)
+                        print(agg_name)
                         assert(agg_name is not None)#, 'Aggregated name is None for %s' % name
                         assert(msg.level == self.agg_msgs[agg_name].level)
                         assert(msg.message == self.agg_msgs[agg_name].message)#, 'Status message of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s' % (name, agg_name))
@@ -274,7 +279,7 @@ class TestAggregator(unittest.TestCase):
                         del self.agg_msgs[header]
                     self.Test_pass = True    
                     print("Test case Pass")
-                    rclpy.shutdown()
+                   # rclpy.shutdown()
             
                
 if __name__ == '__main__':

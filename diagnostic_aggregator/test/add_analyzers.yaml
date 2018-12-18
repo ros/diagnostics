@@ -9,4 +9,3 @@ test_add_analyzer:
                                 type: 'diagnostic_aggregator/GenericAnalyzer'
                                 path: Secondary
                                 startswith: 'secondary'      
-                          

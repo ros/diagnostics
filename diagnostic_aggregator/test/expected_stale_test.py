@@ -136,8 +136,6 @@ class TestAggregator(unittest.TestCase):
     def diag_agg_cb(self, msg):
         with self._mutex:
             if len(self._expecteds) > 0:
-                self.t.stop()
-                self.t1.stop()
                 self.ls.shutdown()
                 self.ls1.shutdown()        
                 for stat in msg.status:

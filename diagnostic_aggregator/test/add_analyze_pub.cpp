@@ -58,8 +58,7 @@ public:
       std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
     msg_->header.stamp = clock->now();
     msg_s->name = "vebs";
-    diagnostic_msgs::msg::DiagnosticStatus msg1, msg2, msg3, msg4, msg5, msg6,
-      msg7, msg8, msg9;
+    diagnostic_msgs::msg::DiagnosticStatus msg1, msg2, msg3;
     msg1.name = "primary";
     msg1.level = 0;
     msg1.message = "OK";
@@ -72,40 +71,11 @@ public:
     msg3.level = 0;
     msg3.message = "OK";
 
-    msg4.name = "prefix1: contains1b";
-    msg4.level = 0;
-    msg4.message = "OK";
-
-    msg5.name = "name1";
-    msg5.level = 0;
-    msg5.message = "OK";
-
-    msg6.name = "prefix1: expected1a";
-    msg6.level = 0;
-    msg6.message = "OK";
-
-    msg7.name = "find1_items: find_remove1a";
-    msg7.level = 0;
-    msg7.message = "OK";
-
-    msg8.name = "contain2a";
-    msg8.level = 0;
-    msg8.message = "OK";
-
-    msg9.name = "other1";
-    msg9.level = 2;
-    msg9.message = "Error";
     vector<diagnostic_msgs::msg::DiagnosticStatus> v_msg;
     v_msg.push_back(msg1);
     v_msg.push_back(msg2);
     v_msg.push_back(msg3);
-    v_msg.push_back(msg4);
-    v_msg.push_back(msg5);
-    v_msg.push_back(msg6);
-    v_msg.push_back(msg7);
-    v_msg.push_back(msg8);
-    v_msg.push_back(msg9);
-
+    
     msg_->status = v_msg;
 
     // Create a function for when messages are to be sent.
