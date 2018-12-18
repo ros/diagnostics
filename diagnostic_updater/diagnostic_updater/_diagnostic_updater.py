@@ -28,7 +28,7 @@ from rclpy.clock import ClockType
 from rclpy.clock import Clock
 from rclpy.duration import Duration
 from rclpy.time import Time
-from test_msgs.msg import Builtins
+#from test_msgs.msg import Builtins
 from ._diagnostic_status_wrapper import *
 
 class DiagnosticTask:
@@ -336,14 +336,15 @@ class Updater(DiagnosticTaskVector):
         now = clock.now()
 
         time = Time()
-        builtins_msg = Builtins()
-        builtins_msg.time_value = now.to_msg()
+        #builtins_msg = Builtins()
+        #builtins_msg.time_value = now.to_msg()
 
         da = DiagnosticArray()
         db =DiagnosticStatus()
         db.name=stat.name 
         da.status.append(db)
-        da.header.stamp =  builtins_msg.time_value# Add timestamp for ROS 0.10
+        #da.header.stamp =  builtins_msg.time_value# Add timestamp for ROS 0.10
+        da.header.stamp =  now.to_msg()# Add timestamp for ROS 0.10
 
         self.publisher.publish(da)
 
