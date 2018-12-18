@@ -23,20 +23,16 @@
 #include "rclcpp/rclcpp.hpp"
 #include "diagnostic_aggregator/analyzer_group.hpp"
 
-using namespace std;
-using namespace diagnostic_aggregator;
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup,
   diagnostic_aggregator::Analyzer)
 
-// namespace std {
-// namespace diagnostic_aggregator {
-AnalyzerGroup::AnalyzerGroup()
+diagnostic_aggregator::AnalyzerGroup::AnalyzerGroup()
 : path_(""), nice_name_(""),
   analyzer_loader_("diagnostic_aggregator",
     "diagnostic_aggregator::Analyzer") {}
 
-bool AnalyzerGroup::init(
-  const string base_path, const char * nsp,
+bool diagnostic_aggregator::AnalyzerGroup::init(
+  const std::string base_path, const char * nsp,
   const rclcpp::Node::SharedPtr & nh, const char * rnsp)
 {
   auto context =
@@ -59,12 +55,13 @@ bool AnalyzerGroup::init(
     path_ = "/" + path_;
   }
 
-  string anz_name;
-  string an_name = nsp;
+  std::string anz_name;
+  std::string an_name = nsp;
   analyzers_nh = nh;
 
   rclcpp::SyncParametersClient::SharedPtr parameters_client_analyzer =
     std::make_shared<rclcpp::SyncParametersClient>(analyzers_nh, nsp);
+  using namespace std::chrono_literals;
   while (!parameters_client_analyzer->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(analyzers_nh->get_logger(),
@@ -81,8 +78,8 @@ bool AnalyzerGroup::init(
 
   bool init_ok = true;
 
-  map<string, string> anl_param;
-  string params_anz, r_nsp;
+  std::map<std::string, std::string> anl_param;
+  std::string params_anz, r_nsp;
   if (rnsp != NULL) {
     r_nsp = rnsp;
     r_nsp.erase(r_nsp.end() - 5, r_nsp.end());
@@ -107,17 +104,17 @@ bool AnalyzerGroup::init(
 
   RCLCPP_INFO(analyzers_nh->get_logger(), ss1.str().c_str());
 
-  for (map<string, string>::iterator anl_it = anl_param.begin();
+  for (std::map<std::string, std::string>::iterator anl_it = anl_param.begin();
     anl_it != anl_param.end(); ++anl_it)
   {
-    string analyzer_name = anl_it->first;
-    string ns = anl_it->second;
+    std::string analyzer_name = anl_it->first;
+    std::string ns = anl_it->second;
     std::shared_ptr<Analyzer> analyzer;
-    string an_type = anl_it->second;
+    std::string an_type = anl_it->second;
     if (std::string::npos != analyzer_name.find("type")) {
-      string params_anz_ = params_anz + ".";
-      string p_name = analyzer_name;
-      string::size_type i = p_name.find(params_anz_);
+      std::string params_anz_ = params_anz + ".";
+      std::string p_name = analyzer_name;
+      std::string::size_type i = p_name.find(params_anz_);
       if (i != std::string::npos) {
         p_name.erase(i, params_anz_.length());
       }
@@ -128,7 +125,7 @@ bool AnalyzerGroup::init(
         // Look for non-fully qualified class name for Analyzer type
         if (!analyzer_loader_.isClassAvailable(an_type)) {
           bool have_class = false;
-          vector<string> classes = analyzer_loader_.getDeclaredClasses();
+          std::vector<std::string> classes = analyzer_loader_.getDeclaredClasses();
           for (unsigned int i = 0; i < classes.size(); ++i) {
             if (an_type == analyzer_loader_.getName(classes[i])) {
               // if we've found a match... we'll get the fully qualified name
@@ -188,17 +185,17 @@ bool AnalyzerGroup::init(
   return init_ok;
 }
 
-AnalyzerGroup::~AnalyzerGroup() {analyzers_.clear();}
+diagnostic_aggregator::AnalyzerGroup::~AnalyzerGroup() {analyzers_.clear();}
 
-bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
+bool diagnostic_aggregator::AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
   analyzers_.push_back(analyzer);
   return true;
 }
 
-bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
+bool diagnostic_aggregator::AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
-  vector<std::shared_ptr<Analyzer>>::iterator it =
+  std::vector<std::shared_ptr<Analyzer>>::iterator it =
     find(analyzers_.begin(), analyzers_.end(), analyzer);
   if (it != analyzers_.end()) {
     analyzers_.erase(it);
@@ -207,7 +204,7 @@ bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
   return false;
 }
 
-bool AnalyzerGroup::match(const string name)
+bool diagnostic_aggregator::AnalyzerGroup::match(const std::string name)
 {
   if (analyzers_.size() == 0) {
     return false;
@@ -215,7 +212,7 @@ bool AnalyzerGroup::match(const string name)
 
   bool match_name = false;
   if (matched_.count(name)) {
-    vector<bool> & mtch_vec = matched_[name];
+    std::vector<bool> & mtch_vec = matched_[name];
     for (unsigned int i = 0; i < mtch_vec.size(); ++i) {
       if (mtch_vec[i]) {
         return true;
@@ -234,12 +231,12 @@ bool AnalyzerGroup::match(const string name)
   return match_name;
 }
 
-void AnalyzerGroup::resetMatches() {matched_.clear();}
+void diagnostic_aggregator::AnalyzerGroup::resetMatches() {matched_.clear();}
 
-bool AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
+bool diagnostic_aggregator::AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
 {
   bool analyzed = false;
-  vector<bool> & mtch_vec = matched_[item->getName()];
+  std::vector<bool> & mtch_vec = matched_[item->getName()];
   for (unsigned int i = 0; i < mtch_vec.size(); ++i) {
     if (mtch_vec[i]) {
       analyzed = analyzers_[i]->analyze(item) || analyzed;
@@ -249,11 +246,10 @@ bool AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
   return analyzed;
 }
 
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
-AnalyzerGroup::report()
+std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+diagnostic_aggregator::AnalyzerGroup::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> output;
-
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> output;
   std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> header_status(
     new diagnostic_msgs::msg::DiagnosticStatus);
   header_status->name = path_;
@@ -275,10 +271,10 @@ AnalyzerGroup::report()
   bool all_stale = true;
 
   for (unsigned int j = 0; j < analyzers_.size(); ++j) {
-    string path = analyzers_[j]->getPath();
-    string nice_name = analyzers_[j]->getName();
+    std::string path = analyzers_[j]->getPath();
+    std::string nice_name = analyzers_[j]->getName();
 
-    vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
+    std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
       analyzers_[j]->report();
 
     // Do not report anything in the header values for analyzers that don't
@@ -299,7 +295,7 @@ AnalyzerGroup::report()
         kv.value = processed[i]->message;
 
         all_stale = all_stale && (processed[i]->level == 3);
-        header_status->level = max(header_status->level, processed[i]->level);
+        header_status->level = std::max(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
     }
@@ -322,5 +318,3 @@ AnalyzerGroup::report()
 
   return output;
 }
-//}
-//}

@@ -49,6 +49,7 @@ inline bool getParamVals(
 {
   container.clear();
   char chars[] = "[]";
+  char * p;
 
   for (unsigned int i = 0; i < strlen(chars); ++i) {
     // you need include <algorithm> to use general algorithms like std::remove()
@@ -60,7 +61,8 @@ inline bool getParamVals(
   memset(s, 0, len * sizeof(char));
   memcpy(s, subject.c_str(), (len - 1) * sizeof(char));
 //  for (char * p = strtok_r(s, ",", &s); p != NULL; p = strtok_r(NULL, ",", &p)) {
-  for (char * p = strtok(s, ","); p != NULL; p = strtok(NULL, ",")) {
+  //  for (char * p = strtok(s, ","); p != NULL; p = strtok(NULL, ",")) {
+  while ((p = strtok_r(s, ",", &s))) {
     container.push_back(p);
   }
   delete[] s;

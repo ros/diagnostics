@@ -19,14 +19,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "diagnostic_aggregator/aggregator.hpp"
 
-using namespace std;
-using namespace diagnostic_aggregator;
+//  using namespace std;
+//  using namespace diagnostic_aggregator;
 
-//  namespace std
-//  {
-//  namespace diagnostic_aggregator
-//  {
-Aggregator::Aggregator()
+diagnostic_aggregator::Aggregator::Aggregator()
 : pub_rate_(1.0), analyzer_group_(NULL), other_analyzer_(NULL),
   base_path_("")
 {
@@ -53,6 +49,7 @@ Aggregator::Aggregator()
     "diagnostic_aggregator", "/", context, arguments, initial_values,
     use_global_arguments, use_intra_process);
   auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(nh);
+  using namespace std::chrono_literals;
   while (!parameters_client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(nh->get_logger(),
@@ -106,18 +103,13 @@ Aggregator::Aggregator()
           res->success = false;
           return true;
         }
-        cout << "Name space pass to bond is " << req->load_namespace << endl;
         std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
           "/diagnostics_agg/bond", req->load_namespace, nh,
           std::function<void(void)>(std::bind(&Aggregator::bondBroken, this,
           req->load_namespace, group)),
           std::function<void(void)>(
             std::bind(&Aggregator::bondFormed, this, group)));
-
-        // req_bond->setFormedCallback(std::bind(&Aggregator::bondBroken));
-        // req_bond->setBrokenCallback(std::bind(&Aggregator::bondFormed));
         req_bond->start();
-
         bonds_.push_back(req_bond);  // bond formed, keep track of it
       }
 
@@ -150,16 +142,16 @@ Aggregator::Aggregator()
     "/diagnostics_toplevel_state");
 }
 
-void Aggregator::checkTimestamp(
+void diagnostic_aggregator::Aggregator::checkTimestamp(
   const diagnostic_msgs::msg::DiagnosticArray::ConstSharedPtr & diag_msg)
 {
   if (((diag_msg->header.stamp.nanosec) * 1e-9) != 0) {
     return;
   }
 
-  string stamp_warn =
+  std::string stamp_warn =
     "No timestamp set for diagnostic message. Message names: ";
-  vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
+  std::vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
   for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it) {
     if (it != diag_msg->status.begin()) {
       stamp_warn += ", ";
@@ -173,11 +165,10 @@ void Aggregator::checkTimestamp(
   }
 }
 
-void Aggregator::diagCallback(
+void diagnostic_aggregator::Aggregator::diagCallback(
   const diagnostic_msgs::msg::DiagnosticArray::ConstSharedPtr & diag_msg)
 {
   checkTimestamp(diag_msg);
-
   bool analyzed = false;
   { // lock the whole loop to ensure nothing in the analyzer group changes
     // during it.
@@ -191,7 +182,7 @@ void Aggregator::diagCallback(
         analyzed = analyzer_group_->analyze(item);
 
       } else {
-        cout << "No match found for " << item->getName() << endl;
+        std::cout << "No match found for " << item->getName() << std::endl;
       }
       if (!analyzed) {
         other_analyzer_->analyze(item);
@@ -200,7 +191,7 @@ void Aggregator::diagCallback(
   }
 }
 
-Aggregator::~Aggregator()
+diagnostic_aggregator::Aggregator::~Aggregator()
 {
   if (analyzer_group_) {
     delete analyzer_group_;
@@ -211,8 +202,8 @@ Aggregator::~Aggregator()
   }
 }
 
-void Aggregator::bondBroken(
-  string bond_id,
+void diagnostic_aggregator::Aggregator::bondBroken(
+  std::string bond_id,
   std::shared_ptr<Analyzer> analyzer)
 {
   // boost::mutex::scoped_lock lock(mutex_); // Possibility of multiple bonds
@@ -233,7 +224,7 @@ void Aggregator::bondBroken(
   analyzer_group_->resetMatches();
 }
 
-void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
+void diagnostic_aggregator::Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
 {
   ROS_DEBUG("Bond formed");
   // boost::mutex::scoped_lock lock(mutex_);
@@ -242,7 +233,7 @@ void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
   analyzer_group_->resetMatches();
 }
 
-void Aggregator::publishData()
+void diagnostic_aggregator::Aggregator::publishData()
 {
   // diagnostic_msgs::msg::DiagnosticArray diag_array;
 
@@ -254,7 +245,7 @@ void Aggregator::publishData()
   std::shared_ptr<diagnostic_msgs::msg::DiagnosticArray> diag_array =
     std::make_shared<diagnostic_msgs::msg::DiagnosticArray>();
 
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   {
     std::unique_lock<std::mutex> lock(mutex_);
     processed = analyzer_group_->report();
@@ -270,7 +261,7 @@ void Aggregator::publishData()
     }
   }
 
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
   processed_other = other_analyzer_->report();
   for (unsigned int i = 0; i < processed_other.size(); ++i) {
     diag_array->status.push_back(*processed_other[i]);
@@ -290,7 +281,6 @@ void Aggregator::publishData()
   diag_array->header.stamp.sec = ros_now.sec;
   diag_array->header.stamp.nanosec = ros_now.nanosec;
   agg_pub_->publish(diag_array);
-  cout << "Publsih array is =" << endl;
   // Top level is error if we have stale items, unless all stale
   if (diag_toplevel_state.level > 2 && min_level <= 2) {
     diag_toplevel_state.level = 2;
@@ -298,5 +288,3 @@ void Aggregator::publishData()
 
   toplevel_state_pub_->publish(diag_toplevel_state);
 }
-//  }  //  namespace diagnostic_aggregator
-//  }  //  namespace std

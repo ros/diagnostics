@@ -17,27 +17,26 @@
 #include <memory>
 #include "diagnostic_aggregator/ignore_analyzer.hpp"
 
-using namespace diagnostic_aggregator;
-using namespace std;
+//  using namespace diagnostic_aggregator;
+//  using namespace std;
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
   diagnostic_aggregator::Analyzer)
 
-IgnoreAnalyzer::IgnoreAnalyzer() {}
+diagnostic_aggregator::IgnoreAnalyzer::IgnoreAnalyzer() {}
 
-IgnoreAnalyzer::~IgnoreAnalyzer() {}
+diagnostic_aggregator::IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-bool IgnoreAnalyzer::init(
+bool diagnostic_aggregator::IgnoreAnalyzer::init(
   const std::string base_name, const char * nsp,
   const rclcpp::Node::SharedPtr & n, const char * rnsp)
 {
   return true;
 }
 
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
-IgnoreAnalyzer::report()
+std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+diagnostic_aggregator::IgnoreAnalyzer::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
-
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   return processed;
 }

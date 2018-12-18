@@ -46,9 +46,9 @@ void v_TEST()
   std::string path = "base_path";
   //  = new diagnostic_aggregator::AnalyzerGroup();
   if (analyzer_group.init(path, nh->get_namespace(), nh, "gen_analyzers")) {
-   std::cout << "test passed" << std::endl;
+    std::cout << "test passed" << std::endl;
   } else {
-   std::cout << "test failed" << std::endl;
+    std::cout << "test failed" << std::endl;
   }
   assert(analyzer_group.init(path, nh->get_namespace(), nh, "gen_analyzers"));
 }

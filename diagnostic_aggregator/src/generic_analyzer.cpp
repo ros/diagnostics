@@ -16,17 +16,14 @@
 #include <vector>
 #include <memory>
 #include "diagnostic_aggregator/generic_analyzer.hpp"
-using namespace std;
-using namespace diagnostic_aggregator;
-// namespace std {
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
   diagnostic_aggregator::Analyzer)
 
-GenericAnalyzer::GenericAnalyzer() {}
+diagnostic_aggregator::GenericAnalyzer::GenericAnalyzer() {}
 
-bool GenericAnalyzer::init(
-  const string base_path, const char * nsp,
+bool diagnostic_aggregator::GenericAnalyzer::init(
+  const std::string base_path, const char * nsp,
   const rclcpp::Node::SharedPtr & n, const char * rnsp)
 {
   auto context =
@@ -38,13 +35,14 @@ bool GenericAnalyzer::init(
   const bool use_global_arguments = true;
   const bool use_intra_process = true;
 
-  string gen_an_name = rnsp;
+  std::string gen_an_name = rnsp;
   gen_an_name.erase(gen_an_name.end() - 5, gen_an_name.end());
 
   gen_nh = n;
-  string nice_name;
+  std::string nice_name;
   auto parameters_client =
     std::make_shared<rclcpp::SyncParametersClient>(gen_nh, nsp);
+  using namespace std::chrono_literals;
   while (!parameters_client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(gen_nh->get_logger(),
@@ -63,7 +61,7 @@ bool GenericAnalyzer::init(
       "): " << parameter.value_to_string();
   }
 #endif
-  map<string, string> anl_param;
+  std::map<std::string, std::string> anl_param;
 
   auto parameters_and_prefixes =
     parameters_client->list_parameters({gen_an_name}, 10);
@@ -78,7 +76,7 @@ bool GenericAnalyzer::init(
       anl_param[parameter.get_name()] = parameter.value_to_string();
     }
   }
-  map<string, string>::iterator anl_it;
+  std::map<std::string, std::string>::iterator anl_it;
   anl_it = anl_param.find(gen_an_name + ".path");
   if (anl_it != anl_param.end()) {
     nice_name = anl_it->second;
@@ -87,8 +85,8 @@ bool GenericAnalyzer::init(
   }
   anl_it = anl_param.find(gen_an_name + ".find_and_remove_prefix");
   if (anl_it != anl_param.end()) {
-    string find_remove = anl_it->second;
-    vector<string> output;
+    std::string find_remove = anl_it->second;
+    std::vector<std::string> output;
     if (getParamVals(find_remove, output)) {
       chaff_ = output;
       startswith_ = output;
@@ -98,31 +96,31 @@ bool GenericAnalyzer::init(
 
   anl_it = anl_param.find(gen_an_name + ".remove_prefix");
   if (anl_it != anl_param.end()) {
-    string remove = anl_it->second;
+    std::string remove = anl_it->second;
     getParamVals(remove, chaff_);
   }
 
   anl_it = anl_param.find(gen_an_name + ".startswith");
   if (anl_it != anl_param.end()) {
-    string startswith = anl_it->second;
+    std::string startswith = anl_it->second;
     getParamVals(startswith, startswith_);
   }
 
   anl_it = anl_param.find(gen_an_name + ".name");
   if (anl_it != anl_param.end()) {
-    string name = anl_it->second;
+    std::string name = anl_it->second;
     getParamVals(name, name_);
   }
 
   anl_it = anl_param.find(gen_an_name + ".contains");
   if (anl_it != anl_param.end()) {
-    string contains = anl_it->second;
+    std::string contains = anl_it->second;
     getParamVals(contains, contains_);
   }
 
   anl_it = anl_param.find(gen_an_name + ".expected");
   if (anl_it != anl_param.end()) {
-    string expected = anl_it->second;
+    std::string expected = anl_it->second;
     // expected.erase(expected.begin() + 0);
     // expected.erase(expected.end() + 0) ;
     getParamVals(expected, expected_);
@@ -134,8 +132,8 @@ bool GenericAnalyzer::init(
 
   anl_it = anl_param.find(gen_an_name + ".regex");
   if (anl_it != anl_param.end()) {
-    string regexes = anl_it->second;
-    vector<string> regex_strs;
+    std::string regexes = anl_it->second;
+    std::vector<std::string> regex_strs;
     getParamVals(regexes, regex_strs);
 
     for (unsigned int i = 0; i < regex_strs.size(); ++i) {
@@ -190,7 +188,7 @@ bool GenericAnalyzer::init(
     discard_stale = false;
   }
 
-  string my_path;
+  std::string my_path;
   if (base_path == "/") {
     my_path = nice_name;
   } else {
@@ -204,9 +202,9 @@ bool GenericAnalyzer::init(
            num_items_expected, discard_stale);
 }
 
-GenericAnalyzer::~GenericAnalyzer() {}
+diagnostic_aggregator::GenericAnalyzer::~GenericAnalyzer() {}
 
-bool GenericAnalyzer::match(const string name)
+bool diagnostic_aggregator::GenericAnalyzer::match(const std::string name)
 {
   std::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i) {
@@ -234,7 +232,7 @@ bool GenericAnalyzer::match(const string name)
   }
 
   for (unsigned int i = 0; i < contains_.size(); ++i) {
-    if (name.find(contains_[i]) != string::npos) {
+    if (name.find(contains_[i]) != std::string::npos) {
       return true;
     }
   }
@@ -242,21 +240,21 @@ bool GenericAnalyzer::match(const string name)
   return false;
 }
 
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
-GenericAnalyzer::report()
+std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+diagnostic_aggregator::GenericAnalyzer::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
     GenericAnalyzerBase::report();
 
   // Check and make sure our expected names haven't been removed ...
-  vector<string> expected_names_missing;
+  std::vector<std::string> expected_names_missing;
   bool has_name = false;
 
   for (unsigned int i = 0; i < expected_.size(); ++i) {
     has_name = false;
     for (unsigned int j = 0; j < processed.size(); ++j) {
       size_t last_slash = processed[j]->name.rfind("/");
-      string nice_name = processed[j]->name.substr(last_slash + 1);
+      std::string nice_name = processed[j]->name.substr(last_slash + 1);
       if (nice_name == expected_[i] ||
         nice_name == getOutputName(expected_[i]))
       {
@@ -320,4 +318,3 @@ GenericAnalyzer::report()
 
   return processed;
 }
-//}

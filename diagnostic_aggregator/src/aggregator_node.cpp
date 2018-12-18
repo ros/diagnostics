@@ -28,7 +28,7 @@ int main(int argc, char ** argv)
       pub_rate.sleep();
     }
   } catch (std::exception & e) {
-  std::cout << "Vaibhav diagnostic_aggregator exception hit  " << std::endl;
+    std::cout << "Vaibhav diagnostic_aggregator exception hit  " << std::endl;
   }
 
   rclcpp::shutdown();

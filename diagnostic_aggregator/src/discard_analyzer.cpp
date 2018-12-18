@@ -16,20 +16,19 @@
 #include <memory>
 #include "diagnostic_aggregator/discard_analyzer.hpp"
 
-using namespace diagnostic_aggregator;
-using namespace std;
+//  using namespace diagnostic_aggregator;
+//  using namespace std;
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer,
   diagnostic_aggregator::Analyzer)
 
-DiscardAnalyzer::DiscardAnalyzer() {}
+diagnostic_aggregator::DiscardAnalyzer::DiscardAnalyzer() {}
 
-DiscardAnalyzer::~DiscardAnalyzer() {}
+diagnostic_aggregator::DiscardAnalyzer::~DiscardAnalyzer() {}
 
-vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
-DiscardAnalyzer::report()
+std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>
+diagnostic_aggregator::DiscardAnalyzer::report()
 {
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
-
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   return processed;
 }

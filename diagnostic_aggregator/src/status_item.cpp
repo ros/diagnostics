@@ -49,8 +49,8 @@ diagnostic_aggregator::StatusItem::StatusItem(
 
 diagnostic_aggregator::StatusItem::~StatusItem() {}
 
-bool diagnostic_aggregator::StatusItem::
-update(const diagnostic_msgs::msg::DiagnosticStatus * status)
+bool diagnostic_aggregator::StatusItem::update(
+  const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   if (name_ != status->name) {
     ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s",
