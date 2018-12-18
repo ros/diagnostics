@@ -53,6 +53,8 @@ class TestCPUMonitor(unittest.TestCase):
         self._msg = msg
         print("diagnostics_callback called",msg)
         #self.node._subscriber.unregister()
+        self.node.destroy_node()
+        self.ls.shutdown()
 
         self.assertEqual(len(self._msg.status), 1)
         status = self._msg.status[0]
@@ -65,9 +67,7 @@ class TestCPUMonitor(unittest.TestCase):
         if self._expected_level:
             self.assertEqual(self._expected_level, status.level)
 
-
-        self.node.destroy_node()
-        self.ls.shutdown()
+        self.Test_pass = True
     
 
     def _assert_launch_errors(self, actions):
@@ -88,6 +88,7 @@ class TestCPUMonitor(unittest.TestCase):
        # rospy.init_node('test_cpu_monitor')
         #rclpy.init()
         #self.node = rclpy.create_node( TEST_NODE)
+        self.Test_pass = False
         self._expected_level = None
         self._msg = None
         self._subscriber = self.node.create_subscription(DiagnosticArray,'diagnostics', self.diagnostics_callback)
@@ -96,7 +97,8 @@ class TestCPUMonitor(unittest.TestCase):
             package='diagnostic_common_diagnostics', node_executable='cpu_monitor', output='screen')
         self._assert_launch_no_errors([node_action])
         print("will go for spining once")
-        rclpy.spin_once(self.node)
+        while self.Test_pass ==False:
+            rclpy.spin_once(self.node)
         #self._subscriber = rospy.Subscriber('diagnostics', DiagnosticArray, self.diagnostics_callback)
 
 
