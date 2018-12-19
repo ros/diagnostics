@@ -60,9 +60,9 @@ inline bool getParamVals(
   char * s = new char[len];
   memset(s, 0, len * sizeof(char));
   memcpy(s, subject.c_str(), (len - 1) * sizeof(char));
-//  for (char * p = strtok_r(s, ",", &s); p != NULL; p = strtok_r(NULL, ",", &p)) {
-  //  for (char * p = strtok(s, ","); p != NULL; p = strtok(NULL, ",")) {
-  while ((p = strtok_r(s, ",", &s))) {
+  char * rest = s;
+//   for (char * p = strtok(s, ","); p != NULL; p = strtok(NULL, ",")) {
+  while ((p = strtok_r(rest, ",", &rest))) {
     container.push_back(p);
   }
   delete[] s;
