@@ -13,14 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# \author Rein Appeldoorn
-
-
-import sys
 from argparse import ArgumentParser
+import sys
 
 
 class PSUtilMock:
+
     CPU_PERCENTAGE = 0
 
     def __init__(self):

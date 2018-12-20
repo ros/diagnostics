@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
 # Copyright 2015 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# -*- coding: utf-8 -*-
 
-from __future__ import with_statement, division
-
-#import roslib; roslib.load_manifest('diagnostic_common_diagnostics')
-import rclpy
-import diagnostic_updater as DIAG
-
-import socket, string
-
-import subprocess
+from io import StringIO
 import math
 import re
-import sys
-from io import StringIO
+import socket
+import subprocess
+
+import diagnostic_updater as DIAG
+
+import rclpy
+
 
 class Sensor(object):
+
     def __init__(self):
         self.critical = None
         self.min = None
@@ -65,69 +64,72 @@ class Sensor(object):
     def __str__(self):
         lines = []
         lines.append(str(self.name))
-        lines.append("\t" + "Type:  " + str(self.type))
+        lines.append('\t' + 'Type:  ' + str(self.type))
         if self.input:
-            lines.append("\t" + "Input: " + str(self.input))
+            lines.append('\t' + 'Input: ' + str(self.input))
         if self.min:
-            lines.append("\t" + "Min:   " + str(self.min))
+            lines.append('\t' + 'Min:   ' + str(self.min))
         if self.max:
-            lines.append("\t" + "Max:   " + str(self.max))
+            lines.append('\t' + 'Max:   ' + str(self.max))
         if self.high:
-            lines.append("\t" + "High:  " + str(self.high))
+            lines.append('\t' + 'High:  ' + str(self.high))
         if self.critical:
-            lines.append("\t" + "Crit:  " + str(self.critical))
-        lines.append("\t" + "Alarm: " + str(self.alarm))
-        return "\n".join(lines)
+            lines.append('\t' + 'Crit:  ' + str(self.critical))
+        lines.append('\t' + 'Alarm: ' + str(self.alarm))
+        return '\n'.join(lines)
 
 
 def parse_sensor_line(line):
     sensor = Sensor()
     line = line.lstrip()
-    [name, reading] = line.split(":")
+    [name, reading] = line.split(':')
 
-    #hack for when the name is temp1
-    if name.find("temp") != -1:
+    #  hack for when the name is temp1
+    if name.find('temp') != -1:
         return None
     else:
-        [sensor.name, sensor.type] = name.rsplit(" ",1)
+        [sensor.name, sensor.type] = name.rsplit(' ', 1)
 
-    if sensor.name == "Core":
+    if sensor.name == 'Core':
         sensor.name = name
-        sensor.type = "Temperature"
-    elif sensor.name.find("Physical id") != -1:
+        sensor.type = 'Temperature'
+    elif sensor.name.find('Physical id') != -1:
         sensor.name = name
-        sensor.type = "Temperature"
+        sensor.type = 'Temperature'
 
-    [reading, params] = reading.lstrip().split("(")
+    [reading, params] = reading.lstrip().split('(')
 
     sensor.alarm = False
-    if line.find("ALARM") != -1:
+    if line.find('ALARM') != -1:
         sensor.alarm = True
 
-    if reading.find("\xc2\xb0C") == -1:
+    if reading.find('\xc2\xb0C') == -1:
         sensor.input = float(reading.split()[0])
     else:
-        sensor.input = float(reading.split("\xc2\xb0C")[0])
+        sensor.input = float(reading.split('\xc2\xb0C')[0])
 
-    params = params.split(",")
+    params = params.split(',')
     for param in params:
-        m = re.search("[0-9]+.[0-9]*", param)
-        if param.find("min") != -1:
+        m = re.search('[0-9] + .[0-9]*', param)
+        if param.find('min') != -1:
             sensor.min = float(m.group(0))
-        elif param.find("max") != -1:
+        elif param.find('max') != -1:
             sensor.max = float(m.group(0))
-        elif param.find("high") != -1:
+        elif param.find('high') != -1:
             sensor.high = float(m.group(0))
-        elif param.find("crit") != -1:
+        elif param.find('crit') != -1:
             sensor.critical = float(m.group(0))
 
     return sensor
 
+
 def _rads_to_rpm(rads):
     return rads / (2 * math.pi) * 60
 
+
 def _rpm_to_rads(rpm):
     return rpm * (2 * math.pi) / 60
+
 
 def parse_sensors_output(output):
     out = StringIO(output)
@@ -135,86 +137,78 @@ def parse_sensors_output(output):
     sensorList = []
     for line in out.readlines():
         # Check for a colon
-        if line.find(":") != -1 and line.find("Adapter") == -1:
+        if line.find(':') != -1 and line.find('Adapter') == -1:
             s = parse_sensor_line(line)
             if s is not None:
                 sensorList.append(s)
     return sensorList
 
+
 def get_sensors():
-    p = subprocess.Popen('sensors', stdout = subprocess.PIPE,
-                         stderr = subprocess.PIPE, shell = True)
-    (o,e) = p.communicate()
+    p = subprocess.Popen('sensors', stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE, shell=True)
+    (o, e) = p.communicate()
     if not p.returncode == 0:
         return ''
     if not o:
         return ''
     return o
 
+
 class SensorsMonitor(object):
-    def __init__(self, hostname,node):
+
+    def __init__(self, hostname, node):
         self.hostname = hostname
         self.node = node
-        #self.ignore_fans = rospy.get_param('~ignore_fans', False)
         self.ignore_fans = False
-        #rospy.loginfo("Ignore fanspeed warnings: %s" % self.ignore_fans)
-        node.get_logger().info("Ignore fanspeed warnings: %s" % self.ignore_fans)
+        node.get_logger().info('Ignore fanspeed warnings: %s' % self.ignore_fans)
 
         self.updater = DIAG.Updater(node)
-        self.updater.setHardwareID("none")
-        self.updater.add('%s Sensor Status'%self.hostname, self.monitor)
+        self.updater.setHardwareID('none')
+        self.updater.add('%s Sensor Status' % self.hostname, self.monitor)
 
-        #self.timer = rospy.Timer(rospy.Duration(1), self.timer_cb)
         timer_period = 1
         self.timer = self.node.create_timer(timer_period, self.timer_cb)
-
-
 
     def timer_cb(self):
         self.updater.update()
 
     def monitor(self, stat):
         try:
-            stat.summary(DIAG.OK, "OK")
+            stat.summary(DIAG.OK, 'OK')
             for sensor in parse_sensors_output(get_sensors()):
-                if sensor.getType() == "Temperature":
+                if sensor.getType() == 'Temperature':
                     if sensor.getInput() > sensor.getCrit():
-                        stat.mergeSummary(DIAG.ERROR, "Critical Temperature")
+                        stat.mergeSummary(DIAG.ERROR, 'Critical Temperature')
                     elif sensor.getInput() > sensor.getHigh():
-                        stat.mergeSummary(DIAG.WARN, "High Temperature")
-                    stat.add(" ".join([sensor.getName(), sensor.getType()]), sensor.getInput())
-                elif sensor.getType() == "Voltage":
+                        stat.mergeSummary(DIAG.WARN, 'High Temperature')
+                    stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
+                elif sensor.getType() == 'Voltage':
                     if sensor.getInput() < sensor.getMin():
-                        stat.mergeSummary(DIAG.ERROR, "Low Voltage")
+                        stat.mergeSummary(DIAG.ERROR, 'Low Voltage')
                     elif sensor.getInput() > sensor.getMax():
-                        stat.mergeSummary(DIAG.ERROR, "High Voltage")
-                    stat.add(" ".join([sensor.getName(), sensor.getType()]), sensor.getInput())
-                elif sensor.getType() == "Speed":
-                    if not ignore_fans:
+                        stat.mergeSummary(DIAG.ERROR, 'High Voltage')
+                    stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
+                elif sensor.getType() == 'Speed':
+                    if not self.ignore_fans:
                         if sensor.getInput() < sensor.getMin():
-                            stat.mergeSummary(DIAG.ERROR, "No Fan Speed")
-                    stat.add(" ".join([sensor.getName(), sensor.getType()]), sensor.getInput())
-        except Exception as e:
+                            stat.mergeSummary(DIAG.ERROR, 'No Fan Speed')
+                    stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
+        except Exception:
             import traceback
-            #rospy.logerr('Unable to process lm-sensors data')
-            #rospy.logerr(traceback.format_exc())
+            traceback.print_exc()
+            #  rospy.logerr('Unable to process lm-sensors data')
+            #  rospy.logerr(traceback.format_exc())
         return stat
+
 
 def main():
     hostname = socket.gethostname()
-    #trantab = maketrans('-','_')
-    #hostname_clean = hostname.translate(trantab)
-    #hostname_clean = string.translate(hostname, string.maketrans('-','_'))
-    #try:
-    #    rospy.init_node('sensors_monitor_%s'%hostname_clean)
-    #except rospy.ROSInitException:
-    #    print >> sys.stderr, 'Unable to initialize node. Master may not be running'
-    #    sys.exit(0)
     rclpy.init()
-    node = rclpy.create_node('sensors_monitor_%s' % hostname.replace("-", "_"))
-    monitor = SensorsMonitor(hostname,node)
+    node = rclpy.create_node('sensors_monitor_%s' % hostname.replace('-', '_'))
+    SensorsMonitor(hostname, node)
     rclpy.spin(node)
+
 
 if __name__ == '__main__':
     main()
-    
