@@ -12,44 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import pathlib
+import threading
+from time import sleep
+import unittest
 
-##\brief Tests receipt of /diagnostics_agg from diagnostic aggregator
+from diagnostic_msgs.msg import DiagnosticArray
 
-from __future__ import with_statement
+from launch import LaunchDescription
+from launch import LaunchService
+from launch.substitutions import EnvironmentVariable
+import launch_ros.actions.node
+import rclpy
+
+prefix = ''
 PKG = 'diagnostic_aggregator'
 TEST_NODE = 'test_aggregator'
 TEST_NAMESPACE = '/'
 
 
-#import roslib; roslib.load_manifest(PKG)
-
-import unittest
-import rclpy
-from rclpy.node import Node
-#from rclpy.parameter import Parameter
-#import rospy, rostest
-from time import sleep
-import sys
-from optparse import OptionParser
-import threading
-import types
-import pathlib
-import os
-from launch import LaunchDescription
-from launch import LaunchService
-from launch import LaunchIntrospector
-from launch_ros import get_default_launch_description
-from launch.substitutions import EnvironmentVariable
-import launch_ros.actions.node
-
-
-from diagnostic_msgs.msg import DiagnosticArray
-
-prefix = ""
-
-cb_1 = 0
-cb_2 = 0
-##\brief Removes name chaff (ex: 'tilt_hokuyo_node: Frequency' to 'Frequency')
 def fix_sub_name(name, remove_prefixes):
     last = str(name)
     for start_name in remove_prefixes:
@@ -59,15 +41,17 @@ def fix_sub_name(name, remove_prefixes):
             last = last[1:]
         while last.startswith(' '):
             last = last[1:]
-    
     return last
+
 
 def combine_name_prefix(my_prefix, name, remove_prefixes):
     fixed = fix_sub_name(name.replace('/', ''), remove_prefixes)
     return '/'.join([prefix, my_prefix, fixed])
 
+
 def header_name(my_prefix):
     return '/'.join([prefix, my_prefix])
+
 
 def _get_params_list(params):
     out = []
@@ -75,7 +59,8 @@ def _get_params_list(params):
         for p in params:
             out.append(str(p))
         return out
-    return [ str(params) ]
+    return [str(params)]
+
 
 def name_to_full_generic(name, my_prefix, value, header=False):
     remove_prefixes = []
@@ -118,52 +103,53 @@ def name_to_full_generic(name, my_prefix, value, header=False):
                 if header:
                     return header_name(my_prefix)
                 return combine_name_prefix(my_prefix, name, remove_prefixes)
-
-
     return None
+
 
 def name_to_agg_name(name, params):
     for key, value in params.items():
         my_prefix = value['path']
-        if value['type'] == 'GenericAnalyzer' or value['type'] == 'diagnostic_aggregator/GenericAnalyzer':
+        if value['type'] \
+           == 'GenericAnalyzer' or value['type'] \
+           == 'diagnostic_aggregator/GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value)
             if generic_name is not None:
                 return generic_name
         else:
             return None
-
-    # If we don't have it...
+    #  If we don't have it...
     return combine_name_prefix('Other', name, [])
 
-# Returns header name for particular item
+
+#  Returns header name for particular item
 def name_to_agg_header(name, params):
     for key, value in params.items():
         my_prefix = value['path']
-        if value['type'] == 'GenericAnalyzer' or value['type'] == 'diagnostic_aggregator/GenericAnalyzer':
+        if value['type'] == 'GenericAnalyzer' or value['type'] \
+           == 'diagnostic_aggregator/GenericAnalyzer':
             generic_name = name_to_full_generic(name, my_prefix, value, header=True)
             if generic_name is not None:
                 return generic_name
         else:
             return None
 
-    # If we don't have it...
+    #  If we don't have it...
     return header_name('Other')
-    key, sep, value = line.strip().partition(" ")
-    return int(key), value
+    #  key, sep, value = line.strip().partition(" ")
+    #  return int(key), value
 
 
-##\brief Uses aggregator parameters to compare diagnostics with aggregated output
-class TestAggregator(unittest.TestCase):       
+class TestAggregator(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
-         rclpy.init()
-         cls.node = rclpy.create_node(TEST_NODE, namespace=TEST_NAMESPACE)
+        rclpy.init()
+        cls.node = rclpy.create_node(TEST_NODE, namespace=TEST_NAMESPACE)
 
     @classmethod
     def tearDownClass(cls):
         cls.node.destroy_node()
         rclpy.shutdown()
-
 
     def _assert_launch_no_errors_1(self, actions):
         ld1 = LaunchDescription(actions)
@@ -182,14 +168,20 @@ class TestAggregator(unittest.TestCase):
     def test_create_subscription(self):
         self.diag_msgs = {}
         self.agg_msgs = {}
-        
-        self.params = { 'prefix1': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'First','remove_prefix': 'prefix1' , 'find_and_remove_prefix': 'find1_items', 'startswith': 'pref1a', 'contains': 'contains1a', 'name': 'name1' }, 'primary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Primary','startswith': 'primary' }, 'secondary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Secondary','startswith': 'secondary' } }
-        
-       # self.params = { 'primary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Primary','startswith': 'primary' }, 'secondary': { 'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Secondary','startswith': 'secondary' } }
-        
-
+        self.params = {
+            'prefix1': {
+                'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'First',
+                'remove_prefix': 'prefix1', 'find_and_remove_prefix': 'find1_items', 'startswith':
+                'pref1a', 'contains': 'contains1a', 'name': 'name1'},
+            'primary': {
+                'type':
+                'diagnostic_aggregator/GenericAnalyzer', 'path': 'Primary', 'startswith':
+                'primary'},
+            'secondary': {
+                'type': 'diagnostic_aggregator/GenericAnalyzer', 'path': 'Secondary',
+                'startswith': 'secondary'}
+        }
         global prefix
-        global cb_1
         self.Test_pass = False
         self._mutex = threading.Lock()
         parameters_file_dir = pathlib.Path(__file__).resolve().parent
@@ -203,27 +195,24 @@ class TestAggregator(unittest.TestCase):
                 parameters_file_path,
                 str(parameters_file_path),
                 [EnvironmentVariable(name='FILE_PATH'), os.sep, 'add_analyzers_init.yaml'],
-                    ],
-            )
+            ],
+        )
         node_action = launch_ros.actions.Node(
             package='diagnostic_aggregator', node_executable='add_analyze_pub', output='screen',
             parameters=[
                 parameters_file_path_1,
                 str(parameters_file_path_1),
                 [EnvironmentVariable(name='FILE_PATH'), os.sep, 'add_analyzers.yaml'],
-                    ],
+            ],
 
-            )
+        )
         self._assert_launch_no_errors([node_action1])
         self._assert_launch_no_errors_1([node_action])
-
-
-
         sleep(10)
         self.node.create_subscription(DiagnosticArray, 'diagnostics_agg', self.cb)
         self.node.create_subscription(DiagnosticArray, 'diagnostics', self.diag_cb)
 
-        while self.Test_pass ==False:
+        while not self.Test_pass:
             rclpy.spin_once(self.node)
 
     def diag_cb(self, msg):
@@ -233,54 +222,44 @@ class TestAggregator(unittest.TestCase):
 
     def cb(self, msg):
             with self._mutex:
-                if len( self.diag_msgs) >0:
+                if len(self.diag_msgs) > 0:
                     for stat in msg.status:
                         self.agg_msgs[stat.name] = stat
-                        length = len(self.agg_msgs)
 
                     all_headers = {}
                     self.node.destroy_node()
                     self.ls.shutdown()
                     self.ls1.shutdown()
-                    #self.destroy_node()
                     for name, msg in self.agg_msgs.items():
-                        assert(name.startswith('/'))#, "Aggregated name %s doesn't start with \"/\"" % name)
+                        assert(name.startswith('/'))
 
                     for name, msg in self.diag_msgs.items():
-                        print(name)
                         agg_name = name_to_agg_name(name, self.params)
-                        print(agg_name)
-                        assert(agg_name is not None)#, 'Aggregated name is None for %s' % name
+                        assert(agg_name is not None)
                         assert(msg.level == self.agg_msgs[agg_name].level)
-                        assert(msg.message == self.agg_msgs[agg_name].message)#, 'Status message of original, aggregated messages doesn\'t match. Name: %s, aggregated name: %s' % (name, agg_name))
-                        if self.agg_msgs[agg_name].level == 3: # Stale
+                        assert(msg.message == self.agg_msgs[agg_name].message)
+                        if self.agg_msgs[agg_name].level == 3:
                             self.agg_msgs[agg_name].level = -1
-                        
-
                         header = name_to_agg_header(name, self.params)
                         if header in all_headers:
-                            all_headers[header] = max(all_headers[header], self.agg_msgs[agg_name].level)
+                            all_headers[header] = \
+                                max(all_headers[header], self.agg_msgs[agg_name].level)
                         else:
                             all_headers[header] = self.agg_msgs[agg_name].level
-
-                        
                         del self.agg_msgs[agg_name]
 
-
-                    # Go through all messages and check that we have them in aggregate
-                                # Check that we have all_headers
+                    #  Go through all messages and check that we have them in aggregate
+                    #  Check that we have all_headers
                     for header, lvl in all_headers.items():
-                        # If everything is stale, report stale. Otherwise, it should report an error
+                        #  If everything is stale,report stale.Otherwise,it should report an error
                         if lvl == -1:
                             lvl = 3
 
-                        if header in self.agg_msgs:#, "Header %s not found in messages" % header)
-                            assert(self.agg_msgs[header].level == lvl)#, "Level of header %s doesn't match expected value." % header)
+                        if header in self.agg_msgs:
+                            assert(self.agg_msgs[header].level == lvl)
                         del self.agg_msgs[header]
-                    self.Test_pass = True    
-                    print("Test case Pass")
-                   # rclpy.shutdown()
-            
-               
+                    self.Test_pass = True
+
+
 if __name__ == '__main__':
-   unittest.main()
+    unittest.main()
