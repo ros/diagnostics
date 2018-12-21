@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# Copyright 2015 Open Source Robotics Foundation, Inc.
+# Copyright 2018 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,16 +20,21 @@ Diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-import rclpy
-import threading, http.client
-from diagnostic_msgs.msg import DiagnosticArray
-import rclpy
-from rclpy.clock import ClockType
+# import http.client
+import threading
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+
+import httplib2
+
+# import rclpy
 from rclpy.clock import Clock
-from rclpy.duration import Duration
-from rclpy.time import Time
-#from test_msgs.msg import Builtins
-from ._diagnostic_status_wrapper import *
+from rclpy.clock import ClockType
+# from rclpy.duration import Duration
+# from rclpy.time import Time
+
+from ._diagnostic_status_wrapper import DiagnosticStatusWrapper
+
 
 class DiagnosticTask:
     """
@@ -115,8 +120,6 @@ class CompositeDiagnosticTask(DiagnosticTask):
             stat = task.run(stat)
             # Merge the new summary into the combined summary.
             combined_summary.mergeSummary(stat)
-
-
         # Copy the combined summary into the output.
         stat.summary(combined_summary)
         return stat
@@ -129,7 +132,6 @@ class CompositeDiagnosticTask(DiagnosticTask):
         CompositeDiagnosticTask is run.
         """
         self.tasks.append(t)
-
 
 
 class DiagnosticTaskVector:
@@ -153,7 +155,6 @@ class DiagnosticTaskVector:
             stat.name = self.name
             return self.fn(stat)
 
-
     def __init__(self):
         self.tasks = []
         self.lock = threading.Lock()
@@ -161,7 +162,7 @@ class DiagnosticTaskVector:
     def addedTaskCallback(self, task):
         """
         Allow an action to be taken when a task is added.
-        
+
         The Updater class
         uses this to immediately publish a diagnostic that says that the node
         is loading.
@@ -176,15 +177,14 @@ class DiagnosticTaskVector:
         add(task): where task is a DiagnosticTask
         add(name, fn): add a DiagnosticTask embodied by a name and function
         """
-        if len(args)==1:
+        if len(args) == 1:
             task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0].getName(), args[0].run)
-        elif len(args)==2:
+        elif len(args) == 2:
             task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0], args[1])
 
         with self.lock:
             self.tasks.append(task)
             self.addedTaskCallback(task)
-            print(task)
 
     def removeByName(self, name):
         """
@@ -206,8 +206,6 @@ class DiagnosticTaskVector:
         return found
 
 
-
-
 class Updater(DiagnosticTaskVector):
     """
     Manage a list of diagnostic tasks, and calls them in a rate-limited manner.
@@ -224,11 +222,11 @@ class Updater(DiagnosticTaskVector):
     reason.
     """
 
-    def __init__(self,node):
+    def __init__(self, node):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
-        self.publisher = self.node.create_publisher(DiagnosticArray, "/diagnostics")
+        self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics')
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
 
@@ -238,7 +236,7 @@ class Updater(DiagnosticTaskVector):
         self.period = 1
 
         self.verbose = False
-        self.hwid = ""
+        self.hwid = ''
         self.warn_nohwid_done = False
 
     def update(self):
@@ -259,19 +257,19 @@ class Updater(DiagnosticTaskVector):
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         self.last_time = clock.now()
 
-        warn_nohwid = len(self.hwid)==0
+        warn_nohwid = len(self.hwid) == 0
 
         status_vec = []
 
-        with self.lock: # Make sure no adds happen while we are processing here.
+        with self.lock:  # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
                 status.name = task.name
                 status.level = b'2'
-                status.message = "No message was set"
+                status.message = 'No message was set'
                 status.hardware_id = self.hwid
 
-                stat = task.run(status)
+                status = task.run(status)
 
                 status_vec.append(status)
 
@@ -279,11 +277,16 @@ class Updater(DiagnosticTaskVector):
                     warn_nohwid = False
 
                 if self.verbose and status.level:
-                    rospy.logwarn("Non-zero diagnostic status. Name: '%s', status %i: '%s'" %
-                                (status.name, status.level, status.message))
+                    self.node.get_logger().warn('Non-zero diagnostic status. Name: %s, status\
+                                                %i: %s' % (status.name, status.level,
+                                                           status.message))
 
         if warn_nohwid and not self.warn_nohwid_done:
-            rospy.logwarn("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            self.node.get_logger().warn('diagnostic_updater: No HW_ID was set. This is probably\
+                                        a bug. Please report it. For devices that do not have a\
+                                        HW_ID, set this value to none. This warning only occurs\
+                                        once all diagnostics are OK so it is okay to wait until\
+                                        the device is open before calling setHardwareID.')
             self.warn_nohwid_done = True
 
         self.publish(status_vec)
@@ -319,10 +322,10 @@ class Updater(DiagnosticTaskVector):
         # parameter server using a standard timeout mechanism (4Hz)
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
-        if  now >= self.last_time_period_checked:
+        if now >= self.last_time_period_checked:
             try:
                 self.last_time_period_checked = now
-            except (httplib.CannotSendRequest, httplib.ResponseNotReady):
+            except (httplib2.CannotSendRequest, httplib2.ResponseNotReady):
                 pass
 
     def publish(self, msg):
@@ -331,26 +334,19 @@ class Updater(DiagnosticTaskVector):
             msg = [msg]
 
         for stat in msg:
-            stat.name = self.node.get_name()[1:]+ ": " + stat.name
+            stat.name = self.node.get_name()[1:] + ': ' + stat.name
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
 
-        time = Time()
-        #builtins_msg = Builtins()
-        #builtins_msg.time_value = now.to_msg()
-
         da = DiagnosticArray()
-        db =DiagnosticStatus()
-        db.name=stat.name 
+        db = DiagnosticStatus()
+        db.name = stat.name
         da.status.append(db)
-        #da.header.stamp =  builtins_msg.time_value# Add timestamp for ROS 0.10
-        da.header.stamp =  now.to_msg()# Add timestamp for ROS 0.10
-
+        da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         self.publisher.publish(da)
 
     def addedTaskCallback(self, task):
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
-        print(task.name)
-        stat.summary(b'0', "Node starting up")
+        stat.summary(b'0', 'Node starting up')
         self.publish(stat)

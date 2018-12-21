@@ -20,9 +20,16 @@ Diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-import rclpy
+# import http.client
+import threading
 
-from ._diagnostic_updater import *
+# import rclpy
+from rclpy.clock import Clock
+from rclpy.clock import ClockType
+# from rclpy.duration import Duration
+# from rclpy.time import Time
+
+from ._diagnostic_updater import DiagnosticTask
 
 
 class FrequencyStatusParam:
@@ -45,7 +52,7 @@ class FrequencyStatusParam:
     window_size is the number of events to consider in the statistics.
     """
 
-    def __init__(self, freq_bound, tolerance = 0.1, window_size = 5):
+    def __init__(self, freq_bound, tolerance=0.1, window_size=5):
         """Create a filled-out FrequencyStatusParam."""
         self.freq_bound = freq_bound
         self.tolerance = tolerance
@@ -62,7 +69,7 @@ class FrequencyStatus(DiagnosticTask):
     been no events in the latest window.
     """
 
-    def __init__(self, params, name = "FrequencyStatus"):
+    def __init__(self, params, name='FrequencyStatus'):
         """Construct a FrequencyStatus class with the given parameters."""
         DiagnosticTask.__init__(self, name)
         self.params = params
@@ -90,31 +97,35 @@ class FrequencyStatus(DiagnosticTask):
             curtime = clock.now()
             curseq = self.count
             events = curseq - self.seq_nums[self.hist_indx]
-            window = (curtime - self.times[self.hist_indx]).nanoseconds*1e-9;
+            window = (curtime - self.times[self.hist_indx]).nanoseconds * 1e-9
             freq = events / window
             self.seq_nums[self.hist_indx] = curseq
             self.times[self.hist_indx] = curtime
             self.hist_indx = (self.hist_indx + 1) % self.params.window_size
 
             if events == 0:
-                stat.summary(b'2', "No events recorded.")
+                stat.summary(b'2', 'No events recorded.')
             elif freq < self.params.freq_bound['min'] * (1 - self.params.tolerance):
-                stat.summary(b'1', "Frequency too low.")
-            elif 'max' in self.params.freq_bound and freq > self.params.freq_bound['max'] * (1 + self.params.tolerance):
-                stat.summary(b'1', "Frequency too high.")
+                stat.summary(b'1', 'Frequency too low.')
+            elif 'max' in self.params.freq_bound and freq > self.params.freq_bound['max'] *\
+                 (1 + self.params.tolerance):
+                stat.summary(b'1', 'Frequency too high.')
             else:
-                stat.summary(b'0', "Desired frequency met")
+                stat.summary(b'0', 'Desired frequency met')
 
-            stat.add("Events in window", "%d" % events)
-            stat.add("Events since startup", "%d" % self.count)
-            stat.add("Duration of window (s)", "%f" % window)
-            stat.add("Actual frequency (Hz)", "%f" % freq)
-            if 'max' in self.params.freq_bound and self.params.freq_bound['min'] == self.params.freq_bound['max']:
-                stat.add("Target frequency (Hz)", "%f" % self.params.freq_bound['min'])
+            stat.add('Events in window', '%d' % events)
+            stat.add('Events since startup', '%d' % self.count)
+            stat.add('Duration of window (s)', '%f' % window)
+            stat.add('Actual frequency (Hz)', '%f' % freq)
+            if 'max' in self.params.freq_bound and self.params.freq_bound['min'] == \
+               self.params.freq_bound['max']:
+                stat.add('Target frequency (Hz)', '%f' % self.params.freq_bound['min'])
             if self.params.freq_bound['min'] > 0:
-                stat.add("Minimum acceptable frequency (Hz)", "%f" % (self.params.freq_bound['min'] * (1 - self.params.tolerance)))
+                stat.add('Minimum acceptable frequency (Hz)', '%f'
+                         % (self.params.freq_bound['min'] * (1 - self.params.tolerance)))
             if 'max' in self.params.freq_bound:
-                stat.add("Maximum acceptable frequency (Hz)", "%f" % (self.params.freq_bound['max'] * (1 + self.params.tolerance)))
+                stat.add('Maximum acceptable frequency (Hz)', '%f'
+                         % (self.params.freq_bound['max'] * (1 + self.params.tolerance)))
 
         return stat
 
@@ -127,7 +138,7 @@ class TimeStampStatusParam:
     min_acceptable: minimum acceptable difference between two timestamps.
     """
 
-    def __init__(self, min_acceptable = -1, max_acceptable = 5):
+    def __init__(self, min_acceptable=-1, max_acceptable=5):
         """Create a filled-out TimeStampStatusParam."""
         self.max_acceptable = max_acceptable
         self.min_acceptable = min_acceptable
@@ -145,7 +156,7 @@ class TimeStampStatus(DiagnosticTask):
     in a more persistent way.
     """
 
-    def __init__(self, params = TimeStampStatusParam(), name = "Timestamp Status"):
+    def __init__(self, params=TimeStampStatusParam(), name='Timestamp Status'):
         """Construct the TimeStampStatus with the given parameters."""
         DiagnosticTask.__init__(self, name)
         self.params = params
@@ -166,15 +177,15 @@ class TimeStampStatus(DiagnosticTask):
         intervals. Can be either a double or a ros::Time.
         """
         if not isinstance(stamp, float):
-            stamp = stamp*1e9
+            stamp = stamp * 1e9
 
         with self.lock:
             if stamp == 0:
                 self.zero_seen = True
             else:
                 clock = Clock(clock_type=ClockType.STEADY_TIME)
-                delta = clock.now().nanoseconds - stamp*1e9
-                delta = delta*1e-9
+                delta = clock.now().nanoseconds - stamp * 1e9
+                delta = delta * 1e-9
                 if not self.deltas_valid or delta > self.max_delta:
                     self.max_delta = delta
                 if not self.deltas_valid or delta < self.min_delta:
@@ -184,27 +195,27 @@ class TimeStampStatus(DiagnosticTask):
     def run(self, stat):
         with self.lock:
 
-            stat.summary(b'0', "Timestamps are reasonable.")
+            stat.summary(b'0', 'Timestamps are reasonable.')
             if not self.deltas_valid:
-                stat.summary(b'1', "No data since last update.")
+                stat.summary(b'1', 'No data since last update.')
             else:
                 if self.min_delta < self.params.min_acceptable:
-                    stat.summary(b'2', "Timestamps too far in future seen.")
+                    stat.summary(b'2', 'Timestamps too far in future seen.')
                     self.early_count += 1
                 if self.max_delta > self.params.max_acceptable:
-                    stat.summary(b'2', "Timestamps too far in past seen.")
+                    stat.summary(b'2', 'Timestamps too far in past seen.')
                     self.late_count += 1
                 if self.zero_seen:
-                    stat.summary(b'2', "Zero timestamp seen.")
+                    stat.summary(b'2', 'Zero timestamp seen.')
                     self.zero_count += 1
 
-            stat.add("Earliest timestamp delay:", "%f" % self.min_delta)
-            stat.add("Latest timestamp delay:", "%f" % self.max_delta)
-            stat.add("Earliest acceptable timestamp delay:", "%f" % self.params.min_acceptable)
-            stat.add("Latest acceptable timestamp delay:", "%f" % self.params.max_acceptable)
-            stat.add("Late diagnostic update count:", "%i" % self.late_count)
-            stat.add("Early diagnostic update count:", "%i" % self.early_count)
-            stat.add("Zero seen diagnostic update count:", "%i" % self.zero_count)
+            stat.add('Earliest timestamp delay:', '%f' % self.min_delta)
+            stat.add('Latest timestamp delay:', '%f' % self.max_delta)
+            stat.add('Earliest acceptable timestamp delay:', '%f' % self.params.min_acceptable)
+            stat.add('Latest acceptable timestamp delay:', '%f' % self.params.max_acceptable)
+            stat.add('Late diagnostic update count:', '%i' % self.late_count)
+            stat.add('Early diagnostic update count:', '%i' % self.early_count)
+            stat.add('Zero seen diagnostic update count:', '%i' % self.zero_count)
 
             self.deltas_valid = False
             self.min_delta = 0
@@ -223,8 +234,8 @@ class Heartbeat(DiagnosticTask):
 
     def __init__(self):
         """Construct a HeartBeat."""
-        DiagnosticTask.__init__(self, "Heartbeat")
+        DiagnosticTask.__init__(self, 'Heartbeat')
 
     def run(self, stat):
-        stat.summary(b'0', "Alive")
+        stat.summary(b'0', 'Alive')
         return stat

@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# Copyright 2015 Open Source Robotics Foundation, Inc.
+# Copyright 2018 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ Diagnostic_updater for Python.
 
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
-import rclpy
-import threading
-from ._update_functions import *
+# import rclpy
+
+from ._diagnostic_updater import CompositeDiagnosticTask
+
+from ._update_functions import FrequencyStatus
+from ._update_functions import TimeStampStatus
 
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
@@ -45,7 +48,7 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
         @param freq The parameters for the FrequencyStatus class that will be
         computing statistics.
         """
-        CompositeDiagnosticTask.__init__(self, name + " topic status")
+        CompositeDiagnosticTask.__init__(self, name + ' topic status')
         self.diag = diag
         self.freq = FrequencyStatus(freq)
         self.addTask(self.freq)
@@ -63,7 +66,7 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
 class TopicDiagnostic(HeaderlessTopicDiagnostic):
     """
     A class to facilitate making diagnostics for a topic using.
-    
+
     a FrequencyStatus and TimeStampStatus.
     """
 

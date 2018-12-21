@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2015 Open Source Robotics Foundation, Inc.
+# Copyright 2018 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +18,16 @@ Diagnostic_updater for Python.
 
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
-import rclpy
+
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+
+# import rclpy
 
 OK = DiagnosticStatus.OK
 WARN = DiagnosticStatus.WARN
 ERROR = DiagnosticStatus.ERROR
+
+
 class DiagnosticStatusWrapper(DiagnosticStatus):
     """
     Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it easier to update.
@@ -52,7 +56,6 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         """
         DiagnosticStatus.__init__(self, *args, **kwds)
 
-
     def summary(self, *args):
         """
         Fill out the level and message fields of the DiagnosticStatus.
@@ -61,18 +64,16 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         summary(diagnostic_status): Copies the summary from a DiagnosticStatus message
         summary(lvl,msg): sets from lvl and messages
         """
-        if len(args)==1:
+        if len(args) == 1:
             self.level = args[0].level
             self.message = args[0].message
-        elif len(args)==2:
-            self.level =args[0] 
+        elif len(args) == 2:
+            self.level = args[0]
             self.message = str(args[1])
-
 
     def clearSummary(self):
         """Clear the summary, setting the level to zero and the message to."""
-        self.summary(b'0', "")
-
+        self.summary(b'0', '')
 
     def mergeSummary(self, *args):
         """
@@ -94,23 +95,22 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         mergeSummary(diagnostic_status): merge from a DiagnosticStatus message
         mergeSummary(lvl,msg): sets from lvl and msg
         """
-        if len(args)==1:
+        if len(args) == 1:
             lvl = args[0].level
             msg = args[0].message
-        elif len(args)==2:
+        elif len(args) == 2:
             lvl = args[0]
             msg = args[1]
 
-        if (lvl>b'0') == (self.level>b'0'):
-            if len(self.message)>0:
-                self.message += "; "
+        if (lvl > b'0') == (self.level > b'0'):
+            if len(self.message) > 0:
+                self.message += '; '
             self.message += msg
         elif lvl > self.level:
             self.message = msg
 
         if lvl > self.level:
             self.level = lvl
-
 
     def add(self, key, val):
         """
