@@ -33,10 +33,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'diagnostic_analysis.diagnostic_status_wrapper': [
-             'diagnostic_status_wrapper = diagnostic_updater._diagnostic_status_wrapper:DiagnosticStatusWrapper',
-             #'listener = demo_nodes_py.topics.listener:main',
+            'diagnostic_status_wrapper = \
+            diagnostic_updater._diagnostic_status_wrapper:DiagnosticStatusWrapper',
         ],
-       
     },
 )
-
