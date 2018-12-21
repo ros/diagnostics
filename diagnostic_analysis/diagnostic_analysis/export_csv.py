@@ -1,6 +1,6 @@
 #!/usr/bin/python3.6
 #
-# Copyright 2015 Open Source Robotics Foundation, Inc.
+# Copyright 2018 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,33 +14,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-##\author Eric Berger, Kevin Watts
+# \author Eric Berger, Kevin Watts
 
-##\brief Converts diagnostics log files into CSV's for analysis
+# \brief Converts diagnostics log files into CSV's for analysis
 
-PKG = 'diagnostic_analysis'
-import argparse
-import sys
-
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import qos_profile_default, qos_profile_sensor_data
-from rclpy.qos import QoSReliabilityPolicy
-
-import diagnostic_msgs.msg
-import time, sys, os
-import operator, tempfile, subprocess
+# import argparse
 
 from optparse import OptionParser
 
-#from diagnostic_analysis.exporter import LogExporter
-##\brief Converts and processes diagnostics logs to CSV format
-##
-## Used by scripts/export_csv.py to convert diagnostics log files to CSV format
+# import operator
+import os
+# import subprocess
+import sys
+import tempfile
+# import time
+import traceback
+
+# import diagnostic_msgs.msg
+
+# import rclpy
+# from rclpy.node import Node
+# from rclpy.qos import qos_profile_default, qos_profile_sensor_data
+# from rclpy.qos import QoSReliabilityPolicy
+
+# from diagnostic_analysis.exporter import LogExporter
+# \brief Converts and processes diagnostics logs to CSV format
+#
+# Used by scripts/export_csv.py to convert diagnostics log files to CSV format
+
 
 class LogExporter:
-    ##\param output_dir str : Complete path of output dir. If None, uses temp dir
-    ##\param logfile str : path of logfile
+    # \param output_dir str : Complete path of output dir. If None, uses temp dir
+    # \param logfile str : path of logfile
+
     def __init__(self, output_dir, logfile):
         self._temp = False
         self._stats = {}
@@ -54,7 +60,8 @@ class LogExporter:
         if not os.path.isdir(self.output_dir):
             os.makedirs(self.output_dir)
 
-    ##\brief Removes all output files. Removes directory if temp
+    # \brief Removes all output files. Removes directory if temp
+
     def remove_files(self):
         for name in self._stats:
             file = self._stats[name]['file_name']
@@ -62,49 +69,51 @@ class LogExporter:
         if self._temp:
             os.rmdir(self.output_dir)
 
-    ##\brief Return filename of output
-    ##\param name str : DiagnosticStatus name ex: 'Mechanism Control'
+    # \brief Return filename of output
+    # \param name str : DiagnosticStatus name ex: 'Mechanism Control'
     def get_filename(self, name):
-        if not self._stats.has_key(name):
-            return None # self.output_dir + '/%s.csv' % name.replace(' ', '_')
+        # if not self._stats.has_key(name):
+        if name in self._stats:
+            return None   # self.output_dir + '/%s.csv' % name.replace(' ', '_')
         return self._stats[name]['file_name']
 
-    ##\brief Use rosrecord to play back bagfile
+    # \brief Use rosrecord to play back bagfile
     def process_log(self):
-        bag = rosbag.Bag(self.logfile)
+        # bag = rosbag.Bag(self.logfile)
+        bag = self.logfile
         for (topic, msg, t) in bag.read_messages():
             self._update(topic, msg)
 
 
-
-
 def main(argv=sys.argv[1:]):
     parser = OptionParser()
-    parser.add_option("-d", "--directory", dest="directory", help="Write output to DIR/output. Default: %s" % PKG, metavar="DIR", action="store" )
+    parser.add_option('-d', '--directory', dest='directory',
+                      help='Write output to DIR/output. Default: %s' % 'diagnostic_analysis',
+                      metavar='DIR', action='store')
 
     options, args = parser.parse_args()
 
     exporters = []
 
-    #print 'Output directory: %s/output' % options.directory
-    print("Output directory: %s/output",options.directory)
+    print('Output directory: %s/output', options.directory)
 
     try:
         for i, f in enumerate(args):
             filepath = 'output/%s_csv' % os.path.basename(f)[0:os.path.basename(f).find('.')]
-            
-            output_dir = os.path.join(options.directory,  filepath)
-            print("Processing file %s. File %d of %d.",(os.path.basename(f), i + 1, len(args)))
-            
+
+            output_dir = os.path.join(options.directory, filepath)
+            print('Processing file %s. File %d of %d.', (os.path.basename(f), i + 1, len(args)))
+
             exp = LogExporter(output_dir, f)
             exp.process_log()
             exp.finish_logfile()
             exporters.append(exp)
 
-        print("Finished processing files.")
-    except:
-        import traceback
-        print("Caught exception processing log file")
+        print('Finished processing files.')
+    except ImportError:
+        print('Caught exception processing log file')
         traceback.print_exc()
+
+
 if __name__ == '__main__':
     main()

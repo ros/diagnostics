@@ -1,16 +1,6 @@
-## ! DO NOT MANUALLY INVOKE THIS setup.py, USE CATKIN INSTEAD
-
-#from distutils.core import setup
-#from catkin_pkg.python_setup import generate_distutils_setup
 from setuptools import find_packages
 from setuptools import setup
 
-# fetch values from package.xml
-#setup_args = generate_distutils_setup(
-#    packages=['diagnostic_analysis'],
-#    package_dir={'': 'src'})
-
-#setup(**setup_args)
 package_name = 'diagnostic_analysis'
 
 setup(
@@ -38,10 +28,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-             'export_csv = diagnostic_analysis.export_csv:main',
-             'sparse_csv = diagnostic_analysis.sparse_csv:main',
-             'bag_csv_test = test.bag_csv_test:main'
-             #'listener = demo_nodes_py.topics.listener:main',
+            'export_csv = diagnostic_analysis.export_csv:main',
+            'sparse_csv = diagnostic_analysis.sparse_csv:main',
+            'bag_csv_test = test.bag_csv_test:main'
         ],
     },
 )
