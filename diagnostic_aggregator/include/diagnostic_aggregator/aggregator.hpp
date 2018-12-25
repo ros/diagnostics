@@ -108,16 +108,10 @@ public:
   rclcpp::Node::SharedPtr get_node() {return nh;}
 
 private:
-  // ros::NodeHandle n_;
   rclcpp::Node::SharedPtr n_;
   rclcpp::Node::SharedPtr nh;
   rclcpp::Node::SharedPtr nh_an;
 
-  // ros::ServiceServer add_srv_; /**< AddDiagnostics,
-  // /diagnostics_agg/add_diagnostics */ ros::Subscriber diag_sub_; /**<
-  // DiagnosticArray, /diagnostics */ ros::Publisher agg_pub_;  /**<
-  // DiagnosticArray, /diagnostics_agg */ ros::Publisher toplevel_state_pub_;
-  // /**< DiagnosticStatus, /diagnostics_toplevel_state */
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr
     toplevel_state_pub_;
@@ -140,16 +134,9 @@ private:
    * information about new diagnostics into added_analyzers_, keeping track of
    * the formed bond in bonds_
    */
-  /*bool addDiagnostics(diagnostic_msgs::msg::AddDiagnostics::Request &req,
-                      diagnostic_msgs::msg::AddDiagnostics::Response &res);*/
   bool addDiagnostics(
     diagnostic_msgs::srv::AddDiagnostics::Request req,
     diagnostic_msgs::srv::AddDiagnostics::Response res);
-  //  bool  Aggregator::addDiagnostics( const std::shared_ptr<rmw_request_id_t>
-  //  request_header,  const std::shared_ptr
-  //  <diagnostic_msgs::srv::AddDiagnostics_Request_::ConstSharedPtr> req,
-  //  std::shared_ptr
-  //  <diagnostic_msgs::srv::AddDiagnostics_Response_::ConstSharedPtr> res);
   bool addDiagnostics_ros2(
     const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
