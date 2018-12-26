@@ -22,12 +22,12 @@ Build proccedure and testing
 
 2. Build the package
 
-	 # cd ../
- 	 # colcon build
+	 2.1 # cd ../
+ 	 2.2 # colcon build
 
 3. Do the test
 
-	 # colcon test
+	 3.1 # colcon test
 
 4. The executable are generated follow the below steps to run tests.
 
@@ -36,18 +36,18 @@ Build proccedure and testing
 
 	4.2 run the executables.
 	 All test cases can be run in following way.  we need to kill the nodes launch by test after test cases execution. This is bug in launch services .
-	 # python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
-	 # ps -ef // to find out node process id
-	 # kill -9 "process id of newly started node for test case "
-	 # python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
-	 # ps -ef
-	 # kill -9 "process id of newly started node for test case "
-	 # python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
-	 # ps -ef
-	 # kill -9 "process id of newly started node for test case "
-	 # python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
-	 # ps -ef
-	 # kill -9 "process id of newly started node for test case "
+	 1>  python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
+	 2>  ps -ef // to find out node process id
+	 3>  kill -9 "process id of newly started node for test case "
+	 4>  python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
+	 5>  ps -ef
+	 6>  kill -9 "process id of newly started node for test case "
+	 7>  python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
+	 8>  ps -ef
+	 9>  kill -9 "process id of newly started node for test case "
+	 10> python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
+	 11> ps -ef
+	 12> kill -9 "process id of newly started node for test case "
 
 
 
