@@ -8,60 +8,60 @@ private parameters. The aggregated diagnostics data is organized
 
 Build proccedure and testing
 
-1. Get pacakge at local system 
+	1. Get pacakge at local system 
 
-	1.1 # mkdir -p diagnostics/src
+		1.1 # mkdir -p diagnostics/src
 
-	1.2 # cd diagnostics/src
-	
-	1.3 # git clone git@github.com:vaibhavbhadade/diagnostics.git 
-
-	1.4 # source source /opt/ros/crystal/setup.sh 
-
+		1.2 # cd diagnostics/src
 		
+		1.3 # git clone git@github.com:vaibhavbhadade/diagnostics.git 
 
-2. Build the package
+		1.4 # source source /opt/ros/crystal/setup.sh 
 
-	 2.1 # cd ../
- 	 2.2 # colcon build
+			
 
-3. Do the test
+	2. Build the package
 
-	 3.1 # colcon test
+		 2.1 # cd ../
+		 2.2 # colcon build
 
-4. The executable are generated follow the below steps to run tests.
+	3. Do the test
 
-	4.1 source local setup
+		 3.1 # colcon test
 
-	 # source install/local_setup.sh
+	4. The executable are generated follow the below steps to run tests.
 
-	4.2 run the executables.
+		4.1 source local setup
 
-	 All test cases can be run in following way.  we need to kill the nodes launch by test after test cases execution. This is bug in launch services .
+		 # source install/local_setup.sh
 
-	 1>  python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
+		4.2 run the executables.
 
-	 2>  ps -ef // to find out node process id
+		 All test cases can be run in following way.  we need to kill the nodes launch by test after test cases execution. This is bug in launch services .
 
-	 3>  kill -9 "process id of newly started node for test case "
+		 1>  python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
 
-	 4>  python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
+		 2>  ps -ef // to find out node process id
 
-	 5>  ps -ef
+		 3>  kill -9 "process id of newly started node for test case "
 
-	 6>  kill -9 "process id of newly started node for test case "
+		 4>  python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
 
-	 7>  python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
+		 5>  ps -ef
 
-	 8>  ps -ef
+		 6>  kill -9 "process id of newly started node for test case "
 
-	 9>  kill -9 "process id of newly started node for test case "
+		 7>  python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
 
-	 10> python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
+		 8>  ps -ef
 
-	 11> ps -ef
+		 9>  kill -9 "process id of newly started node for test case "
 
-	 12> kill -9 "process id of newly started node for test case "
+		 10> python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
+
+		 11> ps -ef
+
+		 12> kill -9 "process id of newly started node for test case "
 
 
 
