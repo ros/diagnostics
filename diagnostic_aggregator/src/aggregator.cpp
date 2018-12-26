@@ -48,6 +48,7 @@ diagnostic_aggregator::Aggregator::Aggregator()
   nh_an = std::make_shared<rclcpp::Node>(
     "diagnostic_aggregator", "/", context, arguments, initial_values,
     use_global_arguments, use_intra_process);
+  //  Listing parameter using syncronous paramter serrvice 
   auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(nh);
   using namespace std::chrono_literals;
   while (!parameters_client->wait_for_service(1s)) {
@@ -62,7 +63,8 @@ diagnostic_aggregator::Aggregator::Aggregator()
   std::stringstream ss, ss1;
 
   analyzer_group_ = new AnalyzerGroup();
-
+  //  Analyzer initialisation: parameter passed is base path, name of node which create analyzer
+  //  node share pointer 
   if (!analyzer_group_->init(base_path_, nh_an->get_name(), nh_an, NULL)) {
     // if (!analyzer_group_->init(base_path_,"analyzers",nh,"gen_analyzers"))
     ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
@@ -70,6 +72,7 @@ diagnostic_aggregator::Aggregator::Aggregator()
   // Last analyzer handles remaining data
   other_analyzer_ = new OtherAnalyzer();
   other_analyzer_->init(base_path_);  //  This always returns true
+  //  Callback for service adding analyzer
   auto handle_add_agreegator =
     [this](
     const std::shared_ptr<rmw_request_id_t> request_header,

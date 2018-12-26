@@ -54,13 +54,6 @@ bool diagnostic_aggregator::GenericAnalyzer::init(
   }
   std::stringstream ss;
   std::stringstream ss1;
-#if 0
-  for (auto & parameter : parameters_client->get_parameters({"startswith"})) {
-    ss << "\nParameter name: " << parameter.get_name();
-    ss << "\nParameter value (" << parameter.get_type_name() <<
-      "): " << parameter.value_to_string();
-  }
-#endif
   std::map<std::string, std::string> anl_param;
 
   auto parameters_and_prefixes =

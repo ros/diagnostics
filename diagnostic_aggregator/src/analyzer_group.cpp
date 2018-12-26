@@ -58,7 +58,7 @@ bool diagnostic_aggregator::AnalyzerGroup::init(
   std::string anz_name;
   std::string an_name = nsp;
   analyzers_nh = nh;
-
+  // Paramter clinet for parameter service
   rclcpp::SyncParametersClient::SharedPtr parameters_client_analyzer =
     std::make_shared<rclcpp::SyncParametersClient>(analyzers_nh, nsp);
   using namespace std::chrono_literals;
@@ -90,7 +90,7 @@ bool diagnostic_aggregator::AnalyzerGroup::init(
 
   auto parameters_and_prefixes =
     parameters_client_analyzer->list_parameters({params_anz}, 10);
-
+  //  Lising parameter for analyzer from yaml file
   ss << "\nParameter names:";
   for (auto & name : parameters_and_prefixes.names) {
     //  ss << "\n " << name;
@@ -103,7 +103,7 @@ bool diagnostic_aggregator::AnalyzerGroup::init(
   }
 
   RCLCPP_INFO(analyzers_nh->get_logger(), ss1.str().c_str());
-
+  //  iterate to find types of analyzer to be created 
   for (std::map<std::string, std::string>::iterator anl_it = anl_param.begin();
     anl_it != anl_param.end(); ++anl_it)
   {
