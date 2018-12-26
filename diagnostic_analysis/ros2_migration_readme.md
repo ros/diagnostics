@@ -28,3 +28,7 @@ Ros2 migration changes
 	1> Python2.7 to Python3 migration done. 
 
 	2> directory structure changes as per ros2 python pacakges
+
+Limitations
+
+	1> Bag file parsing yet not available in this package  

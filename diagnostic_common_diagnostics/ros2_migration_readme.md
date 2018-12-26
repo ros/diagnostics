@@ -33,3 +33,7 @@ Ros2 migration changes
 	2> directory structure changes as per ros2 python pacakges
 
 	3> changes for creating diagnostic_msg required
+
+Limitations
+
+	1> parameter service was not available for ros2 boncy so warningn level is fixed to 90%
