@@ -9,6 +9,7 @@ private parameters. The aggregated diagnostics data is organized
 Build proccedure and testing
 
 1. Get pacakge at local system 
+
 	1.1 # mkdir -p diagnostics/src
 
 	1.2 # cd diagnostics/src
@@ -20,11 +21,13 @@ Build proccedure and testing
 		
 
 2. Build the package
- # cd ../
- # colcon build
+
+	 # cd ../
+ 	 # colcon build
 
 3. Do the test
- # colcon test
+
+	 # colcon test
 
 4. The executable are generated follow the below steps to run tests.
 
@@ -92,7 +95,7 @@ ROS2 Migration changes
 				      'prefix1: expected1a'] 
 
 
-	5> Xmlrpc variables replacced by string tyes and required modification/changes incorporated. 
+	5> Xmlrpc variables replaced by string types variables and required modification/changes incorporated. 
 
 	6> Parametres for analyzers taken from yaml file only so analyzers created using paramter 
 	service and corresponding code and logical parsing changes added to devired class of analyzers 
@@ -101,6 +104,6 @@ ROS2 Migration changes
 
 Limitations
 
-        1> Publish rate is fixed 1hz   	
+        1> Publish rate is fixed 1hz.   	
 	
 	2> This is not designed to be a keepalive, it uses potentially unreliable transports and does not have tight timeouts, and there may be stale data due to aggregation.
