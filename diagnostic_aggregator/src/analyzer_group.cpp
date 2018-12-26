@@ -103,7 +103,7 @@ bool diagnostic_aggregator::AnalyzerGroup::init(
   }
 
   RCLCPP_INFO(analyzers_nh->get_logger(), ss1.str().c_str());
-  //  iterate to find types of analyzer to be created 
+  //  iterate to find types of analyzer to be created
   for (std::map<std::string, std::string>::iterator anl_it = anl_param.begin();
     anl_it != anl_param.end(); ++anl_it)
   {
