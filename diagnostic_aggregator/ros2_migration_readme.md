@@ -39,42 +39,42 @@ Build proccedure and testing
 
 		 All test cases can be run in following way.  we need to kill the nodes launch by test after test cases execution. This is bug in launch services .
 
-		 1>  python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
+			 1.  python3 src/diagnostics/diagnostic_aggregator/test/add_analyzers_test.py
 
-		 2>  ps -ef // to find out node process id
+			 2.  ps -ef // to find out node process id
 
-		 3>  kill -9 "process id of newly started node for test case "
+			 3.  kill -9 "process id of newly started node for test case "
 
-		 4>  python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
+			 4.  python3 src/diagnostics/diagnostic_aggregator/test/aggregator_test.py
 
-		 5>  ps -ef
+			 5.  ps -ef
 
-		 6>  kill -9 "process id of newly started node for test case "
+			 6.  kill -9 "process id of newly started node for test case "
 
-		 7>  python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
+			 7.  python3 src/diagnostics/diagnostic_aggregator/test/expected_stale_test.py
 
-		 8>  ps -ef
+			 8.  ps -ef
 
-		 9>  kill -9 "process id of newly started node for test case "
+			 9.  kill -9 "process id of newly started node for test case "
 
-		 10> python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
+			 10. python3 src/diagnostics/diagnostic_aggregator/test/multiple_match_test.py
 
-		 11> ps -ef
+			 11. ps -ef
 
-		 12> kill -9 "process id of newly started node for test case "
+			 12. kill -9 "process id of newly started node for test case "
 
 
 
 ROS2 Migration changes 
 
-	1> Basic design and concept of aggregator node is same as per ros,this
+	1. Basic design and concept of aggregator node is same as per ros,this
 	node contain two analyzers GenericAnalyzer and AnalyzerGroup to hold 
 	and categorise messsages. 
 
-	2> Defination of base anlyzer class has been changed and extra parameter 
+	2. Defination of base anlyzer class has been changed and extra parameter 
 	added to pass paramters to analyzers 
 
-	3> base analyzers will have following fuctionalities as per ros 
+	3. base analyzers will have following fuctionalities as per ros 
 
 	    init() -  Loads parameters from yaml file
 
@@ -89,7 +89,7 @@ ROS2 Migration changes
 	    getName() - Get nice name, like "Motors" or "Sensors" 
 
 
-	4> To configure the analyzer we give analyzer paramter in private namespace 
+	4. To configure the analyzer we give analyzer paramter in private namespace 
 	'analyzers_params' as below :
 
 			analyzers_params:
@@ -108,15 +108,15 @@ ROS2 Migration changes
 				      'prefix1: expected1a'] 
 
 
-	5> Xmlrpc variables replaced by string types variables and required modification/changes incorporated. 
+	5. Xmlrpc variables replaced by string types variables and required modification/changes incorporated. 
 
-	6> Parametres for analyzers taken from yaml file only so analyzers created using paramter 
+	6. Parametres for analyzers taken from yaml file only so analyzers created using paramter 
 	service and corresponding code and logical parsing changes added to devired class of analyzers 
 
-	7> Rest of the features of aggregator is same as previous.  
+	7. Rest of the features of aggregator is same as previous.  
 
 Limitations
 
-        1> Publish rate is fixed 1hz.   	
+        1. Publish rate is fixed 1hz.   	
 	
-        2> This is not designed to be a keepalive, it uses potentially unreliable transports and does not have tight timeouts, and there may be stale data due to aggregation.
+        2. This is not designed to be a keepalive, it uses potentially unreliable transports and does not have tight timeouts, and there may be stale data due to aggregation.
