@@ -9,7 +9,7 @@ Build proccedure and testing
 
 		1.3 # git clone git@github.com:vaibhavbhadade/diagnostics.git
 
-		1.4 # source source /opt/ros/crystal/setup.sh
+		1.4 # source /opt/ros/crystal/setup.sh
 
 
 

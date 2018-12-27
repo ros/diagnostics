@@ -11,7 +11,7 @@ Build proccedure and testing
 
 		1.3 # git clone git@github.com:vaibhavbhadade/diagnostics.git
 
-		1.4 # source source /opt/ros/crystal/setup.sh
+		1.4 # source /opt/ros/crystal/setup.sh
 
 
 
@@ -30,4 +30,4 @@ Ros2 migration changes
 
 Limitations
 
-	1. Bag file parsing yet not available in this package  
+	1. Bag file to csv conversion  yet not available in this package  
