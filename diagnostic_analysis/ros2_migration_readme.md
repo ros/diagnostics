@@ -1,6 +1,6 @@
 Overview
 
-larger cvs file can be sparsed and convert into smaller csv files.
+	Larger csv file can be sparsed and convert into smaller csv files.
 
 Build proccedure and testing
 
