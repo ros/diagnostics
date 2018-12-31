@@ -5,6 +5,9 @@ and republishes aggregated data on /diagnostics_agg. The aggregator
 creates a series of analyzers according to the specifications of its
 private parameters. The aggregated diagnostics data is organized
 
+Dependency : 
+
+	Psutil package should be installed. If psutil package for python3 then execute "sudo -H python3 -m pip install psutil" 
 
 Build proccedure and testing
 
@@ -29,7 +32,7 @@ Build proccedure and testing
 
 		 3.1 # colcon test
 
-	4. The executable are generated follow the below steps to run tests.
+	4. The executables are generated follow the below steps to run tests.
 
 		4.1 source local setup
 
@@ -67,7 +70,7 @@ Build proccedure and testing
 
 ROS2 Migration changes 
 
-	1. Basic design and concept of aggregator node is same as per ros,this
+	1. Basic design and concept of aggregator node are same as per ros,this
 	node contain two analyzers GenericAnalyzer and AnalyzerGroup to hold 
 	and categorise messsages. 
 
@@ -120,3 +123,5 @@ Limitations
         1. Publish rate is fixed 1hz.   	
 	
         2. This is not designed to be a keepalive, it uses potentially unreliable transports and does not have tight timeouts, and there may be stale data due to aggregation.
+	
+	3. psutils should be install to run colcon test cleanly. 

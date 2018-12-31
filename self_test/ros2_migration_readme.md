@@ -1,5 +1,10 @@
 Overview
 
+Dependency :
+
+        Psutil package should be installed. If psutil package for python3 then execute "sudo -H python3 -m pip install psutil"
+
+
 Build proccedure and testing
 
 	1. Get pacakge at local system
