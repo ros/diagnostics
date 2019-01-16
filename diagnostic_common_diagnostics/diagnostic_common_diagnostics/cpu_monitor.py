@@ -34,7 +34,6 @@ class CpuTask(DiagnosticTask):
     def run(self, stat):
         cpu_percentages = psutil.cpu_percent(percpu=True)
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
-
         stat.add('CPU Load Average', 'cpu_average')
 
         warn = False
@@ -57,7 +56,6 @@ def main():
     rclpy.init()
     node = rclpy.create_node('cpu_monitor_%s' % hostname.replace('-', '_'))
     Parameter('~warning_percentage', Parameter.Type.INTEGER, 90)
-    print(node.get_node_names())
 
     updater = Updater(node)
     updater.setHardwareID(hostname)
