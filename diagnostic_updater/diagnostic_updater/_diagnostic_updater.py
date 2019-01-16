@@ -264,8 +264,8 @@ class Updater(DiagnosticTaskVector):
         with self.lock:  # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
-                status.name = task.name
                 status.level = b'2'
+                status.name = task.name
                 status.message = 'No message was set'
                 status.hardware_id = self.hwid
 
@@ -334,7 +334,7 @@ class Updater(DiagnosticTaskVector):
             msg = [msg]
 
         for stat in msg:
-            stat.name = self.node.get_name()[1:] + ': ' + stat.name
+            stat.name = self.node.get_name() + ': ' + stat.name
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
 

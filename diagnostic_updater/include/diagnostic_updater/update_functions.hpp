@@ -181,7 +181,7 @@ public:
       stat.addf("Minimum acceptable frequency (Hz)", "%f",
         *params_.min_freq_ * (1 - params_.tolerance_));
     }
-    if (finite(*params_.max_freq_)) {
+    if (isfinite(*params_.max_freq_)) {
       stat.addf("Maximum acceptable frequency (Hz)", "%f",
         *params_.max_freq_ * (1 + params_.tolerance_));
     }

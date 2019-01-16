@@ -19,7 +19,7 @@ Diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 # import rclpy
 

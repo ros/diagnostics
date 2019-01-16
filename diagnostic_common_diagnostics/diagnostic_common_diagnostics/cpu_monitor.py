@@ -34,8 +34,6 @@ class CpuTask(DiagnosticTask):
     def run(self, stat):
         cpu_percentages = psutil.cpu_percent(percpu=True)
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
-        stat.add('CPU Load Average', 'cpu_average')
-
         warn = False
         for idx, val in enumerate(cpu_percentages):
             stat.add('CPU {} Load'.format(idx), '{}'.format(val))

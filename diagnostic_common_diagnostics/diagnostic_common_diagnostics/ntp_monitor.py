@@ -30,7 +30,6 @@ from rclpy.clock import ClockType
 def ntp_diag(st, host, off, error_offset):
 
     try:
-        print(host)
         p = Popen(['ntpdate', '-q', host], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         res = p.wait()
         (o, e) = p.communicate()
