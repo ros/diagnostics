@@ -341,6 +341,9 @@ class Updater(DiagnosticTaskVector):
         da = DiagnosticArray()
         db = DiagnosticStatus()
         db.name = stat.name
+        db.message= stat.message
+        db.hardware_id= stat.hardware_id
+        db.values= stat.values
         da.status.append(db)
         da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         self.publisher.publish(da)
