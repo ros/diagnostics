@@ -20,7 +20,8 @@ import re
 import socket
 import subprocess
 
-import diagnostic_updater as DIAG
+from diagnostic_msgs.msg import DiagnosticStatus,DiagnosticArray
+from diagnostic_updater import Updater
 
 import rclpy
 
@@ -163,7 +164,7 @@ class SensorsMonitor(object):
         self.ignore_fans = False
         node.get_logger().info('Ignore fanspeed warnings: %s' % self.ignore_fans)
 
-        self.updater = DIAG.Updater(node)
+        self.updater = Updater(node)
         self.updater.setHardwareID('none')
         self.updater.add('%s Sensor Status' % self.hostname, self.monitor)
 
@@ -175,24 +176,24 @@ class SensorsMonitor(object):
 
     def monitor(self, stat):
         try:
-            stat.summary(DIAG.OK, 'OK')
+            stat.summary(DiagnosticStatus.OK, 'OK')
             for sensor in parse_sensors_output(get_sensors()):
                 if sensor.getType() == 'Temperature':
                     if sensor.getInput() > sensor.getCrit():
-                        stat.mergeSummary(DIAG.ERROR, 'Critical Temperature')
+                        stat.mergeSummary(DiagnosticStatus.ERROR, 'Critical Temperature')
                     elif sensor.getInput() > sensor.getHigh():
-                        stat.mergeSummary(DIAG.WARN, 'High Temperature')
+                        stat.mergeSummary(DiagnosticStatus.WARN, 'High Temperature')
                     stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
                 elif sensor.getType() == 'Voltage':
                     if sensor.getInput() < sensor.getMin():
-                        stat.mergeSummary(DIAG.ERROR, 'Low Voltage')
+                        stat.mergeSummary(DiagnosticStatus.ERROR, 'Low Voltage')
                     elif sensor.getInput() > sensor.getMax():
-                        stat.mergeSummary(DIAG.ERROR, 'High Voltage')
+                        stat.mergeSummary(DiagnosticStatus.ERROR, 'High Voltage')
                     stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
                 elif sensor.getType() == 'Speed':
                     if not self.ignore_fans:
                         if sensor.getInput() < sensor.getMin():
-                            stat.mergeSummary(DIAG.ERROR, 'No Fan Speed')
+                            stat.mergeSummary(DiagnosticStatus.ERROR, 'No Fan Speed')
                     stat.add(' '.join([sensor.getName(), sensor.getType()]), sensor.getInput())
         except Exception:
             import traceback
