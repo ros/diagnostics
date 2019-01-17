@@ -19,8 +19,7 @@ import socket
 from subprocess import PIPE, Popen
 import sys
 import threading
-
-import diagnostic_updater as DIAG
+from diagnostic_msgs.msg import DiagnosticStatus,DiagnosticArray,KeyValue
 
 import rclpy
 from rclpy.clock import Clock
@@ -30,6 +29,7 @@ from rclpy.clock import ClockType
 def ntp_diag(st, host, off, error_offset):
 
     try:
+        print(host)
         p = Popen(['ntpdate', '-q', host], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         res = p.wait()
         (o, e) = p.communicate()
@@ -39,20 +39,28 @@ def ntp_diag(st, host, off, error_offset):
         else:
             raise
     if (res == 0):
-        measured_offset = float(re.search('offset (.*),', o).group(1)) * 1000000
+        measured_offset = float(re.search(b'offset (.*),', o).group(1)) * 1000000
 
-        st.level = DIAG.DiagnosticStatus.OK
+        st.level = DiagnosticStatus.OK
         st.message = 'OK'
+        st.values.insert(0, KeyValue(key='Offset (us)', value=str(measured_offset)))
+        st.values.insert(1, KeyValue(key='Offset tolerance (us)', value=str(off)))
+        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error', value=str(error_offset)))
         if (abs(measured_offset) > off):
-            st.level = DIAG.DiagnosticStatus.WARN
+            st.level = DiagnosticStatus.WARN
             st.message = 'NTP Offset Too High'
         if (abs(measured_offset) > error_offset):
-            st.level = DIAG.DiagnosticStatus.ERROR
+            st.level = DiagnosticStatus.ERROR
             st.message = 'NTP Offset Too High'
 
     else:
-        st.level = DIAG.DiagnosticStatus.ERROR
+        st.level = DiagnosticStatus.ERROR
         st.message = 'Error Running ntpdate. Returned %d' % res
+        st.values.insert(0, KeyValue(key='Offset (us)', value=str('N/A')))
+        st.values.insert(1, KeyValue(key='Offset tolerance (us)', value=str(off)))
+        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error', value=str(error_offset)))
+        st.values.insert(3, KeyValue(key='Output', value='o'))
+        st.values.insert(4, KeyValue(key='Errors', value='e'))
     return st
 
 
@@ -72,15 +80,15 @@ class NTPMonitor:
         if self.diag_hostname is None:
             self.diag_hostname = self.hostname
 
-        self.stat = DIAG.DiagnosticStatus()
-        self.stat.level = DIAG.DiagnosticStatus.OK
+        self.stat = DiagnosticStatus()
+        self.stat.level = DiagnosticStatus.OK
         self.stat.name = 'NTP offset from ' + self.diag_hostname + ' to ' + self.ntp_hostname
         self.stat.message = 'OK'
         self.stat.hardware_id = self.hostname
         self.stat.values = []
 
-        self.self_stat = DIAG.DiagnosticStatus()
-        self.self_stat.level = DIAG.DiagnosticStatus.OK
+        self.self_stat = DiagnosticStatus()
+        self.self_stat.level = DiagnosticStatus.OK
         self.self_stat.name = 'NTP self-offset for ' + self.diag_hostname
         self.self_stat.message = 'OK'
         self.self_stat.hardware_id = self.hostname
@@ -88,7 +96,7 @@ class NTPMonitor:
 
         self.mutex = threading.Lock()
         self.node = node
-        self.pub = self.node.create_publisher(DIAG.DiagnosticArray, '/diagnostics')
+        self.pub = self.node.create_publisher(DiagnosticArray, '/diagnostics')
 
         #  we need to periodically republish this
         self.current_msg = None
@@ -104,7 +112,7 @@ class NTPMonitor:
 
     def checkCB(self):
         self.checktimer.cancel()
-        new_msg = DIAG.DiagnosticArray()
+        new_msg = DiagnosticArray()
         clock = Clock(clock_type=ClockType.STEADY_TIME)
         now = clock.now()
         new_msg.header.stamp = now.to_msg()
