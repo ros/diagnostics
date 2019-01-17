@@ -19,7 +19,8 @@ import socket
 from subprocess import PIPE, Popen
 import sys
 import threading
-from diagnostic_msgs.msg import DiagnosticStatus,DiagnosticArray,KeyValue
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 import rclpy
 from rclpy.clock import Clock
@@ -45,7 +46,8 @@ def ntp_diag(st, host, off, error_offset):
         st.message = 'OK'
         st.values.insert(0, KeyValue(key='Offset (us)', value=str(measured_offset)))
         st.values.insert(1, KeyValue(key='Offset tolerance (us)', value=str(off)))
-        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error', value=str(error_offset)))
+        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error',
+                         value=str(error_offset)))
         if (abs(measured_offset) > off):
             st.level = DiagnosticStatus.WARN
             st.message = 'NTP Offset Too High'
@@ -58,7 +60,8 @@ def ntp_diag(st, host, off, error_offset):
         st.message = 'Error Running ntpdate. Returned %d' % res
         st.values.insert(0, KeyValue(key='Offset (us)', value=str('N/A')))
         st.values.insert(1, KeyValue(key='Offset tolerance (us)', value=str(off)))
-        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error', value=str(error_offset)))
+        st.values.insert(2, KeyValue(key='Offset tolerance (us) for Error',
+                         value=str(error_offset)))
         st.values.insert(3, KeyValue(key='Output', value='o'))
         st.values.insert(4, KeyValue(key='Errors', value='e'))
     return st

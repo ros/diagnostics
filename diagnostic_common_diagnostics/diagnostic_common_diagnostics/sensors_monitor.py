@@ -20,7 +20,7 @@ import re
 import socket
 import subprocess
 
-from diagnostic_msgs.msg import DiagnosticStatus,DiagnosticArray
+from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_updater import Updater
 
 import rclpy
