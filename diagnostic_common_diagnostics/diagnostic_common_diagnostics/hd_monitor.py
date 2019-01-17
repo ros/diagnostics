@@ -53,7 +53,7 @@ def get_hddtemp_data(hostname='localhost', port=7634):
             newdat = hd_sock.recv(1024)
             if len(newdat) == 0:
                 break
-            sock_data = sock_data + newdat
+            sock_data = sock_data + str(newdat)
         hd_sock.close()
 
         sock_vals = sock_data.split('|')
