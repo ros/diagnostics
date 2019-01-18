@@ -66,6 +66,8 @@ inline bool getParamVals(
     container.push_back(p);
   }
   delete[] s;
+
+  return true;
 }
 
 /*!

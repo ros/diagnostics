@@ -175,7 +175,7 @@ int main(int argc, char * argv[])
   auto result = send_request(node, client, request);
   if (result) {
     RCLCPP_INFO(node->get_logger(), "Result of add_two_ints: %s",
-      result->message);
+      result->message.c_str());
   } else {
     RCLCPP_ERROR(node->get_logger(),
       "Interrupted while waiting for response. Exiting.");
