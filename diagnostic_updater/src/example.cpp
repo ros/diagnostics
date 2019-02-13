@@ -35,6 +35,8 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <std_msgs/Bool.h>
 #include <diagnostic_updater/publisher.h>
+
+// ERROR defined in windows.h causes name collision, undefine the macro to fix the issue
 #ifdef ERROR
 #undef ERROR
 #endif
