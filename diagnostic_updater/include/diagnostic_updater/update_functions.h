@@ -124,17 +124,6 @@ namespace diagnostic_updater
     }
 
       /**
-       * \brief Constructs a FrequencyStatus class with the given parameters.
-       */
-
-      FrequencyStatus(const FrequencyStatusParam &params, const std::string name) :
-        DiagnosticTask(name), params_(params),
-        times_(params_.window_size_), seq_nums_(params_.window_size_)
-    {
-      clear();
-    }
-
-      /**
        * \brief Resets the statistics.
        */
 
@@ -201,7 +190,7 @@ namespace diagnostic_updater
         if (*params_.min_freq_ > 0)
           stat.addf("Minimum acceptable frequency (Hz)", "%f",
               *params_.min_freq_ * (1 - params_.tolerance_));
-        if (finite(*params_.max_freq_))
+        if (_finite(*params_.max_freq_))
           stat.addf("Maximum acceptable frequency (Hz)", "%f",
               *params_.max_freq_ * (1 + params_.tolerance_));
       }
