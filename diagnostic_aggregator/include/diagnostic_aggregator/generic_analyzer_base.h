@@ -91,7 +91,7 @@ public:
     path_ = path;
     discard_stale_ = discard_stale;
 
-    if (discard_stale_ and timeout <= 0)
+    if (discard_stale_ && timeout <= 0)
     {
       ROS_WARN("Cannot discard stale items if no timeout specified. No items will be discarded");
       discard_stale_ = false;
@@ -160,7 +160,7 @@ public:
         stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
 
       // Erase item if its stale and we're discarding items
-      if (discard_stale_ and stale)
+      if (discard_stale_ && stale)
       {
         items_.erase(it++);
         continue;
@@ -201,7 +201,7 @@ public:
       header_status->level = 0;
       header_status->message = "OK";
     }
-    else if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_)
+    else if (num_items_expected_ > 0 && int(items_.size()) != num_items_expected_)
     {
       int8_t lvl = 2;
       header_status->level = std::max(lvl, header_status->level);
