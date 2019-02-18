@@ -42,10 +42,10 @@
 
 namespace diagnostic_updater
 {
-     
+
 /**
  * \brief A class to facilitate making diagnostics for a topic using a
- * FrequencyStatus. 
+ * FrequencyStatus.
  *
  * The word "headerless" in the class name refers to the fact that it is
  * mainly designed for use with messages that do not have a header, and
@@ -56,7 +56,7 @@ class HeaderlessTopicDiagnostic : public CompositeDiagnosticTask
 {
 public:
 /**
- * \brief Constructs a HeaderlessTopicDiagnostic. 
+ * \brief Constructs a HeaderlessTopicDiagnostic.
  *
  * \param name The name of the topic that is being diagnosed.
  *
@@ -66,12 +66,12 @@ public:
  * \param freq The parameters for the FrequencyStatus class that will be
  * computing statistics.
  */
-	
-	HeaderlessTopicDiagnostic(
-      std::string name,
-      diagnostic_updater::Updater &diag,
-      const diagnostic_updater::FrequencyStatusParam &freq) :
-    CompositeDiagnosticTask(name + " topic status"), 
+
+  HeaderlessTopicDiagnostic(
+    std::string name,
+    diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq)
+  : CompositeDiagnosticTask(name + " topic status"),
     freq_(freq)
   {
     addTask(&freq_);
@@ -80,19 +80,19 @@ public:
 
   virtual ~HeaderlessTopicDiagnostic()
   {}
-  
+
   /**
-	 * \brief Signals that a publication has occurred.
-	 */
+         * \brief Signals that a publication has occurred.
+         */
 
   virtual void tick()
   {
     freq_.tick();
   }
-  
+
   /**
-	 * \brief Clears the frequency statistics.
-	 */
+         * \brief Clears the frequency statistics.
+         */
 
   virtual void clear_window()
   {
@@ -105,14 +105,14 @@ private:
 
 /**
  * \brief A class to facilitate making diagnostics for a topic using a
- * FrequencyStatus and TimeStampStatus. 
+ * FrequencyStatus and TimeStampStatus.
  */
 
 class TopicDiagnostic : public HeaderlessTopicDiagnostic
 {
 public:
 /**
- * \brief Constructs a TopicDiagnostic. 
+ * \brief Constructs a TopicDiagnostic.
  *
  * \param name The name of the topic that is being diagnosed.
  *
@@ -125,40 +125,44 @@ public:
  * \param stamp The parameters for the TimeStampStatus class that will be
  * computing statistics.
  */
-	
+
   TopicDiagnostic(
-      std::string name,
-      diagnostic_updater::Updater &diag,
-      const diagnostic_updater::FrequencyStatusParam &freq,
-      const diagnostic_updater::TimeStampStatusParam &stamp) : 
-    HeaderlessTopicDiagnostic(name, diag, freq), 
+    std::string name,
+    diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq,
+    const diagnostic_updater::TimeStampStatusParam & stamp)
+  : HeaderlessTopicDiagnostic(name, diag, freq),
     stamp_(stamp)
   {
     addTask(&stamp_);
   }
-  
+
   virtual ~TopicDiagnostic()
   {}
-  
-  /**
-	 * This method should never be called on a TopicDiagnostic as a timestamp
-	 * is needed to collect the timestamp diagnostics. It is defined here to
-	 * prevent the inherited tick method from being used accidentally.
-	 */
-	virtual void tick() { ROS_FATAL("tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead."); }
 
   /**
-	 * \brief Collects statistics and publishes the message.
-	 *
-	 * \param stamp Timestamp to use for interval computation by the
-	 * TimeStampStatus class.
-	 */
-  virtual void tick(const ros::Time &stamp)
+         * This method should never be called on a TopicDiagnostic as a timestamp
+         * is needed to collect the timestamp diagnostics. It is defined here to
+         * prevent the inherited tick method from being used accidentally.
+         */
+  virtual void tick()
+  {
+    ROS_FATAL(
+      "tick(void) has been called on a TopicDiagnostic. This is never correct. Use tick(ros::Time &) instead.");
+  }
+
+  /**
+         * \brief Collects statistics and publishes the message.
+         *
+         * \param stamp Timestamp to use for interval computation by the
+         * TimeStampStatus class.
+         */
+  virtual void tick(const ros::Time & stamp)
   {
     stamp_.tick(stamp);
     HeaderlessTopicDiagnostic::tick();
   }
-  
+
 private:
   TimeStampStatus stamp_;
 };
@@ -175,7 +179,7 @@ class DiagnosedPublisher : public TopicDiagnostic
 {
 public:
 /**
- * \brief Constructs a DiagnosedPublisher. 
+ * \brief Constructs a DiagnosedPublisher.
  *
  * \param pub The publisher on which statistics are being collected.
  *
@@ -188,47 +192,53 @@ public:
  * \param stamp The parameters for the TimeStampStatus class that will be
  * computing statistics.
  */
-	
-  DiagnosedPublisher(const ros::Publisher &pub,
-      diagnostic_updater::Updater &diag, 
-      const diagnostic_updater::FrequencyStatusParam &freq, 
-      const diagnostic_updater::TimeStampStatusParam &stamp) : 
-    TopicDiagnostic(pub.getTopic(), diag, freq, stamp),
+
+  DiagnosedPublisher(
+    const ros::Publisher & pub,
+    diagnostic_updater::Updater & diag,
+    const diagnostic_updater::FrequencyStatusParam & freq,
+    const diagnostic_updater::TimeStampStatusParam & stamp)
+  : TopicDiagnostic(pub.getTopic(), diag, freq, stamp),
     publisher_(pub)
   {}
 
   virtual ~DiagnosedPublisher()
   {}
-  
-  /**
-	 * \brief Collects statistics and publishes the message.
-	 *
-	 * The timestamp to be used by the TimeStampStatus class will be
-	 * extracted from message.header.stamp.
-	 */
-	virtual void publish(const boost::shared_ptr<T>& message) {
-		tick(message->header.stamp); publisher_.publish(message); }
- 
-  /**
-	 * \brief Collects statistics and publishes the message.
-	 *
-	 * The timestamp to be used by the TimeStampStatus class will be
-	 * extracted from message.header.stamp.
-	 */
-	virtual void publish(const T& message) { tick(message.header.stamp);
-		publisher_.publish(message); }
 
   /**
-	 * \brief Returns the publisher.
-	 */
+         * \brief Collects statistics and publishes the message.
+         *
+         * The timestamp to be used by the TimeStampStatus class will be
+         * extracted from message.header.stamp.
+         */
+  virtual void publish(const boost::shared_ptr<T> & message)
+  {
+    tick(message->header.stamp); publisher_.publish(message);
+  }
+
+  /**
+         * \brief Collects statistics and publishes the message.
+         *
+         * The timestamp to be used by the TimeStampStatus class will be
+         * extracted from message.header.stamp.
+         */
+  virtual void publish(const T & message)
+  {
+    tick(message.header.stamp);
+    publisher_.publish(message);
+  }
+
+  /**
+         * \brief Returns the publisher.
+         */
   ros::Publisher getPublisher() const
   {
     return publisher_;
   }
 
   /**
-	 * \brief Changes the publisher.
-	 */
+         * \brief Changes the publisher.
+         */
   void setPublisher(ros::Publisher pub)
   {
     publisher_ = pub;
@@ -238,6 +248,6 @@ private:
   ros::Publisher publisher_;
 };
 
-};
+}
 
 #endif

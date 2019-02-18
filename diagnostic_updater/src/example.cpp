@@ -1,13 +1,13 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
- * 
+ *
  *  Copyright (c) 2008, Willow Garage, Inc.
  *  All rights reserved.
- * 
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
- * 
+ *
  *   * Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
  *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
  *   * Neither the name of the Willow Garage nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -45,33 +45,35 @@ double time_to_launch;
  * class.
  */
 
-void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper & stat)
 {
-  // DiagnosticStatusWrapper are a derived class of 
+  // DiagnosticStatusWrapper are a derived class of
   // diagnostic_msgs::DiagnosticStatus provides a set of convenience
   // methods.
-  
+
   // summary and summaryf set the level and message.
-  if (time_to_launch < 10)
+  if (time_to_launch < 10) {
     // summaryf for formatted text.
-    stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
-  else
+    stat.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR,
+      "Buckle your seat belt. Launch in %f seconds!", time_to_launch);
+  } else {
     // summary for unformatted text.
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Launch is in a long time. Have a soda.");
+  }
 
   // add and addf are used to append key-value pairs.
   stat.add("Diagnostic Name", "dummy");
   // add transparently handles conversion to string (using a string_stream).
   stat.add("Time to Launch", time_to_launch);
   // addf allows arbitrary printf style formatting.
-  stat.addf("Geeky thing to say", "The square of the time to launch %f is %f", 
-      time_to_launch, time_to_launch * time_to_launch);
+  stat.addf("Geeky thing to say", "The square of the time to launch %f is %f",
+    time_to_launch, time_to_launch * time_to_launch);
 }
 
 class DummyClass
 {
 public:
-  void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
     stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is a silly updater.");
 
@@ -82,42 +84,45 @@ public:
 class DummyTask : public diagnostic_updater::DiagnosticTask
 {
 public:
-  DummyTask() : DiagnosticTask("Updater Derived from DiagnosticTask")
+  DummyTask()
+  : DiagnosticTask("Updater Derived from DiagnosticTask")
   {}
 
-  void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
     stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "This is another silly updater.");
     stat.add("Stupidicity of this updater", 2000.);
   }
 };
 
-void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void check_lower_bound(diagnostic_updater::DiagnosticStatusWrapper & stat)
 {
-  if (time_to_launch > 5)
+  if (time_to_launch > 5) {
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Lower-bound OK");
-  else
+  } else {
     stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Too low");
+  }
 
   stat.add("Low-Side Margin", time_to_launch - 5);
 }
 
-void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper &stat)
+void check_upper_bound(diagnostic_updater::DiagnosticStatusWrapper & stat)
 {
-  if (time_to_launch < 10)
+  if (time_to_launch < 10) {
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Upper-bound OK");
-  else
+  } else {
     stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Too high");
+  }
 
   stat.add("Top-Side Margin", 10 - time_to_launch);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   ros::init(argc, argv, "diagnostic_updater_example");
-  
+
   ros::NodeHandle nh;
-  
+
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
   // should be published.
@@ -126,14 +131,14 @@ int main(int argc, char **argv)
   // The diagnostic_updater::Updater class will fill out the hardware_id
   // field of the diagnostic_msgs::DiagnosticStatus message. You need to
   // use the setHardwareID() or setHardwareIDf() methods to set the
-  // hardware ID. 
+  // hardware ID.
   //
   // The hardware ID should be able to identify the specific device you are
   // working with.  If it is not appropriate to fill out a hardware ID in
   // your case, you should call setHardwareIDf("none") to avoid warnings.
   // (A warning will be generated as soon as your node updates with no
   // non-OK statuses.)
-  updater.setHardwareID("none"); 
+  updater.setHardwareID("none");
   // Or...
   updater.setHardwareIDf("Device-%i-%i", 27, 46);
 
@@ -143,21 +148,21 @@ int main(int argc, char **argv)
   updater.add("Function updater", dummy_diagnostic);
   DummyClass dc;
   updater.add("Method updater", &dc, &DummyClass::produce_diagnostics);
-  
+
   // Internally, updater.add converts its arguments into a DiagnosticTask.
   // Sometimes it can be useful to work directly with DiagnosticTasks. Look
   // at FrequencyStatus and TimestampStatus in update_functions.h for a
   // real-life example of how to make a DiagnosticTask by deriving from
   // DiagnosticTask.
-  
+
   // Alternatively, a FunctionDiagnosticTask is a derived class from
   // DiagnosticTask that can be used to create a DiagnosticTask from
   // a function. This will be useful when combining multiple diagnostic
   // tasks using a CompositeDiagnosticTask.
   diagnostic_updater::FunctionDiagnosticTask lower("Lower-bound check",
-      boost::bind(&check_lower_bound, _1));
+    boost::bind(&check_lower_bound, _1));
   diagnostic_updater::FunctionDiagnosticTask upper("Upper-bound check",
-      boost::bind(&check_upper_bound, _1));
+    boost::bind(&check_upper_bound, _1));
 
   // If you want to merge the outputs of two diagnostic tasks together, you
   // can create a CompositeDiagnosticTask, also a derived class from
@@ -168,7 +173,7 @@ int main(int argc, char **argv)
   bounds.addTask(&upper);
 
   // We can then add the CompositeDiagnosticTask to our Updater. When it is
-  // run, the overall name will be the name of the composite task, i.e., 
+  // run, the overall name will be the name of the composite task, i.e.,
   // "Bound check". The summary will be a combination of the summary of the
   // lower and upper tasks (see \ref
   // DiagnosticStatusWrapper::mergeSummarSummary for details on how the
@@ -186,16 +191,16 @@ int main(int argc, char **argv)
   // Some diagnostic tasks are very common, such as checking the rate
   // at which a topic is publishing, or checking that timestamps are
   // sufficiently recent. FrequencyStatus and TimestampStatus can do these
-  // checks for you. 
+  // checks for you.
   //
   // Usually you would instantiate them via a HeaderlessTopicDiagnostic
   // (FrequencyStatus only, for topics that do not contain a header) or a
   // TopicDiagnostic (FrequencyStatus and TimestampStatus, for topics that
-  // do contain a header). 
+  // do contain a header).
   //
   // Some values are passed to the constructor as pointers. If these values
   // are changed, the FrequencyStatus/TimestampStatus will start operating
-  // with the new values. 
+  // with the new values.
   //
   // Refer to diagnostic_updater::FrequencyStatusParam and
   // diagnostic_updater::TimestampStatusParam documentation for details on
@@ -203,7 +208,7 @@ int main(int argc, char **argv)
   double min_freq = 0.5; // If you update these values, the
   double max_freq = 2; // HeaderlessTopicDiagnostic will use the new values.
   diagnostic_updater::HeaderlessTopicDiagnostic pub1_freq("topic1", updater,
-      diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
+    diagnostic_updater::FrequencyStatusParam(&min_freq, &max_freq, 0.1, 10));
 
   // Note that TopicDiagnostic, HeaderlessDiagnosedPublisher,
   // HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
@@ -219,14 +224,14 @@ int main(int argc, char **argv)
   updater.force_update();
 
   // We can remove a task by refering to its name.
-  if (!updater.removeByName("Bound check"))
+  if (!updater.removeByName("Bound check")) {
     ROS_ERROR("The Bound check task was not found when trying to remove it.");
+  }
 
-  while (nh.ok())
-  {
+  while (nh.ok()) {
     std_msgs::Bool msg;
     ros::Duration(0.1).sleep();
-    
+
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.
     msg.data = false;
@@ -238,5 +243,5 @@ int main(int argc, char **argv)
     updater.update();
   }
 
-  return 0; 
+  return 0;
 }
