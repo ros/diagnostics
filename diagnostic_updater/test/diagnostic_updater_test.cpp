@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -40,27 +40,28 @@
 
 using namespace diagnostic_updater;
 
-class TestClass 
+class TestClass
 {
-public: 
-  void unwrapped(diagnostic_msgs::DiagnosticStatus &s)
+public:
+  void unwrapped(diagnostic_msgs::DiagnosticStatus & s)
   {
   }
 
-  void wrapped(DiagnosticStatusWrapper &s)
+  void wrapped(DiagnosticStatusWrapper & s)
   {
   }
 };
-                                   
+
 TEST(DiagnosticUpdater, testDiagnosticUpdater)
 {
   class classFunction : public DiagnosticTask
   {
-  public:
-    classFunction() : DiagnosticTask("classFunction")
+public:
+    classFunction()
+    : DiagnosticTask("classFunction")
     {}
 
-    void run(DiagnosticStatusWrapper &s) 
+    void run(DiagnosticStatusWrapper & s)
     {
       s.summary(0, "Test is running");
       s.addf("Value", "%f", 5);
@@ -71,14 +72,14 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
       s.add("Bool", true);
     }
   };
-  
+
   TestClass c;
   ros::NodeHandle nh;
-  
+
   Updater updater;
-  
+
   updater.add("wrapped", &c, &TestClass::wrapped);
-  
+
   classFunction cf;
   updater.add(cf);
 }
@@ -86,11 +87,12 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater)
 TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs)
 {
   DiagnosticStatusWrapper stat;
-  
-  const char *message = "dummy";
+
+  const char * message = "dummy";
   int level = 1;
   stat.summary(level, message);
-  EXPECT_STREQ(message, stat.message.c_str()) << "DiagnosticStatusWrapper::summary failed to set message";
+  EXPECT_STREQ(message,
+    stat.message.c_str()) << "DiagnosticStatusWrapper::summary failed to set message";
   EXPECT_EQ(level, stat.level) << "DiagnosticStatusWrapper::summary failed to set level";
 
   stat.addf("toto", "%.1f", 5.0);
@@ -99,7 +101,7 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs)
 
   stat.add("bool", true);
   stat.add("bool2", false);
-  
+
   EXPECT_STREQ("5.0", stat.values[0].value.c_str()) << "Bad value, adding a value with addf";
   EXPECT_STREQ("5", stat.values[1].value.c_str()) << "Bad value, adding a string with add";
   EXPECT_STREQ("00027", stat.values[2].value.c_str()) << "Bad value, adding a string with addf";
@@ -110,7 +112,8 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs)
   EXPECT_STREQ("bool", stat.values[3].key.c_str()) << "Bad label, adding a true bool key with add";
   EXPECT_STREQ("True", stat.values[3].value.c_str()) << "Bad label, adding a true bool with add";
 
-  EXPECT_STREQ("bool2", stat.values[4].key.c_str()) << "Bad label, adding a false bool key with add";
+  EXPECT_STREQ("bool2",
+    stat.values[4].key.c_str()) << "Bad label, adding a false bool key with add";
   EXPECT_STREQ("False", stat.values[4].value.c_str()) << "Bad label, adding a false bool with add";
 }
 
@@ -120,22 +123,26 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapperMergeSummary)
 
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
   stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::OK, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::OK, stat.level) << "Bad level, merging levels (OK,OK)";
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::OK,
+    stat.level) << "Bad level, merging levels (OK,OK)";
   EXPECT_STREQ("Old", stat.message.c_str()) << "Bad summary, merging levels (OK,OK)";
 
   stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Old");
   stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (OK,WARN)";
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN,
+    stat.level) << "Bad level, merging levels (OK,WARN)";
   EXPECT_STREQ("New", stat.message.c_str()) << "Bad summary, merging levels (OK,WARN)";
 
   stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
   stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN, stat.level) << "Bad level, merging levels (WARN,WARN)";
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::WARN,
+    stat.level) << "Bad level, merging levels (WARN,WARN)";
   EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,WARN)";
 
   stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Old");
   stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "New");
-  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::ERROR, stat.level) << "Bad level, merging levels (WARN,ERROR)";
+  EXPECT_EQ(diagnostic_msgs::DiagnosticStatus::ERROR,
+    stat.level) << "Bad level, merging levels (WARN,ERROR)";
   EXPECT_STREQ("Old; New", stat.message.c_str()) << "Bad summary, merging levels (WARN,ERROR)";
 }
 
@@ -143,9 +150,9 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
 {
   double minFreq = 10;
   double maxFreq = 20;
-  
+
   FrequencyStatus fs(FrequencyStatusParam(&minFreq, &maxFreq, 0.5, 2));
-  
+
   DiagnosticStatusWrapper stat[5];
   fs.tick();
   usleep(20000);
@@ -185,7 +192,7 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
   ts.run(stat[3]);
   ts.tick(ros::Time::now().toSec() - 6);
   ts.run(stat[4]);
- 
+
   EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
   EXPECT_EQ(2, stat[1].level) << "too far future not reported";
   EXPECT_EQ(0, stat[2].level) << "now not accepted";
@@ -195,7 +202,8 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
   EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) << "Name should be \"Timestamp Status\"";
 }
 
-int main(int argc, char **argv){
+int main(int argc, char ** argv)
+{
   ros::init(argc, argv, "test_node");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
