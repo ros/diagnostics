@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Software License Agreement (BSD License)
 #
-# Copyright (c) 2009, Willow Garage, Inc.
+# Copyright (c) 2019, Magazino GmbH.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
 #    copyright notice, this list of conditions and the following
 #    disclaimer in the documentation and/or other materials provided
 #    with the distribution.
-#  * Neither the name of the Willow Garage nor the names of its
+#  * Neither the name of Magazino GmbH nor the names of its
 #    contributors may be used to endorse or promote products derived
 #    from this software without specific prior written permission.
 #
@@ -36,10 +36,6 @@
 
 ##\brief Tests that expected items from GenericAnalyzer will be removed after the timeout if discard_stale is set to true
 
-DURATION = 10
-PKG = 'diagnostic_aggregator'
-
-import roslib; roslib.load_manifest(PKG)
 import rospy, rostest, unittest
 from diagnostic_msgs.msg import DiagnosticArray
 from time import sleep
@@ -66,9 +62,10 @@ class TestDiscardStale(unittest.TestCase):
                 self._agg_expecteds.append(stat)
 
     def test_discard_stale(self):
+        duration = 10
         while not rospy.is_shutdown():
             sleep(1.0)
-            if rospy.Time.now() - self._start_time > rospy.Duration(DURATION):
+            if rospy.Time.now() - self._start_time > rospy.Duration(duration):
                 break
 
         with self._mutex:
@@ -80,4 +77,4 @@ class TestDiscardStale(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    rostest.run(PKG, sys.argv[0], TestDiscardStale, sys.argv)
+    rostest.run('diagnostic_aggregator', sys.argv[0], TestDiscardStale, sys.argv)
