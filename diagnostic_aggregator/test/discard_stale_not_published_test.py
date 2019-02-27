@@ -32,9 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-##\author Guglielmo Gemignani
+# \author Guglielmo Gemignani
 
-##\brief Tests that expected items from GenericAnalyzer will be removed after the timeout if discard_stale is set to true
+# \brief Tests that expected items from GenericAnalyzer will be removed after the timeout if discard_stale is set to true
 
 import rospy, rostest, unittest
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
@@ -77,19 +77,19 @@ class TestDiscardStale(unittest.TestCase):
         timeout = 10
 
         # wait for expecteds to be published
-        while (len(expecteds.keys()) != 2 and
+        while (len(expecteds.keys()) != 1 and
                not rospy.is_shutdown() and
                (rospy.get_time() - self._start_time < timeout)):
             sleep(1.0)
             with self._mutex:
                 expecteds = self._expecteds
 
-        self.assert_(len(expecteds.keys()) == 2, "The expected diagnostics are not of length 2."
+        self.assert_(len(expecteds.keys()) == 1, "The expected diagnostics are not of length 1."
                                                  "Received diagnostics: {}".format(expecteds))
-        self.assert_(expecteds['Nonexistent1'].level == DiagnosticStatus.OK)
-        self.assert_(expecteds['Nonexistent2'].level == DiagnosticStatus.WARN)
+        self.assert_(expecteds['nonexistent2'].level == DiagnosticStatus.WARN)
 
-        duration = 10
+        duration = 8
+        # waiting a bit more than 5 seconds for the messages to become stale
         while not rospy.is_shutdown():
             sleep(1.0)
             if rospy.get_time() - self._start_time > duration:
@@ -99,10 +99,22 @@ class TestDiscardStale(unittest.TestCase):
             self.assert_(len(self._agg_expecteds) == 1,
                          "There should only be one expected aggregated item left, {} found instead!".
                          format(len(self._agg_expecteds)))
-            self.assert_(self._agg_expecteds[0].name == "/Nonexistent1",
-                         "The name of the only aggregate message should be '/Nonexistent1'!")
+            self.assert_(self._agg_expecteds[0].name == "/Nonexistent2",
+                         "The name of the first aggregated message should be '/Nonexistent2'!")
             self.assert_(self._agg_expecteds[0].level == DiagnosticStatus.STALE,
-                         "The name of the only aggregate message should be '/Nonexistent1'!")
+                         "The level of the first aggregated message should be stale!")
+
+        duration = 15
+        # waiting a bit more than 5 seconds for the timeout of the aggregator to kick in
+        while not rospy.is_shutdown():
+            sleep(1.0)
+            if rospy.get_time() - self._start_time > duration:
+                break
+
+        with self._mutex:
+            self.assert_(len(self._agg_expecteds) == 0,
+                         "There should't be any aggregated items left, {} found instead! {}".
+                         format(len(self._agg_expecteds), self._agg_expecteds))
 
 
 if __name__ == '__main__':

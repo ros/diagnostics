@@ -52,10 +52,9 @@ if __name__ == '__main__':
         array = DiagnosticArray()
         array.header.stamp = rospy.get_rostime()
 
-        if rospy.get_time() - start_time < 5:
-            array.status = [
-                DiagnosticStatus(0, 'Nonexistent1', 'OK', '', []),
-                DiagnosticStatus(1, 'Nonexistent2', 'WARN', '', [])]
+        # after 2 seconds we will publish only an empty diagnostics
+        if rospy.get_time() - start_time < 3:
+            array.status = [DiagnosticStatus(1, 'nonexistent2', 'WARN', '', [])]
 
         pub.publish(array)
-        sleep(1)
+        sleep(1.0)
