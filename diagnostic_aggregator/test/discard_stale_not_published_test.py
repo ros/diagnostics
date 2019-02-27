@@ -37,7 +37,7 @@
 ##\brief Tests that expected items from GenericAnalyzer will be removed after the timeout if discard_stale is set to true
 
 import rospy, rostest, unittest
-from diagnostic_msgs.msg import DiagnosticArray
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from time import sleep
 import sys
 import threading
@@ -50,10 +50,21 @@ class TestDiscardStale(unittest.TestCase):
         self._mutex = threading.Lock()
 
         self._agg_expecteds = []
-        
-        rospy.init_node('test_expected_stale')        
-        sub_agg = rospy.Subscriber("/diagnostics_agg", DiagnosticArray, self.diag_agg_cb)
-        self._start_time = rospy.Time.now()
+        self._expecteds = {}
+
+        rospy.init_node('test_expected_stale')
+        self._diag_agg_sub = rospy.Subscriber("/diagnostics_agg",
+                                              DiagnosticArray,
+                                              self.diag_agg_cb)
+        self._diag_sub = rospy.Subscriber("/diagnostics",
+                                          DiagnosticArray,
+                                          self.diag_cb)
+        self._start_time = rospy.get_time()
+
+    def diag_cb(self, msg):
+        with self._mutex:
+            for stat in msg.status:
+                self._expecteds[stat.name] = stat
 
     def diag_agg_cb(self, msg):
         with self._mutex:
@@ -62,10 +73,26 @@ class TestDiscardStale(unittest.TestCase):
                 self._agg_expecteds.append(stat)
 
     def test_discard_stale(self):
+        expecteds = {}
+        timeout = 10
+
+        # wait for expecteds to be published
+        while (len(expecteds.keys()) != 2 and
+               not rospy.is_shutdown() and
+               (rospy.get_time() - self._start_time < timeout)):
+            sleep(1.0)
+            with self._mutex:
+                expecteds = self._expecteds
+
+        self.assert_(len(expecteds.keys()) == 2, "The expected diagnostics are not of length 2."
+                                                 "Received diagnostics: {}".format(expecteds))
+        self.assert_(expecteds['Nonexistent1'].level == DiagnosticStatus.OK)
+        self.assert_(expecteds['Nonexistent2'].level == DiagnosticStatus.WARN)
+
         duration = 10
         while not rospy.is_shutdown():
             sleep(1.0)
-            if rospy.Time.now() - self._start_time > rospy.Duration(duration):
+            if rospy.get_time() - self._start_time > duration:
                 break
 
         with self._mutex:
@@ -74,7 +101,10 @@ class TestDiscardStale(unittest.TestCase):
                          format(len(self._agg_expecteds)))
             self.assert_(self._agg_expecteds[0].name == "/Nonexistent1",
                          "The name of the only aggregate message should be '/Nonexistent1'!")
+            self.assert_(self._agg_expecteds[0].level == DiagnosticStatus.STALE,
+                         "The name of the only aggregate message should be '/Nonexistent1'!")
 
 
 if __name__ == '__main__':
     rostest.run('diagnostic_aggregator', sys.argv[0], TestDiscardStale, sys.argv)
+
