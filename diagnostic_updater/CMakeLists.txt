@@ -1,26 +1,81 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(diagnostic_updater)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs roscpp std_msgs)
-
-catkin_python_setup()
-
-catkin_package(DEPENDS diagnostic_msgs roscpp std_msgs
-               INCLUDE_DIRS include
-)
-
-include_directories(include ${catkin_INCLUDE_DIRS})
-add_executable(example src/example.cpp)
-target_link_libraries(example ${catkin_LIBRARIES})
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(diagnostic_updater_test test/diagnostic_updater_test.xml test/diagnostic_updater_test.cpp)
-  add_rostest(test/diagnostic_updater_fast_test.xml)
-  target_link_libraries(diagnostic_updater_test ${catkin_LIBRARIES})
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
+find_package(std_msgs REQUIRED)
+
+add_executable(example src/example.cpp)
+target_include_directories(example
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
+ament_target_dependencies(
+  example
+  "diagnostic_msgs"
+  "rclcpp"
+  "std_msgs"
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
+  target_include_directories(diagnostic_updater_test
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  ament_target_dependencies(
+    diagnostic_updater_test
+    "diagnostic_msgs"
+    "rclcpp"
+    "std_msgs"
+  )
+
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
+  ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_DiagnosticStatusWrapper.py")
+endif()
+
+ament_python_install_package(${PROJECT_NAME})
+install(
+  FILES ${PROJECT_NAME}/example.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS example
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+ament_export_include_directories(include)
+ament_export_dependencies(ament_cmake)
+ament_export_dependencies(ament_cmake_python)
+ament_export_dependencies(diagnostic_msgs)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclpy)
+ament_export_dependencies(std_msgs)
+
+ament_package()

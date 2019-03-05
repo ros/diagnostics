@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>diagnostic_updater</name>
   <version>1.9.3</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
@@ -10,27 +10,24 @@
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/diagnostic_updater</url>
-<!-- <url type="bugtracker"></url> -->
 
   <author>Jeremy Leibs</author>
   <author>Blaise Gassend</author>
 
-  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <depend>diagnostic_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
-
-  <!-- <test_depend>roscpp</test_depend> -->
-  <!-- <test_depend>diagnostic_msgs</test_depend> -->
-  <!-- <test_depend>std_msgs</test_depend> -->
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <architecture_independent/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
