@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Software License Agreement (BSD License)
 #
@@ -34,25 +34,25 @@
 
 # -*- coding: utf-8 -*-
 
-"""
-@author Brice Rebsamen <brice [dot] rebsamen [gmail]>
-"""
+"""@author Brice Rebsamen <brice [dot] rebsamen [gmail]>."""
 
-import roslib
-roslib.load_manifest('diagnostic_updater')
-import rospy
-import diagnostic_updater
+from time import sleep
+
 import diagnostic_msgs
-import std_msgs
 
+import diagnostic_updater
+
+import rclpy
+
+import std_msgs
 
 time_to_launch = 0
 
-'''Used as a tutorial for loading and using diagnostic updater.
-
+"""Used as a tutorial for loading and using diagnostic updater.
 DummyClass and dummy_diagnostics show how to use a diagnostic_updater
 class.
-'''
+"""
+
 
 def dummy_diagnostic(stat):
     # stat is supposed to be of type diagnostic_updater.DiagnosticStatusWrapper
@@ -66,21 +66,21 @@ def dummy_diagnostic(stat):
     if time_to_launch < 10:
         # summary for formatted text.
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.ERROR,
-            "Buckle your seat belt. Launch in %f seconds!" % time_to_launch)
+                     'Buckle your seat belt. Launch in %f seconds!' % time_to_launch)
     else:
         # summary for unformatted text. It's just the same ;)
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK,
-            "Launch is in a long time. Have a soda.")
+                     'Launch is in a long time. Have a soda.')
 
     # add is used to append key-value pairs.
     # Again, as oppose to the C++ API, there is no addf function. The second
     # argument is always converted to a str using the str() function.
-    stat.add("Diagnostic Name", "dummy")
+    stat.add('Diagnostic Name', 'dummy')
     # add transparently handles conversion to string (using str()).
-    stat.add("Time to Launch", time_to_launch)
+    stat.add('Time to Launch', 'time_to_launch')
     # add allows arbitrary printf style formatting.
-    stat.add("Geeky thing to say", "The square of the time to launch %f is %f" % \
-        (time_to_launch, time_to_launch * time_to_launch) )
+    stat.add('Geeky thing to say', 'The square of the time to launch %f is %f'
+             % (time_to_launch, time_to_launch * time_to_launch))
 
     # As opposed to the C++ diagnostic function which modifies its argument,
     # the python version must return the modified message.
@@ -88,49 +88,51 @@ def dummy_diagnostic(stat):
 
 
 class DummyClass:
+
     def produce_diagnostics(self, stat):
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, "This is a silly updater.")
-        stat.add("Stupidicity of this updater", 1000.)
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, 'This is a silly updater.')
+        stat.add('Stupidicity of this updater', '1000')
         return stat
 
 
 class DummyTask(diagnostic_updater.DiagnosticTask):
+
     def __init__(self):
         diagnostic_updater.DiagnosticTask.__init__(self,
-            "Updater Derived from DiagnosticTask")
+                                                   'Updater Derived from DiagnosticTask')
 
     def run(self, stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN,
-            "This is another silly updater.")
-        stat.add("Stupidicity of this updater", 2000.)
+                     'This is another silly updater.')
+        stat.add('Stupidicity of this updater', '2000')
         return stat
 
 
 def check_lower_bound(stat):
     if time_to_launch > 5:
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, "Lower-bound OK")
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, 'Lower-bound OK')
     else:
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.ERROR, "Too low")
-    stat.add("Low-Side Margin", time_to_launch - 5)
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.ERROR, 'Too low')
+    stat.add('Low-Side Margin', 'time_to_launch - 5')
     return stat
 
 
 def check_upper_bound(stat):
     if time_to_launch < 10:
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, "Upper-bound OK")
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK, 'Upper-bound OK')
     else:
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, "Too high")
-    stat.add("Top-Side Margin", 10 - time_to_launch)
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, 'Too high')
+    stat.add('Top-Side Margin', '10 - time_to_launch')
     return stat
 
 
-if __name__=='__main__':
-    rospy.init_node("diagnostic_updater_example")
-
+def main():
+    rclpy.init()
+    node = rclpy.create_node('diagnostic_updater_example')
     # The Updater class advertises to /diagnostics, and has a
     # ~diagnostic_period parameter that says how often the diagnostics
     # should be published.
-    updater = diagnostic_updater.Updater()
+    updater = diagnostic_updater.Updater(node)
 
     # The diagnostic_updater.Updater class will fill out the hardware_id
     # field of the diagnostic_msgs.msg.DiagnosticStatus message. You need to
@@ -141,9 +143,9 @@ if __name__=='__main__':
     # your case, you should call setHardwareID("none") to avoid warnings.
     # (A warning will be generated as soon as your node updates with no
     # non-OK statuses.)
-    updater.setHardwareID("none")
+    updater.setHardwareID('none')
     # Or...
-    updater.setHardwareID("Device-%i-%i" % (27, 46) )
+    updater.setHardwareID('Device-%i-%i' % (27, 46))
 
     # Diagnostic tasks are added to the Updater. They will later be run when
     # the updater decides to update.
@@ -151,9 +153,9 @@ if __name__=='__main__':
     # several types of arguments:
     #  - add(task): where task is a DiagnosticTask
     #  - add(name, fn): add a DiagnosticTask embodied by a name and function
-    updater.add("Function updater", dummy_diagnostic)
+    updater.add('Function updater', dummy_diagnostic)
     dc = DummyClass()
-    updater.add("Method updater", dc.produce_diagnostics)
+    updater.add('Method updater', dc.produce_diagnostics)
 
     # Internally, updater.add converts its arguments into a DiagnosticTask.
     # Sometimes it can be useful to work directly with DiagnosticTasks. Look
@@ -165,16 +167,16 @@ if __name__=='__main__':
     # DiagnosticTask that can be used to create a DiagnosticTask from
     # a function. This will be useful when combining multiple diagnostic
     # tasks using a CompositeDiagnosticTask.
-    lower = diagnostic_updater.FunctionDiagnosticTask("Lower-bound check",
-        check_lower_bound)
-    upper = diagnostic_updater.FunctionDiagnosticTask("Upper-bound check",
-        check_upper_bound)
+    lower = diagnostic_updater.FunctionDiagnosticTask('Lower-bound check',
+                                                      check_lower_bound)
+    upper = diagnostic_updater.FunctionDiagnosticTask('Upper-bound check',
+                                                      check_upper_bound)
 
     # If you want to merge the outputs of two diagnostic tasks together, you
     # can create a CompositeDiagnosticTask, also a derived class from
     # DiagnosticTask. For example, we could combine the upper and lower
     # bounds check into a single DiagnosticTask.
-    bounds = diagnostic_updater.CompositeDiagnosticTask("Bound check")
+    bounds = diagnostic_updater.CompositeDiagnosticTask('Bound check')
     bounds.addTask(lower)
     bounds.addTask(upper)
 
@@ -188,11 +190,10 @@ if __name__=='__main__':
 
     # You can broadcast a message in all the DiagnosticStatus if your node
     # is in a special state.
-    updater.broadcast(0, "Doing important initialization stuff.")
+    updater.broadcast(b'0', 'Doing important initialization stuff.')
 
-    pub1 = rospy.Publisher("topic1", std_msgs.msg.Bool, queue_size=10)
-    pub2_temp = rospy.Publisher("topic2", std_msgs.msg.Bool, queue_size=10)
-    rospy.sleep(2) # It isn't important if it doesn't take time.
+    pub1 = node.create_publisher(std_msgs.msg.Bool, 'topic1')
+    sleep(2)  # It isn't important if it doesn't take time.
 
     # Some diagnostic tasks are very common, such as checking the rate
     # at which a topic is publishing, or checking that timestamps are
@@ -211,10 +212,10 @@ if __name__=='__main__':
     # Refer to diagnostic_updater.FrequencyStatusParam and
     # diagnostic_updater.TimestampStatusParam documentation for details on
     # what the parameters mean:
-    freq_bounds = {'min':0.5, 'max':2} # If you update these values, the
+    freq_bounds = {'min': 0.5, 'max': 2}  # If you update these values, the
     # HeaderlessTopicDiagnostic will use the new values.
-    pub1_freq = diagnostic_updater.HeaderlessTopicDiagnostic("topic1", updater,
-        diagnostic_updater.FrequencyStatusParam(freq_bounds, 0.1, 10))
+    pub1_freq = (diagnostic_updater.HeaderlessTopicDiagnostic('topic1', updater,
+                 diagnostic_updater.FrequencyStatusParam(freq_bounds, 0.1, 10)))
 
     # Note that TopicDiagnostic, HeaderlessDiagnosedPublisher,
     # HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
@@ -223,19 +224,19 @@ if __name__=='__main__':
     #
     # Each time pub1_freq is updated, lower will also get updated and its
     # output will be merged with the output from pub1_freq.
-    pub1_freq.addTask(lower) # (This wouldn't work if lower was stateful).
+    pub1_freq.addTask(lower)  # (This wouldn't work if lower was stateful).
 
     # If we know that the state of the node just changed, we can force an
     # immediate update.
     updater.force_update()
 
     # We can remove a task by refering to its name.
-    if not updater.removeByName("Bound check"):
-        rospy.logerr("The Bound check task was not found when trying to remove it.")
+    if not updater.removeByName('Bound check'):
+        node.get_logger().error('The Bound check task was not found when trying to remove it.')
 
-    while not rospy.is_shutdown():
+    while rclpy.ok():
         msg = std_msgs.msg.Bool()
-        rospy.sleep(0.1)
+        sleep(0.1)
 
         # Calls to pub1 have to be accompanied by calls to pub1_freq to keep
         # the statistics up to date.
@@ -246,3 +247,8 @@ if __name__=='__main__':
         # We can call updater.update whenever is convenient. It will take care
         # of rate-limiting the updates.
         updater.update()
+        rclpy.spin_once(node, timeout_sec=1)
+
+
+if __name__ == '__main__':
+    main()
