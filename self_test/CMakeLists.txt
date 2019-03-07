@@ -1,52 +1,67 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(self_test)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs diagnostic_updater roscpp rostest)
-
-catkin_package(DEPENDS diagnostic_msgs diagnostic_updater roscpp
-               INCLUDE_DIRS include
-)
-
-include_directories(include gtest-1.7.0/include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
-find_package(Boost REQUIRED COMPONENTS thread)
-include_directories(${Boost_INCLUDE_DIRS})
-
-add_executable(run_selftest src/run_selftest.cpp)
-find_package(Boost REQUIRED COMPONENTS thread)
-include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(run_selftest ${Boost_LIBRARIES}
-                                   ${catkin_LIBRARIES}
-)
-
-add_executable(selftest_example src/selftest_example.cpp)
-find_package(Boost REQUIRED COMPONENTS thread)
-include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(selftest_example ${Boost_LIBRARIES}
-                                       ${catkin_LIBRARIES}
-)
-
-add_executable(selftest_rostest src/selftest_rostest.cpp
-                                gtest-1.7.0/gtest-all.cc)
-target_link_libraries(selftest_rostest ${Boost_LIBRARIES}
-                                       ${catkin_LIBRARIES}
-)
-
-if(CATKIN_ENABLE_TESTING)
-  add_subdirectory(test)
-
-  add_rostest(test/launch/nominal_test.launch)
-  add_rostest(test/launch/no_id_test.launch)
-  add_rostest(test/launch/error_test.launch)
-  add_rostest(test/launch/exception_test.launch)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(builtin_interfaces REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(diagnostic_updater REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rcutils REQUIRED)
+
+add_executable(run_selftest src/run_selftest.cpp)
+target_include_directories(run_selftest
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(
+  run_selftest
+  "builtin_interfaces"
+  "diagnostic_msgs"
+  "diagnostic_updater"
+  "rclcpp"
+  "rcutils"
 )
 
-install(TARGETS run_selftest selftest_example selftest_rostest
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+# add_executable(selftest_example src/selftest_example.cpp)
+# target_include_directories(selftest_example
+#   PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>
+# )
+# ament_target_dependencies(
+#   selftest_example
+#   "builtin_interfaces"
+#   "diagnostic_msgs"
+#   "diagnostic_updater"
+#   "rclcpp"
+#   "rcutils"
+# )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+#  add_subdirectory(test)
+endif()
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS run_selftest # selftest_example
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+ament_package()
