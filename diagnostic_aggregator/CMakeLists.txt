@@ -20,7 +20,7 @@ if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
 endif()
 
 find_package(Boost REQUIRED COMPONENTS system)
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
+include_directories(include gtest-1.7.0/include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
@@ -29,7 +29,7 @@ add_library(${PROJECT_NAME}
   src/discard_analyzer.cpp
   src/ignore_analyzer.cpp
   src/aggregator.cpp)
-target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES}
                                             ${catkin_LIBRARIES}
 )
 add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
@@ -38,12 +38,13 @@ add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${catkin_LIBRARIES}
                                       ${PROJECT_NAME}
+                                      ${Boost_INCLUDE_DIRS}
 )
 
 # Analyzer loader allows other users to test that Analyzers load
 add_executable(analyzer_loader test/analyzer_loader.cpp
                                gtest-1.7.0/gtest-all.cc)
-target_link_libraries(analyzer_loader diagnostic_aggregator)
+target_link_libraries(analyzer_loader ${PROJECT_NAME} ${Boost_INCLUDE_DIRS})
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
