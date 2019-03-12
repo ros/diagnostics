@@ -20,7 +20,11 @@ if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
 endif()
 
 find_package(Boost REQUIRED COMPONENTS system)
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+
+set(LOCAL_GTEST_DIR "gtest-1.7.0")
+# gtest could be included in ${catkin_INCLUDE_DIRS}, prepend local gtest include directory so it's searched first
+include_directories(BEFORE ${LOCAL_GTEST_DIR}/include)
 
 add_library(${PROJECT_NAME}
   src/status_item.cpp
@@ -41,8 +45,7 @@ target_link_libraries(aggregator_node ${catkin_LIBRARIES}
 )
 
 # Analyzer loader allows other users to test that Analyzers load
-add_executable(analyzer_loader test/analyzer_loader.cpp
-                               gtest-1.7.0/gtest-all.cc)
+add_executable(analyzer_loader test/analyzer_loader.cpp ${LOCAL_GTEST_DIR}/gtest-all.cc)
 target_link_libraries(analyzer_loader diagnostic_aggregator)
 
 if(CATKIN_ENABLE_TESTING)

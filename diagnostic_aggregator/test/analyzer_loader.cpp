@@ -40,7 +40,7 @@
 #include <diagnostic_aggregator/analyzer_group.h>
 #include <ros/ros.h>
 #include <string>
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 //using namespace std;
 //using namespace diagnostic_aggregator;
