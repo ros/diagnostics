@@ -36,36 +36,41 @@
  * @author Blaise Gassend
  */
 
-#ifndef DIAGNOSTICMESSAGEWRAPPER_HH
-#define DIAGNOSTICMESSAGEWRAPPER_HH
+#ifndef DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_
+#define DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_
 
-#include <vector>
-#include <string>
-#include <sstream>
 #include <stdarg.h>
 #include <cstdio>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include "ros/ros.h"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
-#include "diagnostic_msgs/DiagnosticStatus.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_updater
 {
 
 /**
  *
- * \brief Wrapper for the diagnostic_msgs::DiagnosticStatus message that
+ * \brief Wrapper for the diagnostic_msgs::msg::DiagnosticStatus message that
  * makes it easier to update.
  *
  * This class handles common string formatting and vector handling issues
- * for filling the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
- * diagnostic_msgs::DiagnosticStatus, so it can be passed directly to
+ * for filling the diagnostic_msgs::msg::DiagnosticStatus message. It is a
+ * subclass of
+ * diagnostic_msgs::msg::DiagnosticStatus, so it can be passed directly to
  * diagnostic publish calls.
  *
  */
-class DiagnosticStatusWrapper : public diagnostic_msgs::DiagnosticStatus
+class DiagnosticStatusWrapper : public diagnostic_msgs::msg::DiagnosticStatus
 {
 public:
+  DiagnosticStatusWrapper()
+  : debug_logger_(rclcpp::get_logger("diagnostics_wrapper_logger"))
+  {}
+
   /**
    * \brief Fills out the level and message fields of the DiagnosticStatus.
    *
@@ -81,7 +86,8 @@ public:
   /**
    * \brief Merges a level and message with the existing ones.
    *
-   * It is sometimes useful to merge two DiagnosticStatus messages. In that case,
+   * It is sometimes useful to merge two DiagnosticStatus messages. In that
+   * case,
    * the key value pairs can be unioned, but the level and summary message
    * have to be merged more intelligently. This function does the merge in
    * an intelligent manner, combining the summary in *this, with the one
@@ -102,12 +108,11 @@ public:
     if ((lvl > 0) && (level > 0)) {
       if (!message.empty()) {
         message += "; ";
+        message += s;
       }
-      message += s;
     } else if (lvl > level) {
       message = s;
     }
-
     if (lvl > level) {
       level = lvl;
     }
@@ -120,7 +125,7 @@ public:
    * \param src DiagnosticStatus from which to merge the summary.
    */
 
-  void mergeSummary(const diagnostic_msgs::DiagnosticStatus & src)
+  void mergeSummary(const diagnostic_msgs::msg::DiagnosticStatus & src)
   {
     mergeSummary(src.level, src.message);
   }
@@ -140,10 +145,13 @@ public:
   void mergeSummaryf(unsigned char lvl, const char * format, ...)
   {
     va_list va;
-    char buff[1000];     // @todo This could be done more elegantly.
+    const int kBufferSize = 1000;
+    char buff[kBufferSize];  //  @todo This could be done more elegantly.
     va_start(va, format);
-    if (vsnprintf(buff, 1000, format, va) >= 1000) {
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+    if (vsnprintf(buff, sizeof(buff), format, va) >= kBufferSize) {
+      RCLCPP_DEBUG(
+        debug_logger_,
+        "Really long string in DiagnosticStatusWrapper::mergeSummaryf, it was truncated.");
     }
     std::string value = std::string(buff);
     mergeSummary(lvl, value);
@@ -164,10 +172,13 @@ public:
   void summaryf(unsigned char lvl, const char * format, ...)
   {
     va_list va;
-    char buff[1000];     // @todo This could be done more elegantly.
+    const int kBufferSize = 1000;
+    char buff[kBufferSize];
     va_start(va, format);
-    if (vsnprintf(buff, 1000, format, va) >= 1000) {
-      ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+    if (vsnprintf(buff, sizeof(buff), format, va) >= kBufferSize) {
+      RCLCPP_DEBUG(
+        debug_logger_,
+        "Really long string in DiagnosticStatusWrapper::summaryf, it was truncated.");
     }
     std::string value = std::string(buff);
     summary(lvl, value);
@@ -178,17 +189,14 @@ public:
    * \brief clears the summary, setting the level to zero and the
    * message to "".
    */
-  void clearSummary()
-  {
-    summary(0, "");
-  }
+  void clearSummary() {summary(0, "");}
 
   /**
    * \brief copies the summary from a DiagnosticStatus message
    *
    * \param src StatusWrapper to copy the summary from.
    */
-  void summary(const diagnostic_msgs::DiagnosticStatus & src)
+  void summary(const diagnostic_msgs::msg::DiagnosticStatus & src)
   {
     summary(src.level, src.message);
   }
@@ -219,7 +227,7 @@ public:
    * in length.
    */
 
-  void addf(const std::string & key, const char * format, ...);   // In practice format will always be a char *
+  void addf(const std::string & key, const char * format, ...);
 
   /**
    * \brief Clear the key-value pairs.
@@ -227,10 +235,10 @@ public:
    * The values vector containing the key-value pairs is cleared.
    */
 
-  void clear()
-  {
-    values.clear();
-  }
+  void clear() {values.clear();}
+
+private:
+  rclcpp::Logger debug_logger_;
 };
 
 template<>
@@ -238,17 +246,19 @@ inline void DiagnosticStatusWrapper::add<std::string>(
   const std::string & key,
   const std::string & s)
 {
-  diagnostic_msgs::KeyValue ds;
+  diagnostic_msgs::msg::KeyValue ds;
   ds.key = key;
   ds.value = s;
   values.push_back(ds);
 }
 
-///\brief For bool, diagnostic value is "True" or "False"
+//  /\brief For bool, diagnostic value is "True" or "False"
 template<>
-inline void DiagnosticStatusWrapper::add<bool>(const std::string & key, const bool & b)
+inline void DiagnosticStatusWrapper::add<bool>(
+  const std::string & key,
+  const bool & b)
 {
-  diagnostic_msgs::KeyValue ds;
+  diagnostic_msgs::msg::KeyValue ds;
   ds.key = key;
   ds.value = b ? "True" : "False";
 
@@ -257,19 +267,22 @@ inline void DiagnosticStatusWrapper::add<bool>(const std::string & key, const bo
 
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
 // gcc complains that the specialization occurs after instatiation.
-inline void DiagnosticStatusWrapper::addf(const std::string & key, const char * format, ...) // In practice format will always be a char *
+inline void
+DiagnosticStatusWrapper::addf(
+  const std::string & key, const char * format, ...)  // In practice format will always be a char *
 {
   va_list va;
-  char buff[1000];   // @todo This could be done more elegantly.
+  const int kBufferSize = 1000;
+  char buff[kBufferSize];  // @todo This could be done more elegantly.
   va_start(va, format);
-  if (vsnprintf(buff, 1000, format, va) >= 1000) {
-    ROS_DEBUG("Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
+  if (vsnprintf(buff, sizeof(buff), format, va) >= kBufferSize) {
+    RCLCPP_DEBUG(
+      debug_logger_,
+      "Really long string in DiagnosticStatusWrapper::addf, it was truncated.");
   }
   std::string value = std::string(buff);
   add(key, value);
   va_end(va);
 }
-
-
-}
-#endif
+}  // namespace diagnostic_updater
+#endif  // DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_

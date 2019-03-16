@@ -34,15 +34,17 @@
 
 /// Author: Blaise Gassend
 
-#ifndef __DIAGNOSTIC_STATUS__UPDATE_FUNCTIONS_H__
-#define __DIAGNOSTIC_STATUS__UPDATE_FUNCTIONS_H__
+#ifndef DIAGNOSTIC_UPDATER__UPDATE_FUNCTIONS_HPP_
+#define DIAGNOSTIC_UPDATER__UPDATE_FUNCTIONS_HPP_
 
-#include <diagnostic_updater/diagnostic_updater.h>
 #include <math.h>
+#include <string>
+#include <vector>
+
+#include "diagnostic_updater/diagnostic_updater.hpp"
 
 namespace diagnostic_updater
 {
-
 /**
  * \brief A structure that holds the constructor parameters for the
  * FrequencyStatus class.
@@ -54,10 +56,10 @@ struct FrequencyStatusParam
    */
 
   FrequencyStatusParam(
-    double * min_freq, double * max_freq, double tolerance = 0.1,
-    int window_size = 5)
-  : min_freq_(min_freq), max_freq_(max_freq), tolerance_(tolerance), window_size_(window_size)
-  {}
+    double * min_freq, double * max_freq,
+    double tolerance = 0.1, int window_size = 5)
+  : min_freq_(min_freq), max_freq_(max_freq), tolerance_(tolerance),
+    window_size_(window_size) {}
 
   /**
    * \brief Minimum acceptable frequency.
@@ -97,8 +99,10 @@ struct FrequencyStatusParam
  * \brief A diagnostic task that monitors the frequency of an event.
  *
  * This diagnostic task monitors the frequency of calls to its tick method,
- * and creates corresponding diagnostics. It will report a warning if the frequency is
- * outside acceptable bounds, and report an error if there have been no events in the latest
+ * and creates corresponding diagnostics. It will report a warning if the
+ * frequency is
+ * outside acceptable bounds, and report an error if there have been no events
+ * in the latest
  * window.
  */
 
@@ -108,10 +112,11 @@ private:
   const FrequencyStatusParam params_;
 
   int count_;
-  std::vector<ros::Time> times_;
+  std::vector<rclcpp::Time> times_;
   std::vector<int> seq_nums_;
   int hist_indx_;
-  boost::mutex lock_;
+  std::mutex lock_;
+  rclcpp::Logger debug_logger_;
 
 public:
   /**
@@ -119,8 +124,9 @@ public:
    */
 
   FrequencyStatus(const FrequencyStatusParam & params, std::string name)
-  : DiagnosticTask(name), params_(params),
-    times_(params_.window_size_), seq_nums_(params_.window_size_)
+  : DiagnosticTask(name), params_(params), times_(params_.window_size_),
+    seq_nums_(params_.window_size_),
+    debug_logger_(rclcpp::get_logger("FrequencyStatus_debug_logger"))
   {
     clear();
   }
@@ -130,12 +136,9 @@ public:
    *        Uses a default diagnostic task name of "Frequency Status".
    */
 
-  FrequencyStatus(const FrequencyStatusParam & params)
-  : DiagnosticTask("Frequency Status"), params_(params),
-    times_(params_.window_size_), seq_nums_(params_.window_size_)
-  {
-    clear();
-  }
+  explicit FrequencyStatus(const FrequencyStatusParam & params)
+  : FrequencyStatus(params, "Frequency Status")
+  {}
 
   /**
    * \brief Resets the statistics.
@@ -143,8 +146,8 @@ public:
 
   void clear()
   {
-    boost::mutex::scoped_lock lock(lock_);
-    ros::Time curtime = ros::Time::now();
+    std::unique_lock<std::mutex> lock(lock_);
+    rclcpp::Time curtime = rclcpp::Clock().now();
     count_ = 0;
 
     for (int i = 0; i < params_.window_size_; i++) {
@@ -160,18 +163,19 @@ public:
    */
   void tick()
   {
-    boost::mutex::scoped_lock lock(lock_);
-    //ROS_DEBUG("TICK %i", count_);
+    std::unique_lock<std::mutex> lock(lock_);
+    RCLCPP_DEBUG(debug_logger_, "TICK %i", count_);
     count_++;
   }
 
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
-    boost::mutex::scoped_lock lock(lock_);
-    ros::Time curtime = ros::Time::now();
+    std::unique_lock<std::mutex> lock(lock_);
+    rclcpp::Time curtime = rclcpp::Clock().now();
+
     int curseq = count_;
     int events = curseq - seq_nums_[hist_indx_];
-    double window = (curtime - times_[hist_indx_]).toSec();
+    double window = (curtime - times_[hist_indx_]).seconds();
     double freq = events / window;
     seq_nums_[hist_indx_] = curseq;
     times_[hist_indx_] = curtime;
@@ -198,7 +202,7 @@ public:
       stat.addf("Minimum acceptable frequency (Hz)", "%f",
         *params_.min_freq_ * (1 - params_.tolerance_));
     }
-    if (finite(*params_.max_freq_)) {
+    if (isfinite(*params_.max_freq_)) {
       stat.addf("Maximum acceptable frequency (Hz)", "%f",
         *params_.max_freq_ * (1 + params_.tolerance_));
     }
@@ -216,9 +220,10 @@ struct TimeStampStatusParam
    * \brief Creates a filled-out TimeStampStatusParam.
    */
 
-  TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5)
-  : max_acceptable_(max_acceptable), min_acceptable_(min_acceptable)
-  {}
+  TimeStampStatusParam(
+    const double min_acceptable = -1,
+    const double max_acceptable = 5)
+  : max_acceptable_(max_acceptable), min_acceptable_(min_acceptable) {}
 
   /**
    * \brief Maximum acceptable difference between two timestamps.
@@ -231,7 +236,6 @@ struct TimeStampStatusParam
    */
 
   double min_acceptable_;
-
 };
 
 /**
@@ -239,7 +243,8 @@ struct TimeStampStatusParam
  * constructor with no arguments.
  */
 
-static TimeStampStatusParam DefaultTimeStampStatusParam = TimeStampStatusParam();
+static TimeStampStatusParam DefaultTimeStampStatusParam =
+  TimeStampStatusParam();
 
 /**
  * \brief Diagnostic task to monitor the interval between events.
@@ -272,8 +277,7 @@ public:
    */
 
   TimeStampStatus(const TimeStampStatusParam & params, std::string name)
-  : DiagnosticTask(name),
-    params_(params)
+  : DiagnosticTask(name), params_(params)
   {
     init();
   }
@@ -283,9 +287,8 @@ public:
    *        Uses a default diagnostic task name of "Timestamp Status".
    */
 
-  TimeStampStatus(const TimeStampStatusParam & params)
-  : DiagnosticTask("Timestamp Status"),
-    params_(params)
+  explicit TimeStampStatus(const TimeStampStatusParam & params)
+  : DiagnosticTask("Timestamp Status"), params_(params)
   {
     init();
   }
@@ -296,10 +299,7 @@ public:
    */
 
   TimeStampStatus()
-  : DiagnosticTask("Timestamp Status")
-  {
-    init();
-  }
+  : DiagnosticTask("Timestamp Status") {init();}
 
   /**
    * \brief Signals an event. Timestamp stored as a double.
@@ -310,12 +310,12 @@ public:
 
   void tick(double stamp)
   {
-    boost::mutex::scoped_lock lock(lock_);
+    std::unique_lock<std::mutex> lock(lock_);
 
     if (stamp == 0) {
       zero_seen_ = true;
     } else {
-      double delta = ros::Time::now().toSec() - stamp;
+      double delta = rclcpp::Clock().now().seconds() - stamp;
 
       if (!deltas_valid_ || delta > max_delta_) {
         max_delta_ = delta;
@@ -335,15 +335,11 @@ public:
    * \param t The timestamp of the event that will be used in computing
    * intervals.
    */
-
-  void tick(const ros::Time t)
-  {
-    tick(t.toSec());
-  }
+  void tick(const rclcpp::Time t) {tick(t.seconds());}
 
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
-    boost::mutex::scoped_lock lock(lock_);
+    std::unique_lock<std::mutex> lock(lock_);
 
     stat.summary(0, "Timestamps are reasonable.");
     if (!deltas_valid_) {
@@ -367,8 +363,10 @@ public:
 
     stat.addf("Earliest timestamp delay:", "%f", min_delta_);
     stat.addf("Latest timestamp delay:", "%f", max_delta_);
-    stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
-    stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
+    stat.addf("Earliest acceptable timestamp delay:", "%f",
+      params_.min_acceptable_);
+    stat.addf("Latest acceptable timestamp delay:", "%f",
+      params_.max_acceptable_);
     stat.add("Late diagnostic update count:", late_count_);
     stat.add("Early diagnostic update count:", early_count_);
     stat.add("Zero seen diagnostic update count:", zero_count_);
@@ -388,7 +386,7 @@ private:
   double max_delta_;
   double min_delta_;
   bool deltas_valid_;
-  boost::mutex lock_;
+  std::mutex lock_;
 };
 
 /**
@@ -405,15 +403,13 @@ public:
    */
 
   Heartbeat()
-  : DiagnosticTask("Heartbeat")
-  {
-  }
+  : DiagnosticTask("Heartbeat") {}
 
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
     stat.summary(0, "Alive");
   }
 };
-}
+}   // namespace diagnostic_updater
 
-#endif
+#endif  // DIAGNOSTIC_UPDATER__UPDATE_FUNCTIONS_HPP_

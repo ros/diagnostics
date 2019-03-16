@@ -32,18 +32,26 @@
 
 # -*- coding: utf-8 -*-
 
-""" diagnostic_updater for Python.
+"""
+diagnostic_updater for Python.
+
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-import rospy
-import threading, httplib
-from diagnostic_msgs.msg import DiagnosticArray
+import threading
 
-from ._diagnostic_status_wrapper import *
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+
+from rclpy.clock import Clock
+from rclpy.parameter import Parameter
+from rclpy.parameter_service import ParameterService
+
+from ._diagnostic_status_wrapper import DiagnosticStatusWrapper
+
 
 class DiagnosticTask:
-    """DiagnosticTask is an abstract base class for collecting diagnostic data.
+    """
+    DiagnosticTask is an abstract base class for collecting diagnostic data.
 
     Subclasses are provided for generating common diagnostic information.
     A DiagnosticTask has a name, and a function that is called to cleate a
@@ -51,34 +59,37 @@ class DiagnosticTask:
     """
 
     def __init__(self, name):
-        """Constructs a DiagnosticTask setting its name in the process."""
+        """Construct a DiagnosticTask setting its name in the process."""
         self.name = name
 
     def getName(self):
-        """Returns the name of the DiagnosticTask."""
+        """Return the name of the DiagnosticTask."""
         return self.name
 
     def run(self, stat):
-        """Fills out this Task's DiagnosticStatusWrapper.
+        """
+        Fill out this Task's DiagnosticStatusWrapper.
+
         @param stat: the DiagnosticStatusWrapper to fill
         @return the filled DiagnosticStatusWrapper
         """
         return stat
 
 
-
 class FunctionDiagnosticTask(DiagnosticTask):
-    """A DiagnosticTask based on a function.
+    """
+    A DiagnosticTask based on a function.
 
     The FunctionDiagnosticTask calls the function when it updates. The
     function updates the DiagnosticStatusWrapper and collects data.
-
     This is useful for gathering information about a device or driver, like temperature,
     calibration, etc.
     """
 
     def __init__(self, name, fn):
-        """Constructs a GenericFunctionDiagnosticTask based on the given name and function.
+        """
+        Construct a GenericFunctionDiagnosticTask based on the given name and function.
+
         @param name Name of the function.
         @param fn Function to be called when run is called.
         """
@@ -89,26 +100,25 @@ class FunctionDiagnosticTask(DiagnosticTask):
         return self.fn(stat)
 
 
-
 class CompositeDiagnosticTask(DiagnosticTask):
-    """Merges CompositeDiagnosticTask into a single DiagnosticTask.
+    """
+    Merge CompositeDiagnosticTask into a single DiagnosticTask.
 
     The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
     be combined into a single task that produces a single single
     DiagnosticStatusWrapped. The output of the combination has the max of
     the status levels, and a concatenation of the non-zero-level messages.
-
     For instance, this could be used to combine the calibration and offset data
     from an IMU driver.
     """
 
     def __init__(self, name):
-        """Constructs a CompositeDiagnosticTask with the given name."""
+        """Construct a CompositeDiagnosticTask with the given name."""
         DiagnosticTask.__init__(self, name)
         self.tasks = []
 
     def run(self, stat):
-        """Runs each child and merges their outputs."""
+        """Run each child and merges their outputs."""
         combined_summary = DiagnosticStatusWrapper()
         original_summary = DiagnosticStatusWrapper()
 
@@ -121,14 +131,13 @@ class CompositeDiagnosticTask(DiagnosticTask):
             stat = task.run(stat)
             # Merge the new summary into the combined summary.
             combined_summary.mergeSummary(stat)
-
-
         # Copy the combined summary into the output.
         stat.summary(combined_summary)
         return stat
 
     def addTask(self, t):
-        """Adds a child CompositeDiagnosticTask.
+        """
+        Add a child CompositeDiagnosticTask.
 
         This CompositeDiagnosticTask will be called each time this
         CompositeDiagnosticTask is run.
@@ -136,9 +145,9 @@ class CompositeDiagnosticTask(DiagnosticTask):
         self.tasks.append(t)
 
 
-
 class DiagnosticTaskVector:
-    """Internal use only.
+    """
+    Internal use only.
 
     Base class for diagnostic_updater::Updater and self_test::Dispatcher.
     The class manages a collection of diagnostic updaters. It contains the
@@ -147,9 +156,7 @@ class DiagnosticTaskVector:
     """
 
     class DiagnosticTaskInternal:
-        """Class used to represent a diagnostic task internally in
-        DiagnosticTaskVector.
-        """
+        """Class used to represent a diagnostic task internally in DiagnosticTaskVector."""
 
         def __init__(self, name, fn):
             self.name = name
@@ -159,28 +166,31 @@ class DiagnosticTaskVector:
             stat.name = self.name
             return self.fn(stat)
 
-
     def __init__(self):
         self.tasks = []
         self.lock = threading.Lock()
 
     def addedTaskCallback(self, task):
-        """Allows an action to be taken when a task is added. The Updater class
+        """
+        Allow an action to be taken when a task is added.
+
+        The Updater class
         uses this to immediately publish a diagnostic that says that the node
         is loading.
         """
         pass
 
     def add(self, *args):
-        """Add a task to the DiagnosticTaskVector.
+        """
+        Add a task to the DiagnosticTaskVector.
 
         Usage:
         add(task): where task is a DiagnosticTask
         add(name, fn): add a DiagnosticTask embodied by a name and function
         """
-        if len(args)==1:
+        if len(args) == 1:
             task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0].getName(), args[0].run)
-        elif len(args)==2:
+        elif len(args) == 2:
             task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0], args[1])
 
         with self.lock:
@@ -188,11 +198,11 @@ class DiagnosticTaskVector:
             self.addedTaskCallback(task)
 
     def removeByName(self, name):
-        """Removes a task based on its name.
+        """
+        Remove a task based on its name.
 
         Removes the first task that matches the specified name. (New in
         version 1.1.2)
-
         @param name Name of the task to remove.
         @return Returns true if a task matched and was removed.
         """
@@ -206,65 +216,71 @@ class DiagnosticTaskVector:
         return found
 
 
-
-
 class Updater(DiagnosticTaskVector):
-    """Manages a list of diagnostic tasks, and calls them in a rate-limited manner.
+    """
+    Manage a list of diagnostic tasks, and calls them in a rate-limited manner.
 
     This class manages a list of diagnostic tasks. Its update function
     should be called frequently. At some predetermined rate, the update
     function will cause all the diagnostic tasks to run, and will collate
     and publish the resulting diagnostics. The publication rate is
     determined by the "~diagnostic_period" ros parameter.
-
     The class also allows an update to be forced when something significant
     has happened, and allows a single message to be broadcast on all the
     diagnostics if normal operation of the node is suspended for some
     reason.
     """
 
-    def __init__(self):
-        """Constructs an updater class."""
+    def __init__(self, node):
+        """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
-        self.publisher = rospy.Publisher("/diagnostics", DiagnosticArray, queue_size=10)
+        self.node = node
+        self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics')
+        self.clock = Clock()
+        now = self.clock.now()
 
-        self.last_time = rospy.Time.now()
+        self.last_time = now
+
         self.last_time_period_checked = self.last_time
         self.period = 1
+        self.node.set_parameters_atomically(
+            [Parameter('diagnostics_update', Parameter.Type.INTEGER, 1)]
+        )
+        self.parameter_server = ParameterService(self.node)
 
         self.verbose = False
-        self.hwid = ""
+        self.hwid = ''
         self.warn_nohwid_done = False
 
     def update(self):
-        """Causes the diagnostics to update if the inter-update interval
-        has been exceeded.
-        """
+        """Causes the diagnostics to update if the inter-update interval has been exceeded."""
         self._check_diagnostic_period()
-        if rospy.Time.now() >= self.last_time + rospy.Duration(self.period):
+        now = self.clock.now()
+        if now >= self.last_time:
             self.force_update()
 
     def force_update(self):
-        """Forces the diagnostics to update.
+        """
+        Force the diagnostics to update.
 
         Useful if the node has undergone a drastic state change that should be
         published immediately.
         """
-        self.last_time = rospy.Time.now()
+        self.last_time = self.clock.now()
 
-        warn_nohwid = len(self.hwid)==0
+        warn_nohwid = len(self.hwid) == 0
 
         status_vec = []
 
-        with self.lock: # Make sure no adds happen while we are processing here.
+        with self.lock:  # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
+                status.level = b'2'
                 status.name = task.name
-                status.level = 2
-                status.message = "No message was set"
+                status.message = 'No message was set'
                 status.hardware_id = self.hwid
 
-                stat = task.run(status)
+                status = task.run(status)
 
                 status_vec.append(status)
 
@@ -272,24 +288,28 @@ class Updater(DiagnosticTaskVector):
                     warn_nohwid = False
 
                 if self.verbose and status.level:
-                    rospy.logwarn("Non-zero diagnostic status. Name: '%s', status %i: '%s'" %
-                                (status.name, status.level, status.message))
+                    self.node.get_logger().warn('Non-zero diagnostic status. Name: %s, status\
+                                                %i: %s' % (status.name, status.level,
+                                                           status.message))
 
         if warn_nohwid and not self.warn_nohwid_done:
-            rospy.logwarn("diagnostic_updater: No HW_ID was set. This is probably a bug. Please report it. For devices that do not have a HW_ID, set this value to 'none'. This warning only occurs once all diagnostics are OK so it is okay to wait until the device is open before calling setHardwareID.");
+            self.node.get_logger().warn('diagnostic_updater: No HW_ID was set. This is probably\
+                                        a bug. Please report it. For devices that do not have a\
+                                        HW_ID, set this value to none. This warning only occurs\
+                                        once all diagnostics are OK so it is okay to wait until\
+                                        the device is open before calling setHardwareID.')
             self.warn_nohwid_done = True
 
         self.publish(status_vec)
 
     def broadcast(self, lvl, msg):
-        """Outputs a message on all the known DiagnosticStatus.
+        """
+        Output a message on all the known DiagnosticStatus.
 
         Useful if something drastic is happening such as shutdown or a self-test.
-
         @param lvl Level of the diagnostic being output.
         @param msg Status message to output.
         """
-
         status_vec = []
 
         for task in self.tasks:
@@ -305,36 +325,37 @@ class Updater(DiagnosticTaskVector):
 
     def _check_diagnostic_period(self):
         """Recheck the diagnostic_period on the parameter server."""
-
         # This was getParamCached() call in the cpp code. i.e. it would throttle
         # the actual call to the parameter server using a notification of change
         # mechanism.
         # This is not available in rospy. Hence I throttle the call to the
         # parameter server using a standard timeout mechanism (4Hz)
-
-        now = rospy.Time.now()
-        if  now >= self.last_time_period_checked + rospy.Duration(0.25):
-            try:
-                self.period = rospy.get_param("~diagnostic_period", 1)
-                self.last_time_period_checked = now
-            except (httplib.CannotSendRequest, httplib.ResponseNotReady):
-                pass
+        now = self.clock.now()
+        if now >= self.last_time_period_checked:
+            self.period = self.node.get_parameter('diagnostics_update').value
+            self.last_time_period_checked = now
 
     def publish(self, msg):
-        """Publishes a single diagnostic status or a vector of diagnostic statuses."""
+        """Publish a single diagnostic status or a vector of diagnostic statuses."""
         if not type(msg) is list:
             msg = [msg]
 
         for stat in msg:
-            stat.name = rospy.get_name()[1:]+ ": " + stat.name
+            stat.name = self.node.get_name() + ': ' + stat.name
+        now = self.clock.now()
 
         da = DiagnosticArray()
-        da.status = msg
-        da.header.stamp = rospy.Time.now() # Add timestamp for ROS 0.10
+        db = DiagnosticStatus()
+        db.name = stat.name
+        db.message = stat.message
+        db.hardware_id = stat.hardware_id
+        db.values = stat.values
+        da.status.append(db)
+        da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         self.publisher.publish(da)
 
     def addedTaskCallback(self, task):
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
-        stat.summary(0, "Node starting up")
+        stat.summary(b'0', 'Node starting up')
         self.publish(stat)

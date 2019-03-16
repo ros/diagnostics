@@ -32,18 +32,21 @@
 
 # -*- coding: utf-8 -*-
 
-""" diagnostic_updater for Python.
+"""
+diagnostic_updater for Python.
+
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-import rospy
-import threading
-from ._update_functions import *
+from ._diagnostic_updater import CompositeDiagnosticTask
+
+from ._update_functions import FrequencyStatus
+from ._update_functions import TimeStampStatus
 
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
-    """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus.
+    """
+    A class to facilitate making diagnostics for a topic using a FrequencyStatus.
 
     The word "headerless" in the class name refers to the fact that it is
     mainly designed for use with messages that do not have a header, and
@@ -51,17 +54,16 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
     """
 
     def __init__(self, name, diag, freq):
-        """Constructs a HeaderlessTopicDiagnostic.
+        """
+        Construct a HeaderlessTopicDiagnostic.
 
         @param name The name of the topic that is being diagnosed.
-
         @param diag The diagnostic_updater that the CompositeDiagnosticTask
         should add itself to.
-
         @param freq The parameters for the FrequencyStatus class that will be
         computing statistics.
         """
-        CompositeDiagnosticTask.__init__(self, name + " topic status")
+        CompositeDiagnosticTask.__init__(self, name + ' topic status')
         self.diag = diag
         self.freq = FrequencyStatus(freq)
         self.addTask(self.freq)
@@ -72,36 +74,36 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
         self.freq.tick()
 
     def clear_window(self):
-        """Clears the frequency statistics."""
+        """Clear the frequency statistics."""
         self.freq.clear()
 
 
 class TopicDiagnostic(HeaderlessTopicDiagnostic):
-    """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus and TimeStampStatus.
+    """
+    A class to facilitate making diagnostics for a topic using.
+
+    a FrequencyStatus and TimeStampStatus.
     """
 
     def __init__(self, name, diag, freq, stamp):
-        """Constructs a TopicDiagnostic.
+        """
+        Construct a TopicDiagnostic.
 
         @param name The name of the topic that is being diagnosed.
-
         @param diag The diagnostic_updater that the CompositeDiagnosticTask
         should add itself to.
-
         @param freq The parameters for the FrequencyStatus class that will be
         computing statistics.
-
         @param stamp The parameters for the TimeStampStatus class that will be
         computing statistics.
         """
-
         HeaderlessTopicDiagnostic.__init__(self, name, diag, freq)
         self.stamp = TimeStampStatus(stamp)
         self.addTask(self.stamp)
 
     def tick(self, stamp):
-        """Collects statistics and publishes the message.
+        """
+        Collect statistics and publishes the message.
 
         @param stamp Timestamp to use for interval computation by the
         TimeStampStatus class.
@@ -111,23 +113,22 @@ class TopicDiagnostic(HeaderlessTopicDiagnostic):
 
 
 class DiagnosedPublisher(TopicDiagnostic):
-    """A TopicDiagnostic combined with a ros::Publisher.
+    """
+    A TopicDiagnostic combined with a ros::Publisher.
 
     For a standard ros::Publisher, this class allows the ros::Publisher and
     the TopicDiagnostic to be combined for added convenience.
     """
 
     def __init__(self, pub, diag, freq, stamp):
-        """Constructs a DiagnosedPublisher.
+        """
+        Construct a DiagnosedPublisher.
 
         @param pub The publisher on which statistics are being collected.
-
         @param diag The diagnostic_updater that the CompositeDiagnosticTask
         should add itself to.
-
         @param freq The parameters for the FrequencyStatus class that will be
         computing statistics.
-
         @param stamp The parameters for the TimeStampStatus class that will be
         computing statistics.
         """
@@ -135,7 +136,8 @@ class DiagnosedPublisher(TopicDiagnostic):
         self.publisher = pub
 
     def publish(self, message):
-        """Collects statistics and publishes the message.
+        """
+        Collect statistics and publishes the message.
 
         The timestamp to be used by the TimeStampStatus class will be
         extracted from message.header.stamp.
