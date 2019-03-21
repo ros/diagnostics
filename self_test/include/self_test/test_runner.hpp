@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef SELF_TEST__SELF_TEST_HPP_
-#define SELF_TEST__SELF_TEST_HHP_
+#ifndef SELF_TEST__TEST_RUNNER_HPP_
+#define SELF_TEST__TEST_RUNNER_HPP_
 
 #include <functional>
 #include <memory>
@@ -57,31 +57,42 @@ namespace self_test
 class TestRunner : public diagnostic_updater::DiagnosticTaskVector
 {
 private:
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr base_interface_;
+  rclcpp::node_interfaces::NodeServicesInterface::SharedPtr service_interface_;
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr logger_interface_;
+
+  rclcpp::Logger logger_;
   rclcpp::Service<diagnostic_msgs::srv::SelfTest>::SharedPtr service_server_;
-  rclcpp::Node::SharedPtr private_node_handle_;
   std::string id_;
   bool verbose;
 
 public:
   using diagnostic_updater::DiagnosticTaskVector::add;
 
-  explicit TestRunner(rclcpp::Node::SharedPtr ph)
+  TestRunner(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr base_interface,
+    rclcpp::node_interfaces::NodeServicesInterface::SharedPtr service_interface,
+    rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr logger_interface)
+  : base_interface_(base_interface),
+    service_interface_(service_interface),
+    logger_interface_(logger_interface),
+    logger_(logger_interface_->get_logger())
   {
-    private_node_handle_ = ph;
-    auto logger = private_node_handle_->get_logger();
-    RCLCPP_DEBUG(logger, "Advertising self_test");
+    RCLCPP_DEBUG(logger_, "Advertising self_test");
 
     auto serviceCB =
-      [this, &logger](std::shared_ptr<diagnostic_msgs::srv::SelfTest::Request> request,
+      [this](std::shared_ptr<diagnostic_msgs::srv::SelfTest::Request> request,
         std::shared_ptr<diagnostic_msgs::srv::SelfTest::Response> response) -> bool
       {
+        (void) request;
+
         bool retval = false;
         bool ignore_set_id_warn = false;
 
         if (rclcpp::ok()) {
           const std::string unspecified_id("unspecified");
 
-          RCLCPP_INFO(logger, "Entering self-test.");
+          RCLCPP_INFO(logger_, "Entering self-test.");
 
           std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
 
@@ -95,7 +106,7 @@ public:
             status.message = "No message was set";
 
             try {
-              RCLCPP_INFO(logger, "Starting test: %s", iter->getName().c_str());
+              RCLCPP_INFO(logger_, "Starting test: %s", iter->getName().c_str());
               iter->run(status);
             } catch (std::exception & e) {
               status.level = 2;
@@ -105,7 +116,7 @@ public:
 
             if (status.level >= 1) {
               if (verbose) {
-                RCLCPP_WARN(logger,
+                RCLCPP_WARN(logger_,
                   "Non-zero self-test test status. Name: %s Status %i: Message: %s",
                   status.name.c_str(), status.level, status.message.c_str());
               }
@@ -113,7 +124,7 @@ public:
             status_vec.push_back(status);
           }
           if (!ignore_set_id_warn && id_.empty()) {
-            RCLCPP_WARN(logger, "setID was not called by any self-test.");
+            RCLCPP_WARN(logger_, "setID was not called by any self-test.");
           }
           //  One of the test calls should use setID
           response->id = id_;
@@ -130,21 +141,22 @@ public:
           }
 
           if (response->passed && id_ == unspecified_id) {
-            RCLCPP_WARN(logger,
+            RCLCPP_WARN(logger_,
               "Self-test passed, but setID was not called. This is a bug in the driver.");
           }
           response->status = status_vec;
 
           retval = true;
 
-          RCLCPP_INFO("Self-test complete.");
+          RCLCPP_INFO(logger_, "Self-test complete.");
         }
 
         return retval;
       };
 
-    service_server_ = private_node_handle_->create_service<diagnostic_msgs::srv::SelfTest>(
-      "self_test", serviceCB);
+    service_server_ = rclcpp::create_service<diagnostic_msgs::srv::SelfTest>(
+      base_interface_, service_interface_, "self_test", serviceCB, rmw_qos_profile_default,
+      nullptr);
     verbose = true;
   }
 
@@ -154,3 +166,4 @@ public:
   }
 };
 }  //  namespace self_test
+#endif  // SELF_TEST__TEST_RUNNER_HPP_

@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -47,63 +47,50 @@ public:
   : Node("self_test_client")
   {
     client_ = create_client<diagnostic_msgs::srv::SelfTest>("self_test");
-
-    //  Queue an asynchronous service request that will be sent once `spin` is called on the node.
-    queue_async_request();
   }
 
-  void queue_async_request()
+  rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture queue_async_request()
   {
     using namespace std::chrono_literals;
+    using ServiceResponseFuture =
+      rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
+
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
         RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
-        return;
+        return ServiceResponseFuture();
       }
       RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
     }
     auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
 
-    // We give the async_send_request() method a callback that will get executed once the response
-    // is received.
-    // This way we can return immediately from this method and allow other work to be done by the
-    // executor in `spin` while waiting for the response.
-    using ServiceResponseFuture =
-      rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
     auto response_received_callback = [this](ServiceResponseFuture future) {
         auto result_out = future.get();
-        std::string passfail;
 
-        if (result_out->passed) {
-          passfail = "PASSED";
-        } else {
-          passfail = "FAILED";
-        }
+        RCLCPP_INFO(
+          this->get_logger(), "Self test %s for device with id: [%s]",
+          (result_out->passed ? "PASSED" : "FAILED"), result_out->id.c_str());
 
-        printf("Self test %s for device with id: [%s]\n", passfail.c_str(), result_out->id.c_str());
-
-        for (size_t i = 0; i < result_out->status.size(); i++) {
-          printf("%2zd) %s\n", i + 1, result_out->status[i].name.c_str());
-          if (result_out->status[i].level == 0) {
-            printf("     [OK]: ");
-          } else if (result_out->status[i].level == 1) {
-            printf("     [WARNING]: ");
+        // for (size_t i = 0; i < result_out->status.size(); i++) {
+        auto counter = 1;
+        for (const auto & status : result_out->status) {
+          RCLCPP_INFO(this->get_logger(), "%2zd) %s", counter++, status.name.c_str());
+          if (status.level == 0) {
+            RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
+          } else if (status.level == 1) {
+            RCLCPP_WARN(this->get_logger(), "\t%s", status.message.c_str());
           } else {
-            printf("     [ERROR]: ");
+            RCLCPP_ERROR(this->get_logger(), "\t%s", status.message.c_str());
           }
-          printf("%s\n", result_out->status[i].message.c_str());
 
-          for (size_t j = 0; j < result_out->status[i].values.size(); j++) {
-            printf("      [%s] %s\n",
-              result_out->status[i].values[j].key.c_str(),
-              result_out->status[i].values[j].value.c_str());
+          for (const auto & kv : status.values) {
+            RCLCPP_INFO(this->get_logger(), "\t[%s] %s",
+              kv.key.c_str(),
+              kv.value.c_str());
           }
-          printf("\n");
         }
-
-        rclcpp::shutdown();
       };
-    auto future_result = client_->async_send_request(request, response_received_callback);
+    return client_->async_send_request(request, response_received_callback);
   }
 
 private:
@@ -114,8 +101,13 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<ClientNode>();
-  rclcpp::spin(node);
+  auto async_srv_request = node->queue_async_request();
+  if (!async_srv_request.valid()) {
+    rclcpp::shutdown();
+    return -1;
+  }
 
+  rclcpp::spin_until_future_complete(node, async_srv_request);
   rclcpp::shutdown();
   return 0;
 }

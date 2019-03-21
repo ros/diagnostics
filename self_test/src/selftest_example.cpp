@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Willow Garage, Inc.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the <ORGANIZATION> nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,22 +34,21 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "self_test/self_test.hpp"
+#include "self_test/test_runner.hpp"
 
 class MyNode : public rclcpp::Node
 {
 private:
+  //  self_test::TestRunner is the handles sequencing driver self-tests.
   self_test::TestRunner self_test_;
-  double some_val;
+  //  A value showing statefulness of tests
+  double some_val_;
 
 public:
-  //  self_test::TestRunner is the handles sequencing driver self-tests.
-
-  //  A value showing statefulness of tests
-
-  explicit MyNode()
+  MyNode()
   : rclcpp::Node("self_test_node"),
-    self_test_(shared_from_this())
+    self_test_(
+      get_node_base_interface(), get_node_services_interface(), get_node_logging_interface())
   {
     //  If any setup work needs to be done before running the tests,
     //  a pretest can be defined. It is just like any other test, but
@@ -83,7 +82,7 @@ public:
   {
     status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Pretest completed successfully.");
 
-    some_val = 1.0;
+    some_val_ = 1.0;
   }
 
   //  All tests take a reference to a DiagnosticStatusWrapper message which they should populate
@@ -136,20 +135,20 @@ public:
   void test3(diagnostic_updater::DiagnosticStatusWrapper & status)
   {
     //  Do something that changes the state of the node
-    some_val += 41.0;
+    some_val_ += 41.0;
 
-    status.add("some value", some_val);
+    status.add("some value", some_val_);
     status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK,
       "We successfully changed the value.");
   }
 
   void test4(diagnostic_updater::DiagnosticStatusWrapper & status)
   {
-    if (some_val == 42.0) {
+    if (some_val_ == 42.0) {
       status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "We observed the change in value");
     } else {
       status.summaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR,
-        "We failed to observe the change in value, it is currently %f.", some_val);
+        "We failed to observe the change in value, it is currently %f.", some_val_);
     }
   }
 
@@ -162,8 +161,7 @@ public:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  rclcpp::Node::SharedPtr nh_;
-  MyNode n;
+  auto n = std::make_shared<MyNode>();
   rclcpp::spin(n);
 
   rclcpp::shutdown();
