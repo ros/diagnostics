@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2010, Willow Garage, Inc.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the <ORGANIZATION> nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,96 +32,70 @@
  *\author Kevin Watts
  */
 
-#include <ros/ros.h>
+#include <gtest/gtest.h>
 
-#include "diagnostic_msgs/SelfTest.h"
+#include <memory>
 
-#include "self_test/self_test.h"
+#include "selftest_fixture.hpp"
+#include "selftest_node.hpp"
 
-#include <stdexcept>
-
-class MyNode
+class NoIDSelftestNode : public SelftestNode
 {
 public:
+  NoIDSelftestNode()
+  : SelftestNode("no_id_selftest_node")
+  {}
 
-  // self_test::TestRunner is the handles sequencing driver self-tests.
-  self_test::TestRunner self_test_;
-
-  // A value showing statefulness of tests
-  double some_val;
-
-  ros::NodeHandle nh_;
-
-  MyNode() : self_test_()
+  void setup_test_cases() override
   {
-    self_test_.add("Pretest", this, &MyNode::pretest );
+    self_test_.add<NoIDSelftestNode>("Pretest", this, &SelftestNode::pretest);
 
-    self_test_.add("ID Lookup",                 this, &MyNode::test1);
-    self_test_.add("Value generating test",     this, &MyNode::test3);
-    self_test_.add("Value testing test",        this, &MyNode::test4);
+    self_test_.add("ID Lookup", this, &NoIDSelftestNode::test1);
+    self_test_.add<NoIDSelftestNode>("Value generating test", this, &NoIDSelftestNode::test3);
+    self_test_.add<NoIDSelftestNode>("Value testing test", this, &NoIDSelftestNode::test4);
 
-    self_test_.add("Posttest", this, &MyNode::pretest );
+    self_test_.add<NoIDSelftestNode>("Posttest", this, &NoIDSelftestNode::pretest);
   }
 
-  void pretest(diagnostic_updater::DiagnosticStatusWrapper& status)
+  void test1(diagnostic_updater::DiagnosticStatusWrapper & status) override
   {
-    ROS_INFO("Doing preparation stuff before we run our test.\n");
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "Pretest completed successfully.");
-    
-    some_val = 1.0;
-  }
-
-  void test1(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "ID not set");
-  }
-
-  void test3(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    some_val += 41.0;
-
-    status.add("some value", some_val);
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "We successfully changed the value.");
-  }
-
-  void test4(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    if (some_val == 42.0)
-    {
-      status.summary(diagnostic_msgs::DiagnosticStatus::OK, "We observed the change in value");
-    } 
-    else
-    {
-      status.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "We failed to observe the change in value, it is currently %f.", some_val);
-    }
-  }
-
-  void posttest(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    ROS_INFO("Doing cleanup stuff after we run our test.\n");
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "Posttest completed successfully.");
-  }
-
-  bool spin()
-  {
-    while (nh_.ok())
-    {
-      ros::Duration(1).sleep();
-      
-      self_test_.checkTest();
-    }
-    return true;
+    status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "ID not set");
   }
 };
 
-int
-main(int argc, char** argv)
+// using directive necessary as gtest macro TEST_F gets confused with template classes
+using Fixture = SelftestFixture<NoIDSelftestNode>;
+TEST_F(Fixture, run_self_test)
 {
-  ros::init(argc, argv, "my_node");
+  auto client = node_->create_client<diagnostic_msgs::srv::SelfTest>("self_test");
 
-  MyNode n;
+  using namespace std::chrono_literals;
+  if (!client->wait_for_service(5s)) {
+    FAIL() << "could not connect to self test service";
+  }
 
-  n.spin();
+  auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
 
-  return(0);
+  using ServiceResponseFuture =
+    rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+      auto result_out = future.get();
+
+      EXPECT_TRUE(result_out->passed) << "NoIDSelfTestNode is expected to pass";
+      EXPECT_STREQ("", result_out->id.c_str()) << "NoIDSelfTestNode should not have an ID";
+      for (const auto & status : result_out->status) {
+        EXPECT_EQ(0, status.level);
+        auto some_val = std::find_if(status.values.begin(), status.values.end(), [](auto it) {
+              return it.key == "some val";
+            });
+        if (some_val != status.values.end()) {
+          EXPECT_EQ(std::to_string(42), some_val->value);
+        }
+      }
+    };
+  auto future = client->async_send_request(request, response_received_callback);
+  if (!future.valid()) {
+    FAIL() << "could not correctly send self test service request";
+  }
+  rclcpp::spin_until_future_complete(node_, future);
 }

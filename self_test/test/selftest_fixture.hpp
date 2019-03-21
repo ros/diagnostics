@@ -27,54 +27,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SELFTEST_FIXTURE_HPP_
+#define SELFTEST_FIXTURE_HPP_
+
 #include <gtest/gtest.h>
 
 #include <memory>
 
-#include "selftest_fixture.hpp"
-#include "selftest_node.hpp"
+#include "rclcpp/rclcpp.hpp"
 
-class NominalSelftestNode : public SelftestNode
+template<class T>
+class SelftestFixture : public ::testing::Test
 {
-public:
-  NominalSelftestNode()
-  : SelftestNode("nominal_selftest_node")
-  {}
+protected:
+  static void SetUpTestCase()
+  {
+    rclcpp::init(0, nullptr);
+  }
+
+  static void TearDownTestCase()
+  {
+    rclcpp::shutdown();
+  }
+
+  void SetUp()
+  {
+    node_ = std::make_shared<T>();
+  }
+
+  void TearDown()
+  {
+    node_.reset();
+  }
+
+  std::shared_ptr<T> node_;
 };
 
-// using directive necessary as gtest macro TEST_F gets confused with template classes
-using Fixture = SelftestFixture<NominalSelftestNode>;
-TEST_F(Fixture, run_self_test)
-{
-  auto client = node_->create_client<diagnostic_msgs::srv::SelfTest>("self_test");
-
-  using namespace std::chrono_literals;
-  if (!client->wait_for_service(5s)) {
-    FAIL() << "could not connect to self test service";
-  }
-
-  auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
-
-  using ServiceResponseFuture =
-    rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
-  auto response_received_callback = [this](ServiceResponseFuture future) {
-      auto result_out = future.get();
-
-      EXPECT_TRUE(result_out->passed) << "NominalSelftestNode is expected to pass";
-      EXPECT_STREQ(std::to_string(12345).c_str(), result_out->id.c_str());
-      for (const auto & status : result_out->status) {
-        EXPECT_EQ(0, status.level);
-        auto some_val = std::find_if(status.values.begin(), status.values.end(), [](auto it) {
-              return it.key == "some val";
-            });
-        if (some_val != status.values.end()) {
-          EXPECT_EQ(std::to_string(42), some_val->value);
-        }
-      }
-    };
-  auto future = client->async_send_request(request, response_received_callback);
-  if (!future.valid()) {
-    FAIL() << "could not correctly send self test service request";
-  }
-  rclcpp::spin_until_future_complete(node_, future);
-}
+#endif  // SELFTEST_FIXTURE_HPP_

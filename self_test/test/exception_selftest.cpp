@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Willow Garage, Inc.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the <ORGANIZATION> nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,122 +32,91 @@
  *\author Kevin Watts
  */
 
-#include <ros/ros.h>
+#include <gtest/gtest.h>
 
-#include "diagnostic_msgs/SelfTest.h"
+#include <algorithm>
+#include <memory>
+#include <string>
 
-#include "self_test/self_test.h"
+#include "selftest_fixture.hpp"
+#include "selftest_node.hpp"
 
-#include <stdexcept>
-
-//  using namespace std;
-
-class MyNode
+class ExceptionSelftestNode : public SelftestNode
 {
 public:
+  ExceptionSelftestNode()
+  : SelftestNode("exception_selftest_node")
+  {}
 
-  // self_test::TestRunner is the handles sequencing driver self-tests.
-  self_test::TestRunner self_test_;
-
-  // A value showing statefulness of tests
-  double some_val;
-
-  ros::NodeHandle nh_;
-
-  MyNode() : self_test_()
+  void setup_test_cases() override
   {
-    self_test_.add("Pretest", this, &MyNode::pretest );
+    self_test_.add<SelftestNode>("Pretest", this, &SelftestNode::pretest);
 
-    self_test_.add("ID Lookup",                 this, &MyNode::test1);
-    self_test_.add("Exception generating test", this, &MyNode::test2);
-    self_test_.add("Value generating test",     this, &MyNode::test3);
-    self_test_.add("Value testing test",        this, &MyNode::test4);
+    self_test_.add<SelftestNode>("ID Lookup", this, &SelftestNode::test1);
+    self_test_.add("Exception generating test", this, &ExceptionSelftestNode::test2);
+    self_test_.add<SelftestNode>("Value generating test", this, &SelftestNode::test3);
+    self_test_.add<SelftestNode>("Value testing test", this, &SelftestNode::test4);
 
-    self_test_.add("Posttest", this, &MyNode::pretest );
-  }
-
-  void pretest(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    ROS_INFO("Doing preparation stuff before we run our test.\n");
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "Pretest completed successfully.");
-    
-    some_val = 1.0;
-  }
-
-  void test1(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    // Look up ID here
-    char ID[] = "12345";
-    bool lookup_successful = true;
-
-    if (lookup_successful)
-    {
-      status.summary(diagnostic_msgs::DiagnosticStatus::OK, "ID Lookup successful");
-      
-      self_test_.setID(ID);
-
-    } else {
-      status.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "ID Lookup failed");
-    }
+    self_test_.add<SelftestNode>("Posttest", this, &SelftestNode::pretest);
   }
 
   // Throwing an exception
-  void test2(diagnostic_updater::DiagnosticStatusWrapper& status)
+  void test2(diagnostic_updater::DiagnosticStatusWrapper & status) override
   {
     status.level = 0;
 
     throw std::runtime_error("we did something that threw an exception");
 
     // Here's where we would report success if we'd made it past
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "We made it past the exception throwing statement.");
-  }
-
-  void test3(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    some_val += 41.0;
-
-    status.add("some value", some_val);
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "We successfully changed the value.");
-  }
-
-  void test4(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    if (some_val == 42.0)
-    {
-      status.summary(diagnostic_msgs::DiagnosticStatus::OK, "We observed the change in value");
-    } 
-    else
-    {
-      status.summaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "We failed to observe the change in value, it is currently %f.", some_val);
-    }
-  }
-
-  void posttest(diagnostic_updater::DiagnosticStatusWrapper& status)
-  {
-    ROS_INFO("Doing cleanup stuff after we run our test.\n");
-    status.summary(diagnostic_msgs::DiagnosticStatus::OK, "Posttest completed successfully.");
-  }
-
-  bool spin()
-  {
-    while (nh_.ok())
-    {
-      ros::Duration(1).sleep();
-      
-      self_test_.checkTest();
-    }
-    return true;
+    status.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::OK,
+      "We made it past the exception throwing statement.");
   }
 };
 
-int
-main(int argc, char** argv)
+// using directive necessary as gtest macro TEST_F gets confused with template classes
+using Fixture = SelftestFixture<ExceptionSelftestNode>;
+TEST_F(Fixture, run_self_test)
 {
-  ros::init(argc, argv, "my_node");
+  auto client = node_->create_client<diagnostic_msgs::srv::SelfTest>("self_test");
 
-  MyNode n;
+  using namespace std::chrono_literals;
+  if (!client->wait_for_service(5s)) {
+    FAIL() << "could not connect to self test service";
+  }
 
-  n.spin();
+  auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
 
-  return(0);
+  using ServiceResponseFuture =
+    rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
+  auto response_received_callback = [this](ServiceResponseFuture future) {
+      auto result_out = future.get();
+
+      EXPECT_FALSE(result_out->passed) << "ExceptionSelfTestNode shall not pass!";
+      EXPECT_STREQ(std::to_string(12345).c_str(), result_out->id.c_str());
+      unsigned char max_level = 0;
+      bool found_exception = false;
+      for (const auto & status : result_out->status) {
+        max_level = std::max(status.level, max_level);
+        auto some_val = std::find_if(status.values.begin(), status.values.end(), [](auto it) {
+              return it.key == "some val";
+            });
+        if (some_val != status.values.end()) {
+          EXPECT_EQ(std::to_string(42), some_val->value);
+        }
+        auto ex = status.message.find("exception");
+        if (ex != std::string::npos) {
+          found_exception = true;
+        }
+      }
+      EXPECT_TRUE(max_level > 0) <<
+        "Self test failed, but no sub tests reported a failure or warning";
+      EXPECT_TRUE(found_exception) <<
+        "Self test threw and exception, but we didn't catch it and report it";
+    };
+  auto future = client->async_send_request(request, response_received_callback);
+  if (!future.valid()) {
+    FAIL() << "could not correctly send self test service request";
+  }
+  rclcpp::spin_until_future_complete(node_, future);
 }
