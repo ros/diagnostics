@@ -47,8 +47,6 @@
 
 #include "diagnostic_updater/diagnostic_updater.hpp"
 
-#include "rcutils/cmdline_parser.h"
-
 #include "rclcpp/rclcpp.hpp"
 
 namespace self_test

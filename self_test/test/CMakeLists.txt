@@ -5,11 +5,9 @@ macro(add_self_test target_name file_path)
   if(TARGET ${target_name})
     ament_target_dependencies(
       ${target_name}
-      "builtin_interfaces"
       "diagnostic_msgs"
       "diagnostic_updater"
       "rclcpp"
-      "rcutils"
     )
     target_include_directories(${target_name}
       PUBLIC
