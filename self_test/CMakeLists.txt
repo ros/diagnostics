@@ -32,26 +32,27 @@ ament_target_dependencies(
   "rcutils"
 )
 
-# add_executable(selftest_example src/selftest_example.cpp)
-# target_include_directories(selftest_example
-#   PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#   $<INSTALL_INTERFACE:include>
-# )
-# ament_target_dependencies(
-#   selftest_example
-#   "builtin_interfaces"
-#   "diagnostic_msgs"
-#   "diagnostic_updater"
-#   "rclcpp"
-#   "rcutils"
-# )
+add_executable(selftest_example src/selftest_example.cpp)
+target_include_directories(selftest_example
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(
+  selftest_example
+  "builtin_interfaces"
+  "diagnostic_msgs"
+  "diagnostic_updater"
+  "rclcpp"
+  "rcutils"
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-#  add_subdirectory(test)
+
+  add_subdirectory(test)
 endif()
 
 install(
@@ -60,7 +61,7 @@ install(
 )
 
 install(
-  TARGETS run_selftest # selftest_example
+  TARGETS run_selftest selftest_example
   DESTINATION lib/${PROJECT_NAME}
 )
 
