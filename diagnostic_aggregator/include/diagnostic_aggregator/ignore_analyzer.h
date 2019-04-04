@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /*!
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef DIAGNOSTIC_AGGREGATOR_IGNORE_ANALYZER_H
@@ -46,7 +46,8 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <ros/ros.h>
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*!
  *\brief IgnoreAnalyzer ignores all analyzer parameters and does nothing
@@ -71,22 +72,22 @@ public:
    *\brief Default constructor loaded by pluginlib
    */
   IgnoreAnalyzer();
-  
+
   virtual ~IgnoreAnalyzer();
 
-  bool init(const std::string base_name, const ros::NodeHandle &n);
+  bool init(const std::string base_name, const ros::NodeHandle & n);
 
-  bool match(const std::string name) { return false; }
+  bool match(const std::string name) {return false;}
 
-  bool analyze(boost::shared_ptr<StatusItem> item) { return false; }
+  bool analyze(boost::shared_ptr<StatusItem> item) {return false;}
 
   /*
    *\brief Always reports an empty vector
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
 
-  std::string getPath() const { return ""; }
-  std::string getName() const { return ""; }
+  std::string getPath() const {return "";}
+  std::string getName() const {return "";}
 };
 
 }

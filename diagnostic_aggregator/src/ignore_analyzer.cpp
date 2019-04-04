@@ -40,22 +40,22 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, 
-                       diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
+  diagnostic_aggregator::Analyzer)
 
 
-IgnoreAnalyzer::IgnoreAnalyzer() { }
+IgnoreAnalyzer::IgnoreAnalyzer() {}
 
-IgnoreAnalyzer::~IgnoreAnalyzer() { }
+IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)
+bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle & n)
 {
   return true;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > IgnoreAnalyzer::report()
+vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> IgnoreAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed;
 
   return processed;
 }

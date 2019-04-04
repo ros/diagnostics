@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /**
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef DIAGNOSTIC_ANALYZER_GROUP_H
@@ -54,16 +54,17 @@
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*!
  *\brief Allows analyzers to be grouped together, or used as sub-analyzers
  *
  * The AnalyzerGroup is used by the diagnostic aggregator internally to
- * load and handle analyzers. It can be used as a normal analyzer plugin to 
+ * load and handle analyzers. It can be used as a normal analyzer plugin to
  * allow analyzers to become "sub-analyzers", or move as a group.
  *
- * The "sub-analyzers" are initialized using parameters in the "~analyzers" 
+ * The "sub-analyzers" are initialized using parameters in the "~analyzers"
  * namespace of the AnalyzerGroup. The "type" parameters determines the analyzer type.
  *
  * Example initialization:
@@ -92,14 +93,14 @@ namespace diagnostic_aggregator {
  *      num_items: 3
  *\endverbatim
  *
- * Each namespace below "analyzers" describes a new Analyzer that will be loaded as a 
+ * Each namespace below "analyzers" describes a new Analyzer that will be loaded as a
  * sub-analyzer. Any analyzer that fails to initialize or loads incorrectly will
  * generate an error in the console output, and a special diagnostic item in the output
- * of the AnalyzerGroup that describes the error. 
+ * of the AnalyzerGroup that describes the error.
  *
- * In the above example, the AnalyzerGroup will have three sub-analyzers. The 
+ * In the above example, the AnalyzerGroup will have three sub-analyzers. The
  * AnalyzerGroup will report a DiagnosticStatus message in the processed output with
- * the name "Sensors" (the top-level state). The "Sensors" message will have the 
+ * the name "Sensors" (the top-level state). The "Sensors" message will have the
  * level of the highest of the sub-analyzers, or the highest of "Sensors/Base Hokuyo",
  * "Sensors/Tilt Hokuyo" and "Sensors/IMU". The state of any other items, like
  * "Sensors/IMU/Connection" won't matter to the AnalyzerGroup.
@@ -119,17 +120,17 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
-  virtual bool init(const std::string base_path, const ros::NodeHandle &n);
+  virtual bool init(const std::string base_path, const ros::NodeHandle & n);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
    */
-  virtual bool addAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+  virtual bool addAnalyzer(boost::shared_ptr<Analyzer> & analyzer);
 
   /**!
    *\brief Remove an analyzer from this analyzerGroup
    */
-  virtual bool removeAnalyzer(boost::shared_ptr<Analyzer>& analyzer);
+  virtual bool removeAnalyzer(boost::shared_ptr<Analyzer> & analyzer);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
@@ -149,11 +150,11 @@ public:
   /*!
    *\brief The processed output is the combined output of the sub-analyzers, and the top level status
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
 
-  virtual std::string getPath() const { return path_; }
+  virtual std::string getPath() const {return path_;}
 
-  virtual std::string getName() const { return nice_name_; }
+  virtual std::string getName() const {return nice_name_;}
 
 private:
   std::string path_, nice_name_;
@@ -166,14 +167,14 @@ private:
   /*!
    *\brief These items store errors, if any, for analyzers that failed to initialize or load
    */
-  std::vector<boost::shared_ptr<StatusItem> > aux_items_;
+  std::vector<boost::shared_ptr<StatusItem>> aux_items_;
 
-  std::vector<boost::shared_ptr<Analyzer> > analyzers_;
+  std::vector<boost::shared_ptr<Analyzer>> analyzers_;
 
   /*
    *\brief The map of names to matchings is stored internally.
    */
-  std::map<const std::string, std::vector<bool> > matched_;
+  std::map<const std::string, std::vector<bool>> matched_;
 
 };
 

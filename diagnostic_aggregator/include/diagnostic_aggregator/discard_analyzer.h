@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /*!
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef DIAGNOSTIC_AGGREGATOR_DISCARD_ANALYZER_H
@@ -44,7 +44,8 @@
 #include <boost/shared_ptr.hpp>
 #include <diagnostic_msgs/DiagnosticStatus.h>
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*!
  *\brief DiscardAnalyzer is does not report any values. It is a subclass of GenericAnalyzer
@@ -72,13 +73,13 @@ public:
    *\brief Default constructor loaded by pluginlib
    */
   DiscardAnalyzer();
-  
+
   virtual ~DiscardAnalyzer();
 
   /*
    *\brief Always reports an empty vector
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
 };
 
 }

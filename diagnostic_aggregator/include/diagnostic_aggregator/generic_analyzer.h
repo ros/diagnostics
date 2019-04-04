@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /*!
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
@@ -54,7 +54,8 @@
 #include "diagnostic_aggregator/generic_analyzer_base.h"
 #include "XmlRpcValue.h"
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*!
  *\brief Returns list of strings from a parameter
@@ -62,22 +63,18 @@ namespace diagnostic_aggregator {
  * Given an XmlRpcValue, gives vector of strings of that parameter
  *\return False if XmlRpcValue is not string or array of strings
  */
-inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &output)
+inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & output)
 {
   XmlRpc::XmlRpcValue::Type type = param.getType();
-  if (type == XmlRpc::XmlRpcValue::TypeString)
-  {
+  if (type == XmlRpc::XmlRpcValue::TypeString) {
     std::string find = param;
     output.push_back(find);
     return true;
-  }
-  else if (type == XmlRpc::XmlRpcValue::TypeArray)
-  {
-    for (int i = 0; i < param.size(); ++i)
-    {
-      if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString)
-      {
-        ROS_ERROR("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s", param.toXml().c_str());
+  } else if (type == XmlRpc::XmlRpcValue::TypeArray) {
+    for (int i = 0; i < param.size(); ++i) {
+      if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
+        ROS_ERROR("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s",
+          param.toXml().c_str());
         output.clear();
         return false;
       }
@@ -88,7 +85,8 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
     return true;
   }
 
-  ROS_ERROR("Parameter not a list or string, unable to return values. XmlRpcValue:s %s", param.toXml().c_str());
+  ROS_ERROR("Parameter not a list or string, unable to return values. XmlRpcValue:s %s",
+    param.toXml().c_str());
   output.clear();
   return false;
 }
@@ -96,7 +94,7 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
 
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
- * 
+ *
  * GenericAnalyzer analyzes a segment of diagnostics data and reports
  * processed diagnostics data. All analyzed status messages are prepended with
  * "Base Path/My Path", where "Base Path" is from the parent of this Analyzer,
@@ -112,14 +110,14 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
  *\endverbatim
  * Required Parameters:
  * - \b type This is the class name of the analyzer, used to load the correct plugin type.
- * - \b path All diagnostic items analyzed by the GenericAnalyzer will be under "Base Path/My Path". 
- * 
- * In the above example, the GenericAnalyzer wouldn't analyze anything. The GenericAnalyzer 
+ * - \b path All diagnostic items analyzed by the GenericAnalyzer will be under "Base Path/My Path".
+ *
+ * In the above example, the GenericAnalyzer wouldn't analyze anything. The GenericAnalyzer
  * must be configured to listen to diagnostic status names. To do this, optional parameters,
- * like "contains", will tell the analyzer to analyze an item that contains that value. The 
+ * like "contains", will tell the analyzer to analyze an item that contains that value. The
  * GenericAnalyzer looks at the name of the income diagnostic_msgs/DiagnosticStatus messages
  * to determine item matches.
- * 
+ *
  * Optional Parameters for Matching:
  * - \b contains Any item that contains these values
  * - \b startswith Item name must start with this value
@@ -130,15 +128,15 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
  * of strings (['Battery', 'Smart Battery']).
  *
  * In some cases, it's possible to clean up the processed diagnostic status names.
- * - \b remove_prefix If these prefix is found in a status name, it will be removed in the output. 
+ * - \b remove_prefix If these prefix is found in a status name, it will be removed in the output.
  * Can be given as a string or list of strings.
  *
- * The special parameter '''find_and_remove_prefix''' combines "startswith" and 
+ * The special parameter '''find_and_remove_prefix''' combines "startswith" and
  * "remove_prefix". It can be given as a string or list of strings.
- * 
+ *
  * If the number of incoming items under a GenericAnalyzer is known, use '''num_items'''
- * to set an exact value. If the number of items that matches the above parameters is 
- * incorrect, the GenericAnalyzer will report an error in the top-level status. This is 
+ * to set an exact value. If the number of items that matches the above parameters is
+ * incorrect, the GenericAnalyzer will report an error in the top-level status. This is
  * "-1" by default. Negative values will not cause a check on the number of items.
  *
  * For tracking stale items, use the "timeout" parameter. Any item that doesn't update
@@ -169,16 +167,16 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> &ou
  *\endverbatim
  *
  * \subsubsection GenericAnalyzer Behavior
- * 
+ *
  * The GenericAnalyzer will report the latest status of any item that is should analyze.
- * It will report a separate diagnostic_msgs/DiagnosticStatus with the name 
- * "Base Path/My Path". This "top-level" status will have the error state of the highest 
- * of its children. 
- * 
+ * It will report a separate diagnostic_msgs/DiagnosticStatus with the name
+ * "Base Path/My Path". This "top-level" status will have the error state of the highest
+ * of its children.
+ *
  * Stale items are handled differently. A stale child will cause an error
- * in the top-level status, but if all children are stale, the top-level status will 
+ * in the top-level status, but if all children are stale, the top-level status will
  * be stale.
- * 
+ *
  * Example analyzer behavior, using the "Hokuyo" configuration above:
  *\verbatim
  * Input - (DiagnosticStatus Name, Error State)
@@ -202,7 +200,7 @@ public:
    *\brief Default constructor loaded by pluginlib
    */
   GenericAnalyzer();
-  
+
   virtual ~GenericAnalyzer();
 
   // Move to class description above
@@ -211,20 +209,20 @@ public:
    *
    *\param base_path : Prefix for all analyzers (ex: 'Robot')
    *\param n : NodeHandle in full namespace
-   *\return True if initialization succeed, false if no errors of 
+   *\return True if initialization succeed, false if no errors of
    */
-  bool init(const std::string base_path, const ros::NodeHandle &n);
+  bool init(const std::string base_path, const ros::NodeHandle & n);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
-   * 
+   *
    *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
 
   /*!
    *\brief Returns true if item matches any of the given criteria
-   * 
+   *
    */
   virtual bool match(const std::string name);
 

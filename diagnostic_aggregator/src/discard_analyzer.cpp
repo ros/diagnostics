@@ -40,19 +40,18 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer, 
-                        diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer,
+  diagnostic_aggregator::Analyzer)
 
 
-DiscardAnalyzer::DiscardAnalyzer() { }
+DiscardAnalyzer::DiscardAnalyzer() {}
 
-DiscardAnalyzer::~DiscardAnalyzer() { }
+DiscardAnalyzer::~DiscardAnalyzer() {}
 
 
-
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > DiscardAnalyzer::report()
+vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> DiscardAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed;
 
   return processed;
 }

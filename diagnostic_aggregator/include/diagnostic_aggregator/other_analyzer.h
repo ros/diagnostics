@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /*!
- * \author Kevin Watts 
+ * \author Kevin Watts
  */
 
 #ifndef OTHER_ANALYZER_H
@@ -43,17 +43,18 @@
 #include <ros/ros.h>
 #include "diagnostic_aggregator/generic_analyzer_base.h"
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*
  *\brief OtherAnalyzer analyzes any messages that haven't been analyzed by other Analyzers
  *
- * OtherAnalyzer is not loaded as a plugin. It is created by the Aggregator, and called 
+ * OtherAnalyzer is not loaded as a plugin. It is created by the Aggregator, and called
  * seperately. The aggregator will call analyze() on any message not handled by other
  * analyzers.
  *
  * Stale items will be discarded after 5 seconds of no updates.
- * 
+ *
  * OtherAnalyzer is designed to be used internally by the Aggregator only.
  *
  */
@@ -65,9 +66,9 @@ public:
    */
   explicit OtherAnalyzer(bool other_as_errors = false)
   : other_as_errors_(other_as_errors)
-  { }
+  {}
 
-  ~OtherAnalyzer() { }
+  ~OtherAnalyzer() {}
 
   /*
    *\brief Initialized with the base path only.
@@ -84,9 +85,10 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string base_path, const ros::NodeHandle &n)
+  bool init(const std::string base_path, const ros::NodeHandle & n)
   {
-    ROS_ERROR("OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
+    ROS_ERROR(
+      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;
   }
 
@@ -95,36 +97,34 @@ public:
    *
    *\return True, since match() will never by called by Aggregator
    */
-  bool match(std::string name) { return true; }
+  bool match(std::string name) {return true;}
 
   /*
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
    *
    */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report()
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report()
   {
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed =
+      GenericAnalyzerBase::report();
 
     // We don't report anything if there's no "Other" items
-    if (processed.size() == 1)
-    {
+    if (processed.size() == 1) {
       processed.clear();
     }
     // "Other" items are considered an error.
-    else if (other_as_errors_ && processed.size() > 1)
-    {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> >::iterator it = processed.begin();
-      for (; it != processed.end(); ++it)
-      {
-        if ((*it)->name == path_)
-        {
+    else if (other_as_errors_ && processed.size() > 1) {
+      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>>::iterator it =
+        processed.begin();
+      for (; it != processed.end(); ++it) {
+        if ((*it)->name == path_) {
           (*it)->level = 2;
           (*it)->message = "Unanalyzed items found in \"Other\"";
           break;
         }
       }
     }
-    
+
     return processed;
   }
 

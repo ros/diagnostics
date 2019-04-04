@@ -58,7 +58,8 @@
 #include "diagnostic_aggregator/other_analyzer.h"
 
 
-namespace diagnostic_aggregator {
+namespace diagnostic_aggregator
+{
 
 /*!
  *\brief Aggregator processes /diagnostics, republishes on /diagnostics_agg
@@ -78,11 +79,11 @@ Output:
   /Robot/Sensors/Tilt Hokuyo/Frequency
   /Robot/Sensors/Tilt Hokuyo/Connection
 \endverbatim
- * The analyzer should always output a DiagnosticStatus with the name of the 
+ * The analyzer should always output a DiagnosticStatus with the name of the
  * prefix. Any other data output is up to the analyzer developer.
- * 
+ *
  * Analyzer's are loaded by specifying the private parameters of the
- * aggregator. 
+ * aggregator.
 \verbatim
 base_path: My Robot
 pub_rate: 1.0
@@ -103,7 +104,7 @@ analyzers:
  * the aggregator will report the error and publish it in the aggregated output.
  */
 class Aggregator
-{ 
+{
 public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
@@ -120,12 +121,12 @@ public:
   /*!
    *\brief True if the NodeHandle reports OK
    */
-  bool ok() const { return n_.ok(); }
+  bool ok() const {return n_.ok();}
 
   /*!
    *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
    */
-  double getPubRate() const { return pub_rate_; }
+  double getPubRate() const {return pub_rate_;}
 
 private:
   ros::NodeHandle n_;
@@ -139,7 +140,7 @@ private:
   /*!
    *\brief Callback for incoming "/diagnostics"
    */
-  void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
+  void diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr & diag_msg);
 
   /*!
    *\brief Service request callback for addition of diagnostics.
@@ -147,14 +148,15 @@ private:
    * information about new diagnostics into added_analyzers_, keeping track of
    * the formed bond in bonds_
    */
-  bool addDiagnostics(diagnostic_msgs::AddDiagnostics::Request &req,
-		      diagnostic_msgs::AddDiagnostics::Response &res);
+  bool addDiagnostics(
+    diagnostic_msgs::AddDiagnostics::Request & req,
+    diagnostic_msgs::AddDiagnostics::Response & res);
 
-  AnalyzerGroup* analyzer_group_;
+  AnalyzerGroup * analyzer_group_;
 
-  OtherAnalyzer* other_analyzer_;
+  OtherAnalyzer * other_analyzer_;
 
-  std::vector<boost::shared_ptr<bond::Bond> > bonds_; /**< \brief Contains all bonds for additional diagnostics. */
+  std::vector<boost::shared_ptr<bond::Bond>> bonds_;  /**< \brief Contains all bonds for additional diagnostics. */
 
   /*
    *!\brief called when a bond between the aggregator and a node is broken
@@ -164,8 +166,9 @@ private:
    *!\param bond_id The bond id (namespace) from which the analyzer was created
    *!\param analyzer Shared pointer to the analyzer group that was added
    */
-  void bondBroken(std::string bond_id,
-		  boost::shared_ptr<Analyzer> analyzer);
+  void bondBroken(
+    std::string bond_id,
+    boost::shared_ptr<Analyzer> analyzer);
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.
@@ -184,7 +187,7 @@ private:
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
    */
-  void checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg);
+  void checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr & diag_msg);
 
 };
 
@@ -193,8 +196,9 @@ private:
  */
 struct BondIDMatch
 {
-  BondIDMatch(const std::string s) : s(s) {}
-  bool operator()(const boost::shared_ptr<bond::Bond>& b){ return s == b->getId(); }
+  BondIDMatch(const std::string s)
+  : s(s) {}
+  bool operator()(const boost::shared_ptr<bond::Bond> & b) {return s == b->getId();}
   const std::string s;
 };
 

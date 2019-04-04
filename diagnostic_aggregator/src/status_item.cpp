@@ -39,16 +39,16 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
-StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus *status)
+StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus * status)
 {
   level_ = valToLevel(status->level);
   name_ = status->name;
   message_ = status->message;
   hw_id_ = status->hardware_id;
   values_ = status->values;
-  
+
   output_name_ = getOutputName(name_);
-  
+
   update_time_ = ros::Time::now();
 }
 
@@ -58,7 +58,7 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
   message_ = message;
   level_ = level;
   hw_id_ = "";
-  
+
   output_name_ = getOutputName(name_);
 
   update_time_ = ros::Time::now();
@@ -66,17 +66,19 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
 
 StatusItem::~StatusItem() {}
 
-bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
+bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus * status)
 {
-  if (name_ != status->name)
-  {
-    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s", name_.c_str(), status->name.c_str());
+  if (name_ != status->name) {
+    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s",
+      name_.c_str(), status->name.c_str());
     return false;
   }
 
   double update_interval = (ros::Time::now() - update_time_).toSec();
-  if (update_interval < 0)
-    ROS_WARN("StatusItem is being updated with older data. Negative update time: %f", update_interval);
+  if (update_interval < 0) {
+    ROS_WARN("StatusItem is being updated with older data. Negative update time: %f",
+      update_interval);
+  }
 
   level_ = valToLevel(status->level);
   message_ = status->message;
@@ -88,23 +90,26 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
   return true;
 }
 
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(const std::string &path, bool stale) const
+boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(
+  const std::string & path, bool stale) const
 {
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(new diagnostic_msgs::DiagnosticStatus());
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(
+    new diagnostic_msgs::DiagnosticStatus());
 
-  if (path == "/")
+  if (path == "/") {
     status->name = "/" + output_name_;
-  else
+  } else {
     status->name = path + "/" + output_name_;
+  }
 
   status->level = level_;
   status->message = message_;
   status->hardware_id = hw_id_;
   status->values = values_;
 
-  if (stale)
+  if (stale) {
     status->level = Level_Stale;
+  }
 
   return status;
 }
-
