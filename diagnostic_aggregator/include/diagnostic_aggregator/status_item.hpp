@@ -36,16 +36,17 @@
  *\author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_STATUS_ITEM_H
-#define DIAGNOSTIC_STATUS_ITEM_H
+#ifndef DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP
+#define DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP
 
 #include <map>
 #include <string>
 #include <vector>
-#include <ros/ros.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
+#include <diagnostic_msgs/msg/key_value.hpp>
 
 namespace diagnostic_aggregator
 {
@@ -71,9 +72,9 @@ inline std::string getOutputName(const std::string item_name)
  */
 enum DiagnosticLevel
 {
-  Level_OK = diagnostic_msgs::DiagnosticStatus::OK,
-  Level_Warn = diagnostic_msgs::DiagnosticStatus::WARN,
-  Level_Error = diagnostic_msgs::DiagnosticStatus::ERROR,
+  Level_OK = diagnostic_msgs::msg::DiagnosticStatus::OK,
+  Level_Warn = diagnostic_msgs::msg::DiagnosticStatus::WARN,
+  Level_Error = diagnostic_msgs::msg::DiagnosticStatus::ERROR,
   Level_Stale = 3
 };
 
@@ -82,22 +83,22 @@ enum DiagnosticLevel
  */
 inline DiagnosticLevel valToLevel(const int val)
 {
-  if (val == diagnostic_msgs::DiagnosticStatus::OK) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::OK) {
     return Level_OK;
   }
-  if (val == diagnostic_msgs::DiagnosticStatus::WARN) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::WARN) {
     return Level_Warn;
   }
-  if (val == diagnostic_msgs::DiagnosticStatus::ERROR) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR) {
     return Level_Error;
   }
   if (val == 3) {
     return Level_Stale;
   }
 
-  ROS_ERROR(
+  /* todo(anordman): logging /* todo(anordman): logging RCLCPP_ERROR(
     "Attempting to convert %d into DiagnosticLevel. Values are: {0: OK, 1: Warning, 2: Error, 3: Stale}",
-    val);
+    val); */
   return Level_Error;
 }
 
@@ -106,22 +107,22 @@ inline DiagnosticLevel valToLevel(const int val)
  */
 inline std::string valToMsg(const int val)
 {
-  if (val == diagnostic_msgs::DiagnosticStatus::OK) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::OK) {
     return "OK";
   }
-  if (val == diagnostic_msgs::DiagnosticStatus::WARN) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::WARN) {
     return "Warning";
   }
-  if (val == diagnostic_msgs::DiagnosticStatus::ERROR) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR) {
     return "Error";
   }
   if (val == 3) {
     return "Stale";
   }
 
-  ROS_ERROR(
+  /* todo(anordman): logging RCLCPP_ERROR(
     "Attempting to convert diagnostic level %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}",
-    val);
+    val); */
   return "Error";
 }
 
@@ -177,7 +178,7 @@ public:
   /*!
    *\brief Constructed from const DiagnosticStatus*
    */
-  StatusItem(const diagnostic_msgs::DiagnosticStatus * status);
+  StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status);
 
   /*!
   *\brief Constructed from string of item name
@@ -193,12 +194,12 @@ public:
    *
    *\return True if update successful, false if error
    */
-  bool update(const diagnostic_msgs::DiagnosticStatus * status);
+  bool update(const diagnostic_msgs::msg::DiagnosticStatus * status);
 
   /*!
    *\brief Prepends "path/" to name, makes item stale if "stale" true.
    *
-   * Helper function to convert item back to diagnostic_msgs::DiagnosticStatus
+   * Helper function to convert item back to diagnostic_msgs::msg::DiagnosticStatus
    * pointer. Prepends path.
    * Example: Item with name "Hokuyo" toStatusMsg("Base Path/My Path", false)
    * gives "Base Path/My Path/Hokuyo".
@@ -206,7 +207,7 @@ public:
    *\param path : Prepended to name
    *\param stale : If true, status level is 3
    */
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> toStatusMsg(
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> toStatusMsg(
     const std::string & path,
     const bool stale = false) const;
 
@@ -233,7 +234,7 @@ public:
   /*!
    *\brief Returns the time since last update for this item
    */
-  const ros::Time getLastUpdateTime() const {return update_time_;}
+  const rclcpp::Time getLastUpdateTime() const {return update_time_;}
 
   /*!
    *\brief Returns true if item has key in values KeyValues
@@ -268,16 +269,17 @@ public:
   }
 
 private:
-  ros::Time update_time_;
+  rclcpp::Time update_time_;
+  rclcpp::Clock::SharedPtr clock_;
 
   DiagnosticLevel level_;
   std::string output_name_; /**< name_ w/o "/" */
   std::string name_;
   std::string message_;
   std::string hw_id_;
-  std::vector<diagnostic_msgs::KeyValue> values_;
+  std::vector<diagnostic_msgs::msg::KeyValue> values_;
 };
 
 }
 
-#endif //DIAGNOSTIC_STATUS_ITEM_H
+#endif //DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP

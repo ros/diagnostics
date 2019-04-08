@@ -34,12 +34,12 @@
 
 /**!< \author Kevin Watts */
 
-#include <diagnostic_aggregator/status_item.h>
+#include "diagnostic_aggregator/status_item.hpp"
 
 using namespace diagnostic_aggregator;
 using namespace std;
 
-StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus * status)
+StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   level_ = valToLevel(status->level);
   name_ = status->name;
@@ -49,7 +49,7 @@ StatusItem::StatusItem(const diagnostic_msgs::DiagnosticStatus * status)
 
   output_name_ = getOutputName(name_);
 
-  update_time_ = ros::Time::now();
+  update_time_ = clock_->now();
 }
 
 StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
@@ -61,23 +61,23 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
 
   output_name_ = getOutputName(name_);
 
-  update_time_ = ros::Time::now();
+  update_time_ = clock_->now();
 }
 
 StatusItem::~StatusItem() {}
 
-bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus * status)
+bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   if (name_ != status->name) {
-    ROS_ERROR("Incorrect name when updating StatusItem. Expected %s, got %s",
-      name_.c_str(), status->name.c_str());
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Incorrect name when updating StatusItem. Expected %s, got %s",
+      name_.c_str(), status->name.c_str());*/
     return false;
   }
 
-  double update_interval = (ros::Time::now() - update_time_).toSec();
+  double update_interval = (clock_->now() - update_time_).seconds();
   if (update_interval < 0) {
-    ROS_WARN("StatusItem is being updated with older data. Negative update time: %f",
-      update_interval);
+    /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "StatusItem is being updated with older data. Negative update time: %f",
+      update_interval); */
   }
 
   level_ = valToLevel(status->level);
@@ -85,16 +85,16 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus * status)
   hw_id_ = status->hardware_id;
   values_ = status->values;
 
-  update_time_ = ros::Time::now();
+  update_time_ = clock_->now();
 
   return true;
 }
 
-boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> StatusItem::toStatusMsg(
+std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> StatusItem::toStatusMsg(
   const std::string & path, bool stale) const
 {
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> status(
-    new diagnostic_msgs::DiagnosticStatus());
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> status(
+    new diagnostic_msgs::msg::DiagnosticStatus());
 
   if (path == "/") {
     status->name = "/" + output_name_;

@@ -34,7 +34,7 @@
 
 /**< \author Kevin Watts */
 
-#include "diagnostic_aggregator/ignore_analyzer.h"
+#include "diagnostic_aggregator/ignore_analyzer.hpp"
 
 
 using namespace diagnostic_aggregator;
@@ -48,14 +48,14 @@ IgnoreAnalyzer::IgnoreAnalyzer() {}
 
 IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle & n)
+bool IgnoreAnalyzer::init(const std::string base_name, const rclcpp::Node & n)
 {
   return true;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> IgnoreAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> IgnoreAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
 
   return processed;
 }

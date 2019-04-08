@@ -38,17 +38,19 @@
 #define GENERIC_ANALYZER_BASE_H
 
 #include <map>
-#include <ros/ros.h>
 #include <vector>
 #include <string>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/regex.hpp>
+
+#include <rclcpp/rclcpp.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_aggregator/analyzer.h"
-#include "diagnostic_aggregator/status_item.h"
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <diagnostic_msgs/msg/key_value.h>
+
+#include "diagnostic_aggregator/analyzer.hpp"
+#include "diagnostic_aggregator/status_item.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -76,7 +78,7 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string path, const ros::NodeHandle & n) = 0;
+  bool init(const std::string path, const rclcpp::Node & n) = 0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
@@ -94,7 +96,7 @@ public:
     discard_stale_ = discard_stale;
 
     if (discard_stale_ and timeout <= 0) {
-      ROS_WARN("Cannot discard stale items if no timeout specified. No items will be discarded");
+      /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "Cannot discard stale items if no timeout specified. No items will be discarded");*/
       discard_stale_ = false;
     }
 
@@ -106,12 +108,12 @@ public:
   /*!
    *\brief Update state with new StatusItem
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item)
+  virtual bool analyze(const std::shared_ptr<StatusItem> item)
   {
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      ROS_ERROR(
-        "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
+      /* @todo(anordman):logging (get_logger(), 
+        "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");*/
     }
 
     if (!has_initialized_) {
@@ -128,37 +130,37 @@ public:
    *
    *\return Vector of DiagnosticStatus messages. They must have the correct prefix for all names.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report()
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report()
   {
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      ROS_ERROR(
-        "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
+      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
+        "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");*/
     }
     if (!has_initialized_) {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> vec;
+      std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> vec;
       return vec;
     }
 
-    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(
-      new diagnostic_msgs::DiagnosticStatus());
+    std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> header_status(
+      new diagnostic_msgs::msg::DiagnosticStatus());
     header_status->name = path_;
     header_status->level = 0;
     header_status->message = "OK";
 
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed;
+    std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
     processed.push_back(header_status);
 
     bool all_stale = true;
 
-    std::map<std::string, boost::shared_ptr<StatusItem>>::iterator it = items_.begin();
+    std::map<std::string, std::shared_ptr<StatusItem>>::iterator it = items_.begin();
     while (it != items_.end()) {
       std::string name = it->first;
-      boost::shared_ptr<StatusItem> item = it->second;
+      std::shared_ptr<StatusItem> item = it->second;
 
       bool stale = false;
       if (timeout_ > 0) {
-        stale = (ros::Time::now() - item->getLastUpdateTime()).toSec() > timeout_;
+        stale = (clock_->now() - item->getLastUpdateTime()).seconds() > timeout_;
       }
 
       // Erase item if its stale and we're discarding items
@@ -170,7 +172,7 @@ public:
       int8_t level = item->getLevel();
       header_status->level = std::max(header_status->level, level);
 
-      diagnostic_msgs::KeyValue kv;
+      diagnostic_msgs::msg::KeyValue kv;
       kv.key = name;
       kv.value = item->getMessage();
 
@@ -178,7 +180,7 @@ public:
 
       all_stale = all_stale && ((level == 3) || stale);
 
-      //boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
+      //std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
 
       processed.push_back(item->toStatusMsg(path_, stale));
 
@@ -245,13 +247,13 @@ protected:
   /*!
    *\brief Subclasses can add items to analyze
    */
-  void addItem(std::string name, boost::shared_ptr<StatusItem> item) {items_[name] = item;}
+  void addItem(std::string name, std::shared_ptr<StatusItem> item) {items_[name] = item;}
 
 private:
   /*!
    *\brief Stores items by name. State of analyzer
    */
-  std::map<std::string, boost::shared_ptr<StatusItem>> items_;
+  std::map<std::string, std::shared_ptr<StatusItem>> items_;
 
   bool discard_stale_, has_initialized_, has_warned_;
 };

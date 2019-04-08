@@ -34,7 +34,7 @@
 
 /**< \author Kevin Watts */
 
-#include "diagnostic_aggregator/generic_analyzer.h"
+#include "diagnostic_aggregator/generic_analyzer.hpp"
 
 using namespace diagnostic_aggregator;
 using namespace std;
@@ -45,12 +45,12 @@ PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
 
 GenericAnalyzer::GenericAnalyzer() {}
 
-bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle & n)
+bool GenericAnalyzer::init(const string base_path, const rclcpp::Node & n)
 {
   string nice_name;
   if (!n.getParam("path", nice_name)) {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
-      n.getNamespace().c_str());
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
+      n.getNamespace().c_str());*/
     return false;
   }
 
@@ -86,7 +86,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle & n)
   if (n.getParam("expected", expected)) {
     getParamVals(expected, expected_);
     for (unsigned int i = 0; i < expected_.size(); ++i) {
-      boost::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
+      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
       addItem(expected_[i], item);
     }
   }
@@ -101,9 +101,9 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle & n)
         boost::regex re(regex_strs[i]);
         regex_.push_back(re);
       } catch (boost::regex_error & e) {
-        ROS_ERROR(
+        /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
           "Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
-          regex_strs[i].c_str(), e.what());
+          regex_strs[i].c_str(), e.what());*/
       }
     }
   }
@@ -111,9 +111,9 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle & n)
   if (startswith_.size() == 0 && name_.size() == 0 &&
     contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
   {
-    ROS_ERROR(
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
       "GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
-      nice_name.c_str(), n.getNamespace().c_str());
+      nice_name.c_str(), n.getNamespace().c_str());*/
     return false;
   }
 
@@ -183,9 +183,9 @@ bool GenericAnalyzer::match(const string name)
   return false;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> GenericAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> GenericAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed =
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
     GenericAnalyzerBase::report();
 
   // Check and make sure our expected names haven't been removed ...
@@ -226,7 +226,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> GenericAnalyzer::re
 
   // Add missing names to header ...
   for (unsigned int i = 0; i < expected_names_missing.size(); ++i) {
-    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+    std::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
     processed.push_back(item->toStatusMsg(path_, true));
   }
 
@@ -248,7 +248,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> GenericAnalyzer::re
 
       // Add all missing items to header item
       for (unsigned int k = 0; k < expected_names_missing.size(); ++k) {
-        diagnostic_msgs::KeyValue kv;
+        diagnostic_msgs::msg::KeyValue kv;
         kv.key = expected_names_missing[k];
         kv.value = "Missing";
         processed[j]->values.push_back(kv);

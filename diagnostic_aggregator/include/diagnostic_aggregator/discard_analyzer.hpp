@@ -39,10 +39,11 @@
 #ifndef DIAGNOSTIC_AGGREGATOR_DISCARD_ANALYZER_H
 #define DIAGNOSTIC_AGGREGATOR_DISCARD_ANALYZER_H
 
-#include "diagnostic_aggregator/generic_analyzer.h"
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <diagnostic_msgs/DiagnosticStatus.h>
+
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+
+#include "diagnostic_aggregator/generic_analyzer.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -79,7 +80,7 @@ public:
   /*
    *\brief Always reports an empty vector
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 };
 
 }

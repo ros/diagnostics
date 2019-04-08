@@ -36,15 +36,17 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_ANALYZER_H
-#define DIAGNOSTIC_ANALYZER_H
+#ifndef DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP
 
 #include <map>
 #include <vector>
-#include <ros/ros.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
-#include "diagnostic_aggregator/status_item.h"
+
+#include <rclcpp/rclcpp.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <diagnostic_msgs/msg/key_value.h>
+
+#include "diagnostic_aggregator/status_item.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -102,7 +104,7 @@ public:
    *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(const std::string base_path, const ros::NodeHandle & n) = 0;
+  virtual bool init(const std::string base_path, const rclcpp::Node & n) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
@@ -119,7 +121,7 @@ public:
    * Analyzers should only return "true" if they will report the value of this
    * item. If it is only looking at an item, it should return false.
    */
-  virtual bool analyze(const boost::shared_ptr<StatusItem> item) = 0;
+  virtual bool analyze(const std::shared_ptr<StatusItem> item) = 0;
 
   /*!
    *\brief Analysis function, output processed data.
@@ -129,7 +131,7 @@ public:
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report() = 0;
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report() = 0;
 
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')
@@ -141,8 +143,10 @@ public:
    */
   virtual std::string getName() const = 0;
 
+  rclcpp::Clock::SharedPtr clock_;
+
 };
 
 }
 
-#endif //DIAGNOSTIC_ANALYZER_H
+#endif //DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP

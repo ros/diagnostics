@@ -64,9 +64,9 @@ public:
 
   bool match(const std::string name);
 
-  bool analyze(const boost::shared_ptr<diagnostic_aggregator::StatusItem> item);
+  bool analyze(const std::shared_ptr<diagnostic_aggregator::StatusItem> item);
 
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
+  std::vector<std::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
   std::string getPath() const { return path_; }
 

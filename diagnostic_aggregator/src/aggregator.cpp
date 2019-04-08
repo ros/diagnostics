@@ -34,7 +34,7 @@
 
 /**! \author Kevin Watts */
 
-#include <diagnostic_aggregator/aggregator.h>
+#include "diagnostic_aggregator/aggregator.hpp"
 
 using namespace std;
 using namespace diagnostic_aggregator;
@@ -45,7 +45,7 @@ Aggregator::Aggregator()
   other_analyzer_(NULL),
   base_path_("")
 {
-  ros::NodeHandle nh = ros::NodeHandle("~");
+  rclcpp::Node nh = rclcpp::Node("~");
   nh.param(string("base_path"), base_path_, string(""));
   if (base_path_.size() > 0 && base_path_.find("/") != 0) {
     base_path_ = "/" + base_path_;
@@ -59,7 +59,7 @@ Aggregator::Aggregator()
   analyzer_group_ = new AnalyzerGroup();
 
   if (!analyzer_group_->init(base_path_, nh)) {
-    ROS_ERROR("Analyzer group for diagnostic aggregator failed to initialize!");
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Analyzer group for diagnostic aggregator failed to initialize!");*/
   }
 
   // Last analyzer handles remaining data
@@ -68,19 +68,19 @@ Aggregator::Aggregator()
   add_srv_ = n_.advertiseService("/diagnostics_agg/add_diagnostics", &Aggregator::addDiagnostics,
       this);
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
-  agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
-  toplevel_state_pub_ = n_.advertise<diagnostic_msgs::DiagnosticStatus>(
+  agg_pub_ = n_.advertise<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg", 1);
+  toplevel_state_pub_ = n_.advertise<diagnostic_msgs::msg::DiagnosticStatus>(
     "/diagnostics_toplevel_state", 1);
 }
 
-void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr & diag_msg)
+void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::ConstPtr & diag_msg)
 {
   if (diag_msg->header.stamp.toSec() != 0) {
     return;
   }
 
   string stamp_warn = "No timestamp set for diagnostic message. Message names: ";
-  vector<diagnostic_msgs::DiagnosticStatus>::const_iterator it;
+  vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
   for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it) {
     if (it != diag_msg->status.begin()) {
       stamp_warn += ", ";
@@ -89,12 +89,12 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr
   }
 
   if (!ros_warnings_.count(stamp_warn)) {
-    ROS_WARN("%s", stamp_warn.c_str());
+    /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "%s", stamp_warn.c_str());*/
     ros_warnings_.insert(stamp_warn);
   }
 }
 
-void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr & diag_msg)
+void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::ConstPtr & diag_msg)
 {
   checkTimestamp(diag_msg);
 
@@ -104,7 +104,7 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr &
     boost::mutex::scoped_lock lock(mutex_);
     for (unsigned int j = 0; j < diag_msg->status.size(); ++j) {
       analyzed = false;
-      boost::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
+      std::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
 
       if (analyzer_group_->match(item->getName())) {
         analyzed = analyzer_group_->analyze(item);
@@ -125,37 +125,37 @@ Aggregator::~Aggregator()
 }
 
 
-void Aggregator::bondBroken(string bond_id, boost::shared_ptr<Analyzer> analyzer)
+void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
 {
   boost::mutex::scoped_lock lock(mutex_); // Possibility of multiple bonds breaking at once
-  ROS_WARN("Bond for namespace %s was broken", bond_id.c_str());
-  std::vector<boost::shared_ptr<bond::Bond>>::iterator elem;
+  /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "Bond for namespace %s was broken", bond_id.c_str());*/
+  std::vector<std::shared_ptr<bond::Bond>>::iterator elem;
   elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
   if (elem == bonds_.end()) {
-    ROS_WARN("Broken bond tried to erase a bond which didn't exist.");
+    /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "Broken bond tried to erase a bond which didn't exist.");
   } else {
     bonds_.erase(elem);
   }
   if (!analyzer_group_->removeAnalyzer(analyzer)) {
-    ROS_WARN("Broken bond tried to remove an analyzer which didn't exist.");
+    /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "Broken bond tried to remove an analyzer which didn't exist.");*/
   }
 
   analyzer_group_->resetMatches();
 }
 
-void Aggregator::bondFormed(boost::shared_ptr<Analyzer> group)
+void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
 {
-  ROS_DEBUG("Bond formed");
+  /* @todo(anordman):logging RCLCPP_DEBUG(get_logger(), "Bond formed");*/
   boost::mutex::scoped_lock lock(mutex_);
   analyzer_group_->addAnalyzer(group);
   analyzer_group_->resetMatches();
 }
 
 bool Aggregator::addDiagnostics(
-  diagnostic_msgs::AddDiagnostics::Request & req,
-  diagnostic_msgs::AddDiagnostics::Response & res)
+  diagnostic_msgs::msg::AddDiagnostics::Request & req,
+  diagnostic_msgs::msg::AddDiagnostics::Response & res)
 {
-  ROS_DEBUG("Got load request for namespace %s", req.load_namespace.c_str());
+  /* @todo(anordman):logging RCLCPP_DEBUG(get_logger(), "Got load request for namespace %s", req.load_namespace.c_str());*/
   // Don't currently support relative or private namespace definitions
   if (req.load_namespace[0] != '/') {
     res.message =
@@ -164,7 +164,7 @@ bool Aggregator::addDiagnostics(
     return true;
   }
 
-  boost::shared_ptr<Analyzer> group = boost::make_shared<AnalyzerGroup>();
+  std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
   { // lock here ensures that bonds from the same namespace aren't added twice.
     // Without it, possibility of two simultaneous calls adding two objects.
     boost::mutex::scoped_lock lock(mutex_);
@@ -181,7 +181,7 @@ bool Aggregator::addDiagnostics(
     // Use a different topic for each bond to help control the message queue
     // length. Bond has a fixed size subscriber queue, so we can easily miss
     // bond heartbeats if there are too many bonds on the same topic.
-    boost::shared_ptr<bond::Bond> req_bond = boost::make_shared<bond::Bond>(
+    std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
       "/diagnostics_agg/bond" + req.load_namespace, req.load_namespace,
       boost::function<void(void)>(boost::bind(&Aggregator::bondBroken, this, req.load_namespace,
       group)),
@@ -192,7 +192,7 @@ bool Aggregator::addDiagnostics(
     bonds_.push_back(req_bond); // bond formed, keep track of it
   }
 
-  if (group->init(base_path_, ros::NodeHandle(req.load_namespace))) {
+  if (group->init(base_path_, rclcpp::Node(req.load_namespace))) {
     res.message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
     res.success = true;
     return true;
@@ -205,14 +205,14 @@ bool Aggregator::addDiagnostics(
 
 void Aggregator::publishData()
 {
-  diagnostic_msgs::DiagnosticArray diag_array;
+  diagnostic_msgs::msg::DiagnosticArray diag_array;
 
-  diagnostic_msgs::DiagnosticStatus diag_toplevel_state;
+  diagnostic_msgs::msg::DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = -1;
   int min_level = 255;
 
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   {
     boost::mutex::scoped_lock lock(mutex_);
     processed = analyzer_group_->report();
@@ -228,7 +228,7 @@ void Aggregator::publishData()
     }
   }
 
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed_other =
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (unsigned int i = 0; i < processed_other.size(); ++i) {
     diag_array.status.push_back(*processed_other[i]);
@@ -241,7 +241,7 @@ void Aggregator::publishData()
     }
   }
 
-  diag_array.header.stamp = ros::Time::now();
+  diag_array.header.stamp = clock_->now();
 
   agg_pub_.publish(diag_array);
 

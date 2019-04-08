@@ -40,8 +40,10 @@
 #define OTHER_ANALYZER_H
 
 #include <string>
-#include <ros/ros.h>
-#include "diagnostic_aggregator/generic_analyzer_base.h"
+
+#include <rclcpp/rclcpp.hpp>
+
+#include "diagnostic_aggregator/generic_analyzer_base.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -85,10 +87,10 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string base_path, const ros::NodeHandle & n)
+  bool init(const std::string base_path, const rclcpp::Node & n)
   {
-    ROS_ERROR(
-      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
+      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");*/
     return false;
   }
 
@@ -103,9 +105,9 @@ public:
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
    *
    */
-  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report()
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report()
   {
-    std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed =
+    std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
       GenericAnalyzerBase::report();
 
     // We don't report anything if there's no "Other" items
@@ -114,7 +116,7 @@ public:
     }
     // "Other" items are considered an error.
     else if (other_as_errors_ && processed.size() > 1) {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>>::iterator it =
+      std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>::iterator it =
         processed.begin();
       for (; it != processed.end(); ++it) {
         if ((*it)->name == path_) {

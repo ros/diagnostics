@@ -34,7 +34,7 @@
 
 /**! \author Kevin Watts */
 
-#include <diagnostic_aggregator/analyzer_group.h>
+#include "diagnostic_aggregator/analyzer_group.hpp"
 
 using namespace std;
 using namespace diagnostic_aggregator;
@@ -48,7 +48,7 @@ AnalyzerGroup::AnalyzerGroup()
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 {}
 
-bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
+bool AnalyzerGroup::init(const string base_path, const rclcpp::Node & n)
 {
   n.param("path", nice_name_, string(""));
 
@@ -67,27 +67,27 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
     path_ = "/" + path_;
   }
 
-  ros::NodeHandle analyzers_nh = ros::NodeHandle(n, "analyzers");
+  rclcpp::Node analyzers_nh = rclcpp::Node(n, "analyzers");
 
   XmlRpc::XmlRpcValue analyzer_params;
   analyzers_nh.getParam("", analyzer_params);
-  ROS_DEBUG("Analyzer params: %s.", analyzer_params.toXml().c_str());
+  /* @todo(anordman):logging RCLCPP_DEBUG(get_logger(), "Analyzer params: %s.", analyzer_params.toXml().c_str());*/
 
   bool init_ok = true;
 
   XmlRpc::XmlRpcValue::iterator xml_it;
   for (xml_it = analyzer_params.begin(); xml_it != analyzer_params.end(); ++xml_it) {
     XmlRpc::XmlRpcValue analyzer_name = xml_it->first;
-    ROS_DEBUG("Got analyzer name: %s", analyzer_name.toXml().c_str());
+    /* @todo(anordman):logging RCLCPP_DEBUG(get_logger(), "Got analyzer name: %s", analyzer_name.toXml().c_str());*/
     XmlRpc::XmlRpcValue analyzer_value = xml_it->second;
 
     string ns = analyzer_name;
 
     if (!analyzer_value.hasMember("type")) {
-      ROS_ERROR(
+      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
         "Namespace %s has no member 'type', unable to initialize analyzer for this namespace.",
-        analyzers_nh.getNamespace().c_str());
-      boost::shared_ptr<StatusItem> item(new StatusItem(ns, "No Analyzer type given"));
+        analyzers_nh.getNamespace().c_str());*/
+      std::shared_ptr<StatusItem> item(new StatusItem(ns, "No Analyzer type given"));
       aux_items_.push_back(item);
       init_ok = false;
       continue;
@@ -96,7 +96,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
     XmlRpc::XmlRpcValue analyzer_type = analyzer_value["type"];
     string an_type = analyzer_type;
 
-    boost::shared_ptr<Analyzer> analyzer;
+    std::shared_ptr<Analyzer> analyzer;
     try {
       // Look for non-fully qualified class name for Analyzer type
       if (!analyzer_loader_.isClassAvailable(an_type)) {
@@ -105,26 +105,26 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
         for (unsigned int i = 0; i < classes.size(); ++i) {
           if (an_type == analyzer_loader_.getName(classes[i])) {
             //if we've found a match... we'll get the fully qualified name and break out of the loop
-            ROS_WARN(
+            /* @todo(anordman):logging RCLCPP_WARN(get_logger(), 
               "Analyzer specification should now include the package name. You are using a deprecated API. Please switch from %s to %s in your Analyzer specification.",
-              an_type.c_str(), classes[i].c_str());
+              an_type.c_str(), classes[i].c_str());*/
             an_type = classes[i];
             have_class = true;
             break;
           }
         }
         if (!have_class) {
-          ROS_ERROR("Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
-            an_type.c_str());
+          /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
+            an_type.c_str());*/
           continue;
         }
       }
 
       analyzer = analyzer_loader_.createInstance(an_type);
     } catch (pluginlib::LibraryLoadException & e) {
-      ROS_ERROR("Failed to load analyzer %s, type %s. Caught exception. %s",
-        ns.c_str(), an_type.c_str(), e.what());
-      boost::shared_ptr<StatusItem> item(new StatusItem(ns,
+      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Failed to load analyzer %s, type %s. Caught exception. %s",
+        ns.c_str(), an_type.c_str(), e.what());*/
+      std::shared_ptr<StatusItem> item(new StatusItem(ns,
         "Pluginlib exception loading analyzer"));
       aux_items_.push_back(item);
       init_ok = false;
@@ -132,9 +132,9 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
     }
 
     if (!analyzer) {
-      ROS_ERROR("Pluginlib returned a null analyzer for %s, namespace %s.",
-        an_type.c_str(), analyzers_nh.getNamespace().c_str());
-      boost::shared_ptr<StatusItem> item(new StatusItem(ns,
+      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Pluginlib returned a null analyzer for %s, namespace %s.",
+        an_type.c_str(), analyzers_nh.getNamespace().c_str());*/
+      std::shared_ptr<StatusItem> item(new StatusItem(ns,
         "Pluginlib return NULL Analyzer for " +
         an_type));
       aux_items_.push_back(item);
@@ -142,10 +142,10 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
       continue;
     }
 
-    if (!analyzer->init(path_, ros::NodeHandle(analyzers_nh, ns))) {
-      ROS_ERROR("Unable to initialize analyzer NS: %s, type: %s",
-        analyzers_nh.getNamespace().c_str(), an_type.c_str());
-      boost::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
+    if (!analyzer->init(path_, rclcpp::Node(analyzers_nh, ns))) {
+      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Unable to initialize analyzer NS: %s, type: %s",
+        analyzers_nh.getNamespace().c_str(), an_type.c_str());*/
+      std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
       aux_items_.push_back(item);
       init_ok = false;
       continue;
@@ -156,7 +156,7 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle & n)
 
   if (analyzers_.size() == 0) {
     init_ok = false;
-    ROS_ERROR("No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
+    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());*/
   }
 
   return init_ok;
@@ -167,15 +167,15 @@ AnalyzerGroup::~AnalyzerGroup()
   analyzers_.clear();
 }
 
-bool AnalyzerGroup::addAnalyzer(boost::shared_ptr<Analyzer> & analyzer)
+bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
   analyzers_.push_back(analyzer);
   return true;
 }
 
-bool AnalyzerGroup::removeAnalyzer(boost::shared_ptr<Analyzer> & analyzer)
+bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
-  vector<boost::shared_ptr<Analyzer>>::iterator it = find(analyzers_.begin(),
+  vector<std::shared_ptr<Analyzer>>::iterator it = find(analyzers_.begin(),
       analyzers_.end(), analyzer);
   if (it != analyzers_.end()) {
     analyzers_.erase(it);
@@ -217,10 +217,10 @@ void AnalyzerGroup::resetMatches()
 }
 
 
-bool AnalyzerGroup::analyze(const boost::shared_ptr<StatusItem> item)
+bool AnalyzerGroup::analyze(const std::shared_ptr<StatusItem> item)
 {
-  ROS_ASSERT_MSG(matched_.count(
-      item->getName()), "AnalyzerGroup was asked to analyze an item it hadn't matched.");
+  /* @todo(anordman):assertion ROS_ASSERT_MSG(get_logger(), matched_.count(
+      item->getName()), "AnalyzerGroup was asked to analyze an item it hadn't matched.");*/
 
   bool analyzed = false;
   vector<bool> & mtch_vec = matched_[item->getName()];
@@ -233,12 +233,12 @@ bool AnalyzerGroup::analyze(const boost::shared_ptr<StatusItem> item)
   return analyzed;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> AnalyzerGroup::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGroup::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> output;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> output;
 
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(
-    new diagnostic_msgs::DiagnosticStatus);
+  std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> header_status(
+    new diagnostic_msgs::msg::DiagnosticStatus);
   header_status->name = path_;
   header_status->level = 0;
   header_status->message = "OK";
@@ -261,7 +261,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> AnalyzerGroup::repo
     string path = analyzers_[j]->getPath();
     string nice_name = analyzers_[j]->getName();
 
-    vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> processed =
+    vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
       analyzers_[j]->report();
 
     // Do not report anything in the header values for analyzers that don't report
@@ -276,7 +276,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> AnalyzerGroup::repo
 
       // Add to header status
       if (processed[i]->name == path) {
-        diagnostic_msgs::KeyValue kv;
+        diagnostic_msgs::msg::KeyValue kv;
         kv.key = nice_name;
         kv.value = processed[i]->message;
 

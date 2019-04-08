@@ -34,8 +34,9 @@
 
 /**< \author Kevin Watts */
 
-#include <diagnostic_aggregator/aggregator.h>
 #include <exception>
+
+#include "diagnostic_aggregator/aggregator.hpp"
 
 using namespace std;
 

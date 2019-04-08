@@ -36,23 +36,25 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
-#define DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
+#ifndef DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
 
 #include <map>
-#include <ros/ros.h>
 #include <vector>
 #include <string>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/regex.hpp>
+
+#include <rclcpp/rclcpp.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include "diagnostic_msgs/DiagnosticStatus.h"
-#include "diagnostic_msgs/KeyValue.h"
-#include "diagnostic_aggregator/analyzer.h"
-#include "diagnostic_aggregator/status_item.h"
-#include "diagnostic_aggregator/generic_analyzer_base.h"
-#include "XmlRpcValue.h"
+
+#include <diagnostic_msgs/msg/diagnostic_status.h>
+#include <diagnostic_msgs/msg/key_value.h>
+
+#include "diagnostic_aggregator/analyzer.hpp"
+#include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/generic_analyzer_base.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -73,8 +75,8 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & o
   } else if (type == XmlRpc::XmlRpcValue::TypeArray) {
     for (int i = 0; i < param.size(); ++i) {
       if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
-        ROS_ERROR("Parameter is not a list of strings, found non-string value. XmlRpcValue: %s",
-          param.toXml().c_str());
+        /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Parameter is not a list of strings, found non-string value. XmlRpcValue: %s",
+          param.toXml().c_str());*/
         output.clear();
         return false;
       }
@@ -85,8 +87,8 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & o
     return true;
   }
 
-  ROS_ERROR("Parameter not a list or string, unable to return values. XmlRpcValue:s %s",
-    param.toXml().c_str());
+  /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Parameter not a list or string, unable to return values. XmlRpcValue:s %s",
+    param.toXml().c_str());*/
   output.clear();
   return false;
 }
@@ -115,7 +117,7 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & o
  * In the above example, the GenericAnalyzer wouldn't analyze anything. The GenericAnalyzer
  * must be configured to listen to diagnostic status names. To do this, optional parameters,
  * like "contains", will tell the analyzer to analyze an item that contains that value. The
- * GenericAnalyzer looks at the name of the income diagnostic_msgs/DiagnosticStatus messages
+ * GenericAnalyzer looks at the name of the income diagnostic_msgs/msg/DiagnosticStatus messages
  * to determine item matches.
  *
  * Optional Parameters for Matching:
@@ -169,7 +171,7 @@ inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & o
  * \subsubsection GenericAnalyzer Behavior
  *
  * The GenericAnalyzer will report the latest status of any item that is should analyze.
- * It will report a separate diagnostic_msgs/DiagnosticStatus with the name
+ * It will report a separate diagnostic_msgs/msg/DiagnosticStatus with the name
  * "Base Path/My Path". This "top-level" status will have the error state of the highest
  * of its children.
  *
@@ -211,14 +213,14 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of
    */
-  bool init(const std::string base_path, const ros::NodeHandle & n);
+  bool init(const std::string base_path, const rclcpp::Node & n);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
    *
    *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
-  virtual std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus>> report();
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 
   /*!
    *\brief Returns true if item matches any of the given criteria
@@ -237,4 +239,4 @@ private:
 };
 
 }
-#endif //DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_H
+#endif //DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
