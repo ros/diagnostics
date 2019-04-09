@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2009, Willow Garage, Inc.
@@ -30,38 +32,49 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
 
-import unittest
-import rospy, rostest
-import rosparam
-import optparse
 import sys
+import unittest
+import optparse
 import threading
-from bondpy import bondpy
+
+import bondpy
+import rclpy
+from rclpy.parameter import Parameter
+
 from diagnostic_msgs.srv import AddDiagnostics
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 PKG = 'diagnostic_aggregator'
 
+
 class TestAddAnalyzer(unittest.TestCase):
+
     def __init__(self, *args):
         super(TestAddAnalyzer, self).__init__(*args)
-        rospy.init_node('test_add_analyzer')
-        self.namespace = rospy.get_name()
-        paramlist = rosparam.load_file(rospy.myargv()[1])
+
+        rclpy.init()
+        node = rclpy.create_node('test_add_analyzer')
+
+        self.namespace = node.get_name()
+        paramlist = "d" #Parameter.load_file(rclpy.myargv()[1])
+
         # expect to receive these paths in the added analyzers
-        self.expected = [paramlist[0][1] + analyzer['path'] for name, analyzer in paramlist[0][0]['analyzers'].iteritems()]
+        self.expected = [paramlist[0][1] + analyzer['path'] for (name,
+                         analyzer) in paramlist[0][0]['analyzers'
+                         ].iteritems()]
 
         self._mutex = threading.Lock()
         self.agg_msgs = {}
 
         # put parameters in the node namespace so they can be read by the aggregator
-        for params, ns in paramlist:
-            rosparam.upload_params(rospy.get_name() + '/' + ns, params)
+        for (params, ns) in paramlist:
+            Parameter.upload_params(rclpy.get_name() + '/' + ns, params)
 
-        rospy.Subscriber('/diagnostics_agg', DiagnosticArray, self.agg_cb)
-        self.pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=1)
+        rclpy.create_subscription(DiagnosticArray, '/diagnostics_agg',
+                                  self.agg_cb)
+        self.pub = rclpy.create_publisher(DiagnosticArray,
+                '/diagnostics', queue_size=1)
 
     def agg_cb(self, msg):
         with self._mutex:
@@ -71,67 +84,83 @@ class TestAddAnalyzer(unittest.TestCase):
     def add_analyzer(self):
         """Start a bond to the aggregator
         """
-        namespace = rospy.resolve_name(rospy.get_name())
-        self.bond = bondpy.Bond("/diagnostics_agg/bond" + namespace, namespace)
+
+        namespace = rclpy.resolve_name(rclpy.get_name())
+        self.bond = bondpy.Bond('/diagnostics_agg/bond' + namespace,
+                                namespace)
         self.bond.start()
-        rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=10)
-        add_diagnostics = rospy.ServiceProxy('/diagnostics_agg/add_diagnostics', AddDiagnostics)
+        rclpy.wait_for_service('/diagnostics_agg/add_diagnostics',
+                               timeout=10)
+        add_diagnostics = \
+            rclpy.ServiceProxy('/diagnostics_agg/add_diagnostics',
+                               AddDiagnostics)
         print(self.namespace)
         resp = add_diagnostics(load_namespace=self.namespace)
-        self.assert_(resp.success, 'Service call was unsuccessful: {0}'.format(resp.message))
+        self.assert_(resp.success,
+                     'Service call was unsuccessful: {0}'.format(resp.message))
 
     def wait_for_agg(self):
         self.agg_msgs = {}
-        while not self.agg_msgs and not rospy.is_shutdown():
-            rospy.sleep(rospy.Duration(3))
+        while not self.agg_msgs and not rclpy.is_shutdown():
+            rclpy.sleep(rclpy.Duration(3))
 
     def test_add_agg(self):
         self.wait_for_agg()
 
         # confirm that the things we're going to add aren't there already
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
-            self.assert_(not any(expected in agg_paths for expected in self.expected))
-            
+            agg_paths = [msg.name for (name, msg) in
+                         self.agg_msgs.iteritems()]
+            self.assert_(not any(expected in agg_paths for expected in
+                         self.expected))
+
         # add the new groups
         self.add_analyzer()
 
         arr = DiagnosticArray()
-        arr.header.stamp = rospy.get_rostime()
-        arr.status = [
-            DiagnosticStatus(name='primary', message='hello-primary'),
-            DiagnosticStatus(name='secondary', message='hello-secondary')
-        ]
+        arr.header.stamp = rclpy.get_rostime()
+        arr.status = [DiagnosticStatus(name='primary',
+                      message='hello-primary'),
+                      DiagnosticStatus(name='secondary',
+                      message='hello-secondary')]
         self.pub.publish(arr)
         self.wait_for_agg()
+
         # the new aggregator data should contain the extra paths. At this point
         # the paths are probably still in the 'Other' group because the bond
         # hasn't been fully formed
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
-            self.assert_(all(expected in agg_paths for expected in self.expected))
+            agg_paths = [msg.name for (name, msg) in
+                         self.agg_msgs.iteritems()]
+            self.assert_(all(expected in agg_paths for expected in
+                         self.expected))
 
-        rospy.sleep(rospy.Duration(5)) # wait a bit for the new items to move to the right group
-        arr.header.stamp = rospy.get_rostime()
-        self.pub.publish(arr) # publish again to get the correct groups to show OK
+        rclpy.sleep(rclpy.Duration(5))  # wait a bit for the new items to move to the right group
+        arr.header.stamp = rclpy.get_rostime()
+        self.pub.publish(arr)  # publish again to get the correct groups to show OK
         self.wait_for_agg()
 
-        for name, msg in self.agg_msgs.iteritems():
-            if name in self.expected: # should have just received messages on the analyzer
+        for (name, msg) in self.agg_msgs.iteritems():
+            if name in self.expected:  # should have just received messages on the analyzer
                 self.assert_(msg.message == 'OK')
-                
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
-            self.assert_(all(expected in agg_paths for expected in self.expected))
-                
+
+            agg_paths = [msg.name for (name, msg) in
+                         self.agg_msgs.iteritems()]
+            self.assert_(all(expected in agg_paths for expected in
+                         self.expected))
 
         self.bond.shutdown()
-        rospy.sleep(rospy.Duration(5)) # wait a bit for the analyzers to unload
+        rclpy.sleep(rclpy.Duration(5))  # wait a bit for the analyzers to unload
         self.wait_for_agg()
+
         # the aggregator data should no longer contain the paths once the bond is shut down
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
-            self.assert_(not any(expected in agg_paths for expected in self.expected))
-        
+            agg_paths = [msg.name for (name, msg) in
+                         self.agg_msgs.iteritems()]
+            self.assert_(not any(expected in agg_paths for expected in
+                         self.expected))
+
+
 if __name__ == '__main__':
-    print 'SYS ARGS:', sys.argv
-    rostest.run(PKG, sys.argv[0], TestAddAnalyzer, sys.argv)
+    print('SYS ARGS:', sys.argv)
+    unittest.main()
