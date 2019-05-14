@@ -172,7 +172,6 @@ namespace diagnostic_updater
         int events = curseq - seq_nums_[hist_indx_];
         double window = (curtime - times_[hist_indx_]).toSec();
 
-        // If the time window is 0, we cannot truthfully report any frequency
         if (window != 0)
         {
             double freq = events / window;
