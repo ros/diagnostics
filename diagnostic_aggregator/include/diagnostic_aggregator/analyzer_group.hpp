@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_ANALYZER_GROUP_HPP
-#define DIAGNOSTIC_AGGREGATOR_ANALYZER_GROUP_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
+#define DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
 
 #include <map>
 #include <vector>
@@ -52,7 +52,6 @@
 #include <pluginlib/class_list_macros.hpp>
 
 #include "diagnostic_aggregator/status_item.hpp"
-//#include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
 
@@ -122,22 +121,22 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
-  virtual bool init(const std::string base_path, const rclcpp::Node & n);
+  virtual bool init(const std::string, const rclcpp::Node::SharedPtr);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
    */
-  virtual bool addAnalyzer(std::shared_ptr<Analyzer> & analyzer);
+  virtual bool addAnalyzer(std::shared_ptr<Analyzer> &);
 
   /**!
    *\brief Remove an analyzer from this analyzerGroup
    */
-  virtual bool removeAnalyzer(std::shared_ptr<Analyzer> & analyzer);
+  virtual bool removeAnalyzer(std::shared_ptr<Analyzer> &);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
    */
-  virtual bool match(const std::string name);
+  virtual bool match(const std::string);
 
   /*!
    *\brief Clear match arrays. Used when analyzers are added or removed
@@ -147,7 +146,7 @@ public:
   /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
    */
-  virtual bool analyze(const std::shared_ptr<StatusItem> item);
+  virtual bool analyze(const std::shared_ptr<StatusItem>);
 
   /*!
    *\brief The processed output is the combined output of the sub-analyzers, and the top level status
@@ -182,4 +181,4 @@ private:
 
 }
 
-#endif //DIAGNOSTIC_AGGREGATOR_ANALYZER_GROUP_HPP
+#endif //DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
