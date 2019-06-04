@@ -30,7 +30,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <export>
-    <diagnostic_aggregator plugin="${prefix}/analyzer_plugins.xml"/>
+    <diagnostic_aggregator plugin="${prefix}/plugin_description.xml"/>
     <build_type>ament_cmake</build_type>
   </export>
 </package>

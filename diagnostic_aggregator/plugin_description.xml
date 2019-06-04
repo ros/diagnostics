@@ -1,4 +1,4 @@
-<library path="lib/libdiagnostic_aggregator" >
+<library path="diagnostic_aggregator_analyzers" >
   <class name="diagnostic_aggregator/GenericAnalyzer" type="diagnostic_aggregator::GenericAnalyzer" base_class_type="diagnostic_aggregator::Analyzer">
     <description>
       GenericAnalyzer is default diagnostic analyzer.
@@ -20,4 +20,3 @@
     </description>
   </class>
 </library>
-
