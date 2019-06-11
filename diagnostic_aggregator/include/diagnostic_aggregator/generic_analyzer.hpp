@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
 
 #include <map>
 #include <vector>
@@ -47,6 +47,7 @@
 #include <boost/regex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logger.hpp>
 #include <pluginlib/class_list_macros.hpp>
 
 #include <diagnostic_msgs/msg/diagnostic_status.h>
@@ -65,30 +66,25 @@ namespace diagnostic_aggregator
  * Given an XmlRpcValue, gives vector of strings of that parameter
  *\return False if XmlRpcValue is not string or array of strings
  */
-inline bool getParamVals(XmlRpc::XmlRpcValue param, std::vector<std::string> & output)
+inline bool
+getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
 {
-  XmlRpc::XmlRpcValue::Type type = param.getType();
-  if (type == XmlRpc::XmlRpcValue::TypeString) {
-    std::string find = param;
+  rclcpp::ParameterType type = param.get_type();
+  if (type == rclcpp::ParameterType::PARAMETER_STRING) {
+    std::string find = param.as_string();
     output.push_back(find);
     return true;
-  } else if (type == XmlRpc::XmlRpcValue::TypeArray) {
-    for (int i = 0; i < param.size(); ++i) {
-      if (param[i].getType() != XmlRpc::XmlRpcValue::TypeString) {
-        /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Parameter is not a list of strings, found non-string value. XmlRpcValue: %s",
-          param.toXml().c_str());*/
-        output.clear();
-        return false;
-      }
-
-      std::string find = param[i];
-      output.push_back(find);
+  } else if (type == rclcpp::ParameterType::PARAMETER_STRING_ARRAY) {
+    auto param_array = param.as_string_array();
+    for (unsigned int i = 0; i < param_array.size(); ++i) {
+      output.push_back(param_array[i]);
     }
     return true;
   }
 
-  /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Parameter not a list or string, unable to return values. XmlRpcValue:s %s",
-    param.toXml().c_str());*/
+  RCLCPP_ERROR(rclcpp::get_logger(
+      "generic_analyzer"), "Parameter not a list or string, unable to return values. Parameter type: %s",
+    param.get_type_name().c_str());
   output.clear();
   return false;
 }
@@ -213,7 +209,7 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of
    */
-  bool init(const std::string base_path, const rclcpp::Node & n);
+  bool init(const std::string base_path, const rclcpp::Node::SharedPtr n);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
@@ -239,4 +235,4 @@ private:
 };
 
 }
-#endif //DIAGNOSTIC_AGGREGATOR_GENERIC_ANALYZER_HPP
+#endif //DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP

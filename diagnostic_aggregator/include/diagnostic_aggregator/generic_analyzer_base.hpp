@@ -34,8 +34,8 @@
 
 /**!< \author Kevin Watts */
 
-#ifndef GENERIC_ANALYZER_BASE_H
-#define GENERIC_ANALYZER_BASE_H
+#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
+#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
 
 #include <map>
 #include <vector>
@@ -78,7 +78,7 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string path, const rclcpp::Node & n) = 0;
+  bool init(const std::string, const rclcpp::Node::SharedPtr) = 0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
@@ -96,7 +96,9 @@ public:
     discard_stale_ = discard_stale;
 
     if (discard_stale_ and timeout <= 0) {
-      /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "Cannot discard stale items if no timeout specified. No items will be discarded");*/
+      RCLCPP_WARN(rclcpp::get_logger(
+          "generic_analyzer_base"),
+        "Cannot discard stale items if no timeout specified. No items will be discarded");
       discard_stale_ = false;
     }
 
@@ -112,8 +114,9 @@ public:
   {
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      /* @todo(anordman):logging (get_logger(), 
-        "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");*/
+      RCLCPP_WARN(rclcpp::get_logger(
+          "generic_analyzer_base"),
+        "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
 
     if (!has_initialized_) {
@@ -134,8 +137,9 @@ public:
   {
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
-        "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");*/
+      RCLCPP_ERROR(rclcpp::get_logger(
+          "generic_analyzer_base"),
+        "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
     if (!has_initialized_) {
       std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> vec;
@@ -170,7 +174,7 @@ public:
       }
 
       int8_t level = item->getLevel();
-      header_status->level = std::max(header_status->level, level);
+      header_status->level = std::max(int8_t(header_status->level), level);
 
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = name;
@@ -206,7 +210,7 @@ public:
       header_status->message = "OK";
     } else if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_) {
       int8_t lvl = 2;
-      header_status->level = std::max(lvl, header_status->level);
+      header_status->level = std::max(lvl, int8_t(header_status->level));
 
       std::stringstream expec, item;
       expec << num_items_expected_;
@@ -259,4 +263,4 @@ private:
 };
 
 }
-#endif //GENERIC_ANALYZER_BASE_H
+#endif //DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP

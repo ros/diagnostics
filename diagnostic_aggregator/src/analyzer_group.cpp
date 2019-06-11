@@ -33,6 +33,7 @@
  *********************************************************************/
 
 /**! \author Kevin Watts */
+/**! \author Arne Nordmann */
 
 #include "diagnostic_aggregator/analyzer_group.hpp"
 
@@ -53,143 +54,106 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
 {
   RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "init()");
   bool init_ok = true;
+  
+  std::string path = base_path;
+  if (!base_path.empty()) {
+    path += ".analyzers";
+  }  
+  
+  std::map<std::string, rclcpp::Parameter> parameters;
+  if (!n->get_parameters(path, parameters)) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("AnalyzerGroup"),
+      "Couldn't retrieve parameters for analyzer group '%s', namespace '%s'.",
+      path.c_str(), n->get_namespace());
+      return false;
+  }
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("AnalyzerGroup"),
+    "Retrieved %d parameter(s) for analyzer group '%s.",
+    parameters.size(), path.c_str());
 
-  auto options = rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true);
-  rclcpp::Node analyzers_nh("analyzers_config", options);
-  
-  std::map<std::string, rclcpp::Parameter> analyzers_config;
-  analyzers_nh.get_parameters("", analyzers_config);
-  
-  std::string ns, an_type, a_path;
-  for (auto & param : analyzers_config) {
-    RCLCPP_DEBUG(rclcpp::get_logger("analyzer_group"), "Analzer parameter %s:%s:%s", param.first.c_str(), param.second.get_type_name().c_str(), param.second.value_to_string().c_str());
+  std::string ns, an_type, an_path;
+  std::shared_ptr<Analyzer> analyzer;
+  for (auto & param : parameters) {
+    RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer parameter %s:%s:%s", param.first.c_str(), param.second.get_type_name().c_str(), param.second.value_to_string().c_str());
     
     std::string tmpname = param.first.substr(0, param.first.find("."));
     if (tmpname.compare(ns) != 0) {
       // New analyzer, first create the previous one
-      if (!ns.empty()) {
+      if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
        
-        if (an_type.empty()) {
-          RCLCPP_ERROR(rclcpp::get_logger("analyzer_group"), "Can't create analyzer '%s', missing type.", ns.c_str());
+        RCLCPP_WARN(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s", an_type.c_str(), ns.c_str(), an_path.c_str()); 
+        bool have_class = false;
+        
+        try {
+          if (!analyzer_loader_.isClassAvailable(an_type)) {
+            RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
+              an_type.c_str());
+          }
+          
+          analyzer = analyzer_loader_.createSharedInstance(an_type);         
+        } catch (pluginlib::LibraryLoadException & e) {
+          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
+            ns.c_str(), an_type.c_str(), e.what());
+          std::shared_ptr<StatusItem> item(new StatusItem(ns,
+            "Pluginlib exception loading analyzer"));
+          aux_items_.push_back(item);
           init_ok = false;
           continue;
-        } else {
-          RCLCPP_WARN(rclcpp::get_logger("analyzer_group"), "Initialize %s '%s' for %s", an_type.c_str(), ns.c_str(), a_path.c_str()); 
-          
-          // @todo(anordman): Actually create the analyzers
-          std::shared_ptr<Analyzer> analyzer;
-          try {
-            if (!analyzer_loader_.isClassAvailable(an_type)) {
-              bool have_class = false;
-              vector<string> classes = analyzer_loader_.getDeclaredClasses();
-              for (unsigned int i = 0; i < classes.size(); ++i) {
-                if (an_type == analyzer_loader_.getName(classes[i])) {
-                  //if we've found a match... we'll get the fully qualified name and break out of the loop
-                  RCLCPP_WARN(get_logger("analyzer_group"),
-                    "Analyzer specification should now include the package name. You are using a deprecated API. Please switch from %s to %s in your Analyzer specification.",
-                    an_type.c_str(), classes[i].c_str());
-                  an_type = classes[i];
-                  have_class = true;
-                  break;
-                }
-              }
-              if (!have_class) {
-                RCLCPP_ERROR(get_logger("analyzer_group"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
-                  an_type.c_str());
-                continue;
-              }
-            }
-          } catch (pluginlib::LibraryLoadException & e) {
-            RCLCPP_ERROR(get_logger("analyzer_group"), "Failed to load analyzer %s, type %s. Caught exception. %s",
-              ns.c_str(), an_type.c_str(), e.what());
-            std::shared_ptr<StatusItem> item(new StatusItem(ns,
-              "Pluginlib exception loading analyzer"));
-            aux_items_.push_back(item);
-            init_ok = false;
-            continue;
-          }
         }
+        
+        if (!analyzer) {
+          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Pluginlib returned a null analyzer for %s, namespace %s.",
+            an_type.c_str(), n->get_namespace());
+          std::shared_ptr<StatusItem> item(new StatusItem(ns,
+            "Pluginlib return NULL Analyzer for " +
+            an_type));
+          aux_items_.push_back(item);
+          init_ok = false;
+          continue;
+        }
+        
+        if (path.empty()) {
+          an_path = ns;
+        } else {
+          an_path = path + "." + ns;
+        }
+        RCLCPP_DEBUG(get_logger("AnalyzerGroup"), " an_path: %s",
+            an_path.c_str());
+        if (!analyzer->init(an_path, n)) {
+          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Unable to initialize analyzer NS: %s, type: %s",
+            n->get_namespace(), an_type.c_str());
+          std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
+          aux_items_.push_back(item);
+          init_ok = false;
+          continue;
+        }
+
+        this->addAnalyzer(analyzer); 
       }
       
-      ns = tmpname; an_type = ""; a_path = "";
-      RCLCPP_DEBUG(rclcpp::get_logger("analyzer_group"), "New analzer: %s", ns.c_str());
+      ns = tmpname; an_type = ""; an_path = "";
+      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "New analyzer: %s", ns.c_str());
     }    
     std::stringstream p_type;
     p_type << ns << ".type";
     if (param.first.compare(p_type.str()) == 0) {
       an_type = param.second.value_to_string();
-      RCLCPP_DEBUG(rclcpp::get_logger("analyzer_group"), "Analyzer type: %s", an_type.c_str());
+      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer type: %s", an_type.c_str());
     }
     std::stringstream p_path;
     p_path << ns << ".path";
     if (param.first.compare(p_path.str()) == 0) {
-      a_path = param.second.value_to_string();
-      RCLCPP_DEBUG(rclcpp::get_logger("analyzer_group"), "Analyzer path: %s", an_type.c_str());
+      an_path = param.second.value_to_string();
+      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer path: %s", an_path.c_str());
     }
-    
-  }
-  /**
-    try {
-      // Look for non-fully qualified class name for Analyzer type
-      if (!analyzer_loader_.isClassAvailable(an_type)) {
-        bool have_class = false;
-        vector<string> classes = analyzer_loader_.getDeclaredClasses();
-        for (unsigned int i = 0; i < classes.size(); ++i) {
-          if (an_type == analyzer_loader_.getName(classes[i])) {
-            //if we've found a match... we'll get the fully qualified name and break out of the loop
-            RCLCPP_WARN(get_logger("analyzer_group"),
-              "Analyzer specification should now include the package name. You are using a deprecated API. Please switch from %s to %s in your Analyzer specification.",
-              an_type.c_str(), classes[i].c_str());
-            an_type = classes[i];
-            have_class = true;
-            break;
-          }
-        }
-        if (!have_class) {
-          RCLCPP_ERROR(get_logger("analyzer_group"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
-            an_type.c_str());
-          continue;
-        }
-      }
-
-      analyzer = analyzer_loader_.createInstance(an_type);
-    } catch (pluginlib::LibraryLoadException & e) {
-      RCLCPP_ERROR(get_logger("analyzer_group"), "Failed to load analyzer %s, type %s. Caught exception. %s",
-        ns.c_str(), an_type.c_str(), e.what());
-      std::shared_ptr<StatusItem> item(new StatusItem(ns,
-        "Pluginlib exception loading analyzer"));
-      aux_items_.push_back(item);
-      init_ok = false;
-      continue;
-    }
-
-    if (!analyzer) {
-      RCLCPP_ERROR(get_logger("analyzer_group"), "Pluginlib returned a null analyzer for %s, namespace %s.",
-        an_type.c_str(), analyzers_nh.getNamespace().c_str());
-      std::shared_ptr<StatusItem> item(new StatusItem(ns,
-        "Pluginlib return NULL Analyzer for " +
-        an_type));
-      aux_items_.push_back(item);
-      init_ok = false;
-      continue;
-    }
-
-    if (!analyzer->init(path_, rclcpp::Node(analyzers_nh, ns))) {
-      RCLCPP_ERROR(get_logger("analyzer_group"), "Unable to initialize analyzer NS: %s, type: %s",
-        analyzers_nh.getNamespace().c_str(), an_type.c_str());
-      std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
-      aux_items_.push_back(item);
-      init_ok = false;
-      continue;
-    }
-
-    analyzers_.push_back(analyzer);
   }
 
   if (analyzers_.size() == 0) {
     init_ok = false;
-    RCLCPP_ERROR(get_logger("analyzer_group"), "No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
-  } */
+    RCLCPP_ERROR(get_logger("AnalyzerGroup"), "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
+  }
 
   return init_ok;
 }

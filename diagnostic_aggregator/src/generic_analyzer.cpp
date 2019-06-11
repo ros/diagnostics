@@ -33,6 +33,9 @@
  *********************************************************************/
 
 /**< \author Kevin Watts */
+/**< \author Arne Nordmann */
+
+#include <rclcpp/parameter.hpp>
 
 #include "diagnostic_aggregator/generic_analyzer.hpp"
 
@@ -45,90 +48,99 @@ PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
 
 GenericAnalyzer::GenericAnalyzer() {}
 
-bool GenericAnalyzer::init(const string base_path, const rclcpp::Node & n)
+bool GenericAnalyzer::init(const string base_path, const rclcpp::Node::SharedPtr n)
 {
-  string nice_name;
-  if (!n.getParam("path", nice_name)) {
-    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
-      n.getNamespace().c_str());*/
-    return false;
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("generic_analyzer"),
+    "GenericAnalyzer(), base_path: %s, namespace: %s",
+    base_path.c_str(),
+    n->get_namespace());
+  
+  std::map<std::string, rclcpp::Parameter> parameters;
+  if (!n->get_parameters(base_path, parameters)) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("generic_analyzer"),
+      "Couldn't retrieve parameters for generic analyzer '%s', namespace '%s'.",
+      base_path.c_str(), n->get_namespace());
+      return false;
   }
-
-  XmlRpc::XmlRpcValue find_remove;
-  if (n.getParam("find_and_remove_prefix", find_remove)) {
-    vector<string> output;
-    getParamVals(find_remove, output);
-    chaff_ = output;
-    startswith_ = output;
-  }
-
-  XmlRpc::XmlRpcValue removes;
-  if (n.getParam("remove_prefix", removes)) {
-    getParamVals(removes, chaff_);
-  }
-
-  XmlRpc::XmlRpcValue startswith;
-  if (n.getParam("startswith", startswith)) {
-    getParamVals(startswith, startswith_);
-  }
-
-  XmlRpc::XmlRpcValue name_val;
-  if (n.getParam("name", name_val)) {
-    getParamVals(name_val, name_);
-  }
-
-  XmlRpc::XmlRpcValue contains;
-  if (n.getParam("contains", contains)) {
-    getParamVals(contains, contains_);
-  }
-
-  XmlRpc::XmlRpcValue expected;
-  if (n.getParam("expected", expected)) {
-    getParamVals(expected, expected_);
-    for (unsigned int i = 0; i < expected_.size(); ++i) {
-      std::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
-      addItem(expected_[i], item);
-    }
-  }
-
-  XmlRpc::XmlRpcValue regexes;
-  if (n.getParam("regex", regexes)) {
-    vector<string> regex_strs;
-    getParamVals(regexes, regex_strs);
-
-    for (unsigned int i = 0; i < regex_strs.size(); ++i) {
-      try {
-        boost::regex re(regex_strs[i]);
-        regex_.push_back(re);
-      } catch (boost::regex_error & e) {
-        /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
-          "Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
-          regex_strs[i].c_str(), e.what());*/
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("generic_analyzer"),
+    "Retrieved %d parameter(s) for generic analyzer '%s.",
+    parameters.size(), base_path.c_str());
+  
+  string nice_name = base_path; //@todo(anordman): check, what is this about?
+  double timeout;
+  int num_items_expected;
+  bool discard_stale;
+  
+  for (auto param : parameters) {
+    string pname = param.first;
+    rclcpp::Parameter pvalue = param.second;    
+    RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "param: %s : %s", pname.c_str(), pvalue.value_to_string().c_str());
+    
+    if (pname.compare("name") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer name: %s", pvalue.value_to_string().c_str());
+      name_ = pvalue.as_string_array();
+    } else if (pname.compare("find_and_remove_prefix") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer find_and_remove_prefix: %s", pvalue.value_to_string().c_str());
+      vector<string> output = { pname };
+      chaff_ = output;
+      startswith_ = output;
+    } else if (pname.compare("remove_prefix") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer remove_prefix: %s", pvalue.value_to_string().c_str());
+      chaff_ = pvalue.as_string_array();
+    } else if (pname.compare("startswith") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer startswith: %s", pvalue.value_to_string().c_str());
+      startswith_ = pvalue.as_string_array();
+    } else if (pname.compare("contains") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer contains: %s", pvalue.value_to_string().c_str());
+      contains_ = pvalue.as_string_array();
+    } else if (pname.compare("expected") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer expected: %s", pvalue.value_to_string().c_str());
+      for (auto exp : pvalue.as_string_array()) {
+        auto item = std::make_shared<StatusItem>(exp);
+        this->addItem(exp, item);
       }
+    } else if (pname.compare("regex") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer regex: %s", pvalue.value_to_string().c_str());
+      for (auto regex : pvalue.as_string_array()) {
+        try {
+          boost::regex re(regex);
+          regex_.push_back(re);
+        } catch (boost::regex_error & e) {
+          RCLCPP_ERROR(rclcpp::get_logger("generic_analyzer"),
+            "Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
+            regex.c_str(), e.what());
+        }
+      }
+    } else if (pname.compare("timeout") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer timeout: %s", pvalue.value_to_string().c_str());
+      timeout = pvalue.as_double();
+    } else if (pname.compare("num_items") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer num_items: %s", pvalue.value_to_string().c_str());
+      num_items_expected = pvalue.as_int();
+    } else if (pname.compare("discard_stale") == 0) {
+      RCLCPP_DEBUG(rclcpp::get_logger("generic_analyzer"), "GenericAnalyzer discard_stale: %s", pvalue.value_to_string().c_str());
+      discard_stale = pvalue.as_bool();
     }
   }
 
   if (startswith_.size() == 0 && name_.size() == 0 &&
     contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
   {
-    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
+    RCLCPP_ERROR(rclcpp::get_logger(
+        "generic_analyzer"),
       "GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
-      nice_name.c_str(), n.getNamespace().c_str());*/
+      base_path.c_str(), n->get_namespace());
     return false;
   }
-
+  
   // convert chaff_ to output name format. Fixes #17
   for (size_t i = 0; i < chaff_.size(); i++) {
     chaff_[i] = getOutputName(chaff_[i]);
   }
-
-  double timeout;
-  int num_items_expected;
-  bool discard_stale;
-  n.param("timeout", timeout, 5.0);   // Timeout for stale
-  n.param("num_items", num_items_expected, -1); // Number of items must match this
-  n.param("discard_stale", discard_stale, false);
-
+  
   string my_path;
   if (base_path == "/") {
     my_path = nice_name;
@@ -140,8 +152,7 @@ bool GenericAnalyzer::init(const string base_path, const rclcpp::Node & n)
     my_path = "/" + my_path;
   }
 
-  return GenericAnalyzerBase::init(my_path, nice_name,
-           timeout, num_items_expected, discard_stale);
+  return GenericAnalyzerBase::init(my_path, nice_name, timeout, num_items_expected, discard_stale);
 }
 
 GenericAnalyzer::~GenericAnalyzer() {}
