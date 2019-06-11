@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef OTHER_ANALYZER_H
-#define OTHER_ANALYZER_H
+#ifndef DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
 
 #include <string>
 
@@ -68,9 +68,13 @@ public:
    */
   explicit OtherAnalyzer(bool other_as_errors = false)
   : other_as_errors_(other_as_errors)
-  {}
+  {
+    RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "constructor");
+  }
 
-  ~OtherAnalyzer() {}
+  ~OtherAnalyzer() {
+    RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "destructor");
+    }
 
   /*
    *\brief Initialized with the base path only.
@@ -87,10 +91,11 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string base_path, const rclcpp::Node & n)
+  bool init(const std::string, const rclcpp::Node::SharedPtr)
   {
-    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), 
-      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");*/
+    RCLCPP_ERROR(rclcpp::get_logger(
+        "generic_analyzer_base"),
+      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;
   }
 
@@ -99,7 +104,7 @@ public:
    *
    *\return True, since match() will never by called by Aggregator
    */
-  bool match(std::string name) {return true;}
+  bool match(std::string) {return true;}
 
   /*
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
@@ -137,4 +142,4 @@ private:
 }
 
 
-#endif // OTHER_ANALYZER_H
+#endif // DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP

@@ -36,23 +36,22 @@
  *\author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_AGGREGATOR_HPP
-#define DIAGNOSTIC_AGGREGATOR_AGGREGATOR_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
+#define DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
 
 #include <string>
 #include <map>
 #include <vector>
 #include <set>
 #include <boost/thread/mutex.hpp>
-#include <bondcpp/bond.h>
+#include <bondcpp/bond.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <diagnostic_msgs/msg/diagnostic_array.h>
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <diagnostic_msgs/msg/key_value.h>
-#include <diagnostic_msgs/msg/add_diagnostics.h>
+#include <diagnostic_msgs/msg/diagnostic_array.hpp>
+#include <diagnostic_msgs/msg/diagnostic_status.hpp>
+#include <diagnostic_msgs/msg/key_value.hpp>
+#include <diagnostic_msgs/srv/add_diagnostics.hpp>
 
-#include "XmlRpcValue.h"
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/analyzer_group.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
@@ -122,19 +121,21 @@ public:
   /*!
    *\brief True if the NodeHandle reports OK
    */
-  bool ok() const {return n_.ok();}
+  bool ok() const {return rclcpp::ok();}
 
   /*!
    *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
    */
   double getPubRate() const {return pub_rate_;}
 
+  rclcpp::Node::SharedPtr get_node();
+
 private:
-  rclcpp::Node n_;
-  ros::ServiceServer add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
-  ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
-  ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
-  ros::Publisher toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
+  rclcpp::Node::SharedPtr n_;
+  rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
+  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_; /**< DiagnosticArray, /diagnostics */
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
   boost::mutex mutex_;
   double pub_rate_;
   rclcpp::Clock::SharedPtr clock_;
@@ -142,7 +143,7 @@ private:
   /*!
    *\brief Callback for incoming "/diagnostics"
    */
-  void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::ConstPtr & diag_msg);
+  void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr);
 
   /*!
    *\brief Service request callback for addition of diagnostics.
@@ -151,8 +152,9 @@ private:
    * the formed bond in bonds_
    */
   bool addDiagnostics(
-    diagnostic_msgs::msg::AddDiagnostics::Request & req,
-    diagnostic_msgs::msg::AddDiagnostics::Response & res);
+    const std::shared_ptr<rmw_request_id_t>,
+    const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request>,
+    std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response>);
 
   AnalyzerGroup * analyzer_group_;
 
@@ -170,7 +172,7 @@ private:
    */
   void bondBroken(
     std::string bond_id,
-    std::shared_ptr<Analyzer> analyzer);
+    std::shared_ptr<Analyzer>);
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.
@@ -180,7 +182,7 @@ private:
    *!\param group Shared pointer to the analyzer group that is to be added,
    *  which was created in the addDiagnostics function
    */
-  void bondFormed(std::shared_ptr<Analyzer> group);
+  void bondFormed(std::shared_ptr<Analyzer>);
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
@@ -189,7 +191,7 @@ private:
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
    */
-  void checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::ConstPtr & diag_msg);
+  void checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr);
 
 };
 
@@ -206,4 +208,4 @@ struct BondIDMatch
 
 }
 
-#endif // DIAGNOSTIC_AGGREGATOR_AGGREGATOR_HPP
+#endif // DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP

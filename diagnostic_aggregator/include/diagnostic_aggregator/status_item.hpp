@@ -36,8 +36,8 @@
  *\author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP
-#define DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP
+#define DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP
 
 #include <map>
 #include <string>
@@ -96,9 +96,10 @@ inline DiagnosticLevel valToLevel(const int val)
     return Level_Stale;
   }
 
-  /* todo(anordman): logging /* todo(anordman): logging RCLCPP_ERROR(
+  RCLCPP_ERROR(rclcpp::get_logger(
+      "generic_analyzer_base"),
     "Attempting to convert %d into DiagnosticLevel. Values are: {0: OK, 1: Warning, 2: Error, 3: Stale}",
-    val); */
+    val);
   return Level_Error;
 }
 
@@ -120,9 +121,10 @@ inline std::string valToMsg(const int val)
     return "Stale";
   }
 
-  /* todo(anordman): logging RCLCPP_ERROR(
+  RCLCPP_ERROR(rclcpp::get_logger(
+      "generic_analyzer_base"),
     "Attempting to convert diagnostic level %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}",
-    val); */
+    val);
   return "Error";
 }
 
@@ -282,4 +284,4 @@ private:
 
 }
 
-#endif //DIAGNOSTIC_AGGREGATOR_STATUS_ITEM_HPP
+#endif //DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP

@@ -62,7 +62,7 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
   
   std::map<std::string, rclcpp::Parameter> parameters;
   if (!n->get_parameters(path, parameters)) {
-    RCLCPP_ERROR(
+    RCLCPP_WARN(
       rclcpp::get_logger("AnalyzerGroup"),
       "Couldn't retrieve parameters for analyzer group '%s', namespace '%s'.",
       path.c_str(), n->get_namespace());
@@ -83,12 +83,12 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
       // New analyzer, first create the previous one
       if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
        
-        RCLCPP_WARN(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s", an_type.c_str(), ns.c_str(), an_path.c_str()); 
+        RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s", an_type.c_str(), ns.c_str(), an_path.c_str()); 
         bool have_class = false;
         
         try {
           if (!analyzer_loader_.isClassAvailable(an_type)) {
-            RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
+            RCLCPP_WARN(get_logger("AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
               an_type.c_str());
           }
           

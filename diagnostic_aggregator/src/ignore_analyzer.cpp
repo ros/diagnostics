@@ -43,12 +43,11 @@ using namespace std;
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
   diagnostic_aggregator::Analyzer)
 
-
 IgnoreAnalyzer::IgnoreAnalyzer() {}
 
 IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-bool IgnoreAnalyzer::init(const std::string base_name, const rclcpp::Node & n)
+bool IgnoreAnalyzer::init(const std::string, const rclcpp::Node::SharedPtr)
 {
   return true;
 }

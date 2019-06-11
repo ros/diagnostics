@@ -39,7 +39,10 @@
 using namespace diagnostic_aggregator;
 using namespace std;
 
+using rclcpp::get_logger;
+
 StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
+: clock_(new rclcpp::Clock())
 {
   level_ = valToLevel(status->level);
   name_ = status->name;
@@ -53,7 +56,9 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
 }
 
 StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
+: clock_(new rclcpp::Clock())
 {
+  RCLCPP_DEBUG(rclcpp::get_logger("StatusItem"), "StatusItem constructor from string");
   name_ = item_name;
   message_ = message;
   level_ = level;
@@ -62,6 +67,7 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
   output_name_ = getOutputName(name_);
 
   update_time_ = clock_->now();
+  RCLCPP_DEBUG(rclcpp::get_logger("StatusItem"), "StatusItem constructor from string");
 }
 
 StatusItem::~StatusItem() {}
@@ -69,15 +75,17 @@ StatusItem::~StatusItem() {}
 bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   if (name_ != status->name) {
-    /* @todo(anordman):logging RCLCPP_ERROR(get_logger(), "Incorrect name when updating StatusItem. Expected %s, got %s",
-      name_.c_str(), status->name.c_str());*/
+    RCLCPP_ERROR(get_logger(
+        "status_item"), "Incorrect name when updating StatusItem. Expected %s, got %s",
+      name_.c_str(), status->name.c_str());
     return false;
   }
 
   double update_interval = (clock_->now() - update_time_).seconds();
   if (update_interval < 0) {
-    /* @todo(anordman):logging RCLCPP_WARN(get_logger(), "StatusItem is being updated with older data. Negative update time: %f",
-      update_interval); */
+    RCLCPP_WARN(get_logger(
+        "status_item"), "StatusItem is being updated with older data. Negative update time: %f",
+      update_interval);
   }
 
   level_ = valToLevel(status->level);

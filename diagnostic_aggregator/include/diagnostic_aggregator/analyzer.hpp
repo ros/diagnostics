@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR__ANALYZER_HPP
 
 #include <map>
 #include <vector>
@@ -91,7 +91,8 @@ public:
   /*!
    *\brief Default constructor, called by pluginlib.
    */
-  Analyzer() {}
+  Analyzer()
+  : clock_(new rclcpp::Clock()) {}
 
   virtual ~Analyzer() {}
 
@@ -104,7 +105,7 @@ public:
    *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(const std::string base_path, const rclcpp::Node & n) = 0;
+  virtual bool init(const std::string, const rclcpp::Node::SharedPtr) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
@@ -112,7 +113,7 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
-  virtual bool match(const std::string name) = 0;
+  virtual bool match(const std::string) = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
@@ -121,7 +122,7 @@ public:
    * Analyzers should only return "true" if they will report the value of this
    * item. If it is only looking at an item, it should return false.
    */
-  virtual bool analyze(const std::shared_ptr<StatusItem> item) = 0;
+  virtual bool analyze(const std::shared_ptr<StatusItem>) = 0;
 
   /*!
    *\brief Analysis function, output processed data.
@@ -149,4 +150,4 @@ public:
 
 }
 
-#endif //DIAGNOSTIC_AGGREGATOR_ANALYZER_HPP
+#endif //DIAGNOSTIC_AGGREGATOR__ANALYZER_HPP

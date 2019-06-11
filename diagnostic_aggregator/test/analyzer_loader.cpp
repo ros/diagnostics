@@ -36,30 +36,26 @@
 
 /**< \author Loads analyzer params, verifies that they are valid */
 
-//#include <diagnostic_aggregator/aggregator.h>
-#include <diagnostic_aggregator/analyzer_group.h>
-#include <ros/ros.h>
+#include <diagnostic_aggregator/analyzer_group.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 #include <gtest/gtest.h>
-
-//using namespace std;
-//using namespace diagnostic_aggregator;
 
 // Uses AnalyzerGroup to load analyzers
 TEST(AnalyzerLoader, analyzerLoading)
 {
-  ros::NodeHandle nh = ros::NodeHandle("~");
+  auto nh = std::make_shared<rclcpp::Node>("~");
 
   diagnostic_aggregator::AnalyzerGroup analyzer_group;
   std::string path = "base_path";
-  // = new diagnostic_aggregator::AnalyzerGroup();
+
   EXPECT_TRUE(analyzer_group.init(path, nh));
 }
 
-int main(int argc, char **argv)
+int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "analyzer_loader");
-  
+  rclcpp::init(argc, argv);
+
   return RUN_ALL_TESTS();
 }

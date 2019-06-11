@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR_IGNORE_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR_IGNORE_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
+#define DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
 
 #include <vector>
 #include <string>
@@ -46,7 +46,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 
-#include "diagnostic_aggregator/generic_analyzer.h"
+#include "diagnostic_aggregator/generic_analyzer.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -77,11 +77,11 @@ public:
 
   virtual ~IgnoreAnalyzer();
 
-  bool init(const std::string base_name, const rclcpp::Node & n);
+  bool init(const std::string, const rclcpp::Node::SharedPtr);
 
-  bool match(const std::string name) {return false;}
+  bool match(const std::string) {return false;}
 
-  bool analyze(std::shared_ptr<StatusItem> item) {return false;}
+  bool analyze(std::shared_ptr<StatusItem>) {return false;}
 
   /*
    *\brief Always reports an empty vector
@@ -93,4 +93,4 @@ public:
 };
 
 }
-#endif // DIAGNOSTIC_AGGREGATOR_IGNORE_ANALYZER_HPP
+#endif // DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
