@@ -51,8 +51,7 @@ int main(int argc, char ** argv)
 
     rclcpp::executors::SingleThreadedExecutor exec;
     rclcpp::Rate pub_rate(agg.getPubRate());
-    while(rclcpp::ok())
-    {
+    while (rclcpp::ok()) {
       RCLCPP_DEBUG(rclcpp::get_logger("aggregator_node"), "loop");
       exec.spin_node_some(agg.get_node());
       agg.publishData();

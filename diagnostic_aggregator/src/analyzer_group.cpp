@@ -54,19 +54,19 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
 {
   RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "init()");
   bool init_ok = true;
-  
+
   std::string path = base_path;
   if (!base_path.empty()) {
     path += ".analyzers";
-  }  
-  
+  }
+
   std::map<std::string, rclcpp::Parameter> parameters;
   if (!n->get_parameters(path, parameters)) {
     RCLCPP_WARN(
       rclcpp::get_logger("AnalyzerGroup"),
       "Couldn't retrieve parameters for analyzer group '%s', namespace '%s'.",
       path.c_str(), n->get_namespace());
-      return false;
+    return false;
   }
   RCLCPP_DEBUG(
     rclcpp::get_logger("AnalyzerGroup"),
@@ -76,25 +76,31 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
   std::string ns, an_type, an_path;
   std::shared_ptr<Analyzer> analyzer;
   for (auto & param : parameters) {
-    RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer parameter %s:%s:%s", param.first.c_str(), param.second.get_type_name().c_str(), param.second.value_to_string().c_str());
-    
+    RCLCPP_DEBUG(rclcpp::get_logger(
+        "AnalyzerGroup"), "Analyzer parameter %s:%s:%s",
+      param.first.c_str(), param.second.get_type_name().c_str(),
+      param.second.value_to_string().c_str());
+
     std::string tmpname = param.first.substr(0, param.first.find("."));
     if (tmpname.compare(ns) != 0) {
       // New analyzer, first create the previous one
       if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
-       
-        RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s", an_type.c_str(), ns.c_str(), an_path.c_str()); 
+
+        RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s",
+          an_type.c_str(), ns.c_str(), an_path.c_str());
         bool have_class = false;
-        
+
         try {
           if (!analyzer_loader_.isClassAvailable(an_type)) {
-            RCLCPP_WARN(get_logger("AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
+            RCLCPP_WARN(get_logger(
+                "AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
               an_type.c_str());
           }
-          
-          analyzer = analyzer_loader_.createSharedInstance(an_type);         
+
+          analyzer = analyzer_loader_.createSharedInstance(an_type);
         } catch (pluginlib::LibraryLoadException & e) {
-          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
+          RCLCPP_ERROR(get_logger(
+              "AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
             ns.c_str(), an_type.c_str(), e.what());
           std::shared_ptr<StatusItem> item(new StatusItem(ns,
             "Pluginlib exception loading analyzer"));
@@ -102,9 +108,10 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
           init_ok = false;
           continue;
         }
-        
+
         if (!analyzer) {
-          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Pluginlib returned a null analyzer for %s, namespace %s.",
+          RCLCPP_ERROR(get_logger(
+              "AnalyzerGroup"), "Pluginlib returned a null analyzer for %s, namespace %s.",
             an_type.c_str(), n->get_namespace());
           std::shared_ptr<StatusItem> item(new StatusItem(ns,
             "Pluginlib return NULL Analyzer for " +
@@ -113,16 +120,17 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
           init_ok = false;
           continue;
         }
-        
+
         if (path.empty()) {
           an_path = ns;
         } else {
           an_path = path + "." + ns;
         }
         RCLCPP_DEBUG(get_logger("AnalyzerGroup"), " an_path: %s",
-            an_path.c_str());
+          an_path.c_str());
         if (!analyzer->init(an_path, n)) {
-          RCLCPP_ERROR(get_logger("AnalyzerGroup"), "Unable to initialize analyzer NS: %s, type: %s",
+          RCLCPP_ERROR(get_logger(
+              "AnalyzerGroup"), "Unable to initialize analyzer NS: %s, type: %s",
             n->get_namespace(), an_type.c_str());
           std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
           aux_items_.push_back(item);
@@ -130,12 +138,12 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
           continue;
         }
 
-        this->addAnalyzer(analyzer); 
+        this->addAnalyzer(analyzer);
       }
-      
+
       ns = tmpname; an_type = ""; an_path = "";
       RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "New analyzer: %s", ns.c_str());
-    }    
+    }
     std::stringstream p_type;
     p_type << ns << ".type";
     if (param.first.compare(p_type.str()) == 0) {
@@ -152,7 +160,8 @@ bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n
 
   if (analyzers_.size() == 0) {
     init_ok = false;
-    RCLCPP_ERROR(get_logger("AnalyzerGroup"), "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
+    RCLCPP_ERROR(get_logger(
+        "AnalyzerGroup"), "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
   }
 
   return init_ok;

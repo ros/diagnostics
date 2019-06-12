@@ -72,9 +72,10 @@ public:
     RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "constructor");
   }
 
-  ~OtherAnalyzer() {
+  ~OtherAnalyzer()
+  {
     RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "destructor");
-    }
+  }
 
   /*
    *\brief Initialized with the base path only.

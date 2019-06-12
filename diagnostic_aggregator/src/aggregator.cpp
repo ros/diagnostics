@@ -47,7 +47,8 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 
 Aggregator::Aggregator()
-: n_(std::make_shared<rclcpp::Node>("analyzers", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
+: n_(std::make_shared<rclcpp::Node>("analyzers",
+    rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
   pub_rate_(1.0),
   analyzer_group_(NULL),
   other_analyzer_(NULL),
@@ -272,7 +273,8 @@ void Aggregator::publishData()
 }
 
 rclcpp::Node::SharedPtr
-Aggregator::get_node() {
+Aggregator::get_node()
+{
   RCLCPP_DEBUG(get_logger("Aggregator"), "get_node()");
   return this->n_;
 }
