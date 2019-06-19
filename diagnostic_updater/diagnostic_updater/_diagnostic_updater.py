@@ -43,8 +43,6 @@ import threading
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 from rclpy.clock import Clock
-from rclpy.parameter import Parameter
-from rclpy.parameter_service import ParameterService
 
 from ._diagnostic_status_wrapper import DiagnosticStatusWrapper
 
@@ -235,18 +233,17 @@ class Updater(DiagnosticTaskVector):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
-        self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics')
+        self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics', 1)
         self.clock = Clock()
         now = self.clock.now()
 
         self.last_time = now
 
         self.last_time_period_checked = self.last_time
-        self.period = 1
-        self.node.set_parameters_atomically(
-            [Parameter('diagnostics_update', Parameter.Type.INTEGER, 1)]
-        )
-        self.parameter_server = ParameterService(self.node)
+        # unable to separate namespace with '.': https://github.com/ros2/rclpy/issues/373
+        # workaround so far is to specify with '__'.
+        self.period_parameter = node.get_name() + '__diagnostics_update'
+        self.period = self.node.declare_parameter(self.period_parameter, 1.0).value
 
         self.verbose = False
         self.hwid = ''
@@ -332,7 +329,7 @@ class Updater(DiagnosticTaskVector):
         # parameter server using a standard timeout mechanism (4Hz)
         now = self.clock.now()
         if now >= self.last_time_period_checked:
-            self.period = self.node.get_parameter('diagnostics_update').value
+            self.period = self.node.get_parameter(self.period_parameter).value
             self.last_time_period_checked = now
 
     def publish(self, msg):

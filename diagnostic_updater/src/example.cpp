@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
   // should be published.
-  diagnostic_updater::Updater updater;
+  diagnostic_updater::Updater updater(node);
 
   // The diagnostic_updater::Updater class will fill out the hardware_id
   // field of the diagnostic_msgs::DiagnosticStatus message. You need to

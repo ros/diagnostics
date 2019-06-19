@@ -370,11 +370,34 @@ public:
    * \param h Node handle from which to get the diagnostic_period
    * parameter.
    */
-  explicit Updater(rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("diagnostics_updater"))
-  : node_(node), node_name_(node_->get_name())
+  template<class NodeT>
+  explicit Updater(std::shared_ptr<NodeT> node)
+  : Updater(
+      node->get_node_base_interface(),
+      node->get_node_topics_interface(),
+      node->get_node_logging_interface(),
+      node->get_node_parameters_interface())
+  {}
+
+  Updater(
+    std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface> base_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeLoggingInterface> logging_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface)
+  : verbose_(false),
+    publisher_(
+      rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
+        topics_interface, "/diagnostics", 1)),
+    logger_(logging_interface->get_logger()),
+    node_name_(base_interface->get_name()),
+    warn_nohwid_done_(false)
   {
-    // @todo: how to deal with default node?
-    setup();
+    double period = parameters_interface->declare_parameter(
+      node_name_ + ".diagnostics_updater_period",
+      rclcpp::ParameterValue(1.0),
+      rcl_interfaces::msg::ParameterDescriptor()).get<double>();
+    period_ = static_cast<rcl_duration_value_t>(period * 1e9);
+    next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
   }
 
   /**
@@ -434,8 +457,7 @@ public:
 
         if (verbose_ && status.level) {
           RCLCPP_WARN(
-            node_->get_logger(),
-            "Non-zero diagnostic status. Name: '%s', status %i: '%s'",
+            logger_, "Non-zero diagnostic status. Name: '%s', status %i: '%s'",
             status.name.c_str(), status.level, status.message.c_str());
         }
       }
@@ -446,7 +468,7 @@ public:
         error_msg += " For devices that do not have a HW_ID, set this value to 'none'.";
         error_msg += " This warning only occurs once all diagnostics are OK.";
         error_msg += " It is okay to wait until the device is open before calling setHardwareID.";
-        RCLCPP_WARN(node_->get_logger(), error_msg);
+        RCLCPP_WARN(logger_, error_msg);
         warn_nohwid_done_ = true;
       }
 
@@ -498,8 +520,7 @@ public:
     char buff[kBufferSize];  // @todo This could be done more elegantly.
     va_start(va, format);
     if (vsnprintf(buff, kBufferSize, format, va) >= kBufferSize) {
-      RCLCPP_DEBUG(
-        node_->get_logger(), "Really long string in diagnostic_updater::setHardwareIDf.");
+      RCLCPP_DEBUG(logger_, "Really long string in diagnostic_updater::setHardwareIDf.");
     }
     hwid_ = std::string(buff);
     va_end(va);
@@ -515,11 +536,6 @@ private:
   void update_diagnostic_period()
   {
     rcl_duration_value_t old_period = period_;
-#if 0  // @todo: nodes don't automatically have a parameter service yet...disable
-       // for now
-    rclcpp::parameter_client::SyncParametersClient client(private_node_handle_);
-    period_ = client.get_parameter("diagnostic_period", period_);
-#endif
     next_time_ = next_time_ +
       rclcpp::Duration(period_ - old_period);             // Update next_time_
   }
@@ -543,30 +559,12 @@ private:
       status_vec.begin();
       iter != status_vec.end(); iter++)
     {
-      iter->name = node_name_.substr(1) + std::string(": ") + iter->name;
+      iter->name = node_name_ + std::string(": ") + iter->name;
     }
     diagnostic_msgs::msg::DiagnosticArray msg;
     msg.status = status_vec;
     msg.header.stamp = rclcpp::Clock().now();
     publisher_->publish(msg);
-  }
-
-  /**
-   * Publishes on /diagnostics and reads the diagnostic_period parameter.
-   */
-  void setup()
-  {
-    publisher_ =
-      node_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
-      "/diagnostics", 1);
-
-    period_ = static_cast<rcl_duration_value_t>(1e9);  // 1.0s
-
-    next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
-    update_diagnostic_period();
-
-    verbose_ = false;
-    warn_nohwid_done_ = false;
   }
 
   /**
@@ -581,8 +579,8 @@ private:
     publish(stat);
   }
 
-  rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
+  rclcpp::Logger logger_;
 
   rclcpp::Time next_time_;
 

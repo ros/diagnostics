@@ -35,11 +35,15 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <memory>
 #include <thread>
 
 #include "diagnostic_updater/DiagnosticStatusWrapper.hpp"
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "diagnostic_updater/update_functions.hpp"
+
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 using namespace std::chrono_literals;
 
@@ -57,28 +61,42 @@ public:
   }
 };
 
-TEST(DiagnosticUpdater, testDiagnosticUpdater) {
-  class classFunction : public diagnostic_updater::DiagnosticTask
-  {
+class classFunction : public diagnostic_updater::DiagnosticTask
+{
 public:
-    classFunction()
-    : DiagnosticTask("classFunction") {}
+  classFunction()
+  : DiagnosticTask("classFunction") {}
 
-    void run(diagnostic_updater::DiagnosticStatusWrapper & s)
-    {
-      s.summary(0, "Test is running");
-      s.addf("Value", "%f", 5);
-      s.add("String", "Toto");
-      s.add("Floating", 5.55);
-      s.add("Integer", 5);
-      s.addf("Formatted %s %i", "Hello", 5);
-      s.add("Bool", true);
-    }
-  };
+  void run(diagnostic_updater::DiagnosticStatusWrapper & s)
+  {
+    s.summary(0, "Test is running");
+    s.addf("Value", "%f", 5);
+    s.add("String", "Toto");
+    s.add("Floating", 5.55);
+    s.add("Integer", 5);
+    s.addf("Formatted %s %i", "Hello", 5);
+    s.add("Bool", true);
+  }
+};
 
+TEST(DiagnosticUpdater, testDiagnosticUpdater) {
   TestClass c;
 
-  diagnostic_updater::Updater updater;
+  auto node = std::make_shared<rclcpp::Node>("test_diagnostics_updater");
+  diagnostic_updater::Updater updater(node);
+
+  updater.add("wrapped", &c, &TestClass::wrapped);
+
+  classFunction cf;
+  updater.add(cf);
+}
+
+TEST(DiagnosticUpdater, testLifecycleDiagnosticUpdater) {
+  TestClass c;
+
+  auto node =
+    std::make_shared<rclcpp_lifecycle::LifecycleNode>("test_lifeycycle_diagnostics_updater");
+  diagnostic_updater::Updater updater(node);
 
   updater.add("wrapped", &c, &TestClass::wrapped);
 

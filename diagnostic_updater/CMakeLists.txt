@@ -36,6 +36,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(rclcpp_lifecycle REQUIRED)
   ament_add_gtest(diagnostic_updater_test test/diagnostic_updater_test.cpp)
   target_include_directories(diagnostic_updater_test
     PUBLIC
@@ -46,6 +47,7 @@ if(BUILD_TESTING)
     diagnostic_updater_test
     "diagnostic_msgs"
     "rclcpp"
+    "rclcpp_lifecycle"
     "std_msgs"
   )
 
