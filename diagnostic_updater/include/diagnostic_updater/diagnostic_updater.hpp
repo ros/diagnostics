@@ -394,8 +394,7 @@ public:
   {
     double period = parameters_interface->declare_parameter(
       node_name_ + ".diagnostics_updater_period",
-      rclcpp::ParameterValue(1.0),
-      rcl_interfaces::msg::ParameterDescriptor()).get<double>();
+      rclcpp::ParameterValue(1.0)).get<double>();
     period_ = static_cast<rcl_duration_value_t>(period * 1e9);
     next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
   }
