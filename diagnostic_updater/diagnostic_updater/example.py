@@ -228,14 +228,14 @@ def main():
 
     # If we know that the state of the node just changed, we can force an
     # immediate update.
-    updater.force_update()
+    updater.update()
 
     # We can remove a task by refering to its name.
     if not updater.removeByName('Bound check'):
         node.get_logger().error('The Bound check task was not found when trying to remove it.')
 
+    msg = std_msgs.msg.Bool()
     while rclpy.ok():
-        msg = std_msgs.msg.Bool()
         sleep(0.1)
 
         # Calls to pub1 have to be accompanied by calls to pub1_freq to keep
@@ -244,9 +244,6 @@ def main():
         pub1.publish(msg)
         pub1_freq.tick()
 
-        # We can call updater.update whenever is convenient. It will take care
-        # of rate-limiting the updates.
-        updater.update()
         rclpy.spin_once(node, timeout_sec=1)
 
 

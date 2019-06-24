@@ -37,6 +37,8 @@
 
 #include <std_msgs/msg/bool.hpp>
 
+using namespace std::chrono_literals;
+
 double time_to_launch;
 
 /*
@@ -223,7 +225,7 @@ int main(int argc, char ** argv)
 
   // If we know that the state of the node just changed, we can force an
   // immediate update.
-  updater.force_update();
+  updater.update();
 
   // We can remove a task by refering to its name.
   if (!updater.removeByName("Bound check")) {
@@ -231,9 +233,9 @@ int main(int argc, char ** argv)
       node->get_logger(), "The Bound check task was not found when trying to remove it.");
   }
 
+  rclcpp::Rate r(500ms);
   while (rclcpp::ok()) {
     std_msgs::msg::Bool msg;
-    rclcpp::Rate(10).sleep();
 
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.
@@ -241,11 +243,11 @@ int main(int argc, char ** argv)
     pub1->publish(msg);
     pub1_freq.tick();
 
-    // We can call updater.update whenever is convenient. It will take care
-    // of rate-limiting the updates.
-    updater.update();
     rclcpp::spin_some(node);
+    r.sleep();
   }
+
+  rclcpp::shutdown();
 
   return 0;
 }

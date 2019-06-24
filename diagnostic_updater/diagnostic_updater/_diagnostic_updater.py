@@ -229,19 +229,15 @@ class Updater(DiagnosticTaskVector):
     reason.
     """
 
-    def __init__(self, node):
+    def __init__(self, node, period=1.0):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
         self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics', 1)
         self.clock = Clock()
-        now = self.clock.now()
-
-        self.last_time = now
-
-        self.last_time_period_checked = self.last_time
         self.period_parameter = 'diagnostic_updater.period'
-        self.period = self.node.declare_parameter(self.period_parameter, 1.0).value
+        self.__period = self.node.declare_parameter(self.period_parameter, period).value
+        self.timer = self.node.create_timer(self.__period, self.update)
 
         self.verbose = False
         self.hwid = ''
@@ -249,20 +245,6 @@ class Updater(DiagnosticTaskVector):
 
     def update(self):
         """Causes the diagnostics to update if the inter-update interval has been exceeded."""
-        self._check_diagnostic_period()
-        now = self.clock.now()
-        if now >= self.last_time:
-            self.force_update()
-
-    def force_update(self):
-        """
-        Force the diagnostics to update.
-
-        Useful if the node has undergone a drastic state change that should be
-        published immediately.
-        """
-        self.last_time = self.clock.now()
-
         warn_nohwid = len(self.hwid) == 0
 
         status_vec = []
@@ -297,6 +279,16 @@ class Updater(DiagnosticTaskVector):
 
         self.publish(status_vec)
 
+    @property
+    def period(self):
+        return self.__period
+
+    @period.setter
+    def period(self, period):
+        self.__period = period
+        self.timer.reset()
+        self.timer = self.node.creat_timer(self.__period, self.udpate)
+
     def broadcast(self, lvl, msg):
         """
         Output a message on all the known DiagnosticStatus.
@@ -318,17 +310,18 @@ class Updater(DiagnosticTaskVector):
     def setHardwareID(self, hwid):
         self.hwid = hwid
 
-    def _check_diagnostic_period(self):
-        """Recheck the diagnostic_period on the parameter server."""
-        # This was getParamCached() call in the cpp code. i.e. it would throttle
-        # the actual call to the parameter server using a notification of change
-        # mechanism.
-        # This is not available in rospy. Hence I throttle the call to the
-        # parameter server using a standard timeout mechanism (4Hz)
-        now = self.clock.now()
-        if now >= self.last_time_period_checked:
-            self.period = self.node.get_parameter(self.period_parameter).value
-            self.last_time_period_checked = now
+    # TODO(Karsten1987) Re-enable this for eloquent
+    # def _check_diagnostic_period(self):
+    #     """Recheck the diagnostic_period on the parameter server."""
+    #     # This was getParamCached() call in the cpp code. i.e. it would throttle
+    #     # the actual call to the parameter server using a notification of change
+    #     # mechanism.
+    #     # This is not available in rospy. Hence I throttle the call to the
+    #     # parameter server using a standard timeout mechanism (4Hz)
+    #     now = self.clock.now()
+    #     if now >= self.last_time_period_checked:
+    #         # self.period = self.node.get_parameter(self.period_parameter).value
+    #         self.last_time_period_checked = now
 
     def publish(self, msg):
         """Publish a single diagnostic status or a vector of diagnostic statuses."""
