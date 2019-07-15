@@ -96,7 +96,8 @@ inline DiagnosticLevel valToLevel(const int val)
     return Level_Stale;
   }
 
-  RCLCPP_ERROR(rclcpp::get_logger(
+  RCLCPP_ERROR(
+    rclcpp::get_logger(
       "generic_analyzer_base"),
     "Attempting to convert %d into DiagnosticLevel. Values are: {0: OK, 1: Warning, 2: Error, 3: Stale}",
     val);
@@ -121,7 +122,8 @@ inline std::string valToMsg(const int val)
     return "Stale";
   }
 
-  RCLCPP_ERROR(rclcpp::get_logger(
+  RCLCPP_ERROR(
+    rclcpp::get_logger(
       "generic_analyzer_base"),
     "Attempting to convert diagnostic level %d into string. Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"}",
     val);
@@ -180,7 +182,7 @@ public:
   /*!
    *\brief Constructed from const DiagnosticStatus*
    */
-  StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status);
+  explicit StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status);
 
   /*!
   *\brief Constructed from string of item name
@@ -282,6 +284,6 @@ private:
   std::vector<diagnostic_msgs::msg::KeyValue> values_;
 };
 
-}
+}  // namespace diagnostic_aggregator
 
-#endif //DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP

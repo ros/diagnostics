@@ -42,8 +42,8 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <sstream>
 #include <memory>
+#include <sstream>
 #include <boost/regex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -82,8 +82,9 @@ getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
     return true;
   }
 
-  RCLCPP_ERROR(rclcpp::get_logger(
-      "generic_analyzer"), "Parameter not a list or string, unable to return values. Parameter type: %s",
+  RCLCPP_ERROR(
+    rclcpp::get_logger("generic_analyzer"),
+    "Parameter not a list or string, unable to return values. Parameter type: %s",
     param.get_type_name().c_str());
   output.clear();
   return false;
@@ -209,7 +210,7 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of
    */
-  bool init(const std::string base_path, const rclcpp::Node::SharedPtr n);
+  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages
@@ -222,7 +223,7 @@ public:
    *\brief Returns true if item matches any of the given criteria
    *
    */
-  virtual bool match(const std::string name);
+  virtual bool match(const std::string & name);
 
 private:
   std::vector<std::string> chaff_; /**< Removed from the start of node names. */
@@ -231,8 +232,8 @@ private:
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
   std::vector<boost::regex> regex_; /**< Regular expressions to check against diagnostics names. */
-
 };
 
-}
-#endif //DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP

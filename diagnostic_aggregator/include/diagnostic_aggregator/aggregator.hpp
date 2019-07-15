@@ -43,6 +43,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <memory>
 #include <boost/thread/mutex.hpp>
 #include <bondcpp/bond.hpp>
 
@@ -132,10 +133,14 @@ public:
 
 private:
   rclcpp::Node::SharedPtr n_;
-  rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_; /**< AddDiagnostics, /diagnostics_agg/add_diagnostics */
-  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_; /**< DiagnosticArray, /diagnostics */
-  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
-  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
+  /// AddDiagnostics, /diagnostics_agg/add_diagnostics
+  rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
+  /// DiagnosticArray, /diagnostics
+  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
+  /// DiagnosticArray, /diagnostics_agg
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
+  /// DiagnosticStatus, /diagnostics_toplevel_state
+  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;
   boost::mutex mutex_;
   double pub_rate_;
   rclcpp::Clock::SharedPtr clock_;
@@ -160,7 +165,8 @@ private:
 
   OtherAnalyzer * other_analyzer_;
 
-  std::vector<std::shared_ptr<bond::Bond>> bonds_;  /**< \brief Contains all bonds for additional diagnostics. */
+  /// Contains all bonds for additional diagnostics.
+  std::vector<std::shared_ptr<bond::Bond>> bonds_;
 
   /*
    *!\brief called when a bond between the aggregator and a node is broken
@@ -186,13 +192,13 @@ private:
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
-  std::set<std::string> ros_warnings_;  /**< \brief Records all ROS warnings. No warnings are repeated. */
+  /// Records all ROS warnings. No warnings are repeated.
+  std::set<std::string> ros_warnings_;
 
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
    */
   void checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr);
-
 };
 
 /*
@@ -200,12 +206,12 @@ private:
  */
 struct BondIDMatch
 {
-  BondIDMatch(const std::string s)
+  explicit BondIDMatch(const std::string s)
   : s(s) {}
   bool operator()(const std::shared_ptr<bond::Bond> & b) {return s == b->getId();}
   const std::string s;
 };
 
-}
+}  // namespace diagnostic_aggregator
 
-#endif // DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP

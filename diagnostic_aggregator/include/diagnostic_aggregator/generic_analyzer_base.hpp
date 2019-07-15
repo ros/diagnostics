@@ -33,6 +33,7 @@
  *********************************************************************/
 
 /**!< \author Kevin Watts */
+/**!< \author Arne Nordmann */
 
 #ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
 #define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
@@ -42,6 +43,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <algorithm>
 #include <boost/regex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -73,12 +75,15 @@ public:
     discard_stale_(false), has_initialized_(false), has_warned_(false)
   {}
 
-  virtual ~GenericAnalyzerBase() {items_.clear();}
+  virtual ~GenericAnalyzerBase()
+  {
+    items_.clear();
+  }
 
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string, const rclcpp::Node::SharedPtr) = 0;
+  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr) = 0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
@@ -86,16 +91,16 @@ public:
    * Must be initialized in order to prepend the path to all outgoing status messages.
    */
   bool init(
-    const std::string path, const std::string nice_name,
+    const std::string & path, const std::string & breadcrumb,
     double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
-    nice_name_ = nice_name;
-    path_ = path;
+    path_ = path + "/" + nice_name_;
     discard_stale_ = discard_stale;
+    breadcrumb_ = breadcrumb;
 
-    if (discard_stale_ and timeout <= 0) {
+    if (discard_stale_ && timeout <= 0) {
       RCLCPP_WARN(rclcpp::get_logger(
           "generic_analyzer_base"),
         "Cannot discard stale items if no timeout specified. No items will be discarded");
@@ -104,6 +109,9 @@ public:
 
     has_initialized_ = true;
 
+    RCLCPP_INFO(rclcpp::get_logger(
+        "GenericAnalyzerBase"), "Initialized analyzer '%s' with path '%s' and breadcrumb '%s'.",
+      nice_name_.c_str(), path_.c_str(), breadcrumb_.c_str());
     return true;
   }
 
@@ -112,9 +120,15 @@ public:
    */
   virtual bool analyze(const std::shared_ptr<StatusItem> item)
   {
+    RCLCPP_DEBUG(
+      rclcpp::get_logger("GenericAnalyzerBase"),
+      "Analyzer '%s' analyze, item %s: %s",
+      nice_name_.c_str(), item->getName().c_str(), item->getMessage().c_str());
+
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      RCLCPP_WARN(rclcpp::get_logger(
+      RCLCPP_WARN(
+        rclcpp::get_logger(
           "generic_analyzer_base"),
         "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
@@ -135,9 +149,14 @@ public:
    */
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report()
   {
+    RCLCPP_DEBUG(
+      rclcpp::get_logger("GenericAnalyzerBase"),
+      "Analyzer '%s' report()", nice_name_.c_str());
+
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
-      RCLCPP_ERROR(rclcpp::get_logger(
+      RCLCPP_ERROR(
+        rclcpp::get_logger(
           "generic_analyzer_base"),
         "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
     }
@@ -168,7 +187,7 @@ public:
       }
 
       // Erase item if its stale and we're discarding items
-      if (discard_stale_ and stale) {
+      if (discard_stale_ && stale) {
         items_.erase(it++);
         continue;
       }
@@ -183,8 +202,6 @@ public:
       header_status->values.push_back(kv);
 
       all_stale = all_stale && ((level == 3) || stale);
-
-      //std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
 
       processed.push_back(item->toStatusMsg(path_, stale));
 
@@ -208,9 +225,11 @@ public:
     if (num_items_expected_ == 0 && items_.size() == 0) {
       header_status->level = 0;
       header_status->message = "OK";
-    } else if (num_items_expected_ > 0 and int(items_.size()) != num_items_expected_) {
+    } else if (num_items_expected_ > 0 && \
+      static_cast<int8_t>(items_.size()) != num_items_expected_)
+    {
       int8_t lvl = 2;
-      header_status->level = std::max(lvl, int8_t(header_status->level));
+      header_status->level = std::max(lvl, static_cast<int8_t>(header_status->level));
 
       std::stringstream expec, item;
       expec << num_items_expected_;
@@ -229,7 +248,7 @@ public:
   /*!
    *\brief Match function isn't implemented by GenericAnalyzerBase
    */
-  virtual bool match(const std::string name) = 0;
+  virtual bool match(const std::string & name) = 0;
 
   /*!
    *\brief Returns full prefix (ex: "/Robot/Power System")
@@ -242,8 +261,12 @@ public:
   virtual std::string getName() const {return nice_name_;}
 
 protected:
+  /// Nice analyzer name
   std::string nice_name_;
+  /// Nice analyzer path (up to parent)
   std::string path_;
+  /// Dotted parameter path in yaml
+  std::string breadcrumb_;
 
   double timeout_;
   int num_items_expected_;
@@ -262,5 +285,6 @@ private:
   bool discard_stale_, has_initialized_, has_warned_;
 };
 
-}
-#endif //DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP

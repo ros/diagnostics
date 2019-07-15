@@ -42,6 +42,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
 #include <algorithm>
 
 #include <rclcpp/rclcpp.hpp>
@@ -51,7 +52,6 @@
 #include <pluginlib/class_loader.hpp>
 #include <pluginlib/class_list_macros.hpp>
 
-#include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
 
@@ -121,7 +121,7 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
-  virtual bool init(const std::string, const rclcpp::Node::SharedPtr);
+  virtual bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
@@ -136,7 +136,7 @@ public:
   /*!
    *\brief Match returns true if any sub-analyzers match an item
    */
-  virtual bool match(const std::string);
+  virtual bool match(const std::string &);
 
   /*!
    *\brief Clear match arrays. Used when analyzers are added or removed
@@ -158,7 +158,7 @@ public:
   virtual std::string getName() const {return nice_name_;}
 
 private:
-  std::string path_, nice_name_;
+  std::string path_, nice_name_, breadcrumb_;
 
   /*!
    *\brief Loads Analyzer plugins in "analyzers" namespace
@@ -176,9 +176,8 @@ private:
    *\brief The map of names to matchings is stored internally.
    */
   std::map<const std::string, std::vector<bool>> matched_;
-
 };
 
-}
+}  // namespace diagnostic_aggregator
 
-#endif //DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP

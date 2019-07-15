@@ -77,9 +77,9 @@ public:
 
   virtual ~IgnoreAnalyzer();
 
-  bool init(const std::string, const rclcpp::Node::SharedPtr);
+  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
 
-  bool match(const std::string) {return false;}
+  bool match(const std::string &) {return false;}
 
   bool analyze(std::shared_ptr<StatusItem>) {return false;}
 
@@ -92,5 +92,6 @@ public:
   std::string getName() const {return "";}
 };
 
-}
-#endif // DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP

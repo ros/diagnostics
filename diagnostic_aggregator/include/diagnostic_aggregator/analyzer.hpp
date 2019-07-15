@@ -41,6 +41,8 @@
 
 #include <map>
 #include <vector>
+#include <string>
+#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.h>
@@ -103,9 +105,13 @@ public:
    * namespace. The "base_path" is common to all analyzers, and needs to be
    * prepended to all DiagnosticStatus names.
    *\param base_path : Common to all analyzers, prepended to all processed names. Starts with "/".
+   *\param breadcrumb : Prefix for parameter getter.
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
-  virtual bool init(const std::string, const rclcpp::Node::SharedPtr) = 0;
+  virtual bool init(
+    const std::string &,
+    const std::string &,
+    const rclcpp::Node::SharedPtr) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
@@ -113,7 +119,7 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
-  virtual bool match(const std::string) = 0;
+  virtual bool match(const std::string &) = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
@@ -145,9 +151,8 @@ public:
   virtual std::string getName() const = 0;
 
   rclcpp::Clock::SharedPtr clock_;
-
 };
 
-}
+}  // namespace diagnostic_aggregator
 
-#endif //DIAGNOSTIC_AGGREGATOR__ANALYZER_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__ANALYZER_HPP

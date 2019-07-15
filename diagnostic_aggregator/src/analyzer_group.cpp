@@ -37,131 +37,159 @@
 
 #include "diagnostic_aggregator/analyzer_group.hpp"
 
-using namespace std;
-using namespace diagnostic_aggregator;
-
-using rclcpp::get_logger;
+#include <map>
+#include <string>
+#include <vector>
+#include <memory>
+#include <algorithm>
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup,
   diagnostic_aggregator::Analyzer)
+
+namespace diagnostic_aggregator
+{
+
+using std::max;
+using std::string;
+using std::vector;
+
+using rclcpp::get_logger;
 
 AnalyzerGroup::AnalyzerGroup()
 : path_(""), nice_name_(""),
   analyzer_loader_("diagnostic_aggregator", "diagnostic_aggregator::Analyzer")
 {}
 
-bool AnalyzerGroup::init(const string base_path, const rclcpp::Node::SharedPtr n)
+bool AnalyzerGroup::init(
+  const std::string & path,
+  const std::string & breadcrumb,
+  const rclcpp::Node::SharedPtr n)
 {
-  RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "init()");
+  RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "init(%s, %s)", path.c_str(), breadcrumb.c_str());
   bool init_ok = true;
-
-  std::string path = base_path;
-  if (!base_path.empty()) {
-    path += ".analyzers";
-  }
+  path_ = path;
+  breadcrumb_ = breadcrumb;
+  nice_name_ = path;
 
   std::map<std::string, rclcpp::Parameter> parameters;
-  if (!n->get_parameters(path, parameters)) {
+  if (!n->get_parameters(breadcrumb_, parameters)) {
     RCLCPP_WARN(
       rclcpp::get_logger("AnalyzerGroup"),
       "Couldn't retrieve parameters for analyzer group '%s', namespace '%s'.",
-      path.c_str(), n->get_namespace());
+      breadcrumb_.c_str(), n->get_namespace());
     return false;
   }
-  RCLCPP_DEBUG(
+  RCLCPP_INFO(
     rclcpp::get_logger("AnalyzerGroup"),
-    "Retrieved %d parameter(s) for analyzer group '%s.",
-    parameters.size(), path.c_str());
+    "Retrieved %d parameter(s) for analyzer group with prefix '%s'.",
+    parameters.size(), breadcrumb_.c_str());
 
-  std::string ns, an_type, an_path;
+  std::string ns, an_type, an_path, an_breadcrumb;
   std::shared_ptr<Analyzer> analyzer;
+  std::string p_type = breadcrumb_.empty() ? "type" : breadcrumb_ + ".type";
+  std::string p_path = breadcrumb_.empty() ? "path" : breadcrumb_ + ".path";
+  
   for (auto & param : parameters) {
-    RCLCPP_DEBUG(rclcpp::get_logger(
-        "AnalyzerGroup"), "Analyzer parameter %s:%s:%s",
-      param.first.c_str(), param.second.get_type_name().c_str(),
-      param.second.value_to_string().c_str());
+    RCLCPP_DEBUG(
+      rclcpp::get_logger("AnalyzerGroup"), "Group '%s' found param: %s : %s",
+      nice_name_.c_str(), param.first.c_str(), param.second.value_to_string().c_str());
+        
+    if (param.first.compare(p_path) == 0) {
+      nice_name_ = param.second.value_to_string();
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("AnalyzerGroup"), "Group now with name (path): %s",
+        nice_name_.c_str());
+    }
+    
+    // Find name of the entity that this parameter belongs to
+    int pos = 0;
+    if (param.first.substr(0, 10).compare("analyzers.") == 0) {
+      pos = 10;
+    }
+    ns = param.first.substr(0, param.first.find(".", pos));
+    //std::cout << "NS: "<<ns<<std::endl<<std::endl;
 
-    std::string tmpname = param.first.substr(0, param.first.find("."));
-    if (tmpname.compare(ns) != 0) {
-      // New analyzer, first create the previous one
-      if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
+    if (param.first.compare(ns + ".type") == 0) {
+      an_type = param.second.value_to_string();
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("AnalyzerGroup"), "Group '%s' found analyzer type: %s",
+        nice_name_.c_str(), an_type.c_str());
+    }
+    if (param.first.compare(ns + ".path") == 0) {
+      an_path = param.second.value_to_string();
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("AnalyzerGroup"), "Group '%s' found analyzer path: %s",
+        nice_name_.c_str(), an_path.c_str());
+    }
 
-        RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Initialize %s '%s' for %s",
-          an_type.c_str(), ns.c_str(), an_path.c_str());
-        bool have_class = false;
+    if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("AnalyzerGroup"),
+        "Group '%s', creating %s '%s' (breadcrumb: %s) ...",
+        nice_name_.c_str(),
+        an_type.c_str(), an_path.c_str(), ns.c_str());
 
-        try {
-          if (!analyzer_loader_.isClassAvailable(an_type)) {
-            RCLCPP_WARN(get_logger(
-                "AnalyzerGroup"), "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
-              an_type.c_str());
-          }
-
-          analyzer = analyzer_loader_.createSharedInstance(an_type);
-        } catch (pluginlib::LibraryLoadException & e) {
-          RCLCPP_ERROR(get_logger(
-              "AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
-            ns.c_str(), an_type.c_str(), e.what());
-          std::shared_ptr<StatusItem> item(new StatusItem(ns,
-            "Pluginlib exception loading analyzer"));
-          aux_items_.push_back(item);
-          init_ok = false;
-          continue;
+      try {
+        if (!analyzer_loader_.isClassAvailable(an_type)) {
+          RCLCPP_WARN(get_logger("AnalyzerGroup"),
+            "Unable to find Analyzer class %s. Check that Analyzer is fully declared.",
+            an_type.c_str());
         }
 
-        if (!analyzer) {
-          RCLCPP_ERROR(get_logger(
-              "AnalyzerGroup"), "Pluginlib returned a null analyzer for %s, namespace %s.",
-            an_type.c_str(), n->get_namespace());
-          std::shared_ptr<StatusItem> item(new StatusItem(ns,
-            "Pluginlib return NULL Analyzer for " +
-            an_type));
-          aux_items_.push_back(item);
-          init_ok = false;
-          continue;
-        }
-
-        if (path.empty()) {
-          an_path = ns;
-        } else {
-          an_path = path + "." + ns;
-        }
-        RCLCPP_DEBUG(get_logger("AnalyzerGroup"), " an_path: %s",
-          an_path.c_str());
-        if (!analyzer->init(an_path, n)) {
-          RCLCPP_ERROR(get_logger(
-              "AnalyzerGroup"), "Unable to initialize analyzer NS: %s, type: %s",
-            n->get_namespace(), an_type.c_str());
-          std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
-          aux_items_.push_back(item);
-          init_ok = false;
-          continue;
-        }
-
-        this->addAnalyzer(analyzer);
+        analyzer = analyzer_loader_.createSharedInstance(an_type);
+      } catch (pluginlib::LibraryLoadException & e) {
+        RCLCPP_ERROR(get_logger(
+            "AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
+          ns.c_str(), an_type.c_str(), e.what());
+        std::shared_ptr<StatusItem> item(new StatusItem(ns,
+          "Pluginlib exception loading analyzer"));
+        aux_items_.push_back(item);
+        init_ok = false;
+        continue;
       }
 
-      ns = tmpname; an_type = ""; an_path = "";
-      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "New analyzer: %s", ns.c_str());
-    }
-    std::stringstream p_type;
-    p_type << ns << ".type";
-    if (param.first.compare(p_type.str()) == 0) {
-      an_type = param.second.value_to_string();
-      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer type: %s", an_type.c_str());
-    }
-    std::stringstream p_path;
-    p_path << ns << ".path";
-    if (param.first.compare(p_path.str()) == 0) {
-      an_path = param.second.value_to_string();
-      RCLCPP_DEBUG(rclcpp::get_logger("AnalyzerGroup"), "Analyzer path: %s", an_path.c_str());
+      if (!analyzer) {
+        RCLCPP_ERROR(get_logger(
+            "AnalyzerGroup"), "Pluginlib returned a null analyzer for %s, namespace %s.",
+          an_type.c_str(), n->get_namespace());
+        std::shared_ptr<StatusItem> item(new StatusItem(ns,
+          "Pluginlib return NULL Analyzer for " +
+          an_type));
+        aux_items_.push_back(item);
+        init_ok = false;
+        continue;
+      }
+
+      an_path =
+        ((an_type.compare("diagnostic_aggregator/AnalyzerGroup") !=
+        0) ? path : path + "/" + an_path);
+      an_breadcrumb = (breadcrumb_.empty() ? ns : breadcrumb_ + "." + ns);
+      RCLCPP_DEBUG(rclcpp::get_logger(
+          "AnalyzerGroup"), "Initializing %s in '%s' (breadcrumb: %s) ...",
+        an_type.c_str(), an_path.c_str(), an_breadcrumb.c_str());
+      if (!analyzer->init(an_path, an_breadcrumb, n)) {
+        RCLCPP_ERROR(get_logger(
+            "AnalyzerGroup"), "Unable to initialize analyzer NS: %s, type: %s",
+          n->get_namespace(), an_type.c_str());
+        std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
+        aux_items_.push_back(item);
+        init_ok = false;
+        continue;
+      } else {
+        this->addAnalyzer(analyzer);
+        ns = ""; an_type = ""; an_path = "";
+      }
     }
   }
 
-  if (analyzers_.size() == 0) {
+  if (analyzers_.size() == 0 && !nice_name_.empty()) {
     init_ok = false;
     RCLCPP_ERROR(get_logger(
         "AnalyzerGroup"), "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
+  } else {
+    RCLCPP_INFO(get_logger(
+        "AnalyzerGroup"), "Initialized analyzer group '%s' with path '%s' and breadcrumb '%s'.",
+      nice_name_.c_str(), path_.c_str(), breadcrumb_.c_str());
   }
 
   return init_ok;
@@ -175,7 +203,10 @@ AnalyzerGroup::~AnalyzerGroup()
 
 bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
-  RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "addAnalyzer()");
+  RCLCPP_INFO(
+    get_logger("AnalyzerGroup"),
+    "Adding analyzer '%s' to group '%s'.",
+    analyzer->getName().c_str(), nice_name_.c_str());
   analyzers_.push_back(analyzer);
   return true;
 }
@@ -192,14 +223,20 @@ bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
   return false;
 }
 
-bool AnalyzerGroup::match(const string name)
+bool AnalyzerGroup::match(const string & name)
 {
-  RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "match()");
+  RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "Group '%s' match() %s", nice_name_.c_str(),
+    name.c_str());
   if (analyzers_.size() == 0) {
+    RCLCPP_WARN(get_logger(
+        "AnalyzerGroup"), "Group '%s' doesn't contain any analyzers, can't match.",
+      nice_name_.c_str());
     return false;
   }
 
   bool match_name = false;
+
+  // First check cache
   if (matched_.count(name)) {
     vector<bool> & mtch_vec = matched_[name];
     for (unsigned int i = 0; i < mtch_vec.size(); ++i) {
@@ -210,11 +247,17 @@ bool AnalyzerGroup::match(const string name)
     return false;
   }
 
+  // Building up cache for each name, which analyzer matches
   matched_[name].resize(analyzers_.size());
   for (unsigned int i = 0; i < analyzers_.size(); ++i) {
     bool mtch = analyzers_[i]->match(name);
     match_name = mtch || match_name;
     matched_[name].at(i) = mtch;
+    if (mtch) {
+      RCLCPP_INFO(get_logger(
+          "AnalyzerGroup"), "Group '%s' has a match with my analyzer '%s'.",
+        nice_name_.c_str(), analyzers_[i]->getName().c_str());
+    }
   }
 
   return match_name;
@@ -306,7 +349,7 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGroup::r
 
   header_status->message = valToMsg(header_status->level);
 
-  if (path_ != "" && path_ != "/") { // No header if we don't have a base path
+  if (path_ != "" && path_ != "/") {  // No header if we don't have a base path
     output.push_back(header_status);
   }
 
@@ -316,3 +359,5 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGroup::r
 
   return output;
 }
+
+}  // namespace diagnostic_aggregator

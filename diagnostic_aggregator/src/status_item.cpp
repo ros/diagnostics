@@ -36,8 +36,13 @@
 
 #include "diagnostic_aggregator/status_item.hpp"
 
-using namespace diagnostic_aggregator;
-using namespace std;
+#include <string>
+#include <memory>
+
+namespace diagnostic_aggregator
+{
+
+using std::string;
 
 using rclcpp::get_logger;
 
@@ -121,3 +126,5 @@ std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> StatusItem::toStatusMsg(
 
   return status;
 }
+
+}  // namespace diagnostic_aggregator

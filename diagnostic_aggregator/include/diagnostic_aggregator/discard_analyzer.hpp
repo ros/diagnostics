@@ -40,6 +40,7 @@
 #define DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
 
 #include <vector>
+#include <memory>
 
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 
@@ -83,5 +84,6 @@ public:
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 };
 
-}
-#endif //DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP

@@ -40,6 +40,8 @@
 #define DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
 
 #include <string>
+#include <vector>
+#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -81,10 +83,13 @@ public:
    *\brief Initialized with the base path only.
    *
    *\param path Base path of Aggregator
+   *\param breadcrumb Prefix for parameter getter.
    */
-  bool init(std::string path)
+  bool init(const std::string & path, const std::string & = "")
   {
-    return GenericAnalyzerBase::init(path + "/Other", "Other", 5.0, -1, true);
+    nice_name_ = "Other";
+    path_ = path;
+    return GenericAnalyzerBase::init(path_, "", 5.0, -1, true);
   }
 
   /*
@@ -92,9 +97,10 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string, const rclcpp::Node::SharedPtr)
+  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr)
   {
-    RCLCPP_ERROR(rclcpp::get_logger(
+    RCLCPP_ERROR(
+      rclcpp::get_logger(
         "generic_analyzer_base"),
       "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
     return false;
@@ -105,7 +111,7 @@ public:
    *
    *\return True, since match() will never by called by Aggregator
    */
-  bool match(std::string) {return true;}
+  bool match(const std::string &) {return true;}
 
   /*
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data
@@ -119,9 +125,8 @@ public:
     // We don't report anything if there's no "Other" items
     if (processed.size() == 1) {
       processed.clear();
-    }
-    // "Other" items are considered an error.
-    else if (other_as_errors_ && processed.size() > 1) {
+    } else if (other_as_errors_ && processed.size() > 1) {
+      // "Other" items are considered an error.
       std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>>::iterator it =
         processed.begin();
       for (; it != processed.end(); ++it) {
@@ -140,7 +145,6 @@ private:
   bool other_as_errors_;
 };
 
-}
+}  // namespace diagnostic_aggregator
 
-
-#endif // DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
