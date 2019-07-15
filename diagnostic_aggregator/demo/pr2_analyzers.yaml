@@ -12,31 +12,31 @@ analyzers:
           type: diagnostic_aggregator/GenericAnalyzer
           path: Base Hokuyo
           timeout: 5.0
-          find_and_remove_prefix: base_hokuyo_node
+          find_and_remove_prefix: [ 'base_hokuyo_node' ]
           num_items: 3
         tilt_hk:
           type: diagnostic_aggregator/GenericAnalyzer
           path: Tilt Hokuyo
           timeout: 5.0
-          find_and_remove_prefix: tilt_hokuyo_node
+          find_and_remove_prefix: [ 'tilt_hokuyo_node' ]
           num_items: 3
         imu:
           type: diagnostic_aggregator/GenericAnalyzer
           path: IMU
           timeout: 5.0
-          find_and_remove_prefix: imu_node
+          find_and_remove_prefix: [ 'imu_node' ]
           num_items: 3
         forearm_cam_l:
           type: diagnostic_aggregator/GenericAnalyzer
           path: Forearm Cam (Left)
           timeout: 5.0
-          find_and_remove_prefix: l_forearm_cam
+          find_and_remove_prefix: [ 'l_forearm_cam' ]
           num_items: 4
         forearm_cam_r:
           type: diagnostic_aggregator/GenericAnalyzer
           path: Forearm Cam (Right)
           timeout: 5.0
-          find_and_remove_prefix: r_forearm_cam
+          find_and_remove_prefix: [ 'r_forearm_cam' ]
           num_items: 4
     computers:
       type: diagnostic_aggregator/GenericAnalyzer

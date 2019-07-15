@@ -1,0 +1,23 @@
+analyzers:
+  ros__parameters:
+    path: /Demo
+    level0:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Level0
+      startswith: [ 'other' ]
+    contains:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: FindAndRemove
+      contains: [ 'contain' ]
+    findandremove:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: FindAndRemove
+      find_and_remove_prefix: [ 'find1_items: find_remove' ]
+    regex:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Regex
+      regex: [ '.*find.remove\d.*' ]
+    discard:
+      type: diagnostic_aggregator/DiscardAnalyzer
+      path: DoesItNeedAPart?
+      regex: [ 'name\d' ]

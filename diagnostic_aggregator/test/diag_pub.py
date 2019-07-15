@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 # Software License Agreement (BSD License)
 #
 # Copyright (c) 2009, Willow Garage, Inc.
@@ -38,44 +40,62 @@
 
 PKG = 'diagnostic_aggregator'
 
-import roslib; roslib.load_manifest(PKG)
+#import roslib; roslib.load_manifest(PKG)
 
-
-import rospy
-from time import sleep
+import rclpy
+from rclpy.node import Node
+from rclpy.clock import ROSClock
+import builtin_interfaces.msg
 
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
+class DiagnosticTalker(Node):
+
+    def __init__(self):
+        super().__init__('diagnostic_talker')
+        self.i = 0
+        self.pub = self.create_publisher(DiagnosticArray, '/diagnostics') #, queue_size=10
+        timer_period = 1.0
+        self.tmr = self.create_timer(timer_period, self.timer_callback)
+
+        self.array = DiagnosticArray()
+        self.array.status = [
+            # GenericAnalyzer prefix1
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'pref1a', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.WARN, name = 'pref1b', message = 'Warning'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contains1a', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: contains1b', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'name1', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1a', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1b', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1c', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1d', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'find1_items: find_remove1a', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'find1_items: find_remove1b', message = 'OK'),
+
+            # GenericAnalyzer prefix2
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contain2a', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contain2b', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'name2', message = 'OK'),
+
+            # OtherAnalyzer for Other
+            DiagnosticStatus(level = DiagnosticStatus.ERROR, name = 'other1', message = 'Error'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'other2', message = 'OK'),
+            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'other3', message = 'OK')]
+
+    def timer_callback(self):
+        self.array.header.stamp = ROSClock().now().to_msg()
+        self.pub.publish(self.array)
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    node = DiagnosticTalker()
+    rclpy.spin(node)
+
+    node.destroy_node()
+    rclpy.shutdown()
+
+
 if __name__ == '__main__':
-    rospy.init_node('diag_pub')
-    pub = rospy.Publisher('/diagnostics', DiagnosticArray, queue_size=10)
-    
-    array = DiagnosticArray()
-    array.status = [
-        # GenericAnalyzer prefix1
-        DiagnosticStatus(0, 'pref1a', 'OK', '', []),
-        DiagnosticStatus(1, 'pref1b', 'Warning', '', []),
-        DiagnosticStatus(0, 'contains1a', 'OK', '', []),
-        DiagnosticStatus(0, 'prefix1: contains1b', 'OK', '', []),
-        DiagnosticStatus(0, 'name1', 'OK', '', []),
-        DiagnosticStatus(0, 'prefix1: expected1a', 'OK', '', []),
-        DiagnosticStatus(0, 'prefix1: expected1b', 'OK', '', []),
-        DiagnosticStatus(0, 'prefix1: expected1c', 'OK', '', []),
-        DiagnosticStatus(0, 'prefix1: expected1d', 'OK', '', []),
-        DiagnosticStatus(0, 'find1_items: find_remove1a', 'OK', '', []),
-        DiagnosticStatus(0, 'find1_items: find_remove1b', 'OK', '', []),
-
-        # GenericAnalyzer prefix2
-        DiagnosticStatus(0, 'contain2a', 'OK', '', []),
-        DiagnosticStatus(0, 'contain2b', 'OK', '', []),
-        DiagnosticStatus(0, 'name2', 'OK', '', []),
-
-        # OtherAnalyzer for Other
-        DiagnosticStatus(2, 'other1', 'Error', '', []),
-        DiagnosticStatus(0, 'other2', 'OK', '', []),
-        DiagnosticStatus(0, 'other3', 'OK', '', [])]
-    array.header.stamp = rospy.get_rostime()
-
-    while not rospy.is_shutdown():
-        pub.publish(array)
-        sleep(1)
+    main()
