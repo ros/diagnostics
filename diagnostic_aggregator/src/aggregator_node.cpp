@@ -40,7 +40,7 @@
 
 #include "diagnostic_aggregator/aggregator.hpp"
 
-using namespace std;
+using std::exception;
 
 int main(int argc, char ** argv)
 {
