@@ -6,6 +6,7 @@
 
   <author email="gautran@clearpath.ai">Guillaume Autran</author>
   <maintainer email="gautran@clearpath.ai">Guillaume Autran</maintainer>
+  <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
