@@ -39,13 +39,12 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
 #define DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
 
-#include <string>
-#include <map>
-#include <vector>
-#include <set>
-#include <memory>
-#include <boost/thread/mutex.hpp>
 #include <bondcpp/bond.hpp>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_msgs/msg/diagnostic_array.hpp>
@@ -141,7 +140,7 @@ private:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
   /// DiagnosticStatus, /diagnostics_toplevel_state
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;
-  boost::mutex mutex_;
+  std::mutex mutex_;
   double pub_rate_;
   rclcpp::Clock::SharedPtr clock_;
 

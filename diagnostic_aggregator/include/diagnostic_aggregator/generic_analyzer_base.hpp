@@ -38,13 +38,12 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
 #define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
 
-#include <map>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <memory>
 #include <algorithm>
-#include <boost/regex.hpp>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <pluginlib/class_list_macros.hpp>

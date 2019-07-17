@@ -26,14 +26,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${PROJECT_NAME}
-  "diagnostic_msgs"
-  "rclcpp"
   "bondcpp"
-  "std_msgs"
+  "diagnostic_msgs"
   "pluginlib"
-  "boost"
-  "boost_regex"
-  "boost_system"
+  "rclcpp"
+  "std_msgs"
 )
 
 set(PLUGIN_LIB "${PROJECT_NAME}_analyzers")
@@ -45,25 +42,19 @@ target_include_directories(${PLUGIN_LIB} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${PLUGIN_LIB}
-  "diagnostic_msgs"
-  "rclcpp"
   "bondcpp"
-  "std_msgs"
+  "diagnostic_msgs"
   "pluginlib"
-  "boost"
-  "boost_regex"
-  "boost_system"
+  "rclcpp"
+  "std_msgs"
 )
 target_link_libraries(${PLUGIN_LIB}
-  ${PROJECT_NAME}
-  boost_regex
-  boost_system)
+  ${PROJECT_NAME})
 
 # Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
-  ${PROJECT_NAME}
-  boost_system)
+  ${PROJECT_NAME})
 install(
   TARGETS aggregator_node
   DESTINATION lib/${PROJECT_NAME})
@@ -111,11 +102,11 @@ pluginlib_export_plugin_description_file(${PLUGIN_LIB} plugin_description.xml)
 ament_export_include_directories(include)
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(ament_cmake_python)
-ament_export_dependencies(std_msgs)
+ament_export_dependencies(bondcpp)
+ament_export_dependencies(bondpy)
 ament_export_dependencies(diagnostic_msgs)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclpy)
-ament_export_dependencies(bondcpp)
-ament_export_dependencies(bondpy)
+ament_export_dependencies(std_msgs)
 
 ament_package()

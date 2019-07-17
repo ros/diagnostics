@@ -40,11 +40,11 @@
 #define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
 
 #include <map>
-#include <vector>
-#include <string>
 #include <memory>
+#include <regex>
 #include <sstream>
-#include <boost/regex.hpp>
+#include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/logger.hpp>
@@ -231,7 +231,7 @@ private:
   std::vector<std::string> startswith_;
   std::vector<std::string> contains_;
   std::vector<std::string> name_;
-  std::vector<boost::regex> regex_; /**< Regular expressions to check against diagnostics names. */
+  std::vector<std::regex> regex_; /**< Regular expressions to check against diagnostics names. */
 };
 
 }  // namespace diagnostic_aggregator

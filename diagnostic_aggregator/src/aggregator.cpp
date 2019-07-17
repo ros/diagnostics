@@ -38,6 +38,7 @@
 #include "diagnostic_aggregator/aggregator.hpp"
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -147,7 +148,7 @@ void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::Share
 
   bool analyzed = false;
   {  // lock the whole loop to ensure nothing in the analyzer group changes during it.
-    boost::mutex::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     for (unsigned int j = 0; j < diag_msg->status.size(); ++j) {
       analyzed = false;
       std::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
@@ -175,7 +176,7 @@ Aggregator::~Aggregator()
 void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
 {
   RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "bondBroken()");
-  boost::mutex::scoped_lock lock(mutex_);  // Possibility of multiple bonds breaking at once
+  std::lock_guard<std::mutex> lock(mutex_);  // Possibility of multiple bonds breaking at once
   RCLCPP_WARN(get_logger("Aggregator"), "Bond for namespace %s was broken", bond_id.c_str());
   std::vector<std::shared_ptr<bond::Bond>>::iterator elem;
   elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
@@ -195,7 +196,7 @@ void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
 void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
 {
   RCLCPP_DEBUG(get_logger("Aggregator"), "bondFormed()");
-  boost::mutex::scoped_lock lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   analyzer_group_->addAnalyzer(group);
   analyzer_group_->resetMatches();
 }
@@ -220,7 +221,7 @@ bool Aggregator::addDiagnostics(
   std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
   { // lock here ensures that bonds from the same namespace aren't added twice.
     // Without it, possibility of two simultaneous calls adding two objects.
-    boost::mutex::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     // rebuff attempts to add things from the same namespace twice
     if (std::find_if(bonds_.begin(), bonds_.end(),
       BondIDMatch(req->load_namespace)) != bonds_.end())
@@ -268,7 +269,7 @@ void Aggregator::publishData()
 
   vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   {
-    boost::mutex::scoped_lock lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     processed = analyzer_group_->report();
   }
   for (unsigned int i = 0; i < processed.size(); ++i) {

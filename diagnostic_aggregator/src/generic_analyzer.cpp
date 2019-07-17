@@ -38,9 +38,9 @@
 #include <rclcpp/parameter.hpp>
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "diagnostic_aggregator/generic_analyzer.hpp"
 
@@ -131,9 +131,9 @@ bool GenericAnalyzer::init(
         nice_name_.c_str(), pvalue.value_to_string().c_str());
       for (auto regex : pvalue.as_string_array()) {
         try {
-          boost::regex re(regex);
+          std::regex re(regex);
           regex_.push_back(re);
-        } catch (boost::regex_error & e) {
+        } catch (std::regex_error & e) {
           RCLCPP_ERROR(rclcpp::get_logger("GenericAnalyzer"),
             "Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
             regex.c_str(), e.what());
@@ -199,15 +199,14 @@ bool GenericAnalyzer::match(const string & name)
     nice_name_.c_str(),
     name.c_str());
 
-  boost::cmatch what;
+  std::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i) {
-    if (boost::regex_match(name.c_str(), what, regex_[i])) {
+    if (std::regex_match(name.c_str(), what, regex_[i])) {
       RCLCPP_INFO(
         rclcpp::get_logger("GenericAnalyzer"),
-        "Analyzer '%s' matches '%s' with regex %s.",
+        "Analyzer '%s' matches '%s' with regex.",
         nice_name_.c_str(),
-        name.c_str(),
-        regex_[i].str().c_str());
+        name.c_str());
       return true;
     }
   }
