@@ -39,14 +39,13 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
 #define DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
 
-#include <map>
-#include <vector>
-#include <string>
-#include <memory>
 #include <algorithm>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
-
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>
 #include <diagnostic_msgs/msg/key_value.hpp>
 #include <pluginlib/class_loader.hpp>

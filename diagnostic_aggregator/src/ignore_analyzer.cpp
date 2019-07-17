@@ -36,9 +36,9 @@
 
 #include "diagnostic_aggregator/ignore_analyzer.hpp"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
   diagnostic_aggregator::Analyzer)

@@ -37,11 +37,11 @@
 
 #include "diagnostic_aggregator/analyzer_group.hpp"
 
+#include <algorithm>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include <algorithm>
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup,
   diagnostic_aggregator::Analyzer)

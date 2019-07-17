@@ -40,9 +40,9 @@
 #define DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.hpp>

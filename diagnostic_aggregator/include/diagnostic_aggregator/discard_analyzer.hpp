@@ -39,8 +39,8 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
 #define DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <diagnostic_msgs/msg/diagnostic_status.h>
 

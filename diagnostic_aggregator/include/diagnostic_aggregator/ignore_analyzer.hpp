@@ -39,9 +39,9 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
 #define DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP
 
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
 #include <diagnostic_msgs/msg/diagnostic_status.h>

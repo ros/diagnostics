@@ -38,8 +38,8 @@
 
 #include <diagnostic_aggregator/analyzer_group.hpp>
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include <rclcpp/rclcpp.hpp>
 #include <gtest/gtest.h>

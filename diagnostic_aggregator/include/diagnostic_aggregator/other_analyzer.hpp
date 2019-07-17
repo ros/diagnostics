@@ -39,9 +39,9 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
 #define DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <rclcpp/rclcpp.hpp>
 
