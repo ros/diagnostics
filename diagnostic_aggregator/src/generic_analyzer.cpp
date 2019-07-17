@@ -84,7 +84,7 @@ bool GenericAnalyzer::init(
   int num_items_expected;
   bool discard_stale;
 
-  for (auto & param : parameters) {
+  for (const auto & param : parameters) {
     string pname = param.first;
     rclcpp::Parameter pvalue = param.second;
 

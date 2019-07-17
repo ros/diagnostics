@@ -164,8 +164,7 @@ public:
       return vec;
     }
 
-    std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> header_status(
-      new diagnostic_msgs::msg::DiagnosticStatus());
+    auto header_status = std::make_shared<diagnostic_msgs::msg::DiagnosticStatus>();
     header_status->name = path_;
     header_status->level = 0;
     header_status->message = "OK";
@@ -175,10 +174,10 @@ public:
 
     bool all_stale = true;
 
-    std::map<std::string, std::shared_ptr<StatusItem>>::iterator it = items_.begin();
+    auto it = items_.begin();
     while (it != items_.end()) {
-      std::string name = it->first;
-      std::shared_ptr<StatusItem> item = it->second;
+      auto name = it->first;
+      auto item = it->second;
 
       bool stale = false;
       if (timeout_ > 0) {
@@ -192,7 +191,7 @@ public:
       }
 
       int8_t level = item->getLevel();
-      header_status->level = std::max(int8_t(header_status->level), level);
+      header_status->level = std::max(static_cast<int8_t>(header_status->level), level);
 
       diagnostic_msgs::msg::KeyValue kv;
       kv.key = name;
@@ -221,7 +220,7 @@ public:
     header_status->message = valToMsg(header_status->level);
 
     // If we expect a given number of items, check that we have this number
-    if (num_items_expected_ == 0 && items_.size() == 0) {
+    if (num_items_expected_ == 0 && items_.empty()) {
       header_status->level = 0;
       header_status->message = "OK";
     } else if (num_items_expected_ > 0 && \
@@ -234,7 +233,7 @@ public:
       expec << num_items_expected_;
       item << items_.size();
 
-      if (items_.size() > 0) {
+      if (!items_.empty()) {
         header_status->message = "Expected " + expec.str() + ", found " + item.str();
       } else {
         header_status->message = "No items found, expected " + expec.str();

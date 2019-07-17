@@ -50,6 +50,8 @@ ament_target_dependencies(${PLUGIN_LIB}
 )
 target_link_libraries(${PLUGIN_LIB}
   ${PROJECT_NAME})
+target_compile_definitions(${PLUGIN_LIB}
+  PRIVATE "DIAGNOSTICS_DEFAULT_ANALYZER_PLUGINS_BUILDING_LIBRARY")
 
 # Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
@@ -96,7 +98,6 @@ install(
   DESTINATION include
 )
 
-target_compile_definitions(${PLUGIN_LIB} PRIVATE "DIAGNOSTICS_DEFAULT_ANALYZER_PLUGINS_BUILDING_LIBRARY")
 pluginlib_export_plugin_description_file(${PLUGIN_LIB} plugin_description.xml)
 
 ament_export_include_directories(include)

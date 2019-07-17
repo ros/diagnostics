@@ -157,7 +157,9 @@ public:
   virtual std::string getName() const {return nice_name_;}
 
 private:
-  std::string path_, nice_name_, breadcrumb_;
+  std::string path_;
+  std::string nice_name_;
+  std::string breadcrumb_;
 
   /*!
    *\brief Loads Analyzer plugins in "analyzers" namespace

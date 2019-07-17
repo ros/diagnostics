@@ -145,7 +145,7 @@ inline std::string removeLeadingNameChaff(const std::string & input_name, const 
 {
   std::string output_name = input_name;
 
-  if (chaff.size() == 0) {
+  if (chaff.empty()) {
     return output_name;
   }
 

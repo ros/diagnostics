@@ -81,7 +81,7 @@ Aggregator::Aggregator()
     "Retrieved %d parameter(s).",
     parameters.size());
   
-  for (auto & param : parameters) {
+  for (const auto & param : parameters) {
     if (param.first.compare("pub_rate") == 0) {
       pub_rate_ = param.second.as_double();
     } else if (param.first.compare("path") == 0) {
@@ -149,9 +149,9 @@ void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::Share
   bool analyzed = false;
   {  // lock the whole loop to ensure nothing in the analyzer group changes during it.
     std::lock_guard<std::mutex> lock(mutex_);
-    for (unsigned int j = 0; j < diag_msg->status.size(); ++j) {
+    for (auto j = 0u; j < diag_msg->status.size(); ++j) {
       analyzed = false;
-      std::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
+      auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
 
       if (analyzer_group_->match(item->getName())) {
         analyzed = analyzer_group_->analyze(item);

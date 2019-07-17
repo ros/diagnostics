@@ -89,7 +89,7 @@ bool AnalyzerGroup::init(
   std::string p_type = breadcrumb_.empty() ? "type" : breadcrumb_ + ".type";
   std::string p_path = breadcrumb_.empty() ? "path" : breadcrumb_ + ".path";
   
-  for (auto & param : parameters) {
+  for (const auto & param : parameters) {
     RCLCPP_DEBUG(
       rclcpp::get_logger("AnalyzerGroup"), "Group '%s' found param: %s : %s",
       nice_name_.c_str(), param.first.c_str(), param.second.value_to_string().c_str());
@@ -107,7 +107,6 @@ bool AnalyzerGroup::init(
       pos = 10;
     }
     ns = param.first.substr(0, param.first.find(".", pos));
-    //std::cout << "NS: "<<ns<<std::endl<<std::endl;
 
     if (param.first.compare(ns + ".type") == 0) {
       an_type = param.second.value_to_string();
@@ -137,12 +136,11 @@ bool AnalyzerGroup::init(
         }
 
         analyzer = analyzer_loader_.createSharedInstance(an_type);
-      } catch (pluginlib::LibraryLoadException & e) {
+      } catch (const pluginlib::LibraryLoadException & e) {
         RCLCPP_ERROR(get_logger(
             "AnalyzerGroup"), "Failed to load analyzer %s, type %s. Caught exception: %s",
           ns.c_str(), an_type.c_str(), e.what());
-        std::shared_ptr<StatusItem> item(new StatusItem(ns,
-          "Pluginlib exception loading analyzer"));
+        auto item = std::make_shared<StatusItem>(ns, "Pluginlib exception loading analyzer");
         aux_items_.push_back(item);
         init_ok = false;
         continue;
@@ -214,7 +212,7 @@ bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 bool AnalyzerGroup::removeAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
   RCLCPP_DEBUG(get_logger("AnalyzerGroup"), "removeAnalyzer()");
-  vector<std::shared_ptr<Analyzer>>::iterator it = find(analyzers_.begin(),
+  auto it = find(analyzers_.begin(),
       analyzers_.end(), analyzer);
   if (it != analyzers_.end()) {
     analyzers_.erase(it);
@@ -320,7 +318,7 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGroup::r
       analyzers_[j]->report();
 
     // Do not report anything in the header values for analyzers that don't report
-    if (processed.size() == 0) {
+    if (processed.empty()) {
       continue;
     }
 

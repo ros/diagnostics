@@ -74,7 +74,7 @@ public:
     RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "constructor");
   }
 
-  ~OtherAnalyzer()
+  virtual ~OtherAnalyzer()
   {
     RCLCPP_DEBUG(rclcpp::get_logger("OtherAnalyzer"), "destructor");
   }

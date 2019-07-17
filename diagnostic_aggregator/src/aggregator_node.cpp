@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
       agg.publishData();
       pub_rate.sleep();
     }
-  } catch (exception & e) {
+  } catch (const exception & e) {
     RCLCPP_FATAL(
       rclcpp::get_logger("aggregator_node"),
       "Diagnostic aggregator node caught exception. Aborting. %s",
