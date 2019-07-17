@@ -37,19 +37,22 @@
 /**< \author Loads analyzer params, verifies that they are valid */
 
 #include <diagnostic_aggregator/analyzer_group.hpp>
-#include <rclcpp/rclcpp.hpp>
+
 #include <string>
+#include <memory>
+
+#include <rclcpp/rclcpp.hpp>
 #include <gtest/gtest.h>
 
 // Uses AnalyzerGroup to load analyzers
 TEST(AnalyzerLoader, analyzerLoading)
 {
-  auto nh = std::make_shared<rclcpp::Node>("~");
+  auto nh = std::make_shared<rclcpp::Node>("analyzers");
 
   diagnostic_aggregator::AnalyzerGroup analyzer_group;
-  std::string path = "base_path";
+  std::string path = "/BASE/PATH";
 
-  EXPECT_TRUE(analyzer_group.init(path, nh));
+  EXPECT_TRUE(analyzer_group.init(path, "GROUP", nh));
 }
 
 int main(int argc, char ** argv)
