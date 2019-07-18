@@ -380,13 +380,13 @@ namespace diagnostic_updater
           }
         }
 
-        stat.addf("Earliest timestamp delay:", "%f", min_delta_);
-        stat.addf("Latest timestamp delay:", "%f", max_delta_);
-        stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
-        stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
-        stat.add("Late diagnostic update count:", late_count_);
-        stat.add("Early diagnostic update count:", early_count_);
-        stat.add("Zero seen diagnostic update count:", zero_count_);
+        stat.addf("Earliest timestamp delay", "%f", min_delta_);
+        stat.addf("Latest timestamp delay", "%f", max_delta_);
+        stat.addf("Earliest acceptable timestamp delay", "%f", params_.min_acceptable_);
+        stat.addf("Latest acceptable timestamp delay", "%f", params_.max_acceptable_);
+        stat.add("Late diagnostic update count", late_count_);
+        stat.add("Early diagnostic update count", early_count_);
+        stat.add("Zero seen diagnostic update count", zero_count_);
 
         deltas_valid_ = false;
         min_delta_ = 0;
