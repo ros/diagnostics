@@ -63,8 +63,6 @@ Aggregator::Aggregator()
     rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
   pub_rate_(1.0),
   clock_(new rclcpp::Clock()),
-  analyzer_group_(nullptr),
-  other_analyzer_(nullptr),
   base_path_("/")
 {
   RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "constructor");
@@ -97,14 +95,14 @@ Aggregator::Aggregator()
   RCLCPP_DEBUG(get_logger("Aggregator"), "Aggregator other_as_errors configured to: %s",
     (other_as_errors ? "true" : "false"));
 
-  analyzer_group_ = new AnalyzerGroup();
+  analyzer_group_ = std::make_unique<AnalyzerGroup>();
   if (!analyzer_group_->init(base_path_, "", n_)) {
     RCLCPP_ERROR(get_logger(
         "Aggregator"), "Analyzer group for diagnostic aggregator failed to initialize!");
   }
 
   // Last analyzer handles remaining data
-  other_analyzer_ = new OtherAnalyzer(other_as_errors);
+  other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
 
   add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>(
@@ -167,9 +165,6 @@ void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::Share
 Aggregator::~Aggregator()
 {
   RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "destructor");
-  if (analyzer_group_) {delete analyzer_group_;}
-
-  if (other_analyzer_) {delete other_analyzer_;}
 }
 
 
@@ -272,27 +267,27 @@ void Aggregator::publishData()
     std::lock_guard<std::mutex> lock(mutex_);
     processed = analyzer_group_->report();
   }
-  for (unsigned int i = 0; i < processed.size(); ++i) {
-    diag_array.status.push_back(*processed[i]);
+  for (const auto & msg : processed) {
+    diag_array.status.push_back(*msg);
 
-    if (processed[i]->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = processed[i]->level;
+    if (msg->level > diag_toplevel_state.level) {
+      diag_toplevel_state.level = msg->level;
     }
-    if (processed[i]->level < min_level) {
-      min_level = processed[i]->level;
+    if (msg->level < min_level) {
+      min_level = msg->level;
     }
   }
 
   vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed_other =
     other_analyzer_->report();
-  for (unsigned int i = 0; i < processed_other.size(); ++i) {
-    diag_array.status.push_back(*processed_other[i]);
+  for (const auto & msg : processed_other) {
+    diag_array.status.push_back(*msg);
 
-    if (processed_other[i]->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = processed_other[i]->level;
+    if (msg->level > diag_toplevel_state.level) {
+      diag_toplevel_state.level = msg->level;
     }
-    if (processed_other[i]->level < min_level) {
-      min_level = processed_other[i]->level;
+    if (msg->level < min_level) {
+      min_level = msg->level;
     }
   }
 

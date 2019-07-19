@@ -160,9 +160,8 @@ private:
     const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request>,
     std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response>);
 
-  AnalyzerGroup * analyzer_group_;
-
-  OtherAnalyzer * other_analyzer_;
+  std::unique_ptr<AnalyzerGroup> analyzer_group_;
+  std::unique_ptr<OtherAnalyzer> other_analyzer_;
 
   /// Contains all bonds for additional diagnostics.
   std::vector<std::shared_ptr<bond::Bond>> bonds_;

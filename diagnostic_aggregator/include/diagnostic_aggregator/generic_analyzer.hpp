@@ -75,10 +75,7 @@ getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
     output.push_back(find);
     return true;
   } else if (type == rclcpp::ParameterType::PARAMETER_STRING_ARRAY) {
-    auto param_array = param.as_string_array();
-    for (unsigned int i = 0; i < param_array.size(); ++i) {
-      output.push_back(param_array[i]);
-    }
+    output = param.as_string_array();
     return true;
   }
 
