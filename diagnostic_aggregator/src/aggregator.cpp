@@ -37,6 +37,7 @@
 
 #include "diagnostic_aggregator/aggregator.hpp"
 
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -44,11 +45,6 @@
 
 namespace diagnostic_aggregator
 {
-
-using std::string;
-using std::vector;
-
-using rclcpp::get_logger;
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -61,24 +57,20 @@ Aggregator::Aggregator()
 : n_(std::make_shared<rclcpp::Node>("analyzers",
     "",
     rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
+  logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),
   clock_(new rclcpp::Clock()),
   base_path_("/")
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "constructor");
+  RCLCPP_DEBUG(logger_, "constructor");
   bool other_as_errors = false;
 
   std::map<std::string, rclcpp::Parameter> parameters;
   if (!n_->get_parameters("", parameters)) {
-    RCLCPP_ERROR(
-      rclcpp::get_logger("Aggregator"),
-      "Couldn't retrieve parameters.");
+    RCLCPP_ERROR(logger_, "Couldn't retrieve parameters.");
   }
-  RCLCPP_DEBUG(
-    rclcpp::get_logger("AnalyzerGroup"),
-    "Retrieved %d parameter(s).",
-    parameters.size());
-  
+  RCLCPP_DEBUG(logger_, "Retrieved %d parameter(s).", parameters.size());
+
   for (const auto & param : parameters) {
     if (param.first.compare("pub_rate") == 0) {
       pub_rate_ = param.second.as_double();
@@ -88,17 +80,14 @@ Aggregator::Aggregator()
       other_as_errors = param.second.as_bool();
     }
   }
-  RCLCPP_DEBUG(get_logger("Aggregator"), "Aggregator publication rate configured to: %f",
-    pub_rate_);
-  RCLCPP_DEBUG(get_logger("Aggregator"), "Aggregator base path configured to: %s",
-    base_path_.c_str());
-  RCLCPP_DEBUG(get_logger("Aggregator"), "Aggregator other_as_errors configured to: %s",
+  RCLCPP_DEBUG(logger_, "Aggregator publication rate configured to: %f", pub_rate_);
+  RCLCPP_DEBUG(logger_, "Aggregator base path configured to: %s", base_path_.c_str());
+  RCLCPP_DEBUG(logger_, "Aggregator other_as_errors configured to: %s",
     (other_as_errors ? "true" : "false"));
 
   analyzer_group_ = std::make_unique<AnalyzerGroup>();
   if (!analyzer_group_->init(base_path_, "", n_)) {
-    RCLCPP_ERROR(get_logger(
-        "Aggregator"), "Analyzer group for diagnostic aggregator failed to initialize!");
+    RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
   }
 
   // Last analyzer handles remaining data
@@ -119,13 +108,13 @@ Aggregator::Aggregator()
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "checkTimestamp()");
+  RCLCPP_DEBUG(logger_, "checkTimestamp()");
   if (diag_msg->header.stamp.sec != 0) {
     return;
   }
 
-  string stamp_warn = "No timestamp set for diagnostic message. Message names: ";
-  vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
+  std::string stamp_warn = "No timestamp set for diagnostic message. Message names: ";
+  std::vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
   for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it) {
     if (it != diag_msg->status.begin()) {
       stamp_warn += ", ";
@@ -134,14 +123,14 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::Sha
   }
 
   if (!ros_warnings_.count(stamp_warn)) {
-    RCLCPP_WARN(get_logger("Aggregator"), "%s", stamp_warn.c_str());
+    RCLCPP_WARN(logger_, "%s", stamp_warn.c_str());
     ros_warnings_.insert(stamp_warn);
   }
 }
 
 void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "diagCallback()");
+  RCLCPP_DEBUG(logger_, "diagCallback()");
   checkTimestamp(diag_msg);
 
   bool analyzed = false;
@@ -164,25 +153,23 @@ void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::Share
 
 Aggregator::~Aggregator()
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "destructor");
+  RCLCPP_DEBUG(logger_, "destructor");
 }
 
-
-void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
+void Aggregator::bondBroken(std::string bond_id, std::shared_ptr<Analyzer> analyzer)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger("Aggregator"), "bondBroken()");
+  RCLCPP_DEBUG(logger_, "bondBroken()");
   std::lock_guard<std::mutex> lock(mutex_);  // Possibility of multiple bonds breaking at once
-  RCLCPP_WARN(get_logger("Aggregator"), "Bond for namespace %s was broken", bond_id.c_str());
+  RCLCPP_WARN(logger_, "Bond for namespace %s was broken", bond_id.c_str());
   std::vector<std::shared_ptr<bond::Bond>>::iterator elem;
   elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
   if (elem == bonds_.end()) {
-    RCLCPP_WARN(get_logger("Aggregator"), "Broken bond tried to erase a bond which didn't exist.");
+    RCLCPP_WARN(logger_, "Broken bond tried to erase a bond which didn't exist.");
   } else {
     bonds_.erase(elem);
   }
   if (!analyzer_group_->removeAnalyzer(analyzer)) {
-    RCLCPP_WARN(get_logger(
-        "Aggregator"), "Broken bond tried to remove an analyzer which didn't exist.");
+    RCLCPP_WARN(logger_, "Broken bond tried to remove an analyzer which didn't exist.");
   }
 
   analyzer_group_->resetMatches();
@@ -190,7 +177,7 @@ void Aggregator::bondBroken(string bond_id, std::shared_ptr<Analyzer> analyzer)
 
 void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
 {
-  RCLCPP_DEBUG(get_logger("Aggregator"), "bondFormed()");
+  RCLCPP_DEBUG(logger_, "bondFormed()");
   std::lock_guard<std::mutex> lock(mutex_);
   analyzer_group_->addAnalyzer(group);
   analyzer_group_->resetMatches();
@@ -201,10 +188,7 @@ bool Aggregator::addDiagnostics(
   const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
   std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res)
 {
-  RCLCPP_DEBUG(
-    get_logger("Aggregator"),
-    "Got load request for namespace %s",
-    req->load_namespace.c_str());
+  RCLCPP_DEBUG(logger_, "Got load request for namespace %s", req->load_namespace.c_str());
   // Don't currently support relative or private namespace definitions
   if (req->load_namespace[0] != '/') {
     res->message =
@@ -254,7 +238,7 @@ bool Aggregator::addDiagnostics(
 
 void Aggregator::publishData()
 {
-  RCLCPP_DEBUG(get_logger("Aggregator"), "publishData()");
+  RCLCPP_DEBUG(logger_, "publishData()");
   diagnostic_msgs::msg::DiagnosticArray diag_array;
 
   diagnostic_msgs::msg::DiagnosticStatus diag_toplevel_state;
@@ -262,7 +246,7 @@ void Aggregator::publishData()
   diag_toplevel_state.level = -1;
   int min_level = 255;
 
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
   {
     std::lock_guard<std::mutex> lock(mutex_);
     processed = analyzer_group_->report();
@@ -278,7 +262,7 @@ void Aggregator::publishData()
     }
   }
 
-  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed_other =
+  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (const auto & msg : processed_other) {
     diag_array.status.push_back(*msg);
@@ -304,9 +288,9 @@ void Aggregator::publishData()
 }
 
 rclcpp::Node::SharedPtr
-Aggregator::get_node()
+Aggregator::get_node() const
 {
-  RCLCPP_DEBUG(get_logger("Aggregator"), "get_node()");
+  RCLCPP_DEBUG(logger_, "get_node()");
   return this->n_;
 }
 

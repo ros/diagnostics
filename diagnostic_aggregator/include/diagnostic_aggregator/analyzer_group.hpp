@@ -166,6 +166,8 @@ private:
    */
   pluginlib::ClassLoader<Analyzer> analyzer_loader_;
 
+  rclcpp::Logger logger_;
+
   /*!
    *\brief These items store errors, if any, for analyzers that failed to initialize or load
    */

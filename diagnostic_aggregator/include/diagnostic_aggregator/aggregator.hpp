@@ -128,10 +128,13 @@ public:
    */
   double getPubRate() const {return pub_rate_;}
 
-  rclcpp::Node::SharedPtr get_node();
+  rclcpp::Node::SharedPtr get_node() const;
 
 private:
   rclcpp::Node::SharedPtr n_;
+
+  rclcpp::Logger logger_;
+
   /// AddDiagnostics, /diagnostics_agg/add_diagnostics
   rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
   /// DiagnosticArray, /diagnostics

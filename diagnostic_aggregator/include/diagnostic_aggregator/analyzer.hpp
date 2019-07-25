@@ -149,7 +149,7 @@ public:
    *\brief Returns nice name for display. (ex: 'Sensors')
    */
   virtual std::string getName() const = 0;
-  
+
 protected:
   rclcpp::Clock::SharedPtr clock_;
 };
