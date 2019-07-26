@@ -32,9 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-##\author Kevin Watts
+#\author Kevin Watts
 
-##\brief Tests receipt of /diagnostics_agg from diagnostic aggregator
+#\brief Tests receipt of /diagnostics_agg from diagnostic aggregator
 
 from __future__ import with_statement
 PKG = 'diagnostic_aggregator'
@@ -53,7 +53,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 
 prefix = ""
 
-##\brief Removes name chaff (ex: 'tilt_hokuyo_node: Frequency' to 'Frequency')
+#\brief Removes name chaff (ex: 'tilt_hokuyo_node: Frequency' to 'Frequency')
 def fix_sub_name(name, remove_prefixes):
     last = str(name)
     for start_name in remove_prefixes:
@@ -157,7 +157,7 @@ def name_to_agg_header(name, params):
     # If we don't have it...
     return header_name('Other')
 
-##\brief Uses aggregator parameters to compare diagnostics with aggregated output
+#\brief Uses aggregator parameters to compare diagnostics with aggregated output
 class TestAggregator(unittest.TestCase):
     def __init__(self, *args):
         super(TestAggregator, self).__init__(*args)
@@ -254,9 +254,8 @@ class TestAggregator(unittest.TestCase):
                 self.assert_(self.agg_msgs.has_key(prefix), "Global prefix not found in messages: %s. Messages: %s" % (prefix, str(self.agg_msgs)))
             else:
                 self.assert_(len(self.agg_msgs) == 0, "Incorrect number of messages remaining: %d. Messages: %s. Expected 0." % (len(self.agg_msgs), str(self.agg_msgs)))
-                
 
 
 if __name__ == '__main__':
-    print 'SYS ARGS:', sys.argv
+    print('SYS ARGS:', sys.argv)
     rostest.run(PKG, sys.argv[0], TestAggregator, sys.argv)

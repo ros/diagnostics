@@ -82,9 +82,7 @@ class TestAddAnalyzer(unittest.TestCase):
                 self.agg_msgs[stat.name] = stat
 
     def add_analyzer(self):
-        """Start a bond to the aggregator
-        """
-
+        """Start a bond to the aggregator."""
         namespace = rclpy.resolve_name(rclpy.get_name())
         self.bond = bondpy.Bond('/diagnostics_agg/bond' + namespace,
                                 namespace)
