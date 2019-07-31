@@ -1,11 +1,23 @@
-add_executable(nominal_selftest nominal_selftest.cpp)
-target_link_libraries(nominal_selftest ${catkin_LIBRARIES})
+find_package(ament_cmake_gtest REQUIRED)
 
-add_executable(exception_selftest exception_selftest.cpp)
-target_link_libraries(exception_selftest ${catkin_LIBRARIES})
+macro(add_self_test target_name file_path)
+  ament_add_gtest(${target_name} ${file_path})
+  if(TARGET ${target_name})
+    ament_target_dependencies(
+      ${target_name}
+      "diagnostic_msgs"
+      "diagnostic_updater"
+      "rclcpp"
+    )
+    target_include_directories(${target_name}
+      PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+      $<INSTALL_INTERFACE:include>
+    )
+  endif()
+endmacro()
 
-add_executable(error_selftest error_selftest.cpp)
-target_link_libraries(error_selftest ${catkin_LIBRARIES})
-
-add_executable(no_id_selftest no_id_selftest.cpp)
-target_link_libraries(no_id_selftest ${catkin_LIBRARIES})
+add_self_test(test_nominal_selftest nominal_selftest.cpp)
+add_self_test(test_no_id_selftest no_id_selftest.cpp)
+add_self_test(test_exception_selftest exception_selftest.cpp)
+add_self_test(test_error_selftest error_selftest.cpp)

@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>self_test</name>
   <version>1.9.3</version>
   <description>self_test</description>
@@ -11,22 +11,20 @@
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/self_test</url>
-<!-- <url type="bugtracker"></url> -->
 
   <author>Jeremy Leibs and Blaise Gassend</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>diagnostic_msgs</build_depend>
-  <build_depend>diagnostic_updater</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rostest</build_depend>
+  <depend>diagnostic_msgs</depend>
+  <depend>diagnostic_updater</depend>
+  <depend>rclcpp</depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>roscpp</run_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
-  <!-- <test_depend>roscpp</test_depend> -->
-  <!-- <test_depend>diagnostic_updater</test_depend> -->
-  <!-- <test_depend>diagnostic_msgs</test_depend> -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

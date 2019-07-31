@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="self_test" type="nominal_selftest" name="my_node" />
-
-  <test pkg="self_test" type="test_selftest.py"
-        test-name="test_self_test_nominal" time-limit="30" />
-</launch>
