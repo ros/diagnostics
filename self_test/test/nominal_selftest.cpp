@@ -57,7 +57,7 @@ TEST_F(Fixture, run_self_test)
 
   using ServiceResponseFuture =
     rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
-  auto response_received_callback = [this](ServiceResponseFuture future) {
+  auto response_received_callback = [](ServiceResponseFuture future) {
       auto result_out = future.get();
 
       EXPECT_TRUE(result_out->passed) << "NominalSelftestNode is expected to pass";
