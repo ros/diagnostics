@@ -479,7 +479,23 @@ public:
    * \brief Returns the interval between updates.
    */
 
-  rcl_duration_value_t getPeriod() {return period_;}
+  rcl_duration_value_t getPeriod() const {return period_;}
+
+  /**
+   * \brief Sets the period as a rcl_duration_value_t
+   */
+  void setPeriod(rcl_duration_value_t period)
+  {
+    period_ = period;
+  }
+
+  /**
+   * \brief Sets the period given a value in seconds
+   */
+  void setPeriod(double period)
+  {
+    period_ = rcl_duration_value_t(period * 1e9);
+  }
 
   /**
    * \brief Output a message on all the known DiagnosticStatus.
