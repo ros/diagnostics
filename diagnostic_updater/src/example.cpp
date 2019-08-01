@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
   // is in a special state.
   updater.broadcast(0, "Doing important initialization stuff.");
 
-  auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 1);
+  auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 10);
   rclcpp::Rate(2).sleep();  // It isn't important if it doesn't take time.
 
   // Some diagnostic tasks are very common, such as checking the rate
@@ -233,7 +233,7 @@ int main(int argc, char ** argv)
 
   while (rclcpp::ok()) {
     std_msgs::msg::Bool msg;
-    rclcpp::Rate(0.1).sleep();
+    rclcpp::Rate(10).sleep();
 
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.
