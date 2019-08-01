@@ -240,9 +240,7 @@ class Updater(DiagnosticTaskVector):
         self.last_time = now
 
         self.last_time_period_checked = self.last_time
-        # unable to separate namespace with '.': https://github.com/ros2/rclpy/issues/373
-        # workaround so far is to specify with '__'.
-        self.period_parameter = node.get_name() + '__diagnostics_update'
+        self.period_parameter = node.get_name() + '.diagnostics_update'
         self.period = self.node.declare_parameter(self.period_parameter, 1.0).value
 
         self.verbose = False
