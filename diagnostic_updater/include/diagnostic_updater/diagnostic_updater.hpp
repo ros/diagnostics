@@ -574,7 +574,8 @@ private:
       status_vec.begin();
       iter != status_vec.end(); iter++)
     {
-      iter->name = node_name_ + std::string(": ") + iter->name;
+      // see https://github.com/ros/diagnostics/pull/109
+      iter->name = node_name_.substr(1) + std::string(": ") + iter->name;
     }
     diagnostic_msgs::msg::DiagnosticArray msg;
     msg.status = status_vec;
