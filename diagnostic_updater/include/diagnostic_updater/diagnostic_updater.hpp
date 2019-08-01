@@ -560,7 +560,7 @@ private:
       node_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
       "/diagnostics", 1);
 
-    period_ = static_cast<rcl_duration_value_t>(1.0);
+    period_ = static_cast<rcl_duration_value_t>(1e9);  // 1.0s
 
     next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
     update_diagnostic_period();
