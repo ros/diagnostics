@@ -80,6 +80,8 @@ public:
 };
 
 TEST(DiagnosticUpdater, testDiagnosticUpdater) {
+  rclcpp::init(0, nullptr);
+
   TestClass c;
 
   auto node = std::make_shared<rclcpp::Node>("test_diagnostics_updater");
@@ -89,9 +91,14 @@ TEST(DiagnosticUpdater, testDiagnosticUpdater) {
 
   classFunction cf;
   updater.add(cf);
+
+  rclcpp::shutdown();
+  SUCCEED();
 }
 
 TEST(DiagnosticUpdater, testLifecycleDiagnosticUpdater) {
+  rclcpp::init(0, nullptr);
+
   TestClass c;
 
   auto node =
@@ -102,6 +109,28 @@ TEST(DiagnosticUpdater, testLifecycleDiagnosticUpdater) {
 
   classFunction cf;
   updater.add(cf);
+
+  rclcpp::shutdown();
+  SUCCEED();
+}
+
+class DiagnosticWrapperNode : public rclcpp::Node
+{
+public:
+  DiagnosticWrapperNode()
+  : Node("DiagnosticUpdaterTestNode"),
+    updater_(this)
+  {}
+
+private:
+  diagnostic_updater::Updater updater_;
+};
+
+TEST(DiagnosticUpdater, testUpdaterAsNodeClassMember) {
+  rclcpp::init(0, nullptr);
+  DiagnosticWrapperNode node;
+  rclcpp::shutdown();
+  SUCCEED();
 }
 
 TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs) {
@@ -240,11 +269,4 @@ TEST(DiagnosticUpdater, testTimeStampStatus) {
     "Name should not be set by TimeStapmStatus";
   EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) <<
     "Name should be \"Timestamp Status\"";
-}
-
-int main(int argc, char ** argv)
-{
-  rclcpp::init(argc, argv);
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }
