@@ -371,7 +371,7 @@ public:
    * parameter.
    */
   template<class NodeT>
-  explicit Updater(std::shared_ptr<NodeT> node)
+  explicit Updater(NodeT node)
   : Updater(
       node->get_node_base_interface(),
       node->get_node_topics_interface(),
