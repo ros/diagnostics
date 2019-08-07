@@ -150,7 +150,7 @@ private:
   /*!
    *\brief Callback for incoming "/diagnostics"
    */
-  void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr);
+  void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg);
 
   /*!
    *\brief Service request callback for addition of diagnostics.
@@ -159,9 +159,9 @@ private:
    * the formed bond in bonds_
    */
   bool addDiagnostics(
-    const std::shared_ptr<rmw_request_id_t>,
-    const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request>,
-    std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response>);
+    const std::shared_ptr<rmw_request_id_t> header,
+    const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
+    std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> resp);
 
   std::unique_ptr<AnalyzerGroup> analyzer_group_;
   std::unique_ptr<OtherAnalyzer> other_analyzer_;
@@ -179,7 +179,7 @@ private:
    */
   void bondBroken(
     std::string bond_id,
-    std::shared_ptr<Analyzer>);
+    std::shared_ptr<Analyzer> analyzer);
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.
@@ -189,7 +189,7 @@ private:
    *!\param group Shared pointer to the analyzer group that is to be added,
    *  which was created in the addDiagnostics function
    */
-  void bondFormed(std::shared_ptr<Analyzer>);
+  void bondFormed(std::shared_ptr<Analyzer> group);
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
@@ -199,7 +199,7 @@ private:
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
    */
-  void checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr);
+  void checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg);
 };
 
 /*

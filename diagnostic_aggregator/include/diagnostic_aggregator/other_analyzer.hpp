@@ -85,8 +85,12 @@ public:
    *\param path Base path of Aggregator
    *\param breadcrumb Prefix for parameter getter.
    */
-  bool init(const std::string & path, const std::string & = "")
+  bool init(
+    const std::string & path,
+    const std::string & breadcrumb = "")
   {
+    (void)breadcrumb;
+
     nice_name_ = "Other";
     path_ = path;
     return GenericAnalyzerBase::init(path_, "", 5.0, -1, true);
@@ -97,8 +101,15 @@ public:
    *
    *\return False, since NodeHandle initialization isn't valid
    */
-  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr)
+  bool init(
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node)
   {
+    (void)base_path;
+    (void)breadcrumb;
+    (void)node;
+
     RCLCPP_ERROR(
       rclcpp::get_logger(
         "generic_analyzer_base"),
@@ -111,7 +122,12 @@ public:
    *
    *\return True, since match() will never by called by Aggregator
    */
-  bool match(const std::string &) {return true;}
+  bool match(const std::string & name)
+  {
+    (void)name;
+
+    return true;
+  }
 
   /*
    *\brief Reports diagnostics, but doesn't report anything if it doesn't have data

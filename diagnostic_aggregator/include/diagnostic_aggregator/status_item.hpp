@@ -54,7 +54,7 @@ namespace diagnostic_aggregator
 /*!
  *\brief Replace "/" with "" in output name, to avoid confusing robot monitor
  */
-inline std::string getOutputName(const std::string item_name)
+inline std::string getOutputName(const std::string & item_name)
 {
   std::string output_name = item_name;
   std::string slash_str = "/";

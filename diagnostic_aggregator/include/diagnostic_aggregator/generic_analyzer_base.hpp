@@ -82,7 +82,10 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
-  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr) = 0;
+  bool init(
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node) = 0;
 
   /*
    *\brief Must be initialized with path, and a "nice name"
@@ -90,8 +93,11 @@ public:
    * Must be initialized in order to prepend the path to all outgoing status messages.
    */
   bool init(
-    const std::string & path, const std::string & breadcrumb,
-    double timeout = -1.0, int num_items_expected = -1, bool discard_stale = false)
+    const std::string & path,
+    const std::string & breadcrumb,
+    double timeout = -1.0,
+    int num_items_expected = -1,
+    bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;

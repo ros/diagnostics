@@ -56,7 +56,8 @@ using std::vector;
 GenericAnalyzer::GenericAnalyzer() {}
 
 bool GenericAnalyzer::init(
-  const std::string & path, const std::string & breadcrumb,
+  const std::string & path,
+  const std::string & breadcrumb,
   const rclcpp::Node::SharedPtr n)
 {
   path_ = path;

@@ -120,22 +120,25 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
-  virtual bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
+  virtual bool init(
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node);
 
   /**!
    *\brief Add an analyzer to this analyzerGroup
    */
-  virtual bool addAnalyzer(std::shared_ptr<Analyzer> &);
+  virtual bool addAnalyzer(std::shared_ptr<Analyzer> & analyzer);
 
   /**!
    *\brief Remove an analyzer from this analyzerGroup
    */
-  virtual bool removeAnalyzer(std::shared_ptr<Analyzer> &);
+  virtual bool removeAnalyzer(std::shared_ptr<Analyzer> & analyzer);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
    */
-  virtual bool match(const std::string &);
+  virtual bool match(const std::string & name);
 
   /*!
    *\brief Clear match arrays. Used when analyzers are added or removed
@@ -145,7 +148,7 @@ public:
   /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
    */
-  virtual bool analyze(const std::shared_ptr<StatusItem>);
+  virtual bool analyze(const std::shared_ptr<StatusItem> item);
 
   /*!
    *\brief The processed output is the combined output of the sub-analyzers, and the top level status

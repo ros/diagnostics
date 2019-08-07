@@ -207,7 +207,10 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of
    */
-  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
+  bool init(
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node);
 
   /*!
    *\brief Reports current state, returns vector of formatted status messages

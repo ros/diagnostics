@@ -52,8 +52,15 @@ IgnoreAnalyzer::IgnoreAnalyzer() {}
 
 IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
-bool IgnoreAnalyzer::init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr)
+bool IgnoreAnalyzer::init(
+  const std::string & base_path,
+  const std::string & breadcrumb,
+  const rclcpp::Node::SharedPtr node)
 {
+  (void)base_path;
+  (void)breadcrumb;
+  (void)node;
+
   return true;
 }
 

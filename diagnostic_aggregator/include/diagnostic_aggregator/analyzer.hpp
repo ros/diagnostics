@@ -109,9 +109,9 @@ public:
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
   virtual bool init(
-    const std::string &,
-    const std::string &,
-    const rclcpp::Node::SharedPtr) = 0;
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node) = 0;
 
   /*!
    *\brief Returns true if analyzer will handle this item
@@ -119,7 +119,7 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
-  virtual bool match(const std::string &) = 0;
+  virtual bool match(const std::string & name) = 0;
 
   /*!
    *\brief Returns true if analyzer will analyze this name
@@ -128,7 +128,7 @@ public:
    * Analyzers should only return "true" if they will report the value of this
    * item. If it is only looking at an item, it should return false.
    */
-  virtual bool analyze(const std::shared_ptr<StatusItem>) = 0;
+  virtual bool analyze(const std::shared_ptr<StatusItem> item) = 0;
 
   /*!
    *\brief Analysis function, output processed data.

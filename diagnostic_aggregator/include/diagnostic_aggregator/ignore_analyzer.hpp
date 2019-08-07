@@ -77,11 +77,24 @@ public:
 
   virtual ~IgnoreAnalyzer();
 
-  bool init(const std::string &, const std::string &, const rclcpp::Node::SharedPtr);
+  bool init(
+    const std::string & base_path,
+    const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node);
 
-  bool match(const std::string &) {return false;}
+  bool match(const std::string & name)
+  {
+    (void)name;
 
-  bool analyze(std::shared_ptr<StatusItem>) {return false;}
+    return false;
+  }
+
+  bool analyze(std::shared_ptr<StatusItem> item)
+  {
+    (void)item;
+
+    return false;
+  }
 
   /*
    *\brief Always reports an empty vector

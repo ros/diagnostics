@@ -184,10 +184,12 @@ void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
 }
 
 bool Aggregator::addDiagnostics(
-  const std::shared_ptr<rmw_request_id_t>,
+  const std::shared_ptr<rmw_request_id_t> header,
   const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
   std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res)
 {
+  (void) header;
+
   RCLCPP_DEBUG(logger_, "Got load request for namespace %s", req->load_namespace.c_str());
   // Don't currently support relative or private namespace definitions
   if (req->load_namespace[0] != '/') {
