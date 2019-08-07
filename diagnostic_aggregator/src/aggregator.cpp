@@ -194,7 +194,8 @@ bool Aggregator::addDiagnostics(
   // Don't currently support relative or private namespace definitions
   if (req->load_namespace[0] != '/') {
     res->message =
-      "Requested load from non-global namespace. Private and relative namespaces are not supported.";
+      R"(Requested load from non-global namespace.
+      Private and relative namespaces are not supported.)";
     res->success = false;
     return true;
   }

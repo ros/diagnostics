@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
-#define DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP_
+#define DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP_
 
 #include <algorithm>
 #include <map>
@@ -45,14 +45,16 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
-#include <diagnostic_msgs/msg/diagnostic_status.hpp>
-#include <diagnostic_msgs/msg/key_value.hpp>
-#include <pluginlib/class_loader.hpp>
-#include <pluginlib/class_list_macros.hpp>
-
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
+
+#include "pluginlib/class_loader.hpp"
+#include "pluginlib/class_list_macros.hpp"
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -151,7 +153,8 @@ public:
   virtual bool analyze(const std::shared_ptr<StatusItem> item);
 
   /*!
-   *\brief The processed output is the combined output of the sub-analyzers, and the top level status
+   *\brief The processed output is the combined output of the sub-analyzers,
+   * and the top level status
    */
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 
@@ -186,4 +189,4 @@ private:
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__ANALYZER_GROUP_HPP_

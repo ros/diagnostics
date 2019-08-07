@@ -35,14 +35,14 @@
 /**< \author Kevin Watts */
 /**< \author Arne Nordmann */
 
-#include <rclcpp/parameter.hpp>
+#include "diagnostic_aggregator/generic_analyzer.hpp"
 
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "diagnostic_aggregator/generic_analyzer.hpp"
+#include "rclcpp/parameter.hpp"
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer,
   diagnostic_aggregator::Analyzer)
@@ -165,7 +165,8 @@ bool GenericAnalyzer::init(
     RCLCPP_ERROR(
       rclcpp::get_logger(
         "generic_analyzer"),
-      "GenericAnalyzer '%s' was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
+      std::string("GenericAnalyzer ") +
+      "'%s' was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
       nice_name_.c_str(), path.c_str(), n->get_namespace());
     return false;
   }

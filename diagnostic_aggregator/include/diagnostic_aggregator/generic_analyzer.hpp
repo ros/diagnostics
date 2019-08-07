@@ -36,8 +36,8 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP_
+#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP_
 
 #include <map>
 #include <memory>
@@ -46,16 +46,17 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/logger.hpp>
-#include <pluginlib/class_list_macros.hpp>
-
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <diagnostic_msgs/msg/key_value.h>
-
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/generic_analyzer_base.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_status.h"
+#include "diagnostic_msgs/msg/key_value.h"
+
+#include "pluginlib/class_list_macros.hpp"
+
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logger.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -236,4 +237,4 @@ private:
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_HPP_

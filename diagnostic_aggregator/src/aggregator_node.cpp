@@ -36,9 +36,9 @@
 
 #include <exception>
 
-#include <rclcpp/executors.hpp>
-
 #include "diagnostic_aggregator/aggregator.hpp"
+
+#include "rclcpp/executors.hpp"
 
 using std::exception;
 

@@ -36,15 +36,15 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_
+#define DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_
 
 #include <memory>
 #include <vector>
 
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-
 #include "diagnostic_aggregator/generic_analyzer.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_status.h"
 
 namespace diagnostic_aggregator
 {
@@ -86,4 +86,4 @@ public:
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_

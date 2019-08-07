@@ -36,27 +36,28 @@
  *\author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
-#define DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP_
+#define DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP_
 
-#include <bondcpp/bond.hpp>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
-#include <diagnostic_msgs/msg/diagnostic_array.hpp>
-#include <diagnostic_msgs/msg/diagnostic_status.hpp>
-#include <diagnostic_msgs/msg/key_value.hpp>
-#include <diagnostic_msgs/srv/add_diagnostics.hpp>
+#include "bondcpp/bond.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
+#include "diagnostic_msgs/srv/add_diagnostics.hpp"
 
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/analyzer_group.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/other_analyzer.hpp"
 
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -215,4 +216,4 @@ struct BondIDMatch
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP_

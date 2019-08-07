@@ -35,8 +35,8 @@
 /**!< \author Kevin Watts */
 /**!< \author Arne Nordmann */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
-#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP_
+#define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP_
 
 #include <algorithm>
 #include <map>
@@ -45,13 +45,15 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
-#include <pluginlib/class_list_macros.hpp>
-#include <diagnostic_msgs/msg/diagnostic_status.h>
-#include <diagnostic_msgs/msg/key_value.h>
-
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_status.h"
+#include "diagnostic_msgs/msg/key_value.h"
+
+#include "pluginlib/class_list_macros.hpp"
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -135,7 +137,8 @@ public:
       RCLCPP_WARN(
         rclcpp::get_logger(
           "generic_analyzer_base"),
-        "GenericAnalyzerBase is asked to analyze diagnostics without being initialized. init() must be called in order to correctly use this class.");
+        R"(GenericAnalyzerBase is asked to analyze diagnostics without being initialized.
+        init() must be called in order to correctly use this class.)");
     }
 
     if (!has_initialized_) {
@@ -163,7 +166,8 @@ public:
       RCLCPP_ERROR(
         rclcpp::get_logger(
           "generic_analyzer_base"),
-        "GenericAnalyzerBase is asked to report diagnostics without being initialized. init() must be called in order to correctly use this class.");
+        R"("GenericAnalyzerBase is asked to report diagnostics without being initialized.
+        init() must be called in order to correctly use this class.)");
     }
     if (!has_initialized_) {
       std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> vec;
@@ -229,8 +233,8 @@ public:
     if (num_items_expected_ == 0 && items_.empty()) {
       header_status->level = 0;
       header_status->message = "OK";
-    } else if (num_items_expected_ > 0 && \
-      static_cast<int8_t>(items_.size()) != num_items_expected_)
+    } else if (num_items_expected_ > 0 &&  // NOLINT
+      static_cast<int8_t>(items_.size()) != num_items_expected_)  // NOLINT
     {
       int8_t lvl = 2;
       header_status->level = std::max(lvl, static_cast<int8_t>(header_status->level));
@@ -291,4 +295,4 @@ private:
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP_

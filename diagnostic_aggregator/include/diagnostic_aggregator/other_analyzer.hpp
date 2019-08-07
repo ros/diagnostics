@@ -36,16 +36,16 @@
  * \author Kevin Watts
  */
 
-#ifndef DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
-#define DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
+#ifndef DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP_
+#define DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP_
 
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <rclcpp/rclcpp.hpp>
-
 #include "diagnostic_aggregator/generic_analyzer_base.hpp"
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
@@ -113,7 +113,8 @@ public:
     RCLCPP_ERROR(
       rclcpp::get_logger(
         "generic_analyzer_base"),
-      "OtherAnalyzer was attempted to initialize with a NodeHandle. This analyzer cannot be used as a plugin.");
+      R"(OtherAnalyzer was attempted to initialize with a NodeHandle.
+      This analyzer cannot be used as a plugin.)");
     return false;
   }
 
@@ -163,4 +164,4 @@ private:
 
 }  // namespace diagnostic_aggregator
 
-#endif  // DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP
+#endif  // DIAGNOSTIC_AGGREGATOR__OTHER_ANALYZER_HPP_

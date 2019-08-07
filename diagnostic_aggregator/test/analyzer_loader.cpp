@@ -36,13 +36,14 @@
 
 /**< \author Loads analyzer params, verifies that they are valid */
 
-#include <diagnostic_aggregator/analyzer_group.hpp>
+#include <gtest/gtest.h>
 
 #include <memory>
 #include <string>
 
-#include <rclcpp/rclcpp.hpp>
-#include <gtest/gtest.h>
+#include "diagnostic_aggregator/analyzer_group.hpp"
+
+#include "rclcpp/rclcpp.hpp"
 
 // Uses AnalyzerGroup to load analyzers
 TEST(AnalyzerLoader, analyzerLoading)
