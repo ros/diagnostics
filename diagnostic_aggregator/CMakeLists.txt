@@ -85,11 +85,6 @@ endif()
 
 ament_python_install_package(${PROJECT_NAME})
 install(
-  FILES ${PROJECT_NAME}/add_analyzers.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(
   TARGETS ${PROJECT_NAME} ${PLUGIN_LIB}
   DESTINATION lib/${PROJECT_NAME}
 )
@@ -97,6 +92,22 @@ install(
 install(
   DIRECTORY include/
   DESTINATION include
+)
+
+# Install Demo
+set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/demo_pub.yaml")
+configure_file(demo/demo.launch.py.in demo.launch.py @ONLY)
+install( # launch descriptor
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/demo.launch.py
+  DESTINATION share/${PROJECT_NAME}
+)
+install( # example publisher
+  FILES demo/demo_pub.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+install( # example aggregator configration
+  FILES demo/demo_pub.yaml
+  DESTINATION share/${PROJECT_NAME}
 )
 
 pluginlib_export_plugin_description_file(${PLUGIN_LIB} plugin_description.xml)
