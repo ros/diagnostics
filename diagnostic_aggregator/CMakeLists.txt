@@ -66,17 +66,11 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
-  find_package(ament_cmake_gtest REQUIRED)
-
-  ament_add_gtest(analyzer_loader test/analyzer_loader.cpp)
-  if(TARGET analyzer_loader)
-    target_include_directories(analyzer_loader PUBLIC
-      ${rclcpp_INCLUDE_DIRS}
-    )
-    target_link_libraries(analyzer_loader
-      ${PROJECT_NAME}
-      ${PLUGIN_LIB})
-  endif()
+  
+  find_package(launch_testing_ament_cmake REQUIRED)
+  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/add_analyzers.yaml")
+  configure_file(test/test.launch.py.in add_analyzers.launch.py @ONLY)
+  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/add_analyzers.launch.py)
 
   # TODO(Karsten1987): Re-enable when bondpy is ported
   # find_package(ament_cmake_pytest REQUIRED)

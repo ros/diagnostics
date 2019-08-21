@@ -1,9 +1,12 @@
 analyzers:
-  primary:
-    type: 'diagnostic_aggregator/GenericAnalyzer'
-    path: Primary
-    startswith: 'primary'
-  secondary:
-    type: 'diagnostic_aggregator/GenericAnalyzer'
-    path: Secondary
-    startswith: 'secondary'
+  ros__parameters:
+    log_level: debug
+    path: /TEST
+    primary:
+      type: 'diagnostic_aggregator/GenericAnalyzer'
+      path: Primary
+      startswith: [ 'primary' ]
+    secondary:
+      type: 'diagnostic_aggregator/GenericAnalyzer'
+      path: Secondary
+      startswith: [ 'secondary' ]
