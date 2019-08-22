@@ -69,7 +69,12 @@ if(BUILD_TESTING)
   
   find_package(launch_testing_ament_cmake REQUIRED)
   set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/add_analyzers.yaml")
-  configure_file(test/test.launch.py.in add_analyzers.launch.py @ONLY)
+  configure_file(test/dumb-sm-test.launch.py.in dumb-sm-test.launch.py @ONLY)
+  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/dumb-sm-test.launch.py)
+  
+  find_package(launch_testing_ament_cmake REQUIRED)
+  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/add_analyzers.yaml")
+  configure_file(test/add_analyzers.launch.py.in add_analyzers.launch.py @ONLY)
   add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/add_analyzers.launch.py)
 
   # TODO(Karsten1987): Re-enable when bondpy is ported

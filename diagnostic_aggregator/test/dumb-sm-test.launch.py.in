@@ -1,0 +1,35 @@
+"""
+Launch the analyzer loader with parameters from yaml for testing.
+"""
+
+import launch
+import launch.actions
+import launch_ros.actions
+
+import launch_testing
+import launch_testing.util
+
+import logging
+import unittest
+
+analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
+
+logging.root.setLevel(logging.DEBUG)
+
+aggregator = launch_ros.actions.Node(
+    package ='diagnostic_aggregator',
+    node_executable='aggregator_node',
+    output='screen',
+    parameters=[analyzer_params_filepath])
+
+def generate_test_description(ready_fn):
+        
+    return launch.LaunchDescription([
+        aggregator,
+        launch.actions.OpaqueFunction(function=lambda context: ready_fn()),
+    ])
+    
+class TestStateMachine(unittest.TestCase):
+
+    def test_statemachine_in_output(self):
+        self.proc_output.assertWaitFor('WaitingForSister', timeout=10)

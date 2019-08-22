@@ -25,22 +25,14 @@ aggregator = launch_ros.actions.Node(
 def generate_test_description(ready_fn):
         
     return launch.LaunchDescription([
-        aggregator
+        aggregator,
+        launch.actions.OpaqueFunction(function=lambda context: ready_fn()),
     ])
 
-@launch_testing.post_shutdown_test()
-class TestProcessOutput(unittest.TestCase):
+class TestAnalyzers(unittest.TestCase):
+        
+    def test_primary_in_output(self):
+        self.proc_output.assertWaitFor('/TEST/Primary', timeout=10)
 
-    def test_primary_analyzer_in_output(self):
-        launch_testing.asserts.assertInStdout(
-            self.proc_output,
-            "/TEST/Primary",
-            aggregator
-        )
-
-    def test_secondary_analyzer_in_output(self):
-        launch_testing.asserts.assertInStdout(
-            self.proc_output,
-            "/TEST/Secondary",
-            aggregator
-        )
+    def test_secondary_in_output(self):
+        self.proc_output.assertWaitFor('/TEST/Secondary', timeout=10)
