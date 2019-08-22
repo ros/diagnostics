@@ -101,11 +101,11 @@ install( # launch descriptor
   DESTINATION share/${PROJECT_NAME}
 )
 install( # example publisher
-  FILES demo/demo_pub.py
+  FILES demo/demo.pub.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install( # example aggregator configration
-  FILES demo/demo_pub.yaml
+  FILES demo/demo.yaml
   DESTINATION share/${PROJECT_NAME}
 )
 
