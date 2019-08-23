@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
   // The Updater class advertises to /diagnostics, and has a
   // ~diagnostic_period parameter that says how often the diagnostics
   // should be published.
-  diagnostic_updater::Updater updater;
+  diagnostic_updater::Updater updater(node);
 
   // The diagnostic_updater::Updater class will fill out the hardware_id
   // field of the diagnostic_msgs::DiagnosticStatus message. You need to
@@ -186,7 +186,7 @@ int main(int argc, char ** argv)
   // is in a special state.
   updater.broadcast(0, "Doing important initialization stuff.");
 
-  auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 1);
+  auto pub1 = node->create_publisher<std_msgs::msg::Bool>("topic1", 10);
   rclcpp::Rate(2).sleep();  // It isn't important if it doesn't take time.
 
   // Some diagnostic tasks are very common, such as checking the rate
@@ -233,7 +233,7 @@ int main(int argc, char ** argv)
 
   while (rclcpp::ok()) {
     std_msgs::msg::Bool msg;
-    rclcpp::Rate(0.1).sleep();
+    rclcpp::Rate(10).sleep();
 
     // Calls to pub1 have to be accompanied by calls to pub1_freq to keep
     // the statistics up to date.

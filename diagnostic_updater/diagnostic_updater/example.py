@@ -192,7 +192,7 @@ def main():
     # is in a special state.
     updater.broadcast(b'0', 'Doing important initialization stuff.')
 
-    pub1 = node.create_publisher(std_msgs.msg.Bool, 'topic1')
+    pub1 = node.create_publisher(std_msgs.msg.Bool, 'topic1', 10)
     sleep(2)  # It isn't important if it doesn't take time.
 
     # Some diagnostic tasks are very common, such as checking the rate
