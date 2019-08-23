@@ -244,6 +244,7 @@ int main(int argc, char ** argv)
     // We can call updater.update whenever is convenient. It will take care
     // of rate-limiting the updates.
     updater.update();
+    rclcpp::spin_some(node);
   }
 
   return 0;
