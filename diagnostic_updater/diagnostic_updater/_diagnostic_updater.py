@@ -240,7 +240,7 @@ class Updater(DiagnosticTaskVector):
         self.last_time = now
 
         self.last_time_period_checked = self.last_time
-        self.period_parameter = node.get_name() + '.diagnostic_period'
+        self.period_parameter = 'diagnostic_updater.period'
         self.period = self.node.declare_parameter(self.period_parameter, 1.0).value
 
         self.verbose = False
