@@ -393,7 +393,7 @@ public:
     warn_nohwid_done_(false)
   {
     double period = parameters_interface->declare_parameter(
-      "diagnostic_updater.period", rclcpp::ParameterValue(1.0)).get<double>();
+      "diagnostic_updater.period", rclcpp::ParameterValue(1.0), rcl_interfaces::msg::ParameterDescriptor()).get<double>();
     period_ = static_cast<rcl_duration_value_t>(period * 1e9);
     next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
   }
