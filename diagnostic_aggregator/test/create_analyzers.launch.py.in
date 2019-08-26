@@ -21,12 +21,9 @@ import launch.event_handlers.on_process_start
 
 import launch_ros.actions
 import launch_ros.events
-import launch_ros.events.lifecycle
 
 import launch_testing
 import launch_testing.asserts
-
-import lifecycle_msgs.msg
 
 analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
 test_strings_ordered = @TEST_STRINGS_ORDERED@
