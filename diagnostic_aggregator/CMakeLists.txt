@@ -63,19 +63,25 @@ install(
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+  find_package(launch_testing_ament_cmake REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_flake8_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/primitive_analyzers.yaml")
+  set(TEST_STRINGS_ORDERED "['/Primary', '/Secondary', ]")
+  configure_file(test/create_analyzers.launch.py.in primitive_analyzers.launch.py @ONLY)
+  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/primitive_analyzers.launch.py)
   
-  find_package(launch_testing_ament_cmake REQUIRED)
-  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/add_analyzers.yaml")
-  configure_file(test/dumb-sm-test.launch.py.in dumb-sm-test.launch.py @ONLY)
-  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/dumb-sm-test.launch.py)
+  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/all_basic_analyzers.yaml")
+  set(TEST_STRINGS_ORDERED "['/BASIC/First', 'prefix1', '/BASIC/Third', 'prefix3', ]")
+  configure_file(test/create_analyzers.launch.py.in all_basic_analyzers.launch.py @ONLY)
+  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/all_basic_analyzers.launch.py)
   
-  find_package(launch_testing_ament_cmake REQUIRED)
-  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/add_analyzers.yaml")
-  configure_file(test/add_analyzers.launch.py.in add_analyzers.launch.py @ONLY)
-  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/add_analyzers.launch.py)
+  set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/analyzer_group.yaml")
+  set(TEST_STRINGS_ORDERED "['/TEST/Group01/Primary', 'primary.analyzers.primary', '/TEST/Group01/Secondary', 'primary.analyzers.secondary']")
+  configure_file(test/create_analyzers.launch.py.in analyzer_group.launch.py @ONLY)
+  add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/analyzer_group.launch.py)
 
   # TODO(Karsten1987): Re-enable when bondpy is ported
   # find_package(ament_cmake_pytest REQUIRED)

@@ -1,7 +1,6 @@
 analyzers:
   ros__parameters:
     log_level: debug
-    path: /TEST
     primary:
       type: 'diagnostic_aggregator/GenericAnalyzer'
       path: Primary

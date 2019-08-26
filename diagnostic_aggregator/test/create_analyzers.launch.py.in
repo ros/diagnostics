@@ -1,0 +1,58 @@
+# Copyright 2019 Open Source Robotics Foundation, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import re
+import unittest
+
+import launch
+import launch.actions
+import launch.event_handlers.on_process_start
+
+import launch_ros.actions
+import launch_ros.events
+import launch_ros.events.lifecycle
+
+import launch_testing
+import launch_testing.asserts
+
+import lifecycle_msgs.msg
+
+analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
+test_strings_ordered = @TEST_STRINGS_ORDERED@
+
+def generate_test_description(ready_fn):
+    aggregator = launch_ros.actions.Node(
+        package ='diagnostic_aggregator',
+        node_executable='aggregator_node',
+        output='screen',
+        parameters=[analyzer_params_filepath]
+    )
+    return launch.LaunchDescription([
+        aggregator,
+        launch.actions.OpaqueFunction(function=lambda context: ready_fn()),
+    ]), locals()
+
+@launch_testing.post_shutdown_test()
+class TestAggregatorShutdown(unittest.TestCase):
+
+    def test_talker_graceful_shutdown(self, proc_info, aggregator):
+        """Test aggregatorr graceful shutdown."""
+        launch_testing.asserts.assertExitCodes(proc_info, process=aggregator)
+
+
+class TestAnalyzers(unittest.TestCase):
+        
+    def test_strings_in_output(self):
+        for test_string in test_strings_ordered:
+            self.proc_output.assertWaitFor(test_string, timeout=5)

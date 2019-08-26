@@ -75,7 +75,7 @@ Aggregator::Aggregator()
     if (param.first.compare("pub_rate") == 0) {
       pub_rate_ = param.second.as_double();
     } else if (param.first.compare("path") == 0) {
-      base_path_ = param.second.as_string();
+      base_path_.append(param.second.as_string());
     } else if (param.first.compare("other_as_errors") == 0) {
       other_as_errors = param.second.as_bool();
     }
@@ -93,6 +93,9 @@ Aggregator::Aggregator()
   // Last analyzer handles remaining data
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
+  
+  // @todo(anordman): This cout somehow is necessary to continue screen output for testing
+  std::cout << "Aggregator created, starting analysis..." << std::endl;
 
   add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>(
     "/diagnostics_agg/add_diagnostics",
