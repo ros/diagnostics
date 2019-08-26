@@ -72,12 +72,12 @@ if(BUILD_TESTING)
   set(TEST_STRINGS_ORDERED "['/Primary', '/Secondary', ]")
   configure_file(test/create_analyzers.launch.py.in primitive_analyzers.launch.py @ONLY)
   add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/primitive_analyzers.launch.py)
-  
+
   set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/all_basic_analyzers.yaml")
   set(TEST_STRINGS_ORDERED "['/BASIC/First', 'prefix1', '/BASIC/Third', 'prefix3', ]")
   configure_file(test/create_analyzers.launch.py.in all_basic_analyzers.launch.py @ONLY)
   add_launch_test(${CMAKE_CURRENT_BINARY_DIR}/all_basic_analyzers.launch.py)
-  
+
   set(ANALYZER_PARAMS_FILEPATH "${CMAKE_CURRENT_SOURCE_DIR}/test/analyzer_group.yaml")
   set(TEST_STRINGS_ORDERED "['/TEST/Group01/Primary', 'primary.analyzers.primary', '/TEST/Group01/Secondary', 'primary.analyzers.secondary']")
   configure_file(test/create_analyzers.launch.py.in analyzer_group.launch.py @ONLY)

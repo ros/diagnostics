@@ -48,9 +48,8 @@
 // Uses AnalyzerGroup to load analyzers
 TEST(AnalyzerLoader, analyzerLoading)
 {
-  auto nh = std::make_shared<rclcpp::Node>("analyzers",
-    "",
-    rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
+  auto nh = std::make_shared<rclcpp::Node>(
+    "analyzers", "", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
 
   diagnostic_aggregator::AnalyzerGroup analyzer_group;
   std::string path = "/BASE/PATH";

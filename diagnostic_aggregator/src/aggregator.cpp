@@ -93,7 +93,7 @@ Aggregator::Aggregator()
   // Last analyzer handles remaining data
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
-  
+
   // @todo(anordman): This cout somehow is necessary to continue screen output for testing
   std::cout << "Aggregator created, starting analysis..." << std::endl;
 
