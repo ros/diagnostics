@@ -250,7 +250,6 @@ public:
    * called, and in particular it need not be valid at the time the
    * DiagnosticTaskVector is destructed.
    */
-
   void add(const std::string & name, TaskFunction f)
   {
     DiagnosticTaskInternal int_task(name, f);
@@ -264,7 +263,6 @@ public:
    * least until the last time its diagnostic method is called. It need not be
    * valid at the time the DiagnosticTaskVector is destructed.
    */
-
   void add(DiagnosticTask & task)
   {
     TaskFunction f = std::bind(&DiagnosticTask::run, &task, std::placeholders::_1);
@@ -303,7 +301,6 @@ public:
    *
    * \return Returns true if a task matched and was removed.
    */
-
   bool removeByName(const std::string name)
   {
     std::unique_lock<std::mutex> lock(lock_);
@@ -364,8 +361,8 @@ public:
   /**
    * \brief Constructs an updater class.
    *
-   * \param h Node handle from which to get the diagnostic_period
-   * parameter.
+   * \param node Node pointer to set up diagnostics
+   * \param period Value in seconds to set the update period
    */
   template<class NodeT>
   explicit Updater(NodeT node, double period = 1.0)
@@ -389,7 +386,7 @@ public:
     base_interface_(base_interface),
     timers_interface_(timers_interface),
     clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)),
-    period_(rclcpp::Duration(period * 1e9)),
+    period_(static_cast<rcl_duration_value_t>(period * 1e9)),
     publisher_(
       rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
         topics_interface, "/diagnostics", 1)),
@@ -399,7 +396,7 @@ public:
   {
     period = parameters_interface->declare_parameter(
       "diagnostic_updater.period", rclcpp::ParameterValue(period)).get<double>();
-    period_ = rclcpp::Duration(period, 0);
+    period_ = rclcpp::Duration(static_cast<rcl_duration_value_t>(period * 1e9));
 
     reset_timer();
   }
@@ -461,7 +458,6 @@ public:
   /**
    * \brief Returns the interval between updates.
    */
-
   auto getPeriod() const {return period_;}
 
   /**
@@ -486,7 +482,7 @@ public:
    */
   void setPeriod(double period)
   {
-    setPeriod(rclcpp::Duration(period, 0));
+    setPeriod(static_cast<rcl_duration_value_t>(period * 1e9));
   }
 
   /**
@@ -499,7 +495,6 @@ public:
    *
    * \param msg Status message to output.
    */
-
   void broadcast(int lvl, const std::string msg)
   {
     std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
