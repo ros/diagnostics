@@ -242,6 +242,8 @@ private:
   const std::vector<DiagnosticTaskInternal> & getTasks() {return tasks_;}
 
 public:
+  virtual ~DiagnosticTaskVector() {}
+
   /**
    * \brief Add a DiagnosticTask embodied by a name and function to the
    * DiagnosticTaskVector
