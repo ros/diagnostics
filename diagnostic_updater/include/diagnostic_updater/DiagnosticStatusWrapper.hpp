@@ -72,6 +72,16 @@ public:
   {}
 
   /**
+   * \brief Copy constructor
+   * Defined and marked explicit so that you don't accidentally use a
+   * function<void(DiagnosticStatusWrapper)> where a function<void(DiagnosticStatusWrapper &)>
+   * is needed. Otherwise, it's easy to accidentally create a DiagnosticTask that silently does
+   * nothing.
+   * \param other Reference to object to copy
+   */
+  explicit DiagnosticStatusWrapper(const DiagnosticStatusWrapper & other);
+
+  /**
    * \brief Fills out the level and message fields of the DiagnosticStatus.
    *
    * \param lvl Numerical level to assign to this Status (OK, Warn, Err).
