@@ -39,8 +39,8 @@
 #include <memory>
 #include <string>
 
-#include "diagnostic_updater/update_functions.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
+#include "diagnostic_updater/update_functions.hpp"
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"

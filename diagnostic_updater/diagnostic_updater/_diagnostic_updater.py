@@ -222,11 +222,8 @@ class Updater(DiagnosticTaskVector):
     should be called frequently. At some predetermined rate, the update
     function will cause all the diagnostic tasks to run, and will collate
     and publish the resulting diagnostics. The publication rate is
-    determined by the "~diagnostic_period" ros parameter.
-    The class also allows an update to be forced when something significant
-    has happened, and allows a single message to be broadcast on all the
-    diagnostics if normal operation of the node is suspended for some
-    reason.
+    determined by the "~/diagnostic_updater.period" ros2 parameter.
+    The update function can always be triggered async to the period interval.
     """
 
     def __init__(self, node, period=1.0):

@@ -36,8 +36,8 @@
  * @author Blaise Gassend
  */
 
-#ifndef DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_
-#define DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_
+#ifndef DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_
+#define DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_
 
 #include <stdarg.h>
 #include <cstdio>
@@ -295,4 +295,4 @@ DiagnosticStatusWrapper::addf(
   va_end(va);
 }
 }  // namespace diagnostic_updater
-#endif  // DIAGNOSTIC_UPDATER__DIAGNOSTICSTATUSWRAPPER_HPP_
+#endif  // DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_
