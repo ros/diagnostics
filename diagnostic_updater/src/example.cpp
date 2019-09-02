@@ -225,7 +225,7 @@ int main(int argc, char ** argv)
 
   // If we know that the state of the node just changed, we can force an
   // immediate update.
-  updater.update();
+  updater.force_update();
 
   // We can remove a task by refering to its name.
   if (!updater.removeByName("Bound check")) {

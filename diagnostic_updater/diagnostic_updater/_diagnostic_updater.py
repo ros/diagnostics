@@ -223,7 +223,7 @@ class Updater(DiagnosticTaskVector):
     function will cause all the diagnostic tasks to run, and will collate
     and publish the resulting diagnostics. The publication rate is
     determined by the "~/diagnostic_updater.period" ros2 parameter.
-    The update function can always be triggered async to the period interval.
+    The force_update function can always be triggered async to the period interval.
     """
 
     def __init__(self, node, period=1.0):
@@ -285,6 +285,12 @@ class Updater(DiagnosticTaskVector):
         self.__period = period
         self.timer.reset()
         self.timer = self.node.creat_timer(self.__period, self.udpate)
+
+    def force_update(self):
+        """
+        Forces to send out an update for all known DiagnosticStatus.
+        """
+        self.update()
 
     def broadcast(self, lvl, msg):
         """

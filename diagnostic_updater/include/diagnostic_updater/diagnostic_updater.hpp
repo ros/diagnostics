@@ -347,7 +347,7 @@ protected:
  * function will cause all the diagnostic tasks to run, and will collate
  * and publish the resulting diagnostics. The publication rate is
  * determined by the "~/diagnostic_updater.period" ros2 parameter.
- * The update function can always be triggered async to the period interval.
+ * The force_update function can always be triggered async to the period interval.
  */
 class Updater : public DiagnosticTaskVector
 {
@@ -400,60 +400,6 @@ public:
   }
 
   /**
-   * \brief Causes the diagnostics to update if the inter-update interval
-   * has been exceeded.
-   */
-  void update()
-  {
-    if (rclcpp::ok()) {
-      bool warn_nohwid = hwid_.empty();
-
-      std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
-
-      std::unique_lock<std::mutex> lock(
-        lock_);    // Make sure no adds happen while we are processing here.
-      const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
-      for (std::vector<DiagnosticTaskInternal>::const_iterator iter =
-        tasks.begin();
-        iter != tasks.end(); iter++)
-      {
-        diagnostic_updater::DiagnosticStatusWrapper status;
-
-        status.name = iter->getName();
-        status.level = 2;
-        status.message = "No message was set";
-        status.hardware_id = hwid_;
-
-        iter->run(status);
-
-        status_vec.push_back(status);
-
-        if (status.level) {
-          warn_nohwid = false;
-        }
-
-        if (verbose_ && status.level) {
-          RCLCPP_WARN(
-            logger_, "Non-zero diagnostic status. Name: '%s', status %i: '%s'",
-            status.name.c_str(), status.level, status.message.c_str());
-        }
-      }
-
-      if (warn_nohwid && !warn_nohwid_done_) {
-        std::string error_msg = "diagnostic_updater: No HW_ID was set.";
-        error_msg += " This is probably a bug. Please report it.";
-        error_msg += " For devices that do not have a HW_ID, set this value to 'none'.";
-        error_msg += " This warning only occurs once all diagnostics are OK.";
-        error_msg += " It is okay to wait until the device is open before calling setHardwareID.";
-        RCLCPP_WARN(logger_, error_msg);
-        warn_nohwid_done_ = true;
-      }
-
-      publish(status_vec);
-    }
-  }
-
-  /**
    * \brief Returns the interval between updates.
    */
   auto getPeriod() const {return period_;}
@@ -481,6 +427,14 @@ public:
   void setPeriod(double period)
   {
     setPeriod(static_cast<rcl_duration_value_t>(period * 1e9));
+  }
+
+  /**
+   * \brief Forces to send out an update for all known DiagnosticStatus.
+   */
+  void force_update()
+  {
+    update();
   }
 
   /**
@@ -537,6 +491,60 @@ private:
       clock_,
       period_,
       std::bind(&Updater::update, this));
+  }
+
+  /**
+   * \brief Causes the diagnostics to update if the inter-update interval
+   * has been exceeded.
+   */
+  void update()
+  {
+    if (rclcpp::ok()) {
+      bool warn_nohwid = hwid_.empty();
+
+      std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
+
+      std::unique_lock<std::mutex> lock(
+        lock_);    // Make sure no adds happen while we are processing here.
+      const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
+      for (std::vector<DiagnosticTaskInternal>::const_iterator iter =
+        tasks.begin();
+        iter != tasks.end(); iter++)
+      {
+        diagnostic_updater::DiagnosticStatusWrapper status;
+
+        status.name = iter->getName();
+        status.level = 2;
+        status.message = "No message was set";
+        status.hardware_id = hwid_;
+
+        iter->run(status);
+
+        status_vec.push_back(status);
+
+        if (status.level) {
+          warn_nohwid = false;
+        }
+
+        if (verbose_ && status.level) {
+          RCLCPP_WARN(
+            logger_, "Non-zero diagnostic status. Name: '%s', status %i: '%s'",
+            status.name.c_str(), status.level, status.message.c_str());
+        }
+      }
+
+      if (warn_nohwid && !warn_nohwid_done_) {
+        std::string error_msg = "diagnostic_updater: No HW_ID was set.";
+        error_msg += " This is probably a bug. Please report it.";
+        error_msg += " For devices that do not have a HW_ID, set this value to 'none'.";
+        error_msg += " This warning only occurs once all diagnostics are OK.";
+        error_msg += " It is okay to wait until the device is open before calling setHardwareID.";
+        RCLCPP_WARN(logger_, error_msg);
+        warn_nohwid_done_ = true;
+      }
+
+      publish(status_vec);
+    }
   }
 
   /**
