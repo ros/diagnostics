@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2019-09-03)
+------------------
 * Use rclpp timer instead of custom updater logic. (`#114 <https://github.com/ros/diagnostics/issues/114>`_)
 * Use std::isfinite since it is supported on all platorms. (`#123 <https://github.com/ros/diagnostics/issues/123>`_)
 * Make DiagnosticStatusWrapper no longer implicitly copyable. (`#117 <https://github.com/ros/diagnostics/issues/117>`_)
