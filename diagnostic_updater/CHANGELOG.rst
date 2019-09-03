@@ -2,6 +2,21 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use rclpp timer instead of custom updater logic. (`#114 <https://github.com/ros/diagnostics/issues/114>`_)
+* Use std::isfinite since it is supported on all platorms. (`#123 <https://github.com/ros/diagnostics/issues/123>`_)
+* Make DiagnosticStatusWrapper no longer implicitly copyable. (`#117 <https://github.com/ros/diagnostics/issues/117>`_)
+* Add virtual destructor to task vector class. (`#122 <https://github.com/ros/diagnostics/issues/122>`_)
+* Support for node interfaces to allow diagnostics to be used with lifecycle nodes. (`#112 <https://github.com/ros/diagnostics/issues/112>`_)
+* Spin on node in diagnostic_updater example to query parameters. (`#120 <https://github.com/ros/diagnostics/issues/120>`_)
+* Set diagnostic_updater default period to 1s instead of 1ns. (`#110 <https://github.com/ros/diagnostics/issues/110>`_)
+* Make Karsten Knese Maintainer for ROS2 branches `#115 <https://github.com/ros/diagnostics/issues/115>`_
+* Migrate diagnostic_updater to ROS2 `#102 <https://github.com/ros/diagnostics/issues/102>`_
+* Custom names for FrequencyStatus and TimeStampStatus `#86 <https://github.com/ros/diagnostics/issues/86>`_
+* Make FrequencyStatus' name configurable `#84 <https://github.com/ros/diagnostics/issues/84>`_
+* Contributors: Austin, Dan Rose, Ian Colwell, Karsten Knese, Nils Bussas, Scott K Logan, VaibhavBhadade
+
 1.9.3 (2018-05-02)
 ------------------
 * Merge pull request `#73 <https://github.com/ros/diagnostics/issues/73>`_ from tue-robotics/indigo-devel

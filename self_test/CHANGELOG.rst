@@ -2,6 +2,12 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Migrate self_test to ros2 (`#104 <https://github.com/ros/diagnostics/issues/104>`_)
+* Make Karsten Knese maintainer for ros2 branches `#115 <https://github.com/ros/diagnostics/issues/115>`_
+* Contributors: Austin, Karsten Knese
+
 1.9.3 (2018-05-02)
 ------------------
 
