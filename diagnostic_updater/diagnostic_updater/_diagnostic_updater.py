@@ -287,9 +287,7 @@ class Updater(DiagnosticTaskVector):
         self.timer = self.node.creat_timer(self.__period, self.udpate)
 
     def force_update(self):
-        """
-        Forces to send out an update for all known DiagnosticStatus.
-        """
+        """Force sending out an update for all known DiagnosticStatus."""
         self.update()
 
     def broadcast(self, lvl, msg):
