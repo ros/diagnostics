@@ -53,7 +53,7 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
-  ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_DiagnosticStatusWrapper.py")
+  ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_diagnostic_status_wrapper.py")
 endif()
 
 ament_python_install_package(${PROJECT_NAME})

@@ -46,17 +46,12 @@
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
-#include "diagnostic_updater/DiagnosticStatusWrapper.hpp"
+#include "diagnostic_updater/diagnostic_status_wrapper.hpp"
 
 #include "rcl/time.h"
 
-#include "rclcpp/clock.hpp"
-#include "rclcpp/duration.hpp"
-#include "rclcpp/node.hpp"
-#include "rclcpp/parameter_client.hpp"
+#include "rclcpp/create_timer.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp/utilities.hpp"
-#include "rclcpp/time.hpp"
 
 namespace diagnostic_updater
 {
@@ -255,7 +250,6 @@ public:
    * called, and in particular it need not be valid at the time the
    * DiagnosticTaskVector is destructed.
    */
-
   void add(const std::string & name, TaskFunction f)
   {
     DiagnosticTaskInternal int_task(name, f);
@@ -269,7 +263,6 @@ public:
    * least until the last time its diagnostic method is called. It need not be
    * valid at the time the DiagnosticTaskVector is destructed.
    */
-
   void add(DiagnosticTask & task)
   {
     TaskFunction f = std::bind(&DiagnosticTask::run, &task, std::placeholders::_1);
@@ -308,7 +301,6 @@ public:
    *
    * \return Returns true if a task matched and was removed.
    */
-
   bool removeByName(const std::string name)
   {
     std::unique_lock<std::mutex> lock(lock_);
@@ -354,12 +346,8 @@ protected:
  * should be called frequently. At some predetermined rate, the update
  * function will cause all the diagnostic tasks to run, and will collate
  * and publish the resulting diagnostics. The publication rate is
- * determined by the "~diagnostic_period" ros parameter.
- *
- * The class also allows an update to be forced when something significant
- * has happened, and allows a single message to be broadcast on all the
- * diagnostics if normal operation of the node is suspended for some
- * reason.
+ * determined by the "~/diagnostic_updater.period" ros2 parameter.
+ * The force_update function can always be triggered async to the period interval.
  */
 class Updater : public DiagnosticTaskVector
 {
@@ -369,24 +357,34 @@ public:
   /**
    * \brief Constructs an updater class.
    *
-   * \param h Node handle from which to get the diagnostic_period
-   * parameter.
+   * \param node Node pointer to set up diagnostics
+   * \param period Value in seconds to set the update period
+   * \note The given period value not being used if the `diagnostic_updater.period`
+   * ros2 parameter was set previously.
    */
   template<class NodeT>
-  explicit Updater(NodeT node)
+  explicit Updater(NodeT node, double period = 1.0)
   : Updater(
       node->get_node_base_interface(),
-      node->get_node_topics_interface(),
       node->get_node_logging_interface(),
-      node->get_node_parameters_interface())
+      node->get_node_parameters_interface(),
+      node->get_node_timers_interface(),
+      node->get_node_topics_interface(),
+      period)
   {}
 
   Updater(
     std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface> base_interface,
-    std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeLoggingInterface> logging_interface,
-    std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface)
+    std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
+    double period = 1.0)
   : verbose_(false),
+    base_interface_(base_interface),
+    timers_interface_(timers_interface),
+    clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)),
+    period_(static_cast<rcl_duration_value_t>(period * 1e9)),
     publisher_(
       rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
         topics_interface, "/diagnostics", 1)),
@@ -394,10 +392,105 @@ public:
     node_name_(base_interface->get_name()),
     warn_nohwid_done_(false)
   {
-    double period = parameters_interface->declare_parameter(
-      "diagnostic_updater.period", rclcpp::ParameterValue(1.0)).get<double>();
-    period_ = static_cast<rcl_duration_value_t>(period * 1e9);
-    next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
+    period = parameters_interface->declare_parameter(
+      "diagnostic_updater.period", rclcpp::ParameterValue(period)).get<double>();
+    period_ = rclcpp::Duration(static_cast<rcl_duration_value_t>(period * 1e9));
+
+    reset_timer();
+  }
+
+  /**
+   * \brief Returns the interval between updates.
+   */
+  auto getPeriod() const {return period_;}
+
+  /**
+   * \brief Sets the period as a rclcpp::Duration
+   */
+  void setPeriod(rclcpp::Duration period)
+  {
+    period_ = period;
+    reset_timer();
+  }
+
+  /**
+   * \brief Sets the period as a rcl_duration_value_t
+   */
+  void setPeriod(rcl_duration_value_t period)
+  {
+    setPeriod(rclcpp::Duration(period));
+  }
+
+  /**
+   * \brief Sets the period given a value in seconds
+   */
+  void setPeriod(double period)
+  {
+    setPeriod(static_cast<rcl_duration_value_t>(period * 1e9));
+  }
+
+  /**
+   * \brief Forces to send out an update for all known DiagnosticStatus.
+   */
+  void force_update()
+  {
+    update();
+  }
+
+  /**
+   * \brief Output a message on all the known DiagnosticStatus.
+   *
+   * Useful if something drastic is happening such as shutdown or a
+   * self-test.
+   *
+   * \param lvl Level of the diagnostic being output.
+   *
+   * \param msg Status message to output.
+   */
+  void broadcast(int lvl, const std::string msg)
+  {
+    std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
+
+    const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
+    for (std::vector<DiagnosticTaskInternal>::const_iterator iter =
+      tasks.begin();
+      iter != tasks.end(); iter++)
+    {
+      diagnostic_updater::DiagnosticStatusWrapper status;
+
+      status.name = iter->getName();
+      status.summary(lvl, msg);
+
+      status_vec.push_back(status);
+    }
+
+    publish(status_vec);
+  }
+
+  void setHardwareIDf(const char * format, ...)
+  {
+    va_list va;
+    const int kBufferSize = 1000;
+    char buff[kBufferSize];  // @todo This could be done more elegantly.
+    va_start(va, format);
+    if (vsnprintf(buff, kBufferSize, format, va) >= kBufferSize) {
+      RCLCPP_DEBUG(logger_, "Really long string in diagnostic_updater::setHardwareIDf.");
+    }
+    hwid_ = std::string(buff);
+    va_end(va);
+  }
+
+  void setHardwareID(const std::string & hwid) {hwid_ = hwid;}
+
+private:
+  void reset_timer()
+  {
+    update_timer_ = rclcpp::create_timer(
+      base_interface_.get(),
+      timers_interface_.get(),
+      clock_,
+      period_,
+      std::bind(&Updater::update, this));
   }
 
   /**
@@ -406,28 +499,6 @@ public:
    */
   void update()
   {
-    rclcpp::Time now_time = rclcpp::Clock().now();
-
-    if (now_time < next_time_) {
-      // @todo put this back in after fix of #2157 update_diagnostic_period();
-      // Will be checked in force_update otherwise.
-      return;
-    }
-
-    force_update();
-  }
-
-  /**
-   * \brief Forces the diagnostics to update.
-   *
-   * Useful if the node has undergone a drastic state change that should be
-   * published immediately.
-   */
-  void force_update()
-  {
-    update_diagnostic_period();
-    next_time_ = rclcpp::Clock().now() + rclcpp::Duration(period_);
-
     if (rclcpp::ok()) {
       bool warn_nohwid = hwid_.empty();
 
@@ -477,84 +548,16 @@ public:
   }
 
   /**
-   * \brief Returns the interval between updates.
-   */
-
-  rcl_duration_value_t getPeriod() const {return period_;}
-
-  /**
-   * \brief Sets the period as a rcl_duration_value_t
-   */
-  void setPeriod(rcl_duration_value_t period)
-  {
-    period_ = period;
-  }
-
-  /**
-   * \brief Sets the period given a value in seconds
-   */
-  void setPeriod(double period)
-  {
-    period_ = rcl_duration_value_t(period * 1e9);
-  }
-
-  /**
-   * \brief Output a message on all the known DiagnosticStatus.
-   *
-   * Useful if something drastic is happening such as shutdown or a
-   * self-test.
-   *
-   * \param lvl Level of the diagnostic being output.
-   *
-   * \param msg Status message to output.
-   */
-
-  void broadcast(int lvl, const std::string msg)
-  {
-    std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
-
-    const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
-    for (std::vector<DiagnosticTaskInternal>::const_iterator iter =
-      tasks.begin();
-      iter != tasks.end(); iter++)
-    {
-      diagnostic_updater::DiagnosticStatusWrapper status;
-
-      status.name = iter->getName();
-      status.summary(lvl, msg);
-
-      status_vec.push_back(status);
-    }
-
-    publish(status_vec);
-  }
-
-  void setHardwareIDf(const char * format, ...)
-  {
-    va_list va;
-    const int kBufferSize = 1000;
-    char buff[kBufferSize];  // @todo This could be done more elegantly.
-    va_start(va, format);
-    if (vsnprintf(buff, kBufferSize, format, va) >= kBufferSize) {
-      RCLCPP_DEBUG(logger_, "Really long string in diagnostic_updater::setHardwareIDf.");
-    }
-    hwid_ = std::string(buff);
-    va_end(va);
-  }
-
-  void setHardwareID(const std::string & hwid) {hwid_ = hwid;}
-
-private:
-  /**
    * Recheck the diagnostic_period on the parameter server. (Cached)
    */
 
-  void update_diagnostic_period()
-  {
-    rcl_duration_value_t old_period = period_;
-    next_time_ = next_time_ +
-      rclcpp::Duration(period_ - old_period);             // Update next_time_
-  }
+  // TODO(Karsten1987) Follow up PR for eloquent
+  // void update_diagnostic_period()
+  // {
+  //   // rcl_duration_value_t old_period = period_;
+  //   // next_time_ = next_time_ +
+  //   //   rclcpp::Duration(period_ - old_period);             // Update next_time_
+  // }
 
   /**
    * Publishes a single diagnostic status.
@@ -596,12 +599,14 @@ private:
     publish(stat);
   }
 
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr base_interface_;
+  rclcpp::node_interfaces::NodeTimersInterface::SharedPtr timers_interface_;
+  rclcpp::Clock::SharedPtr clock_;
+  rclcpp::Duration period_;
+  rclcpp::TimerBase::SharedPtr update_timer_;
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
   rclcpp::Logger logger_;
 
-  rclcpp::Time next_time_;
-
-  rcl_duration_value_t period_;
   std::string hwid_;
   std::string node_name_;
   bool warn_nohwid_done_;

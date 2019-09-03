@@ -38,11 +38,12 @@
 #include <memory>
 #include <thread>
 
-#include "diagnostic_updater/DiagnosticStatusWrapper.hpp"
+#include "diagnostic_updater/diagnostic_status_wrapper.hpp"
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "diagnostic_updater/update_functions.hpp"
 
 #include "rclcpp/rclcpp.hpp"
+
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 using namespace std::chrono_literals;
