@@ -238,6 +238,6 @@ private:
   ros::Publisher publisher_;
 };
 
-};
+}
 
 #endif
