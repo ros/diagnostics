@@ -473,6 +473,13 @@ public:
   BoundStatus(const BoundStatusParam &params, std::string name = "Bound Status")
     : DiagnosticTask(name), params_(params), current_value_(0), latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
+    clear();
+  }
+
+  void clear()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    current_value_ = 0;
   }
 
   void set(int value)

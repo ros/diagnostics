@@ -38,7 +38,8 @@
 
 #include <ros/publisher.h>
 #include <ros/subscription.h>
-#include <diagnostic_updater/update_functions.h>
+//#include <diagnostic_updater/update_functions.h>
+#include "update_functions.h"
 
 namespace diagnostic_updater
 {
@@ -53,13 +54,51 @@ public:
     diag.add(*this);
   }
 
+  virtual ~CountDiagnostic()
+  {
+  }
+
   virtual void tick()
   {
     count_.tick();
   }
 
+  virtual void clear()
+  {
+    count_.clear();
+  }
+
 private:
   diagnostic_updater::CountStatus count_;
+};
+
+class BoundDiagnostic : public CompositeDiagnosticTask
+{
+public:
+  BoundDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                  const diagnostic_updater::BoundStatusParam &bound)
+    : CompositeDiagnosticTask(name + " bound status"), bound_(bound)
+  {
+    addTask(&bound_);
+    diag.add(*this);
+  }
+
+  virtual ~BoundDiagnostic()
+  {
+  }
+
+  virtual void set(int value)
+  {
+    bound_.set(value);
+  }
+
+  virtual void clear()
+  {
+    bound_.clear();
+  }
+
+private:
+  diagnostic_updater::BoundStatus bound_;
 };
 /**
  * \brief A class to facilitate making diagnostics for a topic using a
