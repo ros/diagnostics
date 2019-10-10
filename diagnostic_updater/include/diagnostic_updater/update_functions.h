@@ -427,6 +427,84 @@ public:
     stat.summary(0, "Alive");
   }
 };
+
+struct BoundStatusParam
+{
+  BoundStatusParam(int error_upper_bound, int warn_upper_bound, int warn_lower_bound, int error_lower_bound)
+    : error_upper_bound_(error_upper_bound)
+    , warn_upper_bound_(warn_upper_bound)
+    , warn_lower_bound_(warn_lower_bound)
+    , error_lower_bound_(error_lower_bound)
+  {
+    if(error_upper_bound_ < error_lower_bound_)
+    {
+      ROS_WARN("Error upper bound must be grater than error lower bound. Swap them.");
+      int tmp            = error_upper_bound;
+      error_upper_bound_ = error_lower_bound_;
+      error_lower_bound_ = tmp;
+    }
+    if(warn_upper_bound_ > error_upper_bound_)
+    {
+      ROS_WARN("Warn upper bound must be less than error upper bound");
+      warn_upper_bound_ = error_upper_bound_;
+    }
+    if(warn_lower_bound_ < error_lower_bound_)
+    {
+      ROS_WARN("Warn lower bound must be grater than error lower bound");
+      warn_lower_bound_ = error_lower_bound_;
+    }
+  }
+
+  int error_upper_bound_;
+  int warn_upper_bound_;
+  int warn_lower_bound_;
+  int error_lower_bound_;
+};
+
+class BoundStatus : public DiagnosticTask
+{
+private:
+  const BoundStatusParam params_;
+  boost::mutex           lock_;
+  int                    current_value_;
+
+public:
+  BoundStatus(const BoundStatusParam &params, std::string name = "Bound Status") : DiagnosticTask(name), params_(params)
+  {
+  }
+
+  void set(int value)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    current_value_ = value;
+  }
+
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+
+    if(current_value_ > params_.error_upper_bound_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Current value exceeds upper bound.");
+    }
+    else if(current_value_ < params_.error_lower_bound_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Current value falls short of lower bound.");
+    }
+    else if(current_value_ > params_.warn_upper_bound_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Current value is in upper warning range.");
+    }
+    else if(current_value_ < params_.warn_lower_bound_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Current value is in lower warning range.");
+    }
+    else
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Current value is in nominal range.");
+    }
+  }
+};
 };  // namespace diagnostic_updater
 
 #endif
