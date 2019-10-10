@@ -100,6 +100,35 @@ public:
 private:
   diagnostic_updater::BoundStatus bound_;
 };
+
+class BoolDiagnostic : public CompositeDiagnosticTask
+{
+public:
+  BoolDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                 const diagnostic_updater::BoolStatusParam &bool_diag)
+    : CompositeDiagnosticTask(name + " bool_diag status"), bool_diag_(bool_diag)
+  {
+    addTask(&bool_diag_);
+    diag.add(*this);
+  }
+
+  virtual ~BoolDiagnostic()
+  {
+  }
+
+  virtual void set(bool result)
+  {
+    bool_diag_.set(result);
+  }
+
+  virtual void clear()
+  {
+    bool_diag_.clear();
+  }
+
+private:
+  diagnostic_updater::BoolStatus bool_diag_;
+};
 /**
  * \brief A class to facilitate making diagnostics for a topic using a
  * FrequencyStatus.
