@@ -570,6 +570,83 @@ public:
     stat.add("Error Threshold:", params_.error_threshold_);
   }
 };
+
+struct BoolStatusParam
+{
+  BoolStatusParam(bool publish_error = true) : publish_error_(publish_error)
+  {
+  }
+
+  /**
+   * \brief Publish ERROR if true, otherwise publish WARN
+   */
+  bool publish_error_;
+};
+
+class BoolStatus : public DiagnosticTask
+{
+private:
+  const BoolStatusParam params_;
+  bool                  is_success_;
+  int                   success_count_;
+  int                   fail_count_;
+  boost::mutex          lock_;
+
+public:
+  /**
+   * \brief Constructs a Bool Checker
+   */
+  BoolStatus(const BoolStatusParam &params, std::string name = "Bool Status")
+    : DiagnosticTask(name), params_(params), is_success_(false)
+  {
+    clear();
+  }
+
+  void clear()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    success_count_ = 0;
+    fail_count_    = 0;
+  }
+
+  void set(bool is_success)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    is_success_ = is_success;
+    if(is_success_)
+    {
+      success_count_++;
+      fail_count_ = 0;
+    }
+    else
+    {
+      success_count_ = 0;
+      fail_count_++;
+    }
+  }
+
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    if(is_success_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Latest process was successfully completed.");
+      stat.add("Successfull update count:", success_count_);
+    }
+    else
+    {
+      if(params_.publish_error_)
+      {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Latest process failed.");
+      }
+      else
+      {
+        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Latest process failed.");
+      }
+      stat.add("Failed update count:", fail_count_);
+    }
+  }
+};
 };  // namespace diagnostic_updater
 
 #endif
