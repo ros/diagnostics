@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: whill/ros_build_with_visionworks
+
+    shell: /bin/bash
+    working_directory: ~/catkin_ws/src/ros_target_pkg
+    environment:
+     DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - checkout
+
+      - run:
+          name: Resolve dependencies
+          command: |
+           apt-get update -qq
+           rosdep install -y --from-paths .. --ignore-src --rosdistro=melodic
+
+      - run:
+          name: catkin_make
+          command: |
+           source /opt/ros/melodic/setup.bash
+           cd ~/catkin_ws
+          
