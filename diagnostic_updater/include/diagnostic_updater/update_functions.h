@@ -505,6 +505,71 @@ public:
     }
   }
 };
+
+struct CountStatusParam
+{
+  CountStatusParam(int warn_threshold, int error_threshold)
+    : warn_threshold_(warn_threshold), error_threshold_(error_threshold)
+  {
+    if(warn_threshold_ > error_threshold_)
+    {
+      ROS_WARN("Error threshold must be grater than or equal to warn threshold.");
+      error_threshold_ = warn_threshold_;
+    }
+  }
+
+  int warn_threshold_;
+  int error_threshold_;
+};
+
+class CountStatus : public DiagnosticTask
+{
+private:
+  const CountStatusParam params_;
+  int                    count_;
+  boost::mutex           lock_;
+
+public:
+  CountStatus(const CountStatusParam &params, std::string name = "Count Status") : DiagnosticTask(name), params_(params)
+  {
+    clear();
+  }
+
+  void clear()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    count_ = 0;
+  }
+
+  /**
+   * \brief Signals that an event has occurred.
+   */
+  void tick()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    count_++;
+  }
+
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    if(count_ >= params_.error_threshold_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Count exceeds error limit.");
+    }
+    else if(count_ >= params_.warn_threshold_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Count exceeds warn limit.");
+    }
+    else
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Count is in nominal range.");
+    }
+    stat.add("Count:", count_);
+    stat.add("Warn Threshold:", params_.warn_threshold_);
+    stat.add("Error Threshold:", params_.error_threshold_);
+  }
+};
 };  // namespace diagnostic_updater
 
 #endif
