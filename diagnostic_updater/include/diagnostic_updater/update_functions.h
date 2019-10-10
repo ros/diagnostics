@@ -42,393 +42,391 @@
 
 namespace diagnostic_updater
 {
-
+/**
+ * \brief A structure that holds the constructor parameters for the
+ * FrequencyStatus class.
+ */
+struct FrequencyStatusParam
+{
   /**
-   * \brief A structure that holds the constructor parameters for the
-   * FrequencyStatus class.
+   * \brief Creates a filled-out FrequencyStatusParam.
    */
-  struct FrequencyStatusParam
+
+  FrequencyStatusParam(double *min_freq, double *max_freq, double tolerance = 0.1, int window_size = 5)
+    : min_freq_(min_freq), max_freq_(max_freq), tolerance_(tolerance), window_size_(window_size)
   {
-    /**
-     * \brief Creates a filled-out FrequencyStatusParam.
-     */
-
-    FrequencyStatusParam(double *min_freq, double *max_freq, double tolerance = 0.1, int window_size = 5) :
-      min_freq_(min_freq), max_freq_(max_freq), tolerance_(tolerance), window_size_(window_size)
-    {}
-
-    /**
-     * \brief Minimum acceptable frequency.
-     *
-     * A pointer is used so that the value can be updated.
-     */
-
-    double *min_freq_;
-
-    /**
-     * \brief Maximum acceptable frequency.
-     *
-     * A pointer is used so that the value can be updated.
-     */
-
-    double *max_freq_;
-
-    /**
-     * \brief Tolerance with which bounds must be satisfied.
-     *
-     * Acceptable values are from *min_freq_ * (1 - torelance_) to *max_freq_ *
-     * (1 + tolerance_).
-     *
-     * Common use cases are to set tolerance_ to zero, or to assign the same
-     * value to *max_freq_ and min_freq_.
-     */
-
-    double tolerance_;
-
-    /**
-     * \brief Number of events to consider in the statistics.
-     */
-    int window_size_;
-  };
+  }
 
   /**
-   * \brief A diagnostic task that monitors the frequency of an event.
+   * \brief Minimum acceptable frequency.
    *
-   * This diagnostic task monitors the frequency of calls to its tick method,
-   * and creates corresponding diagnostics. It will report a warning if the frequency is
-   * outside acceptable bounds, and report an error if there have been no events in the latest
-   * window.
+   * A pointer is used so that the value can be updated.
    */
 
-  class FrequencyStatus : public DiagnosticTask
+  double *min_freq_;
+
+  /**
+   * \brief Maximum acceptable frequency.
+   *
+   * A pointer is used so that the value can be updated.
+   */
+
+  double *max_freq_;
+
+  /**
+   * \brief Tolerance with which bounds must be satisfied.
+   *
+   * Acceptable values are from *min_freq_ * (1 - torelance_) to *max_freq_ *
+   * (1 + tolerance_).
+   *
+   * Common use cases are to set tolerance_ to zero, or to assign the same
+   * value to *max_freq_ and min_freq_.
+   */
+
+  double tolerance_;
+
+  /**
+   * \brief Number of events to consider in the statistics.
+   */
+  int window_size_;
+};
+
+/**
+ * \brief A diagnostic task that monitors the frequency of an event.
+ *
+ * This diagnostic task monitors the frequency of calls to its tick method,
+ * and creates corresponding diagnostics. It will report a warning if the frequency is
+ * outside acceptable bounds, and report an error if there have been no events in the latest
+ * window.
+ */
+
+class FrequencyStatus : public DiagnosticTask
+{
+private:
+  const FrequencyStatusParam params_;
+
+  int                    count_;
+  std::vector<ros::Time> times_;
+  std::vector<int>       seq_nums_;
+  int                    hist_indx_;
+  boost::mutex           lock_;
+
+public:
+  /**
+   * \brief Constructs a FrequencyStatus class with the given parameters.
+   */
+
+  FrequencyStatus(const FrequencyStatusParam &params, std::string name)
+    : DiagnosticTask(name), params_(params), times_(params_.window_size_), seq_nums_(params_.window_size_)
   {
-    private:
-      const FrequencyStatusParam params_;
+    clear();
+  }
 
-      int count_;
-      std::vector <ros::Time> times_;
-      std::vector <int> seq_nums_;
-      int hist_indx_;
-      boost::mutex lock_;
+  /**
+   * \brief Constructs a FrequencyStatus class with the given parameters.
+   *        Uses a default diagnostic task name of "Frequency Status".
+   */
 
-    public:
-      /**
-       * \brief Constructs a FrequencyStatus class with the given parameters.
-       */
+  FrequencyStatus(const FrequencyStatusParam &params)
+    : DiagnosticTask("Frequency Status"), params_(params), times_(params_.window_size_), seq_nums_(params_.window_size_)
+  {
+    clear();
+  }
 
-      FrequencyStatus(const FrequencyStatusParam &params, std::string name) :
-        DiagnosticTask(name), params_(params),
-        times_(params_.window_size_), seq_nums_(params_.window_size_)
-      {
-        clear();
-      }
+  /**
+   * \brief Resets the statistics.
+   */
 
-      /**
-       * \brief Constructs a FrequencyStatus class with the given parameters.
-       *        Uses a default diagnostic task name of "Frequency Status".
-       */
+  void clear()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    ros::Time                 curtime = ros::Time::now();
+    count_                            = 0;
 
-      FrequencyStatus(const FrequencyStatusParam &params) :
-        DiagnosticTask("Frequency Status"), params_(params),
-        times_(params_.window_size_), seq_nums_(params_.window_size_)
-      {
-        clear();
-      }
+    for(int i = 0; i < params_.window_size_; i++)
+    {
+      times_[i]    = curtime;
+      seq_nums_[i] = count_;
+    }
 
-      /**
-       * \brief Resets the statistics.
-       */
+    hist_indx_ = 0;
+  }
 
-      void clear()
-      {
-        boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
-        count_ = 0;
+  /**
+   * \brief Signals that an event has occurred.
+   */
+  void tick()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    // ROS_DEBUG("TICK %i", count_);
+    count_++;
+  }
 
-        for (int i = 0; i < params_.window_size_; i++)
-        {
-          times_[i] = curtime;
-          seq_nums_[i] = count_;
-        }
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    ros::Time                 curtime = ros::Time::now();
+    int                       curseq  = count_;
+    int                       events  = curseq - seq_nums_[hist_indx_];
+    double                    window  = (curtime - times_[hist_indx_]).toSec();
+    double                    freq    = events / window;
+    seq_nums_[hist_indx_]             = curseq;
+    times_[hist_indx_]                = curtime;
+    hist_indx_                        = (hist_indx_ + 1) % params_.window_size_;
 
-        hist_indx_ = 0;
-      }
+    if(events == 0)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "No events recorded.");
+    }
+    else if(freq < *params_.min_freq_ * (1 - params_.tolerance_))
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Frequency too low to continue operation.");
+    }
+    else if(freq > *params_.max_freq_ * (1 + params_.tolerance_))
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Frequency too high to continue operation.");
+    }
+    else if(freq < *params_.min_freq_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency is lower than desired.");
+    }
+    else if(freq > *params_.max_freq_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency is higher than desired.");
+    }
+    else
+    {
+      stat.summary(0, "Desired frequency met");
+    }
 
-      /**
-       * \brief Signals that an event has occurred.
-       */
-      void tick()
-      {
-        boost::mutex::scoped_lock lock(lock_);
-        //ROS_DEBUG("TICK %i", count_);
-        count_++;
-      }
-
-      virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
-      {
-        boost::mutex::scoped_lock lock(lock_);
-        ros::Time curtime = ros::Time::now();
-        int curseq = count_;
-        int events = curseq - seq_nums_[hist_indx_];
-        double window = (curtime - times_[hist_indx_]).toSec();
-        double freq = events / window;
-        seq_nums_[hist_indx_] = curseq;
-        times_[hist_indx_] = curtime;
-        hist_indx_ = (hist_indx_ + 1) % params_.window_size_;
-
-        if (events == 0)
-        {
-          stat.summary(2, "No events recorded.");
-        }
-        else if (freq < *params_.min_freq_ * (1 - params_.tolerance_))
-        {
-          stat.summary(1, "Frequency too low.");
-        }
-        else if (freq > *params_.max_freq_ * (1 + params_.tolerance_))
-        {
-          stat.summary(1, "Frequency too high.");
-        }
-        else
-        {
-          stat.summary(0, "Desired frequency met");
-        }
-
-        stat.addf("Events in window", "%d", events);
-        stat.addf("Events since startup", "%d", count_);
-        stat.addf("Duration of window (s)", "%f", window);
-        stat.addf("Actual frequency (Hz)", "%f",freq);
-        if (*params_.min_freq_ == *params_.max_freq_)
-          stat.addf("Target frequency (Hz)", "%f",*params_.min_freq_);
-        if (*params_.min_freq_ > 0)
-          stat.addf("Minimum acceptable frequency (Hz)", "%f",
-              *params_.min_freq_ * (1 - params_.tolerance_));
+    stat.addf("Events in window", "%d", events);
+    stat.addf("Events since startup", "%d", count_);
+    stat.addf("Duration of window (s)", "%f", window);
+    stat.addf("Actual frequency (Hz)", "%f", freq);
+    if(*params_.min_freq_ == *params_.max_freq_)
+      stat.addf("Target frequency (Hz)", "%f", *params_.min_freq_);
+    if(*params_.min_freq_ > 0)
+      stat.addf("Minimum acceptable frequency (Hz)", "%f", *params_.min_freq_ * (1 - params_.tolerance_));
 
 #ifdef _WIN32
-        if (isfinite(*params_.max_freq_))
+    if(isfinite(*params_.max_freq_))
 #else
-        if (finite(*params_.max_freq_))
+    if(finite(*params_.max_freq_))
 #endif
-          stat.addf("Maximum acceptable frequency (Hz)", "%f",
-              *params_.max_freq_ * (1 + params_.tolerance_));
-      }
-  };
+      stat.addf("Maximum acceptable frequency (Hz)", "%f", *params_.max_freq_ * (1 + params_.tolerance_));
+  }
+};
 
+/**
+ * \brief A structure that holds the constructor parameters for the
+ * TimeStampStatus class.
+ */
+
+struct TimeStampStatusParam
+{
   /**
-   * \brief A structure that holds the constructor parameters for the
-   * TimeStampStatus class.
+   * \brief Creates a filled-out TimeStampStatusParam.
    */
 
-  struct TimeStampStatusParam
+  TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5)
+    : max_acceptable_(max_acceptable), min_acceptable_(min_acceptable)
   {
-    /**
-     * \brief Creates a filled-out TimeStampStatusParam.
-     */
-
-    TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5) :
-      max_acceptable_(max_acceptable), min_acceptable_(min_acceptable)
-    {}
-
-    /**
-     * \brief Maximum acceptable difference between two timestamps.
-     */
-
-    double max_acceptable_;
-
-    /**
-     * \brief Minimum acceptable difference between two timestamps.
-     */
-
-    double min_acceptable_;
-
-  };
+  }
 
   /**
-   * \brief Default TimeStampStatusParam. This is like calling the
-   * constructor with no arguments.
+   * \brief Maximum acceptable difference between two timestamps.
    */
 
-  static TimeStampStatusParam DefaultTimeStampStatusParam = TimeStampStatusParam();
+  double max_acceptable_;
 
   /**
-   * \brief Diagnostic task to monitor the interval between events.
+   * \brief Minimum acceptable difference between two timestamps.
+   */
+
+  double min_acceptable_;
+};
+
+/**
+ * \brief Default TimeStampStatusParam. This is like calling the
+ * constructor with no arguments.
+ */
+
+static TimeStampStatusParam DefaultTimeStampStatusParam = TimeStampStatusParam();
+
+/**
+ * \brief Diagnostic task to monitor the interval between events.
+ *
+ * This diagnostic task monitors the difference between consecutive events,
+ * and creates corresponding diagnostics. An error occurs if the interval
+ * between consecutive events is too large or too small. An error condition
+ * will only be reported during a single diagnostic report unless it
+ * persists. Tallies of errors are also maintained to keep track of errors
+ * in a more persistent way.
+ */
+
+class TimeStampStatus : public DiagnosticTask
+{
+private:
+  void init()
+  {
+    early_count_  = 0;
+    late_count_   = 0;
+    zero_count_   = 0;
+    zero_seen_    = false;
+    max_delta_    = 0;
+    min_delta_    = 0;
+    deltas_valid_ = false;
+  }
+
+public:
+  /**
+   * \brief Constructs the TimeStampStatus with the given parameters.
+   */
+
+  TimeStampStatus(const TimeStampStatusParam &params, std::string name) : DiagnosticTask(name), params_(params)
+  {
+    init();
+  }
+
+  /**
+   * \brief Constructs the TimeStampStatus with the given parameters.
+   *        Uses a default diagnostic task name of "Timestamp Status".
+   */
+
+  TimeStampStatus(const TimeStampStatusParam &params) : DiagnosticTask("Timestamp Status"), params_(params)
+  {
+    init();
+  }
+
+  /**
+   * \brief Constructs the TimeStampStatus with the default parameters.
+   *        Uses a default diagnostic task name of "Timestamp Status".
+   */
+
+  TimeStampStatus() : DiagnosticTask("Timestamp Status")
+  {
+    init();
+  }
+
+  /**
+   * \brief Signals an event. Timestamp stored as a double.
    *
-   * This diagnostic task monitors the difference between consecutive events,
-   * and creates corresponding diagnostics. An error occurs if the interval
-   * between consecutive events is too large or too small. An error condition
-   * will only be reported during a single diagnostic report unless it
-   * persists. Tallies of errors are also maintained to keep track of errors
-   * in a more persistent way.
+   * \param stamp The timestamp of the event that will be used in computing
+   * intervals.
    */
 
-  class TimeStampStatus : public DiagnosticTask
+  void tick(double stamp)
   {
-    private:
-      void init()
+    boost::mutex::scoped_lock lock(lock_);
+
+    if(stamp == 0)
+    {
+      zero_seen_ = true;
+    }
+    else
+    {
+      double delta = ros::Time::now().toSec() - stamp;
+
+      if(!deltas_valid_ || delta > max_delta_)
+        max_delta_ = delta;
+
+      if(!deltas_valid_ || delta < min_delta_)
+        min_delta_ = delta;
+
+      deltas_valid_ = true;
+    }
+  }
+
+  /**
+   * \brief Signals an event.
+   *
+   * \param t The timestamp of the event that will be used in computing
+   * intervals.
+   */
+
+  void tick(const ros::Time t)
+  {
+    tick(t.toSec());
+  }
+
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Timestamps are reasonable.");
+    if(!deltas_valid_)
+    {
+      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No data since last update.");
+    }
+    else
+    {
+      if(min_delta_ < params_.min_acceptable_)
       {
-        early_count_ = 0;
-        late_count_ = 0;
-        zero_count_ = 0;
-        zero_seen_ = false;
-        max_delta_ = 0;
-        min_delta_ = 0;
-        deltas_valid_ = false;
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Timestamps too far in future seen.");
+        early_count_++;
       }
 
-    public:
-      /**
-       * \brief Constructs the TimeStampStatus with the given parameters.
-       */
-
-      TimeStampStatus(const TimeStampStatusParam &params, std::string name) :
-        DiagnosticTask(name),
-        params_(params)
+      if(max_delta_ > params_.max_acceptable_)
       {
-        init();
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Timestamps too far in past seen.");
+        late_count_++;
       }
 
-      /**
-       * \brief Constructs the TimeStampStatus with the given parameters.
-       *        Uses a default diagnostic task name of "Timestamp Status".
-       */
-
-      TimeStampStatus(const TimeStampStatusParam &params) :
-        DiagnosticTask("Timestamp Status"),
-        params_(params)
+      if(zero_seen_)
       {
-        init();
+        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Zero timestamp seen.");
+        zero_count_++;
       }
+    }
 
-      /**
-       * \brief Constructs the TimeStampStatus with the default parameters.
-       *        Uses a default diagnostic task name of "Timestamp Status".
-       */
+    stat.addf("Earliest timestamp delay:", "%f", min_delta_);
+    stat.addf("Latest timestamp delay:", "%f", max_delta_);
+    stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
+    stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
+    stat.add("Late diagnostic update count:", late_count_);
+    stat.add("Early diagnostic update count:", early_count_);
+    stat.add("Zero seen diagnostic update count:", zero_count_);
 
-      TimeStampStatus() :
-        DiagnosticTask("Timestamp Status")
-      {
-        init();
-      }
+    deltas_valid_ = false;
+    min_delta_    = 0;
+    max_delta_    = 0;
+    zero_seen_    = false;
+  }
 
-      /**
-       * \brief Signals an event. Timestamp stored as a double.
-       *
-       * \param stamp The timestamp of the event that will be used in computing
-       * intervals.
-       */
+private:
+  TimeStampStatusParam params_;
+  int                  early_count_;
+  int                  late_count_;
+  int                  zero_count_;
+  bool                 zero_seen_;
+  double               max_delta_;
+  double               min_delta_;
+  bool                 deltas_valid_;
+  boost::mutex         lock_;
+};
 
-      void tick(double stamp)
-      {
-        boost::mutex::scoped_lock lock(lock_);
-
-        if (stamp == 0)
-        {
-          zero_seen_ = true;
-        }
-        else
-        {
-          double delta = ros::Time::now().toSec() - stamp;
-
-          if (!deltas_valid_ || delta > max_delta_)
-            max_delta_ = delta;
-
-          if (!deltas_valid_ || delta < min_delta_)
-            min_delta_ = delta;
-
-          deltas_valid_ = true;
-        }
-      }
-
-      /**
-       * \brief Signals an event.
-       *
-       * \param t The timestamp of the event that will be used in computing
-       * intervals.
-       */
-
-      void tick(const ros::Time t)
-      {
-        tick(t.toSec());
-      }
-
-      virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
-      {
-        boost::mutex::scoped_lock lock(lock_);
-
-        stat.summary(0, "Timestamps are reasonable.");
-        if (!deltas_valid_)
-        {
-          stat.summary(1, "No data since last update.");
-        }
-        else
-        {
-          if (min_delta_ < params_.min_acceptable_)
-          {
-            stat.summary(2, "Timestamps too far in future seen.");
-            early_count_++;
-          }
-
-          if (max_delta_ > params_.max_acceptable_)
-          {
-            stat.summary(2, "Timestamps too far in past seen.");
-            late_count_++;
-          }
-
-          if (zero_seen_)
-          {
-            stat.summary(2, "Zero timestamp seen.");
-            zero_count_++;
-          }
-        }
-
-        stat.addf("Earliest timestamp delay:", "%f", min_delta_);
-        stat.addf("Latest timestamp delay:", "%f", max_delta_);
-        stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
-        stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
-        stat.add("Late diagnostic update count:", late_count_);
-        stat.add("Early diagnostic update count:", early_count_);
-        stat.add("Zero seen diagnostic update count:", zero_count_);
-
-        deltas_valid_ = false;
-        min_delta_ = 0;
-        max_delta_ = 0;
-        zero_seen_ = false;
-      }
-
-    private:
-      TimeStampStatusParam params_;
-      int early_count_;
-      int late_count_;
-      int zero_count_;
-      bool zero_seen_;
-      double max_delta_;
-      double min_delta_;
-      bool deltas_valid_;
-      boost::mutex lock_;
-  };
-
- /**
+/**
  * \brief Diagnostic task to monitor whether a node is alive
  *
  * This diagnostic task always reports as OK and 'Alive' when it runs
  */
 
-  class Heartbeat : public DiagnosticTask
+class Heartbeat : public DiagnosticTask
+{
+public:
+  /**
+   * \brief Constructs a HeartBeat
+   */
+
+  Heartbeat() : DiagnosticTask("Heartbeat")
   {
-  public:
-    /**
-     * \brief Constructs a HeartBeat
-     */
+  }
 
-    Heartbeat() :
-      DiagnosticTask("Heartbeat")
-    {
-    }
-
-    virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
-    {
-      stat.summary(0, "Alive");
-    }
-  };
+  virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+  {
+    stat.summary(0, "Alive");
+  }
 };
+};  // namespace diagnostic_updater
 
 #endif
