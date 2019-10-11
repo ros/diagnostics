@@ -466,8 +466,8 @@ class BoundStatus : public DiagnosticTask
 private:
   const BoundStatusParam params_;
   boost::mutex           lock_;
-  int                    current_value_;
   int                    latest_status_;
+  int                    current_value_;
 
 public:
   BoundStatus(const BoundStatusParam &params, std::string name = "Bound Status")
@@ -501,27 +501,27 @@ public:
     if(current_value_ > params_.error_upper_bound_)
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Current value exceeds upper bound.");
+      stat.summary(latest_status_, "Current value exceeds upper bound.");
     }
     else if(current_value_ < params_.error_lower_bound_)
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Current value falls short of lower bound.");
+      stat.summary(latest_status_, "Current value falls short of lower bound.");
     }
     else if(current_value_ > params_.warn_upper_bound_)
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Current value is in upper warning range.");
+      stat.summary(latest_status_, "Current value is in upper warning range.");
     }
     else if(current_value_ < params_.warn_lower_bound_)
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Current value is in lower warning range.");
+      stat.summary(latest_status_, "Current value is in lower warning range.");
     }
     else
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Current value is in nominal range.");
+      stat.summary(latest_status_, "Current value is in nominal range.");
     }
   }
 };
@@ -546,8 +546,9 @@ class CountStatus : public DiagnosticTask
 {
 private:
   const CountStatusParam params_;
-  int                    count_;
   boost::mutex           lock_;
+  int                    latest_status_;
+  int                    count_;
 
 public:
   CountStatus(const CountStatusParam &params, std::string name = "Count Status") : DiagnosticTask(name), params_(params)
@@ -559,6 +560,12 @@ public:
   {
     boost::mutex::scoped_lock lock(lock_);
     count_ = 0;
+  }
+
+  int get_status()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    return latest_status_;
   }
 
   /**
@@ -575,15 +582,18 @@ public:
     boost::mutex::scoped_lock lock(lock_);
     if(count_ >= params_.error_threshold_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Count exceeds error limit.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      stat.summary(latest_status_, "Count exceeds error limit.");
     }
     else if(count_ >= params_.warn_threshold_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Count exceeds warn limit.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
+      stat.summary(latest_status_, "Count exceeds warn limit.");
     }
     else
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Count is in nominal range.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
+      stat.summary(latest_status_, "Count is in nominal range.");
     }
     stat.add("Count:", count_);
     stat.add("Warn Threshold:", params_.warn_threshold_);
@@ -606,11 +616,12 @@ struct BoolStatusParam
 class BoolStatus : public DiagnosticTask
 {
 private:
+  boost::mutex          lock_;
   const BoolStatusParam params_;
+  int                   latest_status_;
   bool                  is_success_;
   int                   success_count_;
   int                   fail_count_;
-  boost::mutex          lock_;
 
 public:
   /**
@@ -643,6 +654,12 @@ public:
       success_count_ = 0;
       fail_count_++;
     }
+  }
+
+  int get_status()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    return latest_status_;
   }
 
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)

@@ -68,6 +68,11 @@ public:
     count_.clear();
   }
 
+  virtual int get_status()
+  {
+    return count_.get_status();
+  }
+
 private:
   diagnostic_updater::CountStatus count_;
 };
@@ -97,6 +102,11 @@ public:
     bound_.clear();
   }
 
+  virtual int get_status()
+  {
+    return bound_.get_status();
+  }
+
 private:
   diagnostic_updater::BoundStatus bound_;
 };
@@ -124,6 +134,11 @@ public:
   virtual void clear()
   {
     bool_diag_.clear();
+  }
+
+  virtual int get_status()
+  {
+    return bool_diag_.get_status();
   }
 
 private:
