@@ -104,12 +104,12 @@ class FrequencyStatus : public DiagnosticTask
 {
 private:
   const FrequencyStatusParam params_;
-
-  int                    count_;
-  std::vector<ros::Time> times_;
-  std::vector<int>       seq_nums_;
-  int                    hist_indx_;
-  boost::mutex           lock_;
+  int                        latest_status_;
+  int                        count_;
+  std::vector<ros::Time>     times_;
+  std::vector<int>           seq_nums_;
+  int                        hist_indx_;
+  boost::mutex               lock_;
 
 public:
   /**
@@ -131,6 +131,12 @@ public:
     : DiagnosticTask("Frequency Status"), params_(params), times_(params_.window_size_), seq_nums_(params_.window_size_)
   {
     clear();
+  }
+
+  int get_status()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    return latest_status_;
   }
 
   /**
@@ -176,27 +182,33 @@ public:
 
     if(events == 0)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "No events recorded.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      stat.summary(latest_status_, "No events recorded.");
     }
     else if(freq < *params_.min_freq_ * (1 - params_.tolerance_))
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Frequency too low to continue operation.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      stat.summary(latest_status_, "Frequency too low to continue operation.");
     }
     else if(freq > *params_.max_freq_ * (1 + params_.tolerance_))
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Frequency too high to continue operation.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      stat.summary(latest_status_, "Frequency too high to continue operation.");
     }
     else if(freq < *params_.min_freq_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency is lower than desired.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
+      stat.summary(latest_status_, "Frequency is lower than desired.");
     }
     else if(freq > *params_.max_freq_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency is higher than desired.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
+      stat.summary(latest_status_, "Frequency is higher than desired.");
     }
     else
     {
-      stat.summary(0, "Desired frequency met");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
+      stat.summary(latest_status_, "Desired frequency met");
     }
 
     stat.addf("Events in window", "%d", events);
@@ -308,13 +320,18 @@ public:
     init();
   }
 
+  int get_status()
+  {
+    boost::mutex::scoped_lock lock(lock_);
+    return latest_status_;
+  }
+
   /**
    * \brief Signals an event. Timestamp stored as a double.
    *
    * \param stamp The timestamp of the event that will be used in computing
    * intervals.
    */
-
   void tick(double stamp)
   {
     boost::mutex::scoped_lock lock(lock_);
@@ -353,28 +370,33 @@ public:
   {
     boost::mutex::scoped_lock lock(lock_);
 
-    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Timestamps are reasonable.");
+    latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
+    stat.summary(latest_status_, "Timestamps are reasonable.");
     if(!deltas_valid_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "No data since last update.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      stat.summary(latest_status_, "No data since last update.");
     }
     else
     {
       if(min_delta_ < params_.min_acceptable_)
       {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Timestamps too far in future seen.");
+        latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+        stat.summary(latest_status_, "Timestamps too far in future seen.");
         early_count_++;
       }
 
       if(max_delta_ > params_.max_acceptable_)
       {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Timestamps too far in past seen.");
+        latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+        stat.summary(latest_status_, "Timestamps too far in past seen.");
         late_count_++;
       }
 
       if(zero_seen_)
       {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Zero timestamp seen.");
+        latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+        stat.summary(latest_status_, "Zero timestamp seen.");
         zero_count_++;
       }
     }
@@ -403,6 +425,7 @@ private:
   double               min_delta_;
   bool                 deltas_valid_;
   boost::mutex         lock_;
+  int                  latest_status_;
 };
 
 /**

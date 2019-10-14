@@ -198,6 +198,11 @@ public:
     freq_.clear();
   }
 
+  int get_status()
+  {
+    return freq_.get_status();
+  }
+
 private:
   diagnostic_updater::FrequencyStatus freq_;
 };
@@ -257,6 +262,13 @@ public:
   {
     stamp_.tick(stamp);
     HeaderlessTopicDiagnostic::tick();
+  }
+
+  int get_status()
+  {
+    int status_freq  = HeaderlessTopicDiagnostic::get_status();
+    int status_stamp = stamp_.get_status();
+    return (status_freq > status_stamp ? status_freq : status_stamp);
   }
 
 private:
