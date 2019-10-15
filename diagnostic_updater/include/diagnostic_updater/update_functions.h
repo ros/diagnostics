@@ -117,7 +117,11 @@ public:
    */
 
   FrequencyStatus(const FrequencyStatusParam &params, std::string name)
-    : DiagnosticTask(name), params_(params), times_(params_.window_size_), seq_nums_(params_.window_size_)
+    : DiagnosticTask(name)
+    , params_(params)
+    , times_(params_.window_size_)
+    , seq_nums_(params_.window_size_)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
   }
@@ -128,7 +132,11 @@ public:
    */
 
   FrequencyStatus(const FrequencyStatusParam &params)
-    : DiagnosticTask("Frequency Status"), params_(params), times_(params_.window_size_), seq_nums_(params_.window_size_)
+    : DiagnosticTask("Frequency Status")
+    , params_(params)
+    , times_(params_.window_size_)
+    , seq_nums_(params_.window_size_)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
   }
@@ -281,13 +289,14 @@ class TimeStampStatus : public DiagnosticTask
 private:
   void init()
   {
-    early_count_  = 0;
-    late_count_   = 0;
-    zero_count_   = 0;
-    zero_seen_    = false;
-    max_delta_    = 0;
-    min_delta_    = 0;
-    deltas_valid_ = false;
+    early_count_   = 0;
+    late_count_    = 0;
+    zero_count_    = 0;
+    zero_seen_     = false;
+    max_delta_     = 0;
+    min_delta_     = 0;
+    deltas_valid_  = false;
+    latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
   }
 
 public:
@@ -574,7 +583,8 @@ private:
   int                    count_;
 
 public:
-  CountStatus(const CountStatusParam &params, std::string name = "Count Status") : DiagnosticTask(name), params_(params)
+  CountStatus(const CountStatusParam &params, std::string name = "Count Status")
+    : DiagnosticTask(name), params_(params), latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
   }
@@ -651,7 +661,10 @@ public:
    * \brief Constructs a Bool Checker
    */
   BoolStatus(const BoolStatusParam &params, std::string name = "Bool Status")
-    : DiagnosticTask(name), params_(params), is_success_(false)
+    : DiagnosticTask(name)
+    , params_(params)
+    , is_success_(false)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
   }
