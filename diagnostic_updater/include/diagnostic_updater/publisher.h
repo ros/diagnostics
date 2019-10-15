@@ -38,8 +38,7 @@
 
 #include <ros/publisher.h>
 #include <ros/subscription.h>
-//#include <diagnostic_updater/update_functions.h>
-#include "update_functions.h"
+#include "diagnostic_updater/update_functions.h"
 
 namespace diagnostic_updater
 {
