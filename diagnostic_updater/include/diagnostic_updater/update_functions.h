@@ -690,18 +690,21 @@ public:
     boost::mutex::scoped_lock lock(lock_);
     if(is_success_)
     {
-      stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Latest process was successfully completed.");
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
+      stat.summary(latest_status_, "Latest process was successfully completed.");
       stat.add("Successfull update count:", success_count_);
     }
     else
     {
       if(params_.publish_error_)
       {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Latest process failed.");
+        latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+        stat.summary(latest_status_, "Latest process failed.");
       }
       else
       {
-        stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Latest process failed.");
+        latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
+        stat.summary(latest_status_, "Latest process failed.");
       }
       stat.add("Failed update count:", fail_count_);
     }
