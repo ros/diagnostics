@@ -39,8 +39,6 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-#include <chrono>
-#include <thread>
 
 using namespace diagnostic_updater;
 
@@ -148,19 +146,25 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   double minFreq = 10;
   double maxFreq = 20;
   
+  ros::Time::init();
+  ros::Time time(0, 0);
+  ros::Time::setNow(time);
+
   FrequencyStatus fs(FrequencyStatusParam(&minFreq, &maxFreq, 0.5, 2));
-  
+
+  const int MS_TO_NS = 1000000;
+
   DiagnosticStatusWrapper stat[5];
   fs.tick();
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  time += ros::Duration(0, 20 * MS_TO_NS); ros::Time::setNow(time);
   fs.run(stat[0]); // Should be too fast, 20 ms for 1 tick, lower limit should be 33ms.
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  time += ros::Duration(0, 50 * MS_TO_NS); ros::Time::setNow(time);
   fs.tick();
   fs.run(stat[1]); // Should be good, 70 ms for 2 ticks, lower limit should be 66 ms.
-  std::this_thread::sleep_for(std::chrono::milliseconds(300));
+  time += ros::Duration(0, 300 * MS_TO_NS); ros::Time::setNow(time);
   fs.tick();
   fs.run(stat[2]); // Should be good, 350 ms for 2 ticks, upper limit should be 400 ms.
-  std::this_thread::sleep_for(std::chrono::milliseconds(150));
+  time += ros::Duration(0, 150 * MS_TO_NS); ros::Time::setNow(time);
   fs.tick();
   fs.run(stat[3]); // Should be too slow, 450 ms for 2 ticks, upper limit should be 400 ms.
   fs.clear();
@@ -177,17 +181,21 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
 
 TEST(DiagnosticUpdater, testTimeStampStatus)
 {
+  ros::Time::init();
+  ros::Time time(1, 0);
+  ros::Time::setNow(time);
+
   TimeStampStatus ts(DefaultTimeStampStatusParam);
 
   DiagnosticStatusWrapper stat[5];
   ts.run(stat[0]);
-  ts.tick(ros::Time::now().toSec() + 2);
+  ts.tick(time.toSec() + 2);
   ts.run(stat[1]);
-  ts.tick(ros::Time::now());
+  ts.tick(time);
   ts.run(stat[2]);
-  ts.tick(ros::Time::now().toSec() - 4);
+  ts.tick(time.toSec() - 4);
   ts.run(stat[3]);
-  ts.tick(ros::Time::now().toSec() - 6);
+  ts.tick(time.toSec() - 6);
   ts.run(stat[4]);
  
   EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
