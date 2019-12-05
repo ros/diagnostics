@@ -94,9 +94,6 @@ Aggregator::Aggregator()
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
 
-  // @todo(anordman): This cout somehow is necessary to continue screen output for testing
-  std::cout << "Aggregator created, starting analysis..." << std::endl;
-
   add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>(
     "/diagnostics_agg/add_diagnostics",
     std::bind(&Aggregator::addDiagnostics, this, _1, _2, _3));

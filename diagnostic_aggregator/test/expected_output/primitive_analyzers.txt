@@ -1,0 +1,4 @@
+diagnostic_aggregator/GenericAnalyzer 'Primary'
+/Primary
+diagnostic_aggregator/GenericAnalyzer 'Secondary'
+/Secondary
