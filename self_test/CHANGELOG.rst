@@ -2,6 +2,9 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.0.0 (2019-09-03)
 ------------------
 * Migrate self_test to ros2 (`#104 <https://github.com/ros/diagnostics/issues/104>`_)
