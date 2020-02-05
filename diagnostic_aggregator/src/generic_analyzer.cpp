@@ -81,9 +81,9 @@ bool GenericAnalyzer::init(
     "Retrieved %d parameter(s) for prefix '%s'.",
     parameters.size(), breadcrumb_.c_str());
 
-  double timeout;
-  int num_items_expected;
-  bool discard_stale;
+  double timeout = 5.0;
+  int num_items_expected = -1;
+  bool discard_stale = false;
 
   for (const auto & param : parameters) {
     string pname = param.first;
