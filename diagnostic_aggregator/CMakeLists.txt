@@ -102,7 +102,7 @@ endif()
 ament_python_install_package(${PROJECT_NAME})
 install(
   TARGETS ${PROJECT_NAME} ${PLUGIN_LIB}
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib
 )
 
 install(
