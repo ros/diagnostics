@@ -12,11 +12,11 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
-find_package(diagnostic_msgs REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(bondcpp REQUIRED)
-find_package(std_msgs REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(UUID REQUIRED uuid)
@@ -37,31 +37,31 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated) # see https://github.com/pybind/pybind11/commit/ba33b2fc798418c8c9dfe801c5b9023d3703f417
 
-set(PLUGIN_LIB "${PROJECT_NAME}_analyzers")
-add_library(${PLUGIN_LIB} SHARED
+set(ANALYZERS "${PROJECT_NAME}_analyzers")
+add_library(${ANALYZERS} SHARED
   src/generic_analyzer.cpp
   src/discard_analyzer.cpp
   src/ignore_analyzer.cpp)
-target_include_directories(${PLUGIN_LIB} PUBLIC
+target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${PLUGIN_LIB}
+ament_target_dependencies(${ANALYZERS}
   "bondcpp"
   "diagnostic_msgs"
   "pluginlib"
   "rclcpp"
   "std_msgs"
 )
-target_link_libraries(${PLUGIN_LIB}
+target_link_libraries(${ANALYZERS}
   ${PROJECT_NAME})
-target_compile_definitions(${PLUGIN_LIB}
+target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTICS_DEFAULT_ANALYZER_PLUGINS_BUILDING_LIBRARY")
 
 # Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
   ${PROJECT_NAME}
-  ${UUID_LIBRARIES})
+  ${UUID_LINK_LIBRARIES})
 install(
   TARGETS aggregator_node
   DESTINATION lib/${PROJECT_NAME})
@@ -101,7 +101,7 @@ endif()
 
 ament_python_install_package(${PROJECT_NAME})
 install(
-  TARGETS ${PROJECT_NAME} ${PLUGIN_LIB}
+  TARGETS ${PROJECT_NAME} ${ANALYZERS}
   DESTINATION lib
 )
 
