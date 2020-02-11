@@ -40,12 +40,10 @@
 #include <string>
 #include <vector>
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer,
-  diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, diagnostic_aggregator::Analyzer)
 
 namespace diagnostic_aggregator
 {
-
 using std::vector;
 
 IgnoreAnalyzer::IgnoreAnalyzer() {}
@@ -53,9 +51,7 @@ IgnoreAnalyzer::IgnoreAnalyzer() {}
 IgnoreAnalyzer::~IgnoreAnalyzer() {}
 
 bool IgnoreAnalyzer::init(
-  const std::string & base_path,
-  const std::string & breadcrumb,
-  const rclcpp::Node::SharedPtr node)
+  const std::string & base_path, const std::string & breadcrumb, const rclcpp::Node::SharedPtr node)
 {
   (void)base_path;
   (void)breadcrumb;

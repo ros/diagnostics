@@ -51,14 +51,13 @@
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
 
-#include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
+#include "pluginlib/class_loader.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief Allows analyzers to be grouped together, or used as sub-analyzers
  *
@@ -123,8 +122,7 @@ public:
    * The parameters in its namespace determine the sub-analyzers.
    */
   virtual bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
 
   /**!

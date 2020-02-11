@@ -51,7 +51,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief Replace "/" with "" in output name, to avoid confusing robot monitor
  */
@@ -97,7 +96,8 @@ inline DiagnosticLevel valToLevel(const int val)
     return Level_Stale;
   }
 
-  RCLCPP_ERROR(rclcpp::get_logger(
+  RCLCPP_ERROR(
+    rclcpp::get_logger(
       "generic_analyzer_base"),
     R"(Attempting to convert %d into DiagnosticLevel.
     Values are: {0: OK, 1: Warning, 2: Error, 3: Stale})",
@@ -123,7 +123,8 @@ inline std::string valToMsg(const int val)
     return "Stale";
   }
 
-  RCLCPP_ERROR(rclcpp::get_logger(
+  RCLCPP_ERROR(
+    rclcpp::get_logger(
       "generic_analyzer_base"),
     R"(Attempting to convert diagnostic level %d into string.
     Values are: {0: \"OK\", 1: \"Warning\", 2: \"Error\", 3: \"Stale\"})",
@@ -213,8 +214,7 @@ public:
    *\param stale : If true, status level is 3
    */
   std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> toStatusMsg(
-    const std::string & path,
-    const bool stale = false) const;
+    const std::string & path, const bool stale = false) const;
 
   /*
    *\brief Returns level of DiagnosticStatus message

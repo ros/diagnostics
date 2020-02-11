@@ -53,7 +53,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief Base class of all Analyzers. Loaded by aggregator.
  *
@@ -110,8 +109,7 @@ public:
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
   virtual bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node) = 0;
 
   /*!

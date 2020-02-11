@@ -51,7 +51,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief IgnoreAnalyzer ignores all analyzer parameters and does nothing
  *
@@ -79,8 +78,7 @@ public:
   virtual ~IgnoreAnalyzer();
 
   bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
 
   bool match(const std::string & name)

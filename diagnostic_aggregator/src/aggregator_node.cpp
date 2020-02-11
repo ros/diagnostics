@@ -58,8 +58,7 @@ int main(int argc, char ** argv)
   } catch (const exception & e) {
     RCLCPP_FATAL(
       rclcpp::get_logger("aggregator_node"),
-      "Diagnostic aggregator node caught exception. Aborting. %s",
-      e.what());
+      "Diagnostic aggregator node caught exception. Aborting. %s", e.what());
     rclcpp::shutdown();
   }
 

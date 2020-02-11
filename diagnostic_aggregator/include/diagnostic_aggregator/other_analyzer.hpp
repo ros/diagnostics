@@ -49,7 +49,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*
  *\brief OtherAnalyzer analyzes any messages that haven't been analyzed by other Analyzers
  *
@@ -85,9 +84,7 @@ public:
    *\param path Base path of Aggregator
    *\param breadcrumb Prefix for parameter getter.
    */
-  bool init(
-    const std::string & path,
-    const std::string & breadcrumb = "")
+  bool init(const std::string & path, const std::string & breadcrumb = "")
   {
     (void)breadcrumb;
 
@@ -102,8 +99,7 @@ public:
    *\return False, since NodeHandle initialization isn't valid
    */
   bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node)
   {
     (void)base_path;

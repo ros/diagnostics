@@ -47,28 +47,26 @@
 #include <vector>
 
 #include "diagnostic_aggregator/analyzer.hpp"
-#include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/generic_analyzer_base.hpp"
+#include "diagnostic_aggregator/status_item.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 #include "diagnostic_msgs/msg/key_value.h"
 
 #include "pluginlib/class_list_macros.hpp"
 
-#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/logger.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief Returns list of strings from a parameter
  *
  * Given an XmlRpcValue, gives vector of strings of that parameter
  *\return False if XmlRpcValue is not string or array of strings
  */
-inline bool
-getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
+inline bool getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
 {
   rclcpp::ParameterType type = param.get_type();
   if (type == rclcpp::ParameterType::PARAMETER_STRING) {
@@ -87,7 +85,6 @@ getParamVals(rclcpp::Parameter param, std::vector<std::string> & output)
   output.clear();
   return false;
 }
-
 
 /*!
  *\brief GenericAnalyzer is most basic diagnostic Analyzer
@@ -209,8 +206,7 @@ public:
    *\return True if initialization succeed, false if no errors of
    */
   bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
 
   /*!

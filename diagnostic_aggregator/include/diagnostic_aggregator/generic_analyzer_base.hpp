@@ -57,7 +57,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief GenericAnalyzerBase is the base class for GenericAnalyzer and OtherAnalyzer
  *
@@ -72,9 +71,15 @@ class GenericAnalyzerBase : public Analyzer
 {
 public:
   GenericAnalyzerBase()
-  : nice_name_(""), path_(""), timeout_(-1.0), num_items_expected_(-1),
-    discard_stale_(false), has_initialized_(false), has_warned_(false)
-  {}
+  : nice_name_(""),
+    path_(""),
+    timeout_(-1.0),
+    num_items_expected_(-1),
+    discard_stale_(false),
+    has_initialized_(false),
+    has_warned_(false)
+  {
+  }
 
   virtual ~GenericAnalyzerBase()
   {
@@ -85,8 +90,7 @@ public:
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
   bool init(
-    const std::string & base_path,
-    const std::string & breadcrumb,
+    const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node) = 0;
 
   /*
@@ -95,11 +99,8 @@ public:
    * Must be initialized in order to prepend the path to all outgoing status messages.
    */
   bool init(
-    const std::string & path,
-    const std::string & breadcrumb,
-    double timeout = -1.0,
-    int num_items_expected = -1,
-    bool discard_stale = false)
+    const std::string & path, const std::string & breadcrumb, double timeout = -1.0,
+    int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
@@ -108,17 +109,18 @@ public:
     breadcrumb_ = breadcrumb;
 
     if (discard_stale_ && timeout <= 0) {
-      RCLCPP_WARN(rclcpp::get_logger(
-          "generic_analyzer_base"),
+      RCLCPP_WARN(
+        rclcpp::get_logger("generic_analyzer_base"),
         "Cannot discard stale items if no timeout specified. No items will be discarded");
       discard_stale_ = false;
     }
 
     has_initialized_ = true;
 
-    RCLCPP_INFO(rclcpp::get_logger(
-        "GenericAnalyzerBase"), "Initialized analyzer '%s' with path '%s' and breadcrumb '%s'.",
-      nice_name_.c_str(), path_.c_str(), breadcrumb_.c_str());
+    RCLCPP_INFO(
+      rclcpp::get_logger("GenericAnalyzerBase"),
+      "Initialized analyzer '%s' with path '%s' and breadcrumb '%s'.", nice_name_.c_str(),
+      path_.c_str(), breadcrumb_.c_str());
     return true;
   }
 
@@ -128,8 +130,7 @@ public:
   virtual bool analyze(const std::shared_ptr<StatusItem> item)
   {
     RCLCPP_DEBUG(
-      rclcpp::get_logger("GenericAnalyzerBase"),
-      "Analyzer '%s' analyze, item %s: %s",
+      rclcpp::get_logger("GenericAnalyzerBase"), "Analyzer '%s' analyze, item %s: %s",
       nice_name_.c_str(), item->getName().c_str(), item->getMessage().c_str());
 
     if (!has_initialized_ && !has_warned_) {
@@ -158,8 +159,7 @@ public:
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report()
   {
     RCLCPP_DEBUG(
-      rclcpp::get_logger("GenericAnalyzerBase"),
-      "Analyzer '%s' report()", nice_name_.c_str());
+      rclcpp::get_logger("GenericAnalyzerBase"), "Analyzer '%s' report()", nice_name_.c_str());
 
     if (!has_initialized_ && !has_warned_) {
       has_warned_ = true;
@@ -233,9 +233,10 @@ public:
     if (num_items_expected_ == 0 && items_.empty()) {
       header_status->level = 0;
       header_status->message = "OK";
-    } else if (num_items_expected_ > 0 &&  // NOLINT
-      static_cast<int8_t>(items_.size()) != num_items_expected_)  // NOLINT
-    {
+    } else if (  // NOLINT
+      num_items_expected_ > 0 &&
+      static_cast<int8_t>(items_.size()) != num_items_expected_)
+    {  // NOLINT
       int8_t lvl = 2;
       header_status->level = std::max(lvl, static_cast<int8_t>(header_status->level));
 
@@ -282,7 +283,10 @@ protected:
   /*!
    *\brief Subclasses can add items to analyze
    */
-  void addItem(std::string name, std::shared_ptr<StatusItem> item) {items_[name] = item;}
+  void addItem(std::string name, std::shared_ptr<StatusItem> item)
+  {
+    items_[name] = item;
+  }
 
 private:
   /*!

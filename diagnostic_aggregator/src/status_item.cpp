@@ -41,7 +41,6 @@
 
 namespace diagnostic_aggregator
 {
-
 using std::string;
 
 using rclcpp::get_logger;
@@ -80,17 +79,17 @@ StatusItem::~StatusItem() {}
 bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
 {
   if (name_ != status->name) {
-    RCLCPP_ERROR(get_logger(
-        "status_item"), "Incorrect name when updating StatusItem. Expected %s, got %s",
+    RCLCPP_ERROR(
+      get_logger("status_item"), "Incorrect name when updating StatusItem. Expected %s, got %s",
       name_.c_str(), status->name.c_str());
     return false;
   }
 
   double update_interval = (clock_->now() - update_time_).seconds();
   if (update_interval < 0) {
-    RCLCPP_WARN(get_logger(
-        "status_item"), "StatusItem is being updated with older data. Negative update time: %f",
-      update_interval);
+    RCLCPP_WARN(
+      get_logger("status_item"),
+      "StatusItem is being updated with older data. Negative update time: %f", update_interval);
   }
 
   level_ = valToLevel(status->level);

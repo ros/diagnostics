@@ -45,7 +45,6 @@
 
 namespace diagnostic_aggregator
 {
-
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
@@ -54,9 +53,9 @@ using std::placeholders::_3;
  * @todo(anordman): make aggregator a lifecycle node.
  */
 Aggregator::Aggregator()
-: n_(std::make_shared<rclcpp::Node>("analyzers",
-    "",
-    rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
+: n_(std::make_shared<rclcpp::Node>(
+      "analyzers", "",
+      rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
   logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),
   clock_(new rclcpp::Clock()),
@@ -82,8 +81,8 @@ Aggregator::Aggregator()
   }
   RCLCPP_DEBUG(logger_, "Aggregator publication rate configured to: %f", pub_rate_);
   RCLCPP_DEBUG(logger_, "Aggregator base path configured to: %s", base_path_.c_str());
-  RCLCPP_DEBUG(logger_, "Aggregator other_as_errors configured to: %s",
-    (other_as_errors ? "true" : "false"));
+  RCLCPP_DEBUG(
+    logger_, "Aggregator other_as_errors configured to: %s", (other_as_errors ? "true" : "false"));
 
   analyzer_group_ = std::make_unique<AnalyzerGroup>();
   if (!analyzer_group_->init(base_path_, "", n_)) {
@@ -95,15 +94,12 @@ Aggregator::Aggregator()
   other_analyzer_->init(base_path_);  // This always returns true
 
   add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>(
-    "/diagnostics_agg/add_diagnostics",
-    std::bind(&Aggregator::addDiagnostics, this, _1, _2, _3));
-  diag_sub_ = n_->create_subscription<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics",
-      rclcpp::SystemDefaultsQoS(), std::bind(
-        &Aggregator::diagCallback, this,
-        _1));
+    "/diagnostics_agg/add_diagnostics", std::bind(&Aggregator::addDiagnostics, this, _1, _2, _3));
+  diag_sub_ = n_->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
+    "/diagnostics", rclcpp::SystemDefaultsQoS(), std::bind(&Aggregator::diagCallback, this, _1));
   agg_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg", 1);
-  toplevel_state_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>(
-    "/diagnostics_toplevel_state", 1);
+  toplevel_state_pub_ =
+    n_->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 }
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
@@ -188,7 +184,7 @@ bool Aggregator::addDiagnostics(
   const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
   std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res)
 {
-  (void) header;
+  (void)header;
 
   RCLCPP_DEBUG(logger_, "Got load request for namespace %s", req->load_namespace.c_str());
   // Don't currently support relative or private namespace definitions
@@ -201,15 +197,16 @@ bool Aggregator::addDiagnostics(
   }
 
   std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
-  { // lock here ensures that bonds from the same namespace aren't added twice.
+  {  // lock here ensures that bonds from the same namespace aren't added twice.
     // Without it, possibility of two simultaneous calls adding two objects.
     std::lock_guard<std::mutex> lock(mutex_);
     // rebuff attempts to add things from the same namespace twice
-    if (std::find_if(bonds_.begin(), bonds_.end(),
-      BondIDMatch(req->load_namespace)) != bonds_.end())
+    if (
+      std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(req->load_namespace)) !=
+      bonds_.end())
     {
-      res->message = "Requested load from namespace " + req->load_namespace +
-        " which is already in use";
+      res->message =
+        "Requested load from namespace " + req->load_namespace + " which is already in use";
       res->success = false;
       return true;
     }
@@ -219,10 +216,9 @@ bool Aggregator::addDiagnostics(
     // bond heartbeats if there are too many bonds on the same topic.
     std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
       "/diagnostics_agg/bond" + req->load_namespace, req->load_namespace, n_,
-      std::function<void(void)>(std::bind(&Aggregator::bondBroken, this, req->load_namespace,
-      group)),
-      std::function<void(void)>(std::bind(&Aggregator::bondFormed, this, group))
-    );
+      std::function<void(void)>(
+        std::bind(&Aggregator::bondBroken, this, req->load_namespace, group)),
+      std::function<void(void)>(std::bind(&Aggregator::bondFormed, this, group)));
     req_bond->start();
 
     bonds_.push_back(req_bond);  // bond formed, keep track of it
@@ -290,8 +286,7 @@ void Aggregator::publishData()
   toplevel_state_pub_->publish(diag_toplevel_state);
 }
 
-rclcpp::Node::SharedPtr
-Aggregator::get_node() const
+rclcpp::Node::SharedPtr Aggregator::get_node() const
 {
   RCLCPP_DEBUG(logger_, "get_node()");
   return this->n_;

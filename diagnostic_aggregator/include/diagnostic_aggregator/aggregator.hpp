@@ -54,14 +54,13 @@
 
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/analyzer_group.hpp"
-#include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/other_analyzer.hpp"
+#include "diagnostic_aggregator/status_item.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief Aggregator processes /diagnostics, republishes on /diagnostics_agg
  *
@@ -178,9 +177,7 @@ private:
    *!\param bond_id The bond id (namespace) from which the analyzer was created
    *!\param analyzer Shared pointer to the analyzer group that was added
    */
-  void bondBroken(
-    std::string bond_id,
-    std::shared_ptr<Analyzer> analyzer);
+  void bondBroken(std::string bond_id, std::shared_ptr<Analyzer> analyzer);
 
   /*
    *!\brief called when a bond is formed between the aggregator and a node.

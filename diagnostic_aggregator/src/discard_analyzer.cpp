@@ -39,18 +39,15 @@
 #include <memory>
 #include <vector>
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer,
-  diagnostic_aggregator::Analyzer)
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer, diagnostic_aggregator::Analyzer)
 
 namespace diagnostic_aggregator
 {
-
 using std::vector;
 
 DiscardAnalyzer::DiscardAnalyzer() {}
 
 DiscardAnalyzer::~DiscardAnalyzer() {}
-
 
 vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> DiscardAnalyzer::report()
 {

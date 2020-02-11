@@ -48,7 +48,6 @@
 
 namespace diagnostic_aggregator
 {
-
 /*!
  *\brief DiscardAnalyzer is does not report any values. It is a subclass of GenericAnalyzer
  *

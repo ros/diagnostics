@@ -34,58 +34,61 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-##\author Kevin Watts
+# \author Kevin Watts
+# \brief Publishes diagnostic messages for diagnostic aggregator unit test
 
-##\brief Publishes diagnostic messages for diagnostic aggregator unit test
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+import rclpy
+from rclpy.clock import ROSClock
+from rclpy.node import Node
 
 PKG = 'diagnostic_aggregator'
 
-#import roslib; roslib.load_manifest(PKG)
-
-import rclpy
-from rclpy.node import Node
-from rclpy.clock import ROSClock
-import builtin_interfaces.msg
-
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 class DiagnosticTalker(Node):
 
     def __init__(self):
         super().__init__('diagnostic_talker')
         self.i = 0
-        self.pub = self.create_publisher(DiagnosticArray, '/diagnostics') #, queue_size=10
+        self.pub = self.create_publisher(DiagnosticArray, '/diagnostics')  # , queue_size=10
         timer_period = 1.0
         self.tmr = self.create_timer(timer_period, self.timer_callback)
 
         self.array = DiagnosticArray()
         self.array.status = [
             # GenericAnalyzer prefix1
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'pref1a', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.WARN, name = 'pref1b', message = 'Warning'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contains1a', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: contains1b', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'name1', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1a', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1b', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1c', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'prefix1: expected1d', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'find1_items: find_remove1a', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'find1_items: find_remove1b', message = 'OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='pref1a', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.WARN, name='pref1b', message='Warning'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='contains1a', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: contains1b', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='name1', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1a', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1b', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1c', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1d', message='OK'),
+            DiagnosticStatus(
+                level=DiagnosticStatus.OK,
+                name='find1_items: find_remove1a',
+                message='OK'),
+            DiagnosticStatus(
+                level=DiagnosticStatus.OK,
+                name='find1_items: find_remove1b',
+                message='OK'),
 
             # GenericAnalyzer prefix2
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contain2a', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'contain2b', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'name2', message = 'OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='contain2a', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='contain2b', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='name2', message='OK'),
 
             # OtherAnalyzer for Other
-            DiagnosticStatus(level = DiagnosticStatus.ERROR, name = 'other1', message = 'Error'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'other2', message = 'OK'),
-            DiagnosticStatus(level = DiagnosticStatus.OK, name = 'other3', message = 'OK')]
+            DiagnosticStatus(level=DiagnosticStatus.ERROR, name='other1', message='Error'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='other2', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='other3', message='OK')]
 
     def timer_callback(self):
         self.array.header.stamp = ROSClock().now().to_msg()
         self.pub.publish(self.array)
+
 
 def main(args=None):
     rclpy.init(args=args)
