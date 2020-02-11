@@ -11,7 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
 find_package(bondcpp REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -66,9 +65,10 @@ install(
   TARGETS aggregator_node
   DESTINATION lib/${PROJECT_NAME})
 
-  # Testing macro
+# Testing macro
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_pytest REQUIRED)
@@ -110,19 +110,19 @@ install(
   DESTINATION include
 )
 
-# Install Demo
-set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/demo_pub.yaml")
-configure_file(demo/demo.launch.py.in demo.launch.py @ONLY)
+# Install Example
+set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_pub.yaml")
+configure_file(example/example.launch.py.in example.launch.py @ONLY)
 install( # launch descriptor
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/demo.launch.py
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
   DESTINATION share/${PROJECT_NAME}
 )
 install( # example publisher
-  FILES demo/demo.pub.py
+  FILES example/example_pub.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install( # example aggregator configration
-  FILES demo/demo.yaml
+  FILES example/example.yaml
   DESTINATION share/${PROJECT_NAME}
 )
 

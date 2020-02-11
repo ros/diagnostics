@@ -1,6 +1,6 @@
 analyzers:
   ros__parameters:
-    path: /Demo
+    path: /Example
     level0:
       type: diagnostic_aggregator/GenericAnalyzer
       path: Level0

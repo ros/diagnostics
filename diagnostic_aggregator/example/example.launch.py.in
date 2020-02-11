@@ -13,7 +13,7 @@ def generate_launch_description():
         parameters=[analyzer_params_filepath])
     diag_publisher = launch_ros.actions.Node(
         package='diagnostic_aggregator',
-        node_executable='demo_pub.py')
+        node_executable='example_pub.py')
     return launch.LaunchDescription([
         aggregator,
         diag_publisher,
