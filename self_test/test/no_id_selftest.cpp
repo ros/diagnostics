@@ -85,9 +85,10 @@ TEST_F(Fixture, run_self_test)
       EXPECT_STREQ("", result_out->id.c_str()) << "NoIDSelfTestNode should not have an ID";
       for (const auto & status : result_out->status) {
         EXPECT_EQ(0, status.level);
-        auto some_val = std::find_if(status.values.begin(), status.values.end(), [](auto it) {
-              return it.key == "some val";
-            });
+        auto some_val = std::find_if(
+          status.values.begin(), status.values.end(), [](auto it) {
+            return it.key == "some val";
+          });
         if (some_val != status.values.end()) {
           EXPECT_EQ(std::to_string(42), some_val->value);
         }

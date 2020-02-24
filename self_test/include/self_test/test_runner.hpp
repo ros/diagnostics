@@ -114,7 +114,8 @@ public:
 
             if (status.level >= 1) {
               if (verbose) {
-                RCLCPP_WARN(logger_,
+                RCLCPP_WARN(
+                  logger_,
                   "Non-zero self-test test status. Name: %s Status %i: Message: %s",
                   status.name.c_str(), status.level, status.message.c_str());
               }
@@ -139,7 +140,8 @@ public:
           }
 
           if (response->passed && id_ == unspecified_id) {
-            RCLCPP_WARN(logger_,
+            RCLCPP_WARN(
+              logger_,
               "Self-test passed, but setID was not called. This is a bug in the driver.");
           }
           response->status = status_vec;

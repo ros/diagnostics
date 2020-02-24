@@ -56,12 +56,14 @@ void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper & stat)
   // summary and summaryf set the level and message.
   if (time_to_launch < 10) {
     // summaryf for formatted text.
-    stat.summaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR,
+    stat.summaryf(
+      diagnostic_msgs::msg::DiagnosticStatus::ERROR,
       "Buckle your seat belt. Launch in %f seconds!",
       time_to_launch);
   } else {
     // summary for unformatted text.
-    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK,
+    stat.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::OK,
       "Launch is in a long time. Have a soda.");
   }
 
@@ -70,7 +72,8 @@ void dummy_diagnostic(diagnostic_updater::DiagnosticStatusWrapper & stat)
   // add transparently handles conversion to string (using a string_stream).
   stat.add("Time to Launch", time_to_launch);
   // addf allows arbitrary printf style formatting.
-  stat.addf("Geeky thing to say", "The square of the time to launch %f is %f",
+  stat.addf(
+    "Geeky thing to say", "The square of the time to launch %f is %f",
     time_to_launch, time_to_launch * time_to_launch);
 }
 
@@ -79,7 +82,8 @@ class DummyClass
 public:
   void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
-    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN,
+    stat.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::WARN,
       "This is a silly updater.");
 
     stat.add("Stupidicity of this updater", 1000.);
@@ -94,7 +98,8 @@ public:
 
   void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
-    stat.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN,
+    stat.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::WARN,
       "This is another silly updater.");
     stat.add("Stupidicity of this updater", 2000.);
   }
