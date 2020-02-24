@@ -98,9 +98,10 @@ TEST_F(Fixture, run_self_test)
       bool found_exception = false;
       for (const auto & status : result_out->status) {
         max_level = std::max(status.level, max_level);
-        auto some_val = std::find_if(status.values.begin(), status.values.end(), [](auto it) {
-              return it.key == "some val";
-            });
+        auto some_val = std::find_if(
+          status.values.begin(), status.values.end(), [](auto it) {
+            return it.key == "some val";
+          });
         if (some_val != status.values.end()) {
           EXPECT_EQ(std::to_string(42), some_val->value);
         }
