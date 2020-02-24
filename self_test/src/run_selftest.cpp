@@ -84,7 +84,8 @@ public:
           }
 
           for (const auto & kv : status.values) {
-            RCLCPP_INFO(this->get_logger(), "\t[%s] %s",
+            RCLCPP_INFO(
+              this->get_logger(), "\t[%s] %s",
               kv.key.c_str(),
               kv.value.c_str());
           }

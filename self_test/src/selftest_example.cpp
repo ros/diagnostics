@@ -127,7 +127,8 @@ public:
     throw std::runtime_error("we did something that threw an exception");
 
     //  Here's where we would report success if we'd made it past
-    status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK,
+    status.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::OK,
       "We made it past the exception throwing statement.");
   }
 
@@ -138,7 +139,8 @@ public:
     some_val_ += 41.0;
 
     status.add("some value", some_val_);
-    status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK,
+    status.summary(
+      diagnostic_msgs::msg::DiagnosticStatus::OK,
       "We successfully changed the value.");
   }
 
@@ -147,7 +149,8 @@ public:
     if (some_val_ == 42.0) {
       status.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "We observed the change in value");
     } else {
-      status.summaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR,
+      status.summaryf(
+        diagnostic_msgs::msg::DiagnosticStatus::ERROR,
         "We failed to observe the change in value, it is currently %f.", some_val_);
     }
   }

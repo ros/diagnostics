@@ -57,7 +57,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
     def __init__(self, *args, **kwds):
         """
-        Constructor.
+        Construct a new status wrapper.
 
         Any message fields that are implicitly/explicitly
         set to None will be assigned a default value. The recommend

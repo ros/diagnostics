@@ -199,11 +199,13 @@ public:
       stat.addf("Target frequency (Hz)", "%f", *params_.min_freq_);
     }
     if (*params_.min_freq_ > 0) {
-      stat.addf("Minimum acceptable frequency (Hz)", "%f",
+      stat.addf(
+        "Minimum acceptable frequency (Hz)", "%f",
         *params_.min_freq_ * (1 - params_.tolerance_));
     }
     if (std::isfinite(*params_.max_freq_)) {
-      stat.addf("Maximum acceptable frequency (Hz)", "%f",
+      stat.addf(
+        "Maximum acceptable frequency (Hz)", "%f",
         *params_.max_freq_ * (1 + params_.tolerance_));
     }
   }
@@ -363,9 +365,11 @@ public:
 
     stat.addf("Earliest timestamp delay:", "%f", min_delta_);
     stat.addf("Latest timestamp delay:", "%f", max_delta_);
-    stat.addf("Earliest acceptable timestamp delay:", "%f",
+    stat.addf(
+      "Earliest acceptable timestamp delay:", "%f",
       params_.min_acceptable_);
-    stat.addf("Latest acceptable timestamp delay:", "%f",
+    stat.addf(
+      "Latest acceptable timestamp delay:", "%f",
       params_.max_acceptable_);
     stat.add("Late diagnostic update count:", late_count_);
     stat.add("Early diagnostic update count:", early_count_);
