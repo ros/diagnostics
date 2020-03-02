@@ -171,7 +171,7 @@ private:
  * the TopicDiagnostic to be combined for added convenience.
  */
 
-template<class T>
+template<typename MessageT, typename AllocatorT = std::allocator<void>>
 class DiagnosedPublisher : public TopicDiagnostic
 {
 public:
@@ -190,9 +190,10 @@ public:
    * computing statistics.
    */
 
+  using PublisherT = rclcpp::Publisher<MessageT, AllocatorT>;
+
   DiagnosedPublisher(
-    const rclcpp::Publisher<
-      diagnostic_msgs::msg::DiagnosticArray>::SharedPtr & pub,
+    const typename PublisherT::SharedPtr & pub,
     diagnostic_updater::Updater & diag,
     const diagnostic_updater::FrequencyStatusParam & freq,
     const diagnostic_updater::TimeStampStatusParam & stamp)
@@ -207,10 +208,10 @@ public:
    * The timestamp to be used by the TimeStampStatus class will be
    * extracted from message.header.stamp.
    */
-  virtual void publish(const std::shared_ptr<T> & message)
+  virtual void publish(typename PublisherT::MessageUniquePtr message)
   {
     tick(message->header.stamp);
-    publisher_->publish(message);
+    publisher_->publish(std::move(message));
   }
 
   /**
@@ -219,7 +220,7 @@ public:
    * The timestamp to be used by the TimeStampStatus class will be
    * extracted from message.header.stamp.
    */
-  virtual void publish(const T & message)
+  virtual void publish(const MessageT & message)
   {
     tick(message.header.stamp);
     publisher_->publish(message);
@@ -228,7 +229,7 @@ public:
   /**
    * \brief Returns the publisher.
    */
-  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr
+  typename PublisherT::SharedPtr
   getPublisher() const
   {
     return publisher_;
@@ -237,14 +238,13 @@ public:
   /**
    * \brief Changes the publisher.
    */
-  void setPublisher(
-    rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr pub)
+  void setPublisher(typename PublisherT::SharedPtr pub)
   {
     publisher_ = pub;
   }
 
 private:
-  rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
+  typename PublisherT::SharedPtr publisher_;
 };
 }   // namespace diagnostic_updater
 
