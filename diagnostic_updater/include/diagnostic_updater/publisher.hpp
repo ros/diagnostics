@@ -38,6 +38,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_updater/update_functions.hpp"
