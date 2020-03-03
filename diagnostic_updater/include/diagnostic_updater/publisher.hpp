@@ -46,6 +46,26 @@
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"
 
+namespace
+{
+/**
+ * \brief Helper struct to check message for header member.
+ */
+template<typename T, typename = void>
+struct has_header : public std::false_type
+{};
+
+/**
+ * \brief Helper struct to check message for header member.
+ */
+template<typename T>
+struct has_header<T,
+  typename std::enable_if<std::is_same<std_msgs::msg::Header,
+  decltype(std::declval<T>().header)>::value>::type>
+  : public std::true_type
+{};
+}  // namespace
+
 namespace diagnostic_updater
 {
 
@@ -199,7 +219,10 @@ public:
     const diagnostic_updater::FrequencyStatusParam & freq,
     const diagnostic_updater::TimeStampStatusParam & stamp)
   : TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp),
-    publisher_(pub) {}
+    publisher_(pub)
+  {
+    static_assert(has_header<MessageT>::value, "Message type has to have a header.");
+  }
 
   virtual ~DiagnosedPublisher() {}
 
