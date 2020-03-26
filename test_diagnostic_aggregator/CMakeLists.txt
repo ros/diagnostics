@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(test_diagnostic_aggregator)
 
 # Load catkin and all dependencies required for this package
