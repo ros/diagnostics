@@ -84,7 +84,7 @@ class LogExporter:
     ##\brief Creates and updates data files with new messages
     def _update(self, topic, msg):
         if (not (topic == '/diagnostics')):
-            print "Discarding message on topic: %s" % topic
+            print("Discarding message on topic: %s" % topic)
             return
         
         t = time.localtime(float(str(msg.header.stamp)) / 1000000000.0)

@@ -133,5 +133,5 @@ class TestAddAnalyzer(unittest.TestCase):
             self.assert_(not any(expected in agg_paths for expected in self.expected))
         
 if __name__ == '__main__':
-    print 'SYS ARGS:', sys.argv
+    print('SYS ARGS:', sys.argv)
     rostest.run(PKG, sys.argv[0], TestAddAnalyzer, sys.argv)

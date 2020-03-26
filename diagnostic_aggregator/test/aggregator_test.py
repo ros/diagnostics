@@ -163,8 +163,8 @@ class TestAggregator(unittest.TestCase):
         super(TestAggregator, self).__init__(*args)
         parser = OptionParser(usage="./%prog [options]", prog="aggregator_test.py")
         parser.add_option('--gtest_output', action="store", dest="gtest")
-        parser.add_option('--param_name', action="store", dest="param", 
-                          default='diag_agg', metavar="PARAM_NAME", 
+        parser.add_option('--param_name', action="store", dest="param",
+                          default='diag_agg', metavar="PARAM_NAME",
                           help="Name of parameter that defines analyzers")
         parser.add_option('--duration', action="store", dest="duration",
                           default=10, metavar="DURATIION",
@@ -258,5 +258,5 @@ class TestAggregator(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print 'SYS ARGS:', sys.argv
+    print('SYS ARGS:', sys.argv)
     rostest.run(PKG, sys.argv[0], TestAggregator, sys.argv)
