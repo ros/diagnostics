@@ -51,7 +51,7 @@ class TestAddAnalyzer(unittest.TestCase):
         self.namespace = rospy.get_name()
         paramlist = rosparam.load_file(rospy.myargv()[1])
         # expect to receive these paths in the added analyzers
-        self.expected = [paramlist[0][1] + analyzer['path'] for name, analyzer in paramlist[0][0]['analyzers'].iteritems()]
+        self.expected = [paramlist[0][1] + analyzer['path'] for name, analyzer in paramlist[0][0]['analyzers'].items()]
 
         self._mutex = threading.Lock()
         self.agg_msgs = {}
@@ -90,7 +90,7 @@ class TestAddAnalyzer(unittest.TestCase):
 
         # confirm that the things we're going to add aren't there already
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
+            agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
             self.assert_(not any(expected in agg_paths for expected in self.expected))
             
         # add the new groups
@@ -108,7 +108,7 @@ class TestAddAnalyzer(unittest.TestCase):
         # the paths are probably still in the 'Other' group because the bond
         # hasn't been fully formed
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
+            agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
             self.assert_(all(expected in agg_paths for expected in self.expected))
 
         rospy.sleep(rospy.Duration(5)) # wait a bit for the new items to move to the right group
@@ -116,11 +116,11 @@ class TestAddAnalyzer(unittest.TestCase):
         self.pub.publish(arr) # publish again to get the correct groups to show OK
         self.wait_for_agg()
 
-        for name, msg in self.agg_msgs.iteritems():
+        for name, msg in self.agg_msgs.items():
             if name in self.expected: # should have just received messages on the analyzer
                 self.assert_(msg.message == 'OK')
                 
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
+            agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
             self.assert_(all(expected in agg_paths for expected in self.expected))
                 
 
@@ -129,7 +129,7 @@ class TestAddAnalyzer(unittest.TestCase):
         self.wait_for_agg()
         # the aggregator data should no longer contain the paths once the bond is shut down
         with self._mutex:
-            agg_paths = [msg.name for name, msg in self.agg_msgs.iteritems()]
+            agg_paths = [msg.name for name, msg in self.agg_msgs.items()]
             self.assert_(not any(expected in agg_paths for expected in self.expected))
         
 if __name__ == '__main__':

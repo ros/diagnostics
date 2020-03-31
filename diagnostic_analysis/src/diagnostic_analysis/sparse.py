@@ -48,15 +48,15 @@ import csv, os, sys
 def make_sparse_skip(csv_file, skip):
     output_file = csv_file[:-4] + '_sparse.csv'
 
-    input_reader = csv.reader(open(csv_file, 'rb'))
+    input_reader = csv.reader(open(csv_file, newline=''), delimiter=',')
 
-    f = open(output_file, 'wb')
+    f = open(output_file, 'w')
     output_writer = csv.writer(f)
 
     skip_count = skip
     for row in input_reader:
         if skip_count == skip:
-            output_writer.writerow(row)
+            output_writer.writerow([r.encode() for r in row])
             skip_count = 0
             
         skip_count = skip_count + 1
@@ -70,9 +70,9 @@ def make_sparse_skip(csv_file, skip):
 def make_sparse_length(csv_file, length):
     output_file = csv_file[:-4] + '_sprs_len.csv'
 
-    input_reader = csv.reader(open(csv_file, 'rb'))
+    input_reader = csv.reader(open(csv_file, newline=''), delimiter=',')
 
-    f = open(output_file, 'wb')
+    f = open(output_file, 'w')
     output_writer = csv.writer(f)
 
     # Calculate skip count for file

@@ -75,7 +75,7 @@ class TestExpectedItemsStale(unittest.TestCase):
         self._expecteds = {}
         self._agg_expecteds = {}
 
-        rospy.init_node('test_expected_stale')        
+        rospy.init_node('test_expected_stale')
         self._starttime = rospy.get_time()
 
         sub = rospy.Subscriber("/diagnostics", DiagnosticArray, self.diag_cb)
@@ -102,8 +102,8 @@ class TestExpectedItemsStale(unittest.TestCase):
         with self._mutex:
             self.assert_(len(self._expecteds) > 0, "No expected items found in raw data!")
 
-            for name, item in self._expecteds.iteritems():
-                self.assert_(self._agg_expecteds.has_key(name), "Item %s not found in aggregated diagnostics output" % name)
+            for name, item in self._expecteds.items():
+                self.assert_(name in self._agg_expecteds, "Item %s not found in aggregated diagnostics output" % name)
                 if item.is_stale():
                     self.assert_(self._agg_expecteds[name].level == 3, "Stale item in diagnostics, but aggregated didn't report as stale. Item: %s, state: %d" %(name, self._agg_expecteds[name].level))
                 else:
