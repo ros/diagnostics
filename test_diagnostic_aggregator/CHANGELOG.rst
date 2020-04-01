@@ -2,6 +2,11 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* noetic release (`#136 <https://github.com/ros/diagnostics/issues/136>`_)
+* Contributors: Alejandro Hernández Cordero
+
 1.9.3 (2018-05-02)
 ------------------
 
