@@ -56,7 +56,7 @@ def make_sparse_skip(csv_file, skip):
     skip_count = skip
     for row in input_reader:
         if skip_count == skip:
-            output_writer.writerow([r.encode() for r in row])
+            output_writer.writerow(row)
             skip_count = 0
             
         skip_count = skip_count + 1
