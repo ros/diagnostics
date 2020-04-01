@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.4 (2020-04-01)
+------------------
 * noetic release (`#136 <https://github.com/ros/diagnostics/issues/136>`_)
 * Merge pull request `#99 <https://github.com/ros/diagnostics/issues/99>`_ from g-gemignani/indigo-devel
   Fix discard_stale (Closes `#65 <https://github.com/ros/diagnostics/issues/65>`_)

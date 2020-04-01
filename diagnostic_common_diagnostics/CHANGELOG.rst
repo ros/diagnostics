@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.4 (2020-04-01)
+------------------
 * noetic release (`#136 <https://github.com/ros/diagnostics/issues/136>`_)
 * Contributors: Alejandro Hernández Cordero
 
