@@ -102,10 +102,10 @@ class TestMultipleMatch(unittest.TestCase):
         self.assert_(not rospy.is_shutdown(), "Rospy shutdown!")
 
         with self._mutex:
-            self.assert_(self._multi_items.has_key(HEADER1), "Didn't have item under %s. Items: %s" % (HEADER1, self._multi_items))
+            self.assert_(HEADER1 in self._multi_items, "Didn't have item under %s. Items: %s" % (HEADER1, self._multi_items))
             self.assert_(self._multi_items[HEADER1].name == MULTI_NAME, "Item name under %s didn't match %s" % (HEADER1, MULTI_NAME))
 
-            self.assert_(self._multi_items.has_key(HEADER2), "Didn't have item under %s" % HEADER2)
+            self.assert_(HEADER2 in self._multi_items, "Didn't have item under %s" % HEADER2)
             self.assert_(self._multi_items[HEADER2].name == MULTI_NAME, "Item name under %s didn't match %s" % (HEADER2, MULTI_NAME))
          
 

@@ -205,7 +205,7 @@ class SensorsMonitor(object):
                         if sensor.getInput() < sensor.getMin():
                             stat.mergeSummary(DIAG.ERROR, "No Fan Speed")
                     stat.add(" ".join([sensor.getName(), sensor.getType()]), sensor.getInput())
-        except Exception, e:
+        except Exception as e:
             import traceback
             rospy.logerr('Unable to process lm-sensors data')
             rospy.logerr(traceback.format_exc())
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     try:
         rospy.init_node('sensors_monitor_%s'%hostname_clean)
     except rospy.ROSInitException:
-        print >> sys.stderr, 'Unable to initialize node. Master may not be running'
+        print(file=sys.stderr, 'Unable to initialize node. Master may not be running')
         sys.exit(0)
 
     monitor = SensorsMonitor(hostname)
