@@ -36,7 +36,11 @@
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/update_functions.h>
 #include <diagnostic_updater/DiagnosticStatusWrapper.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
+#include <chrono>
+#include <thread>
 
 using namespace diagnostic_updater;
 
@@ -148,15 +152,15 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   
   DiagnosticStatusWrapper stat[5];
   fs.tick();
-  usleep(20000);
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
   fs.run(stat[0]); // Should be too fast, 20 ms for 1 tick, lower limit should be 33ms.
-  usleep(50000);
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   fs.tick();
   fs.run(stat[1]); // Should be good, 70 ms for 2 ticks, lower limit should be 66 ms.
-  usleep(300000);
+  std::this_thread::sleep_for(std::chrono::milliseconds(300));
   fs.tick();
   fs.run(stat[2]); // Should be good, 350 ms for 2 ticks, upper limit should be 400 ms.
-  usleep(150000);
+  std::this_thread::sleep_for(std::chrono::milliseconds(150));
   fs.tick();
   fs.run(stat[3]); // Should be too slow, 450 ms for 2 ticks, upper limit should be 400 ms.
   fs.clear();
