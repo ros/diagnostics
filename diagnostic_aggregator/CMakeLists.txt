@@ -73,7 +73,6 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_pytest REQUIRED)
   find_package(launch_testing_ament_cmake REQUIRED)
-  find_package(rmw_implementation_cmake REQUIRED)
 
   set(aggregator_tests
     "primitive_analyzers"
@@ -111,7 +110,7 @@ install(
 )
 
 # Install Example
-set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_pub.yaml")
+set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example.yaml")
 configure_file(example/example.launch.py.in example.launch.py @ONLY)
 install( # launch descriptor
   FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
