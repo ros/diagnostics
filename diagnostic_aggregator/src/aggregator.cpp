@@ -93,8 +93,6 @@ Aggregator::Aggregator()
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
 
-  add_srv_ = n_->create_service<diagnostic_msgs::srv::AddDiagnostics>(
-    "/diagnostics_agg/add_diagnostics", std::bind(&Aggregator::addDiagnostics, this, _1, _2, _3));
   diag_sub_ = n_->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
     "/diagnostics", rclcpp::SystemDefaultsQoS(), std::bind(&Aggregator::diagCallback, this, _1));
   agg_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg", 1);
@@ -150,89 +148,6 @@ void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::Share
 Aggregator::~Aggregator()
 {
   RCLCPP_DEBUG(logger_, "destructor");
-}
-
-void Aggregator::bondBroken(std::string bond_id, std::shared_ptr<Analyzer> analyzer)
-{
-  RCLCPP_DEBUG(logger_, "bondBroken()");
-  std::lock_guard<std::mutex> lock(mutex_);  // Possibility of multiple bonds breaking at once
-  RCLCPP_WARN(logger_, "Bond for namespace %s was broken", bond_id.c_str());
-  std::vector<std::shared_ptr<bond::Bond>>::iterator elem;
-  elem = std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(bond_id));
-  if (elem == bonds_.end()) {
-    RCLCPP_WARN(logger_, "Broken bond tried to erase a bond which didn't exist.");
-  } else {
-    bonds_.erase(elem);
-  }
-  if (!analyzer_group_->removeAnalyzer(analyzer)) {
-    RCLCPP_WARN(logger_, "Broken bond tried to remove an analyzer which didn't exist.");
-  }
-
-  analyzer_group_->resetMatches();
-}
-
-void Aggregator::bondFormed(std::shared_ptr<Analyzer> group)
-{
-  RCLCPP_DEBUG(logger_, "bondFormed()");
-  std::lock_guard<std::mutex> lock(mutex_);
-  analyzer_group_->addAnalyzer(group);
-  analyzer_group_->resetMatches();
-}
-
-bool Aggregator::addDiagnostics(
-  const std::shared_ptr<rmw_request_id_t> header,
-  const std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Request> req,
-  std::shared_ptr<diagnostic_msgs::srv::AddDiagnostics::Response> res)
-{
-  (void)header;
-
-  RCLCPP_DEBUG(logger_, "Got load request for namespace %s", req->load_namespace.c_str());
-  // Don't currently support relative or private namespace definitions
-  if (req->load_namespace[0] != '/') {
-    res->message =
-      R"(Requested load from non-global namespace.
-      Private and relative namespaces are not supported.)";
-    res->success = false;
-    return true;
-  }
-
-  std::shared_ptr<Analyzer> group = std::make_shared<AnalyzerGroup>();
-  {  // lock here ensures that bonds from the same namespace aren't added twice.
-    // Without it, possibility of two simultaneous calls adding two objects.
-    std::lock_guard<std::mutex> lock(mutex_);
-    // rebuff attempts to add things from the same namespace twice
-    if (
-      std::find_if(bonds_.begin(), bonds_.end(), BondIDMatch(req->load_namespace)) !=
-      bonds_.end())
-    {
-      res->message =
-        "Requested load from namespace " + req->load_namespace + " which is already in use";
-      res->success = false;
-      return true;
-    }
-
-    // Use a different topic for each bond to help control the message queue
-    // length. Bond has a fixed size subscriber queue, so we can easily miss
-    // bond heartbeats if there are too many bonds on the same topic.
-    std::shared_ptr<bond::Bond> req_bond = std::make_shared<bond::Bond>(
-      "/diagnostics_agg/bond" + req->load_namespace, req->load_namespace, n_,
-      std::function<void(void)>(
-        std::bind(&Aggregator::bondBroken, this, req->load_namespace, group)),
-      std::function<void(void)>(std::bind(&Aggregator::bondFormed, this, group)));
-    req_bond->start();
-
-    bonds_.push_back(req_bond);  // bond formed, keep track of it
-  }
-
-  if (group->init(base_path_, "", std::make_shared<rclcpp::Node>(req->load_namespace))) {
-    res->message = "Successfully initialised AnalyzerGroup. Waiting for bond to form.";
-    res->success = true;
-    return true;
-  } else {
-    res->message = "Failed to initialise AnalyzerGroup.";
-    res->success = false;
-    return true;
-  }
 }
 
 void Aggregator::publishData()
