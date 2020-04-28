@@ -11,7 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(bondcpp REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -28,7 +27,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${PROJECT_NAME}
-  "bondcpp"
   "diagnostic_msgs"
   "pluginlib"
   "rclcpp"
@@ -48,7 +46,6 @@ target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${ANALYZERS}
-  "bondcpp"
   "diagnostic_msgs"
   "pluginlib"
   "rclcpp"
@@ -135,8 +132,6 @@ pluginlib_export_plugin_description_file(${PROJECT_NAME} plugin_description.xml)
 ament_export_include_directories(include)
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(ament_cmake_python)
-ament_export_dependencies(bondcpp)
-ament_export_dependencies(bondpy)
 ament_export_dependencies(diagnostic_msgs)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclpy)
