@@ -16,9 +16,6 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(UUID REQUIRED uuid)
-
 add_library(${PROJECT_NAME} SHARED
   src/status_item.cpp
   src/analyzer_group.cpp
@@ -61,8 +58,7 @@ target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIO
 # Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
-  ${PROJECT_NAME}
-  ${UUID_LINK_LIBRARIES})
+  ${PROJECT_NAME})
 install(
   TARGETS aggregator_node
   DESTINATION lib/${PROJECT_NAME})
