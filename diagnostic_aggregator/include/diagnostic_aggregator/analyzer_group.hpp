@@ -47,6 +47,7 @@
 
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
@@ -112,8 +113,10 @@ namespace diagnostic_aggregator
 class AnalyzerGroup : public Analyzer
 {
 public:
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   AnalyzerGroup();
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~AnalyzerGroup();
 
   /*!
@@ -121,6 +124,7 @@ public:
    *
    * The parameters in its namespace determine the sub-analyzers.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool init(
     const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
@@ -128,32 +132,38 @@ public:
   /**!
    *\brief Add an analyzer to this analyzerGroup
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool addAnalyzer(std::shared_ptr<Analyzer> & analyzer);
 
   /**!
    *\brief Remove an analyzer from this analyzerGroup
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool removeAnalyzer(std::shared_ptr<Analyzer> & analyzer);
 
   /*!
    *\brief Match returns true if any sub-analyzers match an item
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool match(const std::string & name);
 
   /*!
    *\brief Clear match arrays. Used when analyzers are added or removed
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   void resetMatches();
 
   /*!
    *\brief Analyze returns true if any sub-analyzers will analyze an item
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool analyze(const std::shared_ptr<StatusItem> item);
 
   /*!
    *\brief The processed output is the combined output of the sub-analyzers,
    * and the top level status
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 
   virtual std::string getPath() const {return path_;}

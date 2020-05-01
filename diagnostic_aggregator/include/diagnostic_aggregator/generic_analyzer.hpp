@@ -49,6 +49,7 @@
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/generic_analyzer_base.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 #include "diagnostic_msgs/msg/key_value.h"
@@ -193,8 +194,10 @@ public:
   /*!
    *\brief Default constructor loaded by pluginlib
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   GenericAnalyzer();
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~GenericAnalyzer();
 
   // Move to class description above
@@ -205,6 +208,7 @@ public:
    *\param n : NodeHandle in full namespace
    *\return True if initialization succeed, false if no errors of
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   bool init(
     const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
@@ -214,12 +218,14 @@ public:
    *
    *\return Vector of DiagnosticStatus messages, with correct prefix for all names.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 
   /*!
    *\brief Returns true if item matches any of the given criteria
    *
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool match(const std::string & name);
 
 private:

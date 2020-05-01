@@ -44,6 +44,7 @@
 #include <vector>
 
 #include "diagnostic_aggregator/generic_analyzer.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 
@@ -73,10 +74,13 @@ public:
   /*!
    *\brief Default constructor loaded by pluginlib
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   IgnoreAnalyzer();
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~IgnoreAnalyzer();
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   bool init(
     const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node);
@@ -98,6 +102,7 @@ public:
   /*
    *\brief Always reports an empty vector
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 
   std::string getPath() const {return "";}

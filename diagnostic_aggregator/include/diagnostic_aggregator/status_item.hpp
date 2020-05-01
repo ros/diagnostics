@@ -44,6 +44,8 @@
 #include <string>
 #include <vector>
 
+#include "diagnostic_aggregator/visibility_control.hpp"
+
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
 
@@ -184,15 +186,18 @@ public:
   /*!
    *\brief Constructed from const DiagnosticStatus*
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   explicit StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status);
 
   /*!
   *\brief Constructed from string of item name
   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   StatusItem(
     const std::string item_name, const std::string message = "Missing",
     const DiagnosticLevel level = Level_Stale);
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   ~StatusItem();
 
   /*!
@@ -200,6 +205,7 @@ public:
    *
    *\return True if update successful, false if error
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   bool update(const diagnostic_msgs::msg::DiagnosticStatus * status);
 
   /*!
@@ -213,6 +219,7 @@ public:
    *\param path : Prepended to name
    *\param stale : If true, status level is 3
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> toStatusMsg(
     const std::string & path, const bool stale = false) const;
 

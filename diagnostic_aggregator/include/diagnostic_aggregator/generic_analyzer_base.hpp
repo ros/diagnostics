@@ -47,6 +47,7 @@
 
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 #include "diagnostic_msgs/msg/key_value.h"
@@ -89,6 +90,7 @@ public:
   /*
    *\brief Cannot be initialized from (string, NodeHandle) like defined Analyzers
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   bool init(
     const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node) = 0;
@@ -257,6 +259,7 @@ public:
   /*!
    *\brief Match function isn't implemented by GenericAnalyzerBase
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool match(const std::string & name) = 0;
 
   /*!

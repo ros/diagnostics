@@ -43,6 +43,7 @@
 #include <vector>
 
 #include "diagnostic_aggregator/generic_analyzer.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 
@@ -73,13 +74,16 @@ public:
   /*!
    *\brief Default constructor loaded by pluginlib
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   DiscardAnalyzer();
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~DiscardAnalyzer();
 
   /*
    *\brief Always reports an empty vector
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
 };
 

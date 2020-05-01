@@ -45,15 +45,16 @@
 #include <string>
 #include <vector>
 
-#include "diagnostic_msgs/msg/diagnostic_array.hpp"
-#include "diagnostic_msgs/msg/diagnostic_status.hpp"
-#include "diagnostic_msgs/msg/key_value.hpp"
-#include "diagnostic_msgs/srv/add_diagnostics.hpp"
-
 #include "diagnostic_aggregator/analyzer.hpp"
 #include "diagnostic_aggregator/analyzer_group.hpp"
 #include "diagnostic_aggregator/other_analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.hpp"
+#include "diagnostic_msgs/msg/key_value.hpp"
+#include "diagnostic_msgs/srv/add_diagnostics.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -107,13 +108,16 @@ public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   Aggregator();
 
-  ~Aggregator();
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  virtual ~Aggregator();
 
   /*!
    *\brief Processes, publishes data. Should be called at pub_rate.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   void publishData();
 
   /*!
@@ -126,6 +130,7 @@ public:
    */
   double getPubRate() const {return pub_rate_;}
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::Node::SharedPtr get_node() const;
 
 private:

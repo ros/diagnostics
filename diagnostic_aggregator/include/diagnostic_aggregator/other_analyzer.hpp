@@ -44,6 +44,7 @@
 #include <vector>
 
 #include "diagnostic_aggregator/generic_analyzer_base.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 

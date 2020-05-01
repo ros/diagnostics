@@ -45,6 +45,7 @@
 #include <vector>
 
 #include "diagnostic_aggregator/status_item.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_status.h"
 #include "diagnostic_msgs/msg/key_value.h"
@@ -94,7 +95,7 @@ public:
    *\brief Default constructor, called by pluginlib.
    */
   Analyzer()
-  : clock_(new rclcpp::Clock()) {}
+  : clock_(std::make_shared<rclcpp::Clock>()) {}
 
   virtual ~Analyzer() {}
 
@@ -108,6 +109,7 @@ public:
    *\param breadcrumb : Prefix for parameter getter.
    *\param n : NodeHandle with proper private namespace for analyzer.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool init(
     const std::string & base_path, const std::string & breadcrumb,
     const rclcpp::Node::SharedPtr node) = 0;
@@ -118,6 +120,7 @@ public:
    * Match is called once for each new status name, so this return value cannot change
    * with time.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool match(const std::string & name) = 0;
 
   /*!
@@ -127,6 +130,7 @@ public:
    * Analyzers should only return "true" if they will report the value of this
    * item. If it is only looking at an item, it should return false.
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual bool analyze(const std::shared_ptr<StatusItem> item) = 0;
 
   /*!
@@ -137,16 +141,19 @@ public:
    *
    *\return The array of DiagnosticStatus messages must have proper names, with prefixes prepended
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report() = 0;
 
   /*!
    *\brief Returns full prefix of analyzer. (ex: '/Robot/Sensors')
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::string getPath() const = 0;
 
   /*!
    *\brief Returns nice name for display. (ex: 'Sensors')
    */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual std::string getName() const = 0;
 
 protected:
