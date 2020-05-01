@@ -6,12 +6,15 @@ namespace diagnostic_generic_diagnostics
 {
 struct TopicStatusParam
 {
-  TopicStatusParam() : topic(""), custom_msg(""), headerless(false), fparam(&this->freq.min, &this->freq.max), tparam()
+  TopicStatusParam()
+    : topic(""), hardware_id(""), custom_msg(""), headerless(false), fparam(&this->freq.min, &this->freq.max), tparam()
   {
     freq.max = 0.0;
     freq.min = 0.0;
   }
+
   std::string topic;
+  std::string hardware_id;
   std::string custom_msg;
   bool        headerless;
   struct
@@ -34,6 +37,8 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
     else
       return false;  // topic name is required
 
+    if(values["hardware_id"].getType() == XmlRpc::XmlRpcValue::TypeString)
+      param.hardware_id = static_cast<std::string>(values["hardware_id"]);
     if(values["custom_msg"].getType() == XmlRpc::XmlRpcValue::TypeString)
       param.custom_msg = static_cast<std::string>(values["custom_msg"]);
     if(values["headerless"].getType() == XmlRpc::XmlRpcValue::TypeBoolean)
@@ -64,35 +69,32 @@ private:
   ros::NodeHandle                  nh_, pnh_;
   ros::Timer                       timer_;
   std::vector<ros::Subscriber>     subs_;
-  UpdaterPtr                       updater_;
   std::vector<TopicStatusParamPtr> params_;
 
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
+                               diagnostic_generic_diagnostics::UpdaterPtr                     updater,
                                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
+    updater->update();
     task->tick();
   }
 
   void topicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> & msg,
+                     diagnostic_generic_diagnostics::UpdaterPtr           updater,
                      std::shared_ptr<diagnostic_updater::TopicDiagnostic> task)
   {
+    updater->update();
     task->tick(ros::Time::now());
   }
 
   void timerCallback(const ros::TimerEvent &e)
   {
-    updater_->update();
   }
 
 public:
   TopicMonitor(ros::NodeHandle nh, ros::NodeHandle pnh) : nh_(nh), pnh_(pnh)
   {
     ROS_INFO("Starting TopicMonitor...");
-
-    updater_ = std::make_shared<diagnostic_updater::Updater>();
-    std::string hardware_id("");
-    pnh_.getParam("hardware_id", hardware_id);
-    updater_->setHardwareID(hardware_id);
 
     XmlRpc::XmlRpcValue topics;
     pnh_.getParam("topics", topics);
@@ -106,24 +108,24 @@ public:
       {
         params_.push_back(param);
 
+        auto updater = std::make_shared<diagnostic_updater::Updater>();
+        updater->setHardwareID(param->hardware_id);
         ros::Subscriber sub;
         if(param->headerless)
         {
           auto watcher =
-              std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(param->topic, *updater_, param->fparam);
+              std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(param->topic, *updater, param->fparam);
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
-              param->topic, 1,
-              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::headerlessTopicCallback, this, _1, watcher));
+              param->topic, 1, boost::bind(&headerlessTopicCallback, this, _1, updater, watcher));
         }
         else
         {
-          auto watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>(param->topic, *updater_, param->fparam,
+          auto watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>(param->topic, *updater, param->fparam,
                                                                                param->tparam);
 
-          sub = nh_.subscribe<topic_tools::ShapeShifter>(
-              param->topic, 1,
-              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::topicCallback, this, _1, watcher));
+          sub = nh_.subscribe<topic_tools::ShapeShifter>(param->topic, 1,
+                                                         boost::bind(&topicCallback, this, _1, updater, watcher));
         }
 
         ROS_INFO("Setup sub for %s", param->topic.c_str());
