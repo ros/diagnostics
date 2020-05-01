@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="diagnostic_generic_diagnostics" type="topic_monitor" name="test_monitor">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_test.yaml"/>
+  </node>
+</launch>
