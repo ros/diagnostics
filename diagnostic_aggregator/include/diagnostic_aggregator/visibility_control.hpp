@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_H_
-#define DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_H_
+#ifndef DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
+#define DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
 
 #ifdef __cplusplus
 extern "C"
@@ -55,4 +55,4 @@ extern "C"
 }
 #endif
 
-#endif  // DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_H_
+#endif  // DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
