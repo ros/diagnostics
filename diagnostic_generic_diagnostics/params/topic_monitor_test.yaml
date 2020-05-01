@@ -10,7 +10,7 @@ topics:
   - topic: /right_cam/obstacles_laser
     hardware_id: test-hw-right
     custom_msg: test-r
-    headerless: false
+    headerless: true
     max_freq: 60.0
     min_freq: 10.0
     tolerance: 0.20
