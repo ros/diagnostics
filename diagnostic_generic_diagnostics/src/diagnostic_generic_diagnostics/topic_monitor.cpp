@@ -6,14 +6,12 @@ namespace diagnostic_generic_diagnostics
 {
 struct TopicStatusParam
 {
-  TopicStatusParam()
-    : topic(""), hardware_id(""), custom_msg(""), headerless(false), fparam(&this->freq.min, &this->freq.max), tparam()
+  TopicStatusParam() : topic(""), custom_msg(""), headerless(false), fparam(&this->freq.min, &this->freq.max), tparam()
   {
     freq.max = 0.0;
     freq.min = 0.0;
   }
   std::string topic;
-  std::string hardware_id;
   std::string custom_msg;
   bool        headerless;
   struct
@@ -36,8 +34,6 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
     else
       return false;  // topic name is required
 
-    if(values["hardware_id"].getType() == XmlRpc::XmlRpcValue::TypeString)
-      param.hardware_id = static_cast<std::string>(values["hardware_id"]);
     if(values["custom_msg"].getType() == XmlRpc::XmlRpcValue::TypeString)
       param.custom_msg = static_cast<std::string>(values["custom_msg"]);
     if(values["headerless"].getType() == XmlRpc::XmlRpcValue::TypeBoolean)
@@ -60,70 +56,81 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
   return false;
 }
 
+using UpdaterPtr          = std::shared_ptr<diagnostic_updater::Updater>;
+using TopicStatusParamPtr = std::shared_ptr<TopicStatusParam>;
 class TopicMonitor
 {
 private:
-  ros::NodeHandle              nh_, pnh_;
-  ros::Timer                   timer_;
-  std::vector<ros::Subscriber> subs_;
+  ros::NodeHandle                  nh_, pnh_;
+  ros::Timer                       timer_;
+  std::vector<ros::Subscriber>     subs_;
+  UpdaterPtr                       updater_;
+  std::vector<TopicStatusParamPtr> params_;
 
-  void callback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
-                std::shared_ptr<diagnostic_updater::Updater>                   updater,
-                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
+  void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
+                               std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
-    ROS_INFO_THROTTLE(1, "callback, %s", task->getName().c_str());
     task->tick();
-    updater->update();
+  }
+
+  void topicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> & msg,
+                     std::shared_ptr<diagnostic_updater::TopicDiagnostic> task)
+  {
+    task->tick(ros::Time::now());
   }
 
   void timerCallback(const ros::TimerEvent &e)
   {
-    for(int i = 0; i < subs_.size(); ++i)
-    {
-      ROS_INFO("Subscribing %s", subs_[i].getTopic().c_str());
-    }
+    updater_->update();
   }
 
 public:
   TopicMonitor(ros::NodeHandle nh, ros::NodeHandle pnh) : nh_(nh), pnh_(pnh)
   {
     ROS_INFO("Starting TopicMonitor...");
+
+    updater_ = std::make_shared<diagnostic_updater::Updater>();
+    std::string hardware_id("");
+    pnh_.getParam("hardware_id", hardware_id);
+    updater_->setHardwareID(hardware_id);
+
     XmlRpc::XmlRpcValue topics;
     pnh_.getParam("topics", topics);
     ROS_ASSERT(topics.getType() == XmlRpc::XmlRpcValue::TypeArray);
     ROS_ASSERT(topics.size() > 0);
     for(int i = 0; i < topics.size(); ++i)
     {
-      ROS_INFO("Reading %d...", i);
-      TopicStatusParam param;
-      if(parseTopicStatus(topics[i], param))
+      ROS_INFO("Reading %dth topic...", i);
+      auto param = std::make_shared<TopicStatusParam>();
+      if(parseTopicStatus(topics[i], *param))
       {
-        auto updater = std::make_shared<diagnostic_updater::Updater>();
-        updater->setHardwareID(param.hardware_id);
-        std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> watcher;
-        if(param.headerless)
+        params_.push_back(param);
+
+        ros::Subscriber sub;
+        if(param->headerless)
         {
-          watcher = std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>("Headerless Topic Monitor",
-                                                                                    *updater, param.fparam);
+          auto watcher =
+              std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(param->topic, *updater_, param->fparam);
+
+          sub = nh_.subscribe<topic_tools::ShapeShifter>(
+              param->topic, 1,
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::headerlessTopicCallback, this, _1, watcher));
         }
         else
         {
-          watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>("Topic Monitor", *updater, param.fparam,
-                                                                          param.tparam);
+          auto watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>(param->topic, *updater_, param->fparam,
+                                                                               param->tparam);
+
+          sub = nh_.subscribe<topic_tools::ShapeShifter>(
+              param->topic, 1,
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::topicCallback, this, _1, watcher));
         }
 
-        ROS_INFO("Setup sub for %s", param.topic.c_str());
-        auto sub = nh_.subscribe<topic_tools::ShapeShifter>(
-            param.topic, 1,
-            boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::callback, this, _1, updater, watcher));
+        ROS_INFO("Setup sub for %s", param->topic.c_str());
         subs_.push_back(sub);
       }
     }
-    for(int i = 0; i < subs_.size(); ++i)
-    {
-      ROS_INFO("Subscribing %s", subs_[i].getTopic().c_str());
-    }
-    timer_ = nh_.createTimer(ros::Duration(1.0), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
+    timer_ = nh_.createTimer(ros::Duration(0.1), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
   }
 };
 
@@ -136,8 +143,10 @@ int main(int argc, char **argv)
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
 
-  diagnostic_generic_diagnostics::TopicMonitor(nh, pnh);
+  diagnostic_generic_diagnostics::TopicMonitor topic_monitor(nh, pnh);
 
+  ROS_INFO("spinning...");
   ros::spin();
+  ROS_INFO("exit...");
   return 0;
 }
