@@ -66,7 +66,7 @@ private:
   ros::NodeHandle              nh_, pnh_;
   std::vector<ros::Subscriber> subs_;
 
-  static void callback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
+  void callback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
                        std::shared_ptr<diagnostic_updater::Updater>                   updater,
                        std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
@@ -104,7 +104,8 @@ public:
         }
 
         auto sub = nh_.subscribe<topic_tools::ShapeShifter>(
-            param.topic, 1, boost::bind(diagnostic_generic_diagnostics::TopicMonitor::callback, _1, updater, watcher));
+            param.topic, 1,
+            boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::callback, this, _1, updater, watcher));
         subs_.push_back(sub);
       }
     }
