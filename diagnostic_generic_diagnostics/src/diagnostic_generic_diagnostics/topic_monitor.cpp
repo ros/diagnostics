@@ -68,8 +68,8 @@ private:
   std::vector<ros::Subscriber> subs_;
 
   void callback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
-                       std::shared_ptr<diagnostic_updater::Updater>                   updater,
-                       std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
+                std::shared_ptr<diagnostic_updater::Updater>                   updater,
+                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
     ROS_INFO_THROTTLE(1, "callback, %s", task->getName().c_str());
     task->tick();
@@ -112,11 +112,16 @@ public:
                                                                           param.tparam);
         }
 
+        ROS_INFO("Setup sub for %s", param.topic.c_str());
         auto sub = nh_.subscribe<topic_tools::ShapeShifter>(
             param.topic, 1,
             boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::callback, this, _1, updater, watcher));
         subs_.push_back(sub);
       }
+    }
+    for(int i = 0; i < subs_.size(); ++i)
+    {
+      ROS_INFO("Subscribing %s", subs_[i].getTopic().c_str());
     }
     timer_ = nh_.createTimer(ros::Duration(1.0), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
   }
