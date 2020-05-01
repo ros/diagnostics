@@ -28,6 +28,7 @@ struct TopicStatusParam
 bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
 {
   ROS_INFO("parsing param...");
+  ROS_INFO("values.getType() %d", values.getType());
   if(values.getType() == XmlRpc::XmlRpcValue::TypeStruct)
   {
     if(values["topic"].getType() == XmlRpc::XmlRpcValue::TypeString)
@@ -69,6 +70,7 @@ private:
                        std::shared_ptr<diagnostic_updater::Updater>                   updater,
                        std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
+    ROS_INFO_THROTTLE(1, "callback, %s", task->getName().c_str());
     task->tick();
     updater->update();
   }
@@ -102,7 +104,7 @@ public:
         }
 
         auto sub = nh_.subscribe<topic_tools::ShapeShifter>(
-            topics[i], 1, boost::bind(diagnostic_generic_diagnostics::TopicMonitor::callback, _1, updater, watcher));
+            param.topic, 1, boost::bind(diagnostic_generic_diagnostics::TopicMonitor::callback, _1, updater, watcher));
         subs_.push_back(sub);
       }
     }
@@ -113,7 +115,7 @@ public:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "logic_gate");
+  ros::init(argc, argv, "topic_monitor");
 
   ros::NodeHandle nh("");
   ros::NodeHandle pnh("~");
