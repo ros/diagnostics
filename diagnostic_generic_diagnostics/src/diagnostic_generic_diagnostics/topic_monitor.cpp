@@ -64,6 +64,7 @@ class TopicMonitor
 {
 private:
   ros::NodeHandle              nh_, pnh_;
+  ros::Timer                   timer_;
   std::vector<ros::Subscriber> subs_;
 
   void callback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
@@ -73,6 +74,14 @@ private:
     ROS_INFO_THROTTLE(1, "callback, %s", task->getName().c_str());
     task->tick();
     updater->update();
+  }
+
+  void timerCallback(const ros::TimerEvent &e)
+  {
+    for(int i = 0; i < subs_.size(); ++i)
+    {
+      ROS_INFO("Subscribing %s", subs_[i].getTopic().c_str());
+    }
   }
 
 public:
@@ -109,6 +118,7 @@ public:
         subs_.push_back(sub);
       }
     }
+    timer_ = nh_.createTimer(ros::Duration(1.0), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
   }
 };
 
