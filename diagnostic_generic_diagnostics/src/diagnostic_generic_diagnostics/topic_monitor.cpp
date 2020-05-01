@@ -117,15 +117,18 @@ public:
               std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(param->topic, *updater, param->fparam);
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
-              param->topic, 1, boost::bind(&headerlessTopicCallback, this, _1, updater, watcher));
+              param->topic, 1,
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::headerlessTopicCallback, this, _1, updater,
+                          watcher));
         }
         else
         {
           auto watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>(param->topic, *updater, param->fparam,
                                                                                param->tparam);
 
-          sub = nh_.subscribe<topic_tools::ShapeShifter>(param->topic, 1,
-                                                         boost::bind(&topicCallback, this, _1, updater, watcher));
+          sub = nh_.subscribe<topic_tools::ShapeShifter>(
+              param->topic, 1,
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::topicCallback, this, _1, updater, watcher));
         }
 
         ROS_INFO("Setup sub for %s", param->topic.c_str());
