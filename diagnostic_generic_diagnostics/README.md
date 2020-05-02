@@ -32,6 +32,8 @@ Sample parameter file is given as params/topic_monitor_test.yaml
 - tolerance (double): Determines width of margin before the diagnostics outputs error state.
 - window_size (int): Lendth of the window for moving average calculation [sec].
 
+![diag P1](https://user-images.githubusercontent.com/22934528/80859252-1eee3000-8c9a-11ea-9bf2-1eb89134d215.png)
+
 ```
 topics:
   - topic: /test/hoge
