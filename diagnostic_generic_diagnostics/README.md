@@ -4,6 +4,9 @@
 
 - topic_monitor: Supervises specific topics and provides diagnostics based on theier frequency and timestamp.
 
+![Screenshot from 2020-05-02 17-28-22](https://user-images.githubusercontent.com/22934528/80859281-5ceb5400-8c9a-11ea-8e3d-a2ac3a86d7b5.png)
+
+
 ## Usage
 
 Sample launch file is given as launch/topic_monitor_test.launch.
@@ -31,6 +34,8 @@ Sample parameter file is given as params/topic_monitor_test.yaml
 - min_freq (double): Lower bound of desired frequency [Hz].
 - tolerance (double): Determines width of margin before the diagnostics outputs error state.
 - window_size (int): Lendth of the window for moving average calculation [sec].
+
+![diag P1](https://user-images.githubusercontent.com/22934528/80859252-1eee3000-8c9a-11ea-9bf2-1eb89134d215.png)
 
 ```
 topics:
