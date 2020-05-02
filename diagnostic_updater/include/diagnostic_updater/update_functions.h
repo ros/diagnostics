@@ -243,16 +243,16 @@ public:
       stat.summary(latest_status_, "Desired frequency met");
     }
 
-    for(int i = 0; i < custom_fields_.size(); ++i)
+    for(const auto &field : custom_fields_)
     {
-      const bool disp_ok   = (custom_fields_[i].level) % 2 == 1;
-      const bool disp_warn = (custom_fields_[i].level / 2) % 2 == 1;
-      const bool disp_err  = (custom_fields_[i].level / 4) % 2 == 1;
+      const bool disp_ok   = (field.level) % 2 == 1;
+      const bool disp_warn = (field.level / 2) % 2 == 1;
+      const bool disp_err  = (field.level / 4) % 2 == 1;
       if((latest_status_ == diagnostic_msgs::DiagnosticStatus::OK && disp_ok) ||
          (latest_status_ == diagnostic_msgs::DiagnosticStatus::WARN && disp_warn) ||
          (latest_status_ == diagnostic_msgs::DiagnosticStatus::ERROR && disp_err))
       {
-        stat.add(custom_fields_[i].key, custom_fields_[i].value);
+        stat.add(field.key, field.value);
       }
     }
 

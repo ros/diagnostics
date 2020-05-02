@@ -85,26 +85,27 @@ private:
   ros::NodeHandle                  nh_, pnh_;
   ros::Timer                       timer_;
   std::vector<ros::Subscriber>     subs_;
+  std::vector<UpdaterPtr>          updaters_;
   std::vector<TopicStatusParamPtr> params_;
 
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
-                               diagnostic_generic_diagnostics::UpdaterPtr                     updater,
                                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
-    updater->update();
     task->tick();
   }
 
   void topicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> & msg,
-                     diagnostic_generic_diagnostics::UpdaterPtr           updater,
                      std::shared_ptr<diagnostic_updater::TopicDiagnostic> task)
   {
-    updater->update();
     task->tick(ros::Time::now());
   }
 
   void timerCallback(const ros::TimerEvent &e)
   {
+    for(const auto &updater : updaters_)
+    {
+      updater->update();
+    }
   }
 
 public:
@@ -126,6 +127,8 @@ public:
 
         auto updater = std::make_shared<diagnostic_updater::Updater>();
         updater->setHardwareID(param->hardware_id);
+        updaters_.push_back(updater);
+
         ros::Subscriber sub;
         if(param->headerless)
         {
@@ -134,8 +137,7 @@ public:
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
               param->topic, 1,
-              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::headerlessTopicCallback, this, _1, updater,
-                          watcher));
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::headerlessTopicCallback, this, _1, watcher));
         }
         else
         {
@@ -144,14 +146,14 @@ public:
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
               param->topic, 1,
-              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::topicCallback, this, _1, updater, watcher));
+              boost::bind(&diagnostic_generic_diagnostics::TopicMonitor::topicCallback, this, _1, watcher));
         }
 
         ROS_INFO("Setup sub for %s", param->topic.c_str());
         subs_.push_back(sub);
       }
     }
-    timer_ = nh_.createTimer(ros::Duration(0.1), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
+    timer_ = nh_.createTimer(ros::Duration(0.5), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
   }
 };
 
