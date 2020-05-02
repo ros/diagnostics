@@ -1,15 +1,10 @@
 #include <ros/ros.h>
 #include <topic_tools/shape_shifter.h>
+#include "diagnostic_updater/update_functions.h"
 #include "diagnostic_updater/publisher.h"
 
 namespace diagnostic_generic_diagnostics
 {
-struct CustomField
-{
-  std::string key;
-  std::string value;
-  int         level;  // OK:1, WARN:2, ERROR:4 and sum of the error level you want to show
-};
 struct TopicStatusParam
 {
   TopicStatusParam()
@@ -19,11 +14,11 @@ struct TopicStatusParam
     freq.min = 0.0;
   }
 
-  std::string              topic;
-  std::string              hardware_id;
-  std::string              custom_msg;
-  std::vector<CustomField> custom_field;
-  bool                     headerless;
+  std::string                                  topic;
+  std::string                                  hardware_id;
+  std::string                                  custom_msg;  // Provision. Currentlly not used.
+  std::vector<diagnostic_updater::CustomField> custom_fields;
+  bool                                         headerless;
   struct
   {
     double max;
@@ -54,11 +49,11 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
       ROS_INFO("parsing field, size of %u...", fields.size());
       for(int i = 0; i < fields.size(); ++i)
       {
-        CustomField field;
+        diagnostic_updater::CustomField field;
         field.key   = static_cast<std::string>(fields[i]["key"]);
         field.value = static_cast<std::string>(fields[i]["value"]);
         field.level = static_cast<int>(fields[i]["level"]);
-        param.custom_field.push_back(field);
+        param.custom_fields.push_back(field);
       }
     }
 
@@ -134,8 +129,8 @@ public:
         ros::Subscriber sub;
         if(param->headerless)
         {
-          auto watcher =
-              std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(param->topic, *updater, param->fparam);
+          auto watcher = std::make_shared<diagnostic_updater::HeaderlessTopicDiagnostic>(
+              param->topic, *updater, param->fparam, param->custom_fields);
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
               param->topic, 1,
@@ -145,7 +140,7 @@ public:
         else
         {
           auto watcher = std::make_shared<diagnostic_updater::TopicDiagnostic>(param->topic, *updater, param->fparam,
-                                                                               param->tparam);
+                                                                               param->tparam, param->custom_fields);
 
           sub = nh_.subscribe<topic_tools::ShapeShifter>(
               param->topic, 1,

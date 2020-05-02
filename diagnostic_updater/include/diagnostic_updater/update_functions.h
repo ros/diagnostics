@@ -43,6 +43,16 @@
 namespace diagnostic_updater
 {
 /**
+ * \brief A structure that holds the custom field parameters.
+ */
+struct CustomField
+{
+  std::string key;
+  std::string value;
+  int         level;  // OK:1, WARN:2, ERROR:4 and sum of the error level you want to show
+};
+
+/**
  * \brief A structure that holds the constructor parameters for the
  * FrequencyStatus class.
  */
@@ -103,13 +113,14 @@ struct FrequencyStatusParam
 class FrequencyStatus : public DiagnosticTask
 {
 private:
-  const FrequencyStatusParam params_;
-  int                        latest_status_;
-  int                        count_;
-  std::vector<ros::Time>     times_;
-  std::vector<int>           seq_nums_;
-  int                        hist_indx_;
-  boost::mutex               lock_;
+  const FrequencyStatusParam                   params_;
+  std::vector<diagnostic_updater::CustomField> custom_fields_;
+  int                                          latest_status_;
+  int                                          count_;
+  std::vector<ros::Time>                       times_;
+  std::vector<int>                             seq_nums_;
+  int                                          hist_indx_;
+  boost::mutex                                 lock_;
 
 public:
   /**
@@ -124,6 +135,18 @@ public:
     , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
+  }
+
+  FrequencyStatus(const FrequencyStatusParam &params, const std::vector<diagnostic_updater::CustomField> &custom_fields)
+    : DiagnosticTask("Frequency Status")
+    , params_(params)
+    , times_(params_.window_size_)
+    , seq_nums_(params_.window_size_)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
+  {
+    clear();
+    custom_fields_ = custom_fields;
+    ROS_INFO("constructor with custom fields, size of %lu", custom_fields_.size());
   }
 
   /**
@@ -164,6 +187,7 @@ public:
     }
 
     hist_indx_ = 0;
+    custom_fields_.clear();
   }
 
   /**
@@ -217,6 +241,19 @@ public:
     {
       latest_status_ = diagnostic_msgs::DiagnosticStatus::OK;
       stat.summary(latest_status_, "Desired frequency met");
+    }
+
+    for(int i = 0; i < custom_fields_.size(); ++i)
+    {
+      const bool disp_ok   = (custom_fields_[i].level) % 2 == 1;
+      const bool disp_warn = (custom_fields_[i].level / 2) % 2 == 1;
+      const bool disp_err  = (custom_fields_[i].level / 4) % 2 == 1;
+      if((latest_status_ == diagnostic_msgs::DiagnosticStatus::OK && disp_ok) ||
+         (latest_status_ == diagnostic_msgs::DiagnosticStatus::WARN && disp_warn) ||
+         (latest_status_ == diagnostic_msgs::DiagnosticStatus::ERROR && disp_err))
+      {
+        stat.add(custom_fields_[i].key, custom_fields_[i].value);
+      }
     }
 
     stat.addf("Events in window", "%d", events);

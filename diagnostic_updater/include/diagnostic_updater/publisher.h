@@ -166,6 +166,15 @@ public:
    * \param freq The parameters for the FrequencyStatus class that will be
    * computing statistics.
    */
+  HeaderlessTopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                            const diagnostic_updater::FrequencyStatusParam &    freq,
+                            const std::vector<diagnostic_updater::CustomField> &fields)
+    : CompositeDiagnosticTask(name + " topic status"), freq_(freq, fields)
+  {
+    ROS_INFO("constructor with custom fields, size of %lu", fields.size());
+    addTask(&freq_);
+    diag.add(*this);
+  }
 
   HeaderlessTopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                             const diagnostic_updater::FrequencyStatusParam &freq)
@@ -228,6 +237,15 @@ public:
    * \param stamp The parameters for the TimeStampStatus class that will be
    * computing statistics.
    */
+  TopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                  const diagnostic_updater::FrequencyStatusParam &    freq,
+                  const diagnostic_updater::TimeStampStatusParam &    stamp,
+                  const std::vector<diagnostic_updater::CustomField> &fields)
+    : HeaderlessTopicDiagnostic(name, diag, freq, fields), stamp_(stamp)
+  {
+    ROS_INFO("constructor with custom fields, size of %lu", fields.size());
+    addTask(&stamp_);
+  }
 
   TopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                   const diagnostic_updater::FrequencyStatusParam &freq,
