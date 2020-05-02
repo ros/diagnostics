@@ -30,7 +30,7 @@ struct TopicStatusParam
 
 bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
 {
-  ROS_INFO("parsing param...");
+  ROS_DEBUG("parsing param...");
   if(values.getType() == XmlRpc::XmlRpcValue::TypeStruct)
   {
     if(values["topic"].getType() == XmlRpc::XmlRpcValue::TypeString)
@@ -46,7 +46,7 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
     if(values["custom_fields"].getType() == XmlRpc::XmlRpcValue::TypeArray)
     {
       auto fields = values["custom_fields"];
-      ROS_INFO("parsing field, size of %u...", fields.size());
+      ROS_DEBUG("parsing field, size of %u...", fields.size());
       for(int i = 0; i < fields.size(); ++i)
       {
         diagnostic_updater::CustomField field;
@@ -119,7 +119,7 @@ public:
     ROS_ASSERT(topics.size() > 0);
     for(int i = 0; i < topics.size(); ++i)
     {
-      ROS_INFO("Reading %dth topic...", i);
+      ROS_DEBUG("Reading %dth topic...", i);
       auto param = std::make_shared<TopicStatusParam>();
       if(parseTopicStatus(topics[i], *param))
       {

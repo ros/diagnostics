@@ -171,7 +171,6 @@ public:
                             const std::vector<diagnostic_updater::CustomField> &fields)
     : CompositeDiagnosticTask(name + " topic status"), freq_(freq, fields)
   {
-    ROS_INFO("constructor with custom fields, size of %lu", fields.size());
     addTask(&freq_);
     diag.add(*this);
   }
@@ -243,7 +242,6 @@ public:
                   const std::vector<diagnostic_updater::CustomField> &fields)
     : HeaderlessTopicDiagnostic(name, diag, freq, fields), stamp_(stamp)
   {
-    ROS_INFO("constructor with custom fields, size of %lu", fields.size());
     addTask(&stamp_);
   }
 

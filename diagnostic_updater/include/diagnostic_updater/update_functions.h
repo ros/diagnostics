@@ -146,7 +146,6 @@ public:
   {
     clear();
     custom_fields_ = custom_fields;
-    ROS_INFO("constructor with custom fields, size of %lu", custom_fields_.size());
   }
 
   /**
