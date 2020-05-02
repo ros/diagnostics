@@ -4,6 +4,12 @@
 
 namespace diagnostic_generic_diagnostics
 {
+struct CustomField
+{
+  std::string key;
+  std::string value;
+  int         level;  // OK:1, WARN:2, ERROR:4 and sum of the error level you want to show
+};
 struct TopicStatusParam
 {
   TopicStatusParam()
@@ -13,10 +19,11 @@ struct TopicStatusParam
     freq.min = 0.0;
   }
 
-  std::string topic;
-  std::string hardware_id;
-  std::string custom_msg;
-  bool        headerless;
+  std::string              topic;
+  std::string              hardware_id;
+  std::string              custom_msg;
+  std::vector<CustomField> custom_field;
+  bool                     headerless;
   struct
   {
     double max;
@@ -29,7 +36,6 @@ struct TopicStatusParam
 bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
 {
   ROS_INFO("parsing param...");
-  ROS_INFO("values.getType() %d", values.getType());
   if(values.getType() == XmlRpc::XmlRpcValue::TypeStruct)
   {
     if(values["topic"].getType() == XmlRpc::XmlRpcValue::TypeString)
@@ -41,6 +47,21 @@ bool parseTopicStatus(XmlRpc::XmlRpcValue &values, TopicStatusParam &param)
       param.hardware_id = static_cast<std::string>(values["hardware_id"]);
     if(values["custom_msg"].getType() == XmlRpc::XmlRpcValue::TypeString)
       param.custom_msg = static_cast<std::string>(values["custom_msg"]);
+
+    if(values["custom_fields"].getType() == XmlRpc::XmlRpcValue::TypeArray)
+    {
+      auto fields = values["custom_fields"];
+      ROS_INFO("parsing field, size of %u...", fields.size());
+      for(int i = 0; i < fields.size(); ++i)
+      {
+        CustomField field;
+        field.key   = static_cast<std::string>(fields[i]["key"]);
+        field.value = static_cast<std::string>(fields[i]["value"]);
+        field.level = static_cast<int>(fields[i]["level"]);
+        param.custom_field.push_back(field);
+      }
+    }
+
     if(values["headerless"].getType() == XmlRpc::XmlRpcValue::TypeBoolean)
       param.headerless = static_cast<bool>(values["headerless"]);
     if(values["max_freq"].getType() == XmlRpc::XmlRpcValue::TypeDouble)
