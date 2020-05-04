@@ -124,3 +124,8 @@ target_link_libraries(bool_monitor_nodelet ${catkin_LIBRARIES})
 # )
 
 # catkin_add_gtest(utest test/utest.cpp)
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch)
+endif()
