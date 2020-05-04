@@ -20,7 +20,7 @@ Sample launch file is given as launch/topic_monitor_test.launch.
 
 ```xml
 <launch>
-  <node pkg="diagnostic_generic_diagnostics" type="topic_monitor" name="test_monitor" output="screen">
+  <node pkg="diagnostic_generic_diagnostics" type="topic_monitor" name="topic_monitor" output="screen">
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_test.yaml"/>
   </node>
 </launch>
@@ -28,7 +28,7 @@ Sample launch file is given as launch/topic_monitor_test.launch.
 
 ```xml
 <launch>
-  <node pkg="nodelet" type="nodelet" name="bool_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="screen">
+  <node pkg="nodelet" type="nodelet" name="topic_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="screen">
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_test.yaml"/>
   </node>
 </launch>
@@ -40,8 +40,8 @@ Sample launch file is given as launch/bool_monitor_test.launch.
 
 ```xml
 <launch>
-  <node pkg="diagnostic_generic_diagnostics" type="boo_monitor" name="test_monitor" output="screen">
-    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/boo_monitor_test.yaml"/>
+  <node pkg="diagnostic_generic_diagnostics" type="bool_monitor" name="bool_monitor" output="screen">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/bool_monitor_test.yaml"/>
   </node>
 </launch>
 ```
