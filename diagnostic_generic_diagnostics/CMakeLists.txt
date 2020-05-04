@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   diagnostic_updater
   nodelet
   topic_tools
+  std_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -56,6 +57,11 @@ add_executable(topic_monitor
   src/${PROJECT_NAME}/topic_monitor.cpp)
 add_dependencies(topic_monitor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(topic_monitor ${catkin_LIBRARIES})
+
+add_executable(bool_monitor
+  src/${PROJECT_NAME}/bool_monitor.cpp)
+add_dependencies(bool_monitor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(bool_monitor ${catkin_LIBRARIES})
 
 #############
 ## Install ##

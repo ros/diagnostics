@@ -114,6 +114,15 @@ class BoolDiagnostic : public CompositeDiagnosticTask
 {
 public:
   BoolDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                 const diagnostic_updater::BoolStatusParam &bool_diag,
+                 const std::vector<diagnostic_updater::CustomField> &fields)
+    : CompositeDiagnosticTask(name + " bool_diag status"), bool_diag_(bool_diag, fields)
+  {
+    addTask(&bool_diag_);
+    diag.add(*this);
+  }
+
+  BoolDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                  const diagnostic_updater::BoolStatusParam &bool_diag)
     : CompositeDiagnosticTask(name + " bool_diag status"), bool_diag_(bool_diag)
   {

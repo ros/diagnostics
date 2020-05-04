@@ -17,6 +17,7 @@
   <depend>nodelet</depend>
   <depend>message_filters</depend>
   <depend>topic_tools</depend>
+  <depend>std_msgs</depend>
 
   <!-- <test_depend>diagnostic_updater</test_depend> -->
   <!-- <test_depend>rospy</test_depend> -->
