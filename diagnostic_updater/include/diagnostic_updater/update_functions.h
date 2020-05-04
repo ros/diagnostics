@@ -53,7 +53,7 @@ struct CustomField
 };
 
 static void addCustomFields(diagnostic_updater::DiagnosticStatusWrapper &stat, const int &status,
-                     const std::vector<diagnostic_updater::CustomField> &fields)
+                            const std::vector<diagnostic_updater::CustomField> &fields)
 {
   for(const auto &field : fields)
   {
@@ -432,7 +432,7 @@ public:
     stat.summary(latest_status_, "Timestamps are reasonable.");
     if(!deltas_valid_)
     {
-      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
       stat.summary(latest_status_, "No data since last update.");
     }
     else
