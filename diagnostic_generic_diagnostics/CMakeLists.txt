@@ -41,27 +41,31 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- #include
+  include
   ${catkin_INCLUDE_DIRS}
 )
-#add_library(max_score_costmap
-#  include/obstacle_avoidance/max_score_costmap_nodelet.hpp
-#  src/max_score_costmap_nodelet.cpp
-#)
-#add_dependencies(max_score_costmap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(max_score_costmap
-#  ${catkin_LIBRARIES}
-#)
 
+## node
 add_executable(topic_monitor
-  src/${PROJECT_NAME}/topic_monitor.cpp)
+  src/${PROJECT_NAME}/topic_monitor_node.cpp)
 add_dependencies(topic_monitor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(topic_monitor ${catkin_LIBRARIES})
 
 add_executable(bool_monitor
-  src/${PROJECT_NAME}/bool_monitor.cpp)
+  src/${PROJECT_NAME}/bool_monitor_node.cpp)
 add_dependencies(bool_monitor ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(bool_monitor ${catkin_LIBRARIES})
+
+## nodelet
+add_library(topic_monitor_nodelet
+  src/${PROJECT_NAME}/topic_monitor_nodelet.cpp)
+add_dependencies(topic_monitor_nodelet ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(topic_monitor_nodelet ${catkin_LIBRARIES})
+
+add_library(bool_monitor_nodelet
+  src/${PROJECT_NAME}/bool_monitor_nodelet.cpp)
+add_dependencies(bool_monitor_nodelet ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(bool_monitor_nodelet ${catkin_LIBRARIES})
 
 #############
 ## Install ##

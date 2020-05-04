@@ -1,3 +1,4 @@
+
 #include <ros/ros.h>
 #include <topic_tools/shape_shifter.h>
 #include <std_msgs/Bool.h>
@@ -124,18 +125,3 @@ public:
 };
 
 };  // namespace diagnostic_generic_diagnostics
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "bool_monitor");
-
-  ros::NodeHandle nh("");
-  ros::NodeHandle pnh("~");
-
-  diagnostic_generic_diagnostics::BoolMonitor bool_monitor(nh, pnh);
-
-  ROS_INFO("spinning...");
-  ros::spin();
-  ROS_INFO("exit...");
-  return 0;
-}

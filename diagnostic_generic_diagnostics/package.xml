@@ -24,6 +24,7 @@
   <!-- <test_depend>tf</test_depend> -->
 
   <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml"/>
     <architecture_independent/>
   </export>
 </package>
