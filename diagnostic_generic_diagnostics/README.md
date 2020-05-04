@@ -43,12 +43,12 @@ Sample launch file is given as launch/bool_monitor_test.launch.
 Sample parameter file is given as params/topic_monitor_test.yaml
 
 - topic (string): Name of the topic that the monitor node should listen to. Required.
-- hardware_id (string): Arbitrary hardware id which will be displayed in diagnostic message. Optional. Default: "".
-- custom_fields (array): Array of params for fields which will be added to diagnostic message. Optional. Default: blank arary.
+- hardware_id (string): Arbitrary hardware id which will be displayed in diagnostic message. Optional. **Default: ""**.
+- custom_fields (array): Array of params for fields which will be added to diagnostic message. Optional. **Default: blank arary**.
   - key (string): Key of the field newly added.
   - value (string): Value of the field newly added. Only string is supported. Formatted string is not supported.
   - level (int): Indicates when the field will be displayed. Sum of the OK(1), WARN(2) and ERROR(4). See pic for more detail.
-- headerless (bool): If true, the monitor node does not watch topic's timestamp. Optional. Default false.
+- headerless (bool): If true, the monitor node does not watch topic's timestamp. Optional. **Default false**.
 - max_freq (double): Upper bound of desired frequency [Hz].
 - min_freq (double): Lower bound of desired frequency [Hz].
 - tolerance (double): Determines width of margin before the diagnostics outputs error state.
@@ -102,14 +102,14 @@ topics:
 Sample parameter file is given as params/topic_monitor_test.yaml
 
 - topic (string): Name of the topic that the monitor node should listen to. Required.
-- hardware_id (string): Arbitrary hardware id which will be displayed in diagnostic message. Optional. Default: "".
-- custom_fields (array): Array of params for fields which will be added to diagnostic message. Optional. Default: blank arary.
+- hardware_id (string): Arbitrary hardware id which will be displayed in diagnostic message. Optional. **Default: ""**.
+- custom_fields (array): Array of params for fields which will be added to diagnostic message. Optional. **Default: blank arary**.
   - key (string): Key of the field newly added.
   - value (string): Value of the field newly added. Only string is supported. Formatted string is not supported.
   - level (int): Indicates when the field will be displayed. Sum of the OK(1), WARN(2) and ERROR(4). See pic for more detail.
-- publish_error (bool): If true, the monitor publishes "error". Otherwise, the monitor publishes "warn". Default true.
-- timer_update (bool): If true, the monitor keeps updating /diagnostics message.
-- invert (bool): Inverts True/False of input topic.
+- publish_error (bool): If true, the monitor publishes "error". Otherwise, the monitor publishes "warn". **Default true**.
+- timer_update (bool): If true, the monitor keeps updating /diagnostics message. **Default false**.
+- invert (bool): Inverts True/False of input topic. **Default false**.
 
 ```yaml
 topics:
