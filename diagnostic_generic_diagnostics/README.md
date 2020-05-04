@@ -3,10 +3,12 @@
 ## Node
 
 - topic_monitor: Supervises specific topics and provides diagnostics based on thier frequency and timestamp.
+- topic_monitor_nodelet: Nodelet implementation of topic_monitor.
 
 ![Screenshot from 2020-05-02 17-28-22](https://user-images.githubusercontent.com/22934528/80859281-5ceb5400-8c9a-11ea-8e3d-a2ac3a86d7b5.png)
 
 - bool_monitor: Subscribes std_msgs/Bool topics and provides diagnostics based on their values.
+- bool_monitor_nodelet: Nodelet implementation of bool_monitor.
 
 ![Screenshot from 2020-05-04 15-27-33](https://user-images.githubusercontent.com/22934528/80940868-e1b1ab80-8e1b-11ea-98fd-a1d3937b5054.png)
 
@@ -24,6 +26,14 @@ Sample launch file is given as launch/topic_monitor_test.launch.
 </launch>
 ```
 
+```xml
+<launch>
+  <node pkg="nodelet" type="nodelet" name="bool_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="screen">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_test.yaml"/>
+  </node>
+</launch>
+```
+
 ### bool_monitor
 
 Sample launch file is given as launch/bool_monitor_test.launch.
@@ -32,6 +42,14 @@ Sample launch file is given as launch/bool_monitor_test.launch.
 <launch>
   <node pkg="diagnostic_generic_diagnostics" type="boo_monitor" name="test_monitor" output="screen">
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/boo_monitor_test.yaml"/>
+  </node>
+</launch>
+```
+
+```xml
+<launch>
+  <node pkg="nodelet" type="nodelet" name="bool_monitor" args="standalone diagnostic_generic_diagnostics/BoolMonitorNodelet" output="screen">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/bool_monitor_test.yaml"/>
   </node>
 </launch>
 ```
