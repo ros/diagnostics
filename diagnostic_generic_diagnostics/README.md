@@ -107,7 +107,7 @@ Sample parameter file is given as params/topic_monitor_test.yaml
   - key (string): Key of the field newly added.
   - value (string): Value of the field newly added. Only string is supported. Formatted string is not supported.
   - level (int): Indicates when the field will be displayed. Sum of the OK(1), WARN(2) and ERROR(4). See pic for more detail.
-- publish_monitor (bool): If true, the monitor node does not watch topic's timestamp. Optional. Default false.
+- publish_error (bool): If true, the monitor publishes "error". Otherwise, the monitor publishes "warn". Default true.
 - timer_update (bool): If true, the monitor keeps updating /diagnostics message.
 - invert (bool): Inverts True/False of input topic.
 
