@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   nodelet
   topic_tools
   std_msgs
+  diagnostic_msgs
   )
 
 ## System dependencies are found with CMake's conventions
@@ -126,6 +127,10 @@ target_link_libraries(bool_monitor_nodelet ${catkin_LIBRARIES})
 # catkin_add_gtest(utest test/utest.cpp)
 
 if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(topic_monitor_nodetest test/launch/topic_monitor_nodetest.test test/topic_monitor_nodetest.cpp)
+  target_link_libraries(topic_monitor_nodetest ${catkin_LIBRARIES})
+
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(launch)
 endif()

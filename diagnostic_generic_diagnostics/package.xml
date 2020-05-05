@@ -18,6 +18,7 @@
   <depend>message_filters</depend>
   <depend>topic_tools</depend>
   <depend>std_msgs</depend>
+  <test_depend>diagnostic_msgs</test_depend>
 
   <build_depend>roslaunch</build_depend>
   <!-- <test_depend>diagnostic_updater</test_depend> -->

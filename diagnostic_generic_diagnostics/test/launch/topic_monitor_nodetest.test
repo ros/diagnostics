@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="diagnostic_generic_diagnostics" type="topic_monitor" name="topic_monitor" output="screen">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/topic_monitor_test.yaml"/>
+  </node>
+  <test test-name="node_test" pkg="diagnostic_generic_diagnostics" type="topic_monitor_nodetest"/>
+  <!--
+  <test name="publishtest" test-name="publishtest" pkg="rostest" type="publishtest">
+    <rosparam>
+      topics:
+        - name: "/diagnostics"
+          timeout: 10
+          negative: False
+    </rosparam>
+  </test>
+  -->
+</launch>
