@@ -131,6 +131,6 @@ if (CATKIN_ENABLE_TESTING)
   add_rostest_gtest(topic_monitor_nodetest test/launch/topic_monitor_nodetest.test test/topic_monitor_nodetest.cpp)
   target_link_libraries(topic_monitor_nodetest ${catkin_LIBRARIES})
 
-  find_package(roslaunch REQUIRED)
-  roslaunch_add_file_check(launch)
+  #find_package(roslaunch REQUIRED)
+  #roslaunch_add_file_check(launch)
 endif()
