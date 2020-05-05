@@ -17,23 +17,24 @@ public:
     pub_hoge = nh.advertise<std_msgs::Header>("/test/hoge", 1);
     pub_fuga = nh.advertise<std_msgs::Bool>("/test/fuga", 1);
 
-    sub = nh.subscribe("/diagnostics", 1, &TopicMonitorTest::callback, this);
+    sub = nh.subscribe("/diagnostics", 10, &TopicMonitorTest::callback, this);
   }
 
 private:
   void callback(const diagnostic_msgs::DiagnosticArrayConstPtr &msgs)
   {
-    std::cerr << "callback invoked: " << msgs->status.size() << std::endl;
+    // std::cerr << "callback invoked: " << msgs->status.size() << std::endl;
 
     for(const auto &msg : msgs->status)
     {
-      std::cerr << msg.hardware_id << std::endl;
+      // std::cerr << msg.hardware_id << std::endl;
       if(msg.hardware_id == "hoge-hw")
       {
         stat_hoge.hardware_id = msg.hardware_id;
         stat_hoge.level       = msg.level;
         stat_hoge.message     = msg.message;
         stat_hoge.name        = msg.name;
+        stat_hoge.values      = msg.values;
       }
       else if(msg.hardware_id == "fuga-hw")
       {
@@ -41,6 +42,7 @@ private:
         stat_fuga.level       = msg.level;
         stat_fuga.message     = msg.message;
         stat_fuga.name        = msg.name;
+        stat_fuga.values      = msg.values;
       }
       else
       {
@@ -61,33 +63,8 @@ protected:
   diagnostic_updater::DiagnosticStatusWrapper stat_hoge, stat_fuga;
 };
 
-/*
-TEST_F(TopicMonitorTest, nhInitTest)
+TEST_F(TopicMonitorTest, subPubInitTest)
 {
-  EXPECT_TRUE(ros::master::check());
-  EXPECT_TRUE(nh.ok());
-  EXPECT_TRUE(pnh.ok());
-}
-*/
-
-TEST_F(TopicMonitorTest, pubInitTest)
-{
-  ros::V_string nodes;
-  EXPECT_TRUE(ros::master::getNodes(nodes));
-  for(const auto &node : nodes)
-  {
-    std::cerr << node << std::endl;
-    // EXPECT_STREQ("/topic_monitor", node.c_str());
-  }
-
-  ros::master::V_TopicInfo topics;
-  EXPECT_TRUE(ros::master::getTopics(topics));
-  for(const auto &topic : topics)
-  {
-    std::cerr << topic.name << std::endl;
-    // EXPECT_STREQ("/test/hoge", topic.name.c_str());
-  }
-
   ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
 
   EXPECT_STREQ("/test/hoge", pub_hoge.getTopic().c_str());
@@ -118,16 +95,27 @@ TEST_F(TopicMonitorTest, outOfRangeUpper)
   ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
 
   std_msgs::Header msg;
-  msg.stamp = ros::Time::now();
-  pub_hoge.publish(msg);
-  usleep(10000);
-  msg.stamp = ros::Time::now();
-  pub_hoge.publish(msg);
-  usleep(10000);
-  msg.stamp = ros::Time::now();
-  pub_hoge.publish(msg);
+  for(int i = 0; i < 2; ++i)
+  {
+    msg.stamp = ros::Time::now();
+    pub_hoge.publish(msg);
+    usleep(10000);
+  }
 
   EXPECT_EQ(stat_hoge.ERROR, stat_hoge.level);
+
+  bool key1_found = false;
+  bool key2_found = false;
+  bool key3_found = false;
+  for(const auto &value : stat_hoge.values)
+  {
+    key1_found = value.key == "key1" ? true : key1_found;
+    key2_found = value.key == "key2" ? true : key2_found;
+    key3_found = value.key == "key3" ? true : key3_found;
+  }
+  EXPECT_FALSE(key1_found);
+  EXPECT_FALSE(key2_found);
+  EXPECT_FALSE(key3_found);
 }
 
 int main(int argc, char **argv)

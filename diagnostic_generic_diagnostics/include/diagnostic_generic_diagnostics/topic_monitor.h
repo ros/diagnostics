@@ -92,20 +92,20 @@ private:
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
                                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
-    ROS_INFO("cb invoked");
+    ROS_DEBUG("cb invoked");
     task->tick();
   }
 
   void topicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> & msg,
                      std::shared_ptr<diagnostic_updater::TopicDiagnostic> task)
   {
-    ROS_INFO("cb invoked");
+    ROS_DEBUG("cb invoked");
     task->tick(ros::Time::now());
   }
 
   void timerCallback(const ros::TimerEvent &e)
   {
-    ROS_INFO_THROTTLE(1, "cb invoked");
+    ROS_DEBUG_THROTTLE(1, "cb invoked");
     for(const auto &updater : updaters_)
     {
       updater->update();
