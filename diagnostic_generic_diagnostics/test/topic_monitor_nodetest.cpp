@@ -20,6 +20,17 @@ public:
     sub = nh.subscribe("/diagnostics", 10, &TopicMonitorTest::callback, this);
   }
 
+  void publish(const int &freq, ros::Publisher &pub)
+  {
+    std_msgs::Header msg;
+    for(int i = 0; i < 2 * freq; ++i)
+    {
+      msg.stamp = ros::Time::now();
+      pub.publish(msg);
+      ros::Duration(1.0 / static_cast<double>(freq)).sleep();  // Error range is above 30Hz.
+    }
+  }
+
 private:
   void callback(const diagnostic_msgs::DiagnosticArrayConstPtr &msgs)
   {
@@ -94,13 +105,8 @@ TEST_F(TopicMonitorTest, outOfRangeUpper)
 {
   ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
 
-  std_msgs::Header msg;
-  for(int i = 0; i < 2; ++i)
-  {
-    msg.stamp = ros::Time::now();
-    pub_hoge.publish(msg);
-    usleep(10000);
-  }
+  const int freq = 50;
+  publish(freq, pub_hoge);
 
   EXPECT_EQ(stat_hoge.ERROR, stat_hoge.level);
 
@@ -116,6 +122,98 @@ TEST_F(TopicMonitorTest, outOfRangeUpper)
   EXPECT_FALSE(key1_found);
   EXPECT_FALSE(key2_found);
   EXPECT_FALSE(key3_found);
+}
+
+TEST_F(TopicMonitorTest, outOfRangeLower)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 3;
+  publish(freq, pub_hoge);
+
+  EXPECT_EQ(stat_hoge.ERROR, stat_hoge.level);
+
+  bool key1_found = false;
+  bool key2_found = false;
+  bool key3_found = false;
+  for(const auto &value : stat_hoge.values)
+  {
+    key1_found = value.key == "key1" ? true : key1_found;
+    key2_found = value.key == "key2" ? true : key2_found;
+    key3_found = value.key == "key3" ? true : key3_found;
+  }
+  EXPECT_FALSE(key1_found);
+  EXPECT_FALSE(key2_found);
+  EXPECT_FALSE(key3_found);
+}
+
+TEST_F(TopicMonitorTest, withinWarnRangeUpper)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 25;
+  publish(freq, pub_hoge);
+
+  EXPECT_EQ(stat_hoge.WARN, stat_hoge.level);
+
+  bool key1_found = false;
+  bool key2_found = false;
+  bool key3_found = false;
+  for(const auto &value : stat_hoge.values)
+  {
+    key1_found = value.key == "key1" ? true : key1_found;
+    key2_found = value.key == "key2" ? true : key2_found;
+    key3_found = value.key == "key3" ? true : key3_found;
+  }
+  EXPECT_FALSE(key1_found);
+  EXPECT_TRUE(key2_found);
+  EXPECT_TRUE(key3_found);
+}
+
+TEST_F(TopicMonitorTest, withinWarnRangeLower)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 7;
+  publish(freq, pub_hoge);
+
+  EXPECT_EQ(stat_hoge.WARN, stat_hoge.level);
+
+  bool key1_found = false;
+  bool key2_found = false;
+  bool key3_found = false;
+  for(const auto &value : stat_hoge.values)
+  {
+    key1_found = value.key == "key1" ? true : key1_found;
+    key2_found = value.key == "key2" ? true : key2_found;
+    key3_found = value.key == "key3" ? true : key3_found;
+  }
+  EXPECT_FALSE(key1_found);
+  EXPECT_TRUE(key2_found);
+  EXPECT_TRUE(key3_found);
+}
+
+TEST_F(TopicMonitorTest, withinOkRange)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 15;
+  publish(freq, pub_hoge);
+
+  EXPECT_EQ(stat_hoge.OK, stat_hoge.level);
+
+  bool key1_found = false;
+  bool key2_found = false;
+  bool key3_found = false;
+  for(const auto &value : stat_hoge.values)
+  {
+    key1_found = value.key == "key1" ? true : key1_found;
+    key2_found = value.key == "key2" ? true : key2_found;
+    key3_found = value.key == "key3" ? true : key3_found;
+  }
+  EXPECT_TRUE(key1_found);
+  EXPECT_FALSE(key2_found);
+  EXPECT_TRUE(key3_found);
 }
 
 int main(int argc, char **argv)

@@ -3,22 +3,43 @@ topics:
     hardware_id: hoge-hw
     custom_fields:
       - key: key1
-        value: hoge
+        value: hoge1
         level: 1
       - key: key2
-        value: hogehoge
+        value: hoge2
         level: 2
       - key: key3
-        value: hogehogehoge
+        value: hoge3
         level: 3
+      - key: key4
+        value: hoge4
+        level: 4
+      - key: key5
+        value: hoge5
+        level: 5
+      - key: key6
+        value: hoge6
+        level: 6
+      - key: key7
+        value: hoge7
+        level: 7
     headerless: false
     max_freq: 20.0
     min_freq: 10.0
     tolerance: 0.50
-    window_size: 2
+    window_size: 1
   - topic: /test/fuga
     hardware_id: fuga-hw
     custom_fields:
+      - key: key1
+        value: fuga1
+        level: 1
+      - key: key2
+        value: fuga2
+        level: 2
+      - key: key3
+        value: fuga3
+        level: 3
       - key: key4
         value: fuga4
         level: 4
@@ -35,4 +56,4 @@ topics:
     max_freq: 30.0
     min_freq: 20.0
     tolerance: 0.50
-    window_size: 2
+    window_size: 1
