@@ -1,3 +1,4 @@
+diagnostic_period: 1.0
 topics:
   - topic: /test/hoge
     hardware_id: hoge-hw

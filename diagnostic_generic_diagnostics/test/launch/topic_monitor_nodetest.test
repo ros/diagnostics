@@ -4,14 +4,12 @@
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/topic_monitor_test.yaml"/>
   </node>
   <test test-name="node_test" pkg="diagnostic_generic_diagnostics" type="topic_monitor_nodetest"/>
-  <!--
-  <test name="publishtest" test-name="publishtest" pkg="rostest" type="publishtest">
+  <test test-name="hztest" pkg="rostest" type="hztest" name="hztest">
     <rosparam>
-      topics:
-        - name: "/diagnostics"
-          timeout: 10
-          negative: False
+      topic: "/diagnostics"
+      hz: 1.0
+      hzerror: 0.75
+      test_duration: 5.0
     </rosparam>
   </test>
-  -->
 </launch>
