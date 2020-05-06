@@ -23,7 +23,7 @@ topics:
       - key: key7
         value: hoge7
         level: 7
-    publish_error: false
+    publish_error: true
     invert: false
     timer_update: false
   - topic: /test/fuga
@@ -50,6 +50,6 @@ topics:
       - key: key7
         value: fuga7
         level: 7
-    publish_error: true
+    publish_error: false
     invert: true
     timer_update: true

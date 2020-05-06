@@ -131,9 +131,18 @@ if (CATKIN_ENABLE_TESTING)
 
   add_rostest_gtest(topic_monitor_nodetest test/launch/topic_monitor_nodetest.test test/topic_monitor_nodetest.cpp)
   target_link_libraries(topic_monitor_nodetest ${catkin_LIBRARIES})
-  
+
   add_rostest_gtest(topic_monitor_nodelettest test/launch/topic_monitor_nodelettest.test test/topic_monitor_nodetest.cpp)
   target_link_libraries(topic_monitor_nodelettest ${catkin_LIBRARIES})
+
+  add_rostest_gtest(bool_monitor_nodetest test/launch/bool_monitor_nodetest.test test/bool_monitor_nodetest.cpp)
+  target_link_libraries(bool_monitor_nodetest ${catkin_LIBRARIES})
+  
+  add_rostest_gtest(bool_monitor_nodelettest test/launch/bool_monitor_nodelettest.test test/bool_monitor_nodetest.cpp)
+  target_link_libraries(bool_monitor_nodelettest ${catkin_LIBRARIES})
+
+  add_rostest(test/launch/bool_monitor_hztest_off_timer.test)
+  add_rostest(test/launch/bool_monitor_hztest_on_timer.test)
 
   find_package(roslaunch REQUIRED)
   roslaunch_add_file_check(launch)
