@@ -31,6 +31,18 @@ public:
     }
   }
 
+  void checkKeys(const diagnostic_msgs::DiagnosticStatus &stat)
+  {
+    for(const auto &value : stat.values)
+    {
+      for(int i = 0; i < key_found.size(); ++i)
+      {
+        std::string keystr = "key" + std::to_string(i + 1);
+        key_found[i]       = value.key == keystr ? true : key_found[i];
+      }
+    }
+  }
+
 private:
   void callback(const diagnostic_msgs::DiagnosticArrayConstPtr &msgs)
   {
@@ -66,12 +78,17 @@ protected:
   {
     stat_hoge.clear();
     stat_fuga.clear();
+    for(auto &e : key_found)
+    {
+      e = false;
+  }
   }
 
   ros::NodeHandle                             nh, pnh;
   ros::Publisher                              pub_hoge, pub_fuga;
   ros::Subscriber                             sub;
   diagnostic_updater::DiagnosticStatusWrapper stat_hoge, stat_fuga;
+  std::array<bool, 7>                         key_found;
 };
 
 TEST_F(TopicMonitorTest, subPubInitTest)
@@ -110,19 +127,15 @@ TEST_F(TopicMonitorTest, outOfRangeUpper)
 
   EXPECT_EQ(stat_hoge.ERROR, stat_hoge.level);
 
-  bool key1_found = false;
-  bool key2_found = false;
-  bool key3_found = false;
-  for(const auto &value : stat_hoge.values)
-  {
-    key1_found = value.key == "key1" ? true : key1_found;
-    key2_found = value.key == "key2" ? true : key2_found;
-    key3_found = value.key == "key3" ? true : key3_found;
+  checkKeys(stat_hoge);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_FALSE(key_found[3 - 1]);
+  EXPECT_TRUE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
   }
-  EXPECT_FALSE(key1_found);
-  EXPECT_FALSE(key2_found);
-  EXPECT_FALSE(key3_found);
-}
 
 TEST_F(TopicMonitorTest, outOfRangeLower)
 {
@@ -133,18 +146,14 @@ TEST_F(TopicMonitorTest, outOfRangeLower)
 
   EXPECT_EQ(stat_hoge.ERROR, stat_hoge.level);
 
-  bool key1_found = false;
-  bool key2_found = false;
-  bool key3_found = false;
-  for(const auto &value : stat_hoge.values)
-  {
-    key1_found = value.key == "key1" ? true : key1_found;
-    key2_found = value.key == "key2" ? true : key2_found;
-    key3_found = value.key == "key3" ? true : key3_found;
-  }
-  EXPECT_FALSE(key1_found);
-  EXPECT_FALSE(key2_found);
-  EXPECT_FALSE(key3_found);
+  checkKeys(stat_hoge);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_FALSE(key_found[3 - 1]);
+  EXPECT_TRUE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
 }
 
 TEST_F(TopicMonitorTest, withinWarnRangeUpper)
@@ -156,18 +165,14 @@ TEST_F(TopicMonitorTest, withinWarnRangeUpper)
 
   EXPECT_EQ(stat_hoge.WARN, stat_hoge.level);
 
-  bool key1_found = false;
-  bool key2_found = false;
-  bool key3_found = false;
-  for(const auto &value : stat_hoge.values)
-  {
-    key1_found = value.key == "key1" ? true : key1_found;
-    key2_found = value.key == "key2" ? true : key2_found;
-    key3_found = value.key == "key3" ? true : key3_found;
-  }
-  EXPECT_FALSE(key1_found);
-  EXPECT_TRUE(key2_found);
-  EXPECT_TRUE(key3_found);
+  checkKeys(stat_hoge);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_TRUE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_FALSE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
 }
 
 TEST_F(TopicMonitorTest, withinWarnRangeLower)
@@ -179,18 +184,14 @@ TEST_F(TopicMonitorTest, withinWarnRangeLower)
 
   EXPECT_EQ(stat_hoge.WARN, stat_hoge.level);
 
-  bool key1_found = false;
-  bool key2_found = false;
-  bool key3_found = false;
-  for(const auto &value : stat_hoge.values)
-  {
-    key1_found = value.key == "key1" ? true : key1_found;
-    key2_found = value.key == "key2" ? true : key2_found;
-    key3_found = value.key == "key3" ? true : key3_found;
-  }
-  EXPECT_FALSE(key1_found);
-  EXPECT_TRUE(key2_found);
-  EXPECT_TRUE(key3_found);
+  checkKeys(stat_hoge);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_TRUE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_FALSE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
 }
 
 TEST_F(TopicMonitorTest, withinOkRange)
@@ -202,10 +203,15 @@ TEST_F(TopicMonitorTest, withinOkRange)
 
   EXPECT_EQ(stat_hoge.OK, stat_hoge.level);
 
-  bool key1_found = false;
-  bool key2_found = false;
-  bool key3_found = false;
-  for(const auto &value : stat_hoge.values)
+  checkKeys(stat_hoge);
+  EXPECT_TRUE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_FALSE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
+}
   {
     key1_found = value.key == "key1" ? true : key1_found;
     key2_found = value.key == "key2" ? true : key2_found;
