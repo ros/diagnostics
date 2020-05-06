@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="diagnostic_generic_diagnostics" type="bool_monitor" name="bool_monitor" output="screen">
+  <node pkg="diagnostic_generic_diagnostics" type="bool_monitor" name="bool_monitor" output="log">
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/bool_monitor_hztest_on_timer.yaml"/>
   </node>
-  <test test-name="hztest" pkg="rostest" type="hztest" name="hztest">
+  <test test-name="on-timer-hztest" pkg="rostest" type="hztest" name="hztest">
     <rosparam>
       topic: "/diagnostics"
       hz: 1.0
-      hzerror: 0.25
+      hzerror: 0.5
       test_duration: 5.0
     </rosparam>
   </test>
