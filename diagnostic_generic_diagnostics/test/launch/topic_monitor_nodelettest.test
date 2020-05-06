@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <node pkg="diagnostic_generic_diagnostics" type="topic_monitor" name="topic_monitor" output="screen">
+  <node pkg="nodelet" type="nodelet" name="topic_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="screen">
     <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/topic_monitor_test.yaml"/>
   </node>
   <test test-name="node_test" pkg="diagnostic_generic_diagnostics" type="topic_monitor_nodetest"/>
