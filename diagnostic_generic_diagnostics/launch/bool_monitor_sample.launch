@@ -1,5 +1,5 @@
 <launch>
   <node pkg="diagnostic_generic_diagnostics" type="bool_monitor" name="bool_monitor" output="screen">
-    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/bool_monitor_test.yaml"/>
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/bool_monitor_sample.yaml"/>
   </node>
 </launch>

@@ -1,5 +1,5 @@
 <launch>
   <node pkg="nodelet" type="nodelet" name="topic_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="screen">
-    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_test.yaml"/>
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/params/topic_monitor_sample.yaml"/>
   </node>
 </launch>
