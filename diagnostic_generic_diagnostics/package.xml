@@ -15,15 +15,12 @@
   <depend>roscpp</depend>
   <depend>diagnostic_updater</depend>
   <depend>nodelet</depend>
-  <depend>message_filters</depend>
   <depend>topic_tools</depend>
   <depend>std_msgs</depend>
-  <test_depend>diagnostic_msgs</test_depend>
 
-  <build_depend>roslaunch</build_depend>
-  <!-- <test_depend>diagnostic_updater</test_depend> -->
-  <!-- <test_depend>rospy</test_depend> -->
-  <!-- <test_depend>tf</test_depend> -->
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>diagnostic_msgs</test_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml"/>
