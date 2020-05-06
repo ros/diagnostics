@@ -22,12 +22,24 @@ public:
 
   void publish(const int &freq, ros::Publisher &pub)
   {
-    std_msgs::Header msg;
-    for(int i = 0; i < 2 * freq; ++i)
+    if(pub.getTopic() == "/test/hoge")
     {
-      msg.stamp = ros::Time::now();
-      pub.publish(msg);
-      ros::Duration(1.0 / static_cast<double>(freq)).sleep();  // Error range is above 30Hz.
+      std_msgs::Header msg;
+      for(int i = 0; i < 2 * freq; ++i)
+      {
+        msg.stamp = ros::Time::now();
+        pub.publish(msg);
+        ros::Duration(1.0 / static_cast<double>(freq)).sleep();  // Error range is above 30Hz.
+      }
+    }
+    else
+    {
+      std_msgs::Bool msg;
+      for(int i = 0; i < 2 * freq; ++i)
+      {
+        pub.publish(msg);
+        ros::Duration(1.0 / static_cast<double>(freq)).sleep();  // Error range is above 30Hz.
+      }
     }
   }
 
@@ -81,7 +93,7 @@ protected:
     for(auto &e : key_found)
     {
       e = false;
-  }
+    }
   }
 
   ros::NodeHandle                             nh, pnh;
@@ -135,7 +147,7 @@ TEST_F(TopicMonitorTest, outOfRangeUpper)
   EXPECT_TRUE(key_found[5 - 1]);
   EXPECT_TRUE(key_found[6 - 1]);
   EXPECT_TRUE(key_found[7 - 1]);
-  }
+}
 
 TEST_F(TopicMonitorTest, outOfRangeLower)
 {
@@ -212,14 +224,100 @@ TEST_F(TopicMonitorTest, withinOkRange)
   EXPECT_FALSE(key_found[6 - 1]);
   EXPECT_TRUE(key_found[7 - 1]);
 }
-  {
-    key1_found = value.key == "key1" ? true : key1_found;
-    key2_found = value.key == "key2" ? true : key2_found;
-    key3_found = value.key == "key3" ? true : key3_found;
-  }
-  EXPECT_TRUE(key1_found);
-  EXPECT_FALSE(key2_found);
-  EXPECT_TRUE(key3_found);
+
+TEST_F(TopicMonitorTest, outOfRangeUpperHeaderless)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 50;
+  publish(freq, pub_fuga);
+
+  EXPECT_EQ(stat_fuga.ERROR, stat_fuga.level);
+
+  checkKeys(stat_fuga);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_FALSE(key_found[3 - 1]);
+  EXPECT_TRUE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
+}
+
+TEST_F(TopicMonitorTest, outOfRangeLowerHeaderless)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 3;
+  publish(freq, pub_fuga);
+
+  EXPECT_EQ(stat_fuga.ERROR, stat_fuga.level);
+
+  checkKeys(stat_fuga);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_FALSE(key_found[3 - 1]);
+  EXPECT_TRUE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
+}
+
+TEST_F(TopicMonitorTest, withinWarnRangeUpperHeaderless)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 35;
+  publish(freq, pub_fuga);
+
+  EXPECT_EQ(stat_fuga.WARN, stat_fuga.level);
+
+  checkKeys(stat_fuga);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_TRUE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_FALSE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
+}
+
+TEST_F(TopicMonitorTest, withinWarnRangeLowerHeaderless)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 15;
+  publish(freq, pub_fuga);
+
+  EXPECT_EQ(stat_fuga.WARN, stat_fuga.level);
+
+  checkKeys(stat_fuga);
+  EXPECT_FALSE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_TRUE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_FALSE(key_found[5 - 1]);
+  EXPECT_TRUE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
+}
+
+TEST_F(TopicMonitorTest, withinOkRangeHeaderless)
+{
+  ros::topic::waitForMessage<diagnostic_msgs::DiagnosticArray>("/diagnostics", nh, ros::Duration(10));
+
+  const int freq = 25;
+  publish(freq, pub_fuga);
+
+  EXPECT_EQ(stat_fuga.OK, stat_fuga.level);
+
+  checkKeys(stat_fuga);
+  EXPECT_TRUE(key_found[1 - 1]);  // "-1" to align array index and disp level
+  EXPECT_FALSE(key_found[2 - 1]);
+  EXPECT_TRUE(key_found[3 - 1]);
+  EXPECT_FALSE(key_found[4 - 1]);
+  EXPECT_TRUE(key_found[5 - 1]);
+  EXPECT_FALSE(key_found[6 - 1]);
+  EXPECT_TRUE(key_found[7 - 1]);
 }
 
 int main(int argc, char **argv)
