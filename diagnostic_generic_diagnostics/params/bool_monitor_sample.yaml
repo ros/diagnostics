@@ -1,0 +1,34 @@
+topics:
+  - topic: /test/hoge
+    hardware_id: hoge-hw
+    custom_fields:
+      - key: hoge-key
+        value: hoge-val
+        level: 1
+      - key: hogehoge-key
+        value: hogehoge-val
+        level: 2
+      - key: hogefuga-key
+        value: hogefuga-val
+        level: 3
+    publish_error: false
+    invert: false
+    timer_update: false
+  - topic: /test/fuga
+    hardware_id: fuga-hw
+    custom_fields:
+      - key: fuga-key
+        value: fuga-val
+        level: 4
+      - key: fugafuga-key
+        value: fugafuga-val
+        level: 5
+      - key: fugahoge-key
+        value: fugahoge-val
+        level: 6
+      - key: fugahogefuga-key
+        value: fugahogefuga-val
+        level: 7
+    publish_error: true
+    invert: true
+    timer_update: true

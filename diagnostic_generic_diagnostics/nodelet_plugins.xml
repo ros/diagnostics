@@ -1,0 +1,19 @@
+<library path="lib/libbool_monitor_nodelet">
+    <class name="diagnostic_generic_diagnostics/BoolMonitorNodelet" 
+           type="diagnostic_generic_diagnostics::BoolMonitorNodelet"
+           base_class_type="nodelet::Nodelet">
+        <description>
+        BoolMonitorNodelet class
+        </description>
+    </class>
+</library>
+
+<library path="lib/libtopic_monitor_nodelet">
+    <class name="diagnostic_generic_diagnostics/TopicMonitorNodelet" 
+           type="diagnostic_generic_diagnostics::TopicMonitorNodelet"
+           base_class_type="nodelet::Nodelet">
+        <description>
+        TopicMonitorNodelet class
+        </description>
+    </class>
+</library>

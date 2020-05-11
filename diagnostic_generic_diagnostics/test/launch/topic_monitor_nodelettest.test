@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="nodelet" type="nodelet" name="topic_monitor" args="standalone diagnostic_generic_diagnostics/TopicMonitorNodelet" output="log">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/topic_monitor_test.yaml"/>
+  </node>
+  <test test-name="node_test" pkg="diagnostic_generic_diagnostics" type="topic_monitor_nodetest"/>
+  <test test-name="hztest" pkg="rostest" type="hztest" name="hztest">
+    <rosparam>
+      topic: "/diagnostics"
+      hz: 2.0
+      hzerror: 0.5
+      test_duration: 5.0
+    </rosparam>
+  </test>
+</launch>

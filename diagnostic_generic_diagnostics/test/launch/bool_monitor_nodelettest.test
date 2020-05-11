@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="nodelet" type="nodelet" name="bool_monitor" args="standalone diagnostic_generic_diagnostics/BoolMonitorNodelet" output="log">
+    <rosparam command="load" file="$(find diagnostic_generic_diagnostics)/test/params/bool_monitor_test.yaml"/>
+  </node>
+  <test test-name="node_test" pkg="diagnostic_generic_diagnostics" type="bool_monitor_nodetest"/>
+</launch>

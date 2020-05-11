@@ -114,6 +114,15 @@ class BoolDiagnostic : public CompositeDiagnosticTask
 {
 public:
   BoolDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                 const diagnostic_updater::BoolStatusParam &bool_diag,
+                 const std::vector<diagnostic_updater::CustomField> &fields)
+    : CompositeDiagnosticTask(name + " bool_diag status"), bool_diag_(bool_diag, fields)
+  {
+    addTask(&bool_diag_);
+    diag.add(*this);
+  }
+
+  BoolDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                  const diagnostic_updater::BoolStatusParam &bool_diag)
     : CompositeDiagnosticTask(name + " bool_diag status"), bool_diag_(bool_diag)
   {
@@ -166,6 +175,14 @@ public:
    * \param freq The parameters for the FrequencyStatus class that will be
    * computing statistics.
    */
+  HeaderlessTopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                            const diagnostic_updater::FrequencyStatusParam &    freq,
+                            const std::vector<diagnostic_updater::CustomField> &fields)
+    : CompositeDiagnosticTask(name + " topic status"), freq_(freq, fields)
+  {
+    addTask(&freq_);
+    diag.add(*this);
+  }
 
   HeaderlessTopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                             const diagnostic_updater::FrequencyStatusParam &freq)
@@ -228,6 +245,14 @@ public:
    * \param stamp The parameters for the TimeStampStatus class that will be
    * computing statistics.
    */
+  TopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
+                  const diagnostic_updater::FrequencyStatusParam &    freq,
+                  const diagnostic_updater::TimeStampStatusParam &    stamp,
+                  const std::vector<diagnostic_updater::CustomField> &fields)
+    : HeaderlessTopicDiagnostic(name, diag, freq, fields), stamp_(stamp)
+  {
+    addTask(&stamp_);
+  }
 
   TopicDiagnostic(std::string name, diagnostic_updater::Updater &diag,
                   const diagnostic_updater::FrequencyStatusParam &freq,

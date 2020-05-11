@@ -1,0 +1,29 @@
+<package format="2">
+  <name>diagnostic_generic_diagnostics</name>
+  <version>0.0.1</version>
+  <description>diagnostic_generic_diagnostics</description>
+  <author email="seiya.shimizu@whill.inc">Seiya Shimizu</author>
+  <maintainer email="seiya.shimizu@whill.inc">Seiya Shimizu</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/diagnostic_generic_diagnostics</url>
+<!-- <url type="bugtracker"></url> -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>diagnostic_updater</depend>
+  <depend>nodelet</depend>
+  <depend>topic_tools</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>roslaunch</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>diagnostic_msgs</test_depend>
+
+  <export>
+    <nodelet plugin="${prefix}/nodelet_plugins.xml"/>
+    <architecture_independent/>
+  </export>
+</package>

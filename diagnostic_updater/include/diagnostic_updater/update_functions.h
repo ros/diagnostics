@@ -43,6 +43,34 @@
 namespace diagnostic_updater
 {
 /**
+ * \brief A structure that holds the custom field parameters.
+ */
+struct CustomField
+{
+  std::string key;
+  std::string value;
+  int         level;  // OK:1, WARN:2, ERROR:4 and sum of the error level you want to show
+};
+
+static void addCustomFields(diagnostic_updater::DiagnosticStatusWrapper &stat, const int &status,
+                            const std::vector<diagnostic_updater::CustomField> &fields)
+{
+  for(const auto &field : fields)
+  {
+    const bool disp_ok   = (field.level) % 2 == 1;
+    const bool disp_warn = (field.level / 2) % 2 == 1;
+    const bool disp_err  = (field.level / 4) % 2 == 1;
+    if((status == diagnostic_msgs::DiagnosticStatus::OK && disp_ok) ||
+       (status == diagnostic_msgs::DiagnosticStatus::WARN && disp_warn) ||
+       (status == diagnostic_msgs::DiagnosticStatus::ERROR && disp_err))
+    {
+      stat.add(field.key, field.value);
+    }
+  }
+  return;
+}
+
+/**
  * \brief A structure that holds the constructor parameters for the
  * FrequencyStatus class.
  */
@@ -103,13 +131,14 @@ struct FrequencyStatusParam
 class FrequencyStatus : public DiagnosticTask
 {
 private:
-  const FrequencyStatusParam params_;
-  int                        latest_status_;
-  int                        count_;
-  std::vector<ros::Time>     times_;
-  std::vector<int>           seq_nums_;
-  int                        hist_indx_;
-  boost::mutex               lock_;
+  const FrequencyStatusParam                   params_;
+  std::vector<diagnostic_updater::CustomField> custom_fields_;
+  int                                          latest_status_;
+  int                                          count_;
+  std::vector<ros::Time>                       times_;
+  std::vector<int>                             seq_nums_;
+  int                                          hist_indx_;
+  boost::mutex                                 lock_;
 
 public:
   /**
@@ -124,6 +153,17 @@ public:
     , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
   {
     clear();
+  }
+
+  FrequencyStatus(const FrequencyStatusParam &params, const std::vector<diagnostic_updater::CustomField> &custom_fields)
+    : DiagnosticTask("Frequency Status")
+    , params_(params)
+    , times_(params_.window_size_)
+    , seq_nums_(params_.window_size_)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
+  {
+    clear();
+    custom_fields_ = custom_fields;
   }
 
   /**
@@ -164,6 +204,7 @@ public:
     }
 
     hist_indx_ = 0;
+    custom_fields_.clear();
   }
 
   /**
@@ -219,6 +260,8 @@ public:
       stat.summary(latest_status_, "Desired frequency met");
     }
 
+    diagnostic_updater::addCustomFields(stat, latest_status_, custom_fields_);
+
     stat.addf("Events in window", "%d", events);
     stat.addf("Events since startup", "%d", count_);
     stat.addf("Duration of window (s)", "%f", window);
@@ -226,14 +269,20 @@ public:
     if(*params_.min_freq_ == *params_.max_freq_)
       stat.addf("Target frequency (Hz)", "%f", *params_.min_freq_);
     if(*params_.min_freq_ > 0)
+    {
       stat.addf("Minimum acceptable frequency (Hz)", "%f", *params_.min_freq_ * (1 - params_.tolerance_));
+      stat.addf("Minimum desired frequency (Hz)", "%f", *params_.min_freq_);
+    }
 
 #ifdef _WIN32
     if(isfinite(*params_.max_freq_))
 #else
     if(finite(*params_.max_freq_))
 #endif
+    {
       stat.addf("Maximum acceptable frequency (Hz)", "%f", *params_.max_freq_ * (1 + params_.tolerance_));
+      stat.addf("Maximum desired frequency (Hz)", "%f", *params_.max_freq_);
+    }
   }
 };
 
@@ -383,7 +432,7 @@ public:
     stat.summary(latest_status_, "Timestamps are reasonable.");
     if(!deltas_valid_)
     {
-      latest_status_ = diagnostic_msgs::DiagnosticStatus::ERROR;
+      latest_status_ = diagnostic_msgs::DiagnosticStatus::WARN;
       stat.summary(latest_status_, "No data since last update.");
     }
     else
@@ -636,7 +685,7 @@ public:
 
 struct BoolStatusParam
 {
-  BoolStatusParam(bool publish_error = true) : publish_error_(publish_error)
+  BoolStatusParam(bool publish_error = true, bool invert = false) : publish_error_(publish_error), invert_(invert)
   {
   }
 
@@ -644,17 +693,19 @@ struct BoolStatusParam
    * \brief Publish ERROR if true, otherwise publish WARN
    */
   bool publish_error_;
+  bool invert_;
 };
 
 class BoolStatus : public DiagnosticTask
 {
 private:
-  boost::mutex          lock_;
-  const BoolStatusParam params_;
-  int                   latest_status_;
-  bool                  is_success_;
-  int                   success_count_;
-  int                   fail_count_;
+  const BoolStatusParam                        params_;
+  std::vector<diagnostic_updater::CustomField> custom_fields_;
+  int                                          latest_status_;
+  bool                                         is_success_;
+  int                                          success_count_;
+  int                                          fail_count_;
+  boost::mutex                                 lock_;
 
 public:
   /**
@@ -669,17 +720,29 @@ public:
     clear();
   }
 
+  BoolStatus(const BoolStatusParam &params, const std::vector<diagnostic_updater::CustomField> &custom_fields,
+             std::string name = "Bool Status")
+    : DiagnosticTask(name)
+    , params_(params)
+    , is_success_(false)
+    , latest_status_(diagnostic_msgs::DiagnosticStatus::ERROR)
+  {
+    clear();
+    custom_fields_ = custom_fields;
+  }
+
   void clear()
   {
     boost::mutex::scoped_lock lock(lock_);
     success_count_ = 0;
     fail_count_    = 0;
+    custom_fields_.clear();
   }
 
   void set(bool is_success)
   {
     boost::mutex::scoped_lock lock(lock_);
-    is_success_ = is_success;
+    is_success_ = params_.invert_ ? !is_success : is_success;
     if(is_success_)
     {
       success_count_++;
@@ -721,6 +784,7 @@ public:
       }
       stat.add("Failed update count:", fail_count_);
     }
+    diagnostic_updater::addCustomFields(stat, latest_status_, custom_fields_);
   }
 };
 };  // namespace diagnostic_updater

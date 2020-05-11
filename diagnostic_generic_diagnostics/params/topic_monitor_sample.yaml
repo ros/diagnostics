@@ -1,0 +1,38 @@
+topics:
+  - topic: /test/hoge
+    hardware_id: hoge-hw
+    custom_fields:
+      - key: hoge-key
+        value: hoge-val
+        level: 1
+      - key: hogehoge-key
+        value: hogehoge-val
+        level: 2
+      - key: hogefuga-key
+        value: hogefuga-val
+        level: 3
+    headerless: false
+    max_freq: 15.0
+    min_freq: 15.0
+    tolerance: 0.20
+    window_size: 10
+  - topic: /test/fuga
+    hardware_id: fuga-hw
+    custom_fields:
+      - key: fuga-key
+        value: fuga-val
+        level: 4
+      - key: fugafuga-key
+        value: fugafuga-val
+        level: 5
+      - key: fugahoge-key
+        value: fugahoge-val
+        level: 6
+      - key: fugahogefuga-key
+        value: fugahogefuga-val
+        level: 7
+    headerless: true
+    max_freq: 60.0
+    min_freq: 10.0
+    tolerance: 0.20
+    window_size: 5

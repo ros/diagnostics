@@ -1,0 +1,3 @@
+topics:
+  - topic: /test/hoge
+    timer_update: true
