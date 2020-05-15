@@ -154,8 +154,8 @@ bool AnalyzerGroup::init(const string base_path, const ros::NodeHandle &n)
 
   if (analyzers_.size() == 0)
   {
-    init_ok = false;
-    ROS_ERROR("No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
+    // This isn't an error if the user didn't configure any analyzer groups
+    ROS_INFO("No analyzers initialized in AnalyzerGroup %s", analyzers_nh.getNamespace().c_str());
   }
 
   return init_ok;
