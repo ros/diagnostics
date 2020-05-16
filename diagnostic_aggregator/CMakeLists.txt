@@ -83,7 +83,7 @@ if(BUILD_TESTING)
 
   foreach(aggregator_test ${aggregator_tests})
     set(AGGREGATOR_NODE "${CMAKE_BINARY_DIR}/aggregator_node")
-    set(PARAMETER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/test/${aggregator_test}.yaml")
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${aggregator_test}.yaml" PARAMETER_FILE)
     set(EXPECTED_OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/${aggregator_test}")
 
     configure_file(
