@@ -82,9 +82,9 @@ if(BUILD_TESTING)
     "analyzer_group")
 
   foreach(aggregator_test ${aggregator_tests})
-    file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/aggregator_node" AGGREGATOR_NODE)
-    file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${aggregator_test}.yaml" PARAMETER_FILE)
-    file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/${aggregator_test}" EXPECTED_OUTPUT)
+    file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${aggregator_test}.yaml" PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/${aggregator_test}" EXPECTED_OUTPUT)
 
     configure_file(
       "test/create_analyzers.launch.py.in"
