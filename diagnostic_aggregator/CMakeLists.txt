@@ -31,7 +31,7 @@ ament_target_dependencies(${PROJECT_NAME}
   "std_msgs"
 )
 target_compile_definitions(${PROJECT_NAME}
-  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_LIBRARY")
+  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
 # see https://github.com/pybind/pybind11/commit/ba33b2fc798418c8c9dfe801c5b9023d3703f417
 if(NOT WIN32)
   target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated)
@@ -56,7 +56,7 @@ ament_target_dependencies(${ANALYZERS}
 target_link_libraries(${ANALYZERS}
   ${PROJECT_NAME})
 target_compile_definitions(${ANALYZERS}
-  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_LIBRARY")
+  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
 # prevent pluginlib from using boost
 target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
