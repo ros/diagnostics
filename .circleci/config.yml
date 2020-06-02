@@ -15,12 +15,14 @@ jobs:
       - run:
           name: Resolve dependencies
           command: |
-            apt-get update -qq
-            rosdep install -y --from-paths .. --ignore-src --rosdistro=melodic
-
+           cd ~/catkin_ws/src
+           apt-get update -qq
+           apt-get install -y python-catkin-tools
+           rosdep install -y --from-path .. --ignore-src --rosdistro=melodic
+           
       - run:
           name: catkin_make
           command: |
-            source /opt/ros/melodic/setup.bash
-            cd ~/catkin_ws
-            catkin_make -j8
+           source /opt/ros/melodic/setup.bash
+           cd ~/catkin_ws
+           catkin build -j8
