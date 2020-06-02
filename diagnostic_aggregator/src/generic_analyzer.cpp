@@ -141,7 +141,7 @@ bool GenericAnalyzer::init(
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found num_items: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
-      num_items_expected = pvalue.as_int();
+      num_items_expected = static_cast<int>(pvalue.as_int());
     } else if (pname.compare("discard_stale") == 0) {
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found discard_stale: %s",
