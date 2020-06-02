@@ -11,8 +11,9 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(diagnostic_msgs REQUIRED)
+# order matters here: https://github.com/ros2/ros2/issues/927
 find_package(pluginlib REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
@@ -63,9 +64,6 @@ target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIO
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
   ${PROJECT_NAME})
-install(
-  TARGETS aggregator_node
-  DESTINATION lib/${PROJECT_NAME})
 
 # Testing macro
 if(BUILD_TESTING)
@@ -100,16 +98,24 @@ if(BUILD_TESTING)
   endforeach()
 endif()
 
-ament_python_install_package(${PROJECT_NAME})
+install(
+  TARGETS aggregator_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(
   TARGETS ${PROJECT_NAME} ${ANALYZERS}
-  DESTINATION lib
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 install(
   DIRECTORY include/
   DESTINATION include
 )
+
+ament_python_install_package(${PROJECT_NAME})
 
 # Install Example
 set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example.yaml")
