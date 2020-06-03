@@ -10,8 +10,8 @@ Changelog for package diagnostic_updater
 * fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
 * Contributors: DensoADAS, Arne Nordmann, Robin Vanhove, Karsten Knese, Scott K Logan
 
-Forthcoming
------------
+2.0.2 (2020-06-03)
+------------------
 * 2.0.2
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
 * generate changelog

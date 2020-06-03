@@ -7,8 +7,8 @@ Changelog for package diagnostic_aggregator
 * Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
 * Contributors: Arne Nordmann, Robin Vanhove, Karsten Knese
 
-Forthcoming
------------
+2.0.2 (2020-06-03)
+------------------
 * 2.0.2
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
 * generate changelog
