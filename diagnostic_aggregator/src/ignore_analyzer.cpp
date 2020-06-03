@@ -34,28 +34,37 @@
 
 /**< \author Kevin Watts */
 
-#include "diagnostic_aggregator/ignore_analyzer.h"
+#include "diagnostic_aggregator/ignore_analyzer.hpp"
 
+#include <memory>
+#include <string>
+#include <vector>
 
-using namespace diagnostic_aggregator;
-using namespace std;
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, diagnostic_aggregator::Analyzer)
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::IgnoreAnalyzer, 
-                       diagnostic_aggregator::Analyzer)
-
-
-IgnoreAnalyzer::IgnoreAnalyzer() { }
-
-IgnoreAnalyzer::~IgnoreAnalyzer() { }
-
-bool IgnoreAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)
+namespace diagnostic_aggregator
 {
+using std::vector;
+
+IgnoreAnalyzer::IgnoreAnalyzer() {}
+
+IgnoreAnalyzer::~IgnoreAnalyzer() {}
+
+bool IgnoreAnalyzer::init(
+  const std::string & base_path, const std::string & breadcrumb, const rclcpp::Node::SharedPtr node)
+{
+  (void)base_path;
+  (void)breadcrumb;
+  (void)node;
+
   return true;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > IgnoreAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> IgnoreAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
 
   return processed;
 }
+
+}  // namespace diagnostic_aggregator

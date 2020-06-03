@@ -34,34 +34,34 @@
 
 /**< \author Kevin Watts */
 
-#include <diagnostic_aggregator/aggregator.h>
 #include <exception>
 
-using namespace std;
+#include "diagnostic_aggregator/aggregator.hpp"
 
-int main(int argc, char **argv)
+#include "rclcpp/executors.hpp"
+
+using std::exception;
+
+int main(int argc, char ** argv)
 {
-  ros::init(argc, argv, "diagnostic_aggregator");
-  
-  try
-  {
-  diagnostic_aggregator::Aggregator agg;
-  
-  ros::Rate pub_rate(agg.getPubRate());
-  while (agg.ok())
-  {
-    ros::spinOnce();
-    agg.publishData();
-    pub_rate.sleep();
+  rclcpp::init(argc, argv);
+
+  try {
+    diagnostic_aggregator::Aggregator agg;
+
+    rclcpp::Rate pub_rate(agg.getPubRate());
+    while (rclcpp::ok()) {
+      rclcpp::spin_some(agg.get_node());
+      agg.publishData();
+      pub_rate.sleep();
+    }
+  } catch (const exception & e) {
+    RCLCPP_FATAL(
+      rclcpp::get_logger("aggregator_node"),
+      "Diagnostic aggregator node caught exception. Aborting. %s", e.what());
+    rclcpp::shutdown();
   }
-  }
-  catch (exception& e)
-  {
-    ROS_FATAL("Diagnostic aggregator node caught exception. Aborting. %s", e.what());
-    ROS_BREAK();
-  }
-  
+
   exit(0);
   return 0;
 }
-  

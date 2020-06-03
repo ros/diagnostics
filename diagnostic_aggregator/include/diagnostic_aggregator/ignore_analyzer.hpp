@@ -32,35 +32,83 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**< \author Kevin Watts */
+/*!
+ * \author Kevin Watts
+ */
 
-/**< \author Loads analyzer params, verifies that they are valid */
-
-#include <gtest/gtest.h>
+#ifndef DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP_
+#define DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP_
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "diagnostic_aggregator/analyzer_group.hpp"
+#include "diagnostic_aggregator/generic_analyzer.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
+
+#include "diagnostic_msgs/msg/diagnostic_status.h"
 
 #include "rclcpp/rclcpp.hpp"
 
-// Uses AnalyzerGroup to load analyzers
-TEST(AnalyzerLoader, analyzerLoading)
+namespace diagnostic_aggregator
 {
-  auto nh = std::make_shared<rclcpp::Node>(
-    "analyzers", "", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
-
-  diagnostic_aggregator::AnalyzerGroup analyzer_group;
-  std::string path = "/BASE/PATH";
-
-  EXPECT_TRUE(analyzer_group.init(path, "", nh));
-}
-
-int main(int argc, char ** argv)
+/*!
+ *\brief IgnoreAnalyzer ignores all analyzer parameters and does nothing
+ *
+ * IgnoreAnalyzer is used to get rid of an Analyzer that is no longer part of a robot configuration.
+ *
+ *\verbatim
+ *<launch>
+ *  <include file="$(find my_pkg)/my_analyzers.launch" />
+ *
+ *  <!-- Overwrite a specific Analyzer to discard all -->
+ *  <param name="diag_agg/analyzers/motors/type" value="IgnoreAnalyzer" />
+ *</launch>
+ *\endverbatim
+ *
+ *
+ */
+class IgnoreAnalyzer : public Analyzer
 {
-  testing::InitGoogleTest(&argc, argv);
-  rclcpp::init(argc, argv);
+public:
+  /*!
+   *\brief Default constructor loaded by pluginlib
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  IgnoreAnalyzer();
 
-  return RUN_ALL_TESTS();
-}
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  virtual ~IgnoreAnalyzer();
+
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  bool init(
+    const std::string & base_path, const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node);
+
+  bool match(const std::string & name)
+  {
+    (void)name;
+
+    return false;
+  }
+
+  bool analyze(std::shared_ptr<StatusItem> item)
+  {
+    (void)item;
+
+    return false;
+  }
+
+  /*
+   *\brief Always reports an empty vector
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
+
+  std::string getPath() const {return "";}
+  std::string getName() const {return "";}
+};
+
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__IGNORE_ANALYZER_HPP_

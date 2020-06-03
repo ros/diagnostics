@@ -1,9 +1,10 @@
-<package>
+<package format="2">
   <name>diagnostic_aggregator</name>
   <version>1.9.3</version>
   <description>diagnostic_aggregator</description>
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <author email="arne.nordmann@de.bosch.com">Brice Rebsamen</author>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
@@ -11,28 +12,26 @@
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/diagnostic_aggregator</url>
-<!-- <url type="bugtracker"></url> -->
 
-  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <build_depend version_gte="1.11.9">diagnostic_msgs</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
   <build_depend>pluginlib</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>rostest</build_depend>
-  <build_depend>xmlrpcpp</build_depend>
-  <build_depend>bondcpp</build_depend>
-  <build_depend>bondpy</build_depend>
+  <build_depend>rclcpp</build_depend>
+  <build_depend>std_msgs</build_depend>
 
-  <run_depend version_gte="1.11.9">diagnostic_msgs</run_depend>
-  <run_depend>pluginlib</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>xmlrpcpp</run_depend>
-  <run_depend>bondcpp</run_depend>
-  <run_depend>bondpy</run_depend>
+  <depend>rclpy</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>launch_testing_ros</test_depend>
 
   <export>
-    <diagnostic_aggregator plugin="${prefix}/analyzer_plugins.xml"/>
+    <diagnostic_aggregator plugin="${prefix}/plugin_description.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

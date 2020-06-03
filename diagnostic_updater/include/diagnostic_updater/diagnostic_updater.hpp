@@ -486,8 +486,8 @@ private:
   void reset_timer()
   {
     update_timer_ = rclcpp::create_timer(
-      base_interface_.get(),
-      timers_interface_.get(),
+      base_interface_,
+      timers_interface_,
       clock_,
       period_,
       std::bind(&Updater::update, this));

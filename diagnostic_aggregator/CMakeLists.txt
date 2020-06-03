@@ -1,74 +1,146 @@
-# http://ros.org/doc/groovy/api/catkin/html/user_guide/supposed.html
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(diagnostic_aggregator)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp)
-catkin_package(DEPENDS diagnostic_msgs pluginlib roscpp rospy xmlrpcpp bondcpp
-    INCLUDE_DIRS include
-    LIBRARIES ${PROJECT_NAME})
-
-set(REQUIRED_diagnostic_msgs_VERSION_Indigo "1.11.9")
-set(REQUIRED_diagnostic_msgs_VERSION_Jade "1.12.4")
-if( ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Indigo})
-  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Indigo} or newer is required to build diagnotic_aggregator on ROS Indigo")
-endif()
-if( (${diagnostic_msgs_VERSION} VERSION_EQUAL "1.12.0") OR
-    (${diagnostic_msgs_VERSION} VERSION_GREATER "1.12.0" AND
-     ${diagnostic_msgs_VERSION} VERSION_LESS ${REQUIRED_diagnostic_msgs_VERSION_Jade}))
-  message(FATAL_ERROR "diagnostic_msgs version ${REQUIRED_diagnostic_msgs_VERSION_Jade} or newer is required to build diagnotic_aggregator on ROS Jade")
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS system)
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} gtest-1.7.0/include)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-add_library(${PROJECT_NAME}
+find_package(ament_cmake REQUIRED)
+# order matters here: https://github.com/ros2/ros2/issues/927
+find_package(pluginlib REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+
+add_library(${PROJECT_NAME} SHARED
   src/status_item.cpp
   src/analyzer_group.cpp
+  src/aggregator.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(${PROJECT_NAME}
+  "diagnostic_msgs"
+  "pluginlib"
+  "rclcpp"
+  "std_msgs"
+)
+target_compile_definitions(${PROJECT_NAME}
+  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
+# see https://github.com/pybind/pybind11/commit/ba33b2fc798418c8c9dfe801c5b9023d3703f417
+if(NOT WIN32)
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated)
+endif()
+# prevent pluginlib from using boost
+target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+
+set(ANALYZERS "${PROJECT_NAME}_analyzers")
+add_library(${ANALYZERS} SHARED
   src/generic_analyzer.cpp
   src/discard_analyzer.cpp
-  src/ignore_analyzer.cpp
-  src/aggregator.cpp)
-target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
-                                            ${catkin_LIBRARIES}
+  src/ignore_analyzer.cpp)
+target_include_directories(${ANALYZERS} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(${ANALYZERS}
+  "diagnostic_msgs"
+  "pluginlib"
+  "rclcpp"
+  "std_msgs"
 )
-add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
+target_link_libraries(${ANALYZERS}
+  ${PROJECT_NAME})
+target_compile_definitions(${ANALYZERS}
+  PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
+# prevent pluginlib from using boost
+target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
-# Aggregator node 
+# Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
-target_link_libraries(aggregator_node ${catkin_LIBRARIES}
-                                      ${PROJECT_NAME}
-)
+target_link_libraries(aggregator_node
+  ${PROJECT_NAME})
 
-# Analyzer loader allows other users to test that Analyzers load
-add_executable(analyzer_loader test/analyzer_loader.cpp
-                               gtest-1.7.0/gtest-all.cc)
-target_link_libraries(analyzer_loader diagnostic_aggregator)
+# Testing macro
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  set(ament_cmake_copyright_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest(test/launch/test_agg.launch)
-  add_rostest(test/launch/test_add_agg.launch)
+  find_package(ament_cmake_pytest REQUIRED)
+  find_package(launch_testing_ament_cmake REQUIRED)
 
-  # Test Analyzer loader
-  add_rostest(test/launch/test_loader.launch)
-  add_rostest(test/launch/test_expected_stale.launch)
-  add_rostest(test/launch/test_multiple_match.launch)
+  set(aggregator_tests
+    "primitive_analyzers"
+    "all_analyzers"
+    "analyzer_group")
+
+  foreach(aggregator_test ${aggregator_tests})
+    file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${aggregator_test}.yaml" PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/${aggregator_test}" EXPECTED_OUTPUT)
+
+    configure_file(
+      "test/create_analyzers.launch.py.in"
+      "test_${aggregator_test}.launch.py"
+      @ONLY
+    )
+    add_launch_test(
+      "${CMAKE_CURRENT_BINARY_DIR}/test_${aggregator_test}.launch.py"
+      TARGET "test_${aggregator_test}"
+      TIMEOUT 30
+      ENV
+    )
+  endforeach()
 endif()
 
-catkin_install_python(
-        PROGRAMS scripts/add_analyzers
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(
+  TARGETS aggregator_node
+  DESTINATION lib/${PROJECT_NAME}
 )
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+
+install(
+  TARGETS ${PROJECT_NAME} ${ANALYZERS}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
-install(FILES analyzer_plugins.xml
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
-install(TARGETS ${PROJECT_NAME}
-        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+
+ament_python_install_package(${PROJECT_NAME})
+
+# Install Example
+set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example.yaml")
+configure_file(example/example.launch.py.in example.launch.py @ONLY)
+install( # launch descriptor
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
+  DESTINATION share/${PROJECT_NAME}
 )
-install(TARGETS aggregator_node analyzer_loader
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install( # example publisher
+  FILES example/example_pub.py
+  DESTINATION lib/${PROJECT_NAME}
 )
+install( # example aggregator configration
+  FILES example/example.yaml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+pluginlib_export_plugin_description_file(${PROJECT_NAME} plugin_description.xml)
+
+ament_export_include_directories(include)
+ament_export_dependencies(ament_cmake)
+ament_export_dependencies(ament_cmake_python)
+ament_export_dependencies(diagnostic_msgs)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclpy)
+ament_export_dependencies(std_msgs)
+
+ament_package()

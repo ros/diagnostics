@@ -32,35 +32,61 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/**< \author Kevin Watts */
+/*!
+ * \author Kevin Watts
+ */
 
-/**< \author Loads analyzer params, verifies that they are valid */
-
-#include <gtest/gtest.h>
+#ifndef DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_
+#define DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_
 
 #include <memory>
-#include <string>
+#include <vector>
 
-#include "diagnostic_aggregator/analyzer_group.hpp"
+#include "diagnostic_aggregator/generic_analyzer.hpp"
+#include "diagnostic_aggregator/visibility_control.hpp"
 
-#include "rclcpp/rclcpp.hpp"
+#include "diagnostic_msgs/msg/diagnostic_status.h"
 
-// Uses AnalyzerGroup to load analyzers
-TEST(AnalyzerLoader, analyzerLoading)
+namespace diagnostic_aggregator
 {
-  auto nh = std::make_shared<rclcpp::Node>(
-    "analyzers", "", rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
-
-  diagnostic_aggregator::AnalyzerGroup analyzer_group;
-  std::string path = "/BASE/PATH";
-
-  EXPECT_TRUE(analyzer_group.init(path, "", nh));
-}
-
-int main(int argc, char ** argv)
+/*!
+ *\brief DiscardAnalyzer is does not report any values. It is a subclass of GenericAnalyzer
+ *
+ * DiscardAnalyzer is a subclass of GenericAnalyzer. It will ignore any value that it matches.
+ * It takes the any of the parameters of a GenericAnalyzer.
+ *
+ * It is useful for configuring an aggregator_node to ignore certain values in the diagnostics.
+ *
+ *\verbatim
+ *<launch>
+ *  <include file="$(find my_pkg)/my_analyzers.launch" />
+ *
+ *  <!-- Overwrite a specific Analyzer to discard all -->
+ *  <param name="diag_agg/analyzers/motors/type" value="DiscardAnalyzer" />
+ *</launch>
+ *\endverbatim
+ *
+ *
+ */
+class DiscardAnalyzer : public GenericAnalyzer
 {
-  testing::InitGoogleTest(&argc, argv);
-  rclcpp::init(argc, argv);
+public:
+  /*!
+   *\brief Default constructor loaded by pluginlib
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  DiscardAnalyzer();
 
-  return RUN_ALL_TESTS();
-}
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  virtual ~DiscardAnalyzer();
+
+  /*
+   *\brief Always reports an empty vector
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  virtual std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> report();
+};
+
+}  // namespace diagnostic_aggregator
+
+#endif  // DIAGNOSTIC_AGGREGATOR__DISCARD_ANALYZER_HPP_

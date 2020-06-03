@@ -34,25 +34,26 @@
 
 /**< \author Kevin Watts */
 
-#include "diagnostic_aggregator/discard_analyzer.h"
+#include "diagnostic_aggregator/discard_analyzer.hpp"
 
+#include <memory>
+#include <vector>
 
-using namespace diagnostic_aggregator;
-using namespace std;
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer, diagnostic_aggregator::Analyzer)
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::DiscardAnalyzer, 
-                        diagnostic_aggregator::Analyzer)
-
-
-DiscardAnalyzer::DiscardAnalyzer() { }
-
-DiscardAnalyzer::~DiscardAnalyzer() { }
-
-
-
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > DiscardAnalyzer::report()
+namespace diagnostic_aggregator
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
+using std::vector;
+
+DiscardAnalyzer::DiscardAnalyzer() {}
+
+DiscardAnalyzer::~DiscardAnalyzer() {}
+
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> DiscardAnalyzer::report()
+{
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
 
   return processed;
 }
+
+}  // namespace diagnostic_aggregator

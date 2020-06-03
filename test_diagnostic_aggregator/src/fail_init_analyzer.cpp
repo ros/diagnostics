@@ -73,14 +73,14 @@ bool FailInitAnalyzer::match(const std::string name)
   return false;
 }
 
-bool FailInitAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
+bool FailInitAnalyzer::analyze(const std::shared_ptr<StatusItem> item)
 {
   return false;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > FailInitAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::DiagnosticStatus> > FailInitAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > output;
+  vector<std::shared_ptr<diagnostic_msgs::DiagnosticStatus> > output;
 
   return output;
 }

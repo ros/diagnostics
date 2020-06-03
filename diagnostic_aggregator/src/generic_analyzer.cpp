@@ -33,237 +33,286 @@
  *********************************************************************/
 
 /**< \author Kevin Watts */
+/**< \author Arne Nordmann */
 
-#include "diagnostic_aggregator/generic_analyzer.h"
+#include "diagnostic_aggregator/generic_analyzer.hpp"
 
-using namespace diagnostic_aggregator;
-using namespace std;
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer, 
-                       diagnostic_aggregator::Analyzer)
+#include "rclcpp/parameter.hpp"
 
+PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::GenericAnalyzer, diagnostic_aggregator::Analyzer)
 
-GenericAnalyzer::GenericAnalyzer() { }
+namespace diagnostic_aggregator
+{
+using std::string;
+using std::vector;
 
-bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
-{ 
-  string nice_name;
-  if (!n.getParam("path", nice_name))
-  {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
-              n.getNamespace().c_str());
+GenericAnalyzer::GenericAnalyzer() {}
+
+bool GenericAnalyzer::init(
+  const std::string & path, const std::string & breadcrumb, const rclcpp::Node::SharedPtr n)
+{
+  path_ = path;
+  breadcrumb_ = breadcrumb;
+  nice_name_ = breadcrumb;
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer, breadcrumb: %s", breadcrumb_.c_str());
+
+  std::map<std::string, rclcpp::Parameter> parameters;
+  if (!n->get_parameters(breadcrumb_, parameters)) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("GenericAnalyzer"),
+      "Couldn't retrieve parameters for generic analyzer at prefix '%s'.", breadcrumb_.c_str());
     return false;
   }
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("GenericAnalyzer"), "Retrieved %d parameter(s) for prefix '%s'.",
+    parameters.size(), breadcrumb_.c_str());
 
-  XmlRpc::XmlRpcValue find_remove;
-  if (n.getParam("find_and_remove_prefix", find_remove))
-  {
-    vector<string> output;
-    getParamVals(find_remove, output);
-    chaff_ = output;
-    startswith_ = output;
-  }
-  
-  XmlRpc::XmlRpcValue removes;
-  if (n.getParam("remove_prefix", removes))
-    getParamVals(removes, chaff_);
-    
-  XmlRpc::XmlRpcValue startswith;
-  if (n.getParam("startswith", startswith))
-    getParamVals(startswith, startswith_);
+  double timeout = 5.0;
+  int num_items_expected = -1;
+  bool discard_stale = false;
 
-  XmlRpc::XmlRpcValue name_val;
-  if (n.getParam("name", name_val))
-    getParamVals(name_val, name_);
+  for (const auto & param : parameters) {
+    string pname = param.first;
+    rclcpp::Parameter pvalue = param.second;
 
-  XmlRpc::XmlRpcValue contains;
-  if (n.getParam("contains", contains))
-    getParamVals(contains, contains_);
-
-  XmlRpc::XmlRpcValue expected;
-  if (n.getParam("expected", expected))
-  {
-    getParamVals(expected, expected_);
-    for (unsigned int i = 0; i < expected_.size(); ++i)
-    {
-      boost::shared_ptr<StatusItem> item(new StatusItem(expected_[i]));
-      addItem(expected_[i], item);
-    }
- }
- 
-  XmlRpc::XmlRpcValue regexes;
-  if (n.getParam("regex", regexes))
-  {
-    vector<string> regex_strs;
-    getParamVals(regexes, regex_strs);
-  
-    for (unsigned int i = 0; i < regex_strs.size(); ++i)
-    {
-      try
-      {
-        boost::regex re(regex_strs[i]);
-        regex_.push_back(re);
+    if (pname.compare("path") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found path: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      nice_name_ = pvalue.as_string();
+    } else if (pname.compare("find_and_remove_prefix") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"),
+        "GenericAnalyzer '%s' found find_and_remove_prefix: %s", nice_name_.c_str(),
+        pvalue.value_to_string().c_str());
+      vector<string> output = pvalue.as_string_array();
+      chaff_ = output;
+      startswith_ = output;
+    } else if (pname.compare("remove_prefix") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found remove_prefix: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      chaff_ = pvalue.as_string_array();
+    } else if (pname.compare("startswith") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found startswith: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      startswith_ = pvalue.as_string_array();
+    } else if (pname.compare("contains") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found contains: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      contains_ = pvalue.as_string_array();
+    } else if (pname.compare("expected") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found expected: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      for (auto exp : pvalue.as_string_array()) {
+        auto item = std::make_shared<StatusItem>(exp);
+        this->addItem(exp, item);
       }
-      catch (boost::regex_error& e)
-      {
-        ROS_ERROR("Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s", 
-                 regex_strs[i].c_str(), e.what());
+    } else if (pname.compare("regex") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found regex: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      for (auto regex : pvalue.as_string_array()) {
+        try {
+          std::regex re(regex);
+          regex_.push_back(re);
+        } catch (std::regex_error & e) {
+          RCLCPP_ERROR(
+            rclcpp::get_logger("GenericAnalyzer"),
+            "Attempted to make regex from %s. Caught exception, ignoring value. Exception: %s",
+            regex.c_str(), e.what());
+        }
       }
+    } else if (pname.compare("timeout") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found timeout: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      timeout = pvalue.as_double();
+    } else if (pname.compare("num_items") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found num_items: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      num_items_expected = static_cast<int>(pvalue.as_int());
+    } else if (pname.compare("discard_stale") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found discard_stale: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      discard_stale = pvalue.as_bool();
     }
   }
 
-  if (startswith_.size() == 0 && name_.size() == 0 && 
-      contains_.size() == 0 && expected_.size() == 0 && regex_.size() == 0)
+  if (
+    startswith_.size() == 0 && name_.size() == 0 && contains_.size() == 0 &&
+    expected_.size() == 0 && regex_.size() == 0)
   {
-    ROS_ERROR("GenericAnalyzer was not initialized with any way of checking diagnostics. Name: %s, namespace: %s", nice_name.c_str(), n.getNamespace().c_str());
+    RCLCPP_ERROR(
+      rclcpp::get_logger("generic_analyzer"),
+      std::string("GenericAnalyzer ") +
+      "'%s' was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
+      nice_name_.c_str(), path.c_str(), n->get_namespace());
     return false;
   }
 
   // convert chaff_ to output name format. Fixes #17
-  for(size_t i=0; i<chaff_.size(); i++) {
+  for (size_t i = 0; i < chaff_.size(); i++) {
     chaff_[i] = getOutputName(chaff_[i]);
   }
-  
-  double timeout;
-  int num_items_expected;
-  bool discard_stale;
-  n.param("timeout", timeout, 5.0);   // Timeout for stale
-  n.param("num_items", num_items_expected, -1); // Number of items must match this
-  n.param("discard_stale", discard_stale, false);
 
   string my_path;
-  if (base_path == "/")
-    my_path = nice_name;
-  else
-    my_path = base_path + "/" + nice_name;
+  if (path == "/") {
+    my_path = nice_name_;
+  } else {
+    my_path = path + "/" + nice_name_;
+  }
 
-  if (my_path.find("/") != 0)
+  if (my_path.find("/") != 0) {
     my_path = "/" + my_path;
+  }
 
-  return GenericAnalyzerBase::init(my_path, nice_name, 
-                                   timeout, num_items_expected, discard_stale);
+  return GenericAnalyzerBase::init(path_, breadcrumb_, timeout, num_items_expected, discard_stale);
 }
 
-GenericAnalyzer::~GenericAnalyzer() { }
+GenericAnalyzer::~GenericAnalyzer() {}
 
-
-bool GenericAnalyzer::match(const string name)
+bool GenericAnalyzer::match(const string & name)
 {
-  boost::cmatch what;
-  for (unsigned int i = 0; i < regex_.size(); ++i)
-  {
-    if (boost::regex_match(name.c_str(), what, regex_[i]))
+  RCLCPP_DEBUG(
+    rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' match %s", nice_name_.c_str(),
+    name.c_str());
+
+  std::cmatch what;
+  for (unsigned int i = 0; i < regex_.size(); ++i) {
+    if (std::regex_match(name.c_str(), what, regex_[i])) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s' with regex.",
+        nice_name_.c_str(), name.c_str());
       return true;
+    }
   }
-  
-  for (unsigned int i = 0; i < expected_.size(); ++i)
-  {
-    if (name == expected_[i])
+
+  for (unsigned int i = 0; i < expected_.size(); ++i) {
+    if (name == expected_[i]) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
+        name.c_str());
       return true;
+    }
   }
-  
-  for (unsigned int i = 0; i < name_.size(); ++i)
-  {
-    if (name == name_[i])
+
+  for (unsigned int i = 0; i < name_.size(); ++i) {
+    if (name == name_[i]) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
+        name.c_str());
       return true;
+    }
   }
-  
-  for (unsigned int i = 0; i < startswith_.size(); ++i)
-  {
-    if (name.find(startswith_[i]) == 0)
+
+  for (unsigned int i = 0; i < startswith_.size(); ++i) {
+    if (name.find(startswith_[i]) == 0) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
+        name.c_str());
       return true;
+    }
   }
-  
-  for (unsigned int i = 0; i < contains_.size(); ++i)
-  {
-    if (name.find(contains_[i]) != string::npos)
+
+  for (unsigned int i = 0; i < contains_.size(); ++i) {
+    if (name.find(contains_[i]) != string::npos) {
+      RCLCPP_INFO(
+        rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
+        name.c_str());
       return true;
+    }
   }
-  
+
   return false;
 }
 
-vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::report()
+vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> GenericAnalyzer::report()
 {
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed = GenericAnalyzerBase::report();
+  RCLCPP_DEBUG(rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' report()", nice_name_.c_str());
+
+  vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed =
+    GenericAnalyzerBase::report();
 
   // Check and make sure our expected names haven't been removed ...
   vector<string> expected_names_missing;
   bool has_name = false;
-  
-  for (unsigned int i = 0; i < expected_.size(); ++i)
-  {
+
+  for (unsigned int i = 0; i < expected_.size(); ++i) {
     has_name = false;
-    for (unsigned int j = 0; j < processed.size(); ++j)
-    {
+    for (unsigned int j = 0; j < processed.size(); ++j) {
       size_t last_slash = processed[j]->name.rfind("/");
       string nice_name = processed[j]->name.substr(last_slash + 1);
-      if (nice_name == expected_[i] || nice_name == getOutputName(expected_[i]))
-      {
+      if (nice_name == expected_[i] || nice_name == getOutputName(expected_[i])) {
         has_name = true;
         break;
       }
 
       // Remove chaff, check names
-      for (unsigned int k = 0; k < chaff_.size(); ++k)
-      {     
-        if (nice_name == removeLeadingNameChaff(expected_[i], chaff_[k]))
-        {
+      for (unsigned int k = 0; k < chaff_.size(); ++k) {
+        if (nice_name == removeLeadingNameChaff(expected_[i], chaff_[k])) {
           has_name = true;
           break;
         }
       }
-
     }
-    if (!has_name)
+    if (!has_name) {
       expected_names_missing.push_back(expected_[i]);
-  }  
-  
+    }
+  }
+
   // Check that all processed items aren't stale
   bool all_stale = true;
-  for (unsigned int j = 0; j < processed.size(); ++j)
-  {
-    if (processed[j]->level != 3)
+  for (unsigned int j = 0; j < processed.size(); ++j) {
+    if (processed[j]->level != 3) {
       all_stale = false;
+    }
   }
 
   // Add missing names to header ...
-  for (unsigned int i = 0; i < expected_names_missing.size(); ++i)
-  {
-    boost::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+  for (unsigned int i = 0; i < expected_names_missing.size(); ++i) {
+    std::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
     processed.push_back(item->toStatusMsg(path_, true));
   }
 
-  for (unsigned int j = 0; j < processed.size(); ++j)
-  {
+  for (unsigned int j = 0; j < processed.size(); ++j) {
     // Remove all leading name chaff
-    for (unsigned int i = 0; i < chaff_.size(); ++i)
+    for (unsigned int i = 0; i < chaff_.size(); ++i) {
       processed[j]->name = removeLeadingNameChaff(processed[j]->name, chaff_[i]);
+    }
 
     // If we're missing any items, set the header status to error or stale
-    if (expected_names_missing.size() > 0 && processed[j]->name == path_)
-    {
-      if (!all_stale)
-      {
+    if (expected_names_missing.size() > 0 && processed[j]->name == path_) {
+      if (!all_stale) {
         processed[j]->level = 2;
         processed[j]->message = "Error";
-      }
-      else
-      {
+      } else {
         processed[j]->level = 3;
         processed[j]->message = "All Stale";
       }
 
       // Add all missing items to header item
-      for (unsigned int k = 0; k < expected_names_missing.size(); ++k)
-      {
-        diagnostic_msgs::KeyValue kv;
+      for (unsigned int k = 0; k < expected_names_missing.size(); ++k) {
+        diagnostic_msgs::msg::KeyValue kv;
         kv.key = expected_names_missing[k];
         kv.value = "Missing";
         processed[j]->values.push_back(kv);
       }
     }
   }
-  
+
   return processed;
 }
+
+}  // namespace diagnostic_aggregator
