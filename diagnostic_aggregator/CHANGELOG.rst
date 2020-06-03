@@ -2,6 +2,11 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
+* Contributors: Arne Nordmann, Robin Vanhove, Karsten Knese
+
 1.9.3 (2018-05-02)
 ------------------
 * Merge pull request `#79 <https://github.com/ros/diagnostics/issues/79>`_ from nlamprian/indigo-devel

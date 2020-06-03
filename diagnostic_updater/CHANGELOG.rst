@@ -2,6 +2,14 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Re-add leading character to node name (`#109 <https://github.com/ros/diagnostics/issues/109>`_)
+* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
+* Fix DiagnosedPublisher (`#135 <https://github.com/ros/diagnostics/issues/135>`_)
+* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
+* Contributors: DensoADAS, Arne Nordmann, Robin Vanhove, Karsten Knese, Scott K Logan
+
 2.0.0 (2019-09-03)
 ------------------
 * Use rclpp timer instead of custom updater logic. (`#114 <https://github.com/ros/diagnostics/issues/114>`_)
