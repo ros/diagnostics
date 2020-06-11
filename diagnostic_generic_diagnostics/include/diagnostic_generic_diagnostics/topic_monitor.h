@@ -94,6 +94,7 @@ private:
   ros::Timer                                  timer_;
   std::vector<ros::Subscriber>                subs_;
   std::unordered_map<std::string, UpdaterPtr> updaters_;
+  std::vector<std::string>                    hardware_ids_;
   std::vector<TopicStatusParamPtr>            params_;
 
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
@@ -110,11 +111,10 @@ private:
 
   void timerCallback(const ros::TimerEvent &e)
   {
-    ROS_DEBUG_THROTTLE(1, "cb invoked");
-    for(const auto &updater : updaters_)
-    {
-      updater.second->update();
-    }
+    static int cb_count = 0;
+    ROS_DEBUG_THROTTLE(0.1, "cb invoked: %d", cb_count);
+    updaters_[hardware_ids_[cb_count]]->update();
+    cb_count = (cb_count + 1) % updaters_.size();
   }
 
 public:
@@ -139,6 +139,7 @@ public:
           auto u = std::make_shared<diagnostic_updater::Updater>();
           u->setHardwareID(param->hardware_id);
           updaters_[param->hardware_id] = u;
+          hardware_ids_.push_back(param->hardware_id);
         }
 
         ROS_ASSERT(updaters_.size() > 0);
