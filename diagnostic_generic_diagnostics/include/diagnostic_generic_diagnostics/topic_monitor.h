@@ -11,7 +11,12 @@ namespace diagnostic_generic_diagnostics
 struct TopicStatusParam
 {
   TopicStatusParam()
-    : topic(""), hardware_id(""), custom_msg(""), headerless(false), fparam(&this->freq.min, &this->freq.max), tparam()
+    : topic("")
+    , hardware_id("anonymous")
+    , custom_msg("")
+    , headerless(false)
+    , fparam(&this->freq.min, &this->freq.max)
+    , tparam()
   {
     freq.max = 0.0;
     freq.min = 0.0;
@@ -94,14 +99,12 @@ private:
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
                                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
   {
-    ROS_DEBUG("cb invoked");
     task->tick();
   }
 
   void topicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> & msg,
                      std::shared_ptr<diagnostic_updater::TopicDiagnostic> task)
   {
-    ROS_DEBUG("cb invoked");
     task->tick(ros::Time::now());
   }
 
@@ -110,7 +113,7 @@ private:
     ROS_DEBUG_THROTTLE(1, "cb invoked");
     for(const auto &updater : updaters_)
     {
-      updater->update();
+      updater.second->update();
     }
   }
 
@@ -131,13 +134,14 @@ public:
       {
         params_.push_back(param);
 
-        if(updaters_.find(param->hardware_id) != updaters_.end())
+        if(updaters_.find(param->hardware_id) == updaters_.end())
         {
           auto u = std::make_shared<diagnostic_updater::Updater>();
           u->setHardwareID(param->hardware_id);
           updaters_[param->hardware_id] = u;
         }
 
+        ROS_ASSERT(updaters_.size() > 0);
         auto itr = updaters_.find(param->hardware_id);
         ROS_ASSERT(itr != updaters_.end());
         auto updater = itr->second;
