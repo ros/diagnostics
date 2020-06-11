@@ -112,7 +112,8 @@ private:
   void timerCallback(const ros::TimerEvent &e)
   {
     static int cb_count = 0;
-    ROS_DEBUG_THROTTLE(0.1, "cb invoked: %d", cb_count);
+    //ROS_DEBUG_THROTTLE(0.1, "cb invoked: %d", cb_count);
+    ROS_DEBUG("cb invoked: %d, %s", cb_count, hardware_ids_[cb_count]);
     updaters_[hardware_ids_[cb_count]]->update();
     cb_count = (cb_count + 1) % updaters_.size();
   }
