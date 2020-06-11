@@ -1,4 +1,6 @@
 
+#include <unordered_map>
+
 #include <ros/ros.h>
 #include <topic_tools/shape_shifter.h>
 #include "diagnostic_updater/update_functions.h"
@@ -83,11 +85,11 @@ using TopicStatusParamPtr = std::shared_ptr<TopicStatusParam>;
 class TopicMonitor
 {
 private:
-  ros::NodeHandle                  nh_, pnh_;
-  ros::Timer                       timer_;
-  std::vector<ros::Subscriber>     subs_;
-  std::vector<UpdaterPtr>          updaters_;
-  std::vector<TopicStatusParamPtr> params_;
+  ros::NodeHandle                             nh_, pnh_;
+  ros::Timer                                  timer_;
+  std::vector<ros::Subscriber>                subs_;
+  std::unordered_map<std::string, UpdaterPtr> updaters_;
+  std::vector<TopicStatusParamPtr>            params_;
 
   void headerlessTopicCallback(const ros::MessageEvent<topic_tools::ShapeShifter> &           msg,
                                std::shared_ptr<diagnostic_updater::HeaderlessTopicDiagnostic> task)
@@ -129,9 +131,16 @@ public:
       {
         params_.push_back(param);
 
-        auto updater = std::make_shared<diagnostic_updater::Updater>();
-        updater->setHardwareID(param->hardware_id);
-        updaters_.push_back(updater);
+        if(updaters_.find(param->hardware_id) != updaters_.end())
+        {
+          auto u = std::make_shared<diagnostic_updater::Updater>();
+          u->setHardwareID(param->hardware_id);
+          updaters_[param->hardware_id] = u;
+        }
+
+        auto itr = updaters_.find(param->hardware_id);
+        ROS_ASSERT(itr != updaters_.end());
+        auto updater = itr->second;
 
         ros::Subscriber sub;
         if(param->headerless)
@@ -157,7 +166,10 @@ public:
         subs_.push_back(sub);
       }
     }
-    timer_ = nh_.createTimer(ros::Duration(0.5), &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
+    auto num_updaters = updaters_.size();
+    ROS_ASSERT(num_updaters > 0);
+    timer_ = nh_.createTimer(ros::Duration(0.1 / static_cast<double>(num_updaters)),
+                             &diagnostic_generic_diagnostics::TopicMonitor::timerCallback, this);
   }
 };
 
