@@ -176,21 +176,23 @@ namespace diagnostic_updater
         times_[hist_indx_] = curtime;
         hist_indx_ = (hist_indx_ + 1) % params_.window_size_;
 
+        using diagnostic_msgs::DiagnosticStatus;
+
         if (events == 0)
         {
-          stat.summary(2, "No events recorded.");
+          stat.summary(DiagnosticStatus::ERROR, "No events recorded.");
         }
         else if (freq < *params_.min_freq_ * (1 - params_.tolerance_))
         {
-          stat.summary(1, "Frequency too low.");
+          stat.summary(DiagnosticStatus::WARN, "Frequency too low.");
         }
         else if (freq > *params_.max_freq_ * (1 + params_.tolerance_))
         {
-          stat.summary(1, "Frequency too high.");
+          stat.summary(DiagnosticStatus::WARN, "Frequency too high.");
         }
         else
         {
-          stat.summary(0, "Desired frequency met");
+          stat.summary(DiagnosticStatus::OK, "Desired frequency met");
         }
 
         stat.addf("Events in window", "%d", events);
@@ -354,28 +356,30 @@ namespace diagnostic_updater
       {
         boost::mutex::scoped_lock lock(lock_);
 
-        stat.summary(0, "Timestamps are reasonable.");
+        using diagnostic_msgs::DiagnosticStatus;
+        
+        stat.summary(DiagnosticStatus::OK, "Timestamps are reasonable.");
         if (!deltas_valid_)
         {
-          stat.summary(1, "No data since last update.");
+          stat.summary(DiagnosticStatus::WARN, "No data since last update.");
         }
         else
         {
           if (min_delta_ < params_.min_acceptable_)
           {
-            stat.summary(2, "Timestamps too far in future seen.");
+            stat.summary(DiagnosticStatus::ERROR, "Timestamps too far in future seen.");
             early_count_++;
           }
 
           if (max_delta_ > params_.max_acceptable_)
           {
-            stat.summary(2, "Timestamps too far in past seen.");
+            stat.summary(DiagnosticStatus::ERROR, "Timestamps too far in past seen.");
             late_count_++;
           }
 
           if (zero_seen_)
           {
-            stat.summary(2, "Zero timestamp seen.");
+            stat.summary(DiagnosticStatus::ERROR, "Zero timestamp seen.");
             zero_count_++;
           }
         }

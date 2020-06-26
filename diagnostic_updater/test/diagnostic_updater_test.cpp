@@ -170,11 +170,13 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   fs.clear();
   fs.run(stat[4]); // Should be good, just cleared it.
 
-  EXPECT_EQ(1, stat[0].level) << "max frequency exceeded but not reported";
-  EXPECT_EQ(0, stat[1].level) << "within max frequency but reported error";
-  EXPECT_EQ(0, stat[2].level) << "within min frequency but reported error";
-  EXPECT_EQ(1, stat[3].level) << "min frequency exceeded but not reported";
-  EXPECT_EQ(2, stat[4].level) << "freshly cleared should fail";
+  using diagnostic_msgs::DiagnosticStatus;
+
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[0].level) << "max frequency exceeded but not reported";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[1].level) << "within max frequency but reported error";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[2].level) << "within min frequency but reported error";
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[3].level) << "min frequency exceeded but not reported";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[4].level) << "freshly cleared should fail";
   EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by FrequencyStatus";
   EXPECT_STREQ("Frequency Status", fs.getName().c_str()) << "Name should be \"Frequency Status\"";
 }
@@ -197,12 +199,14 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
   ts.run(stat[3]);
   ts.tick(time.toSec() - 6);
   ts.run(stat[4]);
- 
-  EXPECT_EQ(1, stat[0].level) << "no data should return a warning";
-  EXPECT_EQ(2, stat[1].level) << "too far future not reported";
-  EXPECT_EQ(0, stat[2].level) << "now not accepted";
-  EXPECT_EQ(0, stat[3].level) << "4 seconds ago not accepted";
-  EXPECT_EQ(2, stat[4].level) << "too far past not reported";
+
+  using diagnostic_msgs::DiagnosticStatus;
+
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[0].level) << "no data should return a warning";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[1].level) << "too far future not reported";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[2].level) << "now not accepted";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[3].level) << "4 seconds ago not accepted";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[4].level) << "too far past not reported";
   EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by TimeStapmStatus";
   EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) << "Name should be \"Timestamp Status\"";
 }
