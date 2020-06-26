@@ -181,6 +181,54 @@ TEST(DiagnosticUpdater, testFrequencyStatus)
   EXPECT_STREQ("Frequency Status", fs.getName().c_str()) << "Name should be \"Frequency Status\"";
 }
 
+TEST(DiagnosticUpdater, testSlowFrequencyStatus)
+{
+  // We have a slow topic (~0.5 Hz) and call the run() method once a second. This ensures that if the window size
+  // is large enough (longer than 1/min_frequency * duration_between_run_calls), the diagnostics correctly reports
+  // the frequency status even in time windows where no ticks happened.
+
+  double minFreq = 0.25;
+  double maxFreq = 0.75;
+
+  ros::Time::init();
+  ros::Time time(0, 0);
+  ros::Time::setNow(time);
+
+  FrequencyStatus fs(FrequencyStatusParam(&minFreq, &maxFreq, 0.0, 5));
+
+  DiagnosticStatusWrapper stat[8];
+  fs.tick();
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[0]); // too high, 1 event in 1 sec window
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[1]); // ok, 1 event in 2 sec window
+  fs.tick();
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[2]); // ok, 2 events in 3 sec window
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[3]); // ok, 2 events in 4 sec window
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[4]); // ok, 2 events in 5 sec window
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[5]); // too low, 1 event in 5 sec window (first tick went out of window)
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[6]); // too low, 1 event in 5 sec window (first tick went out of window)
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+  fs.run(stat[7]); // no events (second tick went out of window)
+  time += ros::Duration(1, 0); ros::Time::setNow(time);
+
+  using diagnostic_msgs::DiagnosticStatus;
+
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[0].level) << "max frequency exceeded but not reported";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[1].level) << "within frequency limits but reported error";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[2].level) << "within frequency limits but reported error";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[3].level) << "within frequency limits but reported error";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[4].level) << "within frequency limits but reported error";
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[5].level) << "min frequency exceeded but not reported";
+  EXPECT_EQ(DiagnosticStatus::WARN, stat[6].level) << "min frequency exceeded but not reported";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[7].level) << "no events should fail";
+}
+
 TEST(DiagnosticUpdater, testTimeStampStatus)
 {
   ros::Time::init();
@@ -209,6 +257,48 @@ TEST(DiagnosticUpdater, testTimeStampStatus)
   EXPECT_EQ(DiagnosticStatus::ERROR, stat[4].level) << "too far past not reported";
   EXPECT_STREQ("", stat[0].name.c_str()) << "Name should not be set by TimeStapmStatus";
   EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) << "Name should be \"Timestamp Status\"";
+}
+
+TEST(DiagnosticUpdater, testSlowTimeStampStatus)
+{
+  // We have a slow topic (< 1 Hz) and call the run() method once a second. If we set the no_data_is_problem parameter
+  // to false, updates without data should not generate a warning but should be treated as ok.
+
+  ros::Time::init();
+  ros::Time time(1, 0);
+  ros::Time::setNow(time);
+
+  TimeStampStatus ts(TimeStampStatusParam(-1, 5, false));
+
+  DiagnosticStatusWrapper stat[11];
+  ts.run(stat[0]); // no events
+  ts.tick(time.toSec() + 2);
+  ts.run(stat[1]);
+  ts.run(stat[2]);
+  ts.tick(time.toSec() - 4);
+  ts.run(stat[3]);
+  ts.run(stat[4]);
+  ts.run(stat[5]);
+  ts.run(stat[6]);
+  ts.tick(time.toSec() - 6);
+  ts.run(stat[7]);
+  ts.run(stat[8]);
+  ts.run(stat[9]);
+  ts.run(stat[10]);
+
+  using diagnostic_msgs::DiagnosticStatus;
+
+  EXPECT_EQ(DiagnosticStatus::OK, stat[0].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[1].level) << "too far future not reported";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[2].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[3].level) << "4 seconds ago not accepted";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[4].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[5].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[6].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::ERROR, stat[7].level) << "too far past not reported";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[8].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[9].level) << "no data should be ok";
+  EXPECT_EQ(DiagnosticStatus::OK, stat[10].level) << "no data should be ok";
 }
 
 int main(int argc, char **argv){

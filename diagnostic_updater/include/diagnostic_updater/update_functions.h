@@ -227,7 +227,11 @@ namespace diagnostic_updater
      */
 
     TimeStampStatusParam(const double min_acceptable = -1, const double max_acceptable = 5) :
-      max_acceptable_(max_acceptable), min_acceptable_(min_acceptable)
+      max_acceptable_(max_acceptable), min_acceptable_(min_acceptable), no_data_is_problem_(true)
+    {}
+
+    TimeStampStatusParam(const double min_acceptable, const double max_acceptable, const bool no_data_is_problem) :
+      max_acceptable_(max_acceptable), min_acceptable_(min_acceptable), no_data_is_problem_(no_data_is_problem)
     {}
 
     /**
@@ -242,6 +246,10 @@ namespace diagnostic_updater
 
     double min_acceptable_;
 
+    /**
+     * \brief Whether to report a warning when no data arrived since last update.
+     */
+    bool no_data_is_problem_;
   };
 
   /**
@@ -361,7 +369,11 @@ namespace diagnostic_updater
         stat.summary(DiagnosticStatus::OK, "Timestamps are reasonable.");
         if (!deltas_valid_)
         {
-          stat.summary(DiagnosticStatus::WARN, "No data since last update.");
+          const auto status = params_.no_data_is_problem_ ? DiagnosticStatus::WARN : DiagnosticStatus::OK;
+          stat.summary(status, "No data since last update.");
+
+          stat.add("Earliest timestamp delay:", "No data");
+          stat.add("Latest timestamp delay:", "No data");
         }
         else
         {
@@ -382,10 +394,11 @@ namespace diagnostic_updater
             stat.summary(DiagnosticStatus::ERROR, "Zero timestamp seen.");
             zero_count_++;
           }
+
+          stat.addf("Earliest timestamp delay:", "%f", min_delta_);
+          stat.addf("Latest timestamp delay:", "%f", max_delta_);
         }
 
-        stat.addf("Earliest timestamp delay:", "%f", min_delta_);
-        stat.addf("Latest timestamp delay:", "%f", max_delta_);
         stat.addf("Earliest acceptable timestamp delay:", "%f", params_.min_acceptable_);
         stat.addf("Latest acceptable timestamp delay:", "%f", params_.max_acceptable_);
         stat.add("Late diagnostic update count:", late_count_);
