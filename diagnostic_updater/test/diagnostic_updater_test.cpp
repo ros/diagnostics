@@ -268,7 +268,7 @@ TEST(DiagnosticUpdater, testSlowTimeStampStatus)
   ros::Time time(1, 0);
   ros::Time::setNow(time);
 
-  TimeStampStatus ts(TimeStampStatusParam(-1, 5, false));
+  SlowTimeStampStatus ts(TimeStampStatusParam(-1, 5));
 
   DiagnosticStatusWrapper stat[11];
   ts.run(stat[0]); // no events
