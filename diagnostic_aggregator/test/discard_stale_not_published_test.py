@@ -88,6 +88,7 @@ class TestDiscardStale(unittest.TestCase):
                                                  "Received diagnostics: {}".format(expecteds))
         self.assert_(expecteds['nonexistent2'].level == DiagnosticStatus.WARN)
 
+        self._start_time = rospy.get_time()
         duration = 8
         # waiting a bit more than 5 seconds for the messages to become stale
         while not rospy.is_shutdown():
@@ -104,7 +105,8 @@ class TestDiscardStale(unittest.TestCase):
             self.assert_(self._agg_expecteds[0].level == DiagnosticStatus.STALE,
                          "The level of the first aggregated message should be stale!")
 
-        duration = 15
+        self._start_time = rospy.get_time()
+        duration = 8
         # waiting a bit more than 5 seconds for the timeout of the aggregator to kick in
         while not rospy.is_shutdown():
             sleep(1.0)
