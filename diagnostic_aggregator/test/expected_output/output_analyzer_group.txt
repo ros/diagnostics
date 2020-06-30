@@ -1,0 +1,12 @@
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01/Primary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01/Secondary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01/Primary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01/Secondary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/TEST/Group01', message='Stale'

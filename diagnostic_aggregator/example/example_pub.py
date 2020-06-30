@@ -39,9 +39,9 @@
 
 from random import random
 
-import rclpy
-
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+
+import rclpy
 from rclpy.clock import ROSClock
 from rclpy.node import Node
 from rclpy.qos import qos_profile_system_default
@@ -67,17 +67,17 @@ class DiagnosticTalker(Node):
             DiagnosticStatus(level=DiagnosticStatus.OK, name='/arms/right/motor', message='OK'),
             DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/left/motor', message='OK'),
             DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/right/motor', message='OK'),
-            
+
             # Sensors
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/left/camera', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/right/camera', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/front/camera', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/rear/camera', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/left/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/right/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/front/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/rear/cam', message='OK'),
             ]
 
     def timer_callback(self):
         self.array.header.stamp = ROSClock().now().to_msg()
-        
+
         # Random diagnostics status
         level = random()
         self.array.status[1].level = DiagnosticStatus.OK
@@ -95,7 +95,7 @@ class DiagnosticTalker(Node):
         if level > .95:
             self.array.status[4].level = DiagnosticStatus.ERROR
             self.array.status[4].message = 'Error'
-        
+
         self.pub.publish(self.array)
 
 
