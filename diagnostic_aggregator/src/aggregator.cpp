@@ -154,10 +154,10 @@ void Aggregator::publishData()
 {
   RCLCPP_DEBUG(logger_, "publishData()");
   diagnostic_msgs::msg::DiagnosticArray diag_array;
-
   diagnostic_msgs::msg::DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
-  diag_toplevel_state.level = -1;
+  diag_toplevel_state.level = 3;  // default to stale
+  int max_level = -1;
   int min_level = 255;
 
   std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
@@ -168,8 +168,8 @@ void Aggregator::publishData()
   for (const auto & msg : processed) {
     diag_array.status.push_back(*msg);
 
-    if (msg->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = msg->level;
+    if (msg->level > max_level) {
+      max_level = msg->level;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
@@ -181,8 +181,8 @@ void Aggregator::publishData()
   for (const auto & msg : processed_other) {
     diag_array.status.push_back(*msg);
 
-    if (msg->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = msg->level;
+    if (msg->level > max_level) {
+      max_level = msg->level;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
@@ -190,14 +190,14 @@ void Aggregator::publishData()
   }
 
   diag_array.header.stamp = clock_->now();
-
   agg_pub_->publish(diag_array);
 
-  // Top level is error if we have stale items, unless all stale
-  if (diag_toplevel_state.level > 2 && min_level <= 2) {
+  diag_toplevel_state.level = max_level;
+  if (max_level < 0 || (max_level > 2 && min_level <= 2)) {
+    // Top level is error if we got no diagnostic level or
+    // have stale items but not all are stale
     diag_toplevel_state.level = 2;
   }
-
   toplevel_state_pub_->publish(diag_toplevel_state);
 }
 
