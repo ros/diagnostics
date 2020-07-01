@@ -1,0 +1,8 @@
+diagnostic_msgs.msg.DiagnosticStatus
+Primary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+Secondary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+Primary', message='Stale'
+diagnostic_msgs.msg.DiagnosticStatus
+Secondary', message='Stale'

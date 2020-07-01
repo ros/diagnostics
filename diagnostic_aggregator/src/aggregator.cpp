@@ -49,6 +49,9 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
+using diagnostic_msgs::msg::DiagnosticArray;
+using diagnostic_msgs::msg::DiagnosticStatus;
+
 /**
  * @todo(anordman): make aggregator a lifecycle node.
  */
@@ -93,14 +96,14 @@ Aggregator::Aggregator()
   other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
   other_analyzer_->init(base_path_);  // This always returns true
 
-  diag_sub_ = n_->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
+  diag_sub_ = n_->create_subscription<DiagnosticArray>(
     "/diagnostics", rclcpp::SystemDefaultsQoS(), std::bind(&Aggregator::diagCallback, this, _1));
-  agg_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg", 1);
+  agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ =
-    n_->create_publisher<diagnostic_msgs::msg::DiagnosticStatus>("/diagnostics_toplevel_state", 1);
+    n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 }
 
-void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
+void Aggregator::checkTimestamp(const DiagnosticArray::SharedPtr diag_msg)
 {
   RCLCPP_DEBUG(logger_, "checkTimestamp()");
   if (diag_msg->header.stamp.sec != 0) {
@@ -108,7 +111,7 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::Sha
   }
 
   std::string stamp_warn = "No timestamp set for diagnostic message. Message names: ";
-  std::vector<diagnostic_msgs::msg::DiagnosticStatus>::const_iterator it;
+  std::vector<DiagnosticStatus>::const_iterator it;
   for (it = diag_msg->status.begin(); it != diag_msg->status.end(); ++it) {
     if (it != diag_msg->status.begin()) {
       stamp_warn += ", ";
@@ -122,7 +125,7 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::Sha
   }
 }
 
-void Aggregator::diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
+void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
 {
   RCLCPP_DEBUG(logger_, "diagCallback()");
   checkTimestamp(diag_msg);
@@ -153,14 +156,14 @@ Aggregator::~Aggregator()
 void Aggregator::publishData()
 {
   RCLCPP_DEBUG(logger_, "publishData()");
-  diagnostic_msgs::msg::DiagnosticArray diag_array;
-
-  diagnostic_msgs::msg::DiagnosticStatus diag_toplevel_state;
+  DiagnosticArray diag_array;
+  DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
-  diag_toplevel_state.level = -1;
+  diag_toplevel_state.level = DiagnosticStatus::STALE;
+  int max_level = -1;
   int min_level = 255;
 
-  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
+  std::vector<std::shared_ptr<DiagnosticStatus>> processed;
   {
     std::lock_guard<std::mutex> lock(mutex_);
     processed = analyzer_group_->report();
@@ -168,21 +171,21 @@ void Aggregator::publishData()
   for (const auto & msg : processed) {
     diag_array.status.push_back(*msg);
 
-    if (msg->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = msg->level;
+    if (msg->level > max_level) {
+      max_level = msg->level;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
     }
   }
 
-  std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed_other =
+  std::vector<std::shared_ptr<DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (const auto & msg : processed_other) {
     diag_array.status.push_back(*msg);
 
-    if (msg->level > diag_toplevel_state.level) {
-      diag_toplevel_state.level = msg->level;
+    if (msg->level > max_level) {
+      max_level = msg->level;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
@@ -190,14 +193,16 @@ void Aggregator::publishData()
   }
 
   diag_array.header.stamp = clock_->now();
-
   agg_pub_->publish(diag_array);
 
-  // Top level is error if we have stale items, unless all stale
-  if (diag_toplevel_state.level > 2 && min_level <= 2) {
-    diag_toplevel_state.level = 2;
+  diag_toplevel_state.level = max_level;
+  if (max_level < 0 ||
+    (max_level > DiagnosticStatus::ERROR && min_level <= DiagnosticStatus::ERROR))
+  {
+    // Top level is error if we got no diagnostic level or
+    // have stale items but not all are stale
+    diag_toplevel_state.level = DiagnosticStatus::ERROR;
   }
-
   toplevel_state_pub_->publish(diag_toplevel_state);
 }
 

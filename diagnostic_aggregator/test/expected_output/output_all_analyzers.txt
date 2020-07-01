@@ -1,0 +1,8 @@
+diagnostic_msgs.msg.DiagnosticStatus
+name='/BASIC/First/expected1c', message='Missing'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/BASIC/First/expected1d', message='Missing'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/BASIC/First/expected1c', message='Missing'
+diagnostic_msgs.msg.DiagnosticStatus
+name='/BASIC/First/expected1d', message='Missing'

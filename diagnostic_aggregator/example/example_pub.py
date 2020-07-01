@@ -37,6 +37,8 @@
 # \author Kevin Watts
 # \brief Publishes diagnostic messages for diagnostic aggregator unit test
 
+from random import random
+
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 import rclpy
@@ -60,37 +62,40 @@ class DiagnosticTalker(Node):
 
         self.array = DiagnosticArray()
         self.array.status = [
-            # GenericAnalyzer prefix1
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='pref1a', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.WARN, name='pref1b', message='Warning'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='contains1a', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: contains1b', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='name1', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1a', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1b', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1c', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='prefix1: expected1d', message='OK'),
-            DiagnosticStatus(
-                level=DiagnosticStatus.OK,
-                name='find1_items: find_remove1a',
-                message='OK'),
-            DiagnosticStatus(
-                level=DiagnosticStatus.OK,
-                name='find1_items: find_remove1b',
-                message='OK'),
+            # Motors
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/arms/left/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/arms/right/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/left/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/right/motor', message='OK'),
 
-            # GenericAnalyzer prefix2
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='contain2a', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='contain2b', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='name2', message='OK'),
-
-            # OtherAnalyzer for Other
-            DiagnosticStatus(level=DiagnosticStatus.ERROR, name='other1', message='Error'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='other2', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='other3', message='OK')]
+            # Sensors
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/left/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/right/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/front/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/rear/cam', message='OK'),
+            ]
 
     def timer_callback(self):
         self.array.header.stamp = ROSClock().now().to_msg()
+
+        # Random diagnostics status
+        level = random()
+        self.array.status[1].level = DiagnosticStatus.OK
+        self.array.status[1].message = 'OK'
+        self.array.status[3].level = DiagnosticStatus.OK
+        self.array.status[3].message = 'OK'
+        self.array.status[4].level = DiagnosticStatus.OK
+        self.array.status[4].message = 'OK'
+        if level > .5:
+            self.array.status[1].level = DiagnosticStatus.WARN
+            self.array.status[1].message = 'Warning'
+        if level > .7:
+            self.array.status[3].level = DiagnosticStatus.WARN
+            self.array.status[3].message = 'Warning'
+        if level > .95:
+            self.array.status[4].level = DiagnosticStatus.ERROR
+            self.array.status[4].message = 'Error'
+
         self.pub.publish(self.array)
 
 
