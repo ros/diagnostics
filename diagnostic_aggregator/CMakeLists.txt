@@ -74,12 +74,13 @@ if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   find_package(launch_testing_ament_cmake REQUIRED)
 
+  file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
   set(create_analyzers_tests
     "primitive_analyzers"
     "all_analyzers"
     "analyzer_group")
   foreach(test_name ${create_analyzers_tests})
-    file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
 
@@ -101,9 +102,7 @@ if(BUILD_TESTING)
     "all_analyzers"
     "analyzer_group")
   foreach(test_name ${create_analyzers_tests})
-    file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_${test_name}" EXPECTED_OUTPUT)
 
     configure_file(
