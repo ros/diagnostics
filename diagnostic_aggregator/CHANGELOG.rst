@@ -7,8 +7,8 @@ Changelog for package diagnostic_aggregator
 * Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
 * Contributors: Arne Nordmann, Robin Vanhove, Karsten Knese
 
-Forthcoming
------------
+2.0.3 (2020-07-09)
+------------------
 * restore alphabetical order (`#148 <https://github.com/ros/diagnostics/issues/148>`_) (`#150 <https://github.com/ros/diagnostics/issues/150>`_)
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
 * Fixes toplevel diagnostic status calculation (`#149 <https://github.com/ros/diagnostics/issues/149>`_)
