@@ -51,7 +51,7 @@ class CpuTask(DiagnosticTask):
 
     def _get_average_reading(self):
         def avg(lst):
-            return float(sum(lst)) / len(lst)
+            return float(sum(lst)) / len(lst) if lst else float('nan')
 
         return [avg(cpu_percentages) for cpu_percentages in zip(*self._readings)]
 
