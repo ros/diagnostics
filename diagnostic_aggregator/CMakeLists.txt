@@ -145,7 +145,7 @@ install( # launch descriptor
   DESTINATION share/${PROJECT_NAME}
 )
 install( # example publisher
-  FILES example/example_pub.py
+  PROGRAMS example/example_pub.py
   DESTINATION lib/${PROJECT_NAME}
 )
 install( # example aggregator configration
