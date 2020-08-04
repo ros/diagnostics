@@ -5,7 +5,7 @@ on:
 jobs:
   ament_xmllint:
     name: ament_xmllint
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
     - uses: ros-tooling/setup-ros@0.0.13
@@ -16,7 +16,7 @@ jobs:
 
   ament_lint_cpp:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -31,7 +31,7 @@ jobs:
 
   ament_lint_py:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
