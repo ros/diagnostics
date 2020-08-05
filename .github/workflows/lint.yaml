@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@0.0.13
-    - uses: ros-tooling/action-ros-lint@0.0.5
+    - uses: ros-tooling/setup-ros@0.0.23
+    - uses: ros-tooling/action-ros-ci@0.0.17
       with:
         linter: xmllint
         package-name: diagnostic_aggregator diagnostic_updater self_test
@@ -23,8 +23,8 @@ jobs:
           linter: [cppcheck, cpplint, uncrustify]
     steps:
     - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@0.0.13
-    - uses: ros-tooling/action-ros-lint@0.0.5
+    - uses: ros-tooling/setup-ros@0.0.23
+    - uses: ros-tooling/action-ros-ci@0.0.17
       with:
         linter: ${{ matrix.linter }}
         package-name: diagnostic_aggregator diagnostic_updater self_test
@@ -38,8 +38,8 @@ jobs:
         linter: [flake8, pep257]
     steps:
     - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@0.0.13
-    - uses: ros-tooling/action-ros-lint@0.0.5
+    - uses: ros-tooling/setup-ros@0.0.23
+    - uses: ros-tooling/action-ros-ci@0.0.17
       with:
         linter: ${{ matrix.linter }}
         package-name: diagnostic_aggregator diagnostic_updater self_test
