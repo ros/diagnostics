@@ -2,6 +2,9 @@
 Changelog for package diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.9.3 (2018-05-02)
 ------------------
 

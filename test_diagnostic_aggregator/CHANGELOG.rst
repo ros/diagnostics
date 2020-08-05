@@ -2,6 +2,9 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.9.3 (2018-05-02)
 ------------------
 

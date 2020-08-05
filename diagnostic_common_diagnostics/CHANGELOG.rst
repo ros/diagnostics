@@ -2,6 +2,11 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added feature of window averaging for cpu monitor
+* Contributors: Guglielmo Gemignani, Rein Appeldoorn
+
 1.9.3 (2018-05-02)
 ------------------
 
