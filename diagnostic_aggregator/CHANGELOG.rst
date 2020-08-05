@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.4 (2020-08-05)
+------------------
 * Fix installation of diagnostic aggregator example. (`#159 <https://github.com/ros/diagnostics/issues/159>`_) (`#160 <https://github.com/ros/diagnostics/issues/160>`_)
 * Contributors: Georg Bartels
 
