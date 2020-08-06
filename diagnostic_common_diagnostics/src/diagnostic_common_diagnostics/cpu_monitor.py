@@ -44,7 +44,7 @@ from diagnostic_updater import DiagnosticTask, Updater
 
 
 class CpuTask(DiagnosticTask):
-    def __init__(self, warning_percentage, window):
+    def __init__(self, warning_percentage, window=1):
         DiagnosticTask.__init__(self, "CPU Information")
         self._warning_percentage = int(warning_percentage)
         self._readings = collections.deque(maxlen=window)
