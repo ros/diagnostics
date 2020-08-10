@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.5 (2020-08-10)
+------------------
 * Update CMakeLists.txt to search for local gtest first
 * Fix copyright and remove unused imports
 * Improvement by using opertors instead of aliases (Closes `#95 <https://github.com/ros/diagnostics/issues/95>`_
