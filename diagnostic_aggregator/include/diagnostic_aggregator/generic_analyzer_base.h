@@ -90,8 +90,6 @@ public:
     nice_name_ = nice_name;
     path_ = path;
     discard_stale_ = discard_stale;
-    last_header_status_change_ = ros::Time::now();
-    last_header_level_ = 0;
 
     if (discard_stale_ && timeout <= 0)
     {
@@ -218,22 +216,6 @@ public:
         header_status->message = "No items found, expected " + expec.str();
     }
     
-    bool header_stale_timed_out = false;
-    if (timeout_ > 0 && last_header_level_ == 3)
-        header_stale_timed_out = (ros::Time::now() - last_header_status_change_).toSec() > timeout_;
-
-    if (last_header_level_ != header_status->level)
-    {
-      last_header_status_change_ = ros::Time::now();
-      last_header_level_ = header_status->level; // update the last header level
-    }
-
-    if (discard_stale_ && processed.size() == 1 && header_stale_timed_out)
-    {
-      std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > vec;
-      return vec;
-    }
-    
     return processed;
   }
 
@@ -271,9 +253,6 @@ private:
   std::map<std::string, boost::shared_ptr<StatusItem> > items_;
 
   bool discard_stale_, has_initialized_, has_warned_;
-  ros::Time last_header_status_change_; // last timestamp at which the header of the returned diagnostic msg array changed
-  int last_header_level_; // last level reported by the header of the returend diagnostic msg array
-
 };
 
 }
