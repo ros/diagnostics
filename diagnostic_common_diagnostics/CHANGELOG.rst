@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.0 (2020-08-11)
+-------------------
 * Add feature of window avereging for cpu monitor (`#153 <https://github.com/ros/diagnostics/issues/153>`_)
 * Make Guglielmo Gemignani ROS1 maintainer (`#155 <https://github.com/ros/diagnostics/issues/155>`_)
 * Contributors: Guglielmo Gemignani, Rein Appeldoorn, gemignani

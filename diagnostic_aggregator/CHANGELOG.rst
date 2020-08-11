@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.0 (2020-08-11)
+-------------------
 * Fixed Flaky Test (`#145 <https://github.com/ros/diagnostics/issues/145>`_)
 * Make Guglielmo Gemignani ROS1 maintainer (`#155 <https://github.com/ros/diagnostics/issues/155>`_)
 * Contributors: Guglielmo Gemignani, Martin Pecka
