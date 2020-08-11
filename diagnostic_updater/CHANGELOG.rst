@@ -2,6 +2,12 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Make Guglielmo Gemignani ROS1 maintainer (`#155 <https://github.com/ros/diagnostics/issues/155>`_)
+* Test build fix on Windows build. (`#8 <https://github.com/ros/diagnostics/issues/8>`_) (`#138 <https://github.com/ros/diagnostics/issues/138>`_)
+* Contributors: Guglielmo Gemignani, Sean Yen
+
 1.9.4 (2020-04-01)
 ------------------
 * noetic release (`#136 <https://github.com/ros/diagnostics/issues/136>`_)

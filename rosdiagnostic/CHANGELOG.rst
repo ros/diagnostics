@@ -2,6 +2,9 @@
 Changelog for package rosdiagnostic
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.9.4 (2020-04-01)
 ------------------
 * noetic release (`#136 <https://github.com/ros/diagnostics/issues/136>`_)
