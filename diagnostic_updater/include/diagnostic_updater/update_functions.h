@@ -171,7 +171,11 @@ namespace diagnostic_updater
         int curseq = count_;
         int events = curseq - seq_nums_[hist_indx_];
         double window = (curtime - times_[hist_indx_]).toSec();
-        double freq = events / window;
+
+        if (window != 0)
+        {
+            double freq = events / window;
+        }
         seq_nums_[hist_indx_] = curseq;
         times_[hist_indx_] = curtime;
         hist_indx_ = (hist_indx_ + 1) % params_.window_size_;
@@ -182,15 +186,15 @@ namespace diagnostic_updater
         {
           stat.summary(DiagnosticStatus::ERROR, "No events recorded.");
         }
-        else if (freq < *params_.min_freq_ * (1 - params_.tolerance_))
+        else if (window != 0 && freq < *params_.min_freq_ * (1 - params_.tolerance_))
         {
           stat.summary(DiagnosticStatus::WARN, "Frequency too low.");
         }
-        else if (freq > *params_.max_freq_ * (1 + params_.tolerance_))
+        else if (window != 0 && freq > *params_.max_freq_ * (1 + params_.tolerance_))
         {
           stat.summary(DiagnosticStatus::WARN, "Frequency too high.");
         }
-        else
+        else if (window != 0)
         {
           stat.summary(DiagnosticStatus::OK, "Desired frequency met");
         }
@@ -198,7 +202,10 @@ namespace diagnostic_updater
         stat.addf("Events in window", "%d", events);
         stat.addf("Events since startup", "%d", count_);
         stat.addf("Duration of window (s)", "%f", window);
-        stat.addf("Actual frequency (Hz)", "%f",freq);
+        
+        if (window != 0) {
+            stat.addf("Actual frequency (Hz)", "%f",freq);
+        } 
         if (*params_.min_freq_ == *params_.max_freq_)
           stat.addf("Target frequency (Hz)", "%f",*params_.min_freq_);
         if (*params_.min_freq_ > 0)
