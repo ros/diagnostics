@@ -457,6 +457,6 @@ namespace diagnostic_updater
       stat.summary(0, "Alive");
     }
   };
-};
+}
 
 #endif

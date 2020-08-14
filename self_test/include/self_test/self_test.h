@@ -203,6 +203,6 @@ namespace self_test
 
       }
   };
-};
+}
 
 #endif
