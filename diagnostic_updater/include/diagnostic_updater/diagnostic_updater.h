@@ -586,6 +586,6 @@ namespace diagnostic_updater
       bool warn_nohwid_done_;
   };
 
-};
+}
 
 #endif
