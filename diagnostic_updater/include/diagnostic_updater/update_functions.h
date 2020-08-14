@@ -203,11 +203,7 @@ namespace diagnostic_updater
           stat.addf("Minimum acceptable frequency (Hz)", "%f",
               *params_.min_freq_ * (1 - params_.tolerance_));
 
-#ifdef _WIN32
-        if (isfinite(*params_.max_freq_))
-#else
-        if (finite(*params_.max_freq_))
-#endif
+        if (std::isfinite(*params_.max_freq_))
           stat.addf("Maximum acceptable frequency (Hz)", "%f",
               *params_.max_freq_ * (1 + params_.tolerance_));
       }
