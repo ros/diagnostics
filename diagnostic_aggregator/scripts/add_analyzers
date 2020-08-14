@@ -48,6 +48,7 @@ class AddAnalyzers:
         self.bond = bondpy.Bond("/diagnostics_agg/bond" + self.namespace,
                                 self.namespace,
                                 on_broken=self.bond_broken)
+        self.bond.set_connect_timeout(rospy.Duration(120))
 
         try:
             rospy.wait_for_service('/diagnostics_agg/add_diagnostics', timeout=args.timeout)
