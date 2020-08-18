@@ -180,21 +180,23 @@ namespace diagnostic_updater
         times_[hist_indx_] = curtime;
         hist_indx_ = (hist_indx_ + 1) % params_.window_size_;
 
+        using diagnostic_msgs::DiagnosticStatus;
+
         if (events == 0)
         {
-          stat.summary(2, "No events recorded.");
+          stat.summary(DiagnosticStatus::ERROR, "No events recorded.");
         }
         else if (window != 0 && freq < *params_.min_freq_ * (1 - params_.tolerance_))
         {
-          stat.summary(1, "Frequency too low.");
+          stat.summary(DiagnosticStatus::WARN, "Frequency too low.");
         }
         else if (window != 0 && freq > *params_.max_freq_ * (1 + params_.tolerance_))
         {
-          stat.summary(1, "Frequency too high.");
+          stat.summary(DiagnosticStatus::WARN, "Frequency too high.");
         }
         else if (window != 0)
         {
-          stat.summary(0, "Desired frequency met");
+          stat.summary(DiagnosticStatus::OK, "Desired frequency met");
         }
 
         stat.addf("Events in window", "%d", events);
@@ -242,7 +244,6 @@ namespace diagnostic_updater
      */
 
     double min_acceptable_;
-
   };
 
   /**
@@ -353,49 +354,7 @@ namespace diagnostic_updater
         tick(t.toSec());
       }
 
-      virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat)
-      {
-        boost::mutex::scoped_lock lock(lock_);
-
-        stat.summary(0, "Timestamps are reasonable.");
-        if (!deltas_valid_)
-        {
-          stat.summary(1, "No data since last update.");
-        }
-        else
-        {
-          if (min_delta_ < params_.min_acceptable_)
-          {
-            stat.summary(2, "Timestamps too far in future seen.");
-            early_count_++;
-          }
-
-          if (max_delta_ > params_.max_acceptable_)
-          {
-            stat.summary(2, "Timestamps too far in past seen.");
-            late_count_++;
-          }
-
-          if (zero_seen_)
-          {
-            stat.summary(2, "Zero timestamp seen.");
-            zero_count_++;
-          }
-        }
-
-        stat.addf("Earliest timestamp delay", "%f", min_delta_);
-        stat.addf("Latest timestamp delay", "%f", max_delta_);
-        stat.addf("Earliest acceptable timestamp delay", "%f", params_.min_acceptable_);
-        stat.addf("Latest acceptable timestamp delay", "%f", params_.max_acceptable_);
-        stat.add("Late diagnostic update count", late_count_);
-        stat.add("Early diagnostic update count", early_count_);
-        stat.add("Zero seen diagnostic update count", zero_count_);
-
-        deltas_valid_ = false;
-        min_delta_ = 0;
-        max_delta_ = 0;
-        zero_seen_ = false;
-      }
+      virtual void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
     private:
       TimeStampStatusParam params_;
@@ -408,6 +367,77 @@ namespace diagnostic_updater
       bool deltas_valid_;
       boost::mutex lock_;
   };
+
+  /**
+   * A TimeStampStatus task that doesn't report periods with no data as a warning. This comes handy if the diagnosed
+   * topic has lower frequency than the diagnostic period.
+   */
+  class SlowTimeStampStatus : public TimeStampStatus
+  {
+    public:
+      SlowTimeStampStatus(const TimeStampStatusParam& params, const std::string& name) : TimeStampStatus(params, name)
+      {}
+
+      SlowTimeStampStatus(const TimeStampStatusParam& params) : TimeStampStatus(params)
+      {}
+
+      SlowTimeStampStatus()
+      {}
+  };
+
+  void TimeStampStatus::run(DiagnosticStatusWrapper& stat)
+  {
+    boost::mutex::scoped_lock lock(lock_);
+
+    using diagnostic_msgs::DiagnosticStatus;
+
+    stat.summary(DiagnosticStatus::OK, "Timestamps are reasonable.");
+    if (!deltas_valid_)
+    {
+      const auto no_data_is_problem = dynamic_cast<SlowTimeStampStatus*>(this) == nullptr;
+      const auto status = no_data_is_problem ? DiagnosticStatus::WARN : DiagnosticStatus::OK;
+      stat.summary(status, "No data since last update.");
+
+      stat.add("Earliest timestamp delay:", "No data");
+      stat.add("Latest timestamp delay:", "No data");
+    }
+    else
+    {
+      if (min_delta_ < params_.min_acceptable_)
+      {
+        stat.summary(DiagnosticStatus::ERROR, "Timestamps too far in future seen.");
+        early_count_++;
+      }
+
+      if (max_delta_ > params_.max_acceptable_)
+      {
+        stat.summary(DiagnosticStatus::ERROR, "Timestamps too far in past seen.");
+        late_count_++;
+      }
+
+      if (zero_seen_)
+      {
+        stat.summary(DiagnosticStatus::ERROR, "Zero timestamp seen.");
+        zero_count_++;
+      }
+
+      stat.addf("Earliest timestamp delay:", "%f", min_delta_);
+      stat.addf("Latest timestamp delay:", "%f", max_delta_);
+    }
+
+    stat.addf("Earliest timestamp delay", "%f", min_delta_);
+    stat.addf("Latest timestamp delay", "%f", max_delta_);
+    stat.addf("Earliest acceptable timestamp delay", "%f", params_.min_acceptable_);
+    stat.addf("Latest acceptable timestamp delay", "%f", params_.max_acceptable_);
+    stat.add("Late diagnostic update count", late_count_);
+    stat.add("Early diagnostic update count", early_count_);
+    stat.add("Zero seen diagnostic update count", zero_count_);
+
+    deltas_valid_ = false;
+    min_delta_ = 0;
+    max_delta_ = 0;
+    zero_seen_ = false;
+  }
 
  /**
  * \brief Diagnostic task to monitor whether a node is alive
