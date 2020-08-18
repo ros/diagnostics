@@ -2,6 +2,11 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix GCC warnings with -Wpedantic (`#124 <https://github.com/ros/diagnostics/issues/124>`_)
+* Contributors: Jacob Perron
+
 1.9.5 (2020-08-10)
 ------------------
 

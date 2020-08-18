@@ -2,6 +2,11 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Extend initial connect timeout for add_analyzers (`#129 <https://github.com/ros/diagnostics/issues/129>`_)
+* Contributors: Mike Purvis
+
 1.9.5 (2020-08-10)
 ------------------
 * Update CMakeLists.txt to search for local gtest first

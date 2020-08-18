@@ -2,6 +2,11 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix shebang line for python3 (`#141 <https://github.com/ros/diagnostics/issues/141>`_)
+* Contributors: Mikael Arguedas, gemignani
+
 1.9.5 (2020-08-10)
 ------------------
 * Added feature of window averaging for cpu monitor

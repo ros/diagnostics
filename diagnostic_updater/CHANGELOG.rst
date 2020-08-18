@@ -2,6 +2,16 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add SlowTimeStampStatus (`#144 <https://github.com/ros/diagnostics/issues/144>`_)
+* Test build fix on Windows (`#8 <https://github.com/ros/diagnostics/issues/8>`_) (`#107 <https://github.com/ros/diagnostics/issues/107>`_)
+* Resolve div by zero in updater (`#108 <https://github.com/ros/diagnostics/issues/108>`_)
+* Use std::isfinite due to deprecation on osx (`#113 <https://github.com/ros/diagnostics/issues/113>`_)
+* Remove extra (not needed) trailing ':' (`#116 <https://github.com/ros/diagnostics/issues/116>`_)
+* Fix GCC warnings with -Wpedantic (`#124 <https://github.com/ros/diagnostics/issues/124>`_)
+* Contributors: Enrique Fernandez Perdomo, Jacob Perron, Sean Yen, Stephan Sundermann, William Hudgins, gemignani
+
 1.9.5 (2020-08-10)
 ------------------
 * Merge pull request `#105 <https://github.com/ros/diagnostics/issues/105>`_ from mikepurvis/py3-httplib
