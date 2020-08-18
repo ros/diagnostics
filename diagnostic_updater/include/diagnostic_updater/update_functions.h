@@ -171,10 +171,11 @@ namespace diagnostic_updater
         int curseq = count_;
         int events = curseq - seq_nums_[hist_indx_];
         double window = (curtime - times_[hist_indx_]).toSec();
+        double freq = 0;
 
         if (window != 0)
         {
-            double freq = events / window;
+            freq = events / window;
         }
         seq_nums_[hist_indx_] = curseq;
         times_[hist_indx_] = curtime;
@@ -202,10 +203,9 @@ namespace diagnostic_updater
         stat.addf("Events in window", "%d", events);
         stat.addf("Events since startup", "%d", count_);
         stat.addf("Duration of window (s)", "%f", window);
-        
         if (window != 0) {
             stat.addf("Actual frequency (Hz)", "%f",freq);
-        } 
+        }
         if (*params_.min_freq_ == *params_.max_freq_)
           stat.addf("Target frequency (Hz)", "%f",*params_.min_freq_);
         if (*params_.min_freq_ > 0)
