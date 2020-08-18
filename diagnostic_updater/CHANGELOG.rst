@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.9.6 (2020-08-18)
+------------------
 * Add SlowTimeStampStatus (`#144 <https://github.com/ros/diagnostics/issues/144>`_)
 * Test build fix on Windows (`#8 <https://github.com/ros/diagnostics/issues/8>`_) (`#107 <https://github.com/ros/diagnostics/issues/107>`_)
 * Resolve div by zero in updater (`#108 <https://github.com/ros/diagnostics/issues/108>`_)
