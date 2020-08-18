@@ -217,7 +217,7 @@ if __name__ == '__main__':
     try:
         rospy.init_node('sensors_monitor_%s'%hostname_clean)
     except rospy.ROSInitException:
-        print('Unable to initialize node. Master may not be running', file=sys.stderr)
+        print('Unable to initialize node. Master may not be running')
         sys.exit(0)
 
     monitor = SensorsMonitor(hostname)
