@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.1 (2020-08-20)
+-------------------
 * Resolve div by zero in updater (`#108 <https://github.com/ros/diagnostics/issues/108>`_)
 * Use std::isfinite due to deprecation on osx (`#113 <https://github.com/ros/diagnostics/issues/113>`_)
 * Remove extra (not needed) trailing ':' (`#116 <https://github.com/ros/diagnostics/issues/116>`_)
