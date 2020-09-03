@@ -2,6 +2,11 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Estract TimestampStatus run to cpp
+* Contributors: Guglielmo Gemignani
+
 1.9.6 (2020-08-18)
 ------------------
 * Add SlowTimeStampStatus (`#144 <https://github.com/ros/diagnostics/issues/144>`_)
