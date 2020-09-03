@@ -2,6 +2,9 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.10.1 (2020-08-20)
 -------------------
 * Extend initial connect timeout for add_analyzers (`#129 <https://github.com/ros/diagnostics/issues/129>`_)

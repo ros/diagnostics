@@ -2,6 +2,11 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Estract TimestampStatus run to cpp
+* Contributors: Guglielmo Gemignani
+
 1.10.1 (2020-08-20)
 -------------------
 * Resolve div by zero in updater (`#108 <https://github.com/ros/diagnostics/issues/108>`_)
