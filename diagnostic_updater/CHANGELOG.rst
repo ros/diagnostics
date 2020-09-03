@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.2 (2020-09-03)
+-------------------
 * Estract TimestampStatus run to cpp
 * Contributors: Guglielmo Gemignani
 
