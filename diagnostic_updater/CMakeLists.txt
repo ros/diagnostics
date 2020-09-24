@@ -15,6 +15,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(example src/example.cpp)
 add_library(${PROJECT_NAME}
   src/timestamp_status.cpp)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 target_link_libraries(example ${catkin_LIBRARIES})
 
 #set(LOCAL_GTEST_DIR "gtest-1.7.0")
