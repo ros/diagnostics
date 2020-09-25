@@ -38,6 +38,7 @@
 #define __DIAGNOSTIC_STATUS__UPDATE_FUNCTIONS_H__
 
 #include <diagnostic_updater/diagnostic_updater.h>
+#include "diagnostic_msgs/DiagnosticStatus.h"
 #include <math.h>
 
 namespace diagnostic_updater
@@ -181,23 +182,21 @@ namespace diagnostic_updater
         times_[hist_indx_] = curtime;
         hist_indx_ = (hist_indx_ + 1) % params_.window_size_;
 
-        using diagnostic_msgs::DiagnosticStatus;
-
         if (events == 0)
         {
-          stat.summary(DiagnosticStatus::ERROR, "No events recorded.");
+          stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "No events recorded.");
         }
         else if (window != 0 && freq < *params_.min_freq_ * (1 - params_.tolerance_))
         {
-          stat.summary(DiagnosticStatus::WARN, "Frequency too low.");
+          stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency too low.");
         }
         else if (window != 0 && freq > *params_.max_freq_ * (1 + params_.tolerance_))
         {
-          stat.summary(DiagnosticStatus::WARN, "Frequency too high.");
+          stat.summary(diagnostic_msgs::DiagnosticStatus::WARN, "Frequency too high.");
         }
         else if (window != 0)
         {
-          stat.summary(DiagnosticStatus::OK, "Desired frequency met");
+          stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Desired frequency met");
         }
 
         stat.addf("Events in window", "%d", events);
