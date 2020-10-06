@@ -320,7 +320,7 @@ class Updater(DiagnosticTaskVector):
         now = rospy.Time.now()
         if  now >= self.last_time_period_checked + rospy.Duration(0.25):
             try:
-                self.period = rospy.get_param("~diagnostic_period", 1)
+                self.period = rospy.get_param_cached("~diagnostic_period", 1)
                 self.last_time_period_checked = now
             except (httplib.CannotSendRequest, httplib.ResponseNotReady):
                 pass
