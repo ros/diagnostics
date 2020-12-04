@@ -2,6 +2,18 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use get_param_cached in diagnostic_updater
+* Diagnostic status msg is not included but being used (`#163 <https://github.com/ros/diagnostics/issues/163>`_)
+  * Diagnostic status msg is not included but being used
+  * Update update_functions.h
+* Change depends to catkin_depends for catkin packages (`#162 <https://github.com/ros/diagnostics/issues/162>`_)
+  * Change depends to catkin_depends for catkin packages
+  * The library also depends on catkin_libs
+* Update maintainer info
+* Contributors: Tobias Fischer, gemignani
+
 1.10.2 (2020-09-03)
 -------------------
 * Estract TimestampStatus run to cpp

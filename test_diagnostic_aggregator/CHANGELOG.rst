@@ -2,6 +2,11 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update maintainer info
+* Contributors: gemignani
+
 1.10.2 (2020-09-03)
 -------------------
 
