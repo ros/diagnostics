@@ -223,7 +223,11 @@ void Aggregator::publishData()
       min_level = processed[i]->level;
   }
 
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other = other_analyzer_->report();
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other; 
+  {
+    boost::mutex::scoped_lock lock(mutex_);
+    processed_other = other_analyzer_->report();
+  }
   for (unsigned int i = 0; i < processed_other.size(); ++i)
   {
     diag_array.status.push_back(*processed_other[i]);
