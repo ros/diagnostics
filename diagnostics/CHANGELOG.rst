@@ -2,8 +2,8 @@
 Changelog for package diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.3 (2020-12-05)
+-------------------
 * Update maintainer info
 * Contributors: gemignani
 

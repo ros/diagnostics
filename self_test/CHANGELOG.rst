@@ -2,8 +2,8 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.3 (2020-12-05)
+-------------------
 * Set cmake_policy CMP0054 to NEW
 * Update maintainer info
 * Contributors: gemignani

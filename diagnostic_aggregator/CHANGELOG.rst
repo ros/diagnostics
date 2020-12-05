@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.3 (2020-12-05)
+-------------------
 * Add mutex for other analyzers (`#170 <https://github.com/ros/diagnostics/issues/170>`_)
 * Update maintainer info
 * Contributors: Guglielmo Gemignani, gemignani
