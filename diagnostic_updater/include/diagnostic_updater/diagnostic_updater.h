@@ -270,7 +270,7 @@ namespace diagnostic_updater
 
       void add(DiagnosticTask &task)
       {
-        TaskFunction f = boost::bind(&DiagnosticTask::run, &task, _1);
+        TaskFunction f = boost::bind(&DiagnosticTask::run, &task, boost::placeholders::_1);
         add(task.getName(), f);
       }
 
@@ -290,7 +290,7 @@ namespace diagnostic_updater
       template <class T>
         void add(const std::string name, T *c, void (T::*f)(diagnostic_updater::DiagnosticStatusWrapper&))
         {
-          DiagnosticTaskInternal int_task(name, boost::bind(f, c, _1));
+          DiagnosticTaskInternal int_task(name, boost::bind(f, c, boost::placeholders::_1));
           addInternal(int_task);
         }
 
