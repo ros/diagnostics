@@ -51,7 +51,7 @@ class DiagnosticTask:
     """DiagnosticTask is an abstract base class for collecting diagnostic data.
 
     Subclasses are provided for generating common diagnostic information.
-    A DiagnosticTask has a name, and a function that is called to cleate a
+    A DiagnosticTask has a name, and a function that is called to create a
     DiagnosticStatusWrapper.
     """
 
