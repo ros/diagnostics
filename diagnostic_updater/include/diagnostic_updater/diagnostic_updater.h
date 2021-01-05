@@ -137,7 +137,7 @@ namespace diagnostic_updater
    * \brief Merges CompositeDiagnosticTask into a single DiagnosticTask.
    *
    * The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
-   * be combined into a single task that produces a single single
+   * be combined into a single task that produces a single
    * DiagnosticStatusWrapped. The output of the combination has the max of
    * the status levels, and a concatenation of the non-zero-level messages.
    *
