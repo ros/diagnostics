@@ -2,6 +2,11 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Set aggregator subscription history depth to 1000. (`#174 <https://github.com/ros/diagnostics/issues/174>`_)
+* Contributors: cdbierl
+
 2.0.4 (2020-08-05)
 ------------------
 * Fix installation of diagnostic aggregator example. (`#159 <https://github.com/ros/diagnostics/issues/159>`_) (`#160 <https://github.com/ros/diagnostics/issues/160>`_)
