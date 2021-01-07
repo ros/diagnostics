@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.5 (2021-01-06)
+------------------
 * Set aggregator subscription history depth to 1000. (`#174 <https://github.com/ros/diagnostics/issues/174>`_)
 * Contributors: cdbierl
 
