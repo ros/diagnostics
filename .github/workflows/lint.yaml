@@ -17,6 +17,6 @@ jobs:
         required-ros-distributions: foxy
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
-        required-ros-distributions: foxy
+        distribution: foxy
         linter: ${{ matrix.linter }}
         package-name: diagnostic_aggregator diagnostic_updater self_test
