@@ -22,6 +22,7 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.1
         with:
           target-ros2-distro: foxy
+          vcs-repo-file-url: ""
           package-name: diagnostic_aggregator diagnostic_updater self_test
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
