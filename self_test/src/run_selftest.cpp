@@ -72,9 +72,9 @@ public:
           (result_out->passed ? "PASSED" : "FAILED"), result_out->id.c_str());
 
         // for (size_t i = 0; i < result_out->status.size(); i++) {
-        auto counter = 1;
+        auto counter = 1lu;
         for (const auto & status : result_out->status) {
-          RCLCPP_INFO(this->get_logger(), "%2zd) %s", counter++, status.name.c_str());
+          RCLCPP_INFO(this->get_logger(), "%zu) %s", counter++, status.name.c_str());
           if (status.level == 0) {
             RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
           } else if (status.level == 1) {

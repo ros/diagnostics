@@ -384,7 +384,7 @@ public:
     base_interface_(base_interface),
     timers_interface_(timers_interface),
     clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)),
-    period_(static_cast<rcl_duration_value_t>(period * 1e9)),
+    period_(rclcpp::Duration::from_nanoseconds(period * 1e9)),
     publisher_(
       rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
         topics_interface, "/diagnostics", 1)),
@@ -394,7 +394,7 @@ public:
   {
     period = parameters_interface->declare_parameter(
       "diagnostic_updater.period", rclcpp::ParameterValue(period)).get<double>();
-    period_ = rclcpp::Duration(static_cast<rcl_duration_value_t>(period * 1e9));
+    period_ = rclcpp::Duration::from_nanoseconds(period * 1e9);
 
     reset_timer();
   }
@@ -414,19 +414,11 @@ public:
   }
 
   /**
-   * \brief Sets the period as a rcl_duration_value_t
-   */
-  void setPeriod(rcl_duration_value_t period)
-  {
-    setPeriod(rclcpp::Duration(period));
-  }
-
-  /**
    * \brief Sets the period given a value in seconds
    */
   void setPeriod(double period)
   {
-    setPeriod(static_cast<rcl_duration_value_t>(period * 1e9));
+    setPeriod(rclcpp::Duration::from_nanoseconds(period * 1e9));
   }
 
   /**
@@ -539,7 +531,7 @@ private:
         error_msg += " For devices that do not have a HW_ID, set this value to 'none'.";
         error_msg += " This warning only occurs once all diagnostics are OK.";
         error_msg += " It is okay to wait until the device is open before calling setHardwareID.";
-        RCLCPP_WARN(logger_, error_msg);
+        RCLCPP_WARN(logger_, "%s", error_msg.c_str());
         warn_nohwid_done_ = true;
       }
 

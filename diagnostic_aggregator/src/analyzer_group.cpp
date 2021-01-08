@@ -74,7 +74,7 @@ bool AnalyzerGroup::init(
     return false;
   }
   RCLCPP_INFO(
-    logger_, "Retrieved %d parameter(s) for analyzer group with prefix '%s'.", parameters.size(),
+    logger_, "Retrieved %zu parameter(s) for analyzer group with prefix '%s'.", parameters.size(),
     breadcrumb_.c_str());
 
   std::string ns, an_type, an_path, an_breadcrumb;
