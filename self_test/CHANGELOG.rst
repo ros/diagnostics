@@ -2,8 +2,8 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2021-01-12)
+------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
 
