@@ -2,9 +2,9 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.1 (2020-06-03)
-------------------
-* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
+Forthcoming
+-----------
+* Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
 
 2.0.2 (2020-06-03)
@@ -15,6 +15,11 @@ Changelog for package self_test
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
 * fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
+* Contributors: Karsten Knese
+
+2.0.1 (2020-06-03)
+------------------
+* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
 * Contributors: Karsten Knese
 
 2.0.0 (2019-09-03)
