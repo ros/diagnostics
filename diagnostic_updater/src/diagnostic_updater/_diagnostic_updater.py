@@ -51,7 +51,7 @@ class DiagnosticTask:
     """DiagnosticTask is an abstract base class for collecting diagnostic data.
 
     Subclasses are provided for generating common diagnostic information.
-    A DiagnosticTask has a name, and a function that is called to cleate a
+    A DiagnosticTask has a name, and a function that is called to create a
     DiagnosticStatusWrapper.
     """
 
@@ -99,7 +99,7 @@ class CompositeDiagnosticTask(DiagnosticTask):
     """Merges CompositeDiagnosticTask into a single DiagnosticTask.
 
     The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
-    be combined into a single task that produces a single single
+    be combined into a single task that produces a single
     DiagnosticStatusWrapped. The output of the combination has the max of
     the status levels, and a concatenation of the non-zero-level messages.
 
