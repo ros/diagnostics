@@ -34,6 +34,7 @@
 
 /**< \author Kevin Watts */
 
+#include <memory>
 #include <rclcpp/rclcpp.hpp>
 
 #include "diagnostic_aggregator/aggregator.hpp"
