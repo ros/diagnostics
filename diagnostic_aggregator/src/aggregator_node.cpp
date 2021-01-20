@@ -34,10 +34,10 @@
 
 /**< \author Kevin Watts */
 
+#include "diagnostic_aggregator/aggregator.hpp"
+
 #include <memory>
 #include <rclcpp/rclcpp.hpp>
-
-#include "diagnostic_aggregator/aggregator.hpp"
 
 int main(int argc, char ** argv)
 {
