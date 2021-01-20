@@ -114,22 +114,6 @@ public:
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~Aggregator();
 
-  /*!
-   *\brief Processes, publishes data. Should be called at pub_rate.
-   */
-  DIAGNOSTIC_AGGREGATOR_PUBLIC
-  void publishData();
-
-  /*!
-   *\brief True if the NodeHandle reports OK
-   */
-  bool ok() const {return rclcpp::ok();}
-
-  /*!
-   *\brief Publish rate defaults to 1Hz, but can be set with ~pub_rate param
-   */
-  double getPubRate() const {return pub_rate_;}
-
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::Node::SharedPtr get_node() const;
 
@@ -137,6 +121,7 @@ private:
   rclcpp::Node::SharedPtr n_;
 
   rclcpp::Logger logger_;
+  rclcpp::TimerBase::SharedPtr publish_timer_;
 
   /// AddDiagnostics, /diagnostics_agg/add_diagnostics
   rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
@@ -162,6 +147,11 @@ private:
 
   /// Records all ROS warnings. No warnings are repeated.
   std::set<std::string> ros_warnings_;
+
+  /*!
+   *\brief Processes, publishes data. Should be called at pub_rate.
+   */
+  void publishData();
 
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
