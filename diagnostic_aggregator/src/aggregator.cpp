@@ -71,7 +71,7 @@ Aggregator::Aggregator()
   if (!n_->get_parameters("", parameters)) {
     RCLCPP_ERROR(logger_, "Couldn't retrieve parameters.");
   }
-  RCLCPP_DEBUG(logger_, "Retrieved %d parameter(s).", parameters.size());
+  RCLCPP_DEBUG(logger_, "Retrieved %zu parameter(s).", parameters.size());
 
   for (const auto & param : parameters) {
     if (param.first.compare("pub_rate") == 0) {

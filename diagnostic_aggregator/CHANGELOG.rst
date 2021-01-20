@@ -2,10 +2,13 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.1 (2020-06-03)
+2.1.0 (2021-01-12)
 ------------------
-* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
-* Contributors: Arne Nordmann, Robin Vanhove, Karsten Knese
+* Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
+* Fix installation of diagnostic aggregator example. (`#159 <https://github.com/ros/diagnostics/issues/159>`_)
+* Restore alphabetical order. (`#148 <https://github.com/ros/diagnostics/issues/148>`_)
+* Aggregator bugfix, tests, and nicer example. (`#147 <https://github.com/ros/diagnostics/issues/147>`_)
+* Contributors: Arne Nordmann, Georg Bartels, Karsten Knese
 
 2.0.2 (2020-06-03)
 ------------------
@@ -150,6 +153,11 @@ Changelog for package diagnostic_aggregator
   Co-authored-by: Arne Nordmann <arne.nordmann@de.bosch.com>
   Co-authored-by: Robin Vanhove <1r0b1n0@gmail.com>
 * Contributors: Karsten Knese
+
+2.0.1 (2020-06-03)
+------------------
+* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
+* Contributors: Arne Nordmann, Robin Vanhove, Karsten Knese
 
 1.9.3 (2018-05-02)
 ------------------

@@ -70,7 +70,7 @@ bool GenericAnalyzer::init(
     return false;
   }
   RCLCPP_DEBUG(
-    rclcpp::get_logger("GenericAnalyzer"), "Retrieved %d parameter(s) for prefix '%s'.",
+    rclcpp::get_logger("GenericAnalyzer"), "Retrieved %zu parameter(s) for prefix '%s'.",
     parameters.size(), breadcrumb_.c_str());
 
   double timeout = 5.0;
@@ -156,8 +156,8 @@ bool GenericAnalyzer::init(
   {
     RCLCPP_ERROR(
       rclcpp::get_logger("generic_analyzer"),
-      std::string("GenericAnalyzer ") +
-      "'%s' was not initialized with any way of checking diagnostics. Name: %s, namespace: %s",
+      "GenericAnalyzer '%s' was not initialized with any way of checking diagnostics."
+      "Name: %s, namespace: %s",
       nice_name_.c_str(), path.c_str(), n->get_namespace());
     return false;
   }

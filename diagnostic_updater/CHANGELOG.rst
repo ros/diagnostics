@@ -2,13 +2,10 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.1 (2020-06-03)
+2.1.0 (2021-01-12)
 ------------------
-* Re-add leading character to node name (`#109 <https://github.com/ros/diagnostics/issues/109>`_)
-* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
-* Fix DiagnosedPublisher (`#135 <https://github.com/ros/diagnostics/issues/135>`_)
-* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
-* Contributors: DensoADAS, Arne Nordmann, Robin Vanhove, Karsten Knese, Scott K Logan
+* Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
+* Contributors: Karsten Knese
 
 2.0.2 (2020-06-03)
 ------------------
@@ -161,6 +158,14 @@ Changelog for package diagnostic_updater
 * fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
   Signed-off-by: Karsten Knese <karsten.knese@us.bosch.com>
 * Contributors: DensoADAS, Karsten Knese, Scott K Logan
+
+2.0.1 (2020-06-03)
+------------------
+* Re-add leading character to node name (`#109 <https://github.com/ros/diagnostics/issues/109>`_)
+* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
+* Fix DiagnosedPublisher (`#135 <https://github.com/ros/diagnostics/issues/135>`_)
+* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
+* Contributors: DensoADAS, Arne Nordmann, Robin Vanhove, Karsten Knese, Scott K Logan
 
 2.0.0 (2019-09-03)
 ------------------

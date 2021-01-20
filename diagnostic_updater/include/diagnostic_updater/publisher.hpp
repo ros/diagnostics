@@ -165,7 +165,7 @@ public:
   {
     std::string error_msg = "tick(void) has been called on a TopicDiagnostic.";
     error_msg += " This is never correct. Use tick(rclcpp::Time &) instead.";
-    RCLCPP_FATAL(error_logger_, error_msg);
+    RCLCPP_FATAL(error_logger_, "%s", error_msg.c_str());
   }
 
   /**
