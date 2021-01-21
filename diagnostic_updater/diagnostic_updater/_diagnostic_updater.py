@@ -328,19 +328,20 @@ class Updater(DiagnosticTaskVector):
         """Publish a single diagnostic status or a vector of diagnostic statuses."""
         if not type(msg) is list:
             msg = [msg]
-
+            
+        now = self.clock.now()
+        da = DiagnosticArray()
+        da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         for stat in msg:
             stat.name = self.node.get_name() + ': ' + stat.name
-        now = self.clock.now()
-
-        da = DiagnosticArray()
-        db = DiagnosticStatus()
-        db.name = stat.name
-        db.message = stat.message
-        db.hardware_id = stat.hardware_id
-        db.values = stat.values
-        da.status.append(db)
-        da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
+            db = DiagnosticStatus()
+            db.name = stat.name
+            db.message = stat.message
+            db.hardware_id = stat.hardware_id
+            db.values = stat.values
+            db.level = stat.level
+            da.status.append(db)
+       
         self.publisher.publish(da)
 
     def addedTaskCallback(self, task):
