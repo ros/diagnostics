@@ -114,6 +114,12 @@ public:
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~Aggregator();
 
+  /*!
+   *\brief Processes, publishes data. Should be called at pub_rate.
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  void publishData();
+
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::Node::SharedPtr get_node() const;
 
@@ -147,11 +153,6 @@ private:
 
   /// Records all ROS warnings. No warnings are repeated.
   std::set<std::string> ros_warnings_;
-
-  /*!
-   *\brief Processes, publishes data. Should be called at pub_rate.
-   */
-  void publishData();
 
   /*
    *!\brief Checks timestamp of message, and warns if timestamp is 0 (not set)
