@@ -114,6 +114,12 @@ public:
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   virtual ~Aggregator();
 
+  /*!
+   *\brief Processes, publishes data. Should be called at pub_rate.
+   */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  void publishData();
+
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::Node::SharedPtr get_node() const;
 
@@ -139,11 +145,6 @@ private:
    *\brief Callback for incoming "/diagnostics"
    */
   void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg);
-
-  /*!
-   *\brief Processes, publishes data. Should be called at pub_rate.
-   */
-  void publishData();
 
   std::unique_ptr<AnalyzerGroup> analyzer_group_;
   std::unique_ptr<OtherAnalyzer> other_analyzer_;
