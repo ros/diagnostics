@@ -98,8 +98,7 @@ Aggregator::Aggregator()
   other_analyzer_->init(base_path_);  // This always returns true
 
   diag_sub_ = n_->create_subscription<DiagnosticArray>(
-    "/diagnostics", rclcpp::SystemDefaultsQoS().keep_last(1000),
-    std::bind(&Aggregator::diagCallback, this, _1));
+    "/diagnostics", rclcpp::SystemDefaultsQoS(), std::bind(&Aggregator::diagCallback, this, _1));
   agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ =
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
