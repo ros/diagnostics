@@ -37,12 +37,12 @@
 
 #include "diagnostic_aggregator/aggregator.hpp"
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
-#include <chrono>
 
 namespace diagnostic_aggregator
 {

@@ -37,7 +37,8 @@
 #include "diagnostic_aggregator/aggregator.hpp"
 
 #include <memory>
-#include <rclcpp/rclcpp.hpp>
+
+#include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char ** argv)
 {
