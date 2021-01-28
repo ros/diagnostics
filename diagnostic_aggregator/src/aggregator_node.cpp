@@ -36,6 +36,7 @@
 
 #include "diagnostic_aggregator/aggregator.hpp"
 
+#include <chrono>
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
@@ -46,6 +47,12 @@ int main(int argc, char ** argv)
 
   rclcpp::executors::SingleThreadedExecutor exec;
   auto agg = std::make_shared<diagnostic_aggregator::Aggregator>();
+
+  int publish_rate_ms = 1000 / agg->getPubRate();
+  auto timer = agg->get_node()->create_wall_timer(
+    std::chrono::milliseconds(publish_rate_ms),
+    std::bind(&diagnostic_aggregator::Aggregator::publishData, agg));
+
   exec.add_node(agg->get_node());
   exec.spin();
 

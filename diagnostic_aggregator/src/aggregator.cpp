@@ -37,7 +37,6 @@
 
 #include "diagnostic_aggregator/aggregator.hpp"
 
-#include <chrono>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -102,11 +101,6 @@ Aggregator::Aggregator()
   agg_pub_ = n_->create_publisher<diagnostic_msgs::msg::DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ =
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
-
-  int publish_rate_ms = 1000 / pub_rate_;
-  publish_timer_ = n_->create_wall_timer(
-    std::chrono::milliseconds(publish_rate_ms),
-    std::bind(&Aggregator::publishData, this));
 }
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg)
