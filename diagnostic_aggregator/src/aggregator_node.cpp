@@ -34,34 +34,22 @@
 
 /**< \author Kevin Watts */
 
-#include <exception>
-
 #include "diagnostic_aggregator/aggregator.hpp"
 
-#include "rclcpp/executors.hpp"
+#include <memory>
 
-using std::exception;
+#include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
 
-  try {
-    diagnostic_aggregator::Aggregator agg;
+  rclcpp::executors::SingleThreadedExecutor exec;
+  auto agg = std::make_shared<diagnostic_aggregator::Aggregator>();
+  exec.add_node(agg->get_node());
+  exec.spin();
 
-    rclcpp::Rate pub_rate(agg.getPubRate());
-    while (rclcpp::ok()) {
-      rclcpp::spin_some(agg.get_node());
-      agg.publishData();
-      pub_rate.sleep();
-    }
-  } catch (const exception & e) {
-    RCLCPP_FATAL(
-      rclcpp::get_logger("aggregator_node"),
-      "Diagnostic aggregator node caught exception. Aborting. %s", e.what());
-    rclcpp::shutdown();
-  }
+  rclcpp::shutdown();
 
-  exit(0);
   return 0;
 }
