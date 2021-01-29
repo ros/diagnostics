@@ -2,6 +2,12 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Move Aggregator publishing to timer to allow subscription callback more processing time. (`#179 <https://github.com/ros/diagnostics/issues/179>`_)
+  Co-authored-by: Chris Bierl <cbierl@moog.com>
+* Contributors: cdbierl
+
 2.0.5 (2021-01-06)
 ------------------
 * Set aggregator subscription history depth to 1000. (`#174 <https://github.com/ros/diagnostics/issues/174>`_)
