@@ -33,29 +33,24 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-##\author Kevin Watts
+# \author Kevin Watts
 
 from __future__ import with_statement
 import roslib
-roslib.load_manifest('diagnostic_common_diagnostics')
-
 import rospy
-
 import traceback
 import threading
-from threading import Timer
-import sys, os, time, string
-from time import sleep
+import sys
 import subprocess
 import socket
-
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
+roslib.load_manifest('diagnostic_common_diagnostics')
 low_hd_level = 5
 critical_hd_level = 1
 
-hd_temp_warn = 55 #3580, setting to 55C to after checking manual
-hd_temp_error = 70 # Above this temperature, hard drives will have serious problems
+hd_temp_warn = 55  # 3580, setting to 55C to after checking manual
+hd_temp_error = 70  # Above this temperature, hard drives will have serious problems
 
 stat_dict = { 0: 'OK', 1: 'Warning', 2: 'Error' }
 temp_dict = { 0: 'OK', 1: 'Hot', 2: 'Critical Hot' }
@@ -63,8 +58,9 @@ usage_dict = { 0: 'OK', 1: 'Low Disk Space', 2: 'Very Low Disk Space' }
 
 REMOVABLE = ['/dev/sg1', '/dev/sdb'] # Store removable drives so we can ignore if removed
 
-## Connects to hddtemp daemon to get temp, HD make.
-def get_hddtemp_data(hostname = 'localhost', port = 7634):
+
+# Connects to hddtemp daemon to get temp, HD make.
+def get_hddtemp_data(hostname='localhost', port=7634):
     try:
         hd_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         hd_sock.connect((hostname, port))
@@ -73,7 +69,7 @@ def get_hddtemp_data(hostname = 'localhost', port = 7634):
             newdat = hd_sock.recv(1024)
             if len(newdat) == 0:
                 break
-            sock_data = sock_data + newdat
+            sock_data = sock_data + str(newdat)
         hd_sock.close()
 
         sock_vals = sock_data.split('|')
@@ -102,15 +98,16 @@ def get_hddtemp_data(hostname = 'localhost', port = 7634):
             idx += 5
 
         return True, drives, makes, temps
-    except:
+    except Exception:
         rospy.logerr(traceback.format_exc())
-        return False, [ 'Exception' ], [ traceback.format_exc() ], [ '0' ]
+        return False, ['Exception'], [traceback.format_exc()], ['0']
+
 
 def update_status_stale(stat, last_update_time):
     time_since_update = rospy.get_time() - last_update_time
 
     stale_status = 'OK'
-    if time_since_update > 20 and time_since_update <= 35:
+    if 20 < time_since_update <= 35:
         stale_status = 'Lagging'
         if stat.level == DiagnosticStatus.OK:
             stat.message = stale_status
@@ -127,11 +124,12 @@ def update_status_stale(stat, last_update_time):
 
     stat.values.pop(0)
     stat.values.pop(0)
-    stat.values.insert(0, KeyValue(key = 'Update Status', value = stale_status))
-    stat.values.insert(1, KeyValue(key = 'Time Since Update', value = str(time_since_update)))
+    stat.values.insert(0, KeyValue(key='Update Status', value=stale_status))
+    stat.values.insert(1, KeyValue(key='Time Since Update', value=str(time_since_update)))
+
 
 class hd_monitor():
-    def __init__(self, hostname, diag_hostname, home_dir = ''):
+    def __init__(self, hostname, diag_hostname, home_dir=''):
         self._mutex = threading.Lock()
 
         self._hostname = hostname
@@ -154,21 +152,21 @@ class hd_monitor():
         self._temp_stat.level = DiagnosticStatus.ERROR
         self._temp_stat.hardware_id = hostname
         self._temp_stat.message = 'No Data'
-        self._temp_stat.values = [ KeyValue(key = 'Update Status', value = 'No Data'),
-                                   KeyValue(key = 'Time Since Last Update', value = 'N/A') ]
+        self._temp_stat.values = [KeyValue(key='Update Status', value='No Data'),
+                                  KeyValue(key='Time Since Last Update', value='N/A')]
 
         if self._home_dir != '':
             self._usage_stat = DiagnosticStatus()
             self._usage_stat.level = DiagnosticStatus.ERROR
             self._usage_stat.hardware_id = hostname
             self._usage_stat.name = '%s HD Usage' % diag_hostname
-            self._usage_stat.values = [ KeyValue(key = 'Update Status', value = 'No Data' ),
-                                        KeyValue(key = 'Time Since Last Update', value = 'N/A') ]
+            self._usage_stat.values = [KeyValue(key='Update Status', value='No Data' ),
+                                       KeyValue(key='Time Since Last Update', value='N/A')]
             self.check_disk_usage()
 
         self.check_temps()
 
-    ## Must have the lock to cancel everything
+    # Must have the lock to cancel everything
     def cancel_timers(self):
         if self._temp_timer:
             self._temp_timer.cancel()
@@ -184,20 +182,19 @@ class hd_monitor():
                 self.cancel_timers()
             return
 
-        diag_strs = [ KeyValue(key = 'Update Status', value = 'OK' ) ,
-                      KeyValue(key = 'Time Since Last Update', value = '0' ) ]
+        diag_strs = [KeyValue(key='Update Status', value='OK'),
+                     KeyValue(key='Time Since Last Update', value='0')]
         diag_level = DiagnosticStatus.OK
-        diag_message = 'OK'
 
         temp_ok, drives, makes, temps = get_hddtemp_data()
 
         for index in range(0, len(drives)):
             temp = temps[index]
 
-            if not unicode(temp).isnumeric() and drives[index] not in REMOVABLE:
+            if not temp.isnumeric() and drives[index] not in REMOVABLE:
                 temp_level = DiagnosticStatus.ERROR
                 temp_ok = False
-            elif not unicode(temp).isnumeric() and drives[index] in REMOVABLE:
+            elif not temp.isnumeric() and drives[index] in REMOVABLE:
                 temp_level = DiagnosticStatus.OK
                 temp = "Removed"
             else:
@@ -209,10 +206,10 @@ class hd_monitor():
 
             diag_level = max(diag_level, temp_level)
 
-            diag_strs.append(KeyValue(key = 'Disk %d Temp Status' % index, value = temp_dict[temp_level]))
-            diag_strs.append(KeyValue(key = 'Disk %d Mount Pt.' % index, value = drives[index]))
-            diag_strs.append(KeyValue(key = 'Disk %d Device ID' % index, value = makes[index]))
-            diag_strs.append(KeyValue(key = 'Disk %d Temp' % index, value = temp))
+            diag_strs.append(KeyValue(key='Disk %d Temp Status' % index, value=temp_dict[temp_level]))
+            diag_strs.append(KeyValue(key='Disk %d Mount Pt.' % index, value=drives[index]))
+            diag_strs.append(KeyValue(key='Disk %d Device ID' % index, value=makes[index]))
+            diag_strs.append(KeyValue(key='Disk %d Temp' % index, value=temp))
 
         if not temp_ok:
             diag_level = DiagnosticStatus.ERROR
@@ -242,8 +239,8 @@ class hd_monitor():
                 self.cancel_timers()
             return
 
-        diag_vals = [ KeyValue(key = 'Update Status', value = 'OK' ),
-                      KeyValue(key = 'Time Since Last Update', value = '0' ) ]
+        diag_vals = [KeyValue(key='Update Status', value='OK'),
+                     KeyValue(key='Time Since Last Update', value='0')]
         diag_level = DiagnosticStatus.OK
         diag_message = 'OK'
 
@@ -253,14 +250,14 @@ class hd_monitor():
             stdout, stderr = p.communicate()
             retcode = p.returncode
 
-            if (retcode == 0):
+            if retcode == 0:
 
-                diag_vals.append(KeyValue(key = 'Disk Space Reading', value = 'OK'))
+                diag_vals.append(KeyValue(key='Disk Space Reading', value='OK'))
                 row_count = 0
                 for row in stdout.split('\n'):
                     if len(row.split()) < 2:
                         continue
-                    if not unicode(row.split()[1]).isnumeric() or float(row.split()[1]) < 10: # Ignore small drives
+                    if not row.split()[1].isnumeric() or float(row.split()[1]) < 10:  # Ignore small drives
                         continue
 
                     row_count += 1
@@ -269,38 +266,37 @@ class hd_monitor():
                     size = row.split()[1]
                     mount_pt = row.split()[-1]
 
-                    if (float(g_available) > low_hd_level):
+                    if float(g_available) > low_hd_level:
                         level = DiagnosticStatus.OK
-                    elif (float(g_available) > critical_hd_level):
+                    elif float(g_available) > critical_hd_level:
                         level = DiagnosticStatus.WARN
                     else:
                         level = DiagnosticStatus.ERROR
 
                     diag_vals.append(KeyValue(
-                            key = 'Disk %d Name' % row_count, value = name))
+                        key='Disk %d Name' % row_count, value=name))
                     diag_vals.append(KeyValue(
-                            key = 'Disk %d Available' % row_count, value = g_available))
+                        key='Disk %d Available' % row_count, value=g_available))
                     diag_vals.append(KeyValue(
-                            key = 'Disk %d Size' % row_count, value = size))
+                        key='Disk %d Size' % row_count, value=size))
                     diag_vals.append(KeyValue(
-                            key = 'Disk %d Status' % row_count, value = stat_dict[level]))
+                        key='Disk %d Status' % row_count, value=stat_dict[level]))
                     diag_vals.append(KeyValue(
-                            key = 'Disk %d Mount Point' % row_count, value = mount_pt))
+                        key='Disk %d Mount Point' % row_count, value=mount_pt))
 
                     diag_level = max(diag_level, level)
                     diag_message = usage_dict[diag_level]
 
             else:
-                diag_vals.append(KeyValue(key = 'Disk Space Reading', value = 'Failed'))
+                diag_vals.append(KeyValue(key='Disk Space Reading', value='Failed'))
                 diag_level = DiagnosticStatus.ERROR
                 diag_message = stat_dict[diag_level]
 
-
-        except:
+        except Exception:
             rospy.logerr(traceback.format_exc())
 
-            diag_vals.append(KeyValue(key = 'Disk Space Reading', value = 'Exception'))
-            diag_vals.append(KeyValue(key = 'Disk Space Ex', value = traceback.format_exc()))
+            diag_vals.append(KeyValue(key='Disk Space Reading', value='Exception'))
+            diag_vals.append(KeyValue(key='Disk Space Ex', value=traceback.format_exc()))
 
             diag_level = DiagnosticStatus.ERROR
             diag_message = stat_dict[diag_level]
@@ -318,7 +314,6 @@ class hd_monitor():
             else:
                 self.cancel_timers()
 
-
     def publish_stats(self):
         with self._mutex:
             update_status_stale(self._temp_stat, self._last_temp_time)
@@ -330,18 +325,12 @@ class hd_monitor():
                 update_status_stale(self._usage_stat, self._last_usage_time)
                 msg.status.append(self._usage_stat)
 
-            #for s in msg.status:
-                #for v in s.values:
-                    #print v, type(v.value)
-
             if rospy.get_time() - self._last_publish_time > 0.5:
                 self._diag_pub.publish(msg)
                 self._last_publish_time = rospy.get_time()
 
 
-
-
-##\todo Need to check HD input/output too using iostat
+# Todo: Need to check HD input/output too using iostat
 
 if __name__ == '__main__':
     hostname = socket.gethostname()
@@ -358,7 +347,7 @@ if __name__ == '__main__':
     if len(args) > 1:
         home_dir = args[1]
 
-    hostname_clean = string.translate(hostname, string.maketrans('-','_'))
+    hostname_clean = hostname.translate(hostname.maketrans('-', '_'))
     try:
         rospy.init_node('hd_monitor_%s' % hostname_clean)
     except rospy.exceptions.ROSInitException:
@@ -376,6 +365,7 @@ if __name__ == '__main__':
         pass
     except Exception as e:
         traceback.print_exc()
+        raise e
 
     hd_monitor.cancel_timers()
     sys.exit(0)
