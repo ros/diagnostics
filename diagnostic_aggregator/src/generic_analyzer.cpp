@@ -246,12 +246,12 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
       if (!all_stale)
       {
         processed[j]->level = 2;
-        processed[j]->message = "Error";
+        processed[j]->message = "Some diagnostics are stale - setting combined level to ERROR.";
       }
       else
       {
         processed[j]->level = 3;
-        processed[j]->message = "All Stale";
+        processed[j]->message = "All diagnostics are stale - setting combined level to STALE.";
       }
 
       // Add all missing items to header item
