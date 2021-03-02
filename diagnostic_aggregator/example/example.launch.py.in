@@ -8,12 +8,12 @@ analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
 def generate_launch_description():
     aggregator = launch_ros.actions.Node(
         package='diagnostic_aggregator',
-        node_executable='aggregator_node',
+        executable='aggregator_node',
         output='screen',
         parameters=[analyzer_params_filepath])
     diag_publisher = launch_ros.actions.Node(
         package='diagnostic_aggregator',
-        node_executable='example_pub.py')
+        executable='example_pub.py')
     return launch.LaunchDescription([
         aggregator,
         diag_publisher,
