@@ -18,50 +18,50 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(d.values, [])
 
     def test_init_lvl_msg(self):
-        d = DiagnosticStatusWrapper(level=b'1', message='test')
-        self.assertEqual(d.level, b'1')
+        d = DiagnosticStatusWrapper(level=b'\x01', message='test')
+        self.assertEqual(d.level, b'\x01')
         self.assertEqual(d.message, 'test')
         self.assertEqual(d.values, [])
 
     def test_summary_lvl_msg(self):
         d = DiagnosticStatusWrapper()
-        d.summary(b'1', 'test')
-        self.assertEqual(d.level, b'1')
+        d.summary(b'\x01', 'test')
+        self.assertEqual(d.level, b'\x01')
         self.assertEqual(d.message, 'test')
 
     def test_summary_dmsg(self):
-        d = DiagnosticStatusWrapper(level=b'0', message='ok')
-        m = DiagnosticStatus(level=b'1', message='warn')
+        d = DiagnosticStatusWrapper(level=b'\x00', message='ok')
+        m = DiagnosticStatus(level=b'\x01', message='warn')
         d.summary(m)
-        self.assertEqual(d.level, b'1')
+        self.assertEqual(d.level, b'\x01')
         self.assertEqual(d.message, 'warn')
 
     def test_clear_summary(self):
-        d = DiagnosticStatusWrapper(level=b'0', message='ok')
+        d = DiagnosticStatusWrapper(level=b'\x00', message='ok')
         d.clearSummary()
-        self.assertEqual(d.level, b'0')
+        self.assertEqual(d.level, b'\x00')
         self.assertEqual(d.message, '')
 
     def test_merge_summary_lvl_msg(self):
-        d = DiagnosticStatusWrapper(level=b'0', message='ok')
-        d.mergeSummary(b'1', 'warn')
-        self.assertEqual(d.level, b'1')
+        d = DiagnosticStatusWrapper(level=b'\x00', message='ok')
+        d.mergeSummary(b'\x01', 'warn')
+        self.assertEqual(d.level, b'\x01')
         self.assertEqual(d.message, 'warn')
 
-        d.mergeSummary(b'2', 'err')
-        self.assertEqual(d.level, b'2')
+        d.mergeSummary(b'\x02', 'err')
+        self.assertEqual(d.level, b'\x02')
         self.assertEqual(d.message, 'warn; err')
 
     def test_merge_summary_dmsg(self):
-        d = DiagnosticStatusWrapper(level=b'0', message='ok')
-        m = DiagnosticStatus(level=b'1', message='warn')
+        d = DiagnosticStatusWrapper(level=b'\x00', message='ok')
+        m = DiagnosticStatus(level=b'\x01', message='warn')
         d.mergeSummary(m)
-        self.assertEqual(d.level, b'1')
+        self.assertEqual(d.level, b'\x01')
         self.assertEqual(d.message, 'warn')
 
-        m = DiagnosticStatus(level=b'2', message='err')
+        m = DiagnosticStatus(level=b'\x02', message='err')
         d.mergeSummary(m)
-        self.assertEqual(d.level, b'2')
+        self.assertEqual(d.level, b'\x02')
         self.assertEqual(d.message, 'warn; err')
 
     def test_add(self):

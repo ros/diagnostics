@@ -115,14 +115,14 @@ class FrequencyStatus(DiagnosticTask):
             self.hist_indx = (self.hist_indx + 1) % self.params.window_size
 
             if events == 0:
-                stat.summary(b'2', 'No events recorded.')
+                stat.summary(b'\x02', 'No events recorded.')
             elif freq < self.params.freq_bound['min'] * (1 - self.params.tolerance):
-                stat.summary(b'1', 'Frequency too low.')
+                stat.summary(b'\x01', 'Frequency too low.')
             elif 'max' in self.params.freq_bound and freq > self.params.freq_bound['max'] *\
                  (1 + self.params.tolerance):
-                stat.summary(b'1', 'Frequency too high.')
+                stat.summary(b'\x01', 'Frequency too high.')
             else:
-                stat.summary(b'0', 'Desired frequency met')
+                stat.summary(b'\x00', 'Desired frequency met')
 
             stat.add('Events in window', '%d' % events)
             stat.add('Events since startup', '%d' % self.count)
@@ -206,18 +206,18 @@ class TimeStampStatus(DiagnosticTask):
     def run(self, stat):
         with self.lock:
 
-            stat.summary(b'0', 'Timestamps are reasonable.')
+            stat.summary(b'\x00', 'Timestamps are reasonable.')
             if not self.deltas_valid:
-                stat.summary(b'1', 'No data since last update.')
+                stat.summary(b'\x01', 'No data since last update.')
             else:
                 if self.min_delta < self.params.min_acceptable:
-                    stat.summary(b'2', 'Timestamps too far in future seen.')
+                    stat.summary(b'\x02', 'Timestamps too far in future seen.')
                     self.early_count += 1
                 if self.max_delta > self.params.max_acceptable:
-                    stat.summary(b'2', 'Timestamps too far in past seen.')
+                    stat.summary(b'\x02', 'Timestamps too far in past seen.')
                     self.late_count += 1
                 if self.zero_seen:
-                    stat.summary(b'2', 'Zero timestamp seen.')
+                    stat.summary(b'\x02', 'Zero timestamp seen.')
                     self.zero_count += 1
 
             stat.add('Earliest timestamp delay:', '%f' % self.min_delta)
@@ -248,5 +248,5 @@ class Heartbeat(DiagnosticTask):
         DiagnosticTask.__init__(self, 'Heartbeat')
 
     def run(self, stat):
-        stat.summary(b'0', 'Alive')
+        stat.summary(b'\x00', 'Alive')
         return stat

@@ -249,7 +249,7 @@ class Updater(DiagnosticTaskVector):
         with self.lock:  # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
-                status.level = b'2'
+                status.level = b'\x02'
                 status.name = task.name
                 status.message = 'No message was set'
                 status.hardware_id = self.hwid
@@ -347,5 +347,5 @@ class Updater(DiagnosticTaskVector):
     def addedTaskCallback(self, task):
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
-        stat.summary(b'0', 'Node starting up')
+        stat.summary(b'\x00', 'Node starting up')
         self.publish(stat)
