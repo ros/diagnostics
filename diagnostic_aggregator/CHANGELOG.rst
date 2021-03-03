@@ -2,10 +2,15 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adapt new launch file syntax. (`#190 <https://github.com/ros/diagnostics/issues/190>`_)
+* Introduce history depth parameter for subscription. (`#168 <https://github.com/ros/diagnostics/issues/168>`_)
+* Contributors: Karsten Knese, Ryohsuke Mitsudome
+
 2.1.1 (2021-01-28)
 ------------------
-* [ROS2] Move Aggregator publishing to timer to allow subscription callback more processing time. (`#180 <https://github.com/ros/diagnostics/issues/180>`_)
-  Co-authored-by: Chris Bierl <cbierl@moog.com>
+* Move Aggregator publishing to timer to allow subscription callback more processing time. (`#180 <https://github.com/ros/diagnostics/issues/180>`_)
 * Contributors: cdbierl
 
 2.1.0 (2021-01-12)
