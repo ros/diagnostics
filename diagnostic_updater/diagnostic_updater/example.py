@@ -190,7 +190,7 @@ def main():
 
     # You can broadcast a message in all the DiagnosticStatus if your node
     # is in a special state.
-    updater.broadcast(b'0', 'Doing important initialization stuff.')
+    updater.broadcast(b'\x00', 'Doing important initialization stuff.')
 
     pub1 = node.create_publisher(std_msgs.msg.Bool, 'topic1', 10)
     sleep(2)  # It isn't important if it doesn't take time.
