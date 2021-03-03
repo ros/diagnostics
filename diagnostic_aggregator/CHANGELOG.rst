@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.2 (2021-03-03)
+------------------
 * Adapt new launch file syntax. (`#190 <https://github.com/ros/diagnostics/issues/190>`_)
 * Introduce history depth parameter for subscription. (`#168 <https://github.com/ros/diagnostics/issues/168>`_)
 * Contributors: Karsten Knese, Ryohsuke Mitsudome
