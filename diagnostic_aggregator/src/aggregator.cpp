@@ -62,6 +62,7 @@ Aggregator::Aggregator()
       rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
   logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),
+  history_depth_(1000),
   clock_(new rclcpp::Clock()),
   base_path_("/")
 {
@@ -81,6 +82,8 @@ Aggregator::Aggregator()
       base_path_.append(param.second.as_string());
     } else if (param.first.compare("other_as_errors") == 0) {
       other_as_errors = param.second.as_bool();
+    } else if (param.first.compare("history_depth") == 0) {
+      history_depth_ = param.second.as_int();
     }
   }
   RCLCPP_DEBUG(logger_, "Aggregator publication rate configured to: %f", pub_rate_);
@@ -98,7 +101,8 @@ Aggregator::Aggregator()
   other_analyzer_->init(base_path_);  // This always returns true
 
   diag_sub_ = n_->create_subscription<DiagnosticArray>(
-    "/diagnostics", rclcpp::SystemDefaultsQoS(), std::bind(&Aggregator::diagCallback, this, _1));
+    "/diagnostics", rclcpp::SystemDefaultsQoS().keep_last(history_depth_),
+    std::bind(&Aggregator::diagCallback, this, _1));
   agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ =
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);

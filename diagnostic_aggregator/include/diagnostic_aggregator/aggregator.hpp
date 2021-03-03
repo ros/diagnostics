@@ -139,6 +139,7 @@ private:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr toplevel_state_pub_;
   std::mutex mutex_;
   double pub_rate_;
+  int history_depth_;
   rclcpp::Clock::SharedPtr clock_;
 
   /*!
