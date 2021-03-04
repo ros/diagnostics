@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.7 (2021-03-04)
+------------------
 * Enable multiple tasks publishing for diagnostic updater (`#182 <https://github.com/ros/diagnostics/issues/182>`_) (`#192 <https://github.com/ros/diagnostics/issues/192>`_)
 * Replace every byte creation instance (`#184 <https://github.com/ros/diagnostics/issues/184>`_) (`#191 <https://github.com/ros/diagnostics/issues/191>`_)
 * Contributors: BasVolkers
