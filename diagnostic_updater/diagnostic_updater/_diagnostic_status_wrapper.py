@@ -88,7 +88,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
     def clearSummary(self):
         """Clear the summary, setting the level to zero and the message to."""
-        self.summary(b'0', '')
+        self.summary(b'\x00', '')
 
     def mergeSummary(self, *args):
         """
@@ -115,7 +115,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
             lvl = args[0]
             msg = args[1]
 
-        if (lvl > b'0') == (self.level > b'0'):
+        if (lvl > b'\x00') == (self.level > b'\x00'):
             if len(self.message) > 0:
                 self.message += '; '
             self.message += msg
