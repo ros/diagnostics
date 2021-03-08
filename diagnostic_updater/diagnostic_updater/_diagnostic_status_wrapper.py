@@ -40,10 +40,6 @@ diagnostic_updater for Python.
 
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
-OK = DiagnosticStatus.OK
-WARN = DiagnosticStatus.WARN
-ERROR = DiagnosticStatus.ERROR
-
 
 class DiagnosticStatusWrapper(DiagnosticStatus):
     """
@@ -88,7 +84,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
 
     def clearSummary(self):
         """Clear the summary, setting the level to zero and the message to."""
-        self.summary(b'\x00', '')
+        self.summary(DiagnosticStatus.OK, '')
 
     def mergeSummary(self, *args):
         """
@@ -115,7 +111,7 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
             lvl = args[0]
             msg = args[1]
 
-        if (lvl > b'\x00') == (self.level > b'\x00'):
+        if (lvl > DiagnosticStatus.OK) == (self.level > DiagnosticStatus.OK):
             if len(self.message) > 0:
                 self.message += '; '
             self.message += msg
