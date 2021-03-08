@@ -110,7 +110,7 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(DiagnosticStatus.OK, stat[1].level, 'within max frequency but reported error')
         self.assertEqual(DiagnosticStatus.OK, stat[2].level, 'within min frequency but reported error')
         self.assertEqual(DiagnosticStatus.WARN, stat[3].level, 'min frequency exceeded but not reported')
-        self.assertEqual(DiagnosticStatus.ERRROR, stat[4].level, 'freshly cleared should fail')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[4].level, 'freshly cleared should fail')
         self.assertEqual('', stat[0].name, 'Name should not be set by FrequencyStatus')
         self.assertEqual('FrequencyStatus', fs.getName(), 'Name should be Frequency Status')
 
@@ -134,10 +134,10 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         stat[4] = ts.run(stat[4])
 
         self.assertEqual(DiagnosticStatus.WARN, stat[0].level, 'no data should return a warning')
-        self.assertEqual(DiagnosticStatus.ERRROR, stat[1].level, 'too far future not reported')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[1].level, 'too far future not reported')
         self.assertEqual(DiagnosticStatus.OK, stat[2].level, 'now not accepted')
         self.assertEqual(DiagnosticStatus.OK, stat[3].level, '4 seconds ago not accepted')
-        self.assertEqual(DiagnosticStatus.ERRROR, stat[4].level, 'too far past not reported')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[4].level, 'too far past not reported')
         self.assertEqual('', stat[0].name, 'Name should not be set by TimeStapmStatus')
         self.assertEqual('Timestamp Status', ts.getName(), 'Name should be Timestamp Status')
 

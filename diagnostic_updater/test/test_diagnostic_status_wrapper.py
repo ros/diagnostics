@@ -48,8 +48,8 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(d.level, DiagnosticStatus.WARN)
         self.assertEqual(d.message, 'warn')
 
-        d.mergeSummary(DiagnosticStatus.ERRROR, 'err')
-        self.assertEqual(d.level, DiagnosticStatus.ERRROR)
+        d.mergeSummary(DiagnosticStatus.ERROR, 'err')
+        self.assertEqual(d.level, DiagnosticStatus.ERROR)
         self.assertEqual(d.message, 'warn; err')
 
     def test_merge_summary_dmsg(self):
@@ -59,9 +59,9 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(d.level, DiagnosticStatus.WARN)
         self.assertEqual(d.message, 'warn')
 
-        m = DiagnosticStatus(level=DiagnosticStatus.ERRROR, message='err')
+        m = DiagnosticStatus(level=DiagnosticStatus.ERROR, message='err')
         d.mergeSummary(m)
-        self.assertEqual(d.level, DiagnosticStatus.ERRROR)
+        self.assertEqual(d.level, DiagnosticStatus.ERROR)
         self.assertEqual(d.message, 'warn; err')
 
     def test_add(self):

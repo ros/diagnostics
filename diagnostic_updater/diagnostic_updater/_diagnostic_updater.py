@@ -249,7 +249,7 @@ class Updater(DiagnosticTaskVector):
         with self.lock:  # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
-                status.level = DiagnosticStatus.ERRROR
+                status.level = DiagnosticStatus.ERROR
                 status.name = task.name
                 status.message = 'No message was set'
                 status.hardware_id = self.hwid
