@@ -2,6 +2,13 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Port diagnostic common diagnostics to python 3
+* fix(cpu_monitor): Exception on shutdown (`#186 <https://github.com/ros/diagnostics/issues/186>`_)
+  Catch sigint properly
+* Contributors: Rein Appeldoorn, gemignani
+
 1.10.3 (2020-12-05)
 -------------------
 * Update maintainer info

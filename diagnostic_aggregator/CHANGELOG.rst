@@ -2,6 +2,11 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Improve messages of GenericAnalyzer when items are stale. (`#187 <https://github.com/ros/diagnostics/issues/187>`_)
+* Contributors: Michael Grupp
+
 1.10.3 (2020-12-05)
 -------------------
 * Add mutex for other analyzers (`#170 <https://github.com/ros/diagnostics/issues/170>`_)
