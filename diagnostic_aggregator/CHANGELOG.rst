@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.10.4 (2021-03-14)
+-------------------
 * Improve messages of GenericAnalyzer when items are stale. (`#187 <https://github.com/ros/diagnostics/issues/187>`_)
 * Contributors: Michael Grupp
 
