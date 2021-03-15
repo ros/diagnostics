@@ -6,6 +6,7 @@
 import time
 import unittest
 
+from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_updater import DiagnosticStatusWrapper, DiagnosticTask
 from diagnostic_updater import FrequencyStatus, FrequencyStatusParam
 from diagnostic_updater import TimeStampStatus, Updater
@@ -21,7 +22,7 @@ class ClassFunction(DiagnosticTask):
         DiagnosticTask.__init__(self, 'classFunction')
 
     def run(self, stat):
-        stat.summary(b'\x00', 'Test is running')
+        stat.summary(DiagnosticStatus.OK, 'Test is running')
         stat.add('Value', '%f' % 5)
         stat.add('String', 'Toto')
         stat.add('Floating', 5.55)
@@ -54,7 +55,7 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         stat = DiagnosticStatusWrapper()
 
         message = 'dummy'
-        level = b'\x01'
+        level = DiagnosticStatus.WARN
         stat.summary(level, message)
         self.assertEqual(message, stat.message, 'DiagnosticStatusWrapper::summary failed\
                          to set message')
@@ -105,11 +106,15 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         stat[4] = fs.run(stat[4])
         # Should be good, just cleared it.
 
-        self.assertEqual(b'\x01', stat[0].level, 'max frequency exceeded but not reported')
-        self.assertEqual(b'\x00', stat[1].level, 'within max frequency but reported error')
-        self.assertEqual(b'\x00', stat[2].level, 'within min frequency but reported error')
-        self.assertEqual(b'\x01', stat[3].level, 'min frequency exceeded but not reported')
-        self.assertEqual(b'\x02', stat[4].level, 'freshly cleared should fail')
+        self.assertEqual(DiagnosticStatus.WARN, stat[0].level,
+                         'max frequency exceeded but not reported')
+        self.assertEqual(DiagnosticStatus.OK, stat[1].level,
+                         'within max frequency but reported error')
+        self.assertEqual(DiagnosticStatus.OK, stat[2].level,
+                         'within min frequency but reported error')
+        self.assertEqual(DiagnosticStatus.WARN, stat[3].level,
+                         'min frequency exceeded but not reported')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[4].level, 'freshly cleared should fail')
         self.assertEqual('', stat[0].name, 'Name should not be set by FrequencyStatus')
         self.assertEqual('FrequencyStatus', fs.getName(), 'Name should be Frequency Status')
 
@@ -132,11 +137,11 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         ts.tick((now.nanoseconds * 1e-9) - 6)
         stat[4] = ts.run(stat[4])
 
-        self.assertEqual(b'\x01', stat[0].level, 'no data should return a warning')
-        self.assertEqual(b'\x02', stat[1].level, 'too far future not reported')
-        self.assertEqual(b'\x00', stat[2].level, 'now not accepted')
-        self.assertEqual(b'\x00', stat[3].level, '4 seconds ago not accepted')
-        self.assertEqual(b'\x02', stat[4].level, 'too far past not reported')
+        self.assertEqual(DiagnosticStatus.WARN, stat[0].level, 'no data should return a warning')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[1].level, 'too far future not reported')
+        self.assertEqual(DiagnosticStatus.OK, stat[2].level, 'now not accepted')
+        self.assertEqual(DiagnosticStatus.OK, stat[3].level, '4 seconds ago not accepted')
+        self.assertEqual(DiagnosticStatus.ERROR, stat[4].level, 'too far past not reported')
         self.assertEqual('', stat[0].name, 'Name should not be set by TimeStapmStatus')
         self.assertEqual('Timestamp Status', ts.getName(), 'Name should be Timestamp Status')
 
