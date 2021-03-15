@@ -106,10 +106,14 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         stat[4] = fs.run(stat[4])
         # Should be good, just cleared it.
 
-        self.assertEqual(DiagnosticStatus.WARN, stat[0].level, 'max frequency exceeded but not reported')
-        self.assertEqual(DiagnosticStatus.OK, stat[1].level, 'within max frequency but reported error')
-        self.assertEqual(DiagnosticStatus.OK, stat[2].level, 'within min frequency but reported error')
-        self.assertEqual(DiagnosticStatus.WARN, stat[3].level, 'min frequency exceeded but not reported')
+        self.assertEqual(DiagnosticStatus.WARN, stat[0].level,
+                         'max frequency exceeded but not reported')
+        self.assertEqual(DiagnosticStatus.OK, stat[1].level,
+                         'within max frequency but reported error')
+        self.assertEqual(DiagnosticStatus.OK, stat[2].level,
+                         'within min frequency but reported error')
+        self.assertEqual(DiagnosticStatus.WARN, stat[3].level,
+                         'min frequency exceeded but not reported')
         self.assertEqual(DiagnosticStatus.ERROR, stat[4].level, 'freshly cleared should fail')
         self.assertEqual('', stat[0].name, 'Name should not be set by FrequencyStatus')
         self.assertEqual('FrequencyStatus', fs.getName(), 'Name should be Frequency Status')
