@@ -112,7 +112,7 @@ class LogExporter:
                 
 
             # Check to see if fields have changed. Add new fields to map
-            if (not [s.key for s in status.values] == self._stats[name]['fields'].keys()):
+            if not [s.key for s in status.values] == list(self._stats[name]['fields'].keys()):
                 for s in status.values:
                     if not s.key in self._stats[name]['fields']:
                         self._stats[name]['fields'][s.key] = len(self._stats[name]['fields'])
