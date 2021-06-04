@@ -69,6 +69,9 @@ Aggregator::Aggregator() :
   diag_sub_ = n_.subscribe("/diagnostics", 1000, &Aggregator::diagCallback, this);
   agg_pub_ = n_.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics_agg", 1);
   toplevel_state_pub_ = n_.advertise<diagnostic_msgs::DiagnosticStatus>("/diagnostics_toplevel_state", 1);
+
+  // Create standard update publish timer
+  updateTimer_ = n_.createTimer(pub_rate_, &Aggregator::updateTimerCB, this);
 }
 
 void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
@@ -84,7 +87,7 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr
       stamp_warn += ", ";
     stamp_warn += it->name;
   }
-  
+
   if (!ros_warnings_.count(stamp_warn))
   {
     ROS_WARN("%s", stamp_warn.c_str());
@@ -97,20 +100,37 @@ void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& 
   checkTimestamp(diag_msg);
 
   bool analyzed = false;
-  { // lock the whole loop to ensure nothing in the analyzer group changes
-    // during it.
-    boost::mutex::scoped_lock lock(mutex_);
-    for (unsigned int j = 0; j < diag_msg->status.size(); ++j)
+  bool immediate_report = false;
+  // lock the whole loop to ensure nothing in the analyzer group changes during it.
+  mutex_.lock();
+  for (unsigned int j = 0; j < diag_msg->status.size(); ++j)
+  {
+    analyzed = false;
+    boost::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
+
+    if (analyzer_group_->match(item->getName()))
     {
-      analyzed = false;
-      boost::shared_ptr<StatusItem> item(new StatusItem(&diag_msg->status[j]));
-
-      if (analyzer_group_->match(item->getName()))
-	analyzed = analyzer_group_->analyze(item);
-
-      if (!analyzed)
-	other_analyzer_->analyze(item);
+      analyzed = analyzer_group_->analyze(item);
     }
+
+    if (!analyzed)
+    {
+      other_analyzer_->analyze(item);
+    }
+
+    // In case we get a Diagnostic message with level > diag_toplevel_, report immediately instead of std 1Hz rate
+    if (item->getLevel() > diag_toplevel_)
+    {
+      immediate_report = true;
+    }
+  }
+
+  // Unlock mutex since we're done processing and publishData() now might need to access it
+  mutex_.unlock();
+
+  if (immediate_report)
+  {
+    publishData();
   }
 }
 
@@ -207,7 +227,10 @@ void Aggregator::publishData()
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = -1;
   int min_level = 255;
-  
+  uint non_ok_status_deepness = 0;
+  uint deepness = 0;
+  uint report_idx = 0;
+
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
   {
     boost::mutex::scoped_lock lock(mutex_);
@@ -217,13 +240,37 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed[i]);
 
+    deepness = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed[i]->level > diag_toplevel_state.level)
+    {
       diag_toplevel_state.level = processed[i]->level;
+      non_ok_status_deepness = deepness;
+      report_idx = i;
+    }
+    if (processed[i]->level == diag_toplevel_state.level && deepness > non_ok_status_deepness)
+    {
+      // On non okay diagnostics also copy the deepest message to toplevel state
+      non_ok_status_deepness = deepness;
+      report_idx = i;
+    }
     if (processed[i]->level < min_level)
+    {
       min_level = processed[i]->level;
+    }
+  }
+  // When a non-ok item was found, copy the complete status message once
+  if (diag_toplevel_state.level > diagnostic_msgs::DiagnosticStatus::OK)
+  {
+    diag_toplevel_state.name = processed[report_idx]->name;
+    diag_toplevel_state.message = processed[report_idx]->message;
+    diag_toplevel_state.hardware_id = processed[report_idx]->hardware_id;
+    diag_toplevel_state.values = processed[report_idx]->values;
   }
 
-  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other; 
+  /* Process other category (unmapped items) */
+  non_ok_status_deepness = 0;
+  report_idx = 0;
+  vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other;
   {
     boost::mutex::scoped_lock lock(mutex_);
     processed_other = other_analyzer_->report();
@@ -232,10 +279,31 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed_other[i]);
 
+    deepness = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed_other[i]->level > diag_toplevel_state.level)
+    {
       diag_toplevel_state.level = processed_other[i]->level;
+      non_ok_status_deepness = deepness;
+      report_idx = i;
+    }
+    if (processed_other[i]->level == diag_toplevel_state.level && deepness > non_ok_status_deepness)
+    {
+      // On non okay diagnostics also copy the deepest message to toplevel state
+      non_ok_status_deepness = deepness;
+      report_idx = i;
+    }
     if (processed_other[i]->level < min_level)
+    {
       min_level = processed_other[i]->level;
+    }
+    // When a non-ok item was found AND it was reported in 'other' categpry, copy the complete status message once
+    if (diag_toplevel_state.level > diagnostic_msgs::DiagnosticStatus::OK && non_ok_status_deepness > 0)
+    {
+      diag_toplevel_state.name = processed_other[report_idx]->name;
+      diag_toplevel_state.message = processed_other[report_idx]->message;
+      diag_toplevel_state.hardware_id = processed_other[report_idx]->hardware_id;
+      diag_toplevel_state.values = processed_other[report_idx]->values;
+    }
   }
 
   diag_array.header.stamp = ros::Time::now();
@@ -246,5 +314,7 @@ void Aggregator::publishData()
   if (diag_toplevel_state.level > int(DiagnosticLevel::Level_Error) && min_level <= int(DiagnosticLevel::Level_Error))
     diag_toplevel_state.level = DiagnosticLevel::Level_Error;
 
+  // Store latest toplevel state for immediate publish checking
+  diag_toplevel_ = diag_toplevel_state.level;
   toplevel_state_pub_.publish(diag_toplevel_state);
 }
