@@ -38,7 +38,7 @@ target_link_libraries(diagnostic_aggregator ${Boost_LIBRARIES}
 )
 add_dependencies(${PROJECT_NAME} diagnostic_msgs_generate_messages_cpp)
 
-# Aggregator node 
+# Aggregator node
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node ${catkin_LIBRARIES}
                                       ${PROJECT_NAME}
@@ -59,6 +59,7 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(test/launch/test_multiple_match.launch)
 
   add_rostest(test/launch/test_discard_stale_not_published.launch)
+  add_rostest(test/launch/test_immediate_agg_publish.launch)
 endif()
 
 catkin_install_python(

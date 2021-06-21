@@ -78,11 +78,11 @@ Output:
   /Robot/Sensors/Tilt Hokuyo/Frequency
   /Robot/Sensors/Tilt Hokuyo/Connection
 \endverbatim
- * The analyzer should always output a DiagnosticStatus with the name of the 
+ * The analyzer should always output a DiagnosticStatus with the name of the
  * prefix. Any other data output is up to the analyzer developer.
- * 
+ *
  * Analyzer's are loaded by specifying the private parameters of the
- * aggregator. 
+ * aggregator.
 \verbatim
 base_path: My Robot
 pub_rate: 1.0
@@ -103,7 +103,7 @@ analyzers:
  * the aggregator will report the error and publish it in the aggregated output.
  */
 class Aggregator
-{ 
+{
 public:
   /*!
    *\brief Constructor initializes with main prefix (ex: '/Robot')
@@ -116,6 +116,14 @@ public:
    *\brief Processes, publishes data. Should be called at pub_rate.
    */
   void publishData();
+
+  /*!
+   *\brief Timer callback
+   */
+  void updateTimerCB(const ros::TimerEvent&)
+  {
+    publishData();
+  }
 
   /*!
    *\brief True if the NodeHandle reports OK
@@ -133,8 +141,10 @@ private:
   ros::Subscriber diag_sub_; /**< DiagnosticArray, /diagnostics */
   ros::Publisher agg_pub_;  /**< DiagnosticArray, /diagnostics_agg */
   ros::Publisher toplevel_state_pub_;  /**< DiagnosticStatus, /diagnostics_toplevel_state */
+  ros::Timer updateTimer_;  /* ROS timer for periodic updates */
   boost::mutex mutex_;
   double pub_rate_;
+  int8_t diag_toplevel_ = -1;
 
   /*!
    *\brief Callback for incoming "/diagnostics"

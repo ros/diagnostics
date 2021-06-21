@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- Aggregator -->
+    <node name="aggregator_node" pkg="diagnostic_aggregator" type="aggregator_node" output="screen">
+        <param name="analyzers/test/type" value="diagnostic_aggregator/GenericAnalyzer" />
+        <param name="analyzers/test/path" value="Test" />
+        <param name="analyzers/test/find_and_remove_prefix" value="test: " />
+    </node>
+
+    <test test-name="test_immediate_agg_publish" pkg="diagnostic_aggregator" type="test_immediate_agg_publish.py" />
+
+</launch>
