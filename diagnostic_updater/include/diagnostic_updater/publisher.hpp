@@ -45,6 +45,7 @@
 
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"
+#include "rclcpp/clock.hpp"
 
 namespace
 {
@@ -140,14 +141,18 @@ public:
    *
    * \param stamp The parameters for the TimeStampStatus class that will be
    * computing statistics.
+   *
+   * \param clock Pointer to a clock instance. If not provided, the default
+   * one will be used
    */
 
   TopicDiagnostic(
     std::string name, diagnostic_updater::Updater & diag,
     const diagnostic_updater::FrequencyStatusParam & freq,
-    const diagnostic_updater::TimeStampStatusParam & stamp)
+    const diagnostic_updater::TimeStampStatusParam & stamp,
+    const rclcpp::Clock::SharedPtr & clock = nullptr)
   : HeaderlessTopicDiagnostic(name, diag, freq),
-    stamp_(stamp),
+    stamp_(stamp, clock),
     error_logger_(rclcpp::get_logger("TopicDiagnostic_error_logger"))
   {
     addTask(&stamp_);

@@ -278,8 +278,11 @@ public:
    * \brief Constructs the TimeStampStatus with the given parameters.
    */
 
-  TimeStampStatus(const TimeStampStatusParam & params, std::string name)
-  : DiagnosticTask(name), params_(params)
+  TimeStampStatus(
+    const TimeStampStatusParam & params,
+    std::string name,
+    const rclcpp::Clock::SharedPtr & clock = nullptr)
+  : DiagnosticTask(name), params_(params), clock_ptr_(clock)
   {
     init();
   }
@@ -289,8 +292,10 @@ public:
    *        Uses a default diagnostic task name of "Timestamp Status".
    */
 
-  explicit TimeStampStatus(const TimeStampStatusParam & params)
-  : DiagnosticTask("Timestamp Status"), params_(params)
+  explicit TimeStampStatus(
+    const TimeStampStatusParam & params,
+    const rclcpp::Clock::SharedPtr & clock = nullptr)
+  : DiagnosticTask("Timestamp Status"), params_(params), clock_ptr_(clock)
   {
     init();
   }
@@ -300,8 +305,8 @@ public:
    *        Uses a default diagnostic task name of "Timestamp Status".
    */
 
-  TimeStampStatus()
-  : DiagnosticTask("Timestamp Status") {init();}
+  explicit TimeStampStatus(const rclcpp::Clock::SharedPtr & clock = nullptr)
+  : DiagnosticTask("Timestamp Status"), clock_ptr_(clock) {init();}
 
   /**
    * \brief Signals an event. Timestamp stored as a double.
@@ -317,7 +322,9 @@ public:
     if (stamp == 0) {
       zero_seen_ = true;
     } else {
-      double delta = rclcpp::Clock().now().seconds() - stamp;
+      const double curr_stamp =
+        clock_ptr_ ? clock_ptr_->now().seconds() : rclcpp::Clock().now().seconds();
+      const double delta = curr_stamp - stamp;
 
       if (!deltas_valid_ || delta > max_delta_) {
         max_delta_ = delta;
@@ -390,6 +397,7 @@ private:
   double max_delta_;
   double min_delta_;
   bool deltas_valid_;
+  const rclcpp::Clock::SharedPtr clock_ptr_;
   std::mutex lock_;
 };
 
