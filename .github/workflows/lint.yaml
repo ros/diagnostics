@@ -12,11 +12,12 @@ jobs:
           linter: [cppcheck, cpplint, flake8, pep257, uncrustify, xmllint]
     steps:
     - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@v0.1
-      with:
-        required-ros-distributions: rolling
+    - uses: ros-tooling/setup-ros@v0.2
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
         distribution: rolling
         linter: ${{ matrix.linter }}
-        package-name: diagnostic_aggregator diagnostic_updater self_test
+        package-name:
+          diagnostic_aggregator
+          diagnostic_updater
+          self_test
