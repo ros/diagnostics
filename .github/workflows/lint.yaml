@@ -3,7 +3,7 @@ on:
   pull_request:
 
 jobs:
-  ament_lint_cpp:
+  ament_lint:
     name: ament_${{ matrix.linter }}
     runs-on: ubuntu-20.04
     strategy:
@@ -12,11 +12,12 @@ jobs:
           linter: [cppcheck, cpplint, flake8, pep257, uncrustify, xmllint]
     steps:
     - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@v0.1
-      with:
-        required-ros-distributions: foxy
+    - uses: ros-tooling/setup-ros@v0.2
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
         distribution: foxy
         linter: ${{ matrix.linter }}
-        package-name: diagnostic_aggregator diagnostic_updater self_test
+        package-name:
+          diagnostic_aggregator
+          diagnostic_updater
+          self_test
