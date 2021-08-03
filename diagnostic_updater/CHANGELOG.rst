@@ -2,6 +2,11 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [ROS2] Time Diagnostics can be used with Simulated Time (`#201 <https://github.com/ros/diagnostics/issues/201>`_) (`#205 <https://github.com/ros/diagnostics/issues/205>`_)
+* Contributors: Marco Lampacrescia
+
 2.0.7 (2021-03-04)
 ------------------
 * Enable multiple tasks publishing for diagnostic updater (`#182 <https://github.com/ros/diagnostics/issues/182>`_) (`#192 <https://github.com/ros/diagnostics/issues/192>`_)
