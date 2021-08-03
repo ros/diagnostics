@@ -43,9 +43,9 @@
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_updater/update_functions.hpp"
 
+#include "rclcpp/clock.hpp"
 #include "rclcpp/publisher.hpp"
 #include "rclcpp/subscription.hpp"
-#include "rclcpp/clock.hpp"
 
 namespace
 {
