@@ -38,6 +38,7 @@
 #define DIAGNOSTIC_UPDATER__UPDATE_FUNCTIONS_HPP_
 
 #include <math.h>
+#include <memory>
 #include <string>
 #include <vector>
 
