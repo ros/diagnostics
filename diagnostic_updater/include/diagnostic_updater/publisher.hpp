@@ -150,7 +150,7 @@ public:
     std::string name, diagnostic_updater::Updater & diag,
     const diagnostic_updater::FrequencyStatusParam & freq,
     const diagnostic_updater::TimeStampStatusParam & stamp,
-    const rclcpp::Clock::SharedPtr & clock = nullptr)
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
   : HeaderlessTopicDiagnostic(name, diag, freq),
     stamp_(stamp, clock),
     error_logger_(rclcpp::get_logger("TopicDiagnostic_error_logger"))
