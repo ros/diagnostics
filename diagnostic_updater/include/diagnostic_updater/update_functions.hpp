@@ -281,7 +281,7 @@ public:
   TimeStampStatus(
     const TimeStampStatusParam & params,
     std::string name,
-    const rclcpp::Clock::SharedPtr & clock = nullptr)
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
   : DiagnosticTask(name), params_(params), clock_ptr_(clock)
   {
     init();
@@ -294,7 +294,7 @@ public:
 
   explicit TimeStampStatus(
     const TimeStampStatusParam & params,
-    const rclcpp::Clock::SharedPtr & clock = nullptr)
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
   : DiagnosticTask("Timestamp Status"), params_(params), clock_ptr_(clock)
   {
     init();
@@ -305,7 +305,8 @@ public:
    *        Uses a default diagnostic task name of "Timestamp Status".
    */
 
-  explicit TimeStampStatus(const rclcpp::Clock::SharedPtr & clock = nullptr)
+  explicit TimeStampStatus(
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
   : DiagnosticTask("Timestamp Status"), clock_ptr_(clock) {init();}
 
   /**
@@ -322,9 +323,7 @@ public:
     if (stamp == 0) {
       zero_seen_ = true;
     } else {
-      const double curr_stamp =
-        clock_ptr_ ? clock_ptr_->now().seconds() : rclcpp::Clock().now().seconds();
-      const double delta = curr_stamp - stamp;
+      const double delta = clock_ptr_->now().seconds() - stamp;
 
       if (!deltas_valid_ || delta > max_delta_) {
         max_delta_ = delta;
