@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.8 (2021-08-03)
+------------------
 * [ROS2] Time Diagnostics can be used with Simulated Time (`#201 <https://github.com/ros/diagnostics/issues/201>`_) (`#205 <https://github.com/ros/diagnostics/issues/205>`_)
 * Contributors: Marco Lampacrescia
 
