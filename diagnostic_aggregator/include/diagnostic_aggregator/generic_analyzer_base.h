@@ -143,7 +143,7 @@ public:
 
     boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> header_status(new diagnostic_msgs::DiagnosticStatus());
     header_status->name = path_;
-    header_status->level = 0;
+    header_status->level = DiagnosticLevel::Level_OK;
     header_status->message = "OK";
     
     std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
@@ -168,7 +168,7 @@ public:
         continue;
       }
       
-      int8_t level = item->getLevel();
+      const int8_t level = item->getLevel();
       header_status->level = std::max(header_status->level, level);
       
       diagnostic_msgs::KeyValue kv;
@@ -177,23 +177,23 @@ public:
       
       header_status->values.push_back(kv);
       
-      all_stale = all_stale && ((level == 3) || stale);
+      all_stale = all_stale && ((level == int(DiagnosticLevel::Level_Stale)) || stale);
       
       //boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> stat = item->toStatusMsg(path_, stale);
       
       processed.push_back(item->toStatusMsg(path_, stale));
 
       if (stale)
-        header_status->level = 3;
+        header_status->level = DiagnosticLevel::Level_Stale;
 
       ++it;
     }
     
     // Header is not stale unless all subs are
     if (all_stale)
-      header_status->level = 3;
-    else if (header_status->level == 3)
-      header_status->level = 2;
+      header_status->level = DiagnosticLevel::Level_Stale;
+    else if (header_status->level == int(DiagnosticLevel::Level_Stale))
+      header_status->level = DiagnosticLevel::Level_Error;
     
     header_status->message = valToMsg(header_status->level);
     
@@ -205,7 +205,7 @@ public:
     }
     else if (num_items_expected_ > 0 && int(items_.size()) != num_items_expected_)
     {
-      int8_t lvl = 2;
+      int8_t lvl = DiagnosticLevel::Level_Error;
       header_status->level = std::max(lvl, header_status->level);
 
       std::stringstream expec, item;
@@ -219,7 +219,7 @@ public:
     }
     
     bool header_stale_timed_out = false;
-    if (timeout_ > 0 && last_header_level_ == 3)
+    if (timeout_ > 0 && last_header_level_ == int(DiagnosticLevel::Level_Stale))
         header_stale_timed_out = (ros::Time::now() - last_header_status_change_).toSec() > timeout_;
 
     if (last_header_level_ != header_status->level)
@@ -272,7 +272,7 @@ private:
 
   bool discard_stale_, has_initialized_, has_warned_;
   ros::Time last_header_status_change_; // last timestamp at which the header of the returned diagnostic msg array changed
-  int last_header_level_; // last level reported by the header of the returend diagnostic msg array
+  int last_header_level_; // last level reported by the header of the returned diagnostic msg array
 
 };
 

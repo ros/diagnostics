@@ -243,8 +243,8 @@ void Aggregator::publishData()
   agg_pub_.publish(diag_array);
 
   // Top level is error if we have stale items, unless all stale
-  if (diag_toplevel_state.level > 2 && min_level <= 2)
-    diag_toplevel_state.level = 2;
+  if (diag_toplevel_state.level > int(DiagnosticLevel::Level_Error) && min_level <= int(DiagnosticLevel::Level_Error))
+    diag_toplevel_state.level = DiagnosticLevel::Level_Error;
 
   toplevel_state_pub_.publish(diag_toplevel_state);
 }

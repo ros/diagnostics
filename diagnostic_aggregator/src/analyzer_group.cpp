@@ -243,7 +243,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
 
   if (analyzers_.size() == 0)
   {
-    header_status->level = 2;
+    header_status->level = DiagnosticLevel::Level_Error;
     header_status->message = "No analyzers";
     output.push_back(header_status);
     
@@ -279,7 +279,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
         kv.key = nice_name;
         kv.value = processed[i]->message;
         
-        all_stale = all_stale && (processed[i]->level == 3);
+        all_stale = all_stale && (processed[i]->level == int(DiagnosticLevel::Level_Stale));
         header_status->level = max(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
@@ -287,8 +287,8 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > AnalyzerGroup::rep
   }
 
   // Report stale as errors unless all stale
-  if (header_status->level == 3 && !all_stale)
-    header_status->level = 2;
+  if (header_status->level == int(DiagnosticLevel::Level_Stale) && !all_stale)
+    header_status->level = DiagnosticLevel::Level_Error;
 
   header_status->message = valToMsg(header_status->level);
 

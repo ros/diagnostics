@@ -118,7 +118,7 @@ public:
       {
         if ((*it)->name == path_)
         {
-          (*it)->level = 2;
+          (*it)->level = DiagnosticLevel::Level_Error;
           (*it)->message = "Unanalyzed items found in \"Other\"";
           break;
         }

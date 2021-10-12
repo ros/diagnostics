@@ -232,7 +232,7 @@ public:
   }
 
   /*!
-   *\brief Returns value for given key, "" if doens't exist
+   *\brief Returns value for given key, "" if doesn't exist
    *
    *\return Value if key present, "" if not
    */
