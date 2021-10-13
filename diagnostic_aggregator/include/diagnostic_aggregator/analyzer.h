@@ -69,7 +69,7 @@ PATH/EtherCAT Devices
  * Analyzers generally also output another DiagnosticStatus message for the "header", with the
  * name BASE_PATH/MY_PATH, as in the example above ("PATH/EtherCAT Devices").
  * 
- * For each new DiagnosticStatus name recieved, the analyzer will be asked whether it wants
+ * For each new DiagnosticStatus name received, the analyzer will be asked whether it wants
  * view the message using "match(string name)". If the analyzer wants to view the message, 
  * all future messages with that name will be given to the analyzer, using "analyze(item)".
  *

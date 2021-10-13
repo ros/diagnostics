@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 
   // Diagnostic tasks are added to the Updater. They will later be run when
   // the updater decides to update. The add method is heavily overloaded
-  // for convenienc. Check doxygen for the full list of add methods.
+  // for convenience. Check doxygen for the full list of add methods.
   updater.add("Function updater", dummy_diagnostic);
   DummyClass dc;
   updater.add("Method updater", &dc, &DummyClass::produce_diagnostics);

@@ -50,7 +50,7 @@ bool GenericAnalyzer::init(const string base_path, const ros::NodeHandle &n)
   string nice_name;
   if (!n.getParam("path", nice_name))
   {
-    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namepspace: %s",
+    ROS_ERROR("GenericAnalyzer was not given parameter \"path\". Namespace: %s",
               n.getNamespace().c_str());
     return false;
   }
@@ -223,7 +223,7 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
   bool all_stale = true;
   for (unsigned int j = 0; j < processed.size(); ++j)
   {
-    if (processed[j]->level != 3)
+    if (processed[j]->level != int(DiagnosticLevel::Level_Stale))
       all_stale = false;
   }
 
@@ -245,12 +245,12 @@ vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > GenericAnalyzer::r
     {
       if (!all_stale)
       {
-        processed[j]->level = 2;
+        processed[j]->level = DiagnosticLevel::Level_Error;
         processed[j]->message = "Some diagnostics are stale - setting combined level to ERROR.";
       }
       else
       {
-        processed[j]->level = 3;
+        processed[j]->level = DiagnosticLevel::Level_Stale;
         processed[j]->message = "All diagnostics are stale - setting combined level to STALE.";
       }
 
