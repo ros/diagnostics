@@ -91,7 +91,7 @@ public:
           }
         }
       };
-    return client_->async_send_request(request, response_received_callback);
+    return client_->async_send_request(request, response_received_callback).future;
   }
 
 private:
