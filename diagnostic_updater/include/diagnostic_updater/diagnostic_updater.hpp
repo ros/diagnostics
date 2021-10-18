@@ -366,6 +366,7 @@ public:
   explicit Updater(NodeT node, double period = 1.0)
   : Updater(
       node->get_node_base_interface(),
+      node->get_node_clock_interface(),
       node->get_node_logging_interface(),
       node->get_node_parameters_interface(),
       node->get_node_timers_interface(),
@@ -375,6 +376,7 @@ public:
 
   Updater(
     std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface> base_interface,
+    std::shared_ptr<rclcpp::node_interfaces::NodeClockInterface> clock_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeLoggingInterface> logging_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
@@ -383,7 +385,7 @@ public:
   : verbose_(false),
     base_interface_(base_interface),
     timers_interface_(timers_interface),
-    clock_(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME)),
+    clock_(clock_interface->get_clock()),
     period_(rclcpp::Duration::from_nanoseconds(period * 1e9)),
     publisher_(
       rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
@@ -574,7 +576,7 @@ private:
     }
     diagnostic_msgs::msg::DiagnosticArray msg;
     msg.status = status_vec;
-    msg.header.stamp = rclcpp::Clock().now();
+    msg.header.stamp = clock_->now();
     publisher_->publish(msg);
   }
 
