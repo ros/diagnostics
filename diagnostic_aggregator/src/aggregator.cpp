@@ -63,7 +63,7 @@ Aggregator::Aggregator()
   logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),
   history_depth_(1000),
-  clock_(new rclcpp::Clock()),
+  clock_(n_->get_clock()),
   base_path_("/")
 {
   RCLCPP_DEBUG(logger_, "constructor");
