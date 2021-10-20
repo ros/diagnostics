@@ -24,7 +24,12 @@ jobs:
             diagnostic_aggregator
             diagnostic_updater
             self_test
-          colcon-mixin-name: coverage-gcc
+          colcon-defaults: |
+            {
+              "build": {
+                "mixin": ["coverage-gcc"]
+              }
+            }
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - uses: actions/upload-artifact@v1
         with:
