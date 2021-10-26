@@ -43,6 +43,7 @@ from ._diagnostic_updater import CompositeDiagnosticTask
 from ._update_functions import FrequencyStatus
 from ._update_functions import TimeStampStatus
 
+from rclpy.time import Time
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
     """
@@ -142,5 +143,6 @@ class DiagnosedPublisher(TopicDiagnostic):
         The timestamp to be used by the TimeStampStatus class will be
         extracted from message.header.stamp.
         """
-        self.tick(message.header.stamp)
+        self.tick(Time.from_msg(message.header.stamp))
         self.publisher.publish(message)
+
