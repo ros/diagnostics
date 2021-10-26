@@ -189,7 +189,7 @@ class TimeStampStatus(DiagnosticTask):
         intervals. Can be either a double or a ros::Time.
         """
         if not isinstance(stamp, float):
-            stamp = stamp * 1e9
+            stamp = stamp.nanoseconds * 1e-9
 
         with self.lock:
             if stamp == 0:
