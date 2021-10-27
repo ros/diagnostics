@@ -42,6 +42,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <regex>
 
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup, diagnostic_aggregator::Analyzer)
 
@@ -144,9 +145,11 @@ bool AnalyzerGroup::init(
         continue;
       }
 
-      an_path =
-        ((an_type.compare("diagnostic_aggregator/AnalyzerGroup") != 0) ? path :
-        path + "/" + an_path);
+      if (std::regex_search(an_type, std::regex("Group$"))) {
+        an_path = path + "/" + an_path;
+      } else {
+        an_path = path;
+      }
       an_breadcrumb = (breadcrumb_.empty() ? ns : breadcrumb_ + "." + ns);
       RCLCPP_DEBUG(
         logger_, "Initializing %s in '%s' (breadcrumb: %s) ...", an_type.c_str(), an_path.c_str(),
