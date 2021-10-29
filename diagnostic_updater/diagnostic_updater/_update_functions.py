@@ -91,7 +91,7 @@ class FrequencyStatus(DiagnosticTask):
         """Reset the statistics."""
         with self.lock:
             self.count = 0
-            clock = Clock(clock_type=ClockType.STEADY_TIME)
+            clock = Clock(clock_type=ClockType.ROS_TIME)
             curtime = clock.now()
             self.times = [curtime for i in range(self.params.window_size)]
             self.seq_nums = [0 for i in range(self.params.window_size)]
@@ -104,7 +104,7 @@ class FrequencyStatus(DiagnosticTask):
 
     def run(self, stat):
         with self.lock:
-            clock = Clock(clock_type=ClockType.STEADY_TIME)
+            clock = Clock(clock_type=ClockType.ROS_TIME)
             curtime = clock.now()
             curseq = self.count
             events = curseq - self.seq_nums[self.hist_indx]
@@ -189,12 +189,12 @@ class TimeStampStatus(DiagnosticTask):
         """
         if not isinstance(stamp, float):
             stamp = stamp.nanoseconds * 1e-9
-
+        
         with self.lock:
             if stamp == 0:
                 self.zero_seen = True
             else:
-                clock = Clock(clock_type=ClockType.STEADY_TIME)
+                clock = Clock(clock_type=ClockType.ROS_TIME)
                 delta = clock.now().nanoseconds - stamp * 1e9
                 delta = delta * 1e-9
                 if not self.deltas_valid or delta > self.max_delta:
