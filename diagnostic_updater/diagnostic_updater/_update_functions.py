@@ -190,7 +190,7 @@ class TimeStampStatus(DiagnosticTask):
         """
         if not isinstance(stamp, float):
             stamp = stamp.nanoseconds * 1e-9
-        
+
         with self.lock:
             if stamp == 0:
                 self.zero_seen = True
