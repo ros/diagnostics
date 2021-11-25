@@ -56,7 +56,7 @@ def ntp_diag(st, host, off, error_offset):
         else:
             raise
     if (res == 0):
-        measured_offset = float(re.search("offset (.*),", o).group(1))*1000000
+        measured_offset = float(re.search("offset (.*),", o.decode()).group(1))*1000000
 
         st.level = DIAG.DiagnosticStatus.OK
         st.message = "OK"
