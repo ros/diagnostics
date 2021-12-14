@@ -156,7 +156,7 @@ def _rpm_to_rads(rpm):
 
 
 def parse_sensors_output(output):
-    out = StringIO(output.decode('utf-8'))
+    out = StringIO(output)
 
     sensorList = []
     for line in out.readlines():
