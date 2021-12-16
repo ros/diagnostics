@@ -176,6 +176,8 @@ def get_sensors():
         return ''
     if not o:
         return ''
+    if isinstance(o, bytes):
+        o = o.decode('utf-8')
     return o
 
 
