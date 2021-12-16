@@ -156,13 +156,16 @@ def _rpm_to_rads(rpm):
 
 
 def parse_sensors_output(output):
-    out = StringIO(output)
+    out = StringIO(output if isinstance(output, str) else output.decode('utf-8'))
 
     sensorList = []
     for line in out.readlines():
         # Check for a colon
         if ":" in line and "Adapter" not in line:
-            s = parse_sensor_line(line)
+            try:
+                s = parse_sensor_line(line)
+            except ValueError:
+                rospy.logdebug('Unable to parse line "{}"'.format(line))
             if s is not None:
                 sensorList.append(s)
     return sensorList
@@ -176,8 +179,6 @@ def get_sensors():
         return ''
     if not o:
         return ''
-    if isinstance(o, bytes):
-        o = o.decode('utf-8')
     return o
 
 
