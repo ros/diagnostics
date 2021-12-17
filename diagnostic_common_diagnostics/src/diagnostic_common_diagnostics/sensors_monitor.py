@@ -121,7 +121,10 @@ def parse_sensor_line(line):
         sensor.name = name
         sensor.type = "Temperature"
 
-    [reading, params] = reading.lstrip().split("(")
+    try:
+        [reading, params] = reading.lstrip().split("(")
+    except ValueError:
+        return None
 
     sensor.alarm = False
     if line.find("ALARM") != -1:
@@ -165,7 +168,7 @@ def parse_sensors_output(output):
             try:
                 s = parse_sensor_line(line)
             except ValueError:
-                rospy.logdebug('Unable to parse line "{}"'.format(line))
+                rospy.logwarn('Unable to parse line "{}"'.format(line))
             if s is not None:
                 sensorList.append(s)
     return sensorList
