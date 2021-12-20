@@ -167,8 +167,8 @@ def parse_sensors_output(output):
         if ":" in line and "Adapter" not in line:
             try:
                 s = parse_sensor_line(line)
-            except ValueError:
-                rospy.logwarn('Unable to parse line "{}"'.format(line))
+            except Exception as exc:
+                rospy.logwarn('Unable to parse line "%s", due to %s', line, exc)
             if s is not None:
                 sensorList.append(s)
     return sensorList
