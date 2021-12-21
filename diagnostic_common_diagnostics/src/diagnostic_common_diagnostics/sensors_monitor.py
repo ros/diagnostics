@@ -121,7 +121,10 @@ def parse_sensor_line(line):
         sensor.name = name
         sensor.type = "Temperature"
 
-    [reading, params] = reading.lstrip().split("(")
+    try:
+        [reading, params] = reading.lstrip().split("(")
+    except ValueError:
+        return None
 
     sensor.alarm = False
     if line.find("ALARM") != -1:
@@ -156,13 +159,16 @@ def _rpm_to_rads(rpm):
 
 
 def parse_sensors_output(output):
-    out = StringIO(output.decode('utf-8'))
+    out = StringIO(output if isinstance(output, str) else output.decode('utf-8'))
 
     sensorList = []
     for line in out.readlines():
         # Check for a colon
         if ":" in line and "Adapter" not in line:
-            s = parse_sensor_line(line)
+            try:
+                s = parse_sensor_line(line)
+            except Exception as exc:
+                rospy.logwarn('Unable to parse line "%s", due to %s', line, exc)
             if s is not None:
                 sensorList.append(s)
     return sensorList
