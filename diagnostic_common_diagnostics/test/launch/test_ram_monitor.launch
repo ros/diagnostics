@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="diagnostic_common_diagnostics" type="ram_monitor.py" name="ram_monitor" output="screen">
+  </node>
+
+  <test test-name="test_cpu_monitor_output" pkg="diagnostic_common_diagnostics" type="test_ram_monitor.py"/>
+</launch>
