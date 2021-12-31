@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.0 (2021-12-31)
+-------------------
 * Added ram monitor (`#222 <https://github.com/ros/diagnostics/issues/222>`_)
 * Improve sensor output processing in sensors_monitor.py (`#223 <https://github.com/ros/diagnostics/issues/223>`_)
 * Decode bytes into string in ntp_monitor (`#220 <https://github.com/ros/diagnostics/issues/220>`_)

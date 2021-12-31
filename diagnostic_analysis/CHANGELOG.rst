@@ -2,8 +2,8 @@
 Changelog for package diagnostic_analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.0 (2021-12-31)
+-------------------
 * Fix type comparison for python3 (`#194 <https://github.com/ros/diagnostics/issues/194>`_)
 * Contributors: Mikael Arguedas
 

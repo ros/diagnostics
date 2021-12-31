@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rosdiagnostic</name>
-  <version>1.10.4</version>
+  <version>1.11.0</version>
   <description>Command to print aggregated diagnostic contents to the command line</description>
 
   <author email="gautran@clearpath.ai">Guillaume Autran</author>
