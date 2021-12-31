@@ -2,6 +2,16 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added ram monitor (`#222 <https://github.com/ros/diagnostics/issues/222>`_)
+* Improve sensor output processing in sensors_monitor.py (`#223 <https://github.com/ros/diagnostics/issues/223>`_)
+* Decode bytes into string in ntp_monitor (`#220 <https://github.com/ros/diagnostics/issues/220>`_)
+  Co-authored-by: Maxime Noizet <maxime.noizet@etu.utc.fr>
+* Add missing lm-sensors dependency for sensors_monitor.py (`#198 <https://github.com/ros/diagnostics/issues/198>`_)
+  Co-authored-by: Vincent Rousseau <vincent.rousseau@sabi-agri.com>
+* Contributors: Noizet Maxime, Rousseau Vincent, chrisflesher
+
 1.10.4 (2021-03-14)
 -------------------
 * Port diagnostic common diagnostics to python 3

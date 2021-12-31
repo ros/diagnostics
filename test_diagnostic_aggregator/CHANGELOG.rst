@@ -2,6 +2,9 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.10.4 (2021-03-14)
 -------------------
 

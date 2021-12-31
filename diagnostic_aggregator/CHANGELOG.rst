@@ -2,6 +2,13 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use DiagnosticLevel enum instead of hardcoded integers (`#208 <https://github.com/ros/diagnostics/issues/208>`_)
+  Spellcheck fixes
+* Add install command for demo in CMakeLists
+* Contributors: Amilcar Lucas, gemignani
+
 1.10.4 (2021-03-14)
 -------------------
 * Improve messages of GenericAnalyzer when items are stale. (`#187 <https://github.com/ros/diagnostics/issues/187>`_)
