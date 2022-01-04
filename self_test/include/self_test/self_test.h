@@ -93,7 +93,7 @@ namespace self_test
     {
       ROS_DEBUG("Advertising self_test");
       ros::AdvertiseServiceOptions ops;//use options so that we can set callback queue directly
-      ops.init<diagnostic_msgs::SelfTest::Request, diagnostic_msgs::SelfTest::Response>("self_test", boost::bind(&TestRunner::doTest, this, _1, _2));
+      ops.init<diagnostic_msgs::SelfTest::Request, diagnostic_msgs::SelfTest::Response>("self_test", boost::bind(&TestRunner::doTest, this, boost::placeholders::_1, boost::placeholders::_2));
       ops.callback_queue = &self_test_queue_;
       service_server_ = private_node_handle_.advertiseService(ops);
       verbose = true;
