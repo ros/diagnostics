@@ -118,16 +118,21 @@ private:
   int hist_indx_;
   std::mutex lock_;
   rclcpp::Logger debug_logger_;
+  const rclcpp::Clock::SharedPtr clock_ptr_;
 
 public:
   /**
    * \brief Constructs a FrequencyStatus class with the given parameters.
    */
 
-  FrequencyStatus(const FrequencyStatusParam & params, std::string name)
+  FrequencyStatus(
+    const FrequencyStatusParam & params,
+    std::string name,
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
   : DiagnosticTask(name), params_(params), times_(params_.window_size_),
     seq_nums_(params_.window_size_),
-    debug_logger_(rclcpp::get_logger("FrequencyStatus_debug_logger"))
+    debug_logger_(rclcpp::get_logger("FrequencyStatus_debug_logger")),
+    clock_ptr_(clock)
   {
     clear();
   }
@@ -137,8 +142,10 @@ public:
    *        Uses a default diagnostic task name of "Frequency Status".
    */
 
-  explicit FrequencyStatus(const FrequencyStatusParam & params)
-  : FrequencyStatus(params, "Frequency Status")
+  explicit FrequencyStatus(
+    const FrequencyStatusParam & params,
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
+  : FrequencyStatus(params, "Frequency Status", clock)
   {}
 
   /**
@@ -148,7 +155,7 @@ public:
   void clear()
   {
     std::unique_lock<std::mutex> lock(lock_);
-    rclcpp::Time curtime = rclcpp::Clock().now();
+    rclcpp::Time curtime = clock_ptr_->now();
     count_ = 0;
 
     for (int i = 0; i < params_.window_size_; i++) {
@@ -172,11 +179,11 @@ public:
   virtual void run(diagnostic_updater::DiagnosticStatusWrapper & stat)
   {
     std::unique_lock<std::mutex> lock(lock_);
-    rclcpp::Time curtime = rclcpp::Clock().now();
+    rclcpp::Time curtime = clock_ptr_->now();
 
     int curseq = count_;
     int events = curseq - seq_nums_[hist_indx_];
-    double window = (curtime - times_[hist_indx_]).seconds();
+    double window = curtime.seconds() - times_[hist_indx_].seconds();
     double freq = events / window;
     seq_nums_[hist_indx_] = curseq;
     times_[hist_indx_] = curtime;

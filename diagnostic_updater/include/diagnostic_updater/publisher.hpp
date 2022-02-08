@@ -91,12 +91,16 @@ public:
    *
    * \param freq The parameters for the FrequencyStatus class that will be
    * computing statistics.
+   *
+   * \param clock Pointer to a clock instance. If not provided, the default
+   * one will be used
    */
 
   HeaderlessTopicDiagnostic(
     std::string name, diagnostic_updater::Updater & diag,
-    const diagnostic_updater::FrequencyStatusParam & freq)
-  : CompositeDiagnosticTask(name + " topic status"), freq_(freq)
+    const diagnostic_updater::FrequencyStatusParam & freq,
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
+  : CompositeDiagnosticTask(name + " topic status"), freq_(freq, clock)
   {
     addTask(&freq_);
     diag.add(*this);
@@ -151,7 +155,7 @@ public:
     const diagnostic_updater::FrequencyStatusParam & freq,
     const diagnostic_updater::TimeStampStatusParam & stamp,
     const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
-  : HeaderlessTopicDiagnostic(name, diag, freq),
+  : HeaderlessTopicDiagnostic(name, diag, freq, clock),
     stamp_(stamp, clock),
     error_logger_(rclcpp::get_logger("TopicDiagnostic_error_logger"))
   {
