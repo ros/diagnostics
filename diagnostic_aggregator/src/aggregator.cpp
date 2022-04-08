@@ -227,8 +227,8 @@ void Aggregator::publishData()
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = -1;
   int min_level = 255;
-  uint non_ok_status_deepness = 0;
-  uint deepness = 0;
+  uint non_ok_status_depth = 0;
+  uint depth = 0;
   uint report_idx = 0;
 
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
@@ -240,17 +240,17 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed[i]);
 
-    deepness = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
+    depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed[i]->level > diag_toplevel_state.level)
     {
       diag_toplevel_state.level = processed[i]->level;
-      non_ok_status_deepness = deepness;
+      non_ok_status_depth = depth;
       report_idx = i;
     }
-    if (processed[i]->level == diag_toplevel_state.level && deepness > non_ok_status_deepness)
+    if (processed[i]->level == diag_toplevel_state.level && depth > non_ok_status_depth)
     {
       // On non okay diagnostics also copy the deepest message to toplevel state
-      non_ok_status_deepness = deepness;
+      non_ok_status_depth = depth;
       report_idx = i;
     }
     if (processed[i]->level < min_level)
@@ -268,7 +268,7 @@ void Aggregator::publishData()
   }
 
   /* Process other category (unmapped items) */
-  non_ok_status_deepness = 0;
+  non_ok_status_depth = 0;
   report_idx = 0;
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed_other;
   {
@@ -279,17 +279,17 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed_other[i]);
 
-    deepness = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
+    depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed_other[i]->level > diag_toplevel_state.level)
     {
       diag_toplevel_state.level = processed_other[i]->level;
-      non_ok_status_deepness = deepness;
+      non_ok_status_depth = depth;
       report_idx = i;
     }
-    if (processed_other[i]->level == diag_toplevel_state.level && deepness > non_ok_status_deepness)
+    if (processed_other[i]->level == diag_toplevel_state.level && depth > non_ok_status_depth)
     {
       // On non okay diagnostics also copy the deepest message to toplevel state
-      non_ok_status_deepness = deepness;
+      non_ok_status_depth = depth;
       report_idx = i;
     }
     if (processed_other[i]->level < min_level)
@@ -297,7 +297,7 @@ void Aggregator::publishData()
       min_level = processed_other[i]->level;
     }
     // When a non-ok item was found AND it was reported in 'other' categpry, copy the complete status message once
-    if (diag_toplevel_state.level > diagnostic_msgs::DiagnosticStatus::OK && non_ok_status_deepness > 0)
+    if (diag_toplevel_state.level > diagnostic_msgs::DiagnosticStatus::OK && non_ok_status_depth > 0)
     {
       diag_toplevel_state.name = processed_other[report_idx]->name;
       diag_toplevel_state.message = processed_other[report_idx]->message;
