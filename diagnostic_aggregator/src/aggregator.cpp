@@ -228,7 +228,6 @@ void Aggregator::publishData()
   diag_toplevel_state.level = -1;
   int min_level = 255;
   uint non_ok_status_depth = 0;
-  uint depth = 0;
   uint report_idx = 0;
 
   vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > processed;
@@ -240,7 +239,7 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed[i]);
 
-    depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
+    const uint depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed[i]->level > diag_toplevel_state.level)
     {
       diag_toplevel_state.level = processed[i]->level;
@@ -279,7 +278,7 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed_other[i]);
 
-    depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
+    const uint depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
     if (processed_other[i]->level > diag_toplevel_state.level)
     {
       diag_toplevel_state.level = processed_other[i]->level;
