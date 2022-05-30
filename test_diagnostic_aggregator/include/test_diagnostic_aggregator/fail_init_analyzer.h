@@ -43,7 +43,7 @@
 #include <diagnostic_aggregator/analyzer.h>
 #include <diagnostic_aggregator/status_item.h>
 #include <diagnostic_msgs/DiagnosticStatus.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <string>
 
 namespace test_diagnostic_aggregator {
