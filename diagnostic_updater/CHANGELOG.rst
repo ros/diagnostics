@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2022-06-10)
+------------------
 * Merge pull request `#217 <https://github.com/ros/diagnostics/issues/217>`_ from boschresearch/ros-time-for-frequency-stat
 * Allow clock instance to be set from outside in FrequencyStatus
 * Use node clock for diagnostic_aggregator and diagnostic_updater (`#210 <https://github.com/ros/diagnostics/issues/210>`_)

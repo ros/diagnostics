@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2022-06-10)
+------------------
 * Use node clock for diagnostic_aggregator and diagnostic_updater (`#210 <https://github.com/ros/diagnostics/issues/210>`_)
 * Contributors: Kenji Miyake
 

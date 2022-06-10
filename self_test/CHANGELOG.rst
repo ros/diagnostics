@@ -2,8 +2,8 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2022-06-10)
+------------------
 * Return the actual future from async_send_request (`#209 <https://github.com/ros/diagnostics/issues/209>`_)
 * Contributors: Chris Lalancette
 
