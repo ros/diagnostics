@@ -77,8 +77,8 @@ def ntp_diag(st, host, off, error_offset):
         st.values = [ DIAG.KeyValue("Offset (us)", "N/A"),
                         DIAG.KeyValue("Offset tolerance (us)", str(off)),
                         DIAG.KeyValue("Offset tolerance (us) for Error", str(error_offset)),
-                        DIAG.KeyValue("Output", o),
-                        DIAG.KeyValue("Errors", e) ]
+                        DIAG.KeyValue("Output", o.decode()),
+                        DIAG.KeyValue("Errors", e.decode()) ]
 
     return st
 
