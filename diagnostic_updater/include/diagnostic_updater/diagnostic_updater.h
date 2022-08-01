@@ -368,8 +368,10 @@ namespace diagnostic_updater
       /**
        * \brief Constructs an updater class.
        *
-       * \param h Node handle from which to get the diagnostic_period
+       * \param h Node handle used to publish the diagnostics messages.
+       * \param ph Node handle from which to get the diagnostic_period
        * parameter.
+       * \param node_name Name of the node used in the messages.
        */
     Updater(ros::NodeHandle h = ros::NodeHandle(), ros::NodeHandle ph = ros::NodeHandle("~"), std::string node_name = ros::this_node::getName()) : private_node_handle_(ph), node_handle_(h), node_name_(node_name)
     {
