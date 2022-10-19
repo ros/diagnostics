@@ -64,15 +64,15 @@ def get_hddtemp_data(hostname='localhost', port=7634):
     try:
         hd_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         hd_sock.connect((hostname, port))
-        sock_data = ''
+        sock_data = b''
         while True:
             newdat = hd_sock.recv(1024)
             if len(newdat) == 0:
                 break
-            sock_data = sock_data + str(newdat)
+            sock_data = sock_data + newdat
         hd_sock.close()
 
-        sock_vals = sock_data.split('|')
+        sock_vals = sock_data.decode().split('|')
 
         # Format of output looks like ' | DRIVE | MAKE | TEMP | '
         idx = 0
