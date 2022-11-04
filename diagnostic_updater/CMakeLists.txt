@@ -46,8 +46,8 @@ ament_target_dependencies(
   "diagnostic_msgs"
   "rclcpp"
   "std_msgs"
-  ${PROJECT_NAME}
 )
+target_link_libraries(example ${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
