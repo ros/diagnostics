@@ -386,7 +386,7 @@ public:
     base_interface_(base_interface),
     timers_interface_(timers_interface),
     clock_(clock_interface->get_clock()),
-    period_(rclcpp::Duration::from_nanoseconds(period * 1e9)),
+    period_(rclcpp::Duration::from_seconds(period)),
     publisher_(
       rclcpp::create_publisher<diagnostic_msgs::msg::DiagnosticArray>(
         topics_interface, "/diagnostics", 1)),
@@ -396,7 +396,7 @@ public:
   {
     period = parameters_interface->declare_parameter(
       "diagnostic_updater.period", rclcpp::ParameterValue(period)).get<double>();
-    period_ = rclcpp::Duration::from_nanoseconds(period * 1e9);
+    period_ = rclcpp::Duration::from_seconds(period);
 
     reset_timer();
   }
@@ -420,7 +420,7 @@ public:
    */
   void setPeriod(double period)
   {
-    setPeriod(rclcpp::Duration::from_nanoseconds(period * 1e9));
+    setPeriod(rclcpp::Duration::from_seconds(period));
   }
 
   /**
@@ -441,7 +441,7 @@ public:
    *
    * \param msg Status message to output.
    */
-  void broadcast(int lvl, const std::string msg)
+  void broadcast(unsigned char lvl, const std::string msg)
   {
     std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
 
