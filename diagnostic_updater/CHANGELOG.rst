@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.9 (2022-11-12)
+------------------
 * Check if parameter is already declared to avoid re-declaring it. (#227)
 * Fix implicit conversion warnings
 * Use node clock in FrequencyStatus diagnostic
