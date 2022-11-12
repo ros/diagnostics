@@ -125,6 +125,7 @@ install(
 
 install(
   TARGETS ${PROJECT_NAME} ${ANALYZERS}
+  EXPORT ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -154,6 +155,8 @@ install( # example aggregator configration
 )
 
 pluginlib_export_plugin_description_file(${PROJECT_NAME} plugin_description.xml)
+
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 ament_export_include_directories(include)
 ament_export_dependencies(ament_cmake)

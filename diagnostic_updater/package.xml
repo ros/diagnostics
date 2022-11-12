@@ -1,12 +1,12 @@
 <package format="2">
   <name>diagnostic_updater</name>
-  <version>2.1.3</version>
+  <version>3.0.0</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-  <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
+  <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
   <license>BSD</license>
 
