@@ -2,6 +2,14 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Check if parameter is already declared to avoid re-declaring it. (#227)
+* Fix implicit conversion warnings
+* Use node clock in FrequencyStatus diagnostic
+* Allow clock instance to be set from outside in FrequencyStatus
+* Contributors: Arne Nordmann, Grzegorz Głowacki, Marco Lampacrescia, Nikos Koukis, Ralph Lange
+
 2.0.8 (2021-08-03)
 ------------------
 * [ROS2] Time Diagnostics can be used with Simulated Time (`#201 <https://github.com/ros/diagnostics/issues/201>`_) (`#205 <https://github.com/ros/diagnostics/issues/205>`_)
