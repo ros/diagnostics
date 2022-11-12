@@ -394,12 +394,11 @@ public:
   {
     constexpr const char * period_param_name = "diagnostic_updater.period";
     rclcpp::ParameterValue period_param;
-    try {
-      period_param = parameters_interface->declare_parameter(
-        period_param_name, rclcpp::ParameterValue(
-          period));
-    } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & exc) {
+    if (parameters_interface->has_parameter(period_param_name)) {
       period_param = parameters_interface->get_parameter(period_param_name).get_parameter_value();
+    } else {
+      period_param = parameters_interface->declare_parameter(
+        period_param_name, rclcpp::ParameterValue(period));
     }
     period = period_param.get<double>();
     period_ = rclcpp::Duration::from_nanoseconds(period * 1e9);
