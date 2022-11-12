@@ -392,8 +392,15 @@ public:
     node_name_(base_interface->get_name()),
     warn_nohwid_done_(false)
   {
-    period = parameters_interface->declare_parameter(
-      "diagnostic_updater.period", rclcpp::ParameterValue(period)).get<double>();
+    constexpr const char * period_param_name = "diagnostic_updater.period";
+    rclcpp::ParameterValue period_param;
+    if (parameters_interface->has_parameter(period_param_name)) {
+      period_param = parameters_interface->get_parameter(period_param_name).get_parameter_value();
+    } else {
+      period_param = parameters_interface->declare_parameter(
+        period_param_name, rclcpp::ParameterValue(period));
+    }
+    period = period_param.get<double>();
     period_ = rclcpp::Duration::from_nanoseconds(period * 1e9);
 
     reset_timer();
