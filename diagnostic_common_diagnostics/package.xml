@@ -4,7 +4,9 @@
   <name>diagnostic_common_diagnostics</name>
   <version>1.10.0</version>
   <description>diagnostic_common_diagnostics</description>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <!-- author -->
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <!-- maintainers -->
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
@@ -28,10 +30,16 @@
   <exec_depend>python-psutil</exec_depend>
   <exec_depend>ntpdate</exec_depend>
 
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+
+  <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
+  For now, enable the linters that do support exlusions.
+  Once all files are migrated to ROS2, all linters can be 
+  enabled vi ament_lint_common as the files are cleaned up. -->
+  <!-- <test_depend>ament_cmake_flake8</test_depend> -->
+  <!-- <test_depend>ament_cmake_pep257</test_depend> -->
+  <test_depend>ament_cmake_xmllint</test_depend>
+  <test_depend>ament_cmake_lint_cmake</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
