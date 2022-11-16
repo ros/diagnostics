@@ -1,28 +1,16 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(diagnostic_common_diagnostics)
 
-# Load catkin and all dependencies required for this package
-find_package(catkin REQUIRED COMPONENTS diagnostic_updater)
+# Find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 
-catkin_python_setup()
+find_package(rclpy REQUIRED)
 
-catkin_package()
-
-catkin_python_setup()
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-
-  # Test CPU Monitor
-  add_rostest(test/launch/test_cpu_monitor.launch)
-  add_rostest(test/launch/test_cpu_monitor_level_ok.launch)
-  add_rostest(test/launch/test_cpu_monitor_level_warn.launch)
-endif()
+ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  src/diagnostic_common_diagnostics/cpu_monitor.py
-  src/diagnostic_common_diagnostics/hd_monitor.py
-  src/diagnostic_common_diagnostics/ntp_monitor.py
-  src/diagnostic_common_diagnostics/sensors_monitor.py
-  src/diagnostic_common_diagnostics/tf_monitor.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+    ${PROJECT_NAME}/ntp_monitor.py
+    DESTINATION lib/${PROJECT_NAME}
+)
+ament_package()
