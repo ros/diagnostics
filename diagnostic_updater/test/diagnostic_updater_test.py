@@ -118,7 +118,7 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
 
         stat = [DiagnosticStatusWrapper() for i in range(5)]
         stat[0] = ts.run(stat[0])
-        clock = Clock(clock_type=ClockType.STEADY_TIME)
+        clock = Clock(clock_type=ClockType.ROS_TIME)
         now = clock.now()
         ts.tick((now.nanoseconds * 1e-9) + 2)
         stat[1] = ts.run(stat[1])
