@@ -93,12 +93,12 @@ class NTPMonitor(Node):
         new_msg = DIAG.DiagnosticArray()
         # new_msg.header.stamp = rospy.get_rostime()
 
-        st = self.ntp_diag(self.stat, self.ntp_hostname, self.offset, self.error_offset)
+        st = self.ntp_diag(self.stat)
         if st is not None:
             new_msg.status.append(st)
 
         if self.do_self_test:
-            st = self.ntp_diag(self.self_stat, self.hostname, self.self_offset, self.error_offset)
+            st = self.ntp_diag(self.self_stat)
             if st is not None:
                 new_msg.status.append(st)
 
@@ -107,7 +107,12 @@ class NTPMonitor(Node):
 
 
 
-    def ntp_diag(self, st, host, off, error_offset):
+    def ntp_diag(self, st):
+        """Adds ntp diagnostics to the given status message and returns the new status
+
+        Args:
+            st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
+        """
         
         def add_kv(stat_values, key, value):
             kv = DIAG.KeyValue()
@@ -116,7 +121,7 @@ class NTPMonitor(Node):
             stat_values.append(kv)
             
         PROCESS_NAME = "ntpdate"
-        p = Popen([PROCESS_NAME, "-q", host], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = Popen([PROCESS_NAME, "-q", self.ntp_hostname], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         try:
             stdout, stderr = p.communicate(timeout=5)
         except TimeoutExpired:
@@ -126,8 +131,8 @@ class NTPMonitor(Node):
         rc = p.returncode
         
         st.values = []
-        add_kv(st.values, "Offset tolerance (us)", str(off))
-        add_kv(st.values, "Offset tolerance (us) for Error", str(error_offset))
+        add_kv(st.values, "Offset tolerance (us)", str(self.offset))
+        add_kv(st.values, "Offset tolerance (us) for Error", str(self.error_offset))
         output = stdout.decode("UTF-8")
         errors = stderr.decode("UTF-8")
         
@@ -139,10 +144,10 @@ class NTPMonitor(Node):
             st.message = "OK"
             add_kv(st.values, "Offset (us)", str(measured_offset))
 
-            if (abs(measured_offset) > off):
+            if (abs(measured_offset) > self.offset):
                 st.level = DIAG.DiagnosticStatus.WARN
                 st.message = "NTP Offset Too High"
-            if (abs(measured_offset) > error_offset):
+            if (abs(measured_offset) > self.error_offset):
                 st.level = DIAG.DiagnosticStatus.ERROR
                 st.message = "NTP Offset Too High"
 
@@ -157,7 +162,7 @@ class NTPMonitor(Node):
 
 
 
-def ntp_monitor_main(argv=sys.argv):
+def ntp_monitor_main(argv=sys.argv[1:]):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntp_hostname",
@@ -183,7 +188,7 @@ def ntp_monitor_main(argv=sys.argv):
     parser.add_argument("--no-self-test", dest="do_self_test",
                       help="Disable self test",
                       action="store_false", default=True)
-    args = parser.parse_args()
+    args = parser.parse_args(args=argv)
 
     offset = args.offset_tol
     self_offset = args.self_offset_tol
