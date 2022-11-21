@@ -38,6 +38,8 @@ diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
+from rclpy.time import Time
+
 from ._diagnostic_updater import CompositeDiagnosticTask
 
 from ._update_functions import FrequencyStatus
@@ -132,7 +134,7 @@ class DiagnosedPublisher(TopicDiagnostic):
         @param stamp The parameters for the TimeStampStatus class that will be
         computing statistics.
         """
-        TopicDiagnostic.__init__(self, pub.name, diag, freq, stamp)
+        TopicDiagnostic.__init__(self, pub.topic_name, diag, freq, stamp)
         self.publisher = pub
 
     def publish(self, message):
@@ -142,5 +144,5 @@ class DiagnosedPublisher(TopicDiagnostic):
         The timestamp to be used by the TimeStampStatus class will be
         extracted from message.header.stamp.
         """
-        self.tick(message.header.stamp)
+        self.tick(Time.from_msg(message.header.stamp))
         self.publisher.publish(message)
