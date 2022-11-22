@@ -4,8 +4,9 @@
 
 \b diagnostic_common_diagnostics contains a few common diagnostic nodes
 
-- tf_monitor publishes diagnostic messages reporting on the health of
-the TF tree. It is based on tfwtf.
+- ntp_monitor publishes diagnostic messages for how well the NTP time sync is working.
+- tf_monitor used to publish diagnostic messages reporting on the health of
+the TF tree. It is based on tfwtf. It is not ported to ROS2.
 
 
 \section codeapi Code API
