@@ -20,18 +20,13 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
-
-
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>diagnostic_updater</exec_depend>
-  <exec_depend>hddtemp</exec_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>tf</exec_depend>
-  <exec_depend>python-psutil</exec_depend>
+  <!-- <exec_depend>hddtemp</exec_depend> -->
+  <!-- <exec_depend>tf</exec_depend> -->
+  <!-- <exec_depend>python-psutil</exec_depend> -->
   <exec_depend>ntpdate</exec_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
 
+  <test_depend>ament_lint_auto</test_depend>
   <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
   For now, enable the linters that do support exlusions.
   Once all files are migrated to ROS2, all linters can be 
@@ -40,6 +35,8 @@
   <!-- <test_depend>ament_cmake_pep257</test_depend> -->
   <test_depend>ament_cmake_xmllint</test_depend>
   <test_depend>ament_cmake_lint_cmake</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -43,6 +43,44 @@ import socket
 from subprocess import Popen, PIPE, TimeoutExpired
 import re
 
+DEFAULT_NTP_HOSTNAME = "pool.ntp.org"
+PROCESS_NAME = "ntpdate"
+DEFAULT_REQUEST_TIMEOUT = 5
+
+def populate_ntpdate_output(ntp_hostname):
+    """Runs the ntpdate command and captures the output
+
+    Args:
+        ntp_hostname (string): The hostname to query 
+
+    Raises:
+        e: TimeoutExpired if the request exceeds DEFAULT_REQUEST_TIMEOUT
+
+    Returns:
+        tuple(int, string, string): A tuple of the request result code, the decoded stdout output, and the decoded stderr output
+    """
+    p = Popen([PROCESS_NAME, "-q", ntp_hostname], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    try:
+        stdout, stderr = p.communicate(timeout=DEFAULT_REQUEST_TIMEOUT)
+    except TimeoutExpired as e:
+        p.kill()
+        stdout, stderr = p.communicate()
+        raise e
+    rc = p.returncode
+    output = stdout.decode("UTF-8")
+    errors = stderr.decode("UTF-8")
+    return rc, output, errors
+
+def parse_ntpdate_response_for_offset(response):
+    """Given stdout from a successful call to ntpdate, return the measured offset
+
+    Args:
+        response (float): The offset [uS]
+    """
+    re_match = re.search("offset (.*),", response)
+
+    if re_match is not None:
+        return float(re_match[1]) * 1E6
 
 class NTPMonitor(Node):
     
@@ -106,6 +144,11 @@ class NTPMonitor(Node):
             self.current_msg = new_msg
 
 
+    def _add_kv(self, stat_values, key, value):
+        kv = DIAG.KeyValue()
+        kv.key = key
+        kv.value = value
+        stat_values.append(kv)
 
     def ntp_diag(self, st):
         """Adds ntp diagnostics to the given status message and returns the new status
@@ -113,36 +156,36 @@ class NTPMonitor(Node):
         Args:
             st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
         """
-        
-        def add_kv(stat_values, key, value):
-            kv = DIAG.KeyValue()
-            kv.key = key
-            kv.value = value
-            stat_values.append(kv)
-            
-        PROCESS_NAME = "ntpdate"
-        p = Popen([PROCESS_NAME, "-q", self.ntp_hostname], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+
         try:
-            stdout, stderr = p.communicate(timeout=5)
-        except TimeoutExpired:
-            p.kill()
-            stdout, stderr = p.communicate()
-            self.get_logger().error('Timeout running %s: "%s"' % (PROCESS_NAME, stderr))
-        rc = p.returncode
+            rc,output,errors = populate_ntpdate_output(self.ntp_hostname)
+        except TimeoutError:
+            self.get_logger().error('Timeout running %s' % (PROCESS_NAME))
         
         st.values = []
-        add_kv(st.values, "Offset tolerance (us)", str(self.offset))
-        add_kv(st.values, "Offset tolerance (us) for Error", str(self.error_offset))
-        output = stdout.decode("UTF-8")
-        errors = stderr.decode("UTF-8")
+        self._add_kv(st.values, "Offset tolerance (us)", str(self.offset))
+        self._add_kv(st.values, "Offset tolerance (us) for Error", str(self.error_offset))
+
         
         if rc == 0:
-            re_match = re.search("offset (.*),", output)
-            measured_offset = float(re_match[1])*1000000
+            st = self.populate_ntp_process_success(st, output)
+        else:
+            st = self.populate_ntp_process_fail(st, rc, output, errors)
 
+        return st
+    
+    def populate_ntp_process_success(self, st, output):
+        """Populate a status message given a successful process return code
+
+        Args:
+            st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
+            output (string): Raw console output from ntp call
+        """
+        measured_offset = parse_ntpdate_response_for_offset(output)
+        if measured_offset is not None:
             st.level = DIAG.DiagnosticStatus.OK
             st.message = "OK"
-            add_kv(st.values, "Offset (us)", str(measured_offset))
+            self._add_kv(st.values, "Offset (us)", str(measured_offset))
 
             if (abs(measured_offset) > self.offset):
                 st.level = DIAG.DiagnosticStatus.WARN
@@ -150,23 +193,36 @@ class NTPMonitor(Node):
             if (abs(measured_offset) > self.error_offset):
                 st.level = DIAG.DiagnosticStatus.ERROR
                 st.message = "NTP Offset Too High"
-
         else:
             st.level = DIAG.DiagnosticStatus.ERROR
-            st.message = "Error Running ntpdate. Returned %d" % rc
-            add_kv(st.values, "Offset (us)", "N/A")
-            add_kv(st.values, "Output", output)
-            add_kv(st.values, "Errors", errors)
-
+            st.message = "Error Running ntpdate. No offset found"
+            self._add_kv(st.values, "Offset (us)", "N/A")
+            self._add_kv(st.values, "Output", output)            
+        
         return st
+        
+    def populate_ntp_process_fail(self, st, rc, output, errors):
+        """Populate a status message given a failed process return code
 
-
+        Args:
+            st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
+            rc (int): The result code from the process call
+            output (string): the decoded stdout output
+            errors (string): the decoded stderr output
+        """
+        st.level = DIAG.DiagnosticStatus.ERROR
+        st.message = "Error Running ntpdate. Returned %d" % rc
+        self._add_kv(st.values, "Offset (us)", "N/A")
+        self._add_kv(st.values, "Output", output)
+        self._add_kv(st.values, "Errors", errors)
+        
+        return st
 
 def ntp_monitor_main(argv=sys.argv[1:]):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntp_hostname",
-                      action="store", default="pool.ntp.org",
+                      action="store", default=DEFAULT_NTP_HOSTNAME,
                       type=str)
     parser.add_argument("--offset-tolerance", dest="offset_tol",
                       action="store", default=500,
