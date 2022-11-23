@@ -27,7 +27,7 @@
   <exec_depend>hddtemp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>tf</exec_depend>
-  <exec_depend>python-psutil</exec_depend>
+  <exec_depend>python3-psutil</exec_depend>
   <exec_depend>ntpdate</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
