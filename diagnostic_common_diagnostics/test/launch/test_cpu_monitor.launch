@@ -1,6 +1,0 @@
-<launch>
-  <node pkg="diagnostic_common_diagnostics" type="cpu_monitor.py" name="cpu_monitor" output="screen">
-  </node>
-
-  <test test-name="test_cpu_monitor_output" pkg="diagnostic_common_diagnostics" type="test_cpu_monitor.py"/>
-</launch>

@@ -1,8 +1,0 @@
-analyzers:
-  fail_init_path:
-    type: test_diagnostic_aggregator/FailInitAnalyzer
-    path: no_way
-  my_path: # Good analyzer loads
-    type: diagnostic_aggregator/GenericAnalyzer
-    path: Motors
-    startswith: 'EtherCAT'
