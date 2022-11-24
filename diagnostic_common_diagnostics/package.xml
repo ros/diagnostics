@@ -16,7 +16,6 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
-  <exec_depend>python-psutil</exec_depend>
   <exec_depend>ntpdate</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
