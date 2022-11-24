@@ -26,3 +26,9 @@ install(PROGRAMS
   src/diagnostic_common_diagnostics/sensors_monitor.py
   src/diagnostic_common_diagnostics/tf_monitor.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+if(BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+endif()
+ament_package()
