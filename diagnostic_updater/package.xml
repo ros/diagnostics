@@ -4,8 +4,6 @@
   <name>diagnostic_updater</name>
   <version>2.0.9</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
@@ -16,6 +14,8 @@
 
   <author>Jeremy Leibs</author>
   <author>Blaise Gassend</author>
+  <author>Kevin Watts</author>
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
