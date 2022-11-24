@@ -4,8 +4,6 @@
   <name>diagnostics</name>
   <version>1.9.3</version>
   <description>diagnostics</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
@@ -15,6 +13,7 @@
   <url type="website">http://www.ros.org/wiki/diagnostics</url>
 
   <author>Kevin Watts</author>
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
