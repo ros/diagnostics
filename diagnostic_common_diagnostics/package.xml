@@ -1,18 +1,22 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>diagnostic_common_diagnostics</name>
   <version>1.9.3</version>
   <description>diagnostic_common_diagnostics</description>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
+  <!-- author -->
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <!-- maintainers -->
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-  <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
+  <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
-<!-- <url type="bugtracker"></url> -->
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
@@ -29,6 +33,6 @@
   <test_depend>ament_cmake_lint_cmake</test_depend>
 
   <export>
-    <architecture_independent/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
