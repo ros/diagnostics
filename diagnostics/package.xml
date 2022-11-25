@@ -1,9 +1,9 @@
-<package>
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>diagnostics</name>
   <version>1.9.3</version>
   <description>diagnostics</description>
-  <author>Kevin Watts</author>
-  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="karsten.knese@us.bosch.com">Karsten Knese</maintainer>
@@ -11,19 +11,18 @@
   <license>BSD</license>
 
   <url type="website">http://www.ros.org/wiki/diagnostics</url>
-<!-- <url type="bugtracker"></url> -->
 
   <author>Kevin Watts</author>
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <run_depend>diagnostic_aggregator</run_depend>
-  <run_depend>diagnostic_analysis</run_depend>
-  <run_depend>diagnostic_common_diagnostics</run_depend>
-  <run_depend>diagnostic_updater</run_depend>
-  <run_depend>self_test</run_depend>
+  <exec_depend>diagnostic_aggregator</exec_depend>
+  <!-- <exec_depend>diagnostic_common_diagnostics</exec_depend> -->
+  <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>self_test</exec_depend>
 
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
