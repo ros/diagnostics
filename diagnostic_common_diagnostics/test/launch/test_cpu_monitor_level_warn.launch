@@ -1,9 +1,0 @@
-<launch>
-  <node pkg="diagnostic_common_diagnostics" type="cpu_monitor_psutil_mock.py" name="cpu_monitor" args="--percentage 80">
-    <param name="warning_percentage" value="60" />
-  </node>
-
-  <test test-name="test_cpu_monitor_output" pkg="diagnostic_common_diagnostics" type="test_cpu_monitor.py">
-    <param name="expected_level" value="1" />
-  </test>
-</launch>
