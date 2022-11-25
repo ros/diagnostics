@@ -129,7 +129,6 @@ class NTPMonitor:
 
     def checkCB(self, ev):
         new_msg = DIAG.DiagnosticArray()
-        new_msg.header.stamp = rospy.get_rostime()
 
         st = ntp_diag(self.stat, self.ntp_hostname, self.offset, self.error_offset)
         if st is not None:
