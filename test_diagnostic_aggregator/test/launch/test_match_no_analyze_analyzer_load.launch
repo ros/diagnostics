@@ -1,7 +1,0 @@
-<launch>
-  <test pkg="diagnostic_aggregator" type="analyzer_loader"
-        name="loader" test-name="match_no_analyze_analyzer_load_test" >
-    <rosparam command="load" 
-              file="$(find test_diagnostic_aggregator)/test/match_no_analyze_analyzer_load.yaml" />
-  </test>
-</launch>
