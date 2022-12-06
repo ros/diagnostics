@@ -14,7 +14,7 @@
   
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
-  <author email="arne.nordmann@de.bosch.com">Brice Rebsamen</author>
+  <author email="arne.nordmann@de.bosch.com">Arne Nordmann</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
