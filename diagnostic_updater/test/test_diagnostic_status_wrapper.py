@@ -6,6 +6,7 @@
 import unittest
 
 from diagnostic_msgs.msg import DiagnosticStatus
+
 from diagnostic_updater import DiagnosticStatusWrapper
 
 

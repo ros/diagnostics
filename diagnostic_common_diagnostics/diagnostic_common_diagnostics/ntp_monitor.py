@@ -38,9 +38,10 @@ import sys
 import threading
 from subprocess import PIPE, Popen, TimeoutExpired
 
-import diagnostic_updater as DIAG
 import rclpy
 from rclpy.node import Node
+
+import diagnostic_updater as DIAG
 
 
 class NTPMonitor(Node):

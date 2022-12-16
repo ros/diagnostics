@@ -39,9 +39,10 @@
 from time import sleep
 
 import diagnostic_msgs
-import diagnostic_updater
 import rclpy
 import std_msgs
+
+import diagnostic_updater
 
 time_to_launch = 0
 

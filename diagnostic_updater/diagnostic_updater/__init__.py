@@ -35,5 +35,5 @@
 # -*- coding: utf-8 -*-
 from ._diagnostic_status_wrapper import *  # noqa
 from ._diagnostic_updater import *  # noqa
-from ._update_functions import *  # noqa
 from ._publisher import *  # noqa
+from ._update_functions import *  # noqa

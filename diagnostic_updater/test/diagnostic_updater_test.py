@@ -8,10 +8,11 @@ import unittest
 
 import rclpy
 from diagnostic_msgs.msg import DiagnosticStatus
+from rclpy.clock import Clock, ClockType
+
 from diagnostic_updater import (DiagnosticStatusWrapper, DiagnosticTask,
                                 FrequencyStatus, FrequencyStatusParam,
                                 TimeStampStatus, Updater)
-from rclpy.clock import Clock, ClockType
 
 
 class ClassFunction(DiagnosticTask):
