@@ -41,21 +41,21 @@ diagnostic_updater for Python.
 import threading
 
 from diagnostic_msgs.msg import DiagnosticStatus
-from rclpy.clock import Clock
-from rclpy.clock import ClockType
+from rclpy.clock import Clock, ClockType
 
 from ._diagnostic_updater import DiagnosticTask
 
 
 class FrequencyStatusParam:
     """
-    A structure that holds the constructor parameters for the FrequencyStatus class.
+    A structure that holds the constructor parameters for the FrequencyStatus
+    class.
 
-    Implementation note: the min_freq and max_freq parameters in the C += 1 code
-    are stored as pointers, so that if they are updated, the new values are used.
-    To emulate this behavior, we here use a dictionary to hold them: {'min','max'}
-    freq_bound is a dictionary with keys 'min' and 'max', containing the min
-    and max acceptable frequencies.
+    Implementation note: the min_freq and max_freq parameters in the C += 1
+    code are stored as pointers, so that if they are updated, the new values
+    are used. To emulate this behavior, we here use a dictionary to hold them:
+    {'min','max'} freq_bound is a dictionary with keys 'min' and 'max',
+    containing the min and max acceptable frequencies.
     tolerance is the tolerance with which bounds must be satisfied. Acceptable
     values are from freq_bound['min'] * (1 - torelance) to
     freq_bound['max'] * (1 + tolerance). Common use cases are to set
@@ -117,10 +117,12 @@ class FrequencyStatus(DiagnosticTask):
 
             if events == 0:
                 stat.summary(DiagnosticStatus.ERROR, 'No events recorded.')
-            elif freq < self.params.freq_bound['min'] * (1 - self.params.tolerance):
+            elif freq < self.params.freq_bound['min'] * (
+                    1 - self.params.tolerance):
                 stat.summary(DiagnosticStatus.WARN, 'Frequency too low.')
-            elif 'max' in self.params.freq_bound and freq > self.params.freq_bound['max'] *\
-                 (1 + self.params.tolerance):
+            elif ('max' in self.params.freq_bound and
+                    freq > self.params.freq_bound['max'] *
+                    (1 + self.params.tolerance)):
                 stat.summary(DiagnosticStatus.WARN, 'Frequency too high.')
             else:
                 stat.summary(DiagnosticStatus.OK, 'Desired frequency met')
@@ -129,22 +131,27 @@ class FrequencyStatus(DiagnosticTask):
             stat.add('Events since startup', '%d' % self.count)
             stat.add('Duration of window (s)', '%f' % window)
             stat.add('Actual frequency (Hz)', '%f' % freq)
-            if 'max' in self.params.freq_bound and self.params.freq_bound['min'] == \
-               self.params.freq_bound['max']:
-                stat.add('Target frequency (Hz)', '%f' % self.params.freq_bound['min'])
+            if ('max' in self.params.freq_bound and
+                self.params.freq_bound['min'] ==
+               self.params.freq_bound['max']):
+                stat.add('Target frequency (Hz)', '%f' %
+                         self.params.freq_bound['min'])
             if self.params.freq_bound['min'] > 0:
                 stat.add('Minimum acceptable frequency (Hz)', '%f'
-                         % (self.params.freq_bound['min'] * (1 - self.params.tolerance)))
+                         % (self.params.freq_bound['min'] *
+                            (1 - self.params.tolerance)))
             if 'max' in self.params.freq_bound:
                 stat.add('Maximum acceptable frequency (Hz)', '%f'
-                         % (self.params.freq_bound['max'] * (1 + self.params.tolerance)))
+                         % (self.params.freq_bound['max'] *
+                            (1 + self.params.tolerance)))
 
         return stat
 
 
 class TimeStampStatusParam:
     """
-    A structure that holds the constructor parameters for the TimeStampStatus class.
+    A structure that holds the constructor parameters for the TimeStampStatus
+    class.
 
     max_acceptable: maximum acceptable difference between two timestamps.
     min_acceptable: minimum acceptable difference between two timestamps.
@@ -209,25 +216,32 @@ class TimeStampStatus(DiagnosticTask):
 
             stat.summary(DiagnosticStatus.OK, 'Timestamps are reasonable.')
             if not self.deltas_valid:
-                stat.summary(DiagnosticStatus.WARN, 'No data since last update.')
+                stat.summary(DiagnosticStatus.WARN,
+                             'No data since last update.')
             else:
                 if self.min_delta < self.params.min_acceptable:
-                    stat.summary(DiagnosticStatus.ERROR, 'Timestamps too far in future seen.')
+                    stat.summary(DiagnosticStatus.ERROR,
+                                 'Timestamps too far in future seen.')
                     self.early_count += 1
                 if self.max_delta > self.params.max_acceptable:
-                    stat.summary(DiagnosticStatus.ERROR, 'Timestamps too far in past seen.')
+                    stat.summary(DiagnosticStatus.ERROR,
+                                 'Timestamps too far in past seen.')
                     self.late_count += 1
                 if self.zero_seen:
-                    stat.summary(DiagnosticStatus.ERROR, 'Zero timestamp seen.')
+                    stat.summary(DiagnosticStatus.ERROR,
+                                 'Zero timestamp seen.')
                     self.zero_count += 1
 
             stat.add('Earliest timestamp delay:', '%f' % self.min_delta)
             stat.add('Latest timestamp delay:', '%f' % self.max_delta)
-            stat.add('Earliest acceptable timestamp delay:', '%f' % self.params.min_acceptable)
-            stat.add('Latest acceptable timestamp delay:', '%f' % self.params.max_acceptable)
+            stat.add('Earliest acceptable timestamp delay:', '%f' %
+                     self.params.min_acceptable)
+            stat.add('Latest acceptable timestamp delay:', '%f' %
+                     self.params.max_acceptable)
             stat.add('Late diagnostic update count:', '%i' % self.late_count)
             stat.add('Early diagnostic update count:', '%i' % self.early_count)
-            stat.add('Zero seen diagnostic update count:', '%i' % self.zero_count)
+            stat.add('Zero seen diagnostic update count:', '%i' %
+                     self.zero_count)
 
             self.deltas_valid = False
             self.min_delta = 0

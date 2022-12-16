@@ -41,14 +41,13 @@ diagnostic_updater for Python.
 from rclpy.time import Time
 
 from ._diagnostic_updater import CompositeDiagnosticTask
-
-from ._update_functions import FrequencyStatus
-from ._update_functions import TimeStampStatus
+from ._update_functions import FrequencyStatus, TimeStampStatus
 
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
     """
-    A class to facilitate making diagnostics for a topic using a FrequencyStatus.
+    A class to facilitate making diagnostics for a topic using a
+    FrequencyStatus.
 
     The word "headerless" in the class name refers to the fact that it is
     mainly designed for use with messages that do not have a header, and

@@ -39,9 +39,8 @@
 
 from random import random
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-
 import rclpy
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from rclpy.clock import ROSClock
 from rclpy.node import Node
 from rclpy.qos import qos_profile_system_default
@@ -63,17 +62,25 @@ class DiagnosticTalker(Node):
         self.array = DiagnosticArray()
         self.array.status = [
             # Motors
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/arms/left/motor', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/arms/right/motor', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/left/motor', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/legs/right/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/arms/left/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/arms/right/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/legs/left/motor', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/legs/right/motor', message='OK'),
 
             # Sensors
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/left/cam', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/right/cam', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/front/cam', message='OK'),
-            DiagnosticStatus(level=DiagnosticStatus.OK, name='/sensors/rear/cam', message='OK'),
-            ]
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/sensors/left/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/sensors/right/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/sensors/front/cam', message='OK'),
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/sensors/rear/cam', message='OK'),
+        ]
 
     def timer_callback(self):
         self.array.header.stamp = ROSClock().now().to_msg()

@@ -41,7 +41,6 @@ diagnostic_updater for Python.
 import threading
 
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-
 from rclpy.clock import Clock
 
 from ._diagnostic_status_wrapper import DiagnosticStatusWrapper
@@ -80,13 +79,14 @@ class FunctionDiagnosticTask(DiagnosticTask):
 
     The FunctionDiagnosticTask calls the function when it updates. The
     function updates the DiagnosticStatusWrapper and collects data.
-    This is useful for gathering information about a device or driver, like temperature,
-    calibration, etc.
+    This is useful for gathering information about a device or driver, like
+    temperature, calibration, etc.
     """
 
     def __init__(self, name, fn):
         """
-        Construct a GenericFunctionDiagnosticTask based on the given name and function.
+        Construct a GenericFunctionDiagnosticTask based on the given name and
+        function.
 
         @param name Name of the function.
         @param fn Function to be called when run is called.
@@ -154,7 +154,8 @@ class DiagnosticTaskVector:
     """
 
     class DiagnosticTaskInternal:
-        """Class used to represent a diagnostic task internally in DiagnosticTaskVector."""
+        """Class used to represent a diagnostic task internally in
+        DiagnosticTaskVector."""
 
         def __init__(self, name, fn):
             self.name = name
@@ -187,9 +188,11 @@ class DiagnosticTaskVector:
         add(name, fn): add a DiagnosticTask embodied by a name and function
         """
         if len(args) == 1:
-            task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0].getName(), args[0].run)
+            task = DiagnosticTaskVector.DiagnosticTaskInternal(
+                args[0].getName(), args[0].run)
         elif len(args) == 2:
-            task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0], args[1])
+            task = DiagnosticTaskVector.DiagnosticTaskInternal(
+                args[0], args[1])
 
         with self.lock:
             self.tasks.append(task)
@@ -223,17 +226,20 @@ class Updater(DiagnosticTaskVector):
     function will cause all the diagnostic tasks to run, and will collate
     and publish the resulting diagnostics. The publication rate is
     determined by the "~/diagnostic_updater.period" ros2 parameter.
-    The force_update function can always be triggered async to the period interval.
+    The force_update function can always be triggered async to the period
+    interval.
     """
 
     def __init__(self, node, period=1.0):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
-        self.publisher = self.node.create_publisher(DiagnosticArray, '/diagnostics', 1)
+        self.publisher = self.node.create_publisher(
+            DiagnosticArray, '/diagnostics', 1)
         self.clock = Clock()
         self.period_parameter = 'diagnostic_updater.period'
-        self.__period = self.node.declare_parameter(self.period_parameter, period).value
+        self.__period = self.node.declare_parameter(
+            self.period_parameter, period).value
         self.timer = self.node.create_timer(self.__period, self.update)
 
         self.verbose = False
@@ -241,12 +247,14 @@ class Updater(DiagnosticTaskVector):
         self.warn_nohwid_done = False
 
     def update(self):
-        """Causes the diagnostics to update if the inter-update interval has been exceeded."""
+        """Causes the diagnostics to update if the inter-update interval has
+        been exceeded."""
         warn_nohwid = len(self.hwid) == 0
 
         status_vec = []
 
-        with self.lock:  # Make sure no adds happen while we are processing here.
+        with self.lock:
+            # Make sure no adds happen while we are processing here.
             for task in self.tasks:
                 status = DiagnosticStatusWrapper()
                 status.level = DiagnosticStatus.ERROR
@@ -262,16 +270,18 @@ class Updater(DiagnosticTaskVector):
                     warn_nohwid = False
 
                 if self.verbose and status.level:
-                    self.node.get_logger().warn('Non-zero diagnostic status. Name: %s, status\
-                                                %i: %s' % (status.name, status.level,
-                                                           status.message))
+                    self.node.get_logger().warn(
+                        'Non-zero diagnostic status. Name: %s, status\
+                        %i: %s' % (status.name, status.level,
+                                   status.message))
 
         if warn_nohwid and not self.warn_nohwid_done:
-            self.node.get_logger().warn('diagnostic_updater: No HW_ID was set. This is probably\
-                                        a bug. Please report it. For devices that do not have a\
-                                        HW_ID, set this value to none. This warning only occurs\
-                                        once all diagnostics are OK so it is okay to wait until\
-                                        the device is open before calling setHardwareID.')
+            self.node.get_logger().warn(
+                'diagnostic_updater: No HW_ID was set. This is probably\
+                a bug. Please report it. For devices that do not have a\
+                HW_ID, set this value to none. This warning only occurs\
+                once all diagnostics are OK so it is okay to wait until\
+                the device is open before calling setHardwareID.')
             self.warn_nohwid_done = True
 
         self.publish(status_vec)
@@ -294,7 +304,8 @@ class Updater(DiagnosticTaskVector):
         """
         Output a message on all the known DiagnosticStatus.
 
-        Useful if something drastic is happening such as shutdown or a self-test.
+        Useful if something drastic is happening such as shutdown or a
+        self-test.
         @param lvl Level of the diagnostic being output.
         @param msg Status message to output.
         """
@@ -314,18 +325,20 @@ class Updater(DiagnosticTaskVector):
     # TODO(Karsten1987) Re-enable this for eloquent
     # def _check_diagnostic_period(self):
     #     """Recheck the diagnostic_period on the parameter server."""
-    #     # This was getParamCached() call in the cpp code. i.e. it would throttle
-    #     # the actual call to the parameter server using a notification of change
-    #     # mechanism.
+    #     # This was getParamCached() call in the cpp code. i.e. it would
+    #     # throttle the actual call to the parameter server using a
+    #     # notification of change mechanism.
     #     # This is not available in rospy. Hence I throttle the call to the
     #     # parameter server using a standard timeout mechanism (4Hz)
     #     now = self.clock.now()
     #     if now >= self.last_time_period_checked:
-    #         # self.period = self.node.get_parameter(self.period_parameter).value
+    #         # self.period = self.node.get_parameter(
+    #               self.period_parameter).value
     #         self.last_time_period_checked = now
 
     def publish(self, msg):
-        """Publish a single diagnostic status or a vector of diagnostic statuses."""
+        """Publish a single diagnostic status or a vector of diagnostic
+        statuses."""
         if not type(msg) is list:
             msg = [msg]
 
