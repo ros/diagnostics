@@ -19,5 +19,6 @@ jobs:
         linter: ${{ matrix.linter }}
         package-name:
           diagnostic_aggregator
+          diagnostic_common_diagnostics
           diagnostic_updater
           self_test
