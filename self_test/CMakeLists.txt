@@ -30,7 +30,8 @@ ament_target_dependencies(
   "rcutils"
 )
 
-add_executable(selftest_example src/selftest_example.cpp)
+# First example node
+add_executable(selftest_example example/selftest_example.cpp)
 target_include_directories(selftest_example
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -38,6 +39,22 @@ target_include_directories(selftest_example
 )
 ament_target_dependencies(
   selftest_example
+  "builtin_interfaces"
+  "diagnostic_msgs"
+  "diagnostic_updater"
+  "rclcpp"
+  "rcutils"
+)
+
+# Second example node
+add_executable(selftest_example_2 example/selftest_example_2.cpp)
+target_include_directories(selftest_example_2
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(
+  selftest_example_2
   "builtin_interfaces"
   "diagnostic_msgs"
   "diagnostic_updater"
@@ -59,7 +76,7 @@ install(
 )
 
 install(
-  TARGETS run_selftest selftest_example
+  TARGETS run_selftest selftest_example selftest_example_2
   DESTINATION lib/${PROJECT_NAME}
 )
 

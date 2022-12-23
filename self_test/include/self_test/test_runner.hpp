@@ -155,7 +155,11 @@ public:
       };
 
     service_server_ = rclcpp::create_service<diagnostic_msgs::srv::SelfTest>(
-      base_interface_, service_interface_, "self_test", serviceCB, rmw_qos_profile_default,
+      base_interface_, 
+      service_interface_, 
+      std::string(base_interface_->get_name()) + std::string("/self_test"), 
+      serviceCB, 
+      rmw_qos_profile_default,
       nullptr);
     verbose = true;
   }
