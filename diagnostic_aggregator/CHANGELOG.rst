@@ -61,9 +61,9 @@ Changelog for package diagnostic_aggregator
   [Aggregator] Fixes C++ Warnings (pluginlib)
 * [Aggregator] Fixes C++ Warnings (pluginlib)
   This fixes the following warnings:
-  warning: Including header <pluginlib/class_list_macros.h>
+  warning: Including header <pluginlib/class_list_macros.hpp>
   is deprecated,include <pluginlib/class_list_macros.hpp> instead. [-Wcpp]
-  warning: Including header <pluginlib/class_loader.h>
+  warning: Including header <pluginlib/class_loader.hpp>
   is deprecated, include <pluginlib/class_loader.hpp> instead. [-Wcpp]
   The .hpp files have been backported to indigo
 * Fixed base_path handling
