@@ -278,7 +278,8 @@ void Aggregator::publishData()
   {
     diag_array.status.push_back(*processed_other[i]);
 
-    const uint depth = static_cast<uint>(std::count(processed[i]->name.begin(), processed[i]->name.end(), '/'));
+    const uint depth = static_cast<uint>(
+      std::count(processed_other[i]->name.begin(), processed_other[i]->name.end(), '/'));
     if (processed_other[i]->level > diag_toplevel_state.level)
     {
       diag_toplevel_state.level = processed_other[i]->level;
