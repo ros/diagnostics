@@ -4,8 +4,8 @@
   <name>self_test</name>
   <version>3.0.0</version>
   <description>self_test</description>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
   <license>BSD</license>
