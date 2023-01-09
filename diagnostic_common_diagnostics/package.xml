@@ -11,7 +11,7 @@
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
 
