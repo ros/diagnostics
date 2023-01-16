@@ -74,7 +74,7 @@ For example in the above image, the left side of the robot is not working proper
 
 # Analyzers
 The `aggregator_node` will load analyzers to process the diagnostics data.
-An analyzer is a plugin that inherits from the [`diagnostic_aggregator::Analyzer`](diagnostic_aggregator/include/diagnostic_aggregator/analyzer.hpp) class.
+An analyzer is a plugin that inherits from the [`diagnostic_aggregator::Analyzer`](include/diagnostic_aggregator/analyzer.hpp) class.
 Analyzers must be implemented in packages that directly depend on [`pluginlib`](https://index.ros.org/p/pluginlib) and `diagnostic_aggregator`.
 
 The [`diagnostic_aggregator::Analyzer`](include/diagnostic_aggregator/analyzer.hpp) class is purely virtual and derived classes must implement the following methods:
