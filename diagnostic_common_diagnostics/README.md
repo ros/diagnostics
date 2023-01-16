@@ -1,4 +1,7 @@
-This package provides generic nodes to monitor a linux host.
+General information about this repository, including legal information, build instructions and known issues/limitations, are given in [README.md](../README.md) in the repository root.
+
+# The diagnostic_common_diagnostics package
+This package provides generic nodes to monitor a Linux host.
 
 Currently only the NTP monitor is ported to ROS2.
 
