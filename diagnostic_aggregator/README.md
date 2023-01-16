@@ -1,4 +1,6 @@
-# Overview
+General information about this repository, including legal information and known issues/limitations, are given in [README.md](../README.md) in the repository root.
+
+# The diagnostic_aggregator package
 This package contains the `aggregator_node`.
 It listens to the [`diagnostic_msgs/DiagnosticArray`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics` topic and aggregates and published them on the `/diagnostics_agg` topic.
 
