@@ -3,7 +3,7 @@ General information about this repository, including legal information, build in
 
 This package is used to implement the collection of diagnostics information.
 
-# Overview
+## Overview
 It can for example update the state of sensors or actors of the robot.
 Common tasks include
 * Publish the status of a sensor topic from a device driver
