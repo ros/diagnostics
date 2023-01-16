@@ -83,7 +83,7 @@ The [`diagnostic_aggregator::Analyzer`](include/diagnostic_aggregator/analyzer.h
 - `match()` - Returns true if the analyzer is interested in the status message
 - `analyze()` - Returns true if the analyzer will analyze the status message
 - `report()` - Returns results of analysis as vector of status messages
-- `getPath()` - Returns the prefix path of the analyzer (e.g. "/robot/motors/", etc.)
+- `getPath()` - Returns the prefix path of the analyzer (e.g., "/robot/motors/")
 - `getName()` - Returns the name of the analyzer (e.g. "Motors", etc.)
 
 Analyzers can choose the value of the error level of their output.
