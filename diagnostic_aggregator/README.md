@@ -4,11 +4,11 @@ General information about this repository, including legal information and known
 This package contains the `aggregator_node`.
 It listens to the [`diagnostic_msgs/DiagnosticArray`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics` topic and aggregates and published them on the `/diagnostics_agg` topic.
 
-## Example
-One example of how to use this package is to aggregate the diagnostics of a robot.
+One use case for this package is to aggregate the diagnostics of a robot.
 Aggregation means that the diagnostics of the robot are grouped by various aspects, like their location on the robot, their type, etc.
-This will allow you to easily see which part of the robot is not working properly.
+This will allow you to easily see which part of the robot is causing problems.
 
+## Example
 In our example, we are looking at a robot with arms and legs.
 The robot has two of each, one on each side.
 The robot also 4 camera sensors, one left and one right and one in the front and one in the back.
