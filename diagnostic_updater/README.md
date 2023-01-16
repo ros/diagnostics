@@ -16,15 +16,15 @@ The file [example.cpp](src/example.cpp) contains an example of how to use the di
 ## C++ and Python API
 The main classes are:
 
-## DiagnosticStatusWrapper
+### DiagnosticStatusWrapper
 This class is used to create a diagnostic message. 
 It simplifies the creation of the message by providing methods to set the level, name, message and values.
 There is also the possibility to merge multiple DiagnosticStatusWrapper into one.
 
-## Updater
+### Updater
 This class is used to collect the diagnostic messages and to publish them.
 
-## DiagnosedPublisher
+### DiagnosedPublisher
 A ROS publisher with included diagnostics. 
 It diagnoses the frequency of the published messages.
 
