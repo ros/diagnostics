@@ -112,7 +112,8 @@ The `base_path` parameter is the prefix that will be added to the name of each i
 
 Under the `analyzers` key, you can specify the analyzers that you want to use.
 Each analyzer must have a unique name.
-Under the name, you must specify the type of the analyzer. This must be the name of the class that implements the analyzer.
+Under the name, you must specify the type of the analyzer.
+This must be the name of the class that implements the analyzer.
 Additional parameters depend on the type of the analyzer.
 
 Any diagnostic item that is not matched by any analyzer will be published by an "Other" analyzer.
