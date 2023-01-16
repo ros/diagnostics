@@ -10,7 +10,7 @@ Common tasks include
 * Report that a hardware device is closed
 * Send an error if a value is out bounds (e.g. temperature)
 
-# Example
+## Example
 The file [example.cpp](src/example.cpp) contains an example of how to use the diagnostic_updater.
 
 # C++ and Python API
