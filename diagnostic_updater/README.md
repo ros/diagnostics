@@ -1,3 +1,6 @@
+General information about this repository, including legal information, build instructions and known issues/limitations, are given in [README.md](../README.md) in the repository root.
+# The diagnostic_updater package
+
 This package is used to implement the collection of diagnostics information.
 
 # Overview
