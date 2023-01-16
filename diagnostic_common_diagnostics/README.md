@@ -30,7 +30,7 @@ Allowed offset from NTP host. Above this is a warning.
 
 #### error-offset-tolerance
 (default: 5000000)
-Offset from NTP host. Above this is error
+If the offset from the NTP host exceeds this value, it is reported as an error instead of warning.
 
 #### self_offset-tolerance
 (default: 500)
