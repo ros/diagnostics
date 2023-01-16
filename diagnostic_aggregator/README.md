@@ -84,7 +84,7 @@ The [`diagnostic_aggregator::Analyzer`](include/diagnostic_aggregator/analyzer.h
 - `analyze()` - Returns true if the analyzer will analyze the status message
 - `report()` - Returns results of analysis as vector of status messages
 - `getPath()` - Returns the prefix path of the analyzer (e.g., "/robot/motors/")
-- `getName()` - Returns the name of the analyzer (e.g. "Motors", etc.)
+- `getName()` - Returns the name of the analyzer (e.g., "Motors")
 
 Analyzers can choose the value of the error level of their output.
 Usually, the error level of the output is the highest error level of the input.
