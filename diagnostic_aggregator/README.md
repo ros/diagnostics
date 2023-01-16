@@ -66,7 +66,7 @@ analyzers:
           contains: [ '/right' ]
 ```
 
-This will allow [rqt_robot_monitor](https://index.ros.org/p/rqt_robot_monitor) to display the diagnostics in a more useful way:
+Based on this configuration, the [rqt_robot_monitor](https://index.ros.org/p/rqt_robot_monitor) will display the diagnostics information in a well-arranged manner as follows:
 ![doc/rqt_robot_monitor.png](doc/rqt_robot_monitor.png)
 
 Note that it will also display the highest state per group to allow you to see at a glance which part of the robot is not working properly.
