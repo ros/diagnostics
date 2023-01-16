@@ -31,7 +31,7 @@ We want to group the diagnostics by
 - left side of the robot
 - right side of the robot
 
-We can achieve that by creating a configuration file that looks like this (see [example_analyzers.yaml](diagnostic_aggregator/example/example_analyzers.yaml)):
+We can achieve that by creating a configuration file that looks like this (see [example_analyzers.yaml](example/example_analyzers.yaml)):
 ``` yaml
 analyzers:
   ros__parameters:
