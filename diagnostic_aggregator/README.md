@@ -144,7 +144,7 @@ This way you can group diagnostics by their location or other aspects as demonst
 The [`diagnostic_aggregator::AnalyzerGroup`](include/diagnostic_aggregator/analyzer_group.hpp) class is a basic analyzer that can be configured to group other analyzers.
 It has itself an `analyzers` parameter that can be filled with other analyzers to group them.
 
-An example of this is also in (see [example_analyzers.yaml](diagnostic_aggregator/example/example_analyzers.yaml)):
+An example of this is (see [example_analyzers.yaml](diagnostic_aggregator/example/example_analyzers.yaml)):
 ``` yaml
     topology:
       type: 'diagnostic_aggregator/AnalyzerGroup'
