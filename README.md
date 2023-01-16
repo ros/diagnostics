@@ -8,7 +8,7 @@ It contains information about the device names, status, and values.
 It contains the following packages:
 - [`diagnostic_aggregator`](/diagnostic_aggregator/): Aggregates diagnostic messages from different sources into a single message.
 - [`diagnostic_analysis`](/diagnostics/): *Not ported to ROS2 yet* **#contributions-welcome**
-- [`diagnostic_common_diagnostics`](/diagnostic_common_diagnostics/): Predefined nodes for monitoring the linux snd ROS system.
+- [`diagnostic_common_diagnostics`](/diagnostic_common_diagnostics/): Predefined nodes for monitoring the Linux and ROS system.
 - [`diagnostic_updater`](/diagnostic_updater/): Base classes to publishing custom diagnostic messages for python and cpp.
 - [`self_test`](/self_test/): Tools to perform self tests on nodes.
 
