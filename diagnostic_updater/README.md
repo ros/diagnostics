@@ -13,7 +13,7 @@ Common tasks include
 ## Example
 The file [example.cpp](src/example.cpp) contains an example of how to use the diagnostic_updater.
 
-# C++ and Python API
+## C++ and Python API
 The main classes are:
 
 ## DiagnosticStatusWrapper
