@@ -70,7 +70,7 @@ Based on this configuration, the [rqt_robot_monitor](https://index.ros.org/p/rqt
 ![doc/rqt_robot_monitor.png](doc/rqt_robot_monitor.png)
 
 Note that it will also display the highest state per group to allow you to see at a glance which part of the robot is not working properly.
-For example in the above image, the left side of the robot is not working properly, because the left cam is in the `ERROR` state.
+For example in the above image, the left side of the robot is not working properly, because the left camera is in the `ERROR` state.
 
 # Analyzers
 The `aggregator_node` will load analyzers to process the diagnostics data.
