@@ -26,7 +26,7 @@ Hostname of NTP server.
 
 #### offset-tolerance"
 (default: 500)
-Offset from NTP host.
+Allowed offset from NTP host. Above this is a warning.
 
 #### error-offset-tolerance
 (default: 5000000)
