@@ -43,10 +43,11 @@
 class ClientNode : public rclcpp::Node
 {
 public:
-  ClientNode()
-      : Node("self_test_client")
+  ClientNode(std::string _node_name)
+      : Node("self_test_client"), node_name_to_test(_node_name)
   {
-    client_ = create_client<diagnostic_msgs::srv::SelfTest>("self_test");
+    client_ = create_client<diagnostic_msgs::srv::SelfTest>(
+        node_name_to_test + "/self_test");
   }
 
   rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture queue_async_request()
@@ -106,12 +107,20 @@ public:
 
 private:
   rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedPtr client_;
+  std::string node_name_to_test;
 };
 
 int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ClientNode>();
+  if (argc != 2)
+  {
+    RCLCPP_ERROR(rclcpp::get_logger("run_selftest"), "usage: run_selftest NODE_NAME");
+    return 1;
+  }
+  std::string node_name = argv[1];
+
+  auto node = std::make_shared<ClientNode>(node_name);
   auto async_srv_request = node->queue_async_request();
   if (!async_srv_request.valid())
   {
