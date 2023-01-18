@@ -1,36 +1,36 @@
 /*********************************************************************
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2008, Willow Garage, Inc.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2008, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
 
 #include <chrono>
 #include <memory>
@@ -44,7 +44,7 @@ class ClientNode : public rclcpp::Node
 {
 public:
   ClientNode()
-  : Node("self_test_client")
+      : Node("self_test_client")
   {
     client_ = create_client<diagnostic_msgs::srv::SelfTest>("self_test");
   }
@@ -53,10 +53,12 @@ public:
   {
     using namespace std::chrono_literals;
     using ServiceResponseFuture =
-      rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
+        rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
 
-    while (!client_->wait_for_service(1s)) {
-      if (!rclcpp::ok()) {
+    while (!client_->wait_for_service(1s))
+    {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
         return ServiceResponseFuture();
       }
@@ -64,33 +66,41 @@ public:
     }
     auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
 
-    auto response_received_callback = [this](ServiceResponseFuture future) {
-        auto result_out = future.get();
+    auto response_received_callback = [this](ServiceResponseFuture future)
+    {
+      auto result_out = future.get();
 
-        RCLCPP_INFO(
+      RCLCPP_INFO(
           this->get_logger(), "Self test %s for device with id: [%s]",
           (result_out->passed ? "PASSED" : "FAILED"), result_out->id.c_str());
 
-        // for (size_t i = 0; i < result_out->status.size(); i++) {
-        auto counter = 1lu;
-        for (const auto & status : result_out->status) {
-          RCLCPP_INFO(this->get_logger(), "%zu) %s", counter++, status.name.c_str());
-          if (status.level == 0) {
-            RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
-          } else if (status.level == 1) {
-            RCLCPP_WARN(this->get_logger(), "\t%s", status.message.c_str());
-          } else {
-            RCLCPP_ERROR(this->get_logger(), "\t%s", status.message.c_str());
-          }
+      // for (size_t i = 0; i < result_out->status.size(); i++) {
+      auto counter = 1lu;
+      for (const auto &status : result_out->status)
+      {
+        RCLCPP_INFO(this->get_logger(), "%zu) %s", counter++, status.name.c_str());
+        if (status.level == 0)
+        {
+          RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
+        }
+        else if (status.level == 1)
+        {
+          RCLCPP_WARN(this->get_logger(), "\t%s", status.message.c_str());
+        }
+        else
+        {
+          RCLCPP_ERROR(this->get_logger(), "\t%s", status.message.c_str());
+        }
 
-          for (const auto & kv : status.values) {
-            RCLCPP_INFO(
+        for (const auto &kv : status.values)
+        {
+          RCLCPP_INFO(
               this->get_logger(), "\t[%s] %s",
               kv.key.c_str(),
               kv.value.c_str());
-          }
         }
-      };
+      }
+    };
     return client_->async_send_request(request, response_received_callback).future;
   }
 
@@ -98,12 +108,13 @@ private:
   rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedPtr client_;
 };
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<ClientNode>();
   auto async_srv_request = node->queue_async_request();
-  if (!async_srv_request.valid()) {
+  if (!async_srv_request.valid())
+  {
     rclcpp::shutdown();
     return -1;
   }
