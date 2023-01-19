@@ -41,7 +41,7 @@
 
 class ClientNode : public rclcpp::Node {
  public:
-  ClientNode(std::string _node_name)
+  explicit ClientNode(std::string _node_name)
       : Node("self_test_client"), node_name_to_test(_node_name) {
     client_ = create_client<diagnostic_msgs::srv::SelfTest>(node_name_to_test +
                                                             "/self_test");
