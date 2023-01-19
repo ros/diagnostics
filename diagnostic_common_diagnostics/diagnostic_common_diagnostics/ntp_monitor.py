@@ -38,17 +38,18 @@ import sys
 import threading
 from subprocess import PIPE, Popen, TimeoutExpired
 
+import diagnostic_updater as DIAG
 import rclpy
 from rclpy.node import Node
 
-import diagnostic_updater as DIAG
-
 
 class NTPMonitor(Node):
+    """A diagnostic task that monitors the NTP offset of the system clock."""
 
     def __init__(self, ntp_hostname, offset=500, self_offset=500,
                  diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
+        """Initialize the NTPMonitor."""
         super().__init__(__class__.__name__)
 
         self.ntp_hostname = ntp_hostname
@@ -107,12 +108,10 @@ class NTPMonitor(Node):
             self.current_msg = new_msg
 
     def ntp_diag(self, st):
-        """Adds ntp diagnostics to the given status message and returns the
-        new status.
+        """
+        Add ntp diagnostics to the given status message.
 
-        Args:
-            st (DIAG.DiagnosticStatus()): The diagnostic status object to
-            populate.
+        @param st: The status message to add diagnostics to.
         """
 
         def add_kv(stat_values, key, value):

@@ -43,8 +43,7 @@ from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 class DiagnosticStatusWrapper(DiagnosticStatus):
     """
-    Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it
-    easier to update.
+    Wrapper for the DiagnosticStatus that makes it easier to update.
 
     This class handles common string formatting and vector handling issues
     for filling the diagnostic_msgs::DiagnosticStatus message. It is a

@@ -48,8 +48,7 @@ from ._diagnostic_updater import DiagnosticTask
 
 class FrequencyStatusParam:
     """
-    A structure that holds the constructor parameters for the FrequencyStatus
-    class.
+    Structure that holds the constructor parameters for the FrequencyStatus.
 
     Implementation note: the min_freq and max_freq parameters in the C += 1
     code are stored as pointers, so that if they are updated, the new values
@@ -104,6 +103,7 @@ class FrequencyStatus(DiagnosticTask):
             self.count += 1
 
     def run(self, stat):
+        """Create the diagnostics."""
         with self.lock:
             clock = Clock(clock_type=ClockType.ROS_TIME)
             curtime = clock.now()
@@ -150,8 +150,7 @@ class FrequencyStatus(DiagnosticTask):
 
 class TimeStampStatusParam:
     """
-    A structure that holds the constructor parameters for the TimeStampStatus
-    class.
+    Structure that holds the constructor parameters for the TimeStampStatus.
 
     max_acceptable: maximum acceptable difference between two timestamps.
     min_acceptable: minimum acceptable difference between two timestamps.
@@ -212,6 +211,7 @@ class TimeStampStatus(DiagnosticTask):
                 self.deltas_valid = True
 
     def run(self, stat):
+        """Create the diagnostics."""
         with self.lock:
 
             stat.summary(DiagnosticStatus.OK, 'Timestamps are reasonable.')
@@ -263,5 +263,6 @@ class Heartbeat(DiagnosticTask):
         DiagnosticTask.__init__(self, 'Heartbeat')
 
     def run(self, stat):
+        """Create the diagnostics."""
         stat.summary(DiagnosticStatus.OK, 'Alive')
         return stat

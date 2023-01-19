@@ -85,8 +85,7 @@ class FunctionDiagnosticTask(DiagnosticTask):
 
     def __init__(self, name, fn):
         """
-        Construct a GenericFunctionDiagnosticTask based on the given name and
-        function.
+        Construct a GenericFunctionDiagnosticTask based on name and function.
 
         @param name Name of the function.
         @param fn Function to be called when run is called.
@@ -95,6 +94,7 @@ class FunctionDiagnosticTask(DiagnosticTask):
         self.fn = fn
 
     def run(self, stat):
+        """Call the function and return the result."""
         return self.fn(stat)
 
 
@@ -154,18 +154,20 @@ class DiagnosticTaskVector:
     """
 
     class DiagnosticTaskInternal:
-        """Class used to represent a diagnostic task internally in
-        DiagnosticTaskVector."""
+        """Class used to represent a diagnostic task internally."""
 
         def __init__(self, name, fn):
+            """Construct a DiagnosticTaskInternal."""
             self.name = name
             self.fn = fn
 
         def run(self, stat):
+            """Run the task."""
             stat.name = self.name
             return self.fn(stat)
 
     def __init__(self):
+        """Construct a DiagnosticTaskVector."""
         self.tasks = []
         self.lock = threading.Lock()
 
@@ -247,8 +249,12 @@ class Updater(DiagnosticTaskVector):
         self.warn_nohwid_done = False
 
     def update(self):
-        """Causes the diagnostics to update if the inter-update interval has
-        been exceeded."""
+        """
+        Update the diagnostics.
+
+        Causes the diagnostics to update if the inter-update interval has
+        been exceeded.
+        """
         warn_nohwid = len(self.hwid) == 0
 
         status_vec = []
@@ -288,6 +294,7 @@ class Updater(DiagnosticTaskVector):
 
     @property
     def period(self):
+        """Get the period of the updater."""
         return self.__period
 
     @period.setter
@@ -320,6 +327,7 @@ class Updater(DiagnosticTaskVector):
         self.publish(status_vec)
 
     def setHardwareID(self, hwid):
+        """Set the hardware ID for all the diagnostics."""
         self.hwid = hwid
 
     # TODO(Karsten1987) Re-enable this for eloquent
@@ -337,8 +345,7 @@ class Updater(DiagnosticTaskVector):
     #         self.last_time_period_checked = now
 
     def publish(self, msg):
-        """Publish a single diagnostic status or a vector of diagnostic
-        statuses."""
+        """Publish a single or a vector of diagnostic statuses."""
         if not type(msg) is list:
             msg = [msg]
 
@@ -358,6 +365,7 @@ class Updater(DiagnosticTaskVector):
         self.publisher.publish(da)
 
     def addedTaskCallback(self, task):
+        """Publish a task (called when added to the updater)."""
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
         stat.summary(DiagnosticStatus.OK, 'Node starting up')
