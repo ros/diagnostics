@@ -13,6 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: ros-tooling/setup-ros@v0.2
+    - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
         distribution: rolling
