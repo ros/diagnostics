@@ -17,6 +17,7 @@ jobs:
         os: [ubuntu-20.04]
     steps:
       - uses: ros-tooling/setup-ros@v0.2
+      - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros2-distro: rolling
