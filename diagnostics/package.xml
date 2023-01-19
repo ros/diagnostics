@@ -4,8 +4,8 @@
   <name>diagnostics</name>
   <version>1.9.3</version>
   <description>diagnostics</description>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
+  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
   <license>BSD-3-Clause</license>
