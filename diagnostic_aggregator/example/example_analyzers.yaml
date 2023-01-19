@@ -1,6 +1,6 @@
 analyzers:
   ros__parameters:
-    path: Analysis
+    path: Aggregation
     arms:
       type: diagnostic_aggregator/GenericAnalyzer
       path: Arms
@@ -11,7 +11,7 @@ analyzers:
       startswith: [ '/legs' ]
     sensors:
       type: diagnostic_aggregator/GenericAnalyzer
-      path: Motors
+      path: Sensors
       startswith: [ '/sensors' ]
     motors:
       type: diagnostic_aggregator/GenericAnalyzer
