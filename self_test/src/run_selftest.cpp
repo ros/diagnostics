@@ -39,71 +39,82 @@
 #include "diagnostic_msgs/srv/self_test.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-class ClientNode : public rclcpp::Node {
- public:
+class ClientNode : public rclcpp::Node
+{
+public:
   explicit ClientNode(std::string _node_name)
-      : Node("self_test_client"), node_name_to_test(_node_name) {
-    client_ = create_client<diagnostic_msgs::srv::SelfTest>(node_name_to_test +
-                                                            "/self_test");
+  : Node("self_test_client"), node_name_to_test(_node_name)
+  {
+    client_ = create_client<diagnostic_msgs::srv::SelfTest>(
+      node_name_to_test +
+      "/self_test");
   }
 
   rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture
-  queue_async_request() {
+  queue_async_request()
+  {
     using namespace std::chrono_literals;
     using ServiceResponseFuture =
-        rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
+      rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedFuture;
 
     while (!client_->wait_for_service(1s)) {
       if (!rclcpp::ok()) {
-        RCLCPP_ERROR(this->get_logger(),
-                     "Interrupted while waiting for the service. Exiting.");
+        RCLCPP_ERROR(
+          this->get_logger(),
+          "Interrupted while waiting for the service. Exiting.");
         return ServiceResponseFuture();
       }
-      RCLCPP_INFO(this->get_logger(),
-                  "service not available, waiting again...");
+      RCLCPP_INFO(
+        this->get_logger(),
+        "service not available, waiting again...");
     }
     auto request = std::make_shared<diagnostic_msgs::srv::SelfTest::Request>();
 
     auto response_received_callback = [this](ServiceResponseFuture future) {
-      auto result_out = future.get();
+        auto result_out = future.get();
 
-      RCLCPP_INFO(this->get_logger(), "Self test %s for device with id: [%s]",
-                  (result_out->passed ? "PASSED" : "FAILED"),
-                  result_out->id.c_str());
+        RCLCPP_INFO(
+          this->get_logger(), "Self test %s for device with id: [%s]",
+          (result_out->passed ? "PASSED" : "FAILED"),
+          result_out->id.c_str());
 
-      // for (size_t i = 0; i < result_out->status.size(); i++) {
-      auto counter = 1lu;
-      for (const auto &status : result_out->status) {
-        RCLCPP_INFO(this->get_logger(), "%zu) %s", counter++,
-                    status.name.c_str());
-        if (status.level == 0) {
-          RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
-        } else if (status.level == 1) {
-          RCLCPP_WARN(this->get_logger(), "\t%s", status.message.c_str());
-        } else {
-          RCLCPP_ERROR(this->get_logger(), "\t%s", status.message.c_str());
+        // for (size_t i = 0; i < result_out->status.size(); i++) {
+        auto counter = 1lu;
+        for (const auto & status : result_out->status) {
+          RCLCPP_INFO(
+            this->get_logger(), "%zu) %s", counter++,
+            status.name.c_str());
+          if (status.level == 0) {
+            RCLCPP_INFO(this->get_logger(), "\t%s", status.message.c_str());
+          } else if (status.level == 1) {
+            RCLCPP_WARN(this->get_logger(), "\t%s", status.message.c_str());
+          } else {
+            RCLCPP_ERROR(this->get_logger(), "\t%s", status.message.c_str());
+          }
+
+          for (const auto & kv : status.values) {
+            RCLCPP_INFO(
+              this->get_logger(), "\t[%s] %s", kv.key.c_str(),
+              kv.value.c_str());
+          }
         }
-
-        for (const auto &kv : status.values) {
-          RCLCPP_INFO(this->get_logger(), "\t[%s] %s", kv.key.c_str(),
-                      kv.value.c_str());
-        }
-      }
-    };
+      };
     return client_->async_send_request(request, response_received_callback)
-        .future;
+           .future;
   }
 
- private:
+private:
   rclcpp::Client<diagnostic_msgs::srv::SelfTest>::SharedPtr client_;
   std::string node_name_to_test;
 };
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv)
+{
   rclcpp::init(argc, argv);
   if (argc != 2) {
-    RCLCPP_ERROR(rclcpp::get_logger("run_selftest"),
-                 "usage: run_selftest NODE_NAME");
+    RCLCPP_ERROR(
+      rclcpp::get_logger("run_selftest"),
+      "usage: run_selftest NODE_NAME");
     return 1;
   }
   std::string node_name = argv[1];
