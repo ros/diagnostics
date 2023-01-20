@@ -20,9 +20,9 @@ jobs:
             rolling
           ]
     runs-on: 
-      - ubuntu-focal
+      - ubuntu-20.04
         if: ${{ matrix.distro == 'foxy' }}
-      - ubuntu-jammy
+      - ubuntu-22.04
         if: ${{ matrix.distro == 'humble' || matrix.distro == 'rolling' }}
     steps:
       - uses: ros-tooling/setup-ros@v0.2
