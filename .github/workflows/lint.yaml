@@ -4,7 +4,7 @@ on:
 
 jobs:
   ament_lint:
-    name: ament_${{ matrix.linter }}
+    name: ament_${{ matrix.linter }} on ${{ matrix.distro }}
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
