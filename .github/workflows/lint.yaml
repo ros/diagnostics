@@ -16,12 +16,19 @@ jobs:
             # pep257, 
             uncrustify, 
             xmllint]
+          distro: [
+            foxy,
+            humble,
+            rolling
+          ]
     steps:
     - uses: actions/checkout@v1
     - uses: ros-tooling/setup-ros@v0.2
+      with:
+        required-ros-distributions: ${{ matrix.distro }}
     - uses: ros-tooling/action-ros-lint@v0.1
       with:
-        distribution: rolling
+        distribution: ${{ matrix.distro }}
         linter: ${{ matrix.linter }}
         package-name:
           diagnostic_aggregator
