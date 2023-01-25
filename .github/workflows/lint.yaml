@@ -19,6 +19,7 @@ jobs:
             uncrustify,
             xmllint,
           ]
+        distro: [foxy, humble, rolling]
         include:
           - distro: foxy
             os: ubuntu-20.04
