@@ -5,25 +5,23 @@ on:
     branches:
       - rolling
   schedule:
-    # Run every week 
-    - cron: '0 0 * * 0'
+    # Run every week
+    - cron: "0 0 * * 0"
 
 jobs:
   build_and_test:
     name: Build and test on ${{ matrix.distro }}
     strategy:
       fail-fast: false
-        matrix:
-          distro: [
-            foxy,
-            humble,
-            rolling
-          ]
-    runs-on: 
-      - ubuntu-20.04
-        if: ${{ matrix.distro == 'foxy' }}
-      - ubuntu-22.04
-        if: ${{ matrix.distro == 'humble' || matrix.distro == 'rolling' }}
+      matrix:
+        include:
+          - distro: foxy
+            os: ubuntu-20.04
+          - distro: humble
+            os: ubuntu-22.04
+          - distro: rolling
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@v0.2
         with:
@@ -31,8 +29,7 @@ jobs:
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
           target-ros2-distro: ${{ matrix.distro }}
-          package-name:
-            diagnostic_aggregator
+          package-name: diagnostic_aggregator
             diagnostic_common_diagnostics
             diagnostic_updater
             self_test
