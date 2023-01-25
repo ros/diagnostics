@@ -44,7 +44,9 @@
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/srv/self_test.hpp"
+
 #include "diagnostic_updater/diagnostic_updater.hpp"
+
 #include "rclcpp/rclcpp.hpp"
 
 namespace self_test
