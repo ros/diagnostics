@@ -52,6 +52,7 @@ target_link_libraries(example ${PROJECT_NAME})
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)  # skip for https://github.com/ros-tooling/action-ros-lint/issues/354
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
