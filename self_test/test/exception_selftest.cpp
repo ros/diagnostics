@@ -78,7 +78,8 @@ public:
 using Fixture = SelftestFixture<ExceptionSelftestNode>;
 TEST_F(Fixture, run_self_test)
 {
-  auto client = node_->create_client<diagnostic_msgs::srv::SelfTest>("self_test");
+  auto client = node_->create_client<diagnostic_msgs::srv::SelfTest>(
+    "exception_selftest_node/self_test");
 
   using namespace std::chrono_literals;
   if (!client->wait_for_service(5s)) {
