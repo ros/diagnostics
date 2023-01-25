@@ -27,6 +27,8 @@ jobs:
           - distro: rolling
             os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
+    env:
+      AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
       - uses: ros-tooling/setup-ros@master
