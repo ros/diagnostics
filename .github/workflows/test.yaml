@@ -14,7 +14,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [foxy, humble, rolling]
         include:
           - distro: foxy
             os: ubuntu-20.04
@@ -24,10 +23,8 @@ jobs:
             os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@v0.2
-        with:
-          required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - uses: ros-tooling/setup-ros@master
+      - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: diagnostic_aggregator

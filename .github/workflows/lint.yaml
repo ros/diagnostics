@@ -19,7 +19,6 @@ jobs:
             uncrustify,
             xmllint,
           ]
-        distro: [foxy, humble, rolling]
         include:
           - distro: foxy
             os: ubuntu-20.04
@@ -30,10 +29,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1
-      - uses: ros-tooling/setup-ros@v0.2
+      - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-lint@v0.1
+      - uses: ros-tooling/action-ros-ci@master
         with:
           distribution: ${{ matrix.distro }}
           linter: ${{ matrix.linter }}
