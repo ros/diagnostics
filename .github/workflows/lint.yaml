@@ -32,7 +32,7 @@ jobs:
       - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@master
+      - uses: ros-tooling/action-ros-lint@master
         with:
           distribution: ${{ matrix.distro }}
           linter: ${{ matrix.linter }}
