@@ -22,6 +22,8 @@ jobs:
           - distro: rolling
             os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
+    env:
+      ROS_DISTRO: ${{ matrix.distro }}
     steps:
       - uses: ros-tooling/setup-ros@master
       - uses: ros-tooling/action-ros-ci@master
