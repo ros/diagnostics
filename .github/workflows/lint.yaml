@@ -5,7 +5,6 @@ on:
 jobs:
   ament_lint:
     name: ament_${{ matrix.linter }} on ${{ matrix.distro }}
-    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +20,11 @@ jobs:
             humble,
             rolling
           ]
+    runs-on: 
+      - ubuntu-20.04
+        if: ${{ matrix.distro == 'foxy' }}
+      - ubuntu-22.04
+        if: ${{ matrix.distro == 'humble' || matrix.distro == 'rolling' }}
     steps:
     - uses: actions/checkout@v1
     - uses: ros-tooling/setup-ros@v0.2
