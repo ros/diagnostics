@@ -4,16 +4,15 @@
   <name>diagnostic_common_diagnostics</name>
   <version>1.9.3</version>
   <description>diagnostic_common_diagnostics</description>
-  <!-- author -->
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-  <!-- maintainers -->
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
   <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
+
+  <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
