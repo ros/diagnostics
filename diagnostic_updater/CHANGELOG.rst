@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2023-01-26)
+------------------
 * Merge of foxy and humble history into rolling for future maintenance from one branch only.
 * Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
 * License fixes (`#263 <https://github.com/ros/diagnostics/issues/263>`_)
