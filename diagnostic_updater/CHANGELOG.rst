@@ -2,6 +2,19 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge of foxy and humble history into rolling for future maintenance from one branch only.
+* Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
+* License fixes (`#263 <https://github.com/ros/diagnostics/issues/263>`_)
+* Fix/cleanup ros1 (`#257 <https://github.com/ros/diagnostics/issues/257>`_)
+* Fixed DiagnosedPublisher and switched to ROS_TIME (`#243 <https://github.com/ros/diagnostics/issues/243>`_)
+* Check if parameter is already declared to avoid re-declaring it. (`#227 <https://github.com/ros/diagnostics/issues/227>`_)
+* Update CMakeLists.txt to support modern cmake syntax
+* Fix diagnostic_updater cmake
+* Fix implicit conversion warnings
+* Contributors: Alberto Soragna, Austin, Christian Henkel, Grzegorz Głowacki, Nikos Koukis, Ralph Lange
+
 3.0.0 (2022-06-10)
 ------------------
 * Merge pull request `#217 <https://github.com/ros/diagnostics/issues/217>`_ from boschresearch/ros-time-for-frequency-stat
