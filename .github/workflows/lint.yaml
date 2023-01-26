@@ -1,30 +1,42 @@
 name: Lint diagnostics
 on:
   pull_request:
+  push:
+    branches:
+      - rolling
 
 jobs:
   ament_lint:
-    name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-20.04
+    name: ament_${{ matrix.linter }} on ${{ matrix.distro }}
     strategy:
       fail-fast: false
       matrix:
-          linter: [
-            cppcheck, 
-            cpplint, 
-            flake8, 
-            # pep257, 
-            uncrustify, 
-            xmllint]
+        linter: [
+            cppcheck,
+            cpplint,
+            flake8,
+            # pep257,
+            uncrustify,
+            xmllint,
+          ]
+        include:
+          - distro: foxy
+            os: ubuntu-20.04
+          - distro: humble
+            os: ubuntu-22.04
+          - distro: rolling
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
+    env:
+      AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
-    - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@v0.2
-    - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
-    - uses: ros-tooling/action-ros-lint@v0.1
-      with:
-        distribution: rolling
-        linter: ${{ matrix.linter }}
-        package-name:
-          diagnostic_aggregator
-          diagnostic_updater
-          self_test
+      - uses: actions/checkout@v1
+      - uses: ros-tooling/setup-ros@master
+      - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+      - uses: ros-tooling/action-ros-lint@master
+        with:
+          distribution: ${{ matrix.distro }}
+          linter: ${{ matrix.linter }}
+          package-name: diagnostic_aggregator
+            diagnostic_updater
+            self_test

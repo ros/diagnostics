@@ -99,8 +99,11 @@ public:
           }
         }
       };
-    return client_->async_send_request(request, response_received_callback)
-           .future;
+#if defined(NO_FUTURE)
+    return client_->async_send_request(request, response_received_callback);
+#else
+    return client_->async_send_request(request, response_received_callback).future;
+#endif
   }
 
 private:

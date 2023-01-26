@@ -10,6 +10,18 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(NOT DEFINED ENV{ROS_DISTRO})
+  message(FATAL_ERROR "ROS_DISTRO is not defined.")
+endif()
+message(STATUS "Build for $ENV{ROS_DISTRO}")
+if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_FUTURE")
+# elseif("$ENV{ROS_DISTRO}" STREQUAL "humble")
+  # TODO: define something here if needed
+# elseif("$ENV{ROS_DISTRO}" STREQUAL "rolling")
+  # TODO: define something here if needed
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
