@@ -19,7 +19,6 @@
 
   <depend>rclpy</depend>
 
-  <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
   <exec_depend>ntpdate</exec_depend>
 
