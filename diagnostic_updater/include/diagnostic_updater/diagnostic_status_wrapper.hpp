@@ -79,7 +79,7 @@ public:
    * nothing.
    * \param other Reference to object to copy
    */
-  explicit DiagnosticStatusWrapper(const DiagnosticStatusWrapper & other);
+  explicit DiagnosticStatusWrapper(const DiagnosticStatusWrapper & other) = default;
 
   /**
    * \brief Fills out the level and message fields of the DiagnosticStatus.
