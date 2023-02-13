@@ -14,7 +14,7 @@ jobs:
         linter: [
             cppcheck,
             cpplint,
-            flake8,  # https://github.com/ros-tooling/action-ros-lint/issues/354
+            flake8, # https://github.com/ros-tooling/action-ros-lint/issues/354
             pep257,
             uncrustify,
             xmllint,
@@ -34,13 +34,13 @@ jobs:
       - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+      - run: sudo pip install pydocstyle==6.1.1 # downgrade to fix https://github.com/ament/ament_lint/pull/428
       - uses: ros-tooling/action-ros-lint@master
         with:
           distribution: ${{ matrix.distro }}
           linter: ${{ matrix.linter }}
-          package-name:
-          diagnostic_aggregator
-          diagnostic_common_diagnostics
-          diagnostic_updater
-          self_test
+          package-name: |
+            diagnostic_aggregator
+            diagnostic_common_diagnostics
+            diagnostic_updater
+            self_test
