@@ -3,7 +3,10 @@ on:
   pull_request:
   push:
     branches:
-      - rolling
+      - ros2
+  schedule:
+    # Run every week at 20:00 on Sunday
+    - cron: "0 20 * * 0"
 
 jobs:
   ament_lint:
