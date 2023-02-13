@@ -2,6 +2,14 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2023-01-26)
+------------------
+* Merge of foxy and humble history into rolling for future maintenance from one branch only.
+* Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
+* License fixes (`#263 <https://github.com/ros/diagnostics/issues/263>`_)
+* Fix/cleanup ros1 (`#257 <https://github.com/ros/diagnostics/issues/257>`_)
+* Contributors: Austin, Christian Henkel, Ralph Lange
+
 3.0.0 (2022-06-10)
 ------------------
 * Return the actual future from async_send_request (`#209 <https://github.com/ros/diagnostics/issues/209>`_)
@@ -20,6 +28,26 @@ Changelog for package self_test
 ------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
+2.0.9 (2022-11-12)
+------------------
+
+2.0.8 (2021-08-03)
+------------------
+
+2.0.7 (2021-03-04)
+------------------
+
+2.0.6 (2021-01-28)
+------------------
+
+2.0.5 (2021-01-06)
+------------------
+
+2.0.4 (2020-08-05)
+------------------
+
+2.0.3 (2020-07-09)
+------------------
 
 2.0.2 (2020-06-03)
 ------------------

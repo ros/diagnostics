@@ -129,9 +129,9 @@ void Aggregator::checkTimestamp(const DiagnosticArray::SharedPtr diag_msg)
     stamp_warn += it->name;
   }
 
-  if (!ros_warnings_.count(stamp_warn)) {
+  auto result = ros_warnings_.insert(stamp_warn);
+  if (result.second) {
     RCLCPP_WARN(logger_, "%s", stamp_warn.c_str());
-    ros_warnings_.insert(stamp_warn);
   }
 }
 
