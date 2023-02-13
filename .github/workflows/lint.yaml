@@ -14,7 +14,7 @@ jobs:
         linter: [
             cppcheck,
             cpplint,
-            # flake8, # https://github.com/ros-tooling/action-ros-lint/issues/354
+            flake8,
             pep257,
             uncrustify,
             xmllint,
