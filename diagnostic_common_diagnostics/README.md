@@ -11,7 +11,7 @@ Currently only the NTP monitor is ported to ROS2.
 Runs 'ntpdate' to check if the system clock is synchronized with the NTP server. 
 * If the offset is smaller than `offset-tolerance`, an `OK` status will be published.
 * If the offset is larger than the configured `offset-tolerance`, a `WARN` status will be published,
-* if it is biggern than `error-offset-tolerance`, an `ERROR` status will be published.
+* if it is bigger than `error-offset-tolerance`, an `ERROR` status will be published.
 * If there was an error running `ntpdate`, an `ERROR` status will be published.
 
 ### Published Topics
