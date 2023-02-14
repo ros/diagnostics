@@ -276,7 +276,7 @@ inline void DiagnosticStatusWrapper::add<bool>(
 }
 
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
-// gcc complains that the specialization occurs after instatiation.
+// gcc complains that the specialization occurs after instantiation.
 inline void
 DiagnosticStatusWrapper::addf(
   const std::string & key, const char * format, ...)  // In practice format will always be a char *
