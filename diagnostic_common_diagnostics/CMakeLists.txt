@@ -15,5 +15,8 @@ install(PROGRAMS
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
     ament_lint_auto_find_test_dependencies()
+
+    find_package(launch_testing_ament_cmake)
+    add_launch_test(test/systemtest/test_ntp_monitor.py)
 endif()
 ament_package()
