@@ -20,7 +20,7 @@
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
-  <exec_depend>ntpdate</exec_depend>
+  <exec_depend>ntp</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
