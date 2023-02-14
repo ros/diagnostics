@@ -55,6 +55,16 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperSummary) {
   EXPECT_EQ(dsw.values.size(), 0u);
 }
 
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperSummaryf) {
+  // A DiagnosticStatusWrapper constructed with a level should have that level and
+  // an formated message.
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  dsw.summaryf(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Test %d", 42);
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::WARN);
+  EXPECT_EQ(dsw.message, "Test 42");
+  EXPECT_EQ(dsw.values.size(), 0u);
+}
+
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperCopyConstructor) {
   // A DiagnosticStatusWrapper initialized from another should have the same
   // values.
@@ -118,8 +128,22 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperMergeFromInstance) {
   EXPECT_EQ(dsw.values.size(), 0u);
 }
 
-TEST(DiagnosticStatusWrapper, testDiagnosticStatusAdd) {
-  // A DiagnosticStatusWrapper should accept a new key-value pair.
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperMergeSummaryf) {
+  // A DiagnosticStatusWrapper can also be merged with a formated message.
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  dsw.summaryf(diagnostic_msgs::msg::DiagnosticStatus::OK, "Was %s", "ok");
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "Was ok");
+  EXPECT_EQ(dsw.values.size(), 0u);
+
+  dsw.mergeSummaryf(diagnostic_msgs::msg::DiagnosticStatus::ERROR, "Error %d", 42);
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::ERROR);
+  EXPECT_EQ(dsw.message, "Error 42");
+  EXPECT_EQ(dsw.values.size(), 0u);
+}
+
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddString) {
+  // A DiagnosticStatusWrapper should accept a String key-value pair.
   diagnostic_updater::DiagnosticStatusWrapper dsw;
   dsw.add("key", "value");
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
@@ -127,4 +151,48 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusAdd) {
   EXPECT_EQ(dsw.values.size(), 1u);
   EXPECT_EQ(dsw.values[0].key, "key");
   EXPECT_EQ(dsw.values[0].value, "value");
+
+  dsw.clear();
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 0u);
+}
+
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddf) {
+  // A DiagnosticStatusWrapper should accept a formated String key-value pair.
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  dsw.addf("key", "value %d", 42);
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 1u);
+  EXPECT_EQ(dsw.values[0].key, "key");
+  EXPECT_EQ(dsw.values[0].value, "value 42");
+
+  dsw.clear();
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 0u);
+}
+
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddBool) {
+  // A DiagnosticStatusWrapper should accept a Bool key-value pair.
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  dsw.add<bool>("key", true);
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 1u);
+  EXPECT_EQ(dsw.values[0].key, "key");
+  EXPECT_EQ(dsw.values[0].value, "True");
+
+  dsw.add<bool>("keyF", false);
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 2u);
+  EXPECT_EQ(dsw.values[1].key, "keyF");
+  EXPECT_EQ(dsw.values[1].value, "False");
+
+  dsw.clear();
+  EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
+  EXPECT_EQ(dsw.message, "");
+  EXPECT_EQ(dsw.values.size(), 0u);
 }
