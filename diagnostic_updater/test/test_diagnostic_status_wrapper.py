@@ -6,6 +6,7 @@
 import unittest
 
 from diagnostic_msgs.msg import DiagnosticStatus
+
 from diagnostic_updater import DiagnosticStatusWrapper
 
 
@@ -18,7 +19,8 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(d.values, [])
 
     def test_init_lvl_msg(self):
-        d = DiagnosticStatusWrapper(level=DiagnosticStatus.WARN, message='test')
+        d = DiagnosticStatusWrapper(level=DiagnosticStatus.WARN,
+                                    message='test')
         self.assertEqual(d.level, DiagnosticStatus.WARN)
         self.assertEqual(d.message, 'test')
         self.assertEqual(d.values, [])

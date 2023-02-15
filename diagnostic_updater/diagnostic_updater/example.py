@@ -39,12 +39,10 @@
 from time import sleep
 
 import diagnostic_msgs
-
 import diagnostic_updater
-
 import rclpy
-
 import std_msgs
+
 
 time_to_launch = 0
 
@@ -65,12 +63,14 @@ def dummy_diagnostic(stat):
     # string formatting instead
     if time_to_launch < 10:
         # summary for formatted text.
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.ERROR,
-                     'Buckle your seat belt. Launch in %f seconds!' % time_to_launch)
+        stat.summary(
+            diagnostic_msgs.msg.DiagnosticStatus.ERROR,
+            'Buckle your seat belt. Launch in %f seconds!' % time_to_launch)
     else:
         # summary for unformatted text. It's just the same ;)
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.OK,
-                     'Launch is in a long time. Have a soda.')
+        stat.summary(
+            diagnostic_msgs.msg.DiagnosticStatus.OK,
+            'Launch is in a long time. Have a soda.')
 
     # add is used to append key-value pairs.
     # Again, as oppose to the C++ API, there is no addf function. The second
@@ -90,7 +90,8 @@ def dummy_diagnostic(stat):
 class DummyClass:
 
     def produce_diagnostics(self, stat):
-        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN, 'This is a silly updater.')
+        stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN,
+                     'This is a silly updater.')
         stat.add('Stupidicity of this updater', '1000')
         return stat
 
@@ -98,8 +99,9 @@ class DummyClass:
 class DummyTask(diagnostic_updater.DiagnosticTask):
 
     def __init__(self):
-        diagnostic_updater.DiagnosticTask.__init__(self,
-                                                   'Updater Derived from DiagnosticTask')
+        diagnostic_updater.DiagnosticTask.__init__(
+            self,
+            'Updater Derived from DiagnosticTask')
 
     def run(self, stat):
         stat.summary(diagnostic_msgs.msg.DiagnosticStatus.WARN,
@@ -215,8 +217,10 @@ def main():
     # what the parameters mean:
     freq_bounds = {'min': 0.5, 'max': 2}  # If you update these values, the
     # HeaderlessTopicDiagnostic will use the new values.
-    pub1_freq = (diagnostic_updater.HeaderlessTopicDiagnostic('topic1', updater,
-                 diagnostic_updater.FrequencyStatusParam(freq_bounds, 0.1, 10)))
+    pub1_freq = (
+        diagnostic_updater.HeaderlessTopicDiagnostic(
+            'topic1', updater,
+            diagnostic_updater.FrequencyStatusParam(freq_bounds, 0.1, 10)))
 
     # Note that TopicDiagnostic, HeaderlessDiagnosedPublisher,
     # HeaderlessDiagnosedPublisher and DiagnosedPublisher all descend from
@@ -233,7 +237,8 @@ def main():
 
     # We can remove a task by refering to its name.
     if not updater.removeByName('Bound check'):
-        node.get_logger().error('The Bound check task was not found when trying to remove it.')
+        node.get_logger().error(
+            'The Bound check task was not found when trying to remove it.')
 
     msg = std_msgs.msg.Bool()
     while rclpy.ok():
