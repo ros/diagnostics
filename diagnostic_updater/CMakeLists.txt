@@ -71,6 +71,20 @@ if(BUILD_TESTING)
     "std_msgs"
   )
 
+  ament_add_gtest(diagnostic_status_wrapper_test test/diagnostic_status_wrapper_test.cpp)
+  target_include_directories(diagnostic_status_wrapper_test
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  ament_target_dependencies(
+    diagnostic_status_wrapper_test
+    "diagnostic_msgs"
+    "rclcpp"
+    "rclcpp_lifecycle"
+    "std_msgs"
+  )
+
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
   ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_diagnostic_status_wrapper.py")
