@@ -1,23 +1,41 @@
 name: Lint diagnostics
 on:
   pull_request:
+  push:
+    branches:
+      - ros2
+  schedule:
+    # Run every week at 20:00 on Sunday
+    - cron: "0 20 * * 0"
 
 jobs:
   ament_lint:
-    name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-20.04
+    name: Linting with ${{ matrix.linter }}
     strategy:
       fail-fast: false
       matrix:
-          linter: [cppcheck, cpplint, flake8, pep257, uncrustify, xmllint]
+        linter: [
+            cppcheck,
+            cpplint,
+            flake8,
+            pep257,
+            uncrustify,
+            xmllint,
+          ]
+    runs-on: ubuntu-22.04
+    env:
+      AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
-    - uses: actions/checkout@v1
-    - uses: ros-tooling/setup-ros@v0.2
-    - uses: ros-tooling/action-ros-lint@v0.1
-      with:
-        distribution: rolling
-        linter: ${{ matrix.linter }}
-        package-name:
-          diagnostic_aggregator
-          diagnostic_updater
-          self_test
+      - uses: actions/checkout@v1
+      - uses: ros-tooling/setup-ros@master
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
+      - run: sudo pip install pydocstyle==6.1.1 # downgrade to fix https://github.com/ament/ament_lint/pull/428
+      - uses: ros-tooling/action-ros-lint@master
+        with:
+          linter: ${{ matrix.linter }}
+          package-name: |
+            diagnostic_aggregator
+            diagnostic_common_diagnostics
+            diagnostic_updater
+            self_test

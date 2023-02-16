@@ -32,16 +32,17 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rclpy
-from rclpy.node import Node
-
-import diagnostic_updater as DIAG
-
+import re
+import socket
+from subprocess import PIPE
+from subprocess import Popen
+from subprocess import TimeoutExpired
 import sys
 import threading
-import socket
-from subprocess import Popen, PIPE, TimeoutExpired
-import re
+
+import diagnostic_updater as DIAG
+import rclpy
+from rclpy.node import Node
 
 DEFAULT_NTP_HOSTNAME = "pool.ntp.org"
 PROCESS_NAME = "ntpdate"
@@ -83,10 +84,12 @@ def parse_ntpdate_response_for_offset(response):
         return float(re_match[1]) * 1E6
 
 class NTPMonitor(Node):
-    
+    """A diagnostic task that monitors the NTP offset of the system clock."""
+
     def __init__(self, ntp_hostname, offset=500, self_offset=500,
-                 diag_hostname = None, error_offset = 5000000,
+                 diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
+        """Initialize the NTPMonitor."""
         super().__init__(__class__.__name__)
 
         self.ntp_hostname = ntp_hostname
@@ -95,27 +98,29 @@ class NTPMonitor(Node):
         self.diag_hostname = diag_hostname
         self.error_offset = error_offset
         self.do_self_test = do_self_test
-        
+
         self.hostname = socket.gethostname()
         if self.diag_hostname is None:
             self.diag_hostname = self.hostname
 
         self.stat = DIAG.DiagnosticStatus()
         self.stat.level = DIAG.DiagnosticStatus.OK
-        self.stat.name = "NTP offset from "+ self.diag_hostname + " to " + self.ntp_hostname
-        self.stat.message = "OK"
+        self.stat.name = 'NTP offset from ' + \
+            self.diag_hostname + ' to ' + self.ntp_hostname
+        self.stat.message = 'OK'
         self.stat.hardware_id = self.hostname
         self.stat.values = []
 
         self.self_stat = DIAG.DiagnosticStatus()
         self.self_stat.level = DIAG.DiagnosticStatus.OK
-        self.self_stat.name = "NTP self-offset for "+ self.diag_hostname
-        self.self_stat.message = "OK"
+        self.self_stat.name = 'NTP self-offset for ' + self.diag_hostname
+        self.self_stat.message = 'OK'
         self.self_stat.hardware_id = self.hostname
         self.self_stat.values = []
 
         self.mutex = threading.Lock()
-        self.pub = self.create_publisher(DIAG.DiagnosticArray, "/diagnostics", 10)
+        self.pub = self.create_publisher(
+            DIAG.DiagnosticArray, '/diagnostics', 10)
 
         # we need to periodically republish this
         self.current_msg = None
@@ -151,10 +156,10 @@ class NTPMonitor(Node):
         stat_values.append(kv)
 
     def ntp_diag(self, st):
-        """Adds ntp diagnostics to the given status message and returns the new status
+        """
+        Add ntp diagnostics to the given status message.
 
-        Args:
-            st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
+        @param st: The status message to add diagnostics to.
         """
 
         try:
@@ -189,7 +194,7 @@ class NTPMonitor(Node):
 
             if (abs(measured_offset) > self.offset):
                 st.level = DIAG.DiagnosticStatus.WARN
-                st.message = "NTP Offset Too High"
+                st.message = 'NTP Offset Too High'
             if (abs(measured_offset) > self.error_offset):
                 st.level = DIAG.DiagnosticStatus.ERROR
                 st.message = "NTP Offset Too High"
@@ -256,17 +261,19 @@ def ntp_monitor_main(argv=sys.argv[1:]):
 
     rclpy.spin(ntp_monitor)
 
+
 def main(args=None):
     rclpy.init(args=args)
     try:
         ntp_monitor_main()
-    except KeyboardInterrupt: pass
-    except SystemExit: pass
-    except:
+    except KeyboardInterrupt:
+        pass
+    except SystemExit:
+        pass
+    except Exception:
         import traceback
         traceback.print_exc()
 
-if __name__ == "__main__":
-    main()
-    
 
+if __name__ == '__main__':
+    main()

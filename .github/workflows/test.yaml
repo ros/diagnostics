@@ -3,25 +3,36 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - ros2
   schedule:
-    # Run every morning to detect flakiness and broken dependencies
-    - cron: '17 8 * * *'
+    # Run every week at 20:00 on Sunday
+    - cron: '0 20 * * 0'
 
 jobs:
   build_and_test:
-    runs-on: ${{ matrix.os }}
+    name: Build and test on ${{ matrix.distro }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        include:
+          - distro: foxy
+            os: ubuntu-20.04
+          - distro: humble
+            os: ubuntu-22.04
+          - distro: rolling
+            os: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@v0.2
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - uses: ros-tooling/setup-ros@master
+      - run: |
+          sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+          sudo pip install pip --upgrade
+          sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
+      - uses: ros-tooling/action-ros-ci@master
         with:
-          target-ros2-distro: rolling
-          package-name:
-            diagnostic_aggregator
+          target-ros2-distro: ${{ matrix.distro }}
+          package-name: diagnostic_aggregator
+            diagnostic_common_diagnostics
             diagnostic_updater
             self_test
           vcs-repo-file-url: |

@@ -5,8 +5,6 @@ project(diagnostic_common_diagnostics)
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 
-find_package(rclpy REQUIRED)
-
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
@@ -16,16 +14,6 @@ install(PROGRAMS
 
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
-    file(GLOB_RECURSE AMENT_LINT_AUTO_FILE_EXCLUDE
-        # Exclude all the ROS1 files in src directory
-        src/*.py
-        # Exclude all the ROS1 files in test directory
-        test/*.py
-    )
-    message(AUTHOR_WARNING
-        "Ament lint auto tests are disabled on the following: "
-        ${AMENT_LINT_AUTO_FILE_EXCLUDE}
-    )
     ament_lint_auto_find_test_dependencies()
 
     find_package(ament_cmake_pytest REQUIRED)

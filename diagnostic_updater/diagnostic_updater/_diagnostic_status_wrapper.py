@@ -38,17 +38,18 @@ diagnostic_updater for Python.
 @author Brice Rebsamen <brice [dot] rebsamen [gmail]>
 """
 
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+from diagnostic_msgs.msg import DiagnosticStatus
+from diagnostic_msgs.msg import KeyValue
 
 
 class DiagnosticStatusWrapper(DiagnosticStatus):
     """
-    Wrapper for the diagnostic_msgs::DiagnosticStatus message that makes it easier to update.
+    Wrapper for the DiagnosticStatus that makes it easier to update.
 
     This class handles common string formatting and vector handling issues
-    for filling the diagnostic_msgs::DiagnosticStatus message. It is a subclass of
-    diagnostic_msgs::DiagnosticStatus, so it can be passed directly to
-    diagnostic publish calls.
+    for filling the diagnostic_msgs::DiagnosticStatus message. It is a
+    subclass of diagnostic_msgs::DiagnosticStatus, so it can be passed
+    directly to diagnostic publish calls.
     """
 
     def __init__(self, *args, **kwds):
@@ -72,7 +73,8 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         Fill out the level and message fields of the DiagnosticStatus.
 
         Usage:
-        summary(diagnostic_status): Copies the summary from a DiagnosticStatus message
+        summary(diagnostic_status): Copies the summary from a DiagnosticStatus
+        message.
         summary(lvl,msg): sets from lvl and messages
         """
         if len(args) == 1:
@@ -90,11 +92,11 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         """
         Merge a level and message with the existing ones.
 
-        It is sometimes useful to merge two DiagnosticStatus messages. In that case,
-        the key value pairs can be unioned, but the level and summary message
-        have to be merged more intelligently. This function does the merge in
-        an intelligent manner, combining the summary in *this, with the one
-        that is passed in.
+        It is sometimes useful to merge two DiagnosticStatus messages. In that
+        case, the key value pairs can be unioned, but the level and summary
+        message have to be merged more intelligently. This function does the
+        merge in an intelligent manner, combining the summary in *this, with
+        the one that is passed in.
         The combined level is the greater of the two levels to be merged.
         If both levels are non-zero (not OK), the messages are combined with a
         semicolon separator. If only one level is zero, and the other is

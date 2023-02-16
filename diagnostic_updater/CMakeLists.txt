@@ -52,6 +52,7 @@ target_link_libraries(example ${PROJECT_NAME})
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)  # skip for https://github.com/ros-tooling/action-ros-lint/issues/354
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
@@ -64,6 +65,20 @@ if(BUILD_TESTING)
   )
   ament_target_dependencies(
     diagnostic_updater_test
+    "diagnostic_msgs"
+    "rclcpp"
+    "rclcpp_lifecycle"
+    "std_msgs"
+  )
+
+  ament_add_gtest(diagnostic_status_wrapper_test test/diagnostic_status_wrapper_test.cpp)
+  target_include_directories(diagnostic_status_wrapper_test
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  ament_target_dependencies(
+    diagnostic_status_wrapper_test
     "diagnostic_msgs"
     "rclcpp"
     "rclcpp_lifecycle"
