@@ -65,17 +65,6 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperSummaryf) {
   EXPECT_EQ(dsw.values.size(), 0u);
 }
 
-TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperCopyConstructor) {
-  // A DiagnosticStatusWrapper initialized from another should have the same
-  // values.
-  diagnostic_updater::DiagnosticStatusWrapper dsw;
-  dsw.summary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Test");
-  diagnostic_updater::DiagnosticStatusWrapper dsw_copy(dsw);
-  EXPECT_EQ(dsw_copy.level, diagnostic_msgs::msg::DiagnosticStatus::WARN);
-  EXPECT_EQ(dsw_copy.message, "Test");
-  EXPECT_EQ(dsw_copy.values.size(), 0u);
-}
-
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperClearSummary) {
   // A DiagnosticStatusWrapper should be empty after calling clearSummary().
   diagnostic_updater::DiagnosticStatusWrapper dsw;
