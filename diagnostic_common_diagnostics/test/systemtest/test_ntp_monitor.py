@@ -34,11 +34,9 @@
 
 import launch_testing
 import launch
-import launch_ros
 import unittest
 import pytest
 import os
-import rospkg
 
 import ament_index_python
 

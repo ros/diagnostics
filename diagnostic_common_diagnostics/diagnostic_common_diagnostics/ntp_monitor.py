@@ -40,14 +40,14 @@ import diagnostic_updater as DIAG
 import sys
 import threading
 import socket
-from subprocess import Popen, PIPE, TimeoutExpired
-import re
+
+import ntplib
 
 
 class NTPMonitor(Node):
-    
+
     def __init__(self, ntp_hostname, offset=500, self_offset=500,
-                 diag_hostname = None, error_offset = 5000000,
+                 diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
         super().__init__(__class__.__name__)
 
@@ -57,27 +57,29 @@ class NTPMonitor(Node):
         self.diag_hostname = diag_hostname
         self.error_offset = error_offset
         self.do_self_test = do_self_test
-        
+
         self.hostname = socket.gethostname()
         if self.diag_hostname is None:
             self.diag_hostname = self.hostname
 
         self.stat = DIAG.DiagnosticStatus()
         self.stat.level = DIAG.DiagnosticStatus.OK
-        self.stat.name = "NTP offset from "+ self.diag_hostname + " to " + self.ntp_hostname
+        self.stat.name = "NTP offset from " + \
+            self.diag_hostname + " to " + self.ntp_hostname
         self.stat.message = "OK"
         self.stat.hardware_id = self.hostname
         self.stat.values = []
 
         self.self_stat = DIAG.DiagnosticStatus()
         self.self_stat.level = DIAG.DiagnosticStatus.OK
-        self.self_stat.name = "NTP self-offset for "+ self.diag_hostname
+        self.self_stat.name = "NTP self-offset for " + self.diag_hostname
         self.self_stat.message = "OK"
         self.self_stat.hardware_id = self.hostname
         self.self_stat.values = []
 
         self.mutex = threading.Lock()
-        self.pub = self.create_publisher(DIAG.DiagnosticArray, "/diagnostics", 10)
+        self.pub = self.create_publisher(
+            DIAG.DiagnosticArray, "/diagnostics", 10)
 
         # we need to periodically republish this
         self.current_msg = None
@@ -104,94 +106,83 @@ class NTPMonitor(Node):
         with self.mutex:
             self.current_msg = new_msg
 
-
-
     def ntp_diag(self, st):
-        """Adds ntp diagnostics to the given status message and returns the new status
+        """Add ntp diagnostics to the given status message and return it.
 
         Args:
-            st (DIAG.DiagnosticStatus()): The diagnostic status object to populate
+            st (DIAG.DiagnosticStatus()):
+                The diagnostic status object to populate
         """
-        
+
         def add_kv(stat_values, key, value):
             kv = DIAG.KeyValue()
             kv.key = key
             kv.value = value
             stat_values.append(kv)
-            
-        PROCESS_NAME = "ntpdate"
-        p = Popen([PROCESS_NAME, "-q", self.ntp_hostname], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+
+        ntp_client = ntplib.NTPClient()
+        response = None
         try:
-            stdout, stderr = p.communicate(timeout=5)
-        except TimeoutExpired:
-            p.kill()
-            stdout, stderr = p.communicate()
-            self.get_logger().error('Timeout running %s: "%s"' % (PROCESS_NAME, stderr))
-        rc = p.returncode
-        
-        st.values = []
-        add_kv(st.values, "Offset tolerance (us)", str(self.offset))
-        add_kv(st.values, "Offset tolerance (us) for Error", str(self.error_offset))
-        output = stdout.decode("UTF-8")
-        errors = stderr.decode("UTF-8")
-        
-        if rc == 0:
-            re_match = re.search("offset (.*),", output)
-            measured_offset = float(re_match[1])*1000000
+            response = ntp_client.request(self.ntp_hostname, version=3)
+        except ntplib.NTPException as e:
+            self.get_logger().error(f'NTP Error: {e}')
+            st.level = DIAG.DiagnosticStatus.ERROR
+            st.message = f'NTP Error: {e}'
+            add_kv(st.values, 'Offset (us)', 'N/A')
+            add_kv(st.values, 'Errors', str(e))
 
-            st.level = DIAG.DiagnosticStatus.OK
-            st.message = "OK"
-            add_kv(st.values, "Offset (us)", str(measured_offset))
-
+        if response is not None:
+            measured_offset = response.offset * 1e6
             if (abs(measured_offset) > self.offset):
                 st.level = DIAG.DiagnosticStatus.WARN
-                st.message = "NTP Offset Too High"
+                st.message = \
+                    f'NTP offset above threshold: {measured_offset}>'\
+                    f'{self.offset} us'
             if (abs(measured_offset) > self.error_offset):
                 st.level = DIAG.DiagnosticStatus.ERROR
-                st.message = "NTP Offset Too High"
-
-        else:
-            st.level = DIAG.DiagnosticStatus.ERROR
-            st.message = "Error Running ntpdate. Returned %d" % rc
-            add_kv(st.values, "Offset (us)", "N/A")
-            add_kv(st.values, "Output", output)
-            add_kv(st.values, "Errors", errors)
+                st.message = \
+                    f'NTP offset above error threshold: {measured_offset}>'\
+                    f'{self.error_offset} us'
+            if (abs(measured_offset) < self.offset):
+                st.level = DIAG.DiagnosticStatus.OK
+                st.message = f'NTP Offset OK: {measured_offset} us'
 
         return st
-
 
 
 def ntp_monitor_main(argv=sys.argv[1:]):
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ntp_hostname",
-                      action="store", default="pool.ntp.org",
-                      type=str)
-    parser.add_argument("--offset-tolerance", dest="offset_tol",
-                      action="store", default=500,
-                      help="Offset from NTP host", metavar="OFFSET-TOL",
-                      type=int)
-    parser.add_argument("--error-offset-tolerance", dest="error_offset_tol",
-                      action="store", default=5000000,
-                      help="Offset from NTP host. Above this is error", metavar="OFFSET-TOL",
-                      type=int)
-    parser.add_argument("--self_offset-tolerance", dest="self_offset_tol",
-                      action="store", default=500,
-                      help="Offset from self", metavar="SELF_OFFSET-TOL",
-                      type=int)
-    parser.add_argument("--diag-hostname", dest="diag_hostname",
-                      help="Computer name in diagnostics output (ex: 'c1')",
-                      metavar="DIAG_HOSTNAME",
-                      action="store", default=None,
-                      type=str)
-    parser.add_argument("--no-self-test", dest="do_self_test",
-                      help="Disable self test",
-                      action="store_false", default=True)
+    parser.add_argument('--ntp_hostname',
+                        action='store', default='0.pool.ntp.org',
+                        type=str)
+    parser.add_argument('--offset-tolerance', dest='offset_tol',
+                        action='store', default=500,
+                        help='Offset from NTP host', metavar='OFFSET-TOL',
+                        type=int)
+    parser.add_argument('--error-offset-tolerance', dest='error_offset_tol',
+                        action='store', default=5000000,
+                        help='Offset from NTP host. Above this is error',
+                        metavar='OFFSET-TOL', type=int)
+    parser.add_argument('--self_offset-tolerance', dest='self_offset_tol',
+                        action='store', default=500,
+                        help='Offset from self', metavar='SELF_OFFSET-TOL',
+                        type=int)
+    parser.add_argument('--diag-hostname', dest='diag_hostname',
+                        help='Computer name in diagnostics output (ex: "c1")',
+                        metavar='DIAG_HOSTNAME',
+                        action='store', default=None,
+                        type=str)
+    parser.add_argument('--no-self-test', dest='do_self_test',
+                        help='Disable self test',
+                        action='store_false', default=True)
     args = parser.parse_args(args=argv)
 
     offset = args.offset_tol
     self_offset = args.self_offset_tol
     error_offset = args.error_offset_tol
+    assert offset < error_offset, \
+        'Offset tolerance must be less than error offset tolerance'
 
     ntp_monitor = NTPMonitor(args.ntp_hostname, offset, self_offset,
                              args.diag_hostname, error_offset,
@@ -199,17 +190,19 @@ def ntp_monitor_main(argv=sys.argv[1:]):
 
     rclpy.spin(ntp_monitor)
 
+
 def main(args=None):
     rclpy.init(args=args)
     try:
         ntp_monitor_main()
-    except KeyboardInterrupt: pass
-    except SystemExit: pass
-    except:
+    except KeyboardInterrupt:
+        pass
+    except SystemExit:
+        pass
+    except Exception:
         import traceback
         traceback.print_exc()
 
+
 if __name__ == "__main__":
     main()
-    
-
