@@ -32,23 +32,22 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rclpy
 from rclpy.node import Node
-
+import rclpy
 import diagnostic_updater as DIAG
-
+import ntplib
+import socket
 import sys
 import threading
-import socket
-
-import ntplib
 
 
 class NTPMonitor(Node):
+    """A diagnostic task that monitors the NTP offset of the system clock."""
 
     def __init__(self, ntp_hostname, offset=500, self_offset=500,
                  diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
+        """Initialize the NTPMonitor."""
         super().__init__(__class__.__name__)
 
         self.ntp_hostname = ntp_hostname
@@ -64,22 +63,22 @@ class NTPMonitor(Node):
 
         self.stat = DIAG.DiagnosticStatus()
         self.stat.level = DIAG.DiagnosticStatus.OK
-        self.stat.name = "NTP offset from " + \
-            self.diag_hostname + " to " + self.ntp_hostname
-        self.stat.message = "OK"
+        self.stat.name = 'NTP offset from ' + \
+            self.diag_hostname + ' to ' + self.ntp_hostname
+        self.stat.message = 'OK'
         self.stat.hardware_id = self.hostname
         self.stat.values = []
 
         self.self_stat = DIAG.DiagnosticStatus()
         self.self_stat.level = DIAG.DiagnosticStatus.OK
-        self.self_stat.name = "NTP self-offset for " + self.diag_hostname
-        self.self_stat.message = "OK"
+        self.self_stat.name = 'NTP self-offset for ' + self.diag_hostname
+        self.self_stat.message = 'OK'
         self.self_stat.hardware_id = self.hostname
         self.self_stat.values = []
 
         self.mutex = threading.Lock()
         self.pub = self.create_publisher(
-            DIAG.DiagnosticArray, "/diagnostics", 10)
+            DIAG.DiagnosticArray, '/diagnostics', 10)
 
         # we need to periodically republish this
         self.current_msg = None
@@ -204,5 +203,5 @@ def main(args=None):
         traceback.print_exc()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
