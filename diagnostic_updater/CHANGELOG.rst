@@ -2,6 +2,19 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2023-01-26)
+------------------
+* Merge of foxy and humble history into rolling for future maintenance from one branch only.
+* Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
+* License fixes (`#263 <https://github.com/ros/diagnostics/issues/263>`_)
+* Fix/cleanup ros1 (`#257 <https://github.com/ros/diagnostics/issues/257>`_)
+* Fixed DiagnosedPublisher and switched to ROS_TIME (`#243 <https://github.com/ros/diagnostics/issues/243>`_)
+* Check if parameter is already declared to avoid re-declaring it. (`#227 <https://github.com/ros/diagnostics/issues/227>`_)
+* Update CMakeLists.txt to support modern cmake syntax
+* Fix diagnostic_updater cmake
+* Fix implicit conversion warnings
+* Contributors: Alberto Soragna, Austin, Christian Henkel, Grzegorz Głowacki, Nikos Koukis, Ralph Lange
+
 3.0.0 (2022-06-10)
 ------------------
 * Merge pull request `#217 <https://github.com/ros/diagnostics/issues/217>`_ from boschresearch/ros-time-for-frequency-stat
@@ -67,14 +80,6 @@ Changelog for package diagnostic_updater
 * Fix DiagnosedPublisher (`#135 <https://github.com/ros/diagnostics/issues/135>`_)
 * fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
 * Contributors: DensoADAS, Karsten Knese, Scott K Logan, Arne Nordmann
-
-2.0.1 (2020-06-03)
-------------------
-* Re-add leading character to node name (`#109 <https://github.com/ros/diagnostics/issues/109>`_)
-* Ros2 migrate diagnostic aggregator (`#118 <https://github.com/ros/diagnostics/issues/118>`_)
-* Fix DiagnosedPublisher (`#135 <https://github.com/ros/diagnostics/issues/135>`_)
-* fix linters (`#134 <https://github.com/ros/diagnostics/issues/134>`_)
-* Contributors: DensoADAS, Arne Nordmann, Robin Vanhove, Karsten Knese, Scott K Logan
 
 2.0.1 (2020-06-03)
 ------------------

@@ -3,10 +3,10 @@ on:
   pull_request:
   push:
     branches:
-      - rolling
+      - ros2
   schedule:
-    # Run every week
-    - cron: "0 0 * * 0"
+    # Run every week at 20:00 on Sunday
+    - cron: '0 20 * * 0'
 
 jobs:
   build_and_test:
@@ -24,7 +24,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
-      - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+      - run: |
+          sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+          sudo pip install pip --upgrade
+          sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}

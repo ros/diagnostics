@@ -79,7 +79,7 @@ public:
    * nothing.
    * \param other Reference to object to copy
    */
-  explicit DiagnosticStatusWrapper(const DiagnosticStatusWrapper & other);
+  explicit DiagnosticStatusWrapper(const DiagnosticStatusWrapper & other) = delete;
 
   /**
    * \brief Fills out the level and message fields of the DiagnosticStatus.
@@ -276,7 +276,7 @@ inline void DiagnosticStatusWrapper::add<bool>(
 }
 
 // Need to place addf after DiagnosticStatusWrapper::add<std::string> or
-// gcc complains that the specialization occurs after instatiation.
+// gcc complains that the specialization occurs after instantiation.
 inline void
 DiagnosticStatusWrapper::addf(
   const std::string & key, const char * format, ...)  // In practice format will always be a char *

@@ -2,6 +2,13 @@
 Changelog for package diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.0 (2023-01-26)
+------------------
+* Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
+* License fixes (`#263 <https://github.com/ros/diagnostics/issues/263>`_)
+* Fix/cleanup ros1 (`#257 <https://github.com/ros/diagnostics/issues/257>`_)
+* Contributors: Austin, Christian Henkel, Ralph Lange
+
 1.9.3 (2018-05-02)
 ------------------
 
