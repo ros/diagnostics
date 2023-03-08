@@ -31,10 +31,12 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
+
 # see https://github.com/pybind/pybind11/commit/ba33b2fc798418c8c9dfe801c5b9023d3703f417
 if(NOT WIN32)
   target_compile_options(${PROJECT_NAME} PRIVATE -Wdeprecated)
 endif()
+
 # prevent pluginlib from using boost
 target_compile_definitions(${PROJECT_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
@@ -56,6 +58,7 @@ target_link_libraries(${ANALYZERS}
   ${PROJECT_NAME})
 target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
+
 # prevent pluginlib from using boost
 target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
@@ -79,6 +82,7 @@ if(BUILD_TESTING)
     "primitive_analyzers"
     "all_analyzers"
     "analyzer_group")
+
   foreach(test_name ${create_analyzers_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
@@ -100,6 +104,7 @@ if(BUILD_TESTING)
     "primitive_analyzers"
     "all_analyzers"
     "analyzer_group")
+
   foreach(test_name ${create_analyzers_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_${test_name}" EXPECTED_OUTPUT)
