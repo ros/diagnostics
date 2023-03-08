@@ -32,13 +32,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from rclpy.node import Node
-import rclpy
-import diagnostic_updater as DIAG
-import ntplib
 import socket
 import sys
 import threading
+
+import ntplib
+import rclpy
+from rclpy.node import Node
+
+import diagnostic_updater as DIAG
 
 
 class NTPMonitor(Node):

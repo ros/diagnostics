@@ -39,9 +39,8 @@
 
 from random import random
 
-from diagnostic_msgs.msg import DiagnosticArray
-from diagnostic_msgs.msg import DiagnosticStatus
 import rclpy
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 from rclpy.clock import ROSClock
 from rclpy.node import Node
 from rclpy.qos import qos_profile_system_default

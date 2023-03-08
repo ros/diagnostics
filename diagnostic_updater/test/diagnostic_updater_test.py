@@ -6,16 +6,13 @@
 import time
 import unittest
 
-from diagnostic_msgs.msg import DiagnosticStatus
-from diagnostic_updater import DiagnosticStatusWrapper
-from diagnostic_updater import DiagnosticTask
-from diagnostic_updater import FrequencyStatus
-from diagnostic_updater import FrequencyStatusParam
-from diagnostic_updater import TimeStampStatus
-from diagnostic_updater import Updater
 import rclpy
-from rclpy.clock import Clock
-from rclpy.clock import ClockType
+from diagnostic_msgs.msg import DiagnosticStatus
+from rclpy.clock import Clock, ClockType
+
+from diagnostic_updater import (DiagnosticStatusWrapper, DiagnosticTask,
+                                FrequencyStatus, FrequencyStatusParam,
+                                TimeStampStatus, Updater)
 
 
 class ClassFunction(DiagnosticTask):

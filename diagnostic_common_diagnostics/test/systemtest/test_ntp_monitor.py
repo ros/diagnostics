@@ -32,13 +32,13 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import launch_testing
-import launch
-import unittest
-import pytest
 import os
+import unittest
 
 import ament_index_python
+import launch
+import launch_testing
+import pytest
 
 
 @pytest.mark.launch_test
