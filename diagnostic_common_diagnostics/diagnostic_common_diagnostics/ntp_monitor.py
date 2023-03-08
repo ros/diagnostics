@@ -108,11 +108,13 @@ class NTPMonitor(Node):
             self.current_msg = new_msg
 
     def ntp_diag(self, st):
-        """Add ntp diagnostics to the given status message and return it.
+        """
+        Add ntp diagnostics to the given status message and return it.
 
         Args:
-            st (DIAG.DiagnosticStatus()):
-                The diagnostic status object to populate
+        ----
+            st: The diagnostic status object to populate
+
         """
 
         def add_kv(stat_values, key, value):
