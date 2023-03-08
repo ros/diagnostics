@@ -66,6 +66,7 @@ def generate_test_description():
 
 
 class TestNTPMonitor(unittest.TestCase):
+
     def test_process_starts(self, proc_output):
         """Test that the process starts and exits normally."""
         proc_output.assertWaitFor('NTPMonitor: Starting up', timeout=5)
