@@ -16,6 +16,8 @@ endif()
 message(STATUS "Build for $ENV{ROS_DISTRO}")
 if("$ENV{ROS_DISTRO}" STREQUAL "foxy")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_FUTURE")
+elseif("$ENV{ROS_DISTRO}" STREQUAL "galactic")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_FUTURE")
 # elseif("$ENV{ROS_DISTRO}" STREQUAL "humble")
   # TODO: define something here if needed
 # elseif("$ENV{ROS_DISTRO}" STREQUAL "rolling")
