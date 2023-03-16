@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.1 (2023-03-16)
+------------------
 * Secretly supporting galactic (`#295 <https://github.com/ros/diagnostics/issues/295>`_)
 * Linting additional package (`#268 <https://github.com/ros/diagnostics/issues/268>`_)
 * Maintainer update
