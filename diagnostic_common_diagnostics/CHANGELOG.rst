@@ -2,6 +2,13 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Secretly supporting galactic (`#295 <https://github.com/ros/diagnostics/issues/295>`_)
+* Linting additional package (`#268 <https://github.com/ros/diagnostics/issues/268>`_)
+* Maintainer update
+* Contributors: Austin, Christian Henkel, Ralph Lange
+
 3.1.0 (2023-01-26)
 ------------------
 * Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
