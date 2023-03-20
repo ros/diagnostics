@@ -21,6 +21,7 @@ jobs:
             diagnostic_updater,
             self_test,
           ]
+        distro: [foxy, humble, rolling]
         include:
           - distro: foxy
             os: ubuntu-20.04
@@ -39,12 +40,5 @@ jobs:
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
-          vcs-repo-file-url: |
-            https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
-          colcon-defaults: |
-            {
-              "build": {
-                "mixin": ["coverage-gcc"]
-              }
-            }
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          # vcs-repo-file-url: |
+          #   https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
