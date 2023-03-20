@@ -32,42 +32,90 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import subprocess
 import os
 import unittest
+import asyncio
 
 import ament_index_python
+
+from diagnostic_msgs.msg import DiagnosticArray
+
 import launch
-import launch_testing
-import pytest
 
-
-@pytest.mark.launch_test
-def generate_test_description():
-    return launch.LaunchDescription([
-        # launch_ros.actions.Node(
-        #     package='diagnostic_common_diagnostics',
-        #     node_executable='ntp_monitor',
-        #     output='screen',
-        #     arguments=['--ntp-hostname', 'localhost']
-        # ),
-        launch.actions.ExecuteProcess(
-            cmd=[
-                os.path.join(
-                    ament_index_python.get_package_prefix(
-                        'diagnostic_common_diagnostics'),
-                    'lib',
-                    'diagnostic_common_diagnostics',
-                    'ntp_monitor.py'
-                ),
-            ],
-        ),
-        launch_testing.actions.ReadyToTest()
-    ])
+import rclpy
 
 
 class TestNTPMonitor(unittest.TestCase):
+    def __init__(self, methodName: str = "runTest") -> None:
+        super().__init__(methodName)
+        self.n_msgs_received = 0
 
-    def test_process_starts(self, proc_output):
-        """Test that the process starts and exits normally."""
-        proc_output.assertWaitFor('NTPMonitor: Starting up', timeout=5)
-        proc_output.assertNotWaitFor('FileNotFoundError', timeout=5)
+    def setUp(self):
+        self.n_msgs_received = 0
+        self.subprocess = subprocess.Popen(
+            [
+                os.path.join(
+                    ament_index_python.get_package_prefix(
+                        'diagnostic_common_diagnostics'
+                    ),
+                    'lib',
+                    'diagnostic_common_diagnostics',
+                    'ntp_monitor.py'
+                )
+            ]
+        )
+        # self.event_loop = asyncio.get_event_loop()
+        # self.tasks = [
+        #     self.event_loop.create_task(
+        #         self.event_loop.run_in_executor(
+        #             None,
+        #             self.subprocess.wait
+        #         )
+        #     )
+        # ]
+
+    def tearDown(self):
+        self.subprocess.kill()
+
+    def _diagnostics_callback(self, msg):
+        search_strings = [
+            "NTP offset from",
+            "NTP self-offset for"
+        ]
+        for search_string in search_strings:
+            if search_string not in ''.join([
+                s.name for s in msg.status
+            ]):
+                return
+        self.n_msgs_received += 1
+
+    def test_publishing(self):
+        rclpy.init()
+        node = rclpy.create_node('test_ntp_monitor')
+        node.create_subscription(
+            DiagnosticArray,
+            'diagnostics',
+            self._diagnostics_callback,
+            1
+        )
+
+        TIMEOUT_MAX_S = 5
+        TIME_D_S = .1
+        waited_s = 0.
+        while waited_s < TIMEOUT_MAX_S and self.n_msgs_received == 0:
+            rclpy.spin_once(node, timeout_sec=TIME_D_S)
+            waited_s += TIME_D_S
+
+        if self.n_msgs_received == 0:
+            raise RuntimeError(
+                "No diagnostic messages received after {}s".format(
+                    TIMEOUT_MAX_S
+                )
+            )
+
+        node.destroy_node()
+
+
+if __name__ == '__main__':
+    unittest.main()
