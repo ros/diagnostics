@@ -45,14 +45,19 @@ import launch
 
 import rclpy
 
+TIMEOUT_MAX_S = 2.
+
 
 class TestNTPMonitor(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
+        rclpy.init()
         self.n_msgs_received = 0
 
     def setUp(self):
         self.n_msgs_received = 0
+        n = self._count_msgs(TIMEOUT_MAX_S)
+        self.assertEqual(n, 0)
         self.subprocess = subprocess.Popen(
             [
                 os.path.join(
@@ -65,15 +70,6 @@ class TestNTPMonitor(unittest.TestCase):
                 )
             ]
         )
-        # self.event_loop = asyncio.get_event_loop()
-        # self.tasks = [
-        #     self.event_loop.create_task(
-        #         self.event_loop.run_in_executor(
-        #             None,
-        #             self.subprocess.wait
-        #         )
-        #     )
-        # ]
 
     def tearDown(self):
         self.subprocess.kill()
@@ -90,8 +86,8 @@ class TestNTPMonitor(unittest.TestCase):
                 return
         self.n_msgs_received += 1
 
-    def test_publishing(self):
-        rclpy.init()
+    def _count_msgs(self, timeout_s):
+        self.n_msgs_received = 0
         node = rclpy.create_node('test_ntp_monitor')
         node.create_subscription(
             DiagnosticArray,
@@ -99,22 +95,22 @@ class TestNTPMonitor(unittest.TestCase):
             self._diagnostics_callback,
             1
         )
-
-        TIMEOUT_MAX_S = 5
         TIME_D_S = .1
         waited_s = 0.
-        while waited_s < TIMEOUT_MAX_S and self.n_msgs_received == 0:
+        while waited_s < timeout_s and self.n_msgs_received == 0:
             rclpy.spin_once(node, timeout_sec=TIME_D_S)
             waited_s += TIME_D_S
-
-        if self.n_msgs_received == 0:
-            raise RuntimeError(
-                "No diagnostic messages received after {}s".format(
-                    TIMEOUT_MAX_S
-                )
-            )
-
         node.destroy_node()
+        return self.n_msgs_received
+
+    def test_publishing(self):
+        n = self._count_msgs(TIMEOUT_MAX_S)
+
+        self.assertGreater(
+            n,
+            0,
+            "No messages received within {}s".format(TIMEOUT_MAX_S)
+        )
 
 
 if __name__ == '__main__':
