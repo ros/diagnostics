@@ -36,11 +36,12 @@ import socket
 import sys
 import threading
 
+import diagnostic_updater as DIAG
+
 import ntplib
+
 import rclpy
 from rclpy.node import Node
-
-import diagnostic_updater as DIAG
 
 
 class NTPMonitor(Node):
