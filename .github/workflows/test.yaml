@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_and_test:
-    name: Build and test ${{ matrix.package }} on ${{ matrix.distro }}
+    name: ${{ matrix.package }} on ${{ matrix.distro }}
     strategy:
       fail-fast: false
       matrix:
