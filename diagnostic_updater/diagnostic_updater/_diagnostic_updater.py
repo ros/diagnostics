@@ -40,7 +40,8 @@ diagnostic_updater for Python.
 
 import threading
 
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+from diagnostic_msgs.msg import DiagnosticArray
+from diagnostic_msgs.msg import DiagnosticStatus
 from rclpy.clock import Clock
 
 from ._diagnostic_status_wrapper import DiagnosticStatusWrapper

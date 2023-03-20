@@ -41,7 +41,8 @@ diagnostic_updater for Python.
 from rclpy.time import Time
 
 from ._diagnostic_updater import CompositeDiagnosticTask
-from ._update_functions import FrequencyStatus, TimeStampStatus
+from ._update_functions import FrequencyStatus
+from ._update_functions import TimeStampStatus
 
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):

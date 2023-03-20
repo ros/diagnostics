@@ -14,8 +14,8 @@
 
 import os
 
-import rclpy
 from diagnostic_msgs.msg import DiagnosticArray
+import rclpy
 from rclpy.node import Node
 
 

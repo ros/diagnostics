@@ -41,7 +41,8 @@ diagnostic_updater for Python.
 import threading
 
 from diagnostic_msgs.msg import DiagnosticStatus
-from rclpy.clock import Clock, ClockType
+from rclpy.clock import Clock
+from rclpy.clock import ClockType
 
 from ._diagnostic_updater import DiagnosticTask
 

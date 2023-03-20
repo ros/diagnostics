@@ -14,7 +14,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        linter: [cppcheck, cpplint, flake8, pep257, uncrustify, xmllint]
+        linter: [
+            cppcheck,
+            cpplint,
+            flake8,
+            pep257,
+            uncrustify,
+            xmllint,
+          ]
     runs-on: ubuntu-22.04
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
@@ -24,7 +31,6 @@ jobs:
         with:
           required-ros-distributions: ${{ matrix.distro }}
       - run: sudo pip install pydocstyle==6.1.1 # downgrade to fix https://github.com/ament/ament_lint/pull/428
-      - run: sudo pip install flake8-isort
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
