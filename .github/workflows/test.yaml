@@ -6,11 +6,11 @@ on:
       - ros2
   schedule:
     # Run every week at 20:00 on Sunday
-    - cron: '0 20 * * 0'
+    - cron: "0 20 * * 0"
 
 jobs:
   build_and_test:
-    name: Build and test on ${{ matrix.distro }}
+    name: Build and test ${{ matrix.package }} on ${{ matrix.distro }}
     strategy:
       fail-fast: false
       matrix:
@@ -21,6 +21,13 @@ jobs:
             os: ubuntu-22.04
           - distro: rolling
             os: ubuntu-22.04
+        package:
+          [
+            diagnostic_aggregator,
+            diagnostic_common_diagnostics,
+            diagnostic_updater,
+            self_test,
+          ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
@@ -31,10 +38,7 @@ jobs:
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
-          package-name: diagnostic_aggregator
-            diagnostic_common_diagnostics
-            diagnostic_updater
-            self_test
+          package-name: ${{ matrix.package }}
           vcs-repo-file-url: |
             https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
           colcon-defaults: |
