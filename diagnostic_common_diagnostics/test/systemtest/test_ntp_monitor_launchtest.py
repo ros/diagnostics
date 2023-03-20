@@ -33,16 +33,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
-import unittest
-from launch_pytest.tools import process as process_tools
 
 import ament_index_python
+
 import launch
-import launch_testing
+
 import launch_pytest
+from launch_pytest.tools import process as process_tools
+
+import launch_testing
+
 import pytest
-import rclpy
-from diagnostic_msgs.msg import DiagnosticArray
 
 
 @pytest.fixture
@@ -69,7 +70,7 @@ def launch_description(ntp_monitor_proc):
     ])
 
 
-@pytest.mark.skip(reason="This test is not working yet")
+@pytest.mark.skip(reason='This test is not working yet')
 @pytest.mark.launch(fixture=launch_description)
 def test_read_stdout(ntp_monitor_proc, launch_context):
     """Check if 'ntp_monitor' was found in the stdout."""

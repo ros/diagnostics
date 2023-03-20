@@ -32,16 +32,13 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import subprocess
 import os
+import subprocess
 import unittest
-import asyncio
 
 import ament_index_python
 
 from diagnostic_msgs.msg import DiagnosticArray
-
-import launch
 
 import rclpy
 
@@ -49,7 +46,8 @@ TIMEOUT_MAX_S = 2.
 
 
 class TestNTPMonitor(unittest.TestCase):
-    def __init__(self, methodName: str = "runTest") -> None:
+
+    def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
         rclpy.init()
         self.n_msgs_received = 0
@@ -76,8 +74,8 @@ class TestNTPMonitor(unittest.TestCase):
 
     def _diagnostics_callback(self, msg):
         search_strings = [
-            "NTP offset from",
-            "NTP self-offset for"
+            'NTP offset from',
+            'NTP self-offset for'
         ]
         for search_string in search_strings:
             if search_string not in ''.join([
@@ -109,7 +107,7 @@ class TestNTPMonitor(unittest.TestCase):
         self.assertGreater(
             n,
             0,
-            "No messages received within {}s".format(TIMEOUT_MAX_S)
+            f'No messages received within {TIMEOUT_MAX_S}s'
         )
 
 
