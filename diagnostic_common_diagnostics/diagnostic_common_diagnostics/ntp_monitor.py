@@ -162,7 +162,7 @@ def ntp_monitor_main(argv=sys.argv[1:]):
                         type=str)
     parser.add_argument('--offset-tolerance', dest='offset_tol',
                         action='store', default=500,
-                        help='Offset from NTP host', metavar='OFFSET-TOL',
+                        help='Offset from NTP host [us]', metavar='OFFSET-TOL',
                         type=int)
     parser.add_argument('--error-offset-tolerance', dest='error_offset_tol',
                         action='store', default=5000000,
@@ -170,7 +170,7 @@ def ntp_monitor_main(argv=sys.argv[1:]):
                         metavar='OFFSET-TOL', type=int)
     parser.add_argument('--self_offset-tolerance', dest='self_offset_tol',
                         action='store', default=500,
-                        help='Offset from self', metavar='SELF_OFFSET-TOL',
+                        help='Offset from self [us]', metavar='SELF_OFFSET-TOL',
                         type=int)
     parser.add_argument('--diag-hostname', dest='diag_hostname',
                         help='Computer name in diagnostics output (ex: "c1")',
