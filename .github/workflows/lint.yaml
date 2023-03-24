@@ -10,7 +10,7 @@ on:
 
 jobs:
   ament_lint:
-    name: Linting with ${{ matrix.linter }}
+    name: Lint ${{ matrix.linter }}
     strategy:
       fail-fast: false
       matrix:
