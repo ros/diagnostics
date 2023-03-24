@@ -2,6 +2,9 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 3.1.1 (2023-03-16)
 ------------------
 * Secretly supporting galactic (`#295 <https://github.com/ros/diagnostics/issues/295>`_)
