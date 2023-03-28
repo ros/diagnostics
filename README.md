@@ -1,4 +1,4 @@
-![ROS2 Foxy](https://img.shields.io/badge/ROS2-foxy-green.svg) ![ROS2 Humble](https://img.shields.io/badge/ROS2-humble-green.svg) ![ROS2 Rolling](https://img.shields.io/badge/ROS2-rolling-green.svg)
+![ROS2 Foxy](https://img.shields.io/badge/ROS2-foxy-green.svg?style=flat-square) ![ROS2 Humble](https://img.shields.io/badge/ROS2-humble-green.svg?style=flat-square) ![ROS2 Rolling](https://img.shields.io/badge/ROS2-rolling-green.svg?style=flat-square)
 
 # Overview
 The diagnostics system collects information about hardware drivers and robot hardware to make them availaible to users and operators. 
