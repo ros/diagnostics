@@ -1,3 +1,5 @@
+![ROS2 Foxy](https://img.shields.io/badge/ROS2-foxy-green.svg?style=flat-square) ![ROS2 Humble](https://img.shields.io/badge/ROS2-humble-green.svg?style=flat-square) ![ROS2 Rolling](https://img.shields.io/badge/ROS2-rolling-green.svg?style=flat-square)
+
 # Overview
 The diagnostics system collects information about hardware drivers and robot hardware to make them availaible to users and operators. 
 The diagnostics system contains tools to collect and analyze this data.
@@ -24,6 +26,12 @@ The `diagnostic_aggregator` package provides tools to aggregate diagnostic messa
 Outside of this repository, there is [`rqt_robot_monitor`](https://index.ros.org/p/rqt_robot_monitor/) to visualize diagnostic messages that have been aggregated by the `diagnostic_aggregator`.
 
 Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_monitor`](https://index.ros.org/p/rqt_runtime_monitor/).
+
+# Target Distribution
+The ['ros2' branch](https://github.com/ros/diagnostics/tree/ros2) targets
+- _Foxy Fitzroy_
+- _Humble Hawksbill_ and
+- _Rolling Ridley_
 
 # License
 The source code is released under a [BSD 3-Clause license](LICENSE).
