@@ -1,4 +1,9 @@
-![ROS2 Foxy](https://img.shields.io/badge/ROS2-foxy-green.svg?style=flat-square) ![ROS2 Humble](https://img.shields.io/badge/ROS2-humble-green.svg?style=flat-square) ![ROS2 Rolling](https://img.shields.io/badge/ROS2-rolling-green.svg?style=flat-square)
+[![Test diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/test.yaml?label=test&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/test.yaml)
+[![Lint diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/lint.yaml?label=lint&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/lint.yaml)
+[![ROS2 Foxy](https://img.shields.io/ros/v/foxy/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#foxy) 
+[![ROS2 Humble](https://img.shields.io/ros/v/humble/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#humble) 
+[![ROS2 Rolling](https://img.shields.io/ros/v/rolling/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#rolling)
+
 
 # Overview
 The diagnostics system collects information about hardware drivers and robot hardware to make them availaible to users and operators. 
