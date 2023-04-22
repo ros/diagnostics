@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'ros2cli.command': [
-            'hello = ros2diagnostics_cli.command.hello:HelloCommand',
+            'diagnostics = ros2diagnostics_cli.command.diagnostics:DiagCommand',
         ],
         'ros2diagnostics_cli.verb': [
             'world = ros2diagnostics_cli.verb.world:WorldVerb',
