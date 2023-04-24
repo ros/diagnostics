@@ -275,7 +275,7 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> GenericAnalyzer:
   // Check that all processed items aren't stale
   bool all_stale = true;
   for (unsigned int j = 0; j < processed.size(); ++j) {
-    if (processed[j]->level != 3) {
+    if (processed[j]->level != diagnostic_msgs::msg::DiagnosticStatus::STALE) {
       all_stale = false;
     }
   }
@@ -295,10 +295,10 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> GenericAnalyzer:
     // If we're missing any items, set the header status to error or stale
     if (expected_names_missing.size() > 0 && processed[j]->name == path_) {
       if (!all_stale) {
-        processed[j]->level = 2;
+        processed[j]->level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
         processed[j]->message = "Error";
       } else {
-        processed[j]->level = 3;
+        processed[j]->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
         processed[j]->message = "All Stale";
       }
 
