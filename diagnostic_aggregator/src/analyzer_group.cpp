@@ -317,7 +317,8 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
         kv.key = nice_name;
         kv.value = processed[i]->message;
 
-        all_stale = all_stale && (processed[i]->level == 3);
+        all_stale = all_stale &&
+          (processed[i]->level == diagnostic_msgs::msg::DiagnosticStatus::STALE);
         header_status->level = max(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
@@ -325,8 +326,8 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
   }
 
   // Report stale as errors unless all stale
-  if (header_status->level == 3 && !all_stale) {
-    header_status->level = 2;
+  if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE && !all_stale) {
+    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
   }
 
   header_status->message = valToMsg(header_status->level);
