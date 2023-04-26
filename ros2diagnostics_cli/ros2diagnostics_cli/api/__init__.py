@@ -73,12 +73,22 @@ def open_file_for_output(csv_file) -> TextIO:
     f = open(csv_file, "w", encoding="utf-8")
     return f
 
+
 class ParserModeEnum(IntEnum):
     List = 1
     CSV = 2
     Show = 3
+
+
 class DiagnosticsParser:
-    def __init__(self, mode: ParserModeEnum, verbose=False, levels=None, run_once=False, name_filter=None) -> None:
+    def __init__(
+        self,
+        mode: ParserModeEnum,
+        verbose=False,
+        levels=None,
+        run_once=False,
+        name_filter=None,
+    ) -> None:
         self.__name_filter = name_filter
         self.__status_render_handler = self.render
         self.__mode = mode
@@ -104,17 +114,15 @@ class DiagnosticsParser:
         if levels is None:
             return b_levels
 
-        for level in levels:
-            match level:
-                case "info":
-                    b_levels.append(b"\x00")
-                case "warn":
-                    b_levels.append(b"\x01")
-                case "error":
-                    b_levels.append(b"\x02")
-        return b_levels
+        map_levels = {
+            "info": lambda: b_levels.append(b"\x00"),
+            "warn": lambda: b_levels.append(b"\x01"),
+            "error": lambda: b_levels.append(b"\x02"),
+        }
 
-    
+        for level in levels:
+            map_levels[level]()
+        return b_levels
 
     @staticmethod
     def convert_level_to_str(level) -> Tuple[str, str]:
@@ -166,9 +174,9 @@ class DiagnosticsParser:
         match self.__mode:
             case ParserModeEnum.List:
                 handler = diagnostic_list_handler
-            case _ :
+            case _:
                 handler = self.diagnostics_status_handler
-        
+
         rclpy.init()
         node = rclpy.create_node("ros2diagnostics_cli_filter")
         node.create_subscription(
@@ -207,14 +215,17 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
 
     print(yaml.dump(data))
 
+
 def add_common_arguments(parser: ArgumentParser):
     parser.add_argument("-1", "--once", action="store_true", help="run only once")
-    parser.add_argument("-f", "--filter", type=str, help="filter diagnostic status name")
     parser.add_argument(
-            "-l",
-            "--levels",
-            action="append",
-            type=str,
-            choices=["info", "warn", "error"],
-            help="levels to filter, can be multiple times",
-        )
+        "-f", "--filter", type=str, help="filter diagnostic status name"
+    )
+    parser.add_argument(
+        "-l",
+        "--levels",
+        action="append",
+        type=str,
+        choices=["info", "warn", "error"],
+        help="levels to filter, can be multiple times",
+    )
