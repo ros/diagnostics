@@ -69,8 +69,9 @@ level_to_str_mapping = {
     b"\x00": lambda: ("OK", GREEN + "OK" + COLOR_DEFAULT),
     b"\x01": lambda: ("WARN", YELLOW + "WARN" + COLOR_DEFAULT),
     b"\x02": lambda: ("ERROR", RED + "ERROR" + COLOR_DEFAULT),
-    b"\x03": lambda: ("STALE", RED + "STALE" + COLOR_DEFAULT)
+    b"\x03": lambda: ("STALE", RED + "STALE" + COLOR_DEFAULT),
 }
+
 
 def convert_level_to_str(level) -> Tuple[str, str]:
     return level_to_str_mapping[level]()
