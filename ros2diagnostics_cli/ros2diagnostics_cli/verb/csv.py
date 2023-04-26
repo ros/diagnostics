@@ -47,7 +47,9 @@ class CSVVerb(VerbExtension):
 
     def add_arguments(self, parser, cli_name):
         add_common_arguments(parser)
-        parser.add_argument("--output", "-o", type=str, required=True, help="export file full path")
+        parser.add_argument(
+            "--output", "-o", type=str, required=True, help="export file full path"
+        )
 
         parser.add_argument(
             "--verbose",
@@ -91,7 +93,7 @@ class CSVVerb(VerbExtension):
                 verbose=args.verbose,
                 run_once=args.once,
                 name_filter=args.filter,
-                levels=args.levels
+                levels=args.levels,
             )
             handler.set_render(self.render)
             handler.run()
