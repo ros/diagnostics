@@ -13,19 +13,13 @@ class ShowVerb(VerbExtension):
             help="Display more info.",
         )
 
-        parser.add_argument(
-            "-l",
-            "--levels",
-            action="append",
-            type=str,
-            choices=["info", "warn", "error"],
-            help="levels to filter, can be multiple times",
-        )
+        
 
     def main(self, *, args):
         diagnostic_parser = DiagnosticsParser(
             mode = ParserModeEnum.Show,
             verbose=args.verbose,
-                                              levels=args.levels,
-                                              run_once=args.once)
+            levels=args.levels,
+            run_once=args.once,
+            name_filter=args.filter)
         diagnostic_parser.run()

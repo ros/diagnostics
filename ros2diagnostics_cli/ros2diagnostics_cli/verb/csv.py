@@ -10,21 +10,32 @@ from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 
 class CSVVerb(VerbExtension):
-    """export diagnostics message to csv file"""
+    """export /diagnostics message to csv file"""
+
     def __init__(self):
         super().__init__()
         self.csv: TextIO = None
 
     def add_arguments(self, parser, cli_name):
         add_common_arguments(parser)
-        parser.add_argument("--output", "-o", type=str, help="export file full path")
+        parser.add_argument("--output", "-o", type=str, required=True, help="export file full path")
+
+        parser.add_argument(
+            "--verbose",
+            "-v",
+            action="store_true",
+            help="export DiagnosticStatus values filed",
+        )
 
     def render(self, status: DiagnosticStatus, time_sec, verbose=False):
         level_name, _ = DiagnosticsParser.convert_level_to_str(status.level)
+        node_name, name = status.name.split(":")
+        name = name.strip()
         line = [
             str(time_sec),
             level_name,
-            status.name,
+            node_name,
+            name,
             status.message,
             status.hardware_id,
         ]
@@ -46,7 +57,13 @@ class CSVVerb(VerbExtension):
                 return
 
         try:
-            handler = DiagnosticsParser(mode=ParserModeEnum.CSV, run_once=args.once)
+            handler = DiagnosticsParser(
+                mode=ParserModeEnum.CSV,
+                verbose=args.verbose,
+                run_once=args.once,
+                name_filter=args.filter,
+                levels=args.levels
+            )
             handler.set_render(self.render)
             handler.run()
         finally:
