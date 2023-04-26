@@ -49,7 +49,7 @@ class ShowVerb(VerbExtension):
 
     def main(self, *, args):
         diagnostic_parser = DiagnosticsParser(
-            mode=ParserModeEnum.Show,
+            mode=ParserModeEnum.SHOW,
             verbose=args.verbose,
             levels=args.levels,
             run_once=args.once,

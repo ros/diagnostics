@@ -35,5 +35,5 @@ class ListVerb(VerbExtension):
     """List all diagnostic status items group by node name"""
 
     def main(self, *, args):
-        diagnostic_parser = DiagnosticsParser(ParserModeEnum.List)
+        diagnostic_parser = DiagnosticsParser(ParserModeEnum.LIST)
         diagnostic_parser.run()

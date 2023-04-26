@@ -47,15 +47,16 @@ KeyValue[] values
     string key
     string value
 """
-from typing import Dict, List, Tuple, TextIO
-import yaml
-import rclpy
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
-from rclpy.qos import qos_profile_system_default
-from argparse import ArgumentParser
 import pathlib
 import re
+from argparse import ArgumentParser
 from enum import IntEnum
+from typing import Dict, List, TextIO, Tuple
+
+import rclpy
+import yaml
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+from rclpy.qos import qos_profile_system_default
 
 TOPIC_DIAGNOSTICS = "/diagnostics"
 
@@ -63,6 +64,16 @@ COLOR_DEFAULT = "\033[39m"
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
+
+level_to_str_mapping = {
+    b"\x00": lambda: ("OK", GREEN + "OK" + COLOR_DEFAULT),
+    b"\x01": lambda: ("WARN", YELLOW + "WARN" + COLOR_DEFAULT),
+    b"\x02": lambda: ("ERROR", RED + "ERROR" + COLOR_DEFAULT),
+    b"\x03": lambda: ("STALE", RED + "STALE" + COLOR_DEFAULT)
+}
+
+def convert_level_to_str(level) -> Tuple[str, str]:
+    return level_to_str_mapping[level]()
 
 
 def open_file_for_output(csv_file) -> TextIO:
@@ -75,9 +86,9 @@ def open_file_for_output(csv_file) -> TextIO:
 
 
 class ParserModeEnum(IntEnum):
-    List = 1
+    LIST = 1
     CSV = 2
-    Show = 3
+    SHOW = 3
 
 
 class DiagnosticsParser:
@@ -90,7 +101,7 @@ class DiagnosticsParser:
         name_filter=None,
     ) -> None:
         self.__name_filter = name_filter
-        self.__status_render_handler = self.render
+        self.__status_render_handler = DiagnosticsParser.render
         self.__mode = mode
         self.__run_once = run_once
         self.__verbose = verbose
@@ -125,21 +136,8 @@ class DiagnosticsParser:
         return b_levels
 
     @staticmethod
-    def convert_level_to_str(level) -> Tuple[str, str]:
-        match level:
-            case b"\x00":
-                return ("OK", GREEN + "OK" + COLOR_DEFAULT)
-            case b"\x01":
-                return ("WARN", YELLOW + "WARN" + COLOR_DEFAULT)
-            case b"\x02":
-                return ("ERROR", RED + "ERROR" + COLOR_DEFAULT)
-            case b"\x03":
-                return ("STALE", RED + "STALE" + COLOR_DEFAULT)
-            case _:
-                return ("UNDEFINED", "UNDEFINED")
-
-    def render(self, status: DiagnosticStatus, time_sec, verbose):
-        _, level_name = DiagnosticsParser.convert_level_to_str(status.level)
+    def render(status: DiagnosticStatus, time_sec, verbose):
+        _, level_name = convert_level_to_str(status.level)
         item = f"{status.name}: {level_name}, {status.message}"
         print(item)
         if verbose:
@@ -171,11 +169,10 @@ class DiagnosticsParser:
             print(f"No diagnostic for levels: {self.__levels_info}")
 
     def register_and_parse_diagnostics_topic(self):
-        match self.__mode:
-            case ParserModeEnum.List:
-                handler = diagnostic_list_handler
-            case _:
-                handler = self.diagnostics_status_handler
+        if self.__mode == ParserModeEnum.LIST:
+            handler = diagnostic_list_handler
+        else:
+            handler = self.diagnostics_status_handler
 
         rclpy.init()
         node = rclpy.create_node("ros2diagnostics_cli_filter")

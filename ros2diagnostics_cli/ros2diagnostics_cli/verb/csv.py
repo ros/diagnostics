@@ -34,6 +34,7 @@ from ros2diagnostics_cli.api import (
     open_file_for_output,
     add_common_arguments,
     ParserModeEnum,
+    convert_level_to_str
 )
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
@@ -59,7 +60,7 @@ class CSVVerb(VerbExtension):
         )
 
     def render(self, status: DiagnosticStatus, time_sec, verbose=False):
-        level_name, _ = DiagnosticsParser.convert_level_to_str(status.level)
+        level_name, _ = convert_level_to_str(status.level)
         node_name, name = status.name.split(":")
         name = name.strip()
         line = [
