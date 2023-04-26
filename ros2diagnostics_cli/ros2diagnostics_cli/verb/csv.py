@@ -1,12 +1,54 @@
-import click
+from typing import TextIO
 from ros2cli.verb import VerbExtension
-from ros2diagnostics_cli.api import get_hello_world, get_hello_world_leet
+from ros2diagnostics_cli.api import (
+    DiagnosticsParser,
+    open_file_for_output,
+    add_common_arguments,
+    ParserModeEnum,
+)
+from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 
 class CSVVerb(VerbExtension):
+    """export diagnostics message to csv file"""
+    def __init__(self):
+        super().__init__()
+        self.csv: TextIO = None
+
     def add_arguments(self, parser, cli_name):
-        parser.add_argument("--output", "-o", type=str, help="export file to file")
+        add_common_arguments(parser)
+        parser.add_argument("--output", "-o", type=str, help="export file full path")
+
+    def render(self, status: DiagnosticStatus, time_sec, verbose=False):
+        level_name, _ = DiagnosticsParser.convert_level_to_str(status.level)
+        line = [
+            str(time_sec),
+            level_name,
+            status.name,
+            status.message,
+            status.hardware_id,
+        ]
+        if verbose:
+            kv: KeyValue
+            for kv in status.values:
+                line.append(kv.value)
+
+        s_line = ",".join(line) + "\n"
+        print(s_line)
+        self.csv.write(s_line)
 
     def main(self, *, args):
         if args.output:
-            print(args.output)
+            try:
+                self.csv = open_file_for_output(args.output)
+            except Exception as error:
+                print(str(error))
+                return
+
+        try:
+            handler = DiagnosticsParser(mode=ParserModeEnum.CSV, run_once=args.once)
+            handler.set_render(self.render)
+            handler.run()
+        finally:
+            if self.csv:
+                self.csv.close()

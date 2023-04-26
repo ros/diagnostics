@@ -25,7 +25,9 @@ setup(
         ],
         'ros2diagnostics_cli.verb': [
             'world = ros2diagnostics_cli.verb.world:WorldVerb',
-            'csv = ros2diagnostics_cli.verb.csv:CSVVerb'
+            'csv = ros2diagnostics_cli.verb.csv:CSVVerb',
+            'list = ros2diagnostics_cli.verb.list:ListVerb',
+            'show = ros2diagnostics_cli.verb.show:ShowVerb'
         ]
     },
 )
