@@ -61,12 +61,16 @@ class CSVVerb(VerbExtension):
 
     def render(self, status: DiagnosticStatus, time_sec, verbose=False):
         level_name, _ = convert_level_to_str(status.level)
-        node_name, name = status.name.split(":")
+        if ":" in name:
+            node, name = status.name.split(":")
+        else:
+            node = "Aggr"
+            name = status.name
         name = name.strip()
         line = [
             str(time_sec),
             level_name,
-            node_name,
+            node,
             name,
             status.message,
             status.hardware_id,
