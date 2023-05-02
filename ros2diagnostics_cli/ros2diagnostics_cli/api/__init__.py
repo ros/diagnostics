@@ -204,7 +204,11 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
     data: Dict[str, List[str]] = {}
     print(f"--- time: {msg.header.stamp.sec} ---")
     for status in msg.status:
-        node, name = status.name.split(":")
+        if ":" in name:
+            node, name = status.name.split(":")
+        else:
+            node = "Aggr"
+            name = status.name
         name = name.strip()
         if node in data:
             data[node].append(name)
