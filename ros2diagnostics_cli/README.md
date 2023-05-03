@@ -144,3 +144,9 @@ ros2 diagnostics csv -o /tmp/1.csv -f Task$ -v
 - Add unit test
 - DEB package and install tests
 - Ideas
+
+
+## Tests
+```
+ros2 launch diagnostic_aggregator example.launch.py
+```

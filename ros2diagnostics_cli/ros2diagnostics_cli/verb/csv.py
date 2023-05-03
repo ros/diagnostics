@@ -61,10 +61,10 @@ class CSVVerb(VerbExtension):
 
     def render(self, status: DiagnosticStatus, time_sec, verbose=False):
         level_name, _ = convert_level_to_str(status.level)
-        if ":" in name:
+        if ":" in status.name:
             node, name = status.name.split(":")
         else:
-            node = "Aggr"
+            node = "---"
             name = status.name
         name = name.strip()
         line = [
