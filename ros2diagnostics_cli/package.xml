@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
   <name>ros2diagnostics_cli</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="robo2020@gmail.com">user</maintainer>
-  <license>TODO: License declaration</license>
+  <version>3.1.2</version>
+  <description>diagnostic command for ROS2 command line, parse and show /diagnostics topic</description>
+  <maintainer email="robo2020@gmail.com"></maintainer>
+  <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
+  <license>BSD-3-Clause</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
