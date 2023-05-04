@@ -73,15 +73,17 @@ level_to_str_mapping = {
 }
 
 
-def convert_level_to_str(level) -> Tuple[str, str]:
+def convert_level_to_str(level: bytes) -> Tuple[str, str]:
     return level_to_str_mapping[level]()
 
 
-def open_file_for_output(csv_file) -> TextIO:
+def open_file_for_output(csv_file: str) -> TextIO:
     base_dir = pathlib.Path(csv_file).parents[0]
     folder_exists = pathlib.Path(base_dir).is_dir()
     if not folder_exists:
-        raise Exception(f"Folder {csv_file} not exists")
+        raise Exception(
+            f"Folder {csv_file} not exists"
+        )  # pylint: disable=[broad-exception-raised]
     f = open(csv_file, "w", encoding="utf-8")
     return f
 
@@ -113,7 +115,7 @@ class DiagnosticsParser:
         self.__status_render_handler = handler
 
     def run(self):
-        self.register_and_parse_diagnostics_topic()
+        self.register_diagnostics_topic()
 
     def __filter_level(self, level):
         if not self.__levels:
@@ -169,7 +171,11 @@ class DiagnosticsParser:
         if not counter:
             print(f"No diagnostic for levels: {self.__levels_info}")
 
-    def register_and_parse_diagnostics_topic(self):
+    def register_diagnostics_topic(self):
+        """
+        create ros node and
+        subscribe to /diagnostic topic
+        """
         if self.__mode == ParserModeEnum.LIST:
             handler = diagnostic_list_handler
         else:
@@ -198,7 +204,8 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
     print group data as yaml to stdout
 
     Args:
-        msg (DiagnosticArray): _description_
+        msg (DiagnosticArray): /diagnostics topic message 
+        http://docs.ros.org/en/noetic/api/diagnostic_msgs/html/msg/DiagnosticArray.html
     """
     status: DiagnosticStatus
     data: Dict[str, List[str]] = {}
@@ -219,6 +226,7 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
 
 
 def add_common_arguments(parser: ArgumentParser):
+    """common arguments for csv and show verbs"""
     parser.add_argument("-1", "--once", action="store_true", help="run only once")
     parser.add_argument(
         "-f", "--filter", type=str, help="filter diagnostic status name"
