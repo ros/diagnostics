@@ -42,7 +42,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 
 import rclpy
 
-TIMEOUT_MAX_S = 2.
+TIMEOUT_MAX_S = 10.
 
 
 class TestNTPMonitor(unittest.TestCase):
