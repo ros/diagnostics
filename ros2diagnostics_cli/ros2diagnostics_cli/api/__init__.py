@@ -26,50 +26,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-"""_summary_
-
-std_msgs/Header header # for timestamp
-builtin_interfaces/Time stamp
-    int32 sec
-    uint32 nanosec
-string frame_id
-DiagnosticStatus[] status # an array of components being reported on
-byte OK=0
-byte WARN=1
-byte ERROR=2
-byte STALE=3
-byte level
-string name
-string message
-string hardware_id
-KeyValue[] values
-    string key
-    string value
-"""
-import pathlib
-import re
 from argparse import ArgumentParser
 from enum import IntEnum
+import pathlib
+import re
 from typing import Dict, List, TextIO, Tuple
 
-import rclpy
-import yaml
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+
+import rclpy
 from rclpy.qos import qos_profile_system_default
 
-TOPIC_DIAGNOSTICS = "/diagnostics"
+import yaml
 
-COLOR_DEFAULT = "\033[39m"
-GREEN = "\033[92m"
-RED = "\033[91m"
-YELLOW = "\033[93m"
+TOPIC_DIAGNOSTICS = '/diagnostics'
+
+COLOR_DEFAULT = '\033[39m'
+GREEN = '\033[92m'
+RED = '\033[91m'
+YELLOW = '\033[93m'
 
 level_to_str_mapping = {
-    b"\x00": lambda: ("OK", GREEN + "OK" + COLOR_DEFAULT),
-    b"\x01": lambda: ("WARN", YELLOW + "WARN" + COLOR_DEFAULT),
-    b"\x02": lambda: ("ERROR", RED + "ERROR" + COLOR_DEFAULT),
-    b"\x03": lambda: ("STALE", RED + "STALE" + COLOR_DEFAULT),
+    b'\x00': ('OK', GREEN + 'OK' + COLOR_DEFAULT),
+    b'\x01': ('WARN', YELLOW + 'WARN' + COLOR_DEFAULT),
+    b'\x02': ('ERROR', RED + 'ERROR' + COLOR_DEFAULT),
+    b'\x03': ('STALE', RED + 'STALE' + COLOR_DEFAULT),
 }
 
 
@@ -82,10 +63,9 @@ def open_file_for_output(csv_file: str) -> TextIO:
     folder_exists = pathlib.Path(base_dir).is_dir()
     if not folder_exists:
         raise Exception(
-            f"Folder {csv_file} not exists"
+            f'Folder {csv_file} not exists'
         )  # pylint: disable=[broad-exception-raised]
-    f = open(csv_file, "w", encoding="utf-8")
-    return f
+    return open(csv_file, 'w', encoding='utf-8')
 
 
 class ParserModeEnum(IntEnum):
@@ -108,7 +88,7 @@ class DiagnosticsParser:
         self.__mode = mode
         self.__run_once = run_once
         self.__verbose = verbose
-        self.__levels_info = ",".join(levels) if levels is not None else ""
+        self.__levels_info = ','.join(levels) if levels is not None else ''
         self.__levels = DiagnosticsParser.map_level_from_name(levels)
 
     def set_render(self, handler):
@@ -129,9 +109,9 @@ class DiagnosticsParser:
             return b_levels
 
         map_levels = {
-            "info": lambda: b_levels.append(b"\x00"),
-            "warn": lambda: b_levels.append(b"\x01"),
-            "error": lambda: b_levels.append(b"\x02"),
+            'info': lambda: b_levels.append(b'\x00'),
+            'warn': lambda: b_levels.append(b'\x01'),
+            'error': lambda: b_levels.append(b'\x02'),
         }
 
         for level in levels:
@@ -141,23 +121,23 @@ class DiagnosticsParser:
     @staticmethod
     def render(status: DiagnosticStatus, time_sec, verbose):
         _, level_name = convert_level_to_str(status.level)
-        item = f"{status.name}: {level_name}, {status.message}"
+        item = f'{status.name}: {level_name}, {status.message}'
         print(item)
         if verbose:
             kv: KeyValue
             for kv in status.values:
-                print(f"- {kv.key}={kv.value}")
+                print(f'- {kv.key}={kv.value}')
 
     def diagnostics_status_handler(self, msg: DiagnosticArray) -> None:
-        """Run handler for each DiagnosticStatus in array
-        filter status by level, name, node name
+        """
+        Filter DiagnosticStatus by level, name and node name.
 
         Args:
             msg (DiagnosticArray): _description_
         """
         counter: int = 0
         status: DiagnosticStatus
-        print(f"--- time: {msg.header.stamp.sec} ---")
+        print(f'--- time: {msg.header.stamp.sec} ---')
         for status in msg.status:
             if self.__name_filter:
                 result = re.search(self.__name_filter, status.name)
@@ -165,24 +145,22 @@ class DiagnosticsParser:
                     continue
             if self.__filter_level(status.level):
                 continue
-            self.__status_render_handler(status, msg.header.stamp.sec, self.__verbose)
+            self.__status_render_handler(
+                status, msg.header.stamp.sec, self.__verbose)
             counter += 1
 
         if not counter:
-            print(f"No diagnostic for levels: {self.__levels_info}")
+            print(f'No diagnostic for levels: {self.__levels_info}')
 
     def register_diagnostics_topic(self):
-        """
-        create ros node and
-        subscribe to /diagnostic topic
-        """
+        """Create ros node and subscribe to /diagnostic topic."""
         if self.__mode == ParserModeEnum.LIST:
             handler = diagnostic_list_handler
         else:
             handler = self.diagnostics_status_handler
 
         rclpy.init()
-        node = rclpy.create_node("ros2diagnostics_cli_filter")
+        node = rclpy.create_node('ros2diagnostics_cli_filter')
         node.create_subscription(
             DiagnosticArray,
             TOPIC_DIAGNOSTICS,
@@ -200,21 +178,20 @@ class DiagnosticsParser:
 
 
 def diagnostic_list_handler(msg: DiagnosticArray) -> None:
-    """Group diagnostics Task by node
-    print group data as yaml to stdout
+    """
+    Print group data as yaml to stdout.
 
     Args:
-        msg (DiagnosticArray): /diagnostics topic message 
-        http://docs.ros.org/en/noetic/api/diagnostic_msgs/html/msg/DiagnosticArray.html
+        msg (DiagnosticArray): /diagnostics topic message
     """
     status: DiagnosticStatus
     data: Dict[str, List[str]] = {}
-    print(f"--- time: {msg.header.stamp.sec} ---")
+    print(f'--- time: {msg.header.stamp.sec} ---')
     for status in msg.status:
-        if ":" in status.name:
-            node, name = status.name.split(":")
+        if ':' in status.name:
+            node, name = status.name.split(':')
         else:
-            node = "---"
+            node = '---'
             name = status.name
         name = name.strip()
         if node in data:
@@ -226,16 +203,16 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
 
 
 def add_common_arguments(parser: ArgumentParser):
-    """common arguments for csv and show verbs"""
-    parser.add_argument("-1", "--once", action="store_true", help="run only once")
+    """Add common arguments for csv and show verbs."""
+    parser.add_argument('-1', '--once', action='store_true', help='run only once')
     parser.add_argument(
-        "-f", "--filter", type=str, help="filter diagnostic status name"
+        '-f', '--filter', type=str, help='filter diagnostic status name'
     )
     parser.add_argument(
-        "-l",
-        "--levels",
-        action="append",
+        '-l',
+        '--levels',
+        action='append',
         type=str,
-        choices=["info", "warn", "error"],
-        help="levels to filter, can be multiple times",
+        choices=['info', 'warn', 'error'],
+        help='levels to filter, can be multiple times',
     )
