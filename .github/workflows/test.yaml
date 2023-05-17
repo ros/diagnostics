@@ -21,11 +21,13 @@ jobs:
             diagnostic_updater,
             self_test,
           ]
-        distro: [foxy, humble, rolling]
+        distro: [foxy, humble, iron, rolling]
         include:
           - distro: foxy
             os: ubuntu-20.04
           - distro: humble
+            os: ubuntu-22.04
+          - distro: iron
             os: ubuntu-22.04
           - distro: rolling
             os: ubuntu-22.04
