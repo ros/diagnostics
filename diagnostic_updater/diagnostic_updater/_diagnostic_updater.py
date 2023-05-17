@@ -42,7 +42,6 @@ import threading
 
 from diagnostic_msgs.msg import DiagnosticArray
 from diagnostic_msgs.msg import DiagnosticStatus
-from rclpy.clock import Clock
 
 from ._diagnostic_status_wrapper import DiagnosticStatusWrapper
 
@@ -239,7 +238,6 @@ class Updater(DiagnosticTaskVector):
         self.node = node
         self.publisher = self.node.create_publisher(
             DiagnosticArray, '/diagnostics', 1)
-        self.clock = Clock()
         self.period_parameter = 'diagnostic_updater.period'
         self.__period = self.node.declare_parameter(
             self.period_parameter, period).value
@@ -350,7 +348,7 @@ class Updater(DiagnosticTaskVector):
         if not type(msg) is list:
             msg = [msg]
 
-        now = self.clock.now()
+        now = self.node.get_clock().now()
         da = DiagnosticArray()
         da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         for stat in msg:
@@ -362,7 +360,6 @@ class Updater(DiagnosticTaskVector):
             db.values = stat.values
             db.level = stat.level
             da.status.append(db)
-
         self.publisher.publish(da)
 
     def addedTaskCallback(self, task):

@@ -211,12 +211,12 @@ public:
 
       header_status->values.push_back(kv);
 
-      all_stale = all_stale && ((level == 3) || stale);
+      all_stale = all_stale && ((level == diagnostic_msgs::msg::DiagnosticStatus::STALE) || stale);
 
       processed.push_back(item->toStatusMsg(path_, stale));
 
       if (stale) {
-        header_status->level = 3;
+        header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
       }
 
       ++it;
@@ -224,8 +224,8 @@ public:
 
     // Header is not stale unless all subs are
     if (all_stale) {
-      header_status->level = 3;
-    } else if (header_status->level == 3) {
+      header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+    } else if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
       header_status->level = 2;
     }
 
