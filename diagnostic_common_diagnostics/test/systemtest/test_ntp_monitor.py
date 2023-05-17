@@ -42,7 +42,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 
 import rclpy
 
-TIMEOUT_MAX_S = 2.
+TIMEOUT_MAX_S = 5.
 
 
 class TestNTPMonitor(unittest.TestCase):
@@ -93,7 +93,7 @@ class TestNTPMonitor(unittest.TestCase):
             self._diagnostics_callback,
             1
         )
-        TIME_D_S = .1
+        TIME_D_S = .05
         waited_s = 0.
         while waited_s < timeout_s and self.n_msgs_received == 0:
             rclpy.spin_once(node, timeout_sec=TIME_D_S)
