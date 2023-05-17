@@ -34,7 +34,7 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 
 # Target Distribution
 
-The ['ros2' branch](https://github.com/ros/diagnostics/tree/ros2) targets
+The [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2) targets
 
 - *Foxy Fitzroy*,
 - *Humble Hawksbill*
