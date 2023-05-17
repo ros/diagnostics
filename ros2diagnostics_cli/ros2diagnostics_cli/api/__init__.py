@@ -133,7 +133,9 @@ class DiagnosticsParser:
         Filter DiagnosticStatus by level, name and node name.
 
         Args:
+        ----
             msg (DiagnosticArray): _description_
+
         """
         counter: int = 0
         status: DiagnosticStatus
@@ -182,7 +184,9 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
     Print group data as yaml to stdout.
 
     Args:
+    ----
         msg (DiagnosticArray): /diagnostics topic message
+
     """
     status: DiagnosticStatus
     data: Dict[str, List[str]] = {}
