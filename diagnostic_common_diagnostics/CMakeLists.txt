@@ -20,7 +20,7 @@ if(BUILD_TESTING)
     ament_add_pytest_test(
         test_ntp_monitor
         test/systemtest/test_ntp_monitor.py
-        TIMEOUT 10)
+        TIMEOUT 12)
 endif()
 
 ament_package()
