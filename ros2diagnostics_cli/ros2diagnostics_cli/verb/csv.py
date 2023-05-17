@@ -28,43 +28,49 @@
 
 
 from typing import TextIO
+
+from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+
 from ros2cli.verb import VerbExtension
 from ros2diagnostics_cli.api import (
+    add_common_arguments,
+    convert_level_to_str,
     DiagnosticsParser,
     open_file_for_output,
-    add_common_arguments,
-    ParserModeEnum,
-    convert_level_to_str
+    ParserModeEnum
 )
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 
 class CSVVerb(VerbExtension):
-    """export /diagnostics message to csv file"""
+    """Export /diagnostics message to csv file."""
 
     def __init__(self):
         super().__init__()
         self.csv: TextIO = None
 
-    def add_arguments(self, parser, cli_name):
+    def add_arguments(self, parser, _):
         add_common_arguments(parser)
         parser.add_argument(
-            "--output", "-o", type=str, required=True, help="export file full path"
+            '--output',
+            '-o',
+            type=str,
+            required=True,
+            help='export file full path'
         )
 
         parser.add_argument(
-            "--verbose",
-            "-v",
-            action="store_true",
-            help="export DiagnosticStatus values filed",
+            '--verbose',
+            '-v',
+            action='store_true',
+            help='export DiagnosticStatus values filed',
         )
 
     def render(self, status: DiagnosticStatus, time_sec, verbose=False):
         level_name, _ = convert_level_to_str(status.level)
-        if ":" in status.name:
-            node, name = status.name.split(":")
+        if ':' in status.name:
+            node, name = status.name.split(':')
         else:
-            node = "---"
+            node = '---'
             name = status.name
         name = name.strip()
         line = [
@@ -80,7 +86,7 @@ class CSVVerb(VerbExtension):
             for kv in status.values:
                 line.append(kv.value)
 
-        s_line = ",".join(line) + "\n"
+        s_line = ','.join(line) + '\n'
         print(s_line)
         self.csv.write(s_line)
 

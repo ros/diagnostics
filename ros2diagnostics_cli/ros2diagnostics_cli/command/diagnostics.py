@@ -32,6 +32,7 @@ from ros2cli.command import CommandExtension
 
 
 class DiagCommand(CommandExtension):
+
     def __init__(self):
         super(DiagCommand, self).__init__()
         self._subparser = None
@@ -39,9 +40,13 @@ class DiagCommand(CommandExtension):
     def add_arguments(self, parser, cli_name):
         self._subparser = parser
         add_subparsers_on_demand(
-            parser, cli_name, '_verb', "ros2diagnostics_cli.verb", required=False)
+            parser,
+            cli_name,
+            '_verb',
+            'ros2diagnostics_cli.verb',
+            required=False)
 
-    def main(self, *, parser, args):
+    def main(self, *, _, args):
         if not hasattr(args, '_verb'):
             self._subparser.print_help()
             return 0
