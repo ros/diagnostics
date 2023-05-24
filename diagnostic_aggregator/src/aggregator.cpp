@@ -64,7 +64,7 @@ Aggregator::Aggregator()
   pub_rate_(1.0),
   history_depth_(1000),
   clock_(n_->get_clock()),
-  base_path_("/")
+  base_path_("")
 {
   RCLCPP_DEBUG(logger_, "constructor");
   bool other_as_errors = false;
