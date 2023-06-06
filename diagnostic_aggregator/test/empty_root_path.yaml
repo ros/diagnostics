@@ -1,0 +1,14 @@
+analyzers:
+  ros__parameters:
+    primary:
+      type: 'diagnostic_aggregator/AnalyzerGroup'
+      path: Group01
+      analyzers:
+        primary:
+          type: 'diagnostic_aggregator/GenericAnalyzer'
+          path: Primary
+          startswith: [ 'primary' ]
+        secondary:
+          type: 'diagnostic_aggregator/GenericAnalyzer'
+          path: Secondary
+          startswith: [ 'secondary' ]
