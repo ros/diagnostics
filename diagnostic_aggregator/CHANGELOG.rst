@@ -2,6 +2,18 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.2 (2023-03-24)
+------------------
+
+3.1.1 (2023-03-16)
+------------------
+* exporting dependency on pluginlib fixes `#293 <https://github.com/ros/diagnostics/issues/293>`_ (`#294 <https://github.com/ros/diagnostics/issues/294>`_)
+* Secretly supporting galactic (`#295 <https://github.com/ros/diagnostics/issues/295>`_)
+* Linting additional package (`#268 <https://github.com/ros/diagnostics/issues/268>`_)
+* Fix code-analyser bug
+* Maintainer update
+* Contributors: Austin, Christian Henkel, Ralph Lange, Tim Clephas
+
 3.1.0 (2023-01-26)
 ------------------
 * Merge of foxy and humble history into rolling for future maintenance from one branch only.

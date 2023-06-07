@@ -64,7 +64,7 @@ Aggregator::Aggregator()
   pub_rate_(1.0),
   history_depth_(1000),
   clock_(n_->get_clock()),
-  base_path_("/")
+  base_path_("")
 {
   RCLCPP_DEBUG(logger_, "constructor");
   bool other_as_errors = false;
@@ -79,6 +79,10 @@ Aggregator::Aggregator()
     if (param.first.compare("pub_rate") == 0) {
       pub_rate_ = param.second.as_double();
     } else if (param.first.compare("path") == 0) {
+      // Leading slash when path is not empty
+      if (!param.second.as_string().empty()) {
+        base_path_.append("/");
+      }
       base_path_.append(param.second.as_string());
     } else if (param.first.compare("other_as_errors") == 0) {
       other_as_errors = param.second.as_bool();

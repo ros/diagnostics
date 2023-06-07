@@ -77,7 +77,7 @@ enum DiagnosticLevel
   Level_OK = diagnostic_msgs::msg::DiagnosticStatus::OK,
   Level_Warn = diagnostic_msgs::msg::DiagnosticStatus::WARN,
   Level_Error = diagnostic_msgs::msg::DiagnosticStatus::ERROR,
-  Level_Stale = 3
+  Level_Stale = diagnostic_msgs::msg::DiagnosticStatus::STALE
 };
 
 /*!
@@ -94,7 +94,7 @@ inline DiagnosticLevel valToLevel(const int val)
   if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR) {
     return Level_Error;
   }
-  if (val == 3) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
     return Level_Stale;
   }
 
@@ -121,7 +121,7 @@ inline std::string valToMsg(const int val)
   if (val == diagnostic_msgs::msg::DiagnosticStatus::ERROR) {
     return "Error";
   }
-  if (val == 3) {
+  if (val == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
     return "Stale";
   }
 

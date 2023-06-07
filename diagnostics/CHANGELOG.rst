@@ -2,6 +2,14 @@
 Changelog for package diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.1.2 (2023-03-24)
+------------------
+
+3.1.1 (2023-03-16)
+------------------
+* Maintainer update
+* Contributors: Austin, Ralph Lange
+
 3.1.0 (2023-01-26)
 ------------------
 * Adding READMEs to the repo (`#270 <https://github.com/ros/diagnostics/issues/270>`_)
