@@ -47,7 +47,7 @@ ament_target_dependencies(
   "rcutils"
 )
 
-add_executable(selftest_example src/selftest_example.cpp)
+add_executable(selftest_example example/selftest_example.cpp)
 target_include_directories(selftest_example
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

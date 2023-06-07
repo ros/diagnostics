@@ -69,7 +69,8 @@ public:
 
   TestRunner(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr base_interface,
-    rclcpp::node_interfaces::NodeServicesInterface::SharedPtr service_interface,
+    rclcpp::node_interfaces::NodeServicesInterface::SharedPtr
+    service_interface,
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr logger_interface)
   : base_interface_(base_interface),
     service_interface_(service_interface),
@@ -79,10 +80,11 @@ public:
     RCLCPP_DEBUG(logger_, "Advertising self_test");
 
     auto serviceCB =
-      [this](std::shared_ptr<diagnostic_msgs::srv::SelfTest::Request> request,
-        std::shared_ptr<diagnostic_msgs::srv::SelfTest::Response> response) -> bool
-      {
-        (void) request;
+      [this](
+      std::shared_ptr<diagnostic_msgs::srv::SelfTest::Request> request,
+      std::shared_ptr<diagnostic_msgs::srv::SelfTest::Response> response)
+      -> bool {
+        (void)request;
 
         bool retval = false;
         bool ignore_set_id_warn = false;
@@ -95,7 +97,8 @@ public:
           std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
 
           const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
-          for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+          for (std::vector<DiagnosticTaskInternal>::const_iterator iter =
+            tasks.begin();
             iter != tasks.end(); iter++)
           {
             diagnostic_updater::DiagnosticStatusWrapper status;
@@ -116,8 +119,10 @@ public:
               if (verbose) {
                 RCLCPP_WARN(
                   logger_,
-                  "Non-zero self-test test status. Name: %s Status %i: Message: %s",
-                  status.name.c_str(), status.level, status.message.c_str());
+                  "Non-zero self-test test status. Name: %s Status %i: "
+                  "Message: %s",
+                  status.name.c_str(), status.level,
+                  status.message.c_str());
               }
             }
             status_vec.push_back(status);
@@ -129,10 +134,9 @@ public:
           response->id = id_;
 
           response->passed = true;
-          for (std::vector<diagnostic_msgs::msg::DiagnosticStatus>::iterator status_iter =
-            status_vec.begin();
-            status_iter != status_vec.end();
-            status_iter++)
+          for (std::vector<diagnostic_msgs::msg::DiagnosticStatus>::iterator
+            status_iter = status_vec.begin();
+            status_iter != status_vec.end(); status_iter++)
           {
             if (status_iter->level >= 2) {
               response->passed = false;
@@ -142,7 +146,8 @@ public:
           if (response->passed && id_ == unspecified_id) {
             RCLCPP_WARN(
               logger_,
-              "Self-test passed, but setID was not called. This is a bug in the driver.");
+              "Self-test passed, but setID was not called. This is a "
+              "bug in the driver.");
           }
           response->status = status_vec;
 
@@ -155,15 +160,13 @@ public:
       };
 
     service_server_ = rclcpp::create_service<diagnostic_msgs::srv::SelfTest>(
-      base_interface_, service_interface_, "self_test", serviceCB, rmw_qos_profile_default,
-      nullptr);
+      base_interface_, service_interface_,
+      std::string(base_interface_->get_name()) + std::string("/self_test"),
+      serviceCB, rmw_qos_profile_default, nullptr);
     verbose = true;
   }
 
-  void setID(std::string id)
-  {
-    id_ = id;
-  }
+  void setID(std::string id) {id_ = id;}
 };
 }  //  namespace self_test
 #endif  // SELF_TEST__TEST_RUNNER_HPP_

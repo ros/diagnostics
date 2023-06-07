@@ -46,7 +46,7 @@ private:
 
 public:
   MyNode()
-  : rclcpp::Node("self_test_node"),
+  : rclcpp::Node("self_test_example_node"),
     self_test_(
       get_node_base_interface(), get_node_services_interface(), get_node_logging_interface())
   {
@@ -122,9 +122,6 @@ public:
     //  until after the exception might be generated.
 
     status.level = 0;
-
-    //  Exceptions of time runtime_error will actually propagate messages
-    throw std::runtime_error("we did something that threw an exception");
 
     //  Here's where we would report success if we'd made it past
     status.summary(
