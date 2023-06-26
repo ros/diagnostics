@@ -271,10 +271,10 @@ class Updater(DiagnosticTaskVector):
 
                 status_vec.append(status)
 
-                if status.level:
+                if status.level != b'\x00':
                     warn_nohwid = False
 
-                if self.verbose and status.level:
+                if self.verbose and status.level != b'\x00':
                     self.node.get_logger().warn(
                         'Non-zero diagnostic status. Name: %s, status\
                         %i: %s' % (status.name, status.level,
