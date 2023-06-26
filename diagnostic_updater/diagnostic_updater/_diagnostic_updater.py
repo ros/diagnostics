@@ -300,7 +300,7 @@ class Updater(DiagnosticTaskVector):
     def period(self, period):
         self.__period = period
         self.timer.reset()
-        self.timer = self.node.creat_timer(self.__period, self.udpate)
+        self.timer = self.node.create_timer(self.__period, self.update)
 
     def force_update(self):
         """Force sending out an update for all known DiagnosticStatus."""
