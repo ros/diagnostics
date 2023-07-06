@@ -190,7 +190,7 @@ def generate_test_description():
 
 
 class TestProcessOutput(unittest.TestCase):
-    
+
     def testProcessOutput(self, proc_output):
         proc_output.assertWaitFor('Non-zero diagnostic status.', timeout=1.0, stream='stderr')
 

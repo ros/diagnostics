@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import rclpy
 from diagnostic_updater import Updater
+import rclpy
 
 
 def main():
@@ -20,6 +20,7 @@ def main():
     finally:
         node.destroy_node()
         rclpy.try_shutdown()
+
 
 if __name__ == '__main__':
     main()
