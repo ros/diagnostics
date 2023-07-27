@@ -3,6 +3,8 @@
 
 """@author Brice Rebsamen <brice [dot] rebsamen [gmail]>."""
 
+import pathlib
+import sys
 import time
 import unittest
 
@@ -13,6 +15,10 @@ from diagnostic_updater import FrequencyStatus
 from diagnostic_updater import FrequencyStatusParam
 from diagnostic_updater import TimeStampStatus
 from diagnostic_updater import Updater
+from launch import LaunchDescription
+from launch.actions import ExecuteProcess
+from launch_testing.actions import ReadyToTest
+import pytest
 import rclpy
 from rclpy.clock import Clock
 from rclpy.clock import ClockType
@@ -170,6 +176,23 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
                          'Name should not be set by TimeStapmStatus')
         self.assertEqual('Timestamp Status', ts.getName(),
                          'Name should be Timestamp Status')
+
+
+@pytest.mark.launch_test
+def generate_test_description():
+    return LaunchDescription([
+        ExecuteProcess(
+            cmd=[sys.executable, str(pathlib.Path(__file__).parent / 'dummy_process.py')],
+            name='test_node',
+        ),
+        ReadyToTest()
+    ])
+
+
+class TestProcessOutput(unittest.TestCase):
+
+    def testProcessOutput(self, proc_output):
+        proc_output.assertWaitFor('Non-zero diagnostic status.', timeout=1.0, stream='stderr')
 
 
 if __name__ == '__main__':
