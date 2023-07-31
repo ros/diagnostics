@@ -102,6 +102,12 @@ class TestNTPMonitor(unittest.TestCase):
         return self.n_msgs_received
 
     def test_publishing(self):
+        self.assertEqual(
+            self.subprocess.poll(),
+            None,
+            'NTP monitor subprocess died'
+        )
+
         n = self._count_msgs(TIMEOUT_MAX_S)
 
         self.assertGreater(
