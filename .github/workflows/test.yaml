@@ -21,13 +21,12 @@ jobs:
             diagnostic_updater,
             self_test,
           ]
-        distro: [humble, rolling]
-        # distro: [humble, iron, rolling]
+        distro: [humble, iron, rolling]
         include:
           - distro: humble
             os: ubuntu-22.04
-          # - distro: iron
-          #   os: ubuntu-22.04
+          - distro: iron
+            os: ubuntu-22.04
           - distro: rolling
             os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
