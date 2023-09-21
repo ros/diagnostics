@@ -224,9 +224,15 @@ public:
 
     // Header is not stale unless all subs are
     if (all_stale) {
-      header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+      // If we elect to discard stale items, then it signals that the absence of an item
+      // is not considered problematic, so we should allow empty queues to roll up as OK.
+      if (discard_stale_) {
+        header_status->level = diagnostic_msgs::msg::DiagnosticStatus::OK;
+      } else {
+        header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+      }
     } else if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
-      header_status->level = 2;
+      header_status->level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
     }
 
     header_status->message = valToMsg(header_status->level);
