@@ -36,5 +36,5 @@ jobs:
             diagnostic_aggregator
             diagnostic_common_diagnostics
             diagnostic_updater
-            ros2diagnostics_cli
+            ros2diagnostics
             self_test

@@ -155,7 +155,7 @@ class DiagnosticsParser:
             handler = self.diagnostics_status_handler
 
         rclpy.init()
-        node = rclpy.create_node('ros2diagnostics_cli_filter')
+        node = rclpy.create_node('ros2diagnostics_filter')
         node.create_subscription(
             DiagnosticArray,
             TOPIC_DIAGNOSTICS,

@@ -28,7 +28,7 @@
 
 
 from ros2cli.verb import VerbExtension
-from ros2diagnostics_cli.api import (
+from ros2diagnostics.api import (
     add_common_arguments,
     DiagnosticsParser,
     ParserModeEnum,

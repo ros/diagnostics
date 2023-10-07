@@ -1,7 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-PACKAGE_NAME = 'ros2diagnostics_cli'
+PACKAGE_NAME = 'ros2diagnostics'
 
 setup(
     name=PACKAGE_NAME,
@@ -21,13 +21,13 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'ros2cli.command': [
-            'diagnostics = ros2diagnostics_cli.command.diagnostics:DiagCommand',
+            'diagnostics = ros2diagnostics.command.diagnostics:DiagCommand',
         ],
-        'ros2diagnostics_cli.verb': [
-            'world = ros2diagnostics_cli.verb.world:WorldVerb',
-            'csv = ros2diagnostics_cli.verb.csv:CSVVerb',
-            'list = ros2diagnostics_cli.verb.list:ListVerb',
-            'show = ros2diagnostics_cli.verb.show:ShowVerb'
+        'ros2diagnostics.verb': [
+            'world = ros2diagnostics.verb.world:WorldVerb',
+            'csv = ros2diagnostics.verb.csv:CSVVerb',
+            'list = ros2diagnostics.verb.list:ListVerb',
+            'show = ros2diagnostics.verb.show:ShowVerb'
         ]
     },
 )

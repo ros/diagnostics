@@ -27,30 +27,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-from ros2cli.command import add_subparsers_on_demand
-from ros2cli.command import CommandExtension
+from ros2cli.verb import VerbExtension
+from ros2diagnostics.api import DiagnosticsParser, ParserModeEnum
 
 
-class DiagCommand(CommandExtension):
+class ListVerb(VerbExtension):
+    """List all diagnostic status items group by node name."""
 
-    def __init__(self):
-        super(DiagCommand, self).__init__()
-        self._subparser = None
-
-    def add_arguments(self, parser, cli_name):
-        self._subparser = parser
-        add_subparsers_on_demand(
-            parser,
-            cli_name,
-            '_verb',
-            'ros2diagnostics_cli.verb',
-            required=False)
-
-    def main(self, *, _, args):
-        if not hasattr(args, '_verb'):
-            self._subparser.print_help()
-            return 0
-
-        extension = getattr(args, '_verb')
-
-        return extension.main(args=args)
+    def main(self, *, args):
+        diagnostic_parser = DiagnosticsParser(ParserModeEnum.LIST)
+        diagnostic_parser.run()

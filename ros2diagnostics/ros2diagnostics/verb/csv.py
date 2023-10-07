@@ -32,7 +32,7 @@ from typing import TextIO
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 from ros2cli.verb import VerbExtension
-from ros2diagnostics_cli.api import (
+from ros2diagnostics.api import (
     add_common_arguments,
     convert_level_to_str,
     DiagnosticsParser,
