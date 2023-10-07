@@ -28,7 +28,7 @@
 
 from argparse import ArgumentParser
 from enum import IntEnum
-import pathlib
+from pathlib import Path
 import re
 from typing import Dict, List, TextIO, Tuple
 
@@ -36,21 +36,17 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 import rclpy
 from rclpy.qos import qos_profile_system_default
+from osrf_pycommon.terminal_color import format_color
 
 import yaml
 
 TOPIC_DIAGNOSTICS = '/diagnostics'
 
-COLOR_DEFAULT = '\033[39m'
-GREEN = '\033[92m'
-RED = '\033[91m'
-YELLOW = '\033[93m'
-
 level_to_str_mapping = {
-    b'\x00': ('OK', GREEN + 'OK' + COLOR_DEFAULT),
-    b'\x01': ('WARN', YELLOW + 'WARN' + COLOR_DEFAULT),
-    b'\x02': ('ERROR', RED + 'ERROR' + COLOR_DEFAULT),
-    b'\x03': ('STALE', RED + 'STALE' + COLOR_DEFAULT),
+    DiagnosticStatus.OK: ('OK', format_color("@{greenf}OK@{reset}.")),
+    DiagnosticStatus.WARN: ('WARN', format_color("@{yellowf}WARN@{reset}.")),
+    DiagnosticStatus.ERROR: ('ERROR', format_color("@{redf}ERROR@{reset}.")),
+    DiagnosticStatus.STALE: ('STALE', format_color("@{redf}STALE@{reset}.")),
 }
 
 
@@ -59,13 +55,12 @@ def convert_level_to_str(level: bytes) -> Tuple[str, str]:
 
 
 def open_file_for_output(csv_file: str) -> TextIO:
-    base_dir = pathlib.Path(csv_file).parents[0]
-    folder_exists = pathlib.Path(base_dir).is_dir()
-    if not folder_exists:
-        raise Exception(
-            f'Folder {csv_file} not exists'
-        )  # pylint: disable=[broad-exception-raised]
-    return open(csv_file, 'w', encoding='utf-8')
+    csv_path = Path(csv_file)
+    if not csv_path.parent.is_dir():
+        raise FileNotFoundError(
+            'Cannot write file, directory does not exist'
+        )
+    return csv_path.open('w', encoding='utf-8')
 
 
 class ParserModeEnum(IntEnum):
@@ -98,9 +93,7 @@ class DiagnosticsParser:
         self.register_diagnostics_topic()
 
     def __filter_level(self, level):
-        if not self.__levels:
-            return False
-        return level not in self.__levels
+        return False if not self.__levels else level not in self.__levels
 
     @staticmethod
     def map_level_from_name(levels: List[str]) -> List[bytes]:
@@ -208,9 +201,17 @@ def diagnostic_list_handler(msg: DiagnosticArray) -> None:
 
 def add_common_arguments(parser: ArgumentParser):
     """Add common arguments for csv and show verbs."""
-    parser.add_argument('-1', '--once', action='store_true', help='run only once')
     parser.add_argument(
-        '-f', '--filter', type=str, help='filter diagnostic status name'
+        '-1',
+        '--once',
+        action='store_true',
+        help='run only once'
+    )
+    parser.add_argument(
+        '-f'
+        '--filter',
+        type=str,
+        help='filter by diagnostic status name'
     )
     parser.add_argument(
         '-l',

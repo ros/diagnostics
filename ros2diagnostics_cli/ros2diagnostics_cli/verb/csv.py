@@ -82,9 +82,7 @@ class CSVVerb(VerbExtension):
             status.hardware_id,
         ]
         if verbose:
-            kv: KeyValue
-            for kv in status.values:
-                line.append(kv.value)
+            line.extend(kv.value for kv in status.values)
 
         s_line = ','.join(line) + '\n'
         print(s_line)
@@ -95,7 +93,7 @@ class CSVVerb(VerbExtension):
             try:
                 self.csv = open_file_for_output(args.output)
             except Exception as error:
-                print(str(error))
+                print(error)
                 return
 
         try:
