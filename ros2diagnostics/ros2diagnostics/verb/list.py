@@ -26,14 +26,44 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from typing import Dict, List, TextIO, Tuple
+import yaml
 
 from ros2cli.verb import VerbExtension
-from ros2diagnostics.api import DiagnosticsParser, ParserModeEnum
+from ros2diagnostics.api import DiagnosticsParser
 
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 class ListVerb(VerbExtension):
     """List all diagnostic status items group by node name."""
 
     def main(self, *, args):
-        diagnostic_parser = DiagnosticsParser(ParserModeEnum.LIST)
-        diagnostic_parser.run()
+        diagnostic_parser = DiagnosticsParser()
+        diagnostic_parser.register_diagnostics_topic(diagnostic_list_handler)
+
+
+def diagnostic_list_handler(msg: DiagnosticArray) -> None:
+    """
+    Print group data as yaml to stdout.
+
+    Args:
+    ----
+        msg (DiagnosticArray): /diagnostics topic message
+
+    """
+    status: DiagnosticStatus
+    data: Dict[str, List[str]] = {}
+    print(f'--- time: {msg.header.stamp.sec} ---')
+    for status in msg.status:
+        if ':' in status.name:
+            node, name = status.name.split(':')
+        else:
+            node = '---'
+            name = status.name
+        name = name.strip()
+        if node in data:
+            data[node].append(name)
+        else:
+            data[node] = [name]
+
+    print(yaml.dump(data))

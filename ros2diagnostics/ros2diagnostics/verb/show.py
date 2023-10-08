@@ -31,8 +31,10 @@ from ros2cli.verb import VerbExtension
 from ros2diagnostics.api import (
     add_common_arguments,
     DiagnosticsParser,
-    ParserModeEnum,
 )
+
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
+
 
 
 class ShowVerb(VerbExtension):
@@ -49,10 +51,35 @@ class ShowVerb(VerbExtension):
 
     def main(self, *, args):
         diagnostic_parser = DiagnosticsParser(
-            mode=ParserModeEnum.SHOW,
             verbose=args.verbose,
             levels=args.levels,
             run_once=args.once,
             name_filter=args.filter,
         )
         diagnostic_parser.run()
+
+    def diagnostics_status_handler(self, msg: DiagnosticArray) -> None:
+        """
+        Filter DiagnosticStatus by level, name and node name.
+
+        Args:
+        ----
+            msg (DiagnosticArray): _description_
+
+        """
+        counter: int = 0
+        status: DiagnosticStatus
+        print(f'--- time: {msg.header.stamp.sec} ---')
+        for status in msg.status:
+            if self.__name_filter:
+                result = re.search(self.__name_filter, status.name)
+                if not result:
+                    continue
+            if self.__filter_level(status.level):
+                continue
+            self.__status_render_handler(
+                status, msg.header.stamp.sec, self.__verbose)
+            counter += 1
+
+        if not counter:
+            print(f'No diagnostic for levels: {self.__levels_info}')

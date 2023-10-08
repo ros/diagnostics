@@ -27,7 +27,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from argparse import ArgumentParser
-from enum import IntEnum
 from pathlib import Path
 import re
 from typing import Dict, List, TextIO, Tuple
@@ -38,7 +37,6 @@ import rclpy
 from rclpy.qos import qos_profile_system_default
 from osrf_pycommon.terminal_color import format_color
 
-import yaml
 
 TOPIC_DIAGNOSTICS = '/diagnostics'
 
@@ -63,16 +61,9 @@ def open_file_for_output(csv_file: str) -> TextIO:
     return csv_path.open('w', encoding='utf-8')
 
 
-class ParserModeEnum(IntEnum):
-    LIST = 1
-    CSV = 2
-    SHOW = 3
-
-
 class DiagnosticsParser:
     def __init__(
         self,
-        mode: ParserModeEnum,
         verbose=False,
         levels=None,
         run_once=False,
@@ -80,7 +71,6 @@ class DiagnosticsParser:
     ) -> None:
         self.__name_filter = name_filter
         self.__status_render_handler = DiagnosticsParser.render
-        self.__mode = mode
         self.__run_once = run_once
         self.__verbose = verbose
         self.__levels_info = ','.join(levels) if levels is not None else ''
@@ -88,9 +78,6 @@ class DiagnosticsParser:
 
     def set_render(self, handler):
         self.__status_render_handler = handler
-
-    def run(self):
-        self.register_diagnostics_topic()
 
     def __filter_level(self, level):
         return False if not self.__levels else level not in self.__levels
@@ -121,38 +108,8 @@ class DiagnosticsParser:
             for kv in status.values:
                 print(f'- {kv.key}={kv.value}')
 
-    def diagnostics_status_handler(self, msg: DiagnosticArray) -> None:
-        """
-        Filter DiagnosticStatus by level, name and node name.
-
-        Args:
-        ----
-            msg (DiagnosticArray): _description_
-
-        """
-        counter: int = 0
-        status: DiagnosticStatus
-        print(f'--- time: {msg.header.stamp.sec} ---')
-        for status in msg.status:
-            if self.__name_filter:
-                result = re.search(self.__name_filter, status.name)
-                if not result:
-                    continue
-            if self.__filter_level(status.level):
-                continue
-            self.__status_render_handler(
-                status, msg.header.stamp.sec, self.__verbose)
-            counter += 1
-
-        if not counter:
-            print(f'No diagnostic for levels: {self.__levels_info}')
-
-    def register_diagnostics_topic(self):
+    def register_diagnostics_topic(self, handler):
         """Create ros node and subscribe to /diagnostic topic."""
-        if self.__mode == ParserModeEnum.LIST:
-            handler = diagnostic_list_handler
-        else:
-            handler = self.diagnostics_status_handler
 
         rclpy.init()
         node = rclpy.create_node('ros2diagnostics_filter')
@@ -170,33 +127,6 @@ class DiagnosticsParser:
         finally:
             node.destroy_node()
             rclpy.try_shutdown()
-
-
-def diagnostic_list_handler(msg: DiagnosticArray) -> None:
-    """
-    Print group data as yaml to stdout.
-
-    Args:
-    ----
-        msg (DiagnosticArray): /diagnostics topic message
-
-    """
-    status: DiagnosticStatus
-    data: Dict[str, List[str]] = {}
-    print(f'--- time: {msg.header.stamp.sec} ---')
-    for status in msg.status:
-        if ':' in status.name:
-            node, name = status.name.split(':')
-        else:
-            node = '---'
-            name = status.name
-        name = name.strip()
-        if node in data:
-            data[node].append(name)
-        else:
-            data[node] = [name]
-
-    print(yaml.dump(data))
 
 
 def add_common_arguments(parser: ArgumentParser):
