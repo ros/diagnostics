@@ -1,12 +1,12 @@
-# ROS2 diagnostic cli
+# ROS2 diagnostics CLI
 
 ROS2 cli to analysis and monitor `/diagnostics` topic
 It's alternative to `diagnostic_analysis` project that not ported yet to ROS2.
 
-The project add `diagnostics` command to ROS2 cli with there verbs.
+The project add `diagnostics` command to ROS2 cli with three verbs:
 
 - list
-- show
+- echo
 - csv
 
 ### list
@@ -21,29 +21,13 @@ diagnostic_simple:
 - DemoTask2
 ```
 
-### show
+### echo
 Monitor `/diagnostics` topic and print the diagnostics_status data can filter by level and node/status name
-
-```bash
-ros2 diagnostics show -h
-usage: ros2 diagnostics show [-h] [-1] [-f FILTER] [--verbose] [-l {info,warn,error}]
-
-Show diagnostics status item info
-
-options:
-  -h, --help            show this help message and exit
-  -1, --once            run only once
-  -f FILTER, --filter FILTER
-                        filter diagnostic status name
-  --verbose, -v         Display more info.
-  -l {info,warn,error}, --levels {info,warn,error}
-                        levels to filter, can be multiple times
-```
 
 #### demo
 
 ```bash title="show all diagnostics status"
-ros2 diagnostics show
+ros2 diagnostics echo
 # 
 --- time: 1682528494 ---
 diagnostic_simple: DemoTask: WARN, running
@@ -54,7 +38,7 @@ diagnostic_simple: DemoTask2: ERROR, bad
 ```
 
 ```bash title="filter by level"
-ros2 diagnostics show -l error
+ros2 diagnostics echo -l error
 --- time: 1682528568 ---
 diagnostic_simple: DemoTask2: ERROR, bad
 --- time: 1682528569 ---
@@ -63,7 +47,7 @@ diagnostic_simple: DemoTask2: ERROR, bad
 ```
 
 ```bash title="filter by name"
-ros2 diagnostics show -f Task2
+ros2 diagnostics echo -f Task2
 #
 --- time: 1682528688 ---
 diagnostic_simple: DemoTask2: ERROR, bad
@@ -72,7 +56,7 @@ diagnostic_simple: DemoTask2: ERROR, bad
 ```
 
 ```bash title="verbose usage"
-ros2 diagnostics show -l warn -v
+ros2 diagnostics echo -l warn -v
 #
 --- time: 1682528760 ---
 diagnostic_simple: DemoTask: WARN, running

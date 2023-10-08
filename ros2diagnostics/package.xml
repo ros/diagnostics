@@ -3,7 +3,7 @@
 <package format="2">
   <name>ros2diagnostics</name>
   <version>3.1.2</version>
-  <description>diagnostic command for ROS2 command line, parse and show diagnostics topic</description>
+  <description>diagnostic command for ROS2 command line, parse and echo diagnostics topic</description>
   <maintainer email="robo2020@gmail.com"></maintainer>
   <maintainer email="russ@sentryrobotics.au"></maintainer>
   <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>

@@ -113,7 +113,7 @@ class DiagnosticsParser:
 
 
 def add_common_arguments(parser: ArgumentParser):
-    """Add common arguments for csv and show verbs."""
+    """Add common arguments for csv and echo verbs."""
     parser.add_argument(
         '-1',
         '--once',

@@ -38,8 +38,8 @@ from ros2diagnostics.api import (
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 
-class ShowVerb(VerbExtension):
-    """Show diagnostics status item info."""
+class EchoVerb(VerbExtension):
+    """Echo diagnostics status item info."""
 
     def add_arguments(self, parser, cli_name):
         add_common_arguments(parser)

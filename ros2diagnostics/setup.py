@@ -16,7 +16,7 @@ setup(
     zip_safe=True,
     maintainer='user',
     maintainer_email='robo2020@gmail.com',
-    description='diagnostic command for ROS2 command line, parse and show /diagnostics topic',
+    description='diagnostic command for ROS2 command line, parse and echo /diagnostics topic',
     license='BSD-3-Clause',
     tests_require=['pytest'],
     entry_points={
@@ -26,7 +26,7 @@ setup(
         'ros2diagnostics.verb': [
             'csv = ros2diagnostics.verb.csv:CSVVerb',
             'list = ros2diagnostics.verb.list:ListVerb',
-            'show = ros2diagnostics.verb.show:ShowVerb'
+            'echo = ros2diagnostics.verb.echo:EchoVerb'
         ]
     },
 )
