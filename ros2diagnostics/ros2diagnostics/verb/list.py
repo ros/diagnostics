@@ -26,7 +26,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from typing import Dict, List, TextIO, Tuple
+from typing import Dict, List
 import yaml
 
 from ros2cli.verb import VerbExtension

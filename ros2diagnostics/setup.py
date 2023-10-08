@@ -21,10 +21,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'ros2cli.command': [
-            'diagnostics = ros2diagnostics.command.diagnostics:DiagCommand',
+            'diagnostics = ros2diagnostics.command.diagnostics:DiagnosticsCommand',
         ],
         'ros2diagnostics.verb': [
-            'world = ros2diagnostics.verb.world:WorldVerb',
             'csv = ros2diagnostics.verb.csv:CSVVerb',
             'list = ros2diagnostics.verb.list:ListVerb',
             'show = ros2diagnostics.verb.show:ShowVerb'

@@ -28,7 +28,6 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-import re
 from typing import Dict, List, TextIO, Tuple
 
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
@@ -49,7 +48,7 @@ level_to_str_mapping = {
 
 
 def convert_level_to_str(level: bytes) -> Tuple[str, str]:
-    return level_to_str_mapping[level]()
+    return level_to_str_mapping[level]
 
 
 def open_file_for_output(csv_file: str) -> TextIO:
@@ -61,52 +60,36 @@ def open_file_for_output(csv_file: str) -> TextIO:
     return csv_path.open('w', encoding='utf-8')
 
 
+def map_level_from_name(levels: List[str]) -> List[bytes]:
+    b_levels = []
+    if levels is None:
+        return b_levels
+
+    map_levels = {
+        'info': lambda: b_levels.append(b'\x00'),
+        'warn': lambda: b_levels.append(b'\x01'),
+        'error': lambda: b_levels.append(b'\x02'),
+    }
+
+    for level in levels:
+        map_levels[level]()
+    return b_levels
+
+
 class DiagnosticsParser:
     def __init__(
         self,
         verbose=False,
         levels=None,
         run_once=False,
-        name_filter=None,
     ) -> None:
-        self.__name_filter = name_filter
-        self.__status_render_handler = DiagnosticsParser.render
         self.__run_once = run_once
         self.__verbose = verbose
         self.__levels_info = ','.join(levels) if levels is not None else ''
-        self.__levels = DiagnosticsParser.map_level_from_name(levels)
+        self.__levels = map_level_from_name(levels)
 
-    def set_render(self, handler):
-        self.__status_render_handler = handler
-
-    def __filter_level(self, level):
+    def filter_level(self, level):
         return False if not self.__levels else level not in self.__levels
-
-    @staticmethod
-    def map_level_from_name(levels: List[str]) -> List[bytes]:
-        b_levels = []
-        if levels is None:
-            return b_levels
-
-        map_levels = {
-            'info': lambda: b_levels.append(b'\x00'),
-            'warn': lambda: b_levels.append(b'\x01'),
-            'error': lambda: b_levels.append(b'\x02'),
-        }
-
-        for level in levels:
-            map_levels[level]()
-        return b_levels
-
-    @staticmethod
-    def render(status: DiagnosticStatus, time_sec, verbose):
-        _, level_name = convert_level_to_str(status.level)
-        item = f'{status.name}: {level_name}, {status.message}'
-        print(item)
-        if verbose:
-            kv: KeyValue
-            for kv in status.values:
-                print(f'- {kv.key}={kv.value}')
 
     def register_diagnostics_topic(self, handler):
         """Create ros node and subscribe to /diagnostic topic."""
@@ -138,7 +121,7 @@ def add_common_arguments(parser: ArgumentParser):
         help='run only once'
     )
     parser.add_argument(
-        '-f'
+        '-f',
         '--filter',
         type=str,
         help='filter by diagnostic status name'

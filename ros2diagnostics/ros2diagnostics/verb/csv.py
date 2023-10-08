@@ -37,7 +37,6 @@ from ros2diagnostics.api import (
     convert_level_to_str,
     DiagnosticsParser,
     open_file_for_output,
-    ParserModeEnum
 )
 
 
@@ -98,12 +97,12 @@ class CSVVerb(VerbExtension):
 
         try:
             handler = DiagnosticsParser(
-                mode=ParserModeEnum.CSV,
                 verbose=args.verbose,
                 run_once=args.once,
-                name_filter=args.filter,
                 levels=args.levels,
             )
+            self.__name_filter = args.filter
+
             handler.set_render(self.render)
             handler.run()
         finally:

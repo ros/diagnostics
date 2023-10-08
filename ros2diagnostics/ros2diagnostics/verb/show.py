@@ -26,15 +26,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import re
 
 from ros2cli.verb import VerbExtension
 from ros2diagnostics.api import (
     add_common_arguments,
+    convert_level_to_str,
     DiagnosticsParser,
 )
 
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
-
 
 
 class ShowVerb(VerbExtension):
@@ -50,13 +51,14 @@ class ShowVerb(VerbExtension):
         )
 
     def main(self, *, args):
-        diagnostic_parser = DiagnosticsParser(
+        self.diagnostic_parser = DiagnosticsParser(
             verbose=args.verbose,
             levels=args.levels,
             run_once=args.once,
-            name_filter=args.filter,
         )
-        diagnostic_parser.run()
+        self.__name_filter = args.filter
+        self.verbose = args.verbose
+        self.diagnostic_parser.register_diagnostics_topic(self.diagnostics_status_handler)
 
     def diagnostics_status_handler(self, msg: DiagnosticArray) -> None:
         """
@@ -75,11 +77,20 @@ class ShowVerb(VerbExtension):
                 result = re.search(self.__name_filter, status.name)
                 if not result:
                     continue
-            if self.__filter_level(status.level):
+            if self.diagnostic_parser.filter_level(status.level):
                 continue
-            self.__status_render_handler(
-                status, msg.header.stamp.sec, self.__verbose)
+            self.render(status, msg.header.stamp.sec, self.verbose)
             counter += 1
 
         if not counter:
             print(f'No diagnostic for levels: {self.__levels_info}')
+
+    @staticmethod
+    def render(status: DiagnosticStatus, time_sec, verbose):
+        _, level_name = convert_level_to_str(status.level)
+        item = f'{status.name}: {level_name}, {status.message}'
+        print(item)
+        if verbose:
+            kv: KeyValue
+            for kv in status.values:
+                print(f'- {kv.key}={kv.value}')
