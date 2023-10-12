@@ -123,6 +123,11 @@ if(BUILD_TESTING)
       ENV
     )
   endforeach()
+
+  ament_add_pytest_test(test_discard_behavior
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
+    TIMEOUT 60
+  )
 endif()
 
 install(
