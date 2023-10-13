@@ -261,7 +261,7 @@ def launch_description(yaml_file, diagnostic_aggregator_node):
 
 @pytest.mark.parametrize('test_metadata', TEST_METADATA, indirect=True)
 @pytest.mark.launch(fixture=launch_description)
-def test_generate_bag(test_metadata, launch_context):
+def test_discard_behavior(test_metadata, launch_context):
     """Run a launch test for each test in our set of tests."""
     rclpy.init()
 
