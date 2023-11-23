@@ -247,6 +247,19 @@ class Updater(DiagnosticTaskVector):
         self.hwid = ''
         self.warn_nohwid_done = False
 
+        self.use_fqn_parameter = 'diagnostic_updater.use_fqn'
+        if self.node.has_parameter(self.use_fqn_parameter):
+            self.__use_fqn = self.node.get_parameter(
+                self.use_fqn_parameter).value
+        else:
+            self.__use_fqn = self.node.declare_parameter(
+                self.use_fqn_parameter, False).value
+
+        if self.__use_fqn:
+            self.node_name = '/'.join([self.node.get_namespace(), self.node.get_name()])
+        else:
+            self.node_name = self.node.get_name()
+
     def update(self):
         """
         Update the diagnostics.
@@ -352,7 +365,7 @@ class Updater(DiagnosticTaskVector):
         da = DiagnosticArray()
         da.header.stamp = now.to_msg()  # Add timestamp for ROS 0.10
         for stat in msg:
-            stat.name = self.node.get_name() + ': ' + stat.name
+            stat.name = self.node_name + ': ' + stat.name
             db = DiagnosticStatus()
             db.name = stat.name
             db.message = stat.message

@@ -406,6 +406,17 @@ public:
     period_ = rclcpp::Duration::from_seconds(period);
 
     reset_timer();
+
+    constexpr const char * use_fqn_param_name = "diagnostic_updater.use_fqn";
+    rclcpp::ParameterValue use_fqn_param;
+    if (parameters_interface->has_parameter(use_fqn_param_name)) {
+      use_fqn_param = parameters_interface->get_parameter(use_fqn_param_name).get_parameter_value();
+    } else {
+      use_fqn_param = parameters_interface->declare_parameter(
+        use_fqn_param_name, rclcpp::ParameterValue(false));
+    }
+    node_name_ = use_fqn_param.get<bool>() ?
+      base_interface->get_fully_qualified_name() : base_interface->get_name();
   }
 
   /**
