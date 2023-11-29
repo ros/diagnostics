@@ -33,9 +33,10 @@
 *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <rclcpp/rclcpp.hpp>
 
 #include <memory>
+
+#include "rclcpp/rclcpp.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_updater/diagnostic_updater.hpp"
