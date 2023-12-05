@@ -178,7 +178,7 @@ public:
 
     auto header_status = std::make_shared<diagnostic_msgs::msg::DiagnosticStatus>();
     header_status->name = path_;
-    header_status->level = 0;
+    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::OK;
     header_status->message = "OK";
 
     std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> processed;
@@ -239,13 +239,13 @@ public:
 
     // If we expect a given number of items, check that we have this number
     if (num_items_expected_ == 0 && items_.empty()) {
-      header_status->level = 0;
+      header_status->level = diagnostic_msgs::msg::DiagnosticStatus::OK;
       header_status->message = "OK";
     } else if (  // NOLINT
       num_items_expected_ > 0 &&
       static_cast<int8_t>(items_.size()) != num_items_expected_)
     {  // NOLINT
-      int8_t lvl = 2;
+      int8_t lvl = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
       header_status->level = std::max(lvl, static_cast<int8_t>(header_status->level));
 
       std::stringstream expec, item;
