@@ -43,11 +43,15 @@ import ntplib
 import rclpy
 from rclpy.node import Node
 
+# Setting port to fix "gaierror: [Errno -8] Servname not supported for ai_socktype #32
+NTP_DEFAULT_PORT = 123
+
 
 class NTPMonitor(Node):
     """A diagnostic task that monitors the NTP offset of the system clock."""
 
-    def __init__(self, ntp_hostname, offset=500, self_offset=500,
+    def __init__(self, ntp_hostname,
+                 offset=500, self_offset=500,
                  diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
         """Initialize the NTPMonitor."""
@@ -127,7 +131,8 @@ class NTPMonitor(Node):
         ntp_client = ntplib.NTPClient()
         response = None
         try:
-            response = ntp_client.request(self.ntp_hostname, version=3)
+            response = ntp_client.request(
+        self.ntp_hostname, version=3, port=NTP_DEFAULT_PORT)
         except ntplib.NTPException as e:
             self.get_logger().error(f'NTP Error: {e}')
             st.level = DIAG.DiagnosticStatus.ERROR
