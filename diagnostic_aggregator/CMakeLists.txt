@@ -124,6 +124,11 @@ if(BUILD_TESTING)
     )
   endforeach()
 
+  add_launch_test(
+    test/test_critical_pub.py
+    TIMEOUT 30
+  )
+
   ament_add_pytest_test(test_discard_behavior
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
     TIMEOUT 60
