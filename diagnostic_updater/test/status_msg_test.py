@@ -1,12 +1,8 @@
-import pytest
-import rclpy
 import unittest
 
-from diagnostic_updater import Updater
-from launch import LaunchDescription
-from launch_ros.actions import Node
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-from launch_testing.actions import ReadyToTest
+from diagnostic_updater import Updater
+import rclpy
 
 
 class TestProcessOutput(unittest.TestCase):
