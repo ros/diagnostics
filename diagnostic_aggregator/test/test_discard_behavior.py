@@ -20,13 +20,13 @@
 #     1. There are no statuses that match any of the GenericAnalyzer child blocks.
 #     2. Every matching status in the GenericAnalyzer child block has been marked stale
 #
-# In this example, if bar and baz have no matching statuses or all of their statuses
+# In this example, if foo and bar have no matching statuses or all of their statuses
 # are STALE, they will roll up as OK because the discard_stale: true flag implies that
 # stale statuses are disposable.
 #
 #     analyzer:
 #         ros__parameters:
-#             path: 'baz'
+#             path: 'agg'
 #             pub_rate: 1.0
 #             analyzers:
 #                 part:
@@ -62,7 +62,7 @@ from rclpy.task import Future
 # All tests take a common structure.
 TestMetadata = namedtuple(
     'TestMetadata',
-    ['foo_discard', 'foo_status', 'bar_discard', 'bar_status', 'baz_result'],
+    ['foo_discard', 'foo_status', 'bar_discard', 'bar_status', 'agg_expected'],
 )
 
 # A status value of 'None' means that the state is never sent (it's missing).
@@ -73,21 +73,21 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=True,
         bar_status=None,
-        baz_result=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
     ),
     TestMetadata(
         foo_discard=True,
         foo_status=DiagnosticStatus.STALE,
         bar_discard=True,
         bar_status=DiagnosticStatus.STALE,
-        baz_result=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
     ),
     TestMetadata(
         foo_discard=True,
         foo_status=None,
         bar_discard=True,
         bar_status=DiagnosticStatus.STALE,
-        baz_result=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
     ),
     # CASE 2: both 'foo' and 'bar' are marked discard_stale := false
     TestMetadata(
@@ -95,21 +95,21 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=False,
         bar_status=None,
-        baz_result=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
     ),
     TestMetadata(
         foo_discard=False,
         foo_status=DiagnosticStatus.STALE,
         bar_discard=False,
         bar_status=DiagnosticStatus.STALE,
-        baz_result=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
     ),
     TestMetadata(
         foo_discard=False,
         foo_status=None,
         bar_discard=False,
         bar_status=DiagnosticStatus.STALE,
-        baz_result=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
     ),
     # CASE 3: one of 'foo' or 'bar' are marked discard_stale := true
     TestMetadata(
@@ -117,28 +117,32 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=False,
         bar_status=None,
-        baz_result=DiagnosticStatus.ERROR,
+        agg_expected=DiagnosticStatus.ERROR, # <-- This is the case we are testing for.
+        # if one of the children is *not* marked discard_stale := true and
+        # there are no statuses, then the parent should roll up to ERROR.
     ),
     TestMetadata(
         foo_discard=True,
         foo_status=DiagnosticStatus.OK,
         bar_discard=False,
         bar_status=None,
-        baz_result=DiagnosticStatus.ERROR,
+        agg_expected=DiagnosticStatus.ERROR,
     ),
     TestMetadata(
         foo_discard=True,
         foo_status=None,
         bar_discard=False,
         bar_status=DiagnosticStatus.OK,
-        baz_result=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK, # <-- This is the case we are testing for.
+        # but if a child is marked discard_stale := true and there are no statuses,
+        # the parent should roll up to OK.
     ),
     TestMetadata(
         foo_discard=True,
         foo_status=DiagnosticStatus.OK,
         bar_discard=False,
         bar_status=DiagnosticStatus.OK,
-        baz_result=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
     ),
 ]
 
@@ -146,12 +150,12 @@ TEST_METADATA = [
 class DiagnosticsTestNode(Node):
     """Class that publishes raw diagnostics and listens for aggregated diagnostics."""
 
-    def __init__(self, foo_status, bar_status, baz_expected):
+    def __init__(self, foo_status, bar_status, agg_expected):
         super().__init__(node_name='diagnostics_listener_node')
         self.foo_status = foo_status
         self.bar_status = bar_status
-        self.baz_expected = baz_expected
-        self.baz_received = None
+        self.agg_expected = agg_expected
+        self.agg_received = None
         self.counter = 0
         self.future = Future()
         self.subscriber = self.create_subscription(
@@ -187,10 +191,10 @@ class DiagnosticsTestNode(Node):
     def diagnostics_aggregated_callback(self, msg):
         """Call from a subscriber providing aggregated diagnostics."""
         for status in msg.status:
-            if status.name == '/robot/baz':
-                self.baz_received = status.level
+            if status.name == '/robot/agg':
+                self.agg_received = status.level
                 self.counter += 1
-                if self.baz_expected == status.level:
+                if self.agg_expected == status.level:
                     # Diagnostics may take a few iterations to 'settle' into the right
                     # state because of how the STALE logic is applied. So, we keep checking
                     # the aggregator result until it reaches the value we are expecting,
@@ -218,7 +222,7 @@ diagnostic_aggregator:
         analyzers:
             part:
                 type: 'diagnostic_aggregator/AnalyzerGroup'
-                path: 'baz'
+                path: 'agg'
                 timeout: 2.0
                 foo:
                     type: 'diagnostic_aggregator/GenericAnalyzer'
@@ -268,7 +272,7 @@ def test_discard_behavior(test_metadata, launch_context):
     node = DiagnosticsTestNode(
         foo_status=test_metadata.foo_status,
         bar_status=test_metadata.bar_status,
-        baz_expected=test_metadata.baz_result,
+        agg_expected=test_metadata.agg_expected,
     )
 
     executor = SingleThreadedExecutor()
@@ -281,13 +285,13 @@ def test_discard_behavior(test_metadata, launch_context):
         The test produced the following result:
             + foo_level: {test_metadata.foo_status} (discard: {test_metadata.foo_discard})
             + bar_level: {test_metadata.bar_status} (discard: {test_metadata.bar_discard})
-        Expected level: {test_metadata.baz_result}
-        Received level: {node.baz_received}
+        Expected level: {test_metadata.agg_expected}
+        Received level: {node.agg_received}
         """
         )
         assert node.future.done(), 'Launch timed out without producing aggregation'
         assert (
-            node.baz_received == test_metadata.baz_result
+            node.agg_received == test_metadata.agg_expected
         ), 'Unexpected parent status level'
         print(f'It took {node.future.result()} aggregations to find the correct status')
 
