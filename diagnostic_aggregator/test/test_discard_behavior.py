@@ -117,7 +117,7 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=False,
         bar_status=None,
-        agg_expected=DiagnosticStatus.ERROR, # <-- This is the case we are testing for.
+        agg_expected=DiagnosticStatus.ERROR,  # <-- This is the case we are testing for.
         # if one of the children is *not* marked discard_stale := true and
         # there are no statuses, then the parent should roll up to ERROR.
     ),
@@ -133,7 +133,7 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=False,
         bar_status=DiagnosticStatus.OK,
-        agg_expected=DiagnosticStatus.OK, # <-- This is the case we are testing for.
+        agg_expected=DiagnosticStatus.OK,  # <-- This is the case we are testing for.
         # but if a child is marked discard_stale := true and there are no statuses,
         # the parent should roll up to OK.
     ),
