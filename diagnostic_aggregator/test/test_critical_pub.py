@@ -73,7 +73,7 @@ class TestProcessOutput(unittest.TestCase):
         time_0 = self.publish_message(state)
 
         assert (self.received_state[0] == state), \
-            ('Received state is not the same as the sent state:' 
+            ('Received state is not the same as the sent state:'
                 + f"'{self.received_state[0]}' != '{state}'")
         self.received_state.clear()
 
@@ -82,7 +82,7 @@ class TestProcessOutput(unittest.TestCase):
         assert (time_1 - time_0 > rclpy.duration.Duration(seconds=0.99)), \
             'OK message received too early'
         assert (self.received_state[0] == state), \
-            ('Received state is not the same as the sent state:' 
+            ('Received state is not the same as the sent state:'
                 + f"'{self.received_state[0]}' != '{state}'")
         self.received_state.clear()
 
@@ -93,7 +93,7 @@ class TestProcessOutput(unittest.TestCase):
         assert (time_2 - time_1 < rclpy.duration.Duration(seconds=0.1)), \
             'Critical error message not received within 0.1 second'
         assert (self.received_state[0] == state), \
-            ('Received state is not the same as the sent state:' 
+            ('Received state is not the same as the sent state:'
                 + f"'{self.received_state[0]}' != '{state}'")
         self.received_state.clear()
 
@@ -103,5 +103,5 @@ class TestProcessOutput(unittest.TestCase):
         assert (time_3 - time_1 > rclpy.duration.Duration(seconds=0.99)), \
             'Periodic error message received too early'
         assert (self.received_state[0] == state), \
-            ('Received state is not the same as the sent state:' 
+            ('Received state is not the same as the sent state:'
                 + f"'{self.received_state[0]}' != '{state}'")
