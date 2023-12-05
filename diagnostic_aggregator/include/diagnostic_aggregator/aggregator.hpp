@@ -152,6 +152,16 @@ private:
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
 
+  /*!
+   *\brief If true, aggregator will publish an error immediately after receiving.
+   */
+  bool critical_;
+
+  /*!
+   *\brief Store the last top level value to publish the critical error only once.
+   */
+  std::uint8_t last_top_level_state_;
+
   /// Records all ROS warnings. No warnings are repeated.
   std::set<std::string> ros_warnings_;
 

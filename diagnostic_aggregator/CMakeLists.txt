@@ -123,6 +123,11 @@ if(BUILD_TESTING)
       ENV
     )
   endforeach()
+
+  add_launch_test(
+    test/test_critical_pub.py
+    TIMEOUT 30
+  )
 endif()
 
 install(
