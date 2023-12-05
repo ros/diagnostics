@@ -64,7 +64,9 @@ Aggregator::Aggregator()
   pub_rate_(1.0),
   history_depth_(1000),
   clock_(n_->get_clock()),
-  base_path_("")
+  base_path_(""),
+  critical_(false),
+  last_top_level_state_(DiagnosticStatus::STALE)
 {
   RCLCPP_DEBUG(logger_, "constructor");
   bool other_as_errors = false;
@@ -88,12 +90,16 @@ Aggregator::Aggregator()
       other_as_errors = param.second.as_bool();
     } else if (param.first.compare("history_depth") == 0) {
       history_depth_ = param.second.as_int();
+    } else if (param.first.compare("critical") == 0) {
+      critical_ = param.second.as_bool();
     }
   }
   RCLCPP_DEBUG(logger_, "Aggregator publication rate configured to: %f", pub_rate_);
   RCLCPP_DEBUG(logger_, "Aggregator base path configured to: %s", base_path_.c_str());
   RCLCPP_DEBUG(
     logger_, "Aggregator other_as_errors configured to: %s", (other_as_errors ? "true" : "false"));
+  RCLCPP_DEBUG(
+    logger_, "Aggregator critical publisher configured to: %s", (critical_ ? "true" : "false"));
 
   analyzer_group_ = std::make_unique<AnalyzerGroup>();
   if (!analyzer_group_->init(base_path_, "", n_)) {
@@ -149,6 +155,24 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto j = 0u; j < diag_msg->status.size(); ++j) {
       analyzed = false;
+
+      const bool top_level_state_transition_to_error =
+        (last_top_level_state_ != DiagnosticStatus::ERROR) &&
+        (diag_msg->status[j].level == DiagnosticStatus::ERROR);
+
+      if (critical_ && top_level_state_transition_to_error) {
+        RCLCPP_DEBUG(
+          logger_, "Received error message: %s, publishing error immediately",
+          diag_msg->status[j].name.c_str());
+        DiagnosticStatus diag_toplevel_state;
+        diag_toplevel_state.name = "toplevel_state_critical";
+        diag_toplevel_state.level = diag_msg->status[j].level;
+        toplevel_state_pub_->publish(diag_toplevel_state);
+
+        // store the last published state
+        last_top_level_state_ = diag_toplevel_state.level;
+      }
+
       auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
 
       if (analyzer_group_->match(item->getName())) {
@@ -217,6 +241,8 @@ void Aggregator::publishData()
     // have stale items but not all are stale
     diag_toplevel_state.level = DiagnosticStatus::ERROR;
   }
+  last_top_level_state_ = diag_toplevel_state.level;
+
   toplevel_state_pub_->publish(diag_toplevel_state);
 }
 
