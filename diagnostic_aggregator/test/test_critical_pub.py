@@ -61,10 +61,10 @@ class TestProcessOutput(unittest.TestCase):
         msg.status.append(DiagnosticStatus())
         msg.status[0].level = level
         msg.status[0].name = 'test status'
-        while len(self.received_state) == 0:
+        while msg.status[0].level not in self.received_state:
+            self.received_state.clear()
             self.publisher.publish(msg)
             rclpy.spin_once(self.node)
-
         return self.node.get_clock().now()
 
     def test_critical_publisher(self):
