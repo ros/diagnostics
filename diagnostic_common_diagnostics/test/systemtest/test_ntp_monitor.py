@@ -73,16 +73,18 @@ class TestNTPMonitor(unittest.TestCase):
         self.subprocess.kill()
 
     def _diagnostics_callback(self, msg):
+        rclpy.logging.get_logger('test_ntp_monitor').info(
+            f'Received diagnostics message: {msg}'
+        )
         search_strings = [
             'NTP offset from',
             'NTP self-offset for'
         ]
         for search_string in search_strings:
-            if search_string not in ''.join([
+            if search_string in ''.join([
                 s.name for s in msg.status
             ]):
-                return
-        self.n_msgs_received += 1
+                self.n_msgs_received += 1
 
     def _count_msgs(self, timeout_s):
         self.n_msgs_received = 0
