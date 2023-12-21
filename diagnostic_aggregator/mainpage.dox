@@ -16,7 +16,7 @@ See Analyzer for more information on the base class.
 
 \subsubsection generic_analyzer GenericAnalyzer
 
-\b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the Analyzer's. It is used by the diagnostic_aggregator/Aggregator to store, process and republish diagnostics data. The GenericAnalyzer is loaded by the pluginlib as a Analyzer plugin. It is the most basic of all Analyzer's. 
+\b generic_analyzer holds the GenericAnalyzer class, which is the most basic of the Analyzer's. It is used by the diagnostic_aggregator/Aggregator to store, process and republish diagnostics data. The GenericAnalyzer is loaded by the pluginlib as a Analyzer plugin. It is the most basic of all Analyzer's.
 
 \subsubsection analyzer_group AnalyzerGroup
 
@@ -37,10 +37,10 @@ aggregator_node subscribes to "/diagnostics" and publishes an aggregated set of 
 \subsubsection topics ROS topics
 
 Subscribes to:
-- \b "/diagnostics": [diagnostics_msgs/DiagnosticArray] 
+- \b "/diagnostics": [diagnostics_msgs/DiagnosticArray]
 
 Publishes to:
-- \b "/diagnostics_agg": [diagnostics_msgs/DiagnosticArray] 
+- \b "/diagnostics_agg": [diagnostics_msgs/DiagnosticArray]
 
 \subsubsection parameters ROS parameters
 
@@ -49,6 +49,7 @@ Reads the following parameters from the parameter server
 - \b "~pub_rate" : \b double [optional] Rate that output diagnostics published
 - \b "~base_path" : \b double [optional] Prepended to all analyzed output
 - \b "~analyzers" : \b {} Configuration for loading analyzers
+- \b "~critical" : \b bool [optional] React immediately to a degradation in diagnostic state
 
 \subsection analyzer_loader analyzer_loader
 
