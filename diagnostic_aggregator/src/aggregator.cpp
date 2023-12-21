@@ -156,14 +156,13 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
     for (auto j = 0u; j < diag_msg->status.size(); ++j) {
       analyzed = false;
 
-      const bool top_level_state_transition_to_error =
-        (last_top_level_state_ != DiagnosticStatus::ERROR) &&
-        (diag_msg->status[j].level == DiagnosticStatus::ERROR);
+      const bool top_level_state_degradation = (last_top_level_state_ < diag_msg->status[j].level);
 
-      if (critical_ && top_level_state_transition_to_error) {
+      if (critical_ && top_level_state_degradation) {
         RCLCPP_DEBUG(
-          logger_, "Received error message: %s, publishing error immediately",
+          logger_, "Received degrated message: %s, publishing immediately",
           diag_msg->status[j].name.c_str());
+
         DiagnosticStatus diag_toplevel_state;
         diag_toplevel_state.name = "toplevel_state_critical";
         diag_toplevel_state.level = diag_msg->status[j].level;
