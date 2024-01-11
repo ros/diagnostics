@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -66,6 +67,10 @@ target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIO
 add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
   ${PROJECT_NAME})
+
+# Add analyzer
+add_executable(add_analyzer src/add_analyzer.cpp)
+ament_target_dependencies(add_analyzer rclcpp rcl_interfaces)
 
 # Testing macro
 if(BUILD_TESTING)
@@ -132,6 +137,11 @@ endif()
 
 install(
   TARGETS aggregator_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS add_analyzer
   DESTINATION lib/${PROJECT_NAME}
 )
 
