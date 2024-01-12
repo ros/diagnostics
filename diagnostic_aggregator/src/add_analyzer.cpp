@@ -66,7 +66,7 @@ public:
     std::map<std::string, rclcpp::Parameter> parameters;
     if (this->get_parameters("", parameters)) {
       for (const auto & param : parameters) {
-        if (param.first.substr(0, prefix_.length()).compare(prefix_) == 0) {
+        if (param.first.substr(0, analyzers_ns_.length()).compare(analyzers_ns_) == 0) {
           auto parameter_msg = param.second.to_parameter_msg();
           request->parameters.push_back(parameter_msg);
         }
@@ -85,7 +85,7 @@ public:
 
 private:
   rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr client_;
-  std::string prefix_ = "analyzers.";
+  std::string analyzers_ns_ = "analyzers.";
 };
 
 int main(int argc, char ** argv)
