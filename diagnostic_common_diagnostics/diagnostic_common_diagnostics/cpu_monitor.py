@@ -46,19 +46,11 @@ from diagnostic_updater import DiagnosticTask, Updater
 
 
 class CpuTask(DiagnosticTask):
-    def __init__(self, node, hostname, warning_percentage=90, window=1):
+    def __init__(self, warning_percentage=90, window=1):
         DiagnosticTask.__init__(self, "CPU Information")
 
-        self._nh: Node = node
         self._warning_percentage = int(warning_percentage)
         self._readings = collections.deque(maxlen=window)
-
-        # Create diagnostic updater with default updater rate of 1 hz
-        self.updater = Updater(self._nh, period=1.0)
-        self.updater.setHardwareID(hostname)
-
-        # Add task to diagnostic updater with the callback producing the diagnostic messages
-        self.updater.add(hostname, self.produce_diagnostics)
 
     def _get_average_reading(self):
         def avg(lst):
@@ -66,7 +58,7 @@ class CpuTask(DiagnosticTask):
 
         return [avg(cpu_percentages) for cpu_percentages in zip(*self._readings)]
 
-    def produce_diagnostics(self, stat):
+    def run(self, stat):
         self._readings.append(psutil.cpu_percent(percpu=True))
         cpu_percentages = self._get_average_reading()
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
@@ -102,8 +94,10 @@ def main(args=None):
     warning_percentage = node.get_parameter('warning_percentage').get_parameter_value().integer_value
     window = node.get_parameter('window').get_parameter_value().integer_value
 
-    # Create the CpuTask
-    CpuTask(node=node, hostname=hostname, warning_percentage=warning_percentage, window=window)
+    # Create diagnostic updater with default updater rate of 1 hz
+    updater = Updater(node)
+    updater.setHardwareID(hostname)
+    updater.add(CpuTask(warning_percentage=warning_percentage, window=window))
 
     rclpy.spin(node)
 
