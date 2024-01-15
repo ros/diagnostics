@@ -5,6 +5,7 @@
 \b diagnostic_common_diagnostics contains a few common diagnostic nodes
 
 - ntp_monitor publishes diagnostic messages for how well the NTP time sync is working.
+- cpu_monitor publishes diagnostic messages with the CPU usage of the system.
 - tf_monitor used to publish diagnostic messages reporting on the health of
 the TF tree. It is based on tfwtf. It is not ported to ROS2.
 

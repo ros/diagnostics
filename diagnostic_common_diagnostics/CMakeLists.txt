@@ -8,6 +8,7 @@ find_package(ament_cmake_python REQUIRED)
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
+    ${PROJECT_NAME}/cpu_monitor.py
     ${PROJECT_NAME}/ntp_monitor.py
     DESTINATION lib/${PROJECT_NAME}
 )
