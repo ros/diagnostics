@@ -32,16 +32,17 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import time
 import unittest
-import time
-import rclpy
 
-from rclpy.node import Node
 from diagnostic_msgs.msg import DiagnosticStatus
-from diagnostic_updater import DiagnosticStatusWrapper
 from diagnostic_updater import DiagnosticArray, Updater
+from diagnostic_updater import DiagnosticStatusWrapper
+
+import rclpy
+from rclpy.node import Node
 from diagnostic_common_diagnostics.cpu_monitor import CpuTask
-import time
+
 
 class TestCPUMonitor(unittest.TestCase):
     @classmethod
@@ -101,7 +102,8 @@ class TestCPUMonitor(unittest.TestCase):
         updater.setHardwareID("test_id")
         updater.add(CpuTask())
 
-        node.create_subscription(DiagnosticArray, '/diagnostics', self.diagnostics_callback, 10)
+        node.create_subscription(
+            DiagnosticArray, '/diagnostics', self.diagnostics_callback, 10)
 
         start_time = time.time()
         timeout = 5.0  # Timeout in seconds

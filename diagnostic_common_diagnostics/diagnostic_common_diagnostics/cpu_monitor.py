@@ -40,9 +40,9 @@ import rclpy
 import socket
 import psutil
 
-from rclpy.node import Node
 from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_updater import DiagnosticTask, Updater
+from rclpy.node import Node
 
 
 class CpuTask(DiagnosticTask):
@@ -56,7 +56,8 @@ class CpuTask(DiagnosticTask):
         def avg(lst):
             return float(sum(lst)) / len(lst) if lst else float('nan')
 
-        return [avg(cpu_percentages) for cpu_percentages in zip(*self._readings)]
+        return [avg(cpu_percentages)
+                for cpu_percentages in zip(*self._readings)]
 
     def run(self, stat):
         self._readings.append(psutil.cpu_percent(percpu=True))
@@ -75,7 +76,8 @@ class CpuTask(DiagnosticTask):
             stat.summary(DiagnosticStatus.WARN,
                          "At least one CPU exceeds {:d} percent".format(self._warning_percentage))
         else:
-            stat.summary(DiagnosticStatus.OK, "CPU Average {:.2f} percent".format(cpu_average))
+            stat.summary(DiagnosticStatus.OK,
+                         "CPU Average {:.2f} percent".format(cpu_average))
 
         return stat
 
@@ -91,7 +93,8 @@ def main(args=None):
     node.declare_parameter('warning_percentage', 90)
     node.declare_parameter('window', 1)
 
-    warning_percentage = node.get_parameter('warning_percentage').get_parameter_value().integer_value
+    warning_percentage = node.get_parameter(
+        'warning_percentage').get_parameter_value().integer_value
     window = node.get_parameter('window').get_parameter_value().integer_value
 
     # Create diagnostic updater with default updater rate of 1 hz
