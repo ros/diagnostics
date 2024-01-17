@@ -81,17 +81,17 @@ class TestCPUMonitor(unittest.TestCase):
         # function be called with at least 0.1 seconds between calls.
         time.sleep(0.1)
 
-        warning_percentage2 = -1
-        task2 = CpuTask(warning_percentage2)
-        stat2 = DiagnosticStatusWrapper()
-        task2.run(stat2)
-        print(f'Raw readings: {task2._readings}')
-        self.assertEqual(task2.name, 'CPU Information')
-        self.assertEqual(stat2.level, DiagnosticStatus.WARN)
-        self.assertIn(str('At least one CPU exceeds'), stat2.message)
+        warning_percentage = -1
+        task = CpuTask(warning_percentage)
+        stat = DiagnosticStatusWrapper()
+        task.run(stat)
+        print(f'Raw readings: {task._readings}')
+        self.assertEqual(task.name, 'CPU Information')
+        self.assertEqual(stat.level, DiagnosticStatus.WARN)
+        self.assertIn(str('At least one CPU exceeds'), stat.message)
 
         # Check for at least 1 CPU Load Average and 1 CPU Load
-        self.assertGreaterEqual(len(stat2.values), 2)
+        self.assertGreaterEqual(len(stat.values), 2)
 
     def test_updater(self):
         # In this case is recommended for accuracy that psutil.cpu_percent()
