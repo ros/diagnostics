@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Software License Agreement (BSD License)
 #
@@ -35,16 +34,19 @@
 import time
 import unittest
 
+from diagnostic_common_diagnostics.cpu_monitor import CpuTask
+
 from diagnostic_msgs.msg import DiagnosticStatus
+
 from diagnostic_updater import DiagnosticArray, Updater
 from diagnostic_updater import DiagnosticStatusWrapper
 
 import rclpy
 from rclpy.node import Node
-from diagnostic_common_diagnostics.cpu_monitor import CpuTask
 
 
 class TestCPUMonitor(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         rclpy.init(args=None)
@@ -99,7 +101,7 @@ class TestCPUMonitor(unittest.TestCase):
 
         node = Node('cpu_monitor_test')
         updater = Updater(node)
-        updater.setHardwareID("test_id")
+        updater.setHardwareID('test_id')
         updater.add(CpuTask())
 
         node.create_subscription(
@@ -113,8 +115,8 @@ class TestCPUMonitor(unittest.TestCase):
             time.sleep(0.1)
             elapsed_time = time.time() - start_time
             if elapsed_time >= timeout:
-                self.fail("No diagnostics received")
+                self.fail('No diagnostics received')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

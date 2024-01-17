@@ -36,18 +36,22 @@
 # \author Rein Appeldoorn
 
 import collections
-import rclpy
 import socket
-import psutil
+import traceback
 
 from diagnostic_msgs.msg import DiagnosticStatus
+
 from diagnostic_updater import DiagnosticTask, Updater
+
+import psutil
+
+import rclpy
 from rclpy.node import Node
 
 
 class CpuTask(DiagnosticTask):
     def __init__(self, warning_percentage=90, window=1):
-        DiagnosticTask.__init__(self, "CPU Information")
+        DiagnosticTask.__init__(self, 'CPU Information')
 
         self._warning_percentage = int(warning_percentage)
         self._readings = collections.deque(maxlen=window)
@@ -64,20 +68,20 @@ class CpuTask(DiagnosticTask):
         cpu_percentages = self._get_average_reading()
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
 
-        stat.add("CPU Load Average", "{:.2f}".format(cpu_average))
+        stat.add('CPU Load Average', '{:.2f}'.format(cpu_average))
 
         warn = False
-        for idx, val in enumerate(cpu_percentages):
-            stat.add("CPU {} Load".format(idx), "{:.2f}".format(val))
-            if val > self._warning_percentage:
+        for idx, cpu_percentage in enumerate(cpu_percentages):
+            stat.add('CPU {} Load'.format(idx), '{:.2f}'.format(cpu_percentage))
+            if cpu_percentage > self._warning_percentage:
                 warn = True
 
         if warn:
             stat.summary(DiagnosticStatus.WARN,
-                         "At least one CPU exceeds {:d} percent".format(self._warning_percentage))
+                         'At least one CPU exceeds {} percent'.format(self._warning_percentage))
         else:
             stat.summary(DiagnosticStatus.OK,
-                         "CPU Average {:.2f} percent".format(cpu_average))
+                         'CPU Average {:.2f} percent'.format(cpu_average))
 
         return stat
 
@@ -87,7 +91,7 @@ def main(args=None):
 
     # Create the node
     hostname = socket.gethostname()
-    node = Node('cpu_monitor_%s' % hostname.replace("-", "_"))
+    node = Node('cpu_monitor_%s' % hostname.replace('-', '_'))
 
     # Declare and get parameters
     node.declare_parameter('warning_percentage', 90)
@@ -111,5 +115,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     except Exception:
-        import traceback
         traceback.print_exc()
