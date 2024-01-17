@@ -50,6 +50,7 @@ from rclpy.node import Node
 
 
 class CpuTask(DiagnosticTask):
+
     def __init__(self, warning_percentage=90, window=1):
         DiagnosticTask.__init__(self, 'CPU Information')
 
