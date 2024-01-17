@@ -81,10 +81,11 @@ class TestCPUMonitor(unittest.TestCase):
         # function be called with at least 0.1 seconds between calls.
         time.sleep(0.1)
 
-        warning_percentage2 = 0
+        warning_percentage2 = -1
         task2 = CpuTask(warning_percentage2)
         stat2 = DiagnosticStatusWrapper()
         task2.run(stat2)
+        print(f'Raw readings: {task2._readings}')
         self.assertEqual(task2.name, 'CPU Information')
         self.assertEqual(stat2.level, DiagnosticStatus.WARN)
         self.assertIn(str('At least one CPU exceeds'), stat2.message)
