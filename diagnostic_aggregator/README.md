@@ -14,7 +14,7 @@ The robot has two of each, one on each side.
 The robot also 4 camera sensors, one left and one right and one in the front and one in the back.
 These are all the available diagnostic sources:
 
-``` 
+```
 /arms/left/motor
 /arms/right/motor
 /legs/left/motor
@@ -118,6 +118,9 @@ Additional parameters depend on the type of the analyzer.
 
 Any diagnostic item that is not matched by any analyzer will be published by an "Other" analyzer.
 Items created by the "Other" analyzer will go stale after 5 seconds.
+
+The `critical` parameter makes the aggregator react immediately to a degradation in diagnostic state.
+This is useful if the toplevel state is parsed by a watchdog for example.
 
 ## Launching
 You can launch the `aggregator_node` like this (see [example.launch.py.in](example/example.launch.py.in)):
