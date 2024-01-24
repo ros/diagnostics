@@ -2,7 +2,7 @@
 
 # Overview
 
-The diagnostics system collects information about hardware drivers and robot hardware to make them availaible to users and operators.
+The diagnostics system collects information about hardware drivers and robot hardware to make them available to users and operators.
 The diagnostics system contains tools to collect and analyze this data.
 
 The diagnostics system is build around the `/diagnostics` topic. The topic is used for `diagnostic_msgs/DiagnosticArray` messages.
