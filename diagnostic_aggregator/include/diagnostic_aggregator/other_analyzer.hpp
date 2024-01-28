@@ -145,7 +145,7 @@ public:
         processed.begin();
       for (; it != processed.end(); ++it) {
         if ((*it)->name == path_) {
-          (*it)->level = 2;
+          (*it)->level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
           (*it)->message = "Unanalyzed items found in \"Other\"";
           break;
         }
