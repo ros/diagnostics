@@ -35,7 +35,7 @@
 
 # \author Rein Appeldoorn
 
-import collections
+from collections import deque
 import socket
 import traceback
 

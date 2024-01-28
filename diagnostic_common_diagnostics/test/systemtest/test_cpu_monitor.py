@@ -56,15 +56,16 @@ class TestCPUMonitor(unittest.TestCase):
         if rclpy.ok():
             rclpy.shutdown()
 
+    def setUp(self):
+        # In this case is recommended for accuracy that psutil.cpu_percent()
+        # function be called with at least 0.1 seconds between calls.
+        time.sleep(0.1)
+
     def diagnostics_callback(self, msg):
         self.message_recieved = True
         self.assertEqual(len(msg.status), 1)
 
     def test_ok(self):
-        # In this case is recommended for accuracy that psutil.cpu_percent()
-        # function be called with at least 0.1 seconds between calls.
-        time.sleep(0.1)
-
         warning_percentage = 100
         task = CpuTask(warning_percentage)
         stat = DiagnosticStatusWrapper()
@@ -77,10 +78,6 @@ class TestCPUMonitor(unittest.TestCase):
         self.assertGreaterEqual(len(stat.values), 2)
 
     def test_warn(self):
-        # In this case is recommended for accuracy that psutil.cpu_percent()
-        # function be called with at least 0.1 seconds between calls.
-        time.sleep(0.1)
-
         warning_percentage = -1
         task = CpuTask(warning_percentage)
         stat = DiagnosticStatusWrapper()
@@ -94,10 +91,6 @@ class TestCPUMonitor(unittest.TestCase):
         self.assertGreaterEqual(len(stat.values), 2)
 
     def test_updater(self):
-        # In this case is recommended for accuracy that psutil.cpu_percent()
-        # function be called with at least 0.1 seconds between calls.
-        time.sleep(0.1)
-
         self.message_recieved = False
 
         node = Node('cpu_monitor_test')
