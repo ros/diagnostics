@@ -217,6 +217,8 @@ void Aggregator::publishData()
   diag_toplevel_state.level = DiagnosticStatus::STALE;
   int max_level = -1;
   int min_level = 255;
+  int non_ok_status_depth = 0;
+  std::shared_ptr<DiagnosticStatus> msg_to_report;
 
   std::vector<std::shared_ptr<DiagnosticStatus>> processed;
   {
@@ -225,26 +227,56 @@ void Aggregator::publishData()
   }
   for (const auto & msg : processed) {
     diag_array.status.push_back(*msg);
+    const auto depth = std::count(msg->name.begin(), msg->name.end(), '/');
 
     if (msg->level > max_level) {
       max_level = msg->level;
+      non_ok_status_depth = depth;
+      msg_to_report = msg;
+    }
+    if (msg->level == max_level && depth > non_ok_status_depth) {
+      // On non okay diagnostics also copy the deepest message to toplevel state
+      non_ok_status_depth = depth;
+      msg_to_report = msg;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
     }
+  }
+  // When a non-ok item was found, copy the complete status message once
+  if (max_level > DiagnosticStatus::OK) {
+    diag_toplevel_state.name = msg_to_report->name;
+    diag_toplevel_state.message = msg_to_report->message;
+    diag_toplevel_state.hardware_id = msg_to_report->hardware_id;
+    diag_toplevel_state.values = msg_to_report->values;
   }
 
   std::vector<std::shared_ptr<DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (const auto & msg : processed_other) {
     diag_array.status.push_back(*msg);
+    const auto depth = std::count(msg->name.begin(), msg->name.end(), '/');
 
     if (msg->level > max_level) {
       max_level = msg->level;
+      non_ok_status_depth = depth;
+      msg_to_report = msg;
+    }
+    if (msg->level == max_level && depth > non_ok_status_depth) {
+      // On non okay diagnostics also copy the deepest message to toplevel state
+      non_ok_status_depth = depth;
+      msg_to_report = msg;
     }
     if (msg->level < min_level) {
       min_level = msg->level;
     }
+  }
+  // When a non-ok item was found, copy the complete status message once
+  if (max_level > DiagnosticStatus::OK) {
+    diag_toplevel_state.name = msg_to_report->name;
+    diag_toplevel_state.message = msg_to_report->message;
+    diag_toplevel_state.hardware_id = msg_to_report->hardware_id;
+    diag_toplevel_state.values = msg_to_report->values;
   }
 
   diag_array.header.stamp = clock_->now();
