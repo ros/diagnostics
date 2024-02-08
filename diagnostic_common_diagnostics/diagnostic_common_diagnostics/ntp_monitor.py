@@ -155,6 +155,10 @@ class NTPMonitor(Node):
 
 
 def ntp_monitor_main(argv=sys.argv[1:]):
+    # filter out ROS args
+    argv = [a for a in argv if not a.startswith('__') and not a == '--ros-args' and not a == '-r']
+
+
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--ntp_hostname',
