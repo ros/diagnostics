@@ -55,7 +55,7 @@ class CpuTask(DiagnosticTask):
         DiagnosticTask.__init__(self, 'CPU Information')
 
         self._warning_percentage = int(warning_percentage)
-        self._readings = collections.deque(maxlen=window)
+        self._readings = deque(maxlen=window)
 
     def _get_average_reading(self):
         def avg(lst):
@@ -69,20 +69,20 @@ class CpuTask(DiagnosticTask):
         cpu_percentages = self._get_average_reading()
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
 
-        stat.add('CPU Load Average', '{:.2f}'.format(cpu_average))
+        stat.add(f"CPU Load Average {cpu_average:.2f}")
 
         warn = False
         for idx, cpu_percentage in enumerate(cpu_percentages):
-            stat.add('CPU {} Load'.format(idx), '{:.2f}'.format(cpu_percentage))
+            stat.add(f"CPU {idx} Load: {cpu_percentage:.2f}")
             if cpu_percentage > self._warning_percentage:
                 warn = True
 
         if warn:
             stat.summary(DiagnosticStatus.WARN,
-                         'At least one CPU exceeds {} percent'.format(self._warning_percentage))
+                         f"At least one CPU exceeds {self._warning_percentage} percent")
         else:
             stat.summary(DiagnosticStatus.OK,
-                         'CPU Average {:.2f} percent'.format(cpu_average))
+                         f"CPU Average {cpu_average:.2f} percent")
 
         return stat
 
@@ -92,7 +92,7 @@ def main(args=None):
 
     # Create the node
     hostname = socket.gethostname()
-    node = Node('cpu_monitor_%s' % hostname.replace('-', '_'))
+    node = Node(f"cpu_monitor_{hostname.replace('-', '_')}")
 
     # Declare and get parameters
     node.declare_parameter('warning_percentage', 90)
