@@ -69,11 +69,11 @@ class CpuTask(DiagnosticTask):
         cpu_percentages = self._get_average_reading()
         cpu_average = sum(cpu_percentages) / len(cpu_percentages)
 
-        stat.add(f'CPU Load Average {cpu_average:.2f}')
+        stat.add('CPU Load Average', f'{cpu_average:.2f}')
 
         warn = False
         for idx, cpu_percentage in enumerate(cpu_percentages):
-            stat.add(f'CPU {idx} Load: {cpu_percentage:.2f}')
+            stat.add(f'CPU {idx} Load', f'{cpu_percentage:.2f}')
             if cpu_percentage > self._warning_percentage:
                 warn = True
 
@@ -92,7 +92,7 @@ def main(args=None):
 
     # Create the node
     hostname = socket.gethostname()
-    node = Node(f'cpu_monitor_{hostname.replace('-', '_')}')
+    node = Node(f'cpu_monitor_{hostname.replace("-", "_")}')
 
     # Declare and get parameters
     node.declare_parameter('warning_percentage', 90)
