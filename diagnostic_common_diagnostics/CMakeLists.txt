@@ -19,12 +19,12 @@ if(BUILD_TESTING)
 
     find_package(ament_cmake_pytest REQUIRED)
     ament_add_pytest_test(
-        test_ntp_monitor
-        test/systemtest/test_ntp_monitor.py
-        TIMEOUT 10)
-    ament_add_pytest_test(
         test_cpu_monitor
         test/systemtest/test_cpu_monitor.py
+        TIMEOUT 10)
+    ament_add_pytest_test(
+        test_ntp_monitor
+        test/systemtest/test_ntp_monitor.py
         TIMEOUT 10)
 endif()
 
