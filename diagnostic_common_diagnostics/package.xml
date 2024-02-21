@@ -22,9 +22,6 @@
   <exec_depend>python3-ntplib</exec_depend>
   <exec_depend>python3-psutil</exec_depend>
 
-  <test_depend>ament_cmake_lint_cmake</test_depend>
-  <test_depend>ament_cmake_pytest</test_depend>
-  <test_depend>ament_cmake_xmllint</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
   For now, enable the linters that do support exlusions.
@@ -32,7 +29,10 @@
   enabled vi ament_lint_common as the files are cleaned up. -->
   <!-- <test_depend>ament_cmake_flake8</test_depend> -->
   <!-- <test_depend>ament_cmake_pep257</test_depend> -->
+  <test_depend>ament_cmake_xmllint</test_depend>
+  <test_depend>ament_cmake_lint_cmake</test_depend>
 
+  <test_depend>ament_cmake_pytest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
