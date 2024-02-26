@@ -219,12 +219,13 @@ public:
     }
     
     bool header_stale_timed_out = false;
+    const ros::Time now = ros::Time::now();
     if (timeout_ > 0 && last_header_level_ == int(DiagnosticLevel::Level_Stale))
-        header_stale_timed_out = (ros::Time::now() - last_header_status_change_).toSec() > timeout_;
+        header_stale_timed_out = (now - last_header_status_change_).toSec() > timeout_;
 
     if (last_header_level_ != header_status->level)
     {
-      last_header_status_change_ = ros::Time::now();
+      last_header_status_change_ = now;
       last_header_level_ = header_status->level; // update the last header level
     }
 

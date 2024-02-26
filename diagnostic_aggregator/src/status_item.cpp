@@ -74,7 +74,8 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
     return false;
   }
 
-  double update_interval = (ros::Time::now() - update_time_).toSec();
+  const ros::Time now = ros::Time::now();
+  double update_interval = (now - update_time_).toSec();
   if (update_interval < 0)
     ROS_WARN("StatusItem is being updated with older data. Negative update time: %f", update_interval);
 
@@ -83,7 +84,7 @@ bool StatusItem::update(const diagnostic_msgs::DiagnosticStatus *status)
   hw_id_ = status->hardware_id;
   values_ = status->values;
 
-  update_time_ = ros::Time::now();
+  update_time_ = now;
 
   return true;
 }
