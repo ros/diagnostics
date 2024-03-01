@@ -50,7 +50,7 @@ public:
         true).automatically_declare_parameters_from_overrides(true))
   {
     client_ = this->create_client<rcl_interfaces::srv::SetParametersAtomically>(
-      "/diagnostics_agg/set_parameters_atomically");
+      "/analyzers/set_parameters_atomically");
   }
 
   void send_request()
@@ -64,14 +64,26 @@ public:
     }
     auto request = std::make_shared<rcl_interfaces::srv::SetParametersAtomically::Request>();
     std::map<std::string, rclcpp::Parameter> parameters;
-    if (this->get_parameters("", parameters)) {
-      for (const auto & param : parameters) {
-        if (param.first.substr(0, analyzers_ns_.length()).compare(analyzers_ns_) == 0) {
-          auto parameter_msg = param.second.to_parameter_msg();
+
+    if (!this->get_parameters("", parameters)) {
+      RCLCPP_ERROR(this->get_logger(), "Failed to retrieve parameters");
+    }
+    for (const auto & [param_name, param] : parameters) {
+      // Find the suffix
+      size_t suffix_start = param_name.find_last_of('.');
+      // Remove suffix if it exists
+      if (suffix_start != std::string::npos){
+        std::string stripped_param_name = param_name.substr(0, suffix_start);
+        // Check in map if the stripped param name with the added suffix "path" exists
+        // This indicates the parameter is part of an analyzer description
+        if (parameters.count(stripped_param_name+".path") > 0) {
+          RCLCPP_INFO(this->get_logger(), param_name.c_str());
+          auto parameter_msg = param.to_parameter_msg();
           request->parameters.push_back(parameter_msg);
         }
       }
     }
+
     auto result = client_->async_send_request(request);
     // Wait for the result.
     if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
