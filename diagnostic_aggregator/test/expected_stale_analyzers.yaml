@@ -1,4 +1,4 @@
-analyzers:
+/**:
   my_path:
     type: diagnostic_aggregator/GenericAnalyzer
     path: My Path

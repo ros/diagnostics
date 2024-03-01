@@ -77,7 +77,6 @@ public:
         // Check in map if the stripped param name with the added suffix "path" exists
         // This indicates the parameter is part of an analyzer description
         if (parameters.count(stripped_param_name + ".path") > 0) {
-          RCLCPP_INFO(this->get_logger(), param_name.c_str());
           auto parameter_msg = param.to_parameter_msg();
           request->parameters.push_back(parameter_msg);
         }
