@@ -84,7 +84,7 @@ class DiagnosticTalker(Node):
 
             # Optional
             DiagnosticStatus(level=DiagnosticStatus.OK,
-                            name='/optional/runtime/analyzer', message='OK'),
+                             name='/optional/runtime/analyzer', message='OK'),
         ]
 
     def timer_callback(self):

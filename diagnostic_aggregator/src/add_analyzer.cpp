@@ -72,11 +72,11 @@ public:
       // Find the suffix
       size_t suffix_start = param_name.find_last_of('.');
       // Remove suffix if it exists
-      if (suffix_start != std::string::npos){
+      if (suffix_start != std::string::npos) {
         std::string stripped_param_name = param_name.substr(0, suffix_start);
         // Check in map if the stripped param name with the added suffix "path" exists
         // This indicates the parameter is part of an analyzer description
-        if (parameters.count(stripped_param_name+".path") > 0) {
+        if (parameters.count(stripped_param_name + ".path") > 0) {
           RCLCPP_INFO(this->get_logger(), param_name.c_str());
           auto parameter_msg = param.to_parameter_msg();
           request->parameters.push_back(parameter_msg);

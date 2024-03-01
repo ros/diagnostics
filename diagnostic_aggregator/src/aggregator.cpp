@@ -92,7 +92,7 @@ void Aggregator::parameterCallback(const rcl_interfaces::msg::ParameterEvent::Sh
 {
   if (msg->node == "/" + std::string(n_->get_name())) {
     if (msg->new_parameters.size() != 0) {
-      base_path_="";
+      base_path_ = "";
       initAnalyzers();
     }
   }
