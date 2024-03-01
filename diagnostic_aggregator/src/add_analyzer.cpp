@@ -96,7 +96,6 @@ public:
 
 private:
   rclcpp::Client<rcl_interfaces::srv::SetParametersAtomically>::SharedPtr client_;
-  std::string analyzers_ns_ = "analyzers.";
 };
 
 int main(int argc, char ** argv)
