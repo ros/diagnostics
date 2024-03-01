@@ -162,6 +162,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Example
 set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_analyzers.yaml")
+set(ADD_ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_add_analyzers.yaml")
 configure_file(example/example.launch.py.in example.launch.py @ONLY)
 install( # launch descriptor
   FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
@@ -172,7 +173,7 @@ install( # example publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 install( # example aggregator configration
-  FILES example/example_analyzers.yaml
+  FILES example/example_analyzers.yaml example/example_add_analyzers.yaml
   DESTINATION share/${PROJECT_NAME}
 )
 
