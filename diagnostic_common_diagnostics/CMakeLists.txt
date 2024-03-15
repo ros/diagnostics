@@ -12,6 +12,7 @@ install(PROGRAMS
     ${PROJECT_NAME}/ntp_monitor.py
     ${PROJECT_NAME}/ram_monitor.py
     ${PROJECT_NAME}/sensors_monitor.py
+    ${PROJECT_NAME}/hd_monitor.py
     DESTINATION lib/${PROJECT_NAME}
 )
 
