@@ -11,22 +11,25 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_ros REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}
+  src/diagnostic_updater.cpp
+)
 target_include_directories(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   diagnostic_msgs
   rclcpp
 )
@@ -63,12 +66,10 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
+  target_link_libraries(diagnostic_updater_test ${PROJECT_NAME})
   ament_target_dependencies(
     diagnostic_updater_test
-    "diagnostic_msgs"
-    "rclcpp"
     "rclcpp_lifecycle"
-    "std_msgs"
   )
 
   ament_add_gtest(diagnostic_status_wrapper_test test/diagnostic_status_wrapper_test.cpp)
@@ -90,11 +91,7 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
-  ament_target_dependencies(
-    status_msg_test
-    "diagnostic_msgs"
-    "rclcpp"
-  )
+  target_link_libraries(status_msg_test ${PROJECT_NAME})
 
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
