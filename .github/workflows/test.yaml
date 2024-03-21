@@ -24,12 +24,13 @@ jobs:
         distro: [humble, iron, rolling]
         include:
           - distro: humble
-            os: ubuntu-22.04
+            os: 22.04
           - distro: iron
-            os: ubuntu-22.04
+            os: 22.04
           - distro: rolling
-            os: ubuntu-22.04
-    runs-on: ${{ matrix.os }}
+            os: 24.04
+    runs-on: ubuntu-${{ matrix.os }}
+    container: ubuntu:${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
       - run: |
