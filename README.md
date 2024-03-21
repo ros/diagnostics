@@ -40,6 +40,10 @@ The [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2) targets
 - *Iron Irwini* and
 - *Rolling Ridley*
 
+The [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy) targets
+
+- *Jazzy Jalisco*
+
 # License
 
 The source code is released under a [BSD 3-Clause license](LICENSE).
