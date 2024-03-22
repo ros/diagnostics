@@ -7,8 +7,31 @@ Currently only the NTP monitor is ported to ROS2.
 
 # Nodes
 
+## cpu_monitor.py
+The `cpu_monitor` module allows users to monitor the CPU usage of their system in real-time.
+It publishes the usage percentage in a diagnostic message.
+
+* Name of the node is "cpu_monitor_" + hostname.
+* Uses the following args:
+  * warning_percentage: If the CPU usage is > warning_percentage, a WARN status will be publised.
+  * window: the maximum length of the used collections.deque for queuing CPU readings.
+
+### Published Topics
+#### /diagnostics
+diagnostic_msgs/DiagnosticArray
+The diagnostics information.
+
+### Parameters
+#### warning_percentage
+(default: 90)
+warning percentage threshold.
+
+#### window
+(default: 1)
+Length of CPU readings queue.
+
 ## ntp_monitor.py
-Runs 'ntpdate' to check if the system clock is synchronized with the NTP server. 
+Runs 'ntpdate' to check if the system clock is synchronized with the NTP server.
 * If the offset is smaller than `offset-tolerance`, an `OK` status will be published.
 * If the offset is larger than the configured `offset-tolerance`, a `WARN` status will be published,
 * if it is bigger than `error-offset-tolerance`, an `ERROR` status will be published.
@@ -20,7 +43,7 @@ diagnostic_msgs/DiagnosticArray
 The diagnostics information.
 
 ### Parameters
-#### ntp_hostname 
+#### ntp_hostname
 (default: "pool.ntp.org")
 Hostname of NTP server.
 
@@ -44,9 +67,6 @@ Computer name in diagnostics output (ex: 'c1')
 Disable self test.
 
 ## hd_monitor.py
-**To be ported**
-
-## cpu_monitor.py
 **To be ported**
 
 ## ram_monitor.py
