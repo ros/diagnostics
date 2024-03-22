@@ -38,11 +38,11 @@ The [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2) targets
 
 - *Humble Hawksbill*
 - *Iron Irwini* and
-- *Rolling Ridley*
 
 The [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy) targets
 
 - *Jazzy Jalisco*
+- *Rolling Ridley*
 
 # License
 
