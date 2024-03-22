@@ -37,12 +37,12 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 The [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2) targets
 
 - *Humble Hawksbill*
-- *Iron Irwini* and
-- *Rolling Ridley*
+- *Iron Irwini*
 
 The [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy) targets
 
 - *Jazzy Jalisco*
+- *Rolling Ridley*
 
 # License
 
