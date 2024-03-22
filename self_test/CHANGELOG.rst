@@ -2,6 +2,11 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Self test publishes the service under the node name, again (`#269 <https://github.com/ros/diagnostics/issues/269>`_)
+* Contributors: Christian Henkel
+
 3.1.2 (2023-03-24)
 ------------------
 
