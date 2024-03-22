@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.0 (2024-03-22)
+------------------
 * Port cpu_monitor to ROS2 (`#326 <https://github.com/ros/diagnostics/issues/326>`_)
 * Debugging instability introduced by `#317 <https://github.com/ros/diagnostics/issues/317>`_  (`#323 <https://github.com/ros/diagnostics/issues/323>`_)
 * not testing on foxy any more (`#310 <https://github.com/ros/diagnostics/issues/310>`_)
