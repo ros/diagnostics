@@ -24,18 +24,15 @@ jobs:
         distro: [humble, iron, rolling]
         include:
           - distro: humble
-            os: ubuntu-22.04
+            os: 22.04
           - distro: iron
-            os: ubuntu-22.04
+            os: 22.04
           - distro: rolling
-            os: ubuntu-22.04
-    runs-on: ${{ matrix.os }}
+            os: 24.04
+    runs-on: ubuntu-latest
+    container: ubuntu:${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@master
-      - run: |
-          sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
-          sudo pip install pip --upgrade
-          sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
+      - uses: ros-tooling/setup-ros@christophebedard/ubuntu-noble-rolling
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
