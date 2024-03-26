@@ -33,9 +33,6 @@ jobs:
     container: ubuntu:${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@christophebedard/ubuntu-noble-rolling
-      - run: |
-          sudo pip install pip --upgrade
-          sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
