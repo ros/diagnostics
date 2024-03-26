@@ -2,6 +2,15 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.0 (2024-03-22)
+------------------
+* including depdency (`#322 <https://github.com/ros/diagnostics/issues/322>`_)
+* Debugging instability introduced by `#317 <https://github.com/ros/diagnostics/issues/317>`_  (`#323 <https://github.com/ros/diagnostics/issues/323>`_)
+* feat: add param to use fqn in updater (`#320 <https://github.com/ros/diagnostics/issues/320>`_)
+* fix: method names & verbose logging (`#307 <https://github.com/ros/diagnostics/issues/307>`_)
+* Fix diagnostic_updater timestamps (`#299 <https://github.com/ros/diagnostics/issues/299>`_)
+* Contributors: Christian Henkel, Kevin Schwarzer, h-wata, outrider-jhulas
+
 3.1.2 (2023-03-24)
 ------------------
 

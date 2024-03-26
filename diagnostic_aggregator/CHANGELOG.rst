@@ -2,6 +2,16 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.2.0 (2024-03-22)
+------------------
+* Avoid rolling up an ERROR state when empty GenericAnalyzer blocks are marked discard_stale, or when all of their items are STALE. (`#315 <https://github.com/ros/diagnostics/issues/315>`_)
+* formatting fixes from PR324 (`#327 <https://github.com/ros/diagnostics/issues/327>`_)
+* Debugging instability introduced by `#317 <https://github.com/ros/diagnostics/issues/317>`_  (`#323 <https://github.com/ros/diagnostics/issues/323>`_)
+* feat: publish top level msg when error is received (`#317 <https://github.com/ros/diagnostics/issues/317>`_)
+* Empty default aggregator base_path (`#305 <https://github.com/ros/diagnostics/issues/305>`_)
+* using defined state for stale (`#298 <https://github.com/ros/diagnostics/issues/298>`_)
+* Contributors: Andrew Symington, Christian Henkel, outrider-jhulas
+
 3.1.2 (2023-03-24)
 ------------------
 

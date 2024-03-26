@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diagnostic_common_diagnostics</name>
-  <version>3.1.2</version>
+  <version>3.2.0</version>
   <description>diagnostic_common_diagnostics</description>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
@@ -18,20 +18,20 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <exec_depend>rclpy</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
   <exec_depend>python3-ntplib</exec_depend>
+  <exec_depend>python3-psutil</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
   For now, enable the linters that do support exlusions.
-  Once all files are migrated to ROS2, all linters can be 
+  Once all files are migrated to ROS2, all linters can be
   enabled vi ament_lint_common as the files are cleaned up. -->
   <!-- <test_depend>ament_cmake_flake8</test_depend> -->
   <!-- <test_depend>ament_cmake_pep257</test_depend> -->
   <test_depend>ament_cmake_xmllint</test_depend>
   <test_depend>ament_cmake_lint_cmake</test_depend>
-  
+
   <test_depend>ament_cmake_pytest</test_depend>
 
   <export>
