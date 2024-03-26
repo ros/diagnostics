@@ -32,28 +32,21 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
+import unittest
 
-import ament_index_python
+from diagnostic_msgs.msg import DiagnosticArray
 
 import launch
 
 import launch_ros
 
-import launch_pytest
-from launch_pytest.tools import process as process_tools
+import launch_testing
 
 from launch_testing_ros import WaitForTopics
 
-import launch_testing
-
 import pytest
 
-import unittest
-
 import rclpy
-
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 
 @pytest.mark.launch_test
@@ -65,7 +58,8 @@ def generate_test_description():
             executable='ntp_monitor.py',
             name='ntp_monitor',
             output='screen',
-            arguments=['--offset-tolerance', '10000', '--error-offset-tolerance', '20000']  
+            arguments=['--offset-tolerance', '10000',
+                       '--error-offset-tolerance', '20000']
             # 10s, 20s, we are not testing if your clock is correct
         ),
         launch_testing.actions.ReadyToTest()
@@ -73,7 +67,7 @@ def generate_test_description():
 
 
 class TestGoodProcess(unittest.TestCase):
-    def __init__(self, methodName: str = "runTest") -> None:
+    def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
         self.received_messages = []
 
@@ -86,7 +80,7 @@ class TestGoodProcess(unittest.TestCase):
             timeout=5
         ):
             print('Topic found')
-        
+
         rclpy.init()
         test_node = rclpy.create_node('test_node')
         test_node.create_subscription(
@@ -108,5 +102,5 @@ class TestGoodProcess(unittest.TestCase):
                 print('Level: ', level)
                 if level < min_level:
                     min_level = level
-        
+
         self.assertEqual(min_level, 0)
