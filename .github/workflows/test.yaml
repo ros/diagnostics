@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
     steps:
-      - uses: christophebedard/setup-ros@ubuntu-noble-rolling
+      - uses: ros-tooling/setup-ros@christophebedard/ubuntu-noble-rolling
       - run: |
           sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
           sudo pip install pip --upgrade
