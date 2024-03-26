@@ -66,13 +66,22 @@ def generate_test_description():
     ])
 
 
-class TestGoodProcess(unittest.TestCase):
+class TestNtpMonitor(unittest.TestCase):
     def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
         self.received_messages = []
 
     def _received_message(self, msg):
         self.received_messages.append(msg)
+
+    def _get_min_level(self):
+        levels = [
+            int.from_bytes(status.level, 'little')
+            for diag in self.received_messages
+            for status in diag.status]
+        if len(levels) == 0:
+            return -1
+        return min(levels)
 
     def test_topic_published(self):
         with WaitForTopics(
@@ -92,15 +101,12 @@ class TestGoodProcess(unittest.TestCase):
 
         while len(self.received_messages) < 10:
             rclpy.spin_once(test_node, timeout_sec=1)
+            if (min_level := self._get_min_level()) == 0:
+                break
 
         test_node.destroy_node()
-
-        min_level = 10
+        rclpy.shutdown()
+        print(f'Got {len(self.received_messages)} messages:')
         for msg in self.received_messages:
-            for status in msg.status:
-                level = int.from_bytes(status.level, byteorder='little')
-                print('Level: ', level)
-                if level < min_level:
-                    min_level = level
-
+            print(msg)
         self.assertEqual(min_level, 0)
