@@ -33,6 +33,10 @@ jobs:
     container: ubuntu:${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@christophebedard/ubuntu-noble-rolling
+      - run:
+          sudo apt install -y python3-pip
+          pip3 install flake8<5  # fix flake8.exceptions.FailedToLoadPlugin: Flake8 failed to load plugin "pycodestyle" due to cannot import name 'missing_whitespace_around_operator' from 'pycodestyle' (/usr/lib/python3/dist-packages/pycodestyle.py).
+        if: ${{ matrix.os }} == '24.04'
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
