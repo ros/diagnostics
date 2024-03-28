@@ -67,6 +67,10 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE
+    ament_cmake_uncrustify  # Inconsistent between jammy and noble
+  )
+
   add_subdirectory(test)
 endif()
 
