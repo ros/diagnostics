@@ -47,13 +47,14 @@ from rclpy.node import Node
 class NTPMonitor(Node):
     """A diagnostic task that monitors the NTP offset of the system clock."""
 
-    def __init__(self, ntp_hostname, offset=500, self_offset=500,
+    def __init__(self, ntp_hostname, ntp_port, offset=500, self_offset=500,
                  diag_hostname=None, error_offset=5000000,
                  do_self_test=True):
         """Initialize the NTPMonitor."""
         super().__init__(__class__.__name__)
 
         self.ntp_hostname = ntp_hostname
+        self.ntp_port = ntp_port
         self.offset = offset
         self.self_offset = self_offset
         self.diag_hostname = diag_hostname
@@ -67,7 +68,8 @@ class NTPMonitor(Node):
         self.stat = DIAG.DiagnosticStatus()
         self.stat.level = DIAG.DiagnosticStatus.OK
         self.stat.name = 'NTP offset from ' + \
-            self.diag_hostname + ' to ' + self.ntp_hostname
+            self.diag_hostname + ' to ' + self.ntp_hostname + \
+            ':' + str(self.ntp_port)
         self.stat.message = 'OK'
         self.stat.hardware_id = self.hostname
         self.stat.values = []
@@ -127,7 +129,10 @@ class NTPMonitor(Node):
         ntp_client = ntplib.NTPClient()
         response = None
         try:
-            response = ntp_client.request(self.ntp_hostname, version=3)
+            response = ntp_client.request(
+                self.ntp_hostname,
+                port=self.ntp_port,
+                version=3)
         except ntplib.NTPException as e:
             self.get_logger().error(f'NTP Error: {e}')
             st.level = DIAG.DiagnosticStatus.ERROR
@@ -163,6 +168,9 @@ def ntp_monitor_main(argv=sys.argv[1:]):
     parser.add_argument('--ntp_hostname',
                         action='store', default='0.pool.ntp.org',
                         type=str)
+    parser.add_argument('--ntp_port',
+                        action='store', default=123,
+                        type=int)
     parser.add_argument('--offset-tolerance', dest='offset_tol',
                         action='store', default=500,
                         help='Offset from NTP host [us]', metavar='OFFSET-TOL',
@@ -191,7 +199,8 @@ def ntp_monitor_main(argv=sys.argv[1:]):
     assert offset < error_offset, \
         'Offset tolerance must be less than error offset tolerance'
 
-    ntp_monitor = NTPMonitor(args.ntp_hostname, offset, self_offset,
+    ntp_monitor = NTPMonitor(args.ntp_hostname, args.ntp_port, 
+                             offset, self_offset,
                              args.diag_hostname, error_offset,
                              args.do_self_test)
 
