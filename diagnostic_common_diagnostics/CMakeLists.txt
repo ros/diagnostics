@@ -15,6 +15,7 @@ install(PROGRAMS
 
 if(BUILD_TESTING)
     find_package(ament_lint_auto REQUIRED)
+    find_package(launch_testing_ament_cmake REQUIRED)
     ament_lint_auto_find_test_dependencies()
 
     find_package(ament_cmake_pytest REQUIRED)
@@ -22,10 +23,10 @@ if(BUILD_TESTING)
         test_cpu_monitor
         test/systemtest/test_cpu_monitor.py
         TIMEOUT 10)
-    ament_add_pytest_test(
-        test_ntp_monitor
-        test/systemtest/test_ntp_monitor.py
-        TIMEOUT 10)
+    add_launch_test(
+        test/systemtest/test_ntp_monitor_launchtest.py
+        TARGET ntp_monitor_launchtest
+        TIMEOUT 20)
 endif()
 
 ament_package()

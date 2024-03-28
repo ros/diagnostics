@@ -32,60 +32,84 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
+import unittest
 
-import ament_index_python
+from diagnostic_msgs.msg import DiagnosticArray
 
 import launch
 
-import launch_pytest
-from launch_pytest.tools import process as process_tools
+import launch_ros
 
 import launch_testing
 
+from launch_testing_ros import WaitForTopics
+
 import pytest
 
-
-@pytest.fixture
-def ntp_monitor_proc():
-    # Launch a process to test
-    return launch.actions.ExecuteProcess(
-        cmd=[
-            os.path.join(
-                ament_index_python.get_package_prefix(
-                    'diagnostic_common_diagnostics'),
-                'lib',
-                'diagnostic_common_diagnostics',
-                'ntp_monitor.py'
-            ),
-        ],
-    ),
+import rclpy
 
 
-@launch_pytest.fixture
-def launch_description(ntp_monitor_proc):
+@pytest.mark.launch_test
+def generate_test_description():
+    """Launch the ntp_monitor node and return a launch description."""
     return launch.LaunchDescription([
-        ntp_monitor_proc,
+        launch_ros.actions.Node(
+            package='diagnostic_common_diagnostics',
+            executable='ntp_monitor.py',
+            name='ntp_monitor',
+            output='screen',
+            arguments=['--offset-tolerance', '10000',
+                       '--error-offset-tolerance', '20000']
+            # 10s, 20s, we are not testing if your clock is correct
+        ),
         launch_testing.actions.ReadyToTest()
     ])
 
 
-@pytest.mark.skip(reason='This test is not working yet')
-@pytest.mark.launch(fixture=launch_description)
-def test_read_stdout(ntp_monitor_proc, launch_context):
-    """Check if 'ntp_monitor' was found in the stdout."""
-    def validate_output(output):
-        # this function can use assertions to validate the output or return a boolean.
-        # pytest generates easier to understand failures when assertions are used.
-        assert output.splitlines() == [
-            'ntp_monitor'], 'process never printed ntp_monitor'
-    process_tools.assert_output_sync(
-        launch_context, ntp_monitor_proc, validate_output, timeout=5)
+class TestNtpMonitor(unittest.TestCase):
+    """Test if the ntp_monitor node is publishing diagnostics."""
 
-    def validate_output(output):
-        return output == 'this will never happen'
-    assert not process_tools.wait_for_output_sync(
-        launch_context, ntp_monitor_proc, validate_output, timeout=0.1)
-    yield
-    # this is executed after launch service shutdown
-    assert ntp_monitor_proc.return_code == 0
+    def __init__(self, methodName: str = 'runTest') -> None:
+        super().__init__(methodName)
+        self.received_messages = []
+
+    def _received_message(self, msg):
+        self.received_messages.append(msg)
+
+    def _get_min_level(self):
+        levels = [
+            int.from_bytes(status.level, 'little')
+            for diag in self.received_messages
+            for status in diag.status]
+        if len(levels) == 0:
+            return -1
+        return min(levels)
+
+    def test_topic_published(self):
+        """Test if the ntp_monitor node is publishing diagnostics."""
+        with WaitForTopics(
+            [('/diagnostics', DiagnosticArray)],
+            timeout=5
+        ):
+            print('Topic found')
+
+        rclpy.init()
+        test_node = rclpy.create_node('test_node')
+        test_node.create_subscription(
+            DiagnosticArray,
+            '/diagnostics',
+            self._received_message,
+            1
+        )
+
+        while len(self.received_messages) < 10:
+            rclpy.spin_once(test_node, timeout_sec=1)
+            if (min_level := self._get_min_level()) == 0:
+                break
+
+        test_node.destroy_node()
+        rclpy.shutdown()
+        print(f'Got {len(self.received_messages)} messages:')
+        for msg in self.received_messages:
+            print(msg)
+        self.assertEqual(min_level, 0)
