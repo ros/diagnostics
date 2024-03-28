@@ -87,7 +87,6 @@ class TestNtpMonitor(unittest.TestCase):
 
     def test_topic_published(self):
         """Test if the ntp_monitor node is publishing diagnostics."""
-
         with WaitForTopics(
             [('/diagnostics', DiagnosticArray)],
             timeout=5

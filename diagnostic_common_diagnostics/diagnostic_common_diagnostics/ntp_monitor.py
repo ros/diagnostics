@@ -199,7 +199,7 @@ def ntp_monitor_main(argv=sys.argv[1:]):
     assert offset < error_offset, \
         'Offset tolerance must be less than error offset tolerance'
 
-    ntp_monitor = NTPMonitor(args.ntp_hostname, args.ntp_port, 
+    ntp_monitor = NTPMonitor(args.ntp_hostname, args.ntp_port,
                              offset, self_offset,
                              args.diag_hostname, error_offset,
                              args.do_self_test)
