@@ -1,4 +1,4 @@
-analyzers:
+/**:
   ros__parameters:
     primary:
       type: 'diagnostic_aggregator/AnalyzerGroup'

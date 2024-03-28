@@ -59,7 +59,8 @@ using diagnostic_msgs::msg::DiagnosticStatus;
 Aggregator::Aggregator()
 : n_(std::make_shared<rclcpp::Node>(
       "analyzers", "",
-      rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true))),
+      rclcpp::NodeOptions().allow_undeclared_parameters(true).
+      automatically_declare_parameters_from_overrides(true))),
   logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),
   history_depth_(1000),
@@ -69,6 +70,36 @@ Aggregator::Aggregator()
   last_top_level_state_(DiagnosticStatus::STALE)
 {
   RCLCPP_DEBUG(logger_, "constructor");
+  initAnalyzers();
+
+  diag_sub_ = n_->create_subscription<DiagnosticArray>(
+    "/diagnostics", rclcpp::SystemDefaultsQoS().keep_last(history_depth_),
+    std::bind(&Aggregator::diagCallback, this, _1));
+  agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
+  toplevel_state_pub_ =
+    n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
+
+  int publish_rate_ms = 1000 / pub_rate_;
+  publish_timer_ = n_->create_wall_timer(
+    std::chrono::milliseconds(publish_rate_ms),
+    std::bind(&Aggregator::publishData, this));
+
+  param_sub_ = n_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
+    "/parameter_events", 1, std::bind(&Aggregator::parameterCallback, this, _1));
+}
+
+void Aggregator::parameterCallback(const rcl_interfaces::msg::ParameterEvent::SharedPtr msg)
+{
+  if (msg->node == "/" + std::string(n_->get_name())) {
+    if (msg->new_parameters.size() != 0) {
+      base_path_ = "";
+      initAnalyzers();
+    }
+  }
+}
+
+void Aggregator::initAnalyzers()
+{
   bool other_as_errors = false;
 
   std::map<std::string, rclcpp::Parameter> parameters;
@@ -101,26 +132,17 @@ Aggregator::Aggregator()
   RCLCPP_DEBUG(
     logger_, "Aggregator critical publisher configured to: %s", (critical_ ? "true" : "false"));
 
-  analyzer_group_ = std::make_unique<AnalyzerGroup>();
-  if (!analyzer_group_->init(base_path_, "", n_)) {
-    RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
+  {  // lock the mutex while analyzer_group_ and other_analyzer_ are being updated
+    std::lock_guard<std::mutex> lock(mutex_);
+    analyzer_group_ = std::make_unique<AnalyzerGroup>();
+    if (!analyzer_group_->init(base_path_, "", n_)) {
+      RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
+    }
+
+    // Last analyzer handles remaining data
+    other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
+    other_analyzer_->init(base_path_);  // This always returns true
   }
-
-  // Last analyzer handles remaining data
-  other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
-  other_analyzer_->init(base_path_);  // This always returns true
-
-  diag_sub_ = n_->create_subscription<DiagnosticArray>(
-    "/diagnostics", rclcpp::SystemDefaultsQoS().keep_last(history_depth_),
-    std::bind(&Aggregator::diagCallback, this, _1));
-  agg_pub_ = n_->create_publisher<DiagnosticArray>("/diagnostics_agg", 1);
-  toplevel_state_pub_ =
-    n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
-
-  int publish_rate_ms = 1000 / pub_rate_;
-  publish_timer_ = n_->create_wall_timer(
-    std::chrono::milliseconds(publish_rate_ms),
-    std::bind(&Aggregator::publishData, this));
 }
 
 void Aggregator::checkTimestamp(const DiagnosticArray::SharedPtr diag_msg)

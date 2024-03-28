@@ -81,6 +81,10 @@ class DiagnosticTalker(Node):
                              name='/sensors/front/cam', message='OK'),
             DiagnosticStatus(level=DiagnosticStatus.OK,
                              name='/sensors/rear/cam', message='OK'),
+
+            # Optional
+            DiagnosticStatus(level=DiagnosticStatus.OK,
+                             name='/optional/runtime/analyzer', message='OK'),
         ]
 
     def timer_callback(self):
