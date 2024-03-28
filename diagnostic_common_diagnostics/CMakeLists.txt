@@ -28,6 +28,10 @@ if(BUILD_TESTING)
         test/systemtest/test_ntp_monitor_launchtest.py
         TARGET ntp_monitor_launchtest
         TIMEOUT 20)
+    add_launch_test(
+        test/systemtest/test_hd_monitor_launchtest.py
+        TARGET hd_monitor_launchtest
+        TIMEOUT 20)
 endif()
 
 ament_package()
