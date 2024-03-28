@@ -10,6 +10,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
     ${PROJECT_NAME}/cpu_monitor.py
     ${PROJECT_NAME}/ntp_monitor.py
+    ${PROJECT_NAME}/hd_monitor.py
     DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -26,6 +27,10 @@ if(BUILD_TESTING)
     add_launch_test(
         test/systemtest/test_ntp_monitor_launchtest.py
         TARGET ntp_monitor_launchtest
+        TIMEOUT 20)
+    add_launch_test(
+        test/systemtest/test_hd_monitor_launchtest.py
+        TARGET hd_monitor_launchtest
         TIMEOUT 20)
 endif()
 
