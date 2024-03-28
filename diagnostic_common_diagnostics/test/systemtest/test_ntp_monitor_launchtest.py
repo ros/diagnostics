@@ -51,7 +51,7 @@ import rclpy
 
 @pytest.mark.launch_test
 def generate_test_description():
-    # Launch a process to test
+    """Launch the ntp_monitor node and return a launch description."""
     return launch.LaunchDescription([
         launch_ros.actions.Node(
             package='diagnostic_common_diagnostics',
@@ -67,6 +67,8 @@ def generate_test_description():
 
 
 class TestNtpMonitor(unittest.TestCase):
+    """Test if the ntp_monitor node is publishing diagnostics."""
+
     def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
         self.received_messages = []
@@ -84,6 +86,8 @@ class TestNtpMonitor(unittest.TestCase):
         return min(levels)
 
     def test_topic_published(self):
+        """Test if the ntp_monitor node is publishing diagnostics."""
+
         with WaitForTopics(
             [('/diagnostics', DiagnosticArray)],
             timeout=5
