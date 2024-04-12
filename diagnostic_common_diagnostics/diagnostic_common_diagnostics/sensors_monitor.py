@@ -249,4 +249,7 @@ if __name__ == '__main__':
     node = rclpy.create_node('sensors_monitor_%s' % hostname_clean)
 
     monitor = SensorsMonitor(node, hostname)
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
