@@ -216,7 +216,7 @@ void Aggregator::publishData()
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = DiagnosticStatus::STALE;
   int max_level = -1;
-  int min_level = 255;
+  int8_t max_level_without_stale = 0;
   int non_ok_status_depth = 0;
   std::shared_ptr<DiagnosticStatus> msg_to_report;
 
@@ -239,8 +239,11 @@ void Aggregator::publishData()
       non_ok_status_depth = depth;
       msg_to_report = msg;
     }
-    if (msg->level < min_level) {
-      min_level = msg->level;
+    if (
+      msg->level > max_level_without_stale &&
+      msg->level != diagnostic_msgs::msg::DiagnosticStatus::STALE)
+    {
+      max_level_without_stale = msg->level;
     }
   }
   // When a non-ok item was found, copy the complete status message once
@@ -251,6 +254,7 @@ void Aggregator::publishData()
     diag_toplevel_state.values = msg_to_report->values;
   }
 
+  non_ok_status_depth = 0;
   std::vector<std::shared_ptr<DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (const auto & msg : processed_other) {
@@ -267,8 +271,11 @@ void Aggregator::publishData()
       non_ok_status_depth = depth;
       msg_to_report = msg;
     }
-    if (msg->level < min_level) {
-      min_level = msg->level;
+    if (
+      msg->level > max_level_without_stale &&
+      msg->level != diagnostic_msgs::msg::DiagnosticStatus::STALE)
+    {
+      max_level_without_stale = msg->level;
     }
   }
   // When a non-ok item was found, copy the complete status message once
@@ -282,14 +289,16 @@ void Aggregator::publishData()
   diag_array.header.stamp = clock_->now();
   agg_pub_->publish(diag_array);
 
-  diag_toplevel_state.level = max_level;
-  if (max_level < 0 ||
-    (max_level > DiagnosticStatus::ERROR && min_level <= DiagnosticStatus::ERROR))
+  if (
+    max_level == diagnostic_msgs::msg::DiagnosticStatus::STALE &&
+    max_level_without_stale < diagnostic_msgs::msg::DiagnosticStatus::ERROR)
   {
-    // Top level is error if we got no diagnostic level or
-    // have stale items but not all are stale
-    diag_toplevel_state.level = DiagnosticStatus::ERROR;
+    diag_toplevel_state.level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+  } else {
+    diag_toplevel_state.level = max_level_without_stale;
   }
+
+
   last_top_level_state_ = diag_toplevel_state.level;
 
   toplevel_state_pub_->publish(diag_toplevel_state);
