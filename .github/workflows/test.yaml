@@ -28,10 +28,10 @@ jobs:
       - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - run: |
-          sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
-          sudo pip install pip --upgrade
-          sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
+      # - run: |
+      #     sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
+      #     sudo pip install pip --upgrade
+      #     sudo pip install pyopenssl --upgrade  # fix for AttributeError: module 'lib' has no attribute 'X509_V_FLAG_CB_ISSUER_CHECK'
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
