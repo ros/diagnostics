@@ -35,17 +35,11 @@
 import unittest
 
 from diagnostic_msgs.msg import DiagnosticArray
-
 import launch
-
 import launch_ros
-
 import launch_testing
-
 from launch_testing_ros import WaitForTopics
-
 import pytest
-
 import rclpy
 
 
@@ -58,9 +52,10 @@ def generate_test_description():
             executable='ntp_monitor.py',
             name='ntp_monitor',
             output='screen',
-            arguments=['--offset-tolerance', '10000',
-                       '--error-offset-tolerance', '20000']
-            # 10s, 20s, we are not testing if your clock is correct
+            arguments=['--offset-tolerance', '100000',
+                       '--error-offset-tolerance', '200000',
+                       '--ntp_hostname', 'ntp.ubuntu.com']
+            # 100s, 200s, we are not testing if your clock is correct
         ),
         launch_testing.actions.ReadyToTest()
     ])

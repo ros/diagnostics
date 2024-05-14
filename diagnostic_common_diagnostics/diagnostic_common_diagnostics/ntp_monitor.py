@@ -37,9 +37,7 @@ import sys
 import threading
 
 import diagnostic_updater as DIAG
-
 import ntplib
-
 import rclpy
 from rclpy.node import Node
 
@@ -145,16 +143,16 @@ class NTPMonitor(Node):
             if (abs(measured_offset) > self.offset):
                 st.level = DIAG.DiagnosticStatus.WARN
                 st.message = \
-                    f'NTP offset above threshold: {measured_offset}>'\
+                    f'NTP offset above threshold: abs({measured_offset})>'\
                     f'{self.offset} us'
             if (abs(measured_offset) > self.error_offset):
                 st.level = DIAG.DiagnosticStatus.ERROR
                 st.message = \
-                    f'NTP offset above error threshold: {measured_offset}>'\
+                    f'NTP offset above error threshold: abs({measured_offset})>'\
                     f'{self.error_offset} us'
             if (abs(measured_offset) < self.offset):
                 st.level = DIAG.DiagnosticStatus.OK
-                st.message = f'NTP Offset OK: {measured_offset} us'
+                st.message = f'NTP Offset OK: abs({measured_offset}) us'
 
         return st
 
