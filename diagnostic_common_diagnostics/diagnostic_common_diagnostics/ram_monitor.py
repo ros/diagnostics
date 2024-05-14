@@ -57,15 +57,15 @@ class RamTask(DiagnosticTask):
         self._readings.append(psutil.virtual_memory().percent)
         ram_average = sum(self._readings) / len(self._readings)
 
-        stat.add('RAM Load Average', '{:.2f}'.format(ram_average))
+        stat.add('RAM Load Average', f'{ram_average:.2f}')
 
         if ram_average > self._warning_percentage:
             stat.summary(
                 DiagnosticStatus.WARN,
-                'RAM Average exceeds {:d} percent'.format(self._warning_percentage),
+                f'RAM Average exceeds {self._warning_percentage:d} percent',
             )
         else:
-            stat.summary(DiagnosticStatus.OK, 'RAM Average {:.2f} percent'.format(ram_average))
+            stat.summary(DiagnosticStatus.OK, f'RAM Average {ram_average:.2f} percent')
 
         return stat
 
@@ -73,7 +73,7 @@ class RamTask(DiagnosticTask):
 def main():
     hostname = socket.gethostname()
     rclpy.init()
-    node = rclpy.create_node('ram_monitor_%s' % hostname.replace('-', '_'))
+    node = rclpy.create_node(f'ram_monitor_{hostname.replace("-", "_")}')
 
     updater = Updater(node)
     updater.setHardwareID(hostname)
