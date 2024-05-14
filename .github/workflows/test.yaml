@@ -26,6 +26,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
       - run: |
           sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
           sudo pip install pip --upgrade
