@@ -48,7 +48,7 @@ import rclpy
 
 class RamTask(DiagnosticTask):
 
-    def __init__(self, warning_percentage, window=1):
+    def __init__(self, warning_percentage, window):
         DiagnosticTask.__init__(self, 'RAM Information')
         self._warning_percentage = int(warning_percentage)
         self._readings = collections.deque(maxlen=window)
