@@ -76,7 +76,7 @@ It publishes the usage percentage in a diagnostic message.
 * Name of the node is "ram_monitor_" + hostname.
 * Uses the following args:
   * warning_percentage: If the RAM usage is > warning_percentage, a WARN status will be published.
-  * window: the maximum length of the used collections.deque for queuing CPU readings.
+  * window: the maximum length of the used collections.deque for queuing RAM readings.
 
 ### Published Topics
 #### /diagnostics
