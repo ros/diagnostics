@@ -22,7 +22,7 @@ jobs:
           ]
         include:
           - distro: jazzy
-            os: ubuntu-22.04
+            os: ubuntu-24.04
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
