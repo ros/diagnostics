@@ -60,7 +60,7 @@ def generate_test_description():
             output='screen',
             arguments=['--offset-tolerance', '10000',
                        '--error-offset-tolerance', '20000',
-                       '--ntp-hostname', 'ntp.ubuntu.com']
+                       '--ntp_hostname', 'ntp.ubuntu.com']
             # 10s, 20s, we are not testing if your clock is correct
         ),
         launch_testing.actions.ReadyToTest()
