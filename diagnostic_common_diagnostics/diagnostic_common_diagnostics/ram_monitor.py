@@ -79,7 +79,7 @@ def main():
     updater.setHardwareID(hostname)
     updater.add(
         RamTask(
-            node.declare_parameter('warning_percentage', 90.0).value,
+            node.declare_parameter('warning_percentage', 90).value,
             node.declare_parameter('window', 1).value,
         )
     )
