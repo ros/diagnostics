@@ -34,19 +34,13 @@
 
 import unittest
 
-from diagnostic_msgs.msg import DiagnosticArray
-
 import launch
-
 import launch_ros
-
 import launch_testing
-
-from launch_testing_ros import WaitForTopics
-
 import pytest
-
 import rclpy
+from diagnostic_msgs.msg import DiagnosticArray
+from launch_testing_ros import WaitForTopics
 
 
 @pytest.mark.launch_test
