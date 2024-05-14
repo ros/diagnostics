@@ -24,7 +24,10 @@ jobs:
             uncrustify,
             xmllint,
           ]
-    runs-on: ubuntu-24.04
+        include:
+          - distro: jazzy
+            os: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
@@ -32,7 +35,6 @@ jobs:
       - uses: ros-tooling/setup-ros@master
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      # - run: sudo pip install pydocstyle==6.1.1  # downgrade to fix https://github.com/ament/ament_lint/pull/428
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
