@@ -19,6 +19,7 @@
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
   <exec_depend>diagnostic_updater</exec_depend>
+  <exec_depend>lm-sensors</exec_depend>
   <exec_depend>python3-ntplib</exec_depend>
   <exec_depend>python3-psutil</exec_depend>
 
