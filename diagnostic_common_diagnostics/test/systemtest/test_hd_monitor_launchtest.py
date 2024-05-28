@@ -58,7 +58,7 @@ def generate_test_description():
             executable='hd_monitor.py',
             name='hd_monitor',
             output='screen',
-            arguments=[]
+            ros_arguments=["free_percent_low", "0.20", "free_percent_crit", "0.05"],
         ),
         launch_testing.actions.ReadyToTest()
     ])

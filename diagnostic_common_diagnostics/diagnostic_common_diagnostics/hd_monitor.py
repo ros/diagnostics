@@ -69,6 +69,8 @@ class HDMonitor(Node):
 
         self.add_on_set_parameters_callback(self.callback_config)
         self.declare_parameter("path", "~")
+        self.declare_parameter("free_percent_low", 0.05)
+        self.declare_parameter("free_percent_crit", 0.01)
 
         self._updater = Updater(self)
         self._updater.setHardwareID(hostname)
@@ -76,8 +78,13 @@ class HDMonitor(Node):
 
     def callback_config(self, params: List[rclpy.Parameter]):
         for param in params:
-            if param.name == "path":
-                self._path = str(Path(param.value).expanduser().resolve(strict=True))
+            match param.name:
+                case "path":
+                    self._path = str(Path(param.value).expanduser().resolve(strict=True))
+                case "free_percent_low":
+                    self._free_percent_low = param.value
+                case "free_percent_crit":
+                    self._free_percent_crit = param.value
         return SetParametersResult(successful=True)
 
     def check_disk_usage(self, diag: DiagnosticStatus) -> DiagnosticStatus:
@@ -86,9 +93,9 @@ class HDMonitor(Node):
         total, used, free = disk_usage(self._path)
         percent = free / total
 
-        if percent > FREE_PERCENT_LOW:
+        if percent > self._free_percent_low:
             diag.level = DiagnosticStatus.OK
-        elif percent > FREE_PERCENT_CRIT:
+        elif percent > self._free_percent_crit:
             diag.level = DiagnosticStatus.WARN
         else:
             diag.level = DiagnosticStatus.ERROR
