@@ -90,7 +90,7 @@ class HDMonitor(Node):
     def check_disk_usage(self, diag: DiagnosticStatus) -> DiagnosticStatus:
         diag.level = DiagnosticStatus.OK
 
-        total, used, free = disk_usage(self._path)
+        total, _, free = disk_usage(self._path)
         percent = free / total
 
         if percent > self._free_percent_low:
@@ -102,14 +102,13 @@ class HDMonitor(Node):
 
         total_Go = total // (1024*1024)
         diag.values.extend([
-            KeyValue(key=f'Name', value=self._path),
-            KeyValue(key=f'Status', value=DICT_STATUS[diag.level]),
-            KeyValue(key=f'Total (Go)', value=str(total_Go)),
-            KeyValue(key=f'Available (%)', value=str(round(percent, 2))),
+            KeyValue(key='Name', value=self._path),
+            KeyValue(key='Status', value=DICT_STATUS[diag.level]),
+            KeyValue(key='Total (Go)', value=str(total_Go)),
+            KeyValue(key='Available (%)', value=str(round(percent, 2))),
         ])
 
         diag.message = DICT_USAGE[diag.level]
-        print(diag)
         return diag
 
 
