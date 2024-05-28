@@ -51,14 +51,14 @@ from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 FREE_PERCENT_LOW = 0.05
 FREE_PERCENT_CRIT = 0.01
 DICT_STATUS = {
-    DiagnosticStatus.OK: 'OK',
-    DiagnosticStatus.WARN: 'Warning',
-    DiagnosticStatus.ERROR: 'Error',
+    DiagnosticStatus.OK: "OK",
+    DiagnosticStatus.WARN: "Warning",
+    DiagnosticStatus.ERROR: "Error",
 }
 DICT_USAGE = {
-    DiagnosticStatus.OK: 'OK',
-    DiagnosticStatus.WARN: 'Low Disk Space',
-    DiagnosticStatus.ERROR: 'Very Low Disk Space',
+    DiagnosticStatus.OK: "OK",
+    DiagnosticStatus.WARN: "Low Disk Space",
+    DiagnosticStatus.ERROR: "Very Low Disk Space",
 }
 
 
@@ -80,7 +80,9 @@ class HDMonitor(Node):
         for param in params:
             match param.name:
                 case "path":
-                    self._path = str(Path(param.value).expanduser().resolve(strict=True))
+                    self._path = str(
+                        Path(param.value).expanduser().resolve(strict=True)
+                    )
                 case "free_percent_low":
                     self._free_percent_low = param.value
                 case "free_percent_crit":
@@ -100,13 +102,15 @@ class HDMonitor(Node):
         else:
             diag.level = DiagnosticStatus.ERROR
 
-        total_Go = total // (1024*1024)
-        diag.values.extend([
-            KeyValue(key='Name', value=self._path),
-            KeyValue(key='Status', value=DICT_STATUS[diag.level]),
-            KeyValue(key='Total (Go)', value=str(total_Go)),
-            KeyValue(key='Available (%)', value=str(round(percent, 2))),
-        ])
+        total_Go = total // (1024 * 1024)
+        diag.values.extend(
+            [
+                KeyValue(key="Name", value=self._path),
+                KeyValue(key="Status", value=DICT_STATUS[diag.level]),
+                KeyValue(key="Total (Go)", value=str(total_Go)),
+                KeyValue(key="Available (%)", value=str(round(percent, 2))),
+            ]
+        )
 
         diag.message = DICT_USAGE[diag.level]
         return diag
@@ -122,5 +126,5 @@ def main(args=None):
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
