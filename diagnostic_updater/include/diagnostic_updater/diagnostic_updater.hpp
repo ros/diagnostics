@@ -368,7 +368,8 @@ public:
    * ros2 parameter was set previously.
    */
   template<class NodeT>
-  explicit Updater(NodeT node, double period = 1.0,
+  explicit Updater(
+    NodeT node, double period = 1.0,
     int starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK)
   : Updater(
       node->get_node_base_interface(),
