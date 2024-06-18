@@ -74,7 +74,7 @@ bool AnalyzerGroup::init(
       breadcrumb_.c_str(), n->get_namespace());
     return false;
   }
-  RCLCPP_INFO(
+  RCLCPP_DEBUG(
     logger_, "Retrieved %zu parameter(s) for analyzer group with prefix '%s'.", parameters.size(),
     breadcrumb_.c_str());
 
@@ -112,7 +112,7 @@ bool AnalyzerGroup::init(
     }
 
     if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         logger_, "Group '%s', creating %s '%s' (breadcrumb: %s) ...", nice_name_.c_str(),
         an_type.c_str(), an_path.c_str(), ns.c_str());
 
@@ -175,7 +175,7 @@ bool AnalyzerGroup::init(
     init_ok = false;
     RCLCPP_ERROR(logger_, "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
   } else {
-    RCLCPP_INFO(
+    RCLCPP_DEBUG(
       logger_, "Initialized analyzer group '%s' with path '%s' and breadcrumb '%s'.",
       nice_name_.c_str(), path_.c_str(), breadcrumb_.c_str());
   }
@@ -191,7 +191,7 @@ AnalyzerGroup::~AnalyzerGroup()
 
 bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
-  RCLCPP_INFO(
+  RCLCPP_DEBUG(
     logger_, "Adding analyzer '%s' to group '%s'.", analyzer->getName().c_str(),
     nice_name_.c_str());
   analyzers_.push_back(analyzer);
@@ -238,7 +238,7 @@ bool AnalyzerGroup::match(const std::string & name)
     match_name = mtch || match_name;
     matched_[name].at(i) = mtch;
     if (mtch) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         logger_, "Group '%s' has a match with my analyzer '%s'.", nice_name_.c_str(),
         analyzers_[i]->getName().c_str());
     }

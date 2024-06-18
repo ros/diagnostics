@@ -23,7 +23,9 @@ def generate_test_description():
             "@AGGREGATOR_NODE@",
             "--ros-args",
             "--params-file",
-            "@PARAMETER_FILE@"
+            "@PARAMETER_FILE@",
+            "--log-level",
+            "DEBUG"
             ],
         name='aggregator_node',
         emulate_tty=True,

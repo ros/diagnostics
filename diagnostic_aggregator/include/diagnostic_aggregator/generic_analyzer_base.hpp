@@ -119,7 +119,7 @@ public:
 
     has_initialized_ = true;
 
-    RCLCPP_INFO(
+    RCLCPP_DEBUG(
       rclcpp::get_logger("GenericAnalyzerBase"),
       "Initialized analyzer '%s' with path '%s' and breadcrumb '%s'.", nice_name_.c_str(),
       path_.c_str(), breadcrumb_.c_str());
