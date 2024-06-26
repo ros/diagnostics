@@ -121,7 +121,7 @@ void Updater::reset_timer()
 
 void Updater::update()
 {
-  if (rclcpp::ok()) {
+  if (rclcpp::ok(base_interface_->get_context())) {
     bool warn_nohwid = hwid_.empty();
 
     std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
