@@ -1,4 +1,4 @@
-analyzers:
+/**:
   ros__parameters:
     path: TEST
     primary:
