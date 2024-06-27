@@ -151,28 +151,11 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
   checkTimestamp(diag_msg);
 
   bool analyzed = false;
+  bool immediate_report = false;
   {  // lock the whole loop to ensure nothing in the analyzer group changes during it.
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto j = 0u; j < diag_msg->status.size(); ++j) {
       analyzed = false;
-
-      const bool top_level_state_transition_to_error =
-        (last_top_level_state_ != DiagnosticStatus::ERROR) &&
-        (diag_msg->status[j].level == DiagnosticStatus::ERROR);
-
-      if (critical_ && top_level_state_transition_to_error) {
-        RCLCPP_DEBUG(
-          logger_, "Received error message: %s, publishing error immediately",
-          diag_msg->status[j].name.c_str());
-        DiagnosticStatus diag_toplevel_state;
-        diag_toplevel_state.name = "toplevel_state_critical";
-        diag_toplevel_state.level = diag_msg->status[j].level;
-        toplevel_state_pub_->publish(diag_toplevel_state);
-
-        // store the last published state
-        last_top_level_state_ = diag_toplevel_state.level;
-      }
-
       auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
 
       if (analyzer_group_->match(item->getName())) {
@@ -182,7 +165,16 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
       if (!analyzed) {
         other_analyzer_->analyze(item);
       }
+
+      // In case there is a degraded state, publish immediately
+      if (critical_ && item->getLevel() > last_top_level_state_) {
+        immediate_report = true;
+      }
     }
+  }
+
+  if (immediate_report) {
+    publishData();
   }
 }
 
