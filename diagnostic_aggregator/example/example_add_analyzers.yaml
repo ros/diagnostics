@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    optional:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Optional
+      contains: [ '/optional' ]
