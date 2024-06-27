@@ -14,8 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package:
-          [
+        package: [
             diagnostic_aggregator,
             diagnostic_common_diagnostics,
             diagnostic_updater,
@@ -28,6 +27,8 @@ jobs:
     container: ubuntu:${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
       - uses: ros-tooling/action-ros-ci@master
         with:
           target-ros2-distro: ${{ matrix.distro }}
