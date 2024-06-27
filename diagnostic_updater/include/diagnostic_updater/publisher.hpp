@@ -226,8 +226,9 @@ public:
     const typename PublisherT::SharedPtr & pub,
     diagnostic_updater::Updater & diag,
     const diagnostic_updater::FrequencyStatusParam & freq,
-    const diagnostic_updater::TimeStampStatusParam & stamp)
-  : TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp),
+    const diagnostic_updater::TimeStampStatusParam & stamp,
+    const rclcpp::Clock::SharedPtr & clock = std::make_shared<rclcpp::Clock>())
+  : TopicDiagnostic(pub->get_topic_name(), diag, freq, stamp, clock),
     publisher_(pub)
   {
     static_assert(has_header<MessageT>::value, "Message type has to have a header.");
