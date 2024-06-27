@@ -4,6 +4,7 @@ import launch
 import launch_ros.actions
 
 analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
+add_analyzer_params_filepath = "@ADD_ANALYZER_PARAMS_FILEPATH@"
 
 
 def generate_launch_description():
@@ -12,11 +13,18 @@ def generate_launch_description():
         executable='aggregator_node',
         output='screen',
         parameters=[analyzer_params_filepath])
+    add_analyzer = launch_ros.actions.Node(
+        package='diagnostic_aggregator',
+        executable='add_analyzer',
+        output='screen',
+        parameters=[add_analyzer_params_filepath]
+    )
     diag_publisher = launch_ros.actions.Node(
         package='diagnostic_aggregator',
         executable='example_pub.py')
     return launch.LaunchDescription([
         aggregator,
+        add_analyzer,
         diag_publisher,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(

@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -67,6 +68,10 @@ add_executable(aggregator_node src/aggregator_node.cpp)
 target_link_libraries(aggregator_node
   ${PROJECT_NAME})
 
+# Add analyzer
+add_executable(add_analyzer src/add_analyzer.cpp)
+ament_target_dependencies(add_analyzer rclcpp rcl_interfaces)
+
 # Testing macro
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -77,6 +82,7 @@ if(BUILD_TESTING)
   find_package(launch_testing_ament_cmake REQUIRED)
 
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
+  file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/add_analyzer" ADD_ANALYZER)
   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
   set(create_analyzers_tests
     "primitive_analyzers"
@@ -124,6 +130,27 @@ if(BUILD_TESTING)
     )
   endforeach()
 
+  set(add_analyzers_tests
+  "all_analyzers")
+
+  foreach(test_name ${add_analyzers_tests})
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
+
+    configure_file(
+      "test/add_analyzers.launch.py.in"
+      "test_add_${test_name}.launch.py"
+      @ONLY
+    )
+    add_launch_test(
+      "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
+      TARGET "test_add_${test_name}"
+      TIMEOUT 30
+      ENV
+    )
+  endforeach()
+
   add_launch_test(
     test/test_critical_pub.py
     TIMEOUT 30
@@ -137,6 +164,11 @@ endif()
 
 install(
   TARGETS aggregator_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  TARGETS add_analyzer
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -157,6 +189,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Example
 set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_analyzers.yaml")
+set(ADD_ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_add_analyzers.yaml")
 configure_file(example/example.launch.py.in example.launch.py @ONLY)
 install( # launch descriptor
   FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
@@ -167,7 +200,7 @@ install( # example publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 install( # example aggregator configration
-  FILES example/example_analyzers.yaml
+  FILES example/example_analyzers.yaml example/example_add_analyzers.yaml
   DESTINATION share/${PROJECT_NAME}
 )
 
