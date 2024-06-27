@@ -39,6 +39,22 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 - **Iron Irwini** by the [`ros2-iron` branch](https://github.com/ros/diagnostics/tree/ros2-iron)
 - **Jazzy Jalisco** by the [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy)
 
+## Workflow
+
+New features are to be developed in custom branches and then merged into the `ros2` branch.
+
+From there, the changes are backported to the other branches.
+
+## Backport Tooling
+
+This tool has proven to be useful: [backport](https://www.npmjs.com/package/backport)
+
+Use this command to port a given PR of `PR_NUMBER` to the other branches:
+
+```bash
+backport --pr PR_NUMBER -b ros2-humble ros2-iron ros2-jazzy
+```
+
 # Versioning and Releases
 
 - (__X__.0.0) We use the major version number to indicate a breaking change.
