@@ -76,11 +76,14 @@ class HDMonitor(Node):
         hostname = gethostname().replace('.', '_').replace('-', '_')
         super().__init__(f'hd_monitor_{hostname}')
 
+        self._path = '~'
+        self._free_percent_low = 0.05
+        self._free_percent_crit = 0.01
+
         self.add_on_set_parameters_callback(self.callback_config)
-        self.declare_parameter('path', '~')
-        self.declare_parameter('free_percent_low', 0.05)
-        self.declare_parameter('free_percent_crit', 0.01)
-        self._path = self._free_percent_low = self._free_percent_crit = None
+        self.declare_parameter('path', self._path)
+        self.declare_parameter('free_percent_low', self._free_percent_low)
+        self.declare_parameter('free_percent_crit', self._free_percent_crit)
 
         self._updater = Updater(self)
         self._updater.setHardwareID(hostname)

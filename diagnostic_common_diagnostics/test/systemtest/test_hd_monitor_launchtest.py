@@ -55,11 +55,11 @@ def generate_test_description():
     return launch.LaunchDescription(
         [
             launch_ros.actions.Node(
-                package="diagnostic_common_diagnostics",
-                executable="hd_monitor.py",
-                name="hd_monitor",
-                output="screen",
-                parameters=[{"free_percent_low": 0.20, "free_percent_crit": 0.05}],
+                package='diagnostic_common_diagnostics',
+                executable='hd_monitor.py',
+                name='hd_monitor',
+                output='screen',
+                parameters=[{'free_percent_low': 0.20, 'free_percent_crit': 0.05}],
             ),
             launch_testing.actions.ReadyToTest(),
         ]
@@ -69,7 +69,7 @@ def generate_test_description():
 class TestHDMonitor(unittest.TestCase):
     """Test if the hd_monitor node is publishing diagnostics."""
 
-    def __init__(self, methodName: str = "runTest") -> None:
+    def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
         self.received_messages = []
 
@@ -78,7 +78,7 @@ class TestHDMonitor(unittest.TestCase):
 
     def _get_min_level(self):
         levels = [
-            int.from_bytes(status.level, "little")
+            int.from_bytes(status.level, 'little')
             for diag in self.received_messages
             for status in diag.status
         ]
@@ -88,13 +88,13 @@ class TestHDMonitor(unittest.TestCase):
 
     def test_topic_published(self):
         """Test if the hd_monitor node is publishing diagnostics."""
-        with WaitForTopics([("/diagnostics", DiagnosticArray)], timeout=5):
-            print("Topic found")
+        with WaitForTopics([('/diagnostics', DiagnosticArray)], timeout=5):
+            print('Topic found')
 
         rclpy.init()
-        test_node = rclpy.create_node("test_node")
+        test_node = rclpy.create_node('test_node')
         test_node.create_subscription(
-            DiagnosticArray, "/diagnostics", self._received_message, 1
+            DiagnosticArray, '/diagnostics', self._received_message, 1
         )
 
         while len(self.received_messages) < 10:
@@ -104,7 +104,7 @@ class TestHDMonitor(unittest.TestCase):
 
         test_node.destroy_node()
         rclpy.shutdown()
-        print(f"Got {len(self.received_messages)} messages:")
+        print(f'Got {len(self.received_messages)} messages:')
         for msg in self.received_messages:
             print(msg)
         self.assertEqual(min_level, 0)
