@@ -64,7 +64,8 @@ DICT_USAGE = {
 
 
 class HDMonitor(Node):
-    """Diagnostic node checking the remaining space on the specified hard drive.
+    """
+    Diagnostic node checking the remaining space on the specified hard drive.
 
     Three ROS parameters:
     - path: Path on the filesystem to check (string, default: home directory)
@@ -90,7 +91,8 @@ class HDMonitor(Node):
         self._updater.add(f'{hostname} HD Usage', self.check_disk_usage)
 
     def callback_config(self, params: List[rclpy.Parameter]):
-        """Retrieve ROS parameters.
+        """
+        Retrieve ROS parameters.
 
         see the class documentation for declared parameters.
         """
@@ -108,7 +110,8 @@ class HDMonitor(Node):
         return SetParametersResult(successful=True)
 
     def check_disk_usage(self, diag: DiagnosticStatus) -> DiagnosticStatus:
-        """Compute the disk usage and derive a status from it.
+        """
+        Compute the disk usage and derive a status from it.
 
         Task periodically ran by the diagnostic updater.
         """
