@@ -47,7 +47,8 @@
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logger.hpp"
+#include "rclcpp/logging.hpp"
 
 namespace diagnostic_updater
 {
