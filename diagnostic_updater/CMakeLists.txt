@@ -118,6 +118,7 @@ install(
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(ament_cmake_python)
 ament_export_dependencies(diagnostic_msgs)
