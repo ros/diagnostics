@@ -33,7 +33,44 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # -*- coding: utf-8 -*-
+
+"""
+`diagnostic_updater` contains assorted Python classes to assist in diagnostic
+publication. These libraries are commonly used by device drivers as part of the diagnostics
+toolchain. The main parts of `diagnostic_updater` are:
+
+ - :class:`DiagnosticStatusWrapper`, a wrapper providing
+   convenience functions for working with :class:`diagnostics_msgs.msg.DiagnosticStatus`.
+
+ - :class:`Updater`, a class for managing periodic publishing of the
+   :class:`DiagnosticStatusWrapper` output by a set of :class:`DiagnosticTask`.
+
+ - :class:`TopicDiagnostic` and :class:`HeaderlessTopicDiagnostic` for calculating and
+   publishing statistics on timestamps and publication frequencies, and
+   their corresponding :class:`DiagnosedPublisher` and :class:`HeaderlessDiagnosedPublisher`
+   to update the statistics automatically when publications are made to a topic.
+
+Example uses of these classes can be found in `src/example.py`.
+"""
+
 from ._diagnostic_status_wrapper import *
 from ._diagnostic_updater import *
 from ._update_functions import *
 from ._publisher import *
+
+__all__ = [
+  'DiagnosticStatusWrapper',
+  'DiagnosticTask',
+  'FunctionDiagnosticTask',
+  'CompositeDiagnosticTask',
+  'DiagnosticTaskVector',
+  'Updater',
+  'HeaderlessTopicDiagnostic',
+  'TopicDiagnostic',
+  'DiagnosedPublisher',
+  'FrequencyStatusParam',
+  'FrequencyStatus',
+  'TimeStampStatusParam',
+  'TimeStampStatus',
+  'Heartbeat',
+]

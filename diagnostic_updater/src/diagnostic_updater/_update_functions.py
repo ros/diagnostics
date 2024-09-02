@@ -44,24 +44,36 @@ class FrequencyStatusParam:
     """A structure that holds the constructor parameters for the FrequencyStatus
     class.
 
-    Implementation note: the min_freq and max_freq parameters in the C += 1 code
+    Implementation note: the `min_freq` and `max_freq` parameters in the C++ code
     are stored as pointers, so that if they are updated, the new values are used.
     To emulate this behavior, we here use a dictionary to hold them: {'min','max'}
 
-    freq_bound is a dictionary with keys 'min' and 'max', containing the min
-    and max acceptable frequencies.
+    :ivar dict freq_bound: Dictionary with keys `min` and `max`, containing the min
+                           and max acceptable frequencies.
 
-    tolerance is the tolerance with which bounds must be satisfied. Acceptable
-    values are from freq_bound['min'] * (1 - torelance) to
-    freq_bound['max'] * (1 + tolerance). Common use cases are to set
-    tolerance to zero, or to assign the same value to freq_bound['min'] and
-    freq_bound['max']
+    :ivar float tolerance: The tolerance with which bounds must be satisfied. Acceptable
+                           values are from `freq_bound['min'] * (1 - torelance)` to
+                           `freq_bound['max'] * (1 + tolerance)`. Common use cases are to set
+                           tolerance to zero, or to assign the same value to `freq_bound['min']` and
+                           `freq_bound['max']`.
 
-    window_size is the number of events to consider in the statistics.
+    :ivar int window_size: The number of events to consider in the statistics.
     """
 
     def __init__(self, freq_bound, tolerance = 0.1, window_size = 5):
-        """Creates a filled-out FrequencyStatusParam."""
+        """Creates a filled-out :class:`FrequencyStatusParam`.
+        
+        :param dict freq_bound: Dictionary with keys `min` and `max`, containing the min
+                                and max acceptable frequencies.
+        
+        :param float tolerance: The tolerance with which bounds must be satisfied. Acceptable
+                                values are from `freq_bound['min'] * (1 - torelance)` to
+                                `freq_bound['max'] * (1 + tolerance)`. Common use cases are to set
+                                tolerance to zero, or to assign the same value to `freq_bound['min']` and
+                                `freq_bound['max']`.
+    
+        :param int window_size: The number of events to consider in the statistics.
+        """
         self.freq_bound = freq_bound
         self.tolerance = tolerance
         self.window_size = window_size
@@ -77,7 +89,11 @@ class FrequencyStatus(DiagnosticTask):
     """
 
     def __init__(self, params, name = "FrequencyStatus"):
-        """Constructs a FrequencyStatus class with the given parameters."""
+        """Constructs a FrequencyStatus class with the given parameters.
+        
+        :param FrequencyStatus params: parameters of the diagnostic task.
+        :param str name: name of the diagnostic task.
+        """
         DiagnosticTask.__init__(self, name)
         self.params = params
         self.lock = threading.Lock()
@@ -132,14 +148,18 @@ class FrequencyStatus(DiagnosticTask):
 
 
 class TimeStampStatusParam:
-    """A structure that holds the constructor parameters for the TimeStampStatus class.
+    """A structure that holds the constructor parameters for the :class:`TimeStampStatus` class.
 
-    max_acceptable: maximum acceptable difference between two timestamps.
-    min_acceptable: minimum acceptable difference between two timestamps.
+    :ivar float max_acceptable: maximum acceptable difference between two timestamps.
+    :ivar float min_acceptable: minimum acceptable difference between two timestamps.
     """
 
     def __init__(self, min_acceptable = -1, max_acceptable = 5):
-        """Creates a filled-out TimeStampStatusParam."""
+        """Creates a filled-out :class:`TimeStampStatusParam`.
+        
+        :param float min_acceptable: minimum acceptable difference between two timestamps. 
+        :param float max_acceptable: maximum acceptable difference between two timestamps. 
+        """
         self.max_acceptable = max_acceptable
         self.min_acceptable = min_acceptable
 
@@ -156,7 +176,11 @@ class TimeStampStatus(DiagnosticTask):
     """
 
     def __init__(self, params = TimeStampStatusParam(), name = "Timestamp Status"):
-        """Constructs the TimeStampStatus with the given parameters."""
+        """Constructs the :class:`TimeStampStatus` with the given parameters.
+        
+        :param TimeStampStatus params: parameters of the diagnostic task.
+        :param str name: name of the diagnostic task.
+        """
         DiagnosticTask.__init__(self, name)
         self.params = params
         self.lock = threading.Lock()
@@ -170,8 +194,9 @@ class TimeStampStatus(DiagnosticTask):
 
     def tick(self, stamp):
         """Signals an event.
-        @param stamp The timestamp of the event that will be used in computing
-        intervals. Can be either a double or a ros::Time.
+
+        :param stamp: The timestamp of the event that will be used in computing intervals.
+        :type stamp: float or rospy.Time.
         """
         if not isinstance(stamp, float):
             stamp = stamp.to_sec()

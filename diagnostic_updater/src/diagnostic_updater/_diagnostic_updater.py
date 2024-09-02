@@ -51,32 +51,40 @@ class DiagnosticTask:
     """DiagnosticTask is an abstract base class for collecting diagnostic data.
 
     Subclasses are provided for generating common diagnostic information.
-    A DiagnosticTask has a name, and a function that is called to create a
-    DiagnosticStatusWrapper.
+    A :class:`DiagnosticTask` has a name, and a function that is called to create a
+    :class:`DiagnosticStatusWrapper`.
     """
 
     def __init__(self, name):
-        """Constructs a DiagnosticTask setting its name in the process."""
+        """Constructs a :class:`DiagnosticTask` setting its name in the process.
+        
+        :param str name: The name of the diagnostic task.
+        """
         self.name = name
 
     def getName(self):
-        """Returns the name of the DiagnosticTask."""
+        """Returns the name of the :class:`DiagnosticTask`.
+        
+        :rtype: str
+        """
         return self.name
 
     def run(self, stat):
-        """Fills out this Task's DiagnosticStatusWrapper.
-        @param stat: the DiagnosticStatusWrapper to fill
-        @return the filled DiagnosticStatusWrapper
+        """Fills out this Task's :class:`DiagnosticStatusWrapper`.
+
+        :param DiagnosticStatusWrapper stat: the :class:`DiagnosticStatusWrapper` to fill
+        :return: the filled :class:`DiagnosticStatusWrapper`
+        :rtype: DiagnosticStatusWrapper
         """
         return stat
 
 
 
 class FunctionDiagnosticTask(DiagnosticTask):
-    """A DiagnosticTask based on a function.
+    """A :class:`DiagnosticTask` based on a function.
 
-    The FunctionDiagnosticTask calls the function when it updates. The
-    function updates the DiagnosticStatusWrapper and collects data.
+    The :class:`FunctionDiagnosticTask` calls the function when it updates. The
+    function updates the :class:`DiagnosticStatusWrapper` and collects data.
 
     This is useful for gathering information about a device or driver, like temperature,
     calibration, etc.
@@ -84,8 +92,9 @@ class FunctionDiagnosticTask(DiagnosticTask):
 
     def __init__(self, name, fn):
         """Constructs a GenericFunctionDiagnosticTask based on the given name and function.
-        @param name Name of the function.
-        @param fn Function to be called when run is called.
+
+        :param str name: Name of the function.
+        :param fn: Function to be called when run is called.
         """
         DiagnosticTask.__init__(self, name)
         self.fn = fn
@@ -96,24 +105,30 @@ class FunctionDiagnosticTask(DiagnosticTask):
 
 
 class CompositeDiagnosticTask(DiagnosticTask):
-    """Merges CompositeDiagnosticTask into a single DiagnosticTask.
+    """Merges :class:`CompositeDiagnosticTask` into a single :class:`DiagnosticTask`.
 
-    The CompositeDiagnosticTask allows multiple DiagnosticTask instances to
+    The :class:`CompositeDiagnosticTask` allows multiple :class:`DiagnosticTask` instances to
     be combined into a single task that produces a single
-    DiagnosticStatusWrapped. The output of the combination has the max of
+    :class:`DiagnosticStatusWrapper`. The output of the combination has the max of
     the status levels, and a concatenation of the non-zero-level messages.
 
     For instance, this could be used to combine the calibration and offset data
     from an IMU driver.
+    
+    :ivar tasks: List of tasks
+    :vartype tasks: list of :class:`DiagnosticTask`
     """
 
     def __init__(self, name):
-        """Constructs a CompositeDiagnosticTask with the given name."""
+        """Constructs a :class:`CompositeDiagnosticTask` with the given name.
+        
+        :param str name: The name of the diagnostic task.
+        """
         DiagnosticTask.__init__(self, name)
+
         self.tasks = []
 
     def run(self, stat):
-        """Runs each child and merges their outputs."""
         combined_summary = DiagnosticStatusWrapper()
         original_summary = DiagnosticStatusWrapper()
 
@@ -133,10 +148,12 @@ class CompositeDiagnosticTask(DiagnosticTask):
         return stat
 
     def addTask(self, t):
-        """Adds a child CompositeDiagnosticTask.
+        """Adds a child :class:`CompositeDiagnosticTask`.
 
-        This CompositeDiagnosticTask will be called each time this
-        CompositeDiagnosticTask is run.
+        This :class:`CompositeDiagnosticTask` will be called each time this
+        :class:`CompositeDiagnosticTask` is run.
+        
+        :param DiagnosticTask t: the :class:`DiagnosticTask` to add.
         """
         self.tasks.append(t)
 
@@ -145,15 +162,19 @@ class CompositeDiagnosticTask(DiagnosticTask):
 class DiagnosticTaskVector:
     """Internal use only.
 
-    Base class for diagnostic_updater::Updater and self_test::Dispatcher.
+    Base class for :class:`Updater` and self_test::Dispatcher.
     The class manages a collection of diagnostic updaters. It contains the
     common functionality used for producing diagnostic updates and for
     self-tests.
+    
+    :ivar tasks: List of tasks
+    :vartype tasks: list of :class:`DiagnosticTask`
+    :ivar threading.Lock lock: The lock protecting the enclosed list of tasks.
     """
 
     class DiagnosticTaskInternal:
         """Class used to represent a diagnostic task internally in
-        DiagnosticTaskVector.
+        :class:`DiagnosticTaskVector`.
         """
 
         def __init__(self, name, fn):
@@ -170,18 +191,22 @@ class DiagnosticTaskVector:
         self.lock = threading.Lock()
 
     def addedTaskCallback(self, task):
-        """Allows an action to be taken when a task is added. The Updater class
+        """Allows an action to be taken when a task is added. The :class:`Updater` class
         uses this to immediately publish a diagnostic that says that the node
         is loading.
+        
+        :param DiagnosticTask task: the added task.
         """
         pass
 
     def add(self, *args):
-        """Add a task to the DiagnosticTaskVector.
+        """Add a task to the :class:`DiagnosticTaskVector`.
 
         Usage:
-        add(task): where task is a DiagnosticTask
-        add(name, fn): add a DiagnosticTask embodied by a name and function
+
+        `add(task)`: where task is a DiagnosticTask
+
+        `add(name, fn)`: add a DiagnosticTask embodied by a name and function
         """
         if len(args)==1:
             task = DiagnosticTaskVector.DiagnosticTaskInternal(args[0].getName(), args[0].run)
@@ -198,8 +223,9 @@ class DiagnosticTaskVector:
         Removes the first task that matches the specified name. (New in
         version 1.1.2)
 
-        @param name Name of the task to remove.
-        @return Returns true if a task matched and was removed.
+        :param str name: Name of the task to remove.
+        :return: Returns true if a task matched and was removed.
+        :rtype: bool
         """
         found = False
         with self.lock:
@@ -220,7 +246,7 @@ class Updater(DiagnosticTaskVector):
     should be called frequently. At some predetermined rate, the update
     function will cause all the diagnostic tasks to run, and will collate
     and publish the resulting diagnostics. The publication rate is
-    determined by the "~diagnostic_period" ros parameter.
+    determined by the `~diagnostic_period` ros parameter.
 
     The class also allows an update to be forced when something significant
     has happened, and allows a single message to be broadcast on all the
@@ -291,8 +317,8 @@ class Updater(DiagnosticTaskVector):
 
         Useful if something drastic is happening such as shutdown or a self-test.
 
-        @param lvl Level of the diagnostic being output.
-        @param msg Status message to output.
+        :param int lvl: Level of the diagnostic being output.
+        :param str msg: Status message to output.
         """
 
         status_vec = []
@@ -306,10 +332,13 @@ class Updater(DiagnosticTaskVector):
         self.publish(status_vec)
 
     def setHardwareID(self, hwid):
+        """
+        :param str hwid: The hardware ID.
+        """
         self.hwid = hwid
 
     def _check_diagnostic_period(self):
-        """Recheck the diagnostic_period on the parameter server."""
+        """Recheck the `~diagnostic_period` on the parameter server."""
 
         # This was getParamCached() call in the cpp code. i.e. it would throttle
         # the actual call to the parameter server using a notification of change
@@ -326,7 +355,11 @@ class Updater(DiagnosticTaskVector):
                 pass
 
     def publish(self, msg):
-        """Publishes a single diagnostic status or a vector of diagnostic statuses."""
+        """Publishes a single diagnostic status or a vector of diagnostic statuses.
+        
+        :param msg: The status(es) to publish.
+        :type msg: diagnostic_msgs.msg.DiagnosticStatus
+        """
         if not type(msg) is list:
             msg = [msg]
 
