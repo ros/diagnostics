@@ -70,8 +70,9 @@ class RamTask(DiagnosticTask):
 
         return stat
 
+
 def get_ram_diagnostics_node() -> Node:
-    """get ram diagnostics node."""
+    """Get ram diagnostics node."""
     hostname = socket.gethostname()
 
     node = rclpy.create_node('ram_monitor')

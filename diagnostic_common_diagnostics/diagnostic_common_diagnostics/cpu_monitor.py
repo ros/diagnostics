@@ -86,8 +86,9 @@ class CpuTask(DiagnosticTask):
 
         return stat
 
+
 def get_cpu_diagnostics_node() -> Node:
-    """get cpu diagnostics node."""
+    """Get cpu diagnostics node."""
     # Create the node
     hostname = socket.gethostname()
     node = Node('cpu_monitor')

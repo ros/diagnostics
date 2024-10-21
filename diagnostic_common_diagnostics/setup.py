@@ -24,7 +24,7 @@ setup(
     maintainer_email='vladyslav.hrynchak@logivations.com',
     description='Package for diagnostics',
     license="TODO: License declaration",
-    tests_require=["pytest"],
+    tests_require=['pytest'],
     entry_points={
         'console_scripts': [
             'cpu_monitor = diagnostic_common_diagnostics.cpu_monitor:main', 
