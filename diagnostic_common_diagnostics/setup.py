@@ -23,15 +23,15 @@ setup(
     maintainer='root',
     maintainer_email='vladyslav.hrynchak@logivations.com',
     description='Package for diagnostics',
-    license="TODO: License declaration",
+    license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'cpu_monitor = diagnostic_common_diagnostics.cpu_monitor:main', 
-            'ntp_monitor = diagnostic_common_diagnostics.ntp_monitor:main', 
-            'ram_monitor = diagnostic_common_diagnostics.ram_monitor:main', 
-            'sensors_monitor = diagnostic_common_diagnostics.sensors_monitor:main', 
-            'hd_monitor = diagnostic_common_diagnostics.hd_monitor:main', 
+            'cpu_monitor = diagnostic_common_diagnostics.cpu_monitor:main',
+            'ntp_monitor = diagnostic_common_diagnostics.ntp_monitor:main',
+            'ram_monitor = diagnostic_common_diagnostics.ram_monitor:main',
+            'sensors_monitor = diagnostic_common_diagnostics.sensors_monitor:main',
+            'hd_monitor = diagnostic_common_diagnostics.hd_monitor:main',
         ],
     },
 )
