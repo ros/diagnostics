@@ -91,7 +91,6 @@ def get_ram_diagnostics_node() -> Node:
 
 def main():
     rclpy.init()
-    
     node = get_ram_diagnostics_node()
     rclpy.spin(node)
 

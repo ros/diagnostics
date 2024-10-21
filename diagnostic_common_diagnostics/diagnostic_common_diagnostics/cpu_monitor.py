@@ -111,7 +111,6 @@ def get_cpu_diagnostics_node() -> Node:
 
 def main(args=None):
     rclpy.init(args=args)
-    
     node = get_cpu_diagnostics_node()
     rclpy.spin(node)
 
