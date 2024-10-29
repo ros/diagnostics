@@ -43,6 +43,7 @@ from diagnostic_msgs.msg import DiagnosticStatus
 
 from diagnostic_updater import DiagnosticTask, Updater
 
+import os
 import psutil
 
 import rclpy
@@ -71,15 +72,16 @@ class CpuTask(DiagnosticTask):
 
         stat.add('CPU Load Average', f'{cpu_average:.2f}')
 
-        warn = False
         for idx, cpu_percentage in enumerate(cpu_percentages):
             stat.add(f'CPU {idx} Load', f'{cpu_percentage:.2f}')
-            if cpu_percentage > self._warning_percentage:
-                warn = True
 
-        if warn:
+        num_cpus = os.cpu_count()
+        load1, load5, load15 = os.getloadavg()
+        threshold = 3 * num_cpus
+
+        if load1 > threshold:
             stat.summary(DiagnosticStatus.WARN,
-                         f'At least one CPU exceeds {self._warning_percentage} percent')
+                         f'System load exceeds {threshold} percent')
         else:
             stat.summary(DiagnosticStatus.OK,
                          f'CPU Average {cpu_average:.2f} percent')
