@@ -22,6 +22,7 @@
   <exec_depend>lm-sensors</exec_depend>
   <exec_depend>python3-ntplib</exec_depend>
   <exec_depend>python3-psutil</exec_depend>
+  <exec_depend>rclpy</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <!-- Usage of ament_lint_common is locked by https://github.com/ament/ament_lint/issues/423
