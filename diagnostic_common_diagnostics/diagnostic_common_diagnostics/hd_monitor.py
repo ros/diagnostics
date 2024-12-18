@@ -74,8 +74,12 @@ class HDMonitor(Node):
     """
 
     def __init__(self):
-        hostname = gethostname().replace('.', '_').replace('-', '_')
-        super().__init__(f'hd_monitor_{hostname}')
+        hostname = gethostname()
+        # Every invalid symbol is replaced by underscore.
+        # isalnum() alone also allows invalid symbols depending on the locale
+        cleaned_hostname = ''.join(
+            c if (c.isascii() and c.isalnum()) else '_' for c in hostname)
+        super().__init__(f'hd_monitor_{cleaned_hostname}')
 
         self._path = '~'
         self._free_percent_low = 0.05
