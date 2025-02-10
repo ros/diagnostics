@@ -2,6 +2,19 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Checking licenses in CI (`#431 <https://github.com/ros/diagnostics/issues/431>`_) (`#432 <https://github.com/ros/diagnostics/issues/432>`_)
+  * Checking licenses in ci
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#428 <https://github.com/ros/diagnostics/issues/428>`_)
+  Co-authored-by: Silvio Traversaro <silvio@traversaro.it>
+* Support custom `rclcpp::NodeOptions` (`#417 <https://github.com/ros/diagnostics/issues/417>`_) (`#422 <https://github.com/ros/diagnostics/issues/422>`_)
+  * Support custom `rclcpp::NodeOptions`   This eases static composition of multiple ROS 2 nodes
+  Co-authored-by: Patrick Roncagliolo <ronca.pat@gmail.com>
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_) (`#414 <https://github.com/ros/diagnostics/issues/414>`_)
+  * skipping flaky ntp test
+* Contributors: Christian Henkel
+
 3.2.1 (2024-06-27)
 ------------------
 * Add add_analyzer functionality (`#329 <https://github.com/ros/diagnostics/issues/329>`_) (`#359 <https://github.com/ros/diagnostics/issues/359>`_)

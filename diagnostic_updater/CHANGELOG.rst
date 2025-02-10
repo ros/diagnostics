@@ -2,6 +2,14 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#428 <https://github.com/ros/diagnostics/issues/428>`_)
+  Co-authored-by: Silvio Traversaro <silvio@traversaro.it>
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_) (`#414 <https://github.com/ros/diagnostics/issues/414>`_)
+  * skipping flaky ntp test
+* Contributors: Christian Henkel
+
 3.2.1 (2024-06-27)
 ------------------
 * change(diagnosed-publisher): allow specifying node clock 
