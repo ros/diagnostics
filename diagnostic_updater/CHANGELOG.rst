@@ -2,6 +2,11 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)
+* Contributors: Christian Henkel, Silvio Traversaro
+
 4.3.1 (2024-07-30)
 ------------------
 * Fix correctly exporting the library (`#388 <https://github.com/ros/diagnostics/issues/388>`_) (`#393 <https://github.com/ros/diagnostics/issues/393>`_)

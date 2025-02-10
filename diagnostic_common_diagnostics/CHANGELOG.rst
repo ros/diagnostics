@@ -2,6 +2,15 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* common_diagnostics cleaned hostname string (`#405 <https://github.com/ros/diagnostics/issues/405>`_)
+  * Hostnames are properly cleaned to only contain alphanumeric characters or underscore.
+* Skipping flaky ntp test (`#409 <https://github.com/ros/diagnostics/issues/409>`_)
+  * skipping flaky ntp test
+* Add missing rclpy dependency to common_diagnostics to fix rosdoc2 output (`#402 <https://github.com/ros/diagnostics/issues/402>`_)
+* Contributors: Christian Henkel, R Kent James, sjusner
+
 4.3.1 (2024-07-30)
 ------------------
 * fixing pep257 problems introduced by `#334 <https://github.com/ros/diagnostics/issues/334>`_ (`#384 <https://github.com/ros/diagnostics/issues/384>`_)
