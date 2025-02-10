@@ -2,6 +2,18 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* common_diagnostics cleaned hostname string (`#405 <https://github.com/ros/diagnostics/issues/405>`_) (`#420 <https://github.com/ros/diagnostics/issues/420>`_)
+  * Hostnames are properly cleaned to only contain alphanumeric characters or underscore.
+  Co-authored-by: sjusner <simon.jusner@knapp.com>
+* Add missing rclpy dependency to common_diagnostics to fix rosdoc2 output (`#402 <https://github.com/ros/diagnostics/issues/402>`_) (`#407 <https://github.com/ros/diagnostics/issues/407>`_)
+  Co-authored-by: R Kent James <kent@caspia.com>
+* [ros2-iron] Port hd_monitor to ROS2 (`#334 <https://github.com/ros/diagnostics/issues/334>`_) (`#382 <https://github.com/ros/diagnostics/issues/382>`_)
+  * Port hd_monitor to ROS2 (`#334 <https://github.com/ros/diagnostics/issues/334>`_)
+  Co-authored-by: Antoine Lima <7421319+limaanto@users.noreply.github.com>
+* Contributors: Christian Henkel
+
 3.2.0 (2024-03-22)
 ------------------
 * Port cpu_monitor to ROS2 (`#326 <https://github.com/ros/diagnostics/issues/326>`_)

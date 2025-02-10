@@ -2,6 +2,14 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#429 <https://github.com/ros/diagnostics/issues/429>`_)
+  Co-authored-by: Silvio Traversaro <silvio@traversaro.it>
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_) (`#415 <https://github.com/ros/diagnostics/issues/415>`_)
+  * skipping flaky ntp test
+* Contributors: Christian Henkel
+
 3.2.0 (2024-03-22)
 ------------------
 * including depdency (`#322 <https://github.com/ros/diagnostics/issues/322>`_)

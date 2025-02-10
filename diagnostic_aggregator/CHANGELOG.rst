@@ -2,6 +2,18 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Checking licenses in CI (`#431 <https://github.com/ros/diagnostics/issues/431>`_) (`#433 <https://github.com/ros/diagnostics/issues/433>`_)
+  * Checking licenses in ci
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#429 <https://github.com/ros/diagnostics/issues/429>`_)
+  Co-authored-by: Silvio Traversaro <silvio@traversaro.it>
+* Support custom `rclcpp::NodeOptions` (`#417 <https://github.com/ros/diagnostics/issues/417>`_) (`#423 <https://github.com/ros/diagnostics/issues/423>`_)
+  Co-authored-by: Patrick Roncagliolo <ronca.pat@gmail.com>
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_) (`#415 <https://github.com/ros/diagnostics/issues/415>`_)
+  * skipping flaky ntp test
+* Contributors: Christian Henkel
+
 3.2.0 (2024-03-22)
 ------------------
 * Avoid rolling up an ERROR state when empty GenericAnalyzer blocks are marked discard_stale, or when all of their items are STALE. (`#315 <https://github.com/ros/diagnostics/issues/315>`_)
