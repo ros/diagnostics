@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.2.2 (2025-02-10)
+------------------
 * common_diagnostics cleaned hostname string (`#405 <https://github.com/ros/diagnostics/issues/405>`_) (`#421 <https://github.com/ros/diagnostics/issues/421>`_)
   * Hostnames are properly cleaned to only contain alphanumeric characters or underscore.
   Co-authored-by: sjusner <simon.jusner@knapp.com>
