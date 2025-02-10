@@ -2,6 +2,15 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* common_diagnostics cleaned hostname string (`#405 <https://github.com/ros/diagnostics/issues/405>`_) (`#421 <https://github.com/ros/diagnostics/issues/421>`_)
+  * Hostnames are properly cleaned to only contain alphanumeric characters or underscore.
+  Co-authored-by: sjusner <simon.jusner@knapp.com>
+* Add missing rclpy dependency to common_diagnostics to fix rosdoc2 output (`#402 <https://github.com/ros/diagnostics/issues/402>`_) (`#408 <https://github.com/ros/diagnostics/issues/408>`_)
+  Co-authored-by: R Kent James <kent@caspia.com>
+* Contributors: Christian Henkel
+
 4.2.1 (2024-07-30)
 ------------------
 * fixing pep257 problems introduced by `#334 <https://github.com/ros/diagnostics/issues/334>`_ (`#384 <https://github.com/ros/diagnostics/issues/384>`_) (`#392 <https://github.com/ros/diagnostics/issues/392>`_)
