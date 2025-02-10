@@ -36,8 +36,8 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 
 - **Rolling Ridley** by the [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2)
 - **Humble Hawksbill** by the [`ros2-humble` branch](https://github.com/ros/diagnostics/tree/ros2-humble)
-- **Iron Irwini** by the [`ros2-iron` branch](https://github.com/ros/diagnostics/tree/ros2-iron)
 - **Jazzy Jalisco** by the [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy)
+- **Kilted Kaiju** by the [`ros2-kilted` branch](https://github.com/ros/diagnostics/tree/ros2-kilted)
 
 ## Workflow
 
@@ -52,21 +52,22 @@ This tool has proven to be useful: [backport](https://www.npmjs.com/package/back
 Use this command to port a given PR of `PR_NUMBER` to the other branches:
 
 ```bash
-backport --pr PR_NUMBER -b ros2-humble ros2-iron ros2-jazzy
+backport --pr PR_NUMBER -b ros2-humble ros2-jazzy ros2-kilted
 ```
 
 ## Versioning and Releases
 
-- (__X__.0.0) We use the major version number to indicate a breaking change.
-- (0.__Y__.0) The minor version number is used to differentiate between different ROS distributions:
-  - x.__0__.z: Humble Hawksbill
-  - x.__1__.z: Iron Irwini
-  - x.__2__.z: Jazzy Jalisco
-  - x.__3__.z: Rolling Ridley
-  - Future releases (Kilted Kaiju 05/25) will get x.__3__.z and _Rolling_ will be incremented accordingly.
-- (0.0.__Z__) The patch version number is used for changes in the current ROS distribution that do not affect the API.
+- (**X**.0.0) We use the major version number to indicate a breaking change.
+- (0.**Y**.0) The minor version number is used to differentiate between different ROS distributions:
+  - x.**0**.z: Humble Hawksbill
+  - x.**1**.z: Iron Irwini
+  - x.**2**.z: Jazzy Jalisco
+  - x.**3**.z: Kilted Kaiju
+  - x.**4**.z: Rolling Ridley
+  - (Future releases will receive x.**4**.z and rolling will then be x.**5**.z)
+- (0.0.**Z**) The patch version number is used for changes in the current ROS distribution that do not affect the API.
 
-## Buildfarm Statuses
+<!-- ## Buildfarm Statuses
 
 ### diagnostic_aggregator
 
@@ -78,7 +79,6 @@ backport --pr PR_NUMBER -b ros2-humble ros2-iron ros2-jazzy
 | bin, ubuntu, arm64 | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_ujv8_uJv8__diagnostic_aggregator__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_ujv8_uJv8__diagnostic_aggregator__ubuntu_jammy_arm64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_ujv8_uJv8__diagnostic_aggregator__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_ujv8_uJv8__diagnostic_aggregator__ubuntu_jammy_arm64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_unv8_uNv8__diagnostic_aggregator__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_unv8_uNv8__diagnostic_aggregator__ubuntu_noble_arm64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_unv8_uNv8__diagnostic_aggregator__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_unv8_uNv8__diagnostic_aggregator__ubuntu_noble_arm64__binary) |
 | bin, rhel | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_rhel_el864__diagnostic_aggregator__rhel_8_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_rhel_el864__diagnostic_aggregator__rhel_8_x86_64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_rhel_el964__diagnostic_aggregator__rhel_9_x86_64__binary) |
 
-
 ### diagnostic_common_diagnostics
 
 |         | H | I | J | R |
@@ -88,7 +88,6 @@ backport --pr PR_NUMBER -b ros2-humble ros2-iron ros2-jazzy
 | bin, ubuntu, amd64 | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__diagnostic_common_diagnostics__ubuntu_jammy_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_uJ64__diagnostic_common_diagnostics__ubuntu_jammy_amd64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_uJ64__diagnostic_common_diagnostics__ubuntu_jammy_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_uJ64__diagnostic_common_diagnostics__ubuntu_jammy_amd64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__diagnostic_common_diagnostics__ubuntu_noble_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_uN64__diagnostic_common_diagnostics__ubuntu_noble_amd64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__diagnostic_common_diagnostics__ubuntu_noble_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_uN64__diagnostic_common_diagnostics__ubuntu_noble_amd64__binary) |
 | bin, ubuntu, arm64 | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_ujv8_uJv8__diagnostic_common_diagnostics__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_ujv8_uJv8__diagnostic_common_diagnostics__ubuntu_jammy_arm64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_ujv8_uJv8__diagnostic_common_diagnostics__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_ujv8_uJv8__diagnostic_common_diagnostics__ubuntu_jammy_arm64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_unv8_uNv8__diagnostic_common_diagnostics__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_unv8_uNv8__diagnostic_common_diagnostics__ubuntu_noble_arm64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_unv8_uNv8__diagnostic_common_diagnostics__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_unv8_uNv8__diagnostic_common_diagnostics__ubuntu_noble_arm64__binary) |
 | bin, rhel | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_rhel_el864__diagnostic_common_diagnostics__rhel_8_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_rhel_el864__diagnostic_common_diagnostics__rhel_8_x86_64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_rhel_el964__diagnostic_common_diagnostics__rhel_9_x86_64__binary) |
-
 
 ### diagnostic_updater
 
@@ -108,8 +107,7 @@ backport --pr PR_NUMBER -b ros2-humble ros2-iron ros2-jazzy
 | src, rhel | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hsrc_el8__self_test__rhel_8__source&style=ball-32x32)](https://build.ros2.org/job/Hsrc_el8__self_test__rhel_8__source) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Isrc_el9__self_test__rhel_9__source&style=ball-32x32)](https://build.ros2.org/job/Isrc_el9__self_test__rhel_9__source) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jsrc_el9__self_test__rhel_9__source&style=ball-32x32)](https://build.ros2.org/job/Jsrc_el9__self_test__rhel_9__source) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rsrc_el9__self_test__rhel_9__source&style=ball-32x32)](https://build.ros2.org/job/Rsrc_el9__self_test__rhel_9__source) |
 | bin, ubuntu, amd64 | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__self_test__ubuntu_jammy_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_uJ64__self_test__ubuntu_jammy_amd64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_uJ64__self_test__ubuntu_jammy_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_uJ64__self_test__ubuntu_jammy_amd64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__self_test__ubuntu_noble_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_uN64__self_test__ubuntu_noble_amd64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__self_test__ubuntu_noble_amd64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_uN64__self_test__ubuntu_noble_amd64__binary) |
 | bin, ubuntu, arm64 | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_ujv8_uJv8__self_test__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_ujv8_uJv8__self_test__ubuntu_jammy_arm64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_ujv8_uJv8__self_test__ubuntu_jammy_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_ujv8_uJv8__self_test__ubuntu_jammy_arm64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_unv8_uNv8__self_test__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_unv8_uNv8__self_test__ubuntu_noble_arm64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_unv8_uNv8__self_test__ubuntu_noble_arm64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_unv8_uNv8__self_test__ubuntu_noble_arm64__binary) |
-| bin, rhel | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_rhel_el864__self_test__rhel_8_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_rhel_el864__self_test__rhel_8_x86_64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_rhel_el964__self_test__rhel_9_x86_64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_rhel_el964__self_test__rhel_9_x86_64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_rhel_el964__self_test__rhel_9_x86_64__binary) |
-
+| bin, rhel | [![Humble](https://build.ros2.org/buildStatus/icon?job=Hbin_rhel_el864__self_test__rhel_8_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Hbin_rhel_el864__self_test__rhel_8_x86_64__binary) | [![Iron](https://build.ros2.org/buildStatus/icon?job=Ibin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Ibin_rhel_el964__self_test__rhel_9_x86_64__binary) | [![Jazzy](https://build.ros2.org/buildStatus/icon?job=Jbin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Jbin_rhel_el964__self_test__rhel_9_x86_64__binary) | [![Rolling](https://build.ros2.org/buildStatus/icon?job=Rbin_rhel_el964__self_test__rhel_9_x86_64__binary&style=ball-32x32)](https://build.ros2.org/job/Rbin_rhel_el964__self_test__rhel_9_x86_64__binary) | -->
 
 # License
 
