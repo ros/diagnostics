@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diagnostics</name>
-  <version>4.0.0</version>
+  <version>4.0.2</version>
   <description>diagnostics</description>
   <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
   <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
