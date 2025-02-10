@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.3.2 (2025-02-10)
+------------------
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)
 * Contributors: Christian Henkel, Silvio Traversaro
 
