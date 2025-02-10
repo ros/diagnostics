@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.2 (2025-02-10)
+------------------
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#429 <https://github.com/ros/diagnostics/issues/429>`_)
   Co-authored-by: Silvio Traversaro <silvio@traversaro.it>
 * Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_) (`#415 <https://github.com/ros/diagnostics/issues/415>`_)

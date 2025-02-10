@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.2 (2025-02-10)
+------------------
 * Checking licenses in CI (`#431 <https://github.com/ros/diagnostics/issues/431>`_) (`#433 <https://github.com/ros/diagnostics/issues/433>`_)
   * Checking licenses in ci
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#429 <https://github.com/ros/diagnostics/issues/429>`_)
