@@ -197,6 +197,14 @@ public:
     const std::string item_name, const std::string message = "Missing",
     const DiagnosticLevel level = Level_Stale);
 
+  /*!
+  *\brief Constructed from string of item name and vector of key values
+  */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  StatusItem(
+    const std::string item_name, const std::vector<diagnostic_msgs::msg::KeyValue> & values,
+    const std::string message = "Missing", const DiagnosticLevel level = Level_Stale);
+
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   ~StatusItem();
 
@@ -253,16 +261,8 @@ public:
    *
    *\return True if has key
    */
-  bool hasKey(const std::string & key) const
-  {
-    for (unsigned int i = 0; i < values_.size(); ++i) {
-      if (values_[i].key == key) {
-        return true;
-      }
-    }
-
-    return false;
-  }
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  bool hasKey(const std::string & key) const;
 
   /*!
    *\brief Returns value for given key, "" if doens't exist
@@ -280,7 +280,26 @@ public:
     return std::string("");
   }
 
+  /*!
+  * \brief Adds key value pair to values_ vector
+  *
+  * If key already exists, updates value. Otherwise, adds new key value pair.
+  *
+  * \param key : Key to add
+  * \param value : Value to add
+  */
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  void addValue(const std::string & key, const std::string & value);
+
 private:
+  /*!
+  * \brief Returns index of key in values_ vector, values_.size() if not found
+  *
+  * \param key : Key to search for
+  * \return Index of key in values_ vector if key present, values_.size() if not
+  */
+  std::size_t findKey(const std::string & key) const;
+
   rclcpp::Time update_time_;
   rclcpp::Clock::SharedPtr clock_;
 
