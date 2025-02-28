@@ -82,8 +82,8 @@ class HDMonitor(Node):
         super().__init__(f'hd_monitor_{cleaned_hostname}')
 
         self._path = '~'
-        self._free_percent_low = 0.05
-        self._free_percent_crit = 0.01
+        self._free_percent_low = 5
+        self._free_percent_crit = 1
 
         self.add_on_set_parameters_callback(self.callback_config)
         self.declare_parameter('path', self._path)
@@ -122,7 +122,7 @@ class HDMonitor(Node):
         diag.level = DiagnosticStatus.OK
 
         total, _, free = disk_usage(self._path)
-        percent = free / total
+        percent = free / total * 100.0
 
         if percent > self._free_percent_low:
             diag.level = DiagnosticStatus.OK
@@ -137,7 +137,7 @@ class HDMonitor(Node):
                 KeyValue(key='Name', value=self._path),
                 KeyValue(key='Status', value=DICT_STATUS[diag.level]),
                 KeyValue(key='Total (Go)', value=str(total_go)),
-                KeyValue(key='Available (%)', value=str(round(percent, 2))),
+                KeyValue(key='Available (%)', value=str(round(percent, 1))),
             ]
         )
 
