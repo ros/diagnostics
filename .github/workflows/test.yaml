@@ -17,6 +17,7 @@ jobs:
         package: [
             diagnostic_aggregator,
             diagnostic_common_diagnostics,
+            diagnostic_remote_logging,
             diagnostic_updater,
             self_test,
           ]
