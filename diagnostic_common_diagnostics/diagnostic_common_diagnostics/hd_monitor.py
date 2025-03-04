@@ -44,7 +44,7 @@ from typing import List
 
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 from diagnostic_updater import Updater
-from rcl_interfaces.msg import SetParametersResult
+from rcl_interfaces.msg import SetParametersResult, ParameterDescriptor
 import rclpy
 from rclpy.node import Node
 
@@ -86,9 +86,14 @@ class HDMonitor(Node):
         self._free_percent_crit = FREE_PERCENT_CRIT
 
         self.add_on_set_parameters_callback(self.callback_config)
-        self.declare_parameter('path', self._path)
-        self.declare_parameter('free_percent_low', self._free_percent_low)
-        self.declare_parameter('free_percent_crit', self._free_percent_crit)
+        self.declare_parameter('path', self._path,  ParameterDescriptor(
+            description='Path in which to check remaining space.'))
+        self.declare_parameter(
+            'free_percent_low', self._free_percent_low,  ParameterDescriptor(
+                description='Warning threshold.', type=int()))
+        self.declare_parameter(
+            'free_percent_crit', self._free_percent_crit,  ParameterDescriptor(
+                description='Error threshold.', type=int()))
 
         self._updater = Updater(self)
         self._updater.setHardwareID(hostname)
