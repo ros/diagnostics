@@ -98,14 +98,23 @@ TEST(FormatValuesTests, FormatsKeyValuePairs)
 // Test splitHardwareID
 TEST(SplitHardwareIDTests, SplitsCorrectly)
 {
-  EXPECT_EQ(splitHardwareID("node_name"), std::make_pair(std::string("none"), std::string("node_"
-                                                                                          "name")));
-  EXPECT_EQ(splitHardwareID("/ns/node_name"), std::make_pair(std::string("ns"), std::string("node_"
-                                                                                            "nam"
-                                                                                            "e")));
-  EXPECT_EQ(splitHardwareID("/ns/prefix/node_name"),
-            std::make_pair(std::string("ns"), std::string("prefix/"
-                                                          "node_name")));
+  EXPECT_EQ(
+    splitHardwareID("node_name"), std::make_pair(
+      std::string("none"), std::string(
+        "node_"
+        "name")));
+  EXPECT_EQ(
+    splitHardwareID("/ns/node_name"), std::make_pair(
+      std::string("ns"), std::string(
+        "node_"
+        "nam"
+        "e")));
+  EXPECT_EQ(
+    splitHardwareID("/ns/prefix/node_name"),
+    std::make_pair(
+      std::string("ns"), std::string(
+        "prefix/"
+        "node_name")));
 }
 
 // Test statusToInfluxLineProtocol

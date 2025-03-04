@@ -57,8 +57,8 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
     // Ensure all parameters are set
     if (organization.empty() || bucket.empty() || influx_token_.empty()) {
       throw std::runtime_error(
-          "All parameters (connection.organization, connection.bucket, connection.token) "
-          "must be set, or when using a proxy like Telegraf none have to be set.");
+              "All parameters (connection.organization, connection.bucket, connection.token) "
+              "must be set, or when using a proxy like Telegraf none have to be set.");
     }
 
     // Construct the Telegraf URL
@@ -70,14 +70,14 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
 
   if (declare_parameter("send.agg", true)) {
     diag_sub_ = this->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
-        "/diagnostics_agg", rclcpp::SensorDataQoS(),
-        std::bind(&InfluxDB::diagnosticsCallback, this, std::placeholders::_1));
+      "/diagnostics_agg", rclcpp::SensorDataQoS(),
+      std::bind(&InfluxDB::diagnosticsCallback, this, std::placeholders::_1));
   }
 
   if (declare_parameter<bool>("send.top_level_state", true)) {
     top_level_sub_ = this->create_subscription<diagnostic_msgs::msg::DiagnosticStatus>(
-        "/diagnostics_toplevel_state", rclcpp::SensorDataQoS(),
-        std::bind(&InfluxDB::topLevelCallback, this, std::placeholders::_1));
+      "/diagnostics_toplevel_state", rclcpp::SensorDataQoS(),
+      std::bind(&InfluxDB::topLevelCallback, this, std::placeholders::_1));
   }
 }
 
@@ -149,8 +149,9 @@ bool InfluxDB::sendToInfluxDB(const std::string & data)
   curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_code);
 
   if (response_code != 204) {
-    RCLCPP_ERROR(this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code,
-                 data.c_str());
+    RCLCPP_ERROR(
+      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code,
+      data.c_str());
     return false;
   }
 
