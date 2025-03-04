@@ -49,8 +49,8 @@ import rclpy
 from rclpy.node import Node
 
 
-FREE_PERCENT_LOW = 0.05
-FREE_PERCENT_CRIT = 0.01
+FREE_PERCENT_LOW = 5
+FREE_PERCENT_CRIT = 1
 DICT_STATUS = {
     DiagnosticStatus.OK: 'OK',
     DiagnosticStatus.WARN: 'Warning',
@@ -82,8 +82,8 @@ class HDMonitor(Node):
         super().__init__(f'hd_monitor_{cleaned_hostname}')
 
         self._path = '~'
-        self._free_percent_low = 5
-        self._free_percent_crit = 1
+        self._free_percent_low = FREE_PERCENT_LOW
+        self._free_percent_crit = FREE_PERCENT_CRIT
 
         self.add_on_set_parameters_callback(self.callback_config)
         self.declare_parameter('path', self._path)
