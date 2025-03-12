@@ -106,15 +106,14 @@ class HDMonitor(Node):
         see the class documentation for declared parameters.
         """
         for param in params:
-            match param.name:
-                case 'path':
-                    self._path = str(
-                        Path(param.value).expanduser().resolve(strict=True)
-                    )
-                case 'free_percent_low':
-                    self._free_percent_low = param.value
-                case 'free_percent_crit':
-                    self._free_percent_crit = param.value
+            if param.name == 'path':
+                self._path = str(
+                    Path(param.value).expanduser().resolve(strict=True)
+                )
+            elif param.name == 'free_percent_low':
+                self._free_percent_low = param.value
+            elif param.name == 'free_percent_crit':
+                self._free_percent_crit = param.value
 
         return SetParametersResult(successful=True)
 
