@@ -44,7 +44,7 @@ from typing import List
 
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 from diagnostic_updater import Updater
-from rcl_interfaces.msg import SetParametersResult, ParameterDescriptor
+from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 import rclpy
 from rclpy.node import Node
 
