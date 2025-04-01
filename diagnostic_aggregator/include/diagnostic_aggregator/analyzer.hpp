@@ -94,8 +94,7 @@ public:
   /*!
    *\brief Default constructor, called by pluginlib.
    */
-  Analyzer()
-  : clock_(std::make_shared<rclcpp::Clock>()) {}
+  Analyzer() {}
 
   virtual ~Analyzer() {}
 

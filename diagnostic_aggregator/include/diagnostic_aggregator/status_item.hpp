@@ -187,13 +187,16 @@ public:
    *\brief Constructed from const DiagnosticStatus*
    */
   DIAGNOSTIC_AGGREGATOR_PUBLIC
-  explicit StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status);
+  StatusItem(
+    const diagnostic_msgs::msg::DiagnosticStatus * status,
+    rclcpp::Clock::SharedPtr clock);
 
   /*!
   *\brief Constructed from string of item name
   */
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   StatusItem(
+    rclcpp::Clock::SharedPtr clock,
     const std::string item_name, const std::string message = "Missing",
     const DiagnosticLevel level = Level_Stale);
 

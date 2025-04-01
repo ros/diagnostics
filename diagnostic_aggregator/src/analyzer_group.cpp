@@ -66,6 +66,7 @@ bool AnalyzerGroup::init(
   path_ = path;
   breadcrumb_ = breadcrumb;
   nice_name_ = path;
+  clock_ = n->get_clock();
 
   std::map<std::string, rclcpp::Parameter> parameters;
   if (!n->get_parameters(breadcrumb_, parameters)) {
@@ -128,7 +129,7 @@ bool AnalyzerGroup::init(
         RCLCPP_ERROR(
           logger_, "Failed to load analyzer %s, type %s. Caught exception: %s", ns.c_str(),
           an_type.c_str(), e.what());
-        auto item = std::make_shared<StatusItem>(ns, "Pluginlib exception loading analyzer");
+        auto item = std::make_shared<StatusItem>(n->get_clock(), ns, "Pluginlib exception loading analyzer");
         aux_items_.push_back(item);
         init_ok = false;
         continue;
@@ -139,7 +140,7 @@ bool AnalyzerGroup::init(
           logger_, "Pluginlib returned a null analyzer for %s, namespace %s.", an_type.c_str(),
           n->get_namespace());
         std::shared_ptr<StatusItem> item(
-          new StatusItem(ns, "Pluginlib return NULL Analyzer for " + an_type));
+          new StatusItem(n->get_clock(), ns, "Pluginlib return NULL Analyzer for " + an_type));
         aux_items_.push_back(item);
         init_ok = false;
         continue;
@@ -158,7 +159,7 @@ bool AnalyzerGroup::init(
         RCLCPP_ERROR(
           logger_, "Unable to initialize analyzer NS: %s, type: %s", n->get_namespace(),
           an_type.c_str());
-        std::shared_ptr<StatusItem> item(new StatusItem(ns, "Analyzer init failed"));
+        std::shared_ptr<StatusItem> item(new StatusItem(n->get_clock(), ns, "Analyzer init failed"));
         aux_items_.push_back(item);
         init_ok = false;
         continue;

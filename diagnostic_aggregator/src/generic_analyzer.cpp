@@ -56,9 +56,11 @@ GenericAnalyzer::GenericAnalyzer() {}
 bool GenericAnalyzer::init(
   const std::string & path, const std::string & breadcrumb, const rclcpp::Node::SharedPtr n)
 {
+  node_ = n;
   path_ = path;
   breadcrumb_ = breadcrumb;
   nice_name_ = breadcrumb;
+  clock_ = n->get_clock();
   RCLCPP_DEBUG(
     rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer, breadcrumb: %s", breadcrumb_.c_str());
 
@@ -114,7 +116,7 @@ bool GenericAnalyzer::init(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found expected: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
       for (auto exp : pvalue.as_string_array()) {
-        auto item = std::make_shared<StatusItem>(exp);
+        auto item = std::make_shared<StatusItem>(n->get_clock(), exp);
         this->addItem(exp, item);
       }
     } else if (pname.compare("regex") == 0) {
@@ -178,7 +180,7 @@ bool GenericAnalyzer::init(
     my_path = "/" + my_path;
   }
 
-  return GenericAnalyzerBase::init(path_, breadcrumb_, timeout, num_items_expected, discard_stale);
+  return GenericAnalyzerBase::init(path_, breadcrumb_, node_, timeout, num_items_expected, discard_stale);
 }
 
 GenericAnalyzer::~GenericAnalyzer() {}
@@ -282,7 +284,7 @@ vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> GenericAnalyzer:
 
   // Add missing names to header ...
   for (unsigned int i = 0; i < expected_names_missing.size(); ++i) {
-    std::shared_ptr<StatusItem> item(new StatusItem(expected_names_missing[i]));
+    std::shared_ptr<StatusItem> item(new StatusItem(node_->get_clock(), expected_names_missing[i]));
     processed.push_back(item->toStatusMsg(path_, true));
   }
 

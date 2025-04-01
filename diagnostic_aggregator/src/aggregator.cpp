@@ -83,8 +83,8 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 
   int publish_rate_ms = 1000 / pub_rate_;
-  publish_timer_ = n_->create_wall_timer(
-    std::chrono::milliseconds(publish_rate_ms),
+  publish_timer_ = rclcpp::create_timer(
+    n_, clock_, std::chrono::milliseconds(publish_rate_ms),
     std::bind(&Aggregator::publishData, this));
 
   param_sub_ = n_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
@@ -144,7 +144,7 @@ void Aggregator::initAnalyzers()
 
     // Last analyzer handles remaining data
     other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
-    other_analyzer_->init(base_path_);  // This always returns true
+    other_analyzer_->init(base_path_, "", n_);  // This always returns true
   }
 }
 
@@ -181,7 +181,7 @@ void Aggregator::diagCallback(const DiagnosticArray::SharedPtr diag_msg)
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto j = 0u; j < diag_msg->status.size(); ++j) {
       analyzed = false;
-      auto item = std::make_shared<StatusItem>(&diag_msg->status[j]);
+      auto item = std::make_shared<StatusItem>(&diag_msg->status[j], n_->get_clock());
 
       if (analyzer_group_->match(item->getName())) {
         analyzed = analyzer_group_->analyze(item);

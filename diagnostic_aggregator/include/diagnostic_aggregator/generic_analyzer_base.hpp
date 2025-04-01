@@ -101,7 +101,8 @@ public:
    * Must be initialized in order to prepend the path to all outgoing status messages.
    */
   bool init(
-    const std::string & path, const std::string & breadcrumb, double timeout = -1.0,
+    const std::string & path, const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node, double timeout = -1.0,
     int num_items_expected = -1, bool discard_stale = false)
   {
     num_items_expected_ = num_items_expected;
@@ -109,6 +110,7 @@ public:
     path_ = path + "/" + nice_name_;
     discard_stale_ = discard_stale;
     breadcrumb_ = breadcrumb;
+    clock_ = node->get_clock();
 
     if (discard_stale_ && timeout <= 0) {
       RCLCPP_WARN(

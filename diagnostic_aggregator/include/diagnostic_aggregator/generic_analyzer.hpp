@@ -229,6 +229,7 @@ public:
   virtual bool match(const std::string & name);
 
 private:
+  rclcpp::Node::SharedPtr node_;
   std::vector<std::string> chaff_; /**< Removed from the start of node names. */
   std::vector<std::string> expected_;
   std::vector<std::string> startswith_;

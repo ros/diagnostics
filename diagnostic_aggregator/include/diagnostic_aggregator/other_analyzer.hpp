@@ -85,34 +85,15 @@ public:
    *\param path Base path of Aggregator
    *\param breadcrumb Prefix for parameter getter.
    */
-  bool init(const std::string & path, const std::string & breadcrumb = "")
+  bool init(
+    const std::string & path, const std::string & breadcrumb,
+    const rclcpp::Node::SharedPtr node)
   {
     (void)breadcrumb;
 
     nice_name_ = "Other";
     path_ = path;
-    return GenericAnalyzerBase::init(path_, "", 5.0, -1, true);
-  }
-
-  /*
-   *\brief OtherAnalyzer cannot be initialized with a NodeHandle
-   *
-   *\return False, since NodeHandle initialization isn't valid
-   */
-  bool init(
-    const std::string & base_path, const std::string & breadcrumb,
-    const rclcpp::Node::SharedPtr node)
-  {
-    (void)base_path;
-    (void)breadcrumb;
-    (void)node;
-
-    RCLCPP_ERROR(
-      rclcpp::get_logger(
-        "generic_analyzer_base"),
-      R"(OtherAnalyzer was attempted to initialize with a NodeHandle.
-      This analyzer cannot be used as a plugin.)");
-    return false;
+    return GenericAnalyzerBase::init(path_, "", node, 5.0, -1, true);
   }
 
   /*

@@ -45,8 +45,10 @@ using std::string;
 
 using rclcpp::get_logger;
 
-StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
-: clock_(new rclcpp::Clock())
+StatusItem::StatusItem(
+  const diagnostic_msgs::msg::DiagnosticStatus * status,
+  rclcpp::Clock::SharedPtr clock)
+: clock_(clock)
 {
   level_ = valToLevel(status->level);
   name_ = status->name;
@@ -59,8 +61,12 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
   update_time_ = clock_->now();
 }
 
-StatusItem::StatusItem(const string item_name, const string message, const DiagnosticLevel level)
-: clock_(new rclcpp::Clock())
+StatusItem::StatusItem(
+  rclcpp::Clock::SharedPtr clock,
+  const string item_name,
+  const string message,
+  const DiagnosticLevel level)
+: clock_(clock)
 {
   RCLCPP_DEBUG(rclcpp::get_logger("StatusItem"), "StatusItem constructor from string");
   name_ = item_name;
