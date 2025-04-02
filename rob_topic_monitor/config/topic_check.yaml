@@ -1,0 +1,45 @@
+# /diagnostics/topic_frequency_monitor:
+#     ros__parameters:
+#       monitor_configured_only: True
+#       topics:
+#         - /odom
+#         - /base_link/odom
+#         - /rpm/sensors/front/imu/imu/data
+#         - /rpm/sensors/front/lidar3d/points
+#         - /rpm/sensors/rear/lidar3d/points
+#       min_freqs:
+#         - 49.0
+#         - 7.5
+#         - 99.0
+#         - 9.5
+#         - 9.5
+#       max_freqs:
+#         - 51.0
+#         - 10.0
+#         - 100.0
+#         - 10.5
+#         - 10.5
+
+# /diagnostics/message_age_monitor:
+#     ros__parameters:
+#       monitor_configured_only: True
+#       topics:
+#         - /odom
+#         - /base_link/odom
+#         - /rpm/sensors/front/imu/imu/data
+#         - /rpm/sensors/front/lidar3d/points
+#         - /rpm/sensors/rear/lidar3d/points
+#       min_delays:
+#         - -0.09  # can occur due to simulated time
+#         - -0.09
+#         - -0.09
+#         - 0.0
+#         - 0.0
+#       max_delays:
+#         - 0.1
+#         - 0.1
+#         - 0.1
+#         - 0.200
+#         - 0.200
+
+
