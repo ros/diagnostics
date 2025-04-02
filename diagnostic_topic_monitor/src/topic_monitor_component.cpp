@@ -63,7 +63,7 @@ private:
 };
 }  // namespace
 
-namespace rob_topic_monitor
+namespace diagnostic_topic_monitor
 {
 constexpr const char * TOPICS_PARAM_NAME = "topics";
 constexpr const char * MIN_FREQS_PARAM_NAME = "min_freqs";
@@ -277,7 +277,7 @@ void TopicMonitor::update_topic_subscriptions()
     topics.size(),
     known_topics_.size(), subscribed_topics_.size());
 }
-}  // namespace rob_topic_monitor
+}  // namespace diagnostic_topic_monitor
 
 #include <rclcpp_components/register_node_macro.hpp>  // NOLINT: upstream
-RCLCPP_COMPONENTS_REGISTER_NODE(rob_topic_monitor::TopicMonitor)
+RCLCPP_COMPONENTS_REGISTER_NODE(diagnostic_topic_monitor::TopicMonitor)
