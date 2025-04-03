@@ -2,8 +2,8 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.3.3 (2025-04-03)
+------------------
 * cleanup (#450 <https://github.com/ros/diagnostics/issues/450>)
 * Grafana Integration (#425 <https://github.com/ros/diagnostics/issues/425>)
   * First working version of remote_logging
