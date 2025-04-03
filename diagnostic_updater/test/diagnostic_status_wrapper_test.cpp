@@ -86,7 +86,7 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperMergeSummary) {
 
   dsw.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Still ok");
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
-  EXPECT_EQ(dsw.message, "Was ok");
+  EXPECT_EQ(dsw.message, "Was ok; Still ok");
   EXPECT_EQ(dsw.values.size(), 0u);
 
   dsw.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Warning");
