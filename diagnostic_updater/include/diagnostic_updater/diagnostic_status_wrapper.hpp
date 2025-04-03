@@ -115,7 +115,7 @@ public:
 
   void mergeSummary(unsigned char lvl, const std::string s)
   {
-    if ((lvl > 0) && (level > 0)) {
+    if ((lvl > 0) == (level > 0)) {
       if (!message.empty()) {
         message += "; ";
         message += s;
