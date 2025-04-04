@@ -129,7 +129,8 @@ bool AnalyzerGroup::init(
         RCLCPP_ERROR(
           logger_, "Failed to load analyzer %s, type %s. Caught exception: %s", ns.c_str(),
           an_type.c_str(), e.what());
-        auto item = std::make_shared<StatusItem>(n->get_clock(), ns, "Pluginlib exception loading analyzer");
+        auto item = std::make_shared<StatusItem>(
+          n->get_clock(), ns, "Pluginlib exception loading analyzer");
         aux_items_.push_back(item);
         init_ok = false;
         continue;
@@ -159,7 +160,8 @@ bool AnalyzerGroup::init(
         RCLCPP_ERROR(
           logger_, "Unable to initialize analyzer NS: %s, type: %s", n->get_namespace(),
           an_type.c_str());
-        std::shared_ptr<StatusItem> item(new StatusItem(n->get_clock(), ns, "Analyzer init failed"));
+        std::shared_ptr<StatusItem> item(
+          new StatusItem(n->get_clock(), ns, "Analyzer init failed"));
         aux_items_.push_back(item);
         init_ok = false;
         continue;

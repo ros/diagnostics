@@ -180,7 +180,8 @@ bool GenericAnalyzer::init(
     my_path = "/" + my_path;
   }
 
-  return GenericAnalyzerBase::init(path_, breadcrumb_, node_, timeout, num_items_expected, discard_stale);
+  return GenericAnalyzerBase::init(
+    path_, breadcrumb_, node_, timeout, num_items_expected, discard_stale);
 }
 
 GenericAnalyzer::~GenericAnalyzer() {}
