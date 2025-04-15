@@ -85,29 +85,29 @@ if(BUILD_TESTING)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/add_analyzer" ADD_ANALYZER)
   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
-  # SKIPPING FLAKY TEST
-  # set(create_analyzers_tests
-  #   "primitive_analyzers"
-  #   "all_analyzers"
-  #   "analyzer_group"
-  #   "empty_root_path")
 
-  # foreach(test_name ${create_analyzers_tests})
-  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
-  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
+  set(create_analyzers_tests
+    "primitive_analyzers"
+    "all_analyzers"
+    "analyzer_group"
+    "empty_root_path")
 
-  #   configure_file(
-  #     "test/create_analyzers.launch.py.in"
-  #     "test_create_${test_name}.launch.py"
-  #     @ONLY
-  #   )
-  #   add_launch_test(
-  #     "${CMAKE_CURRENT_BINARY_DIR}/test_create_${test_name}.launch.py"
-  #     TARGET "test_create_${test_name}"
-  #     TIMEOUT 30
-  #     ENV
-  #   )
-  # endforeach()
+  foreach(test_name ${create_analyzers_tests})
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
+
+    configure_file(
+      "test/create_analyzers.launch.py.in"
+      "test_create_${test_name}.launch.py"
+      @ONLY
+    )
+    add_launch_test(
+      "${CMAKE_CURRENT_BINARY_DIR}/test_create_${test_name}.launch.py"
+      TARGET "test_create_${test_name}"
+      TIMEOUT 30
+      ENV
+    )
+  endforeach()
 
   set(analyzers_output_tests
     "primitive_analyzers"
@@ -133,7 +133,7 @@ if(BUILD_TESTING)
   endforeach()
 
   set(add_analyzers_tests
-  "all_analyzers")
+    "all_analyzers")
 
   foreach(test_name ${add_analyzers_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
