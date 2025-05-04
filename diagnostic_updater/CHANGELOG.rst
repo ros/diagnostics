@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2025-05-04)
+-------------------
 * diagnostic_updater: Added documentation of the Python interface. (`#399 <https://github.com/ros/diagnostics/issues/399>`_)
   * diagnostic_updater: Added documentation of the Python interface.
   * diagnostic_updater: Added link to Python docs from the C++ docs.

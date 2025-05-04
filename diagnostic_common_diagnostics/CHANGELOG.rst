@@ -2,8 +2,8 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2025-05-04)
+-------------------
 * Fix Python3 port of hd_monitor.py (`#231 <https://github.com/ros/diagnostics/issues/231>`_)
   The data returned from a socket is `bytes`. So to properly deal with
   this data we'd have to concatenate as bytes and decode to string at the

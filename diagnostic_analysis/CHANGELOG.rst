@@ -2,8 +2,8 @@
 Changelog for package diagnostic_analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2025-05-04)
+-------------------
 * Fix python3 shebang for diagnostic_analysis (`#241 <https://github.com/ros/diagnostics/issues/241>`_)
 * Contributors: SubaruArai
 

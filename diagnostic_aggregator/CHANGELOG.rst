@@ -2,8 +2,8 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.1 (2025-05-04)
+-------------------
 * Add DowngradeAnalyser for reporting non-critical errors (`#126 <https://github.com/ros/diagnostics/issues/126>`_)
 * Fix two code-analyser bugs (`#282 <https://github.com/ros/diagnostics/issues/282>`_)
 * Optimize ros::Time::now() function calls (`#332 <https://github.com/ros/diagnostics/issues/332>`_)
