@@ -1,4 +1,4 @@
-<package>
+<package format="2">
   <name>diagnostic_updater</name>
   <version>1.11.0</version>
   <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
@@ -22,15 +22,19 @@
   <build_depend>rostest</build_depend>
   <build_depend>std_msgs</build_depend>
 
-  <run_depend>diagnostic_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  
+  <doc_depend>rosdoc_lite</doc_depend>
+  <doc_depend>python3-catkin-sphinx</doc_depend>
 
   <!-- <test_depend>roscpp</test_depend> -->
   <!-- <test_depend>diagnostic_msgs</test_depend> -->
   <!-- <test_depend>std_msgs</test_depend> -->
 
   <export>
+    <rosdoc config="rosdoc.yaml"/>
     <architecture_independent/>
   </export>
 </package>

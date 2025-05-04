@@ -43,23 +43,23 @@ from ._update_functions import *
 
 class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
     """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus.
+    :class:`FrequencyStatus`.
 
     The word "headerless" in the class name refers to the fact that it is
     mainly designed for use with messages that do not have a header, and
-    that cannot therefore be checked using a TimeStampStatus.
+    that cannot therefore be checked using a :class:`TimeStampStatus`.
     """
 
     def __init__(self, name, diag, freq):
-        """Constructs a HeaderlessTopicDiagnostic.
+        """Constructs a :class:`HeaderlessTopicDiagnostic`.
 
-        @param name The name of the topic that is being diagnosed.
+        :param str name: The name of the topic that is being diagnosed.
 
-        @param diag The diagnostic_updater that the CompositeDiagnosticTask
-        should add itself to.
+        :param diagnostic_updater.Updater diag: The :class:`Updater` that the :class:`CompositeDiagnosticTask`
+                                                should add itself to.
 
-        @param freq The parameters for the FrequencyStatus class that will be
-        computing statistics.
+        :param diagnostic_updater.FrequencyStatusParam freq: The parameters for the :class:`FrequencyStatus`
+                                                             class that will be computing statistics.
         """
         CompositeDiagnosticTask.__init__(self, name + " topic status")
         self.diag = diag
@@ -78,22 +78,22 @@ class HeaderlessTopicDiagnostic(CompositeDiagnosticTask):
 
 class TopicDiagnostic(HeaderlessTopicDiagnostic):
     """A class to facilitate making diagnostics for a topic using a
-    FrequencyStatus and TimeStampStatus.
+    :class:`FrequencyStatus` and :class:`TimeStampStatus`.
     """
 
     def __init__(self, name, diag, freq, stamp):
-        """Constructs a TopicDiagnostic.
+        """Constructs a :class:`TopicDiagnostic`.
 
-        @param name The name of the topic that is being diagnosed.
+        :param str name: The name of the topic that is being diagnosed.
 
-        @param diag The diagnostic_updater that the CompositeDiagnosticTask
-        should add itself to.
+        :param diagnostic_updater.Updater diag: The :class:`Updater` that the :class:`CompositeDiagnosticTask`
+                                                should add itself to.
 
-        @param freq The parameters for the FrequencyStatus class that will be
-        computing statistics.
+        :param diagnostic_updater.FrequencyStatusParam freq: The parameters for the :class:`FrequencyStatus`
+                                                             class that will be computing statistics.
 
-        @param stamp The parameters for the TimeStampStatus class that will be
-        computing statistics.
+        :param diagnostic_updater.TimeStampStatusParam stamp: The parameters for the :class:`TimeStampStatus`
+                                                              class that will be computing statistics.
         """
 
         HeaderlessTopicDiagnostic.__init__(self, name, diag, freq)
@@ -103,33 +103,34 @@ class TopicDiagnostic(HeaderlessTopicDiagnostic):
     def tick(self, stamp):
         """Collects statistics and publishes the message.
 
-        @param stamp Timestamp to use for interval computation by the
-        TimeStampStatus class.
+        :param stamp: Timestamp to use for interval computation by the
+                      :class:`TimeStampStatus` class.
+        :type stamp: float or rospy.Time
         """
         self.stamp.tick(stamp)
         HeaderlessTopicDiagnostic.tick(self)
 
 
 class DiagnosedPublisher(TopicDiagnostic):
-    """A TopicDiagnostic combined with a ros::Publisher.
+    """A :class:`TopicDiagnostic` combined with a :class:`rospy.Publisher`.
 
-    For a standard ros::Publisher, this class allows the ros::Publisher and
-    the TopicDiagnostic to be combined for added convenience.
+    For a standard :class:`rospy.Publisher`, this class allows the :class:`rospy.Publisher` and
+    the :class:`TopicDiagnostic` to be combined for added convenience.
     """
 
     def __init__(self, pub, diag, freq, stamp):
-        """Constructs a DiagnosedPublisher.
+        """Constructs a :class:`DiagnosedPublisher`.
 
-        @param pub The publisher on which statistics are being collected.
+        :param rospy.Publisher pub: The publisher on which statistics are being collected.
 
-        @param diag The diagnostic_updater that the CompositeDiagnosticTask
-        should add itself to.
+        :param diagnostic_updater.Updater diag: The :class:`Updater` that the :class:`CompositeDiagnosticTask`
+                                                should add itself to.
 
-        @param freq The parameters for the FrequencyStatus class that will be
-        computing statistics.
+        :param diagnostic_updater.FrequencyStatusParam freq: The parameters for the :class:`FrequencyStatus`
+                                                             class that will be computing statistics.
 
-        @param stamp The parameters for the TimeStampStatus class that will be
-        computing statistics.
+        :param diagnostic_updater.TimeStampStatusParam stamp: The parameters for the :class:`TimeStampStatus`
+                                                              class that will be computing statistics.
         """
         TopicDiagnostic.__init__(self, pub.name, diag, freq, stamp)
         self.publisher = pub
@@ -137,8 +138,10 @@ class DiagnosedPublisher(TopicDiagnostic):
     def publish(self, message):
         """Collects statistics and publishes the message.
 
-        The timestamp to be used by the TimeStampStatus class will be
-        extracted from message.header.stamp.
+        The timestamp to be used by the :class:`TimeStampStatus` class will be
+        extracted from `message.header.stamp`.
+        
+        :param genpy.Message message: The message to be published.
         """
         self.tick(message.header.stamp)
         self.publisher.publish(message)
