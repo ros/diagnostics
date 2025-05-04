@@ -2,6 +2,17 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* diagnostic_updater: Added documentation of the Python interface. (`#399 <https://github.com/ros/diagnostics/issues/399>`_)
+  * diagnostic_updater: Added documentation of the Python interface.
+  * diagnostic_updater: Added link to Python docs from the C++ docs.
+  ---------
+* Fix diagnostics Updater constructor NodeHandle documentation (`#234 <https://github.com/ros/diagnostics/issues/234>`_)
+  Previously the documentation mistakenly stated the argument `h` was used for getting the `diagnostic_period` parameter. I fixed the documentation.
+* Switch to new boost/bind/bind.hpp (`#224 <https://github.com/ros/diagnostics/issues/224>`_)
+* Contributors: Jacob Seibert, Jochen Sprickerhof, Martin Pecka
+
 1.11.0 (2021-12-31)
 -------------------
 * Use DiagnosticLevel enum instead of hardcoded integers (`#208 <https://github.com/ros/diagnostics/issues/208>`_)

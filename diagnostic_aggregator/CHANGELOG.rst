@@ -2,6 +2,13 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add DowngradeAnalyser for reporting non-critical errors (`#126 <https://github.com/ros/diagnostics/issues/126>`_)
+* Fix two code-analyser bugs (`#282 <https://github.com/ros/diagnostics/issues/282>`_)
+* Optimize ros::Time::now() function calls (`#332 <https://github.com/ros/diagnostics/issues/332>`_)
+* Contributors: Amilcar Lucas, Tim Clephas
+
 1.11.0 (2021-12-31)
 -------------------
 * Use DiagnosticLevel enum instead of hardcoded integers (`#208 <https://github.com/ros/diagnostics/issues/208>`_)

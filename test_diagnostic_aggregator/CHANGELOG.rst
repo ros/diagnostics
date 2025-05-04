@@ -2,6 +2,11 @@
 Changelog for package test_diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Switch to hpp headers of pluginlib (`#230 <https://github.com/ros/diagnostics/issues/230>`_)
+* Contributors: Jochen Sprickerhof
+
 1.11.0 (2021-12-31)
 -------------------
 

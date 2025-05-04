@@ -2,6 +2,18 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix Python3 port of hd_monitor.py (`#231 <https://github.com/ros/diagnostics/issues/231>`_)
+  The data returned from a socket is `bytes`. So to properly deal with
+  this data we'd have to concatenate as bytes and decode to string at the
+  end.
+  The old (wrong) way of concatenating results in some stray `'b'`
+  characters showing up in the drive names.
+* Diagnostic meesage requires a string instead of bytes (`#233 <https://github.com/ros/diagnostics/issues/233>`_)
+  Co-authored-by: sunfish <sunfish@stoneaerospace.com>
+* Contributors: Ramon Wijnands, chrisflesher
+
 1.11.0 (2021-12-31)
 -------------------
 * Added ram monitor (`#222 <https://github.com/ros/diagnostics/issues/222>`_)
