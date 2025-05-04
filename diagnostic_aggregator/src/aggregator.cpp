@@ -84,12 +84,9 @@ void Aggregator::checkTimestamp(const diagnostic_msgs::DiagnosticArray::ConstPtr
       stamp_warn += ", ";
     stamp_warn += it->name;
   }
-  
-  if (!ros_warnings_.count(stamp_warn))
-  {
-    ROS_WARN("%s", stamp_warn.c_str());
-    ros_warnings_.insert(stamp_warn);
-  }
+
+  auto result = ros_warnings_.insert(stamp_warn);
+  ROS_WARN_COND(result.second, "%s", stamp_warn.c_str());
 }
 
 void Aggregator::diagCallback(const diagnostic_msgs::DiagnosticArray::ConstPtr& diag_msg)
