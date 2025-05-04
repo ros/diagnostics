@@ -2,7 +2,7 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.11.1 (2025-05-04)
+1.12.0 (2025-05-04)
 -------------------
 * Fix Python3 port of hd_monitor.py (`#231 <https://github.com/ros/diagnostics/issues/231>`_)
   The data returned from a socket is `bytes`. So to properly deal with

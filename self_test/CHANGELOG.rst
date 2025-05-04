@@ -2,7 +2,7 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.11.1 (2025-05-04)
+1.12.0 (2025-05-04)
 -------------------
 * Switch to new boost/bind/bind.hpp (`#224 <https://github.com/ros/diagnostics/issues/224>`_)
 * Contributors: Jochen Sprickerhof
