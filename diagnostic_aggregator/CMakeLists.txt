@@ -25,7 +25,7 @@ add_library(${PROJECT_NAME} SHARED
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME} PUBLIC
   "diagnostic_msgs"
   "pluginlib"
   "rclcpp"
@@ -50,7 +50,7 @@ add_library(${ANALYZERS} SHARED
 target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${ANALYZERS}
+target_link_libraries(${ANALYZERS} PUBLIC
   "diagnostic_msgs"
   "pluginlib"
   "rclcpp"
@@ -71,7 +71,7 @@ target_link_libraries(aggregator_node
 
 # Add analyzer
 add_executable(add_analyzer src/add_analyzer.cpp)
-ament_target_dependencies(add_analyzer rclcpp rcl_interfaces)
+target_link_libraries(add_analyzer PUBLIC rclcpp rcl_interfaces)
 
 # Testing macro
 if(BUILD_TESTING)

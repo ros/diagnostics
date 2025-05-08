@@ -38,8 +38,8 @@ target_include_directories(run_selftest
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
-  run_selftest
+target_link_libraries(run_selftest
+  PUBLIC
   "builtin_interfaces"
   "diagnostic_msgs"
   "diagnostic_updater"
@@ -53,8 +53,8 @@ target_include_directories(selftest_example
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
-  selftest_example
+target_link_libraries(selftest_example
+  PUBLIC
   "builtin_interfaces"
   "diagnostic_msgs"
   "diagnostic_updater"

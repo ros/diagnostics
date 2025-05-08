@@ -28,7 +28,7 @@ target_include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
+target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC
   diagnostic_msgs
@@ -45,8 +45,8 @@ install(
 )
 
 add_executable(example src/example.cpp)
-ament_target_dependencies(
-  example
+target_link_libraries(example
+  PUBLIC
   "diagnostic_msgs"
   "rclcpp"
   "std_msgs"
