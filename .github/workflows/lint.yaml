@@ -50,4 +50,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: boschresearch/ros_license_toolkit@2.0.1
+      - uses: boschresearch/ros_license_toolkit@2.0.2
