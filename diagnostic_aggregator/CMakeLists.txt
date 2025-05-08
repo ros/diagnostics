@@ -55,8 +55,6 @@ target_link_libraries(${ANALYZERS} PUBLIC
   "pluginlib"
   "rclcpp"
   "std_msgs"
-)
-target_link_libraries(${ANALYZERS}
   ${PROJECT_NAME})
 target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
