@@ -26,10 +26,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  "diagnostic_msgs"
-  "pluginlib"
-  "rclcpp"
-  "std_msgs"
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  pluginlib::pluginlib
+  rclcpp::rclcpp
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
@@ -51,11 +51,11 @@ target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(${ANALYZERS} PUBLIC
-  "diagnostic_msgs"
-  "pluginlib"
-  "rclcpp"
-  "std_msgs"
-  ${PROJECT_NAME})
+  ${PROJECT_NAME}
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  rclcpp::rclcpp
+)
 target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
 
@@ -69,7 +69,7 @@ target_link_libraries(aggregator_node
 
 # Add analyzer
 add_executable(add_analyzer src/add_analyzer.cpp)
-target_link_libraries(add_analyzer PUBLIC rclcpp rcl_interfaces)
+target_link_libraries(add_analyzer PUBLIC ${rcl_interfaces_TARGETS} rclcpp::rclcpp)
 
 # Testing macro
 if(BUILD_TESTING)

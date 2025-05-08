@@ -40,11 +40,11 @@ target_include_directories(run_selftest
 )
 target_link_libraries(run_selftest
   PUBLIC
-  "builtin_interfaces"
-  "diagnostic_msgs"
-  "diagnostic_updater"
-  "rclcpp"
-  "rcutils"
+  ${builtin_interfaces_TARGETS}
+  ${diagnostic_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rcutils::rcutils
 )
 
 add_executable(selftest_example example/selftest_example.cpp)
@@ -55,11 +55,11 @@ target_include_directories(selftest_example
 )
 target_link_libraries(selftest_example
   PUBLIC
-  "builtin_interfaces"
-  "diagnostic_msgs"
-  "diagnostic_updater"
-  "rclcpp"
-  "rcutils"
+  ${builtin_interfaces_TARGETS}
+  ${diagnostic_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rcutils::rcutils
 )
 
 if(BUILD_TESTING)

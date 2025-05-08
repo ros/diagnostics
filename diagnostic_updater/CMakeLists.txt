@@ -31,8 +31,8 @@ target_include_directories(
 target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC
-  diagnostic_msgs
-  rclcpp
+  ${diagnostic_msgs_TARGETS}
+  rclcpp::rclcpp
 )
 
 install(
@@ -47,10 +47,10 @@ install(
 add_executable(example src/example.cpp)
 target_link_libraries(example
   PUBLIC
-  "diagnostic_msgs"
-  "rclcpp"
-  "std_msgs"
   ${PROJECT_NAME}
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  rclcpp::rclcpp
 )
 
 if(BUILD_TESTING)
