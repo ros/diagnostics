@@ -52,6 +52,7 @@ target_include_directories(${ANALYZERS} PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(${ANALYZERS} PUBLIC
   ${PROJECT_NAME}
+  pluginlib::pluginlib
   ${diagnostic_msgs_TARGETS}
   ${std_msgs_TARGETS}
   rclcpp::rclcpp
