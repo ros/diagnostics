@@ -54,6 +54,7 @@ target_link_libraries(${ANALYZERS} PUBLIC
   ${PROJECT_NAME}
   ${diagnostic_msgs_TARGETS}
   ${std_msgs_TARGETS}
+  pluginlib::pluginlib
   rclcpp::rclcpp
 )
 target_compile_definitions(${ANALYZERS}
