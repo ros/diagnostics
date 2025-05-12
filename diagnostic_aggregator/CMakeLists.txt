@@ -96,7 +96,7 @@ if(BUILD_TESTING)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
 
     configure_file(
-      "test/create_analyzers.launch.py.in"
+      "test/test_create_analyzers.launch.py.in"
       "test_create_${test_name}.launch.py"
       @ONLY
     )
@@ -114,7 +114,7 @@ if(BUILD_TESTING)
     "analyzer_group"
     "empty_root_path")
 
-  foreach(test_name ${create_analyzers_tests})
+  foreach(test_name ${analyzers_output_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_${test_name}" EXPECTED_OUTPUT)
 
@@ -140,7 +140,7 @@ if(BUILD_TESTING)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
 
     configure_file(
-      "test/add_analyzers.launch.py.in"
+      "test/test_add_analyzers.launch.py.in"
       "test_add_${test_name}.launch.py"
       @ONLY
     )
@@ -152,17 +152,15 @@ if(BUILD_TESTING)
     )
   endforeach()
 
-  # SKIPPING FLAKY TEST
-  # add_launch_test(
-  #   test/test_critical_pub.py
-  #   TIMEOUT 30
-  # )
+  add_launch_test(
+    test/test_critical_pub.py
+    TIMEOUT 30
+  )
 
-  # SKIPPING FLAKY TEST
-  # ament_add_pytest_test(test_discard_behavior
-  #   "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
-  #   TIMEOUT 60
-  # )
+  ament_add_pytest_test(test_discard_behavior
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
+    TIMEOUT 60
+  )
 endif()
 
 install(
