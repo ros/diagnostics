@@ -2,6 +2,9 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 4.2.2 (2025-02-10)
 ------------------
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_) (`#430 <https://github.com/ros/diagnostics/issues/430>`_)
