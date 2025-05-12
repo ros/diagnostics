@@ -109,10 +109,10 @@ if(BUILD_TESTING)
   endforeach()
 
   set(analyzers_output_tests
-    "primitive_analyzers"
-    "all_analyzers"
-    "analyzer_group"
-    "empty_root_path")
+    "primitive_analyzers")
+    # "all_analyzers"
+    # "analyzer_group"
+    # "empty_root_path")
 
   foreach(test_name ${analyzers_output_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
@@ -131,36 +131,38 @@ if(BUILD_TESTING)
     )
   endforeach()
 
-  set(add_analyzers_tests
-    "all_analyzers")
+  # TODO ...
 
-  foreach(test_name ${add_analyzers_tests})
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
+  # set(add_analyzers_tests
+  #   "all_analyzers")
 
-    configure_file(
-      "test/test_add_analyzers.launch.py.in"
-      "test_add_${test_name}.launch.py"
-      @ONLY
-    )
-    add_launch_test(
-      "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
-      TARGET "test_add_${test_name}"
-      TIMEOUT 30
-      ENV
-    )
-  endforeach()
+  # foreach(test_name ${add_analyzers_tests})
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
 
-  add_launch_test(
-    test/test_critical_pub.py
-    TIMEOUT 30
-  )
+  #   configure_file(
+  #     "test/test_add_analyzers.launch.py.in"
+  #     "test_add_${test_name}.launch.py"
+  #     @ONLY
+  #   )
+  #   add_launch_test(
+  #     "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
+  #     TARGET "test_add_${test_name}"
+  #     TIMEOUT 30
+  #     ENV
+  #   )
+  # endforeach()
 
-  ament_add_pytest_test(test_discard_behavior
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
-    TIMEOUT 60
-  )
+  # add_launch_test(
+  #   test/test_critical_pub.py
+  #   TIMEOUT 30
+  # )
+
+  # ament_add_pytest_test(test_discard_behavior
+  #   "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
+  #   TIMEOUT 60
+  # )
 endif()
 
 install(

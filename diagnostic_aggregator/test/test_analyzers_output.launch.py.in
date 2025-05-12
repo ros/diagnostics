@@ -16,7 +16,7 @@ import launch_testing_ros
 
 test_listener = ExecuteProcess(
     cmd=[
-        "@PYTHON_EXECUTABLE@",
+        "/usr/bin/python3",
         "@TEST_LISTENER@"
         ],
     name='test_listener',
