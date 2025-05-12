@@ -2,6 +2,11 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.4 (2025-05-12)
+------------------
+* Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
+* Contributors: David V. Lu, Christian Henkel
+
 4.4.3 (2025-04-03)
 ------------------
 * cleanup (`#450 <https://github.com/ros/diagnostics/issues/450>`_)
