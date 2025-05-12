@@ -109,10 +109,10 @@ if(BUILD_TESTING)
   endforeach()
 
   set(analyzers_output_tests
-    "primitive_analyzers")
-    # "all_analyzers"
-    # "analyzer_group"
-    # "empty_root_path")
+    "primitive_analyzers"
+    "all_analyzers"
+    "analyzer_group"
+    "empty_root_path")
 
   foreach(test_name ${analyzers_output_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
