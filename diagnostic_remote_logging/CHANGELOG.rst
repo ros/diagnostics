@@ -2,6 +2,9 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 4.0.3 (2025-04-03)
 ------------------
 * cleanup (#450 <https://github.com/ros/diagnostics/issues/450>)
