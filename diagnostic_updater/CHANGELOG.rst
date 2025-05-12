@@ -2,6 +2,11 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
+* Contributors: David V. Lu, Christian Henkel
+
 4.3.2 (2025-02-10)
 ------------------
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)
