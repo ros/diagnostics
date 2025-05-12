@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.3.4 (2025-05-12)
+------------------
 * Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
 * Contributors: David V. Lu, Christian Henkel
 
