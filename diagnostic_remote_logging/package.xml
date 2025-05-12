@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diagnostic_remote_logging</name>
-  <version>4.0.3</version>
+  <version>4.0.4</version>
   <description>diagnostic_remote_logging</description>
   <maintainer email="dwijffels@lely.com">Daan Wijffels</maintainer>
   <license>BSD-3-Clause</license>
