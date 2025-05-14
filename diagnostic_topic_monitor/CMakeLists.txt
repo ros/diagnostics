@@ -23,13 +23,13 @@ find_package(rclcpp REQUIRED)
 find_package(diagnostic_updater REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_library(topic_monitor_component SHARED src/topic_monitor_component.cpp)
-rclcpp_components_register_node(topic_monitor_component
-  PLUGIN "rob_topic_monitor::TopicMonitor"
-  EXECUTABLE topic_monitor
+add_library(topic_frequency_monitor_component SHARED src/topic_frequency_monitor_component.cpp)
+rclcpp_components_register_node(topic_frequency_monitor_component
+  PLUGIN "diagnostic_topic_monitor::TopicFrequencyMonitor"
+  EXECUTABLE topic_frequency_monitor
 )
-target_include_directories(topic_monitor_component PRIVATE include)
-ament_target_dependencies(topic_monitor_component
+target_include_directories(topic_frequency_monitor_component PRIVATE include)
+ament_target_dependencies(topic_frequency_monitor_component
   "lifecycle_msgs"
   "rclcpp"
   "rclcpp_lifecycle"
@@ -37,70 +37,64 @@ ament_target_dependencies(topic_monitor_component
   "diagnostic_msgs"
   "diagnostic_updater"
 )
-ament_export_targets(export_topic_monitor_component)
-install(TARGETS topic_monitor_component
-  EXPORT export_topic_monitor_component
+ament_export_targets(export_topic_frequency_monitor_component)
+install(TARGETS topic_frequency_monitor_component
+  EXPORT export_topic_frequency_monitor_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-add_library(header_topic_monitor_component SHARED src/header_topic_monitor_component.cpp)
-rclcpp_components_register_node(header_topic_monitor_component
-  PLUGIN "rob_topic_monitor::HeaderTopicMonitor"
-  EXECUTABLE header_topic_monitor
+add_library(topic_age_monitor_component SHARED src/topic_age_monitor_component.cpp)
+rclcpp_components_register_node(topic_age_monitor_component
+  PLUGIN "diagnostic_topic_monitor::TopicAgeMonitor"
+  EXECUTABLE topic_age_monitor
 )
-target_include_directories(header_topic_monitor_component PRIVATE include)
-ament_target_dependencies(header_topic_monitor_component
+target_include_directories(topic_age_monitor_component PRIVATE include)
+ament_target_dependencies(topic_age_monitor_component
   "lifecycle_msgs"
-  "std_msgs"
   "rclcpp"
   "rclcpp_lifecycle"
   "rclcpp_components"
   "diagnostic_msgs"
   "diagnostic_updater"
 )
-ament_export_targets(export_header_topic_monitor_component)
-install(TARGETS header_topic_monitor_component
-  EXPORT export_header_topic_monitor_component
+ament_export_targets(export_topic_age_monitor_component)
+install(TARGETS topic_age_monitor_component
+  EXPORT export_topic_age_monitor_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-
-# Install launch files.
 install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
+  DIRECTORY include/
+  DESTINATION include
 )
-# Install config files.
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}/
-)
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
+  find_package(launch_testing_ament_cmake REQUIRED)
 
-  find_package(ament_cmake_pytest REQUIRED)
-  file(GLOB _pytest_tests TESTS test/*.py)
-  foreach(_test_path ${_pytest_tests})
-    get_filename_component(_test_name ${_test_path} NAME_WE)
-    ament_add_pytest_test(${_test_name} ${_test_path}
-      APPEND_ENV PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
-      TIMEOUT 60
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
-  endforeach()
+  # Install the test configs and dummy publisher used for testing
+  install(
+    DIRECTORY test
+    DESTINATION share/${PROJECT_NAME}/
+  )
+  install(
+    PROGRAMS test/dummy_publishers.py
+    DESTINATION lib/${PROJECT_NAME}
+  )
+
+  add_launch_test(
+    test/test_topic_frequency_monitor.py
+    TARGET test_topic_frequency_monitor
+    TIMEOUT 20)
+
+  add_launch_test(
+    test/test_topic_age_monitor.py
+    TARGET test_topic_age_monitor
+    TIMEOUT 20)
 endif()
 
 ament_package()
