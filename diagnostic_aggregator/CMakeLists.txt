@@ -25,11 +25,11 @@ add_library(${PROJECT_NAME} SHARED
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${PROJECT_NAME}
-  "diagnostic_msgs"
-  "pluginlib"
-  "rclcpp"
-  "std_msgs"
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  pluginlib::pluginlib
+  rclcpp::rclcpp
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
@@ -50,14 +50,13 @@ add_library(${ANALYZERS} SHARED
 target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${ANALYZERS}
-  "diagnostic_msgs"
-  "pluginlib"
-  "rclcpp"
-  "std_msgs"
+target_link_libraries(${ANALYZERS} PUBLIC
+  ${PROJECT_NAME}
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  pluginlib::pluginlib
+  rclcpp::rclcpp
 )
-target_link_libraries(${ANALYZERS}
-  ${PROJECT_NAME})
 target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
 
@@ -71,7 +70,7 @@ target_link_libraries(aggregator_node
 
 # Add analyzer
 add_executable(add_analyzer src/add_analyzer.cpp)
-ament_target_dependencies(add_analyzer rclcpp rcl_interfaces)
+target_link_libraries(add_analyzer PUBLIC ${rcl_interfaces_TARGETS} rclcpp::rclcpp)
 
 # Testing macro
 if(BUILD_TESTING)

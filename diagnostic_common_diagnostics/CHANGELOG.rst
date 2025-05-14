@@ -2,6 +2,9 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.4 (2025-05-12)
+------------------
+
 4.4.2 (2025-02-10)
 ------------------
 * common_diagnostics cleaned hostname string (`#405 <https://github.com/ros/diagnostics/issues/405>`_)
