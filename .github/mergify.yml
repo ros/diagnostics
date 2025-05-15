@@ -2,8 +2,15 @@ pull_request_rules:
   - name: add ros2 label
     description: If targeting an ROS2 branch, add the label
     conditions:
-      - base=ros2
+      - base = ros2
     actions:
       label:
         add:
           - ros2
+  - name: no PRs against distro-specific branches
+    conditions:
+      - base ~= ^ros2-[a-z]+$
+    actions:
+      close: 
+        message: Please make all PRs against the `ros2` branch. They will be backported if possible.
+      
