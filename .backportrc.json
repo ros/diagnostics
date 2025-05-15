@@ -1,0 +1,13 @@
+{
+    "repoName": "diagnostics",
+    "repoOwner": "ros",
+    "sourceBranch": "ros2",
+    "targetBranchChoices": [
+        "ros2-humble",
+        "ros2-jazzy",
+        "ros2-kilted"
+    ],
+    "targetPRLabels": [
+        "automerge"
+    ]
+}
