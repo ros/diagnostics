@@ -7,7 +7,7 @@
   <maintainer email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</maintainer>
   <author email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</author>
   <author email="tejas.kumarshastha@de.bosch.com">Tejas Kumar Shastha</author>
-  <license>BIOSv4</license>
+  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
