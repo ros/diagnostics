@@ -20,7 +20,19 @@ pull_request_rules:
   - name: Automatic merge
     description: Merge when PR passes all branch protection and has label automerge
     conditions:
-      # Branch protections are automatically injected
       - label = automerge
+      # we have to list all checks, apparently
+      - check-success = Check licenses
+      - check-success = Lint cppcheck
+      - check-success = Lint cpplint
+      - check-success = Lint flake8
+      - check-success = Lint uncurstify
+      - check-success = Lint xmllint
+      - check-success = diagnostic_aggregator on rolling
+      - check-success = diagnostic_common_diagnostics on rolling
+      - check-success = diagnostic_remote_logging on rolling
+      # - check-success = diagnostic_topic_monitor on rolling
+      - check-success = diagnostic_updater on rolling
+      - check-success = self_test on rolling
     actions:
       merge:
