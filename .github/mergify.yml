@@ -17,4 +17,26 @@ pull_request_rules:
     actions:
       close: 
         message: Please make all PRs against the `ros2` branch. They will be backported if possible.
+<<<<<<< HEAD
       
+=======
+  - name: Automatic merge
+    description: Merge when PR passes all branch protection and has label automerge
+    conditions:
+      - label = automerge
+      # we have to list all checks, apparently
+      - check-success = Check licenses
+      - check-success = Lint cppcheck
+      - check-success = Lint cpplint
+      - check-success = Lint flake8
+      - check-success = Lint uncurstify
+      - check-success = Lint xmllint
+      - check-success = diagnostic_aggregator on rolling
+      - check-success = diagnostic_common_diagnostics on rolling
+      - check-success = diagnostic_remote_logging on rolling
+      # - check-success = diagnostic_topic_monitor on rolling
+      - check-success = diagnostic_updater on rolling
+      - check-success = self_test on rolling
+    actions:
+      merge:
+>>>>>>> 7f36aee (Listing all checks for automerge (#484))
