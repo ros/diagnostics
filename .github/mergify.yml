@@ -1,0 +1,9 @@
+pull_request_rules:
+  - name: add ros2 label
+    description: If targeting an ROS2 branch, add the label
+    conditions:
+      - base=ros2
+    actions:
+      label:
+        add:
+          - ros2
