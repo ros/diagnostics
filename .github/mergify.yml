@@ -10,10 +10,10 @@ pull_request_rules:
   - name: no PRs against distro-specific branches
     description: PRs against branches like ros-humble are closed automatically. Unless they are a backport.
     conditions:
-      - and
+      - and:
         - base ~= ^ros2-[a-z]+$
-        - not
-          - head ~= ^backport\/.+$
+        - not:
+            head ~= ^backport\/.+$
     actions:
       close: 
         message: Please make all PRs against the `ros2` branch. They will be backported if possible.
