@@ -1,3 +1,7 @@
+// Copyright (c) 2024, 2025 Robert Bosch GmbH
+//
+// See the top-level LICENSE file for licensing terms.
+
 #ifndef GENERIC_TOPIC_MONITOR_HPP
 #define GENERIC_TOPIC_MONITOR_HPP
 

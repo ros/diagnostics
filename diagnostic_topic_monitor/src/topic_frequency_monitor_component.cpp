@@ -1,4 +1,8 @@
-#include "diagnostic_topic_monitor/topic_frquency_monitor.hpp"
+// Copyright (c) 2024, 2025 Robert Bosch GmbH
+//
+// See the top-level LICENSE file for licensing terms.
+
+#include "diagnostic_topic_monitor/topic_frequency_monitor.hpp"
 
 namespace diagnostic_topic_monitor
 {

@@ -1,4 +1,6 @@
-// TODO: Insert copyright
+// Copyright (c) 2024, 2025 Robert Bosch GmbH
+//
+// See the top-level LICENSE file for licensing terms.
 
 #ifndef ACTIVITY_DIAGNOSTIC_TASK_HPP
 #define ACTIVITY_DIAGNOSTIC_TASK_HPP

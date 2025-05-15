@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+
+# Copyright (c) 2024, 2025 Robert Bosch GmbH
+#
+# See the top-level LICENSE file for licensing terms.
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String

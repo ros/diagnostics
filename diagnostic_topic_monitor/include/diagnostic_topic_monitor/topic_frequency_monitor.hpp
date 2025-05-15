@@ -1,3 +1,7 @@
+// Copyright (c) 2024, 2025 Robert Bosch GmbH
+//
+// See the top-level LICENSE file for licensing terms.
+
 #ifndef DIAGNOSTIC_TOPIC_MONITOR_TOPIC_FREQUENCY_MONITOR_HPP
 #define DIAGNOSTIC_TOPIC_MONITOR_TOPIC_FREQUENCY_MONITOR_HPP
 
