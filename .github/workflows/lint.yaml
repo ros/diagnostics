@@ -43,6 +43,7 @@ jobs:
             diagnostic_common_diagnostics
             diagnostic_remote_logging
             diagnostic_updater
+            diagnostic_topic_monitor
             self_test
 
   check_licenses:

@@ -18,6 +18,7 @@ jobs:
             diagnostic_aggregator,
             diagnostic_common_diagnostics,
             diagnostic_remote_logging,
+            diagnostic_topic_monitor,
             diagnostic_updater,
             self_test,
           ]
