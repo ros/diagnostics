@@ -26,7 +26,7 @@ pull_request_rules:
       - check-success = Lint cppcheck
       - check-success = Lint cpplint
       - check-success = Lint flake8
-      - check-success = Lint uncurstify
+      - check-success = Lint uncrustify
       - check-success = Lint xmllint
       - check-success ~= diagnostic_aggregator on [a-z]+
       - check-success ~= diagnostic_common_diagnostics on [a-z]+
