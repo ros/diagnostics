@@ -34,5 +34,8 @@ pull_request_rules:
       # - check-success ~= diagnostic_topic_monitor on [a-z]+
       - check-success ~= diagnostic_updater on [a-z]+
       - check-success ~= self_test on [a-z]+
+      # This makes sure the buildfarm job succeeds in case it is added while the others run
+      - #check-failure = 0
+      - #check-pending = 0
     actions:
       merge:
