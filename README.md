@@ -49,10 +49,8 @@ From there, the changes are backported to the other branches.
 
 This tool has proven to be useful: [backport](https://www.npmjs.com/package/backport)
 
-Use this command to port a given PR of `PR_NUMBER` to the other branches:
-
 ```bash
-backport --pr PR_NUMBER -b ros2-humble ros2-jazzy ros2-kilted
+yarn backport --config $(pwd)/.backportrc.json
 ```
 
 ## Versioning and Releases
