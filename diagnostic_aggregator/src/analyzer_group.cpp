@@ -74,7 +74,7 @@ bool AnalyzerGroup::init(
       breadcrumb_.c_str(), n->get_namespace());
     return false;
   }
-  RCLCPP_DEBUG(
+  RCLCPP_INFO(
     logger_, "Retrieved %zu parameter(s) for analyzer group with prefix '%s'.", parameters.size(),
     breadcrumb_.c_str());
 
@@ -191,7 +191,7 @@ AnalyzerGroup::~AnalyzerGroup()
 
 bool AnalyzerGroup::addAnalyzer(std::shared_ptr<Analyzer> & analyzer)
 {
-  RCLCPP_DEBUG(
+  RCLCPP_INFO(
     logger_, "Adding analyzer '%s' to group '%s'.", analyzer->getName().c_str(),
     nice_name_.c_str());
   analyzers_.push_back(analyzer);
