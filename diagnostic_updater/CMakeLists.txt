@@ -68,9 +68,8 @@ if(BUILD_TESTING)
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries(diagnostic_updater_test ${PROJECT_NAME})
-  ament_target_dependencies(
-    diagnostic_updater_test
-    "rclcpp_lifecycle"
+  target_link_libraries(diagnostic_updater_test
+    rclcpp_lifecycle::rclcpp_lifecycle
   )
 
   ament_add_gtest(diagnostic_status_wrapper_test test/diagnostic_status_wrapper_test.cpp)
@@ -79,12 +78,11 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
-  ament_target_dependencies(
-    diagnostic_status_wrapper_test
-    "diagnostic_msgs"
-    "rclcpp"
-    "rclcpp_lifecycle"
-    "std_msgs"
+  target_link_libraries(diagnostic_status_wrapper_test
+    ${diagnostic_msgs_TARGETS}
+    ${std_msgs_TARGETS}
+    rclcpp::rclcpp
+    rclcpp_lifecycle::rclcpp_lifecycle
   )
   # SKIPPING FLAKY TEST
   # ament_add_gtest(status_msg_test test/status_msg_test.cpp)
