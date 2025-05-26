@@ -3,11 +3,10 @@ find_package(ament_cmake_gtest REQUIRED)
 macro(add_self_test target_name file_path)
   ament_add_gtest(${target_name} ${file_path})
   if(TARGET ${target_name})
-    ament_target_dependencies(
-      ${target_name}
-      "diagnostic_msgs"
-      "diagnostic_updater"
-      "rclcpp"
+    target_link_libraries(${target_name}
+      ${diagnostic_msgs_TARGETS}
+      diagnostic_updater::diagnostic_updater
+      rclcpp::rclcpp
     )
     target_include_directories(${target_name}
       PUBLIC
