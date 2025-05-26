@@ -27,6 +27,7 @@ target_link_libraries(influx_component PUBLIC
     ${diagnostic_msgs_TARGETS}
     rclcpp::rclcpp
     rclcpp_components::component
+    CURL::libcurl
 )
 
 ament_export_dependencies(influx_component ${dependencies})
