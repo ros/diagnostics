@@ -2,8 +2,8 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.6 (2025-05-26)
+------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
 * fix: Missing link to libcurl (`#505 <https://github.com/ros/diagnostics/issues/505>`_)
 * Contributors: Christian Henkel, Moritz Schauer
