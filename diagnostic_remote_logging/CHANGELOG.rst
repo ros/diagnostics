@@ -2,6 +2,12 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
+* fix: Missing link to libcurl (`#505 <https://github.com/ros/diagnostics/issues/505>`_)
+* Contributors: Christian Henkel, Moritz Schauer
+
 4.4.5 (2025-05-26)
 ------------------
 * Use target_link_libraries instead of ament_target_dependencies (`#507 <https://github.com/ros/diagnostics/issues/507>`_)
