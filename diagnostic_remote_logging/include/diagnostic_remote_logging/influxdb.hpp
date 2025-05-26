@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Karsten Knese
+ *  Copyright (c) 2025, Daan Wijffels
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,47 +32,40 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
-#define DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
+/**
+ * \author Daan Wijffels
+ */
 
-#ifdef __cplusplus
-extern "C"
+#ifndef DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
+#define DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
+
+#include <curl/curl.h>
+#include <string>
+
+#include "diagnostic_remote_logging/influx_line_protocol.hpp"
+
+#include "rclcpp/rclcpp.hpp"
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
+
+class InfluxDB : public rclcpp::Node
 {
-#endif
+public:
+  explicit InfluxDB(const rclcpp::NodeOptions & opt);
+  ~InfluxDB();
 
-// This logic was borrowed (then namespaced) from the examples on the gcc wiki:
-//     https://gcc.gnu.org/wiki/Visibility
+private:
+  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
+  rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticStatus>::SharedPtr top_level_sub_;
 
-#if defined _WIN32 || defined __CYGWIN__
-  #ifdef __GNUC__
-    #define DIAGNOSTIC_AGGREGATOR_EXPORT __attribute__ ((dllexport))
-    #define DIAGNOSTIC_AGGREGATOR_IMPORT __attribute__ ((dllimport))
-  #else
-    #define DIAGNOSTIC_AGGREGATOR_EXPORT __declspec(dllexport)
-    #define DIAGNOSTIC_AGGREGATOR_IMPORT __declspec(dllimport)
-  #endif
-  #ifdef DIAGNOSTIC_AGGREGATOR_BUILDING_DLL
-    #define DIAGNOSTIC_AGGREGATOR_PUBLIC DIAGNOSTIC_AGGREGATOR_EXPORT
-  #else
-    #define DIAGNOSTIC_AGGREGATOR_PUBLIC DIAGNOSTIC_AGGREGATOR_IMPORT
-  #endif
-  #define DIAGNOSTIC_AGGREGATOR_PUBLIC_TYPE DIAGNOSTIC_AGGREGATOR_PUBLIC
-  #define DIAGNOSTIC_AGGREGATOR_LOCAL
-#else
-  #define DIAGNOSTIC_AGGREGATOR_EXPORT __attribute__ ((visibility("default")))
-  #define DIAGNOSTIC_AGGREGATOR_IMPORT
-  #if __GNUC__ >= 4
-    #define DIAGNOSTIC_AGGREGATOR_PUBLIC __attribute__ ((visibility("default")))
-    #define DIAGNOSTIC_AGGREGATOR_LOCAL  __attribute__ ((visibility("hidden")))
-  #else
-    #define DIAGNOSTIC_AGGREGATOR_PUBLIC
-    #define DIAGNOSTIC_AGGREGATOR_LOCAL
-  #endif
-  #define DIAGNOSTIC_AGGREGATOR_PUBLIC_TYPE
-#endif
+  std::string post_url_, influx_token_;
+  CURL * curl_;
 
-#ifdef __cplusplus
-}
-#endif
+  void setupConnection(const std::string & telegraf_url);
 
-#endif  // DIAGNOSTIC_AGGREGATOR__VISIBILITY_CONTROL_HPP_
+  void diagnosticsCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg);
+  void topLevelCallback(const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr msg);
+
+  bool sendToInfluxDB(const std::string & data);
+};
+
+#endif  // DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_

@@ -67,7 +67,28 @@ Computer name in diagnostics output (ex: 'c1')
 Disable self test.
 
 ## hd_monitor.py
-**To be ported**
+Runs 'shutil.disk_usage' to check if there is enough space left on a given device. With default parameters, the following thresholds are used:
+* Above 5% of free space left, an `OK` status will be published.
+* Between 5% and 1%, a `WARN` status will be published,
+* Below 1%, an `ERROR` status will be published.
+
+### Published Topics
+#### /diagnostics
+diagnostic_msgs/DiagnosticArray
+The diagnostics information.
+
+### Parameters
+#### path
+(default: home directory "~")
+Path in which to check remaining space.
+
+#### free_percent_low
+(default: 5%)
+Warning threshold.
+
+#### free_percent_crit
+(default: 1%)
+Error threshold.
 
 ## ram_monitor.py
 The `ram_monitor` module allows users to monitor the RAM usage of their system in real-time.

@@ -2,6 +2,33 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.5 (2025-05-26)
+------------------
+
+4.4.4 (2025-05-12)
+------------------
+* Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
+* Contributors: David V. Lu, Christian Henkel
+
+4.4.2 (2025-02-10)
+------------------
+* Checking licenses in CI (`#431 <https://github.com/ros/diagnostics/issues/431>`_)
+  * Checking licenses in ci
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)
+* Support custom `rclcpp::NodeOptions` (`#417 <https://github.com/ros/diagnostics/issues/417>`_)
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_)
+* Skipping flaky ntp test (`#409 <https://github.com/ros/diagnostics/issues/409>`_)
+* Contributors: Christian Henkel, Patrick Roncagliolo, Silvio Traversaro
+
+4.3.1 (2024-07-30)
+------------------
+
+3.2.1 (2024-06-27)
+------------------
+* Add add_analyzer functionality (`#329 <https://github.com/ros/diagnostics/issues/329>`_)
+* Aggregator: publish diagnostics_toplevel_state immediately on every degradation (`#324 <https://github.com/ros/diagnostics/issues/324>`_)
+* Contributors: MartinCornelis2, Tim Clephas
+
 3.2.0 (2024-03-22)
 ------------------
 * Avoid rolling up an ERROR state when empty GenericAnalyzer blocks are marked discard_stale, or when all of their items are STALE. (`#315 <https://github.com/ros/diagnostics/issues/315>`_)

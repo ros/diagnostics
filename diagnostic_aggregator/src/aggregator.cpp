@@ -57,9 +57,12 @@ using diagnostic_msgs::msg::DiagnosticStatus;
  * @todo(anordman): make aggregator a lifecycle node.
  */
 Aggregator::Aggregator()
+: Aggregator(rclcpp::NodeOptions()) {}
+
+Aggregator::Aggregator(rclcpp::NodeOptions options)
 : n_(std::make_shared<rclcpp::Node>(
       "analyzers", "",
-      rclcpp::NodeOptions().allow_undeclared_parameters(true).
+      options.allow_undeclared_parameters(true).
       automatically_declare_parameters_from_overrides(true))),
   logger_(rclcpp::get_logger("Aggregator")),
   pub_rate_(1.0),

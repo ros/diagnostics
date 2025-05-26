@@ -47,7 +47,8 @@
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/logger.hpp"
+#include "rclcpp/logging.hpp"
 
 namespace diagnostic_updater
 {
@@ -115,7 +116,7 @@ public:
 
   void mergeSummary(unsigned char lvl, const std::string s)
   {
-    if ((lvl > 0) && (level > 0)) {
+    if ((lvl > 0) == (level > 0)) {
       if (!message.empty()) {
         message += "; ";
         message += s;
