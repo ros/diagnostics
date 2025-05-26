@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.5 (2025-05-26)
+------------------
 * Use target_link_libraries instead of ament_target_dependencies (`#507 <https://github.com/ros/diagnostics/issues/507>`_)
 * Contributors: Christoph Fröhlich
 
