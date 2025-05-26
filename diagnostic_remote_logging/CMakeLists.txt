@@ -50,7 +50,12 @@ if(BUILD_TESTING)
     find_package(ament_cmake_gtest REQUIRED)
     ament_add_gtest(unit_tests test/influx_line_protocol.cpp)
     target_include_directories(unit_tests PRIVATE include)
-    target_link_libraries(unit_tests influx_component)
-    ament_target_dependencies(unit_tests ${dependencies} ament_cmake_gtest)
+    target_link_libraries(unit_tests
+      influx_component
+      ${diagnostic_msgs_TARGETS}
+      rclcpp::rclcpp
+      rclcpp_components::component
+      rclcpp_components::component_manager
+    )
 endif()
 ament_package()
