@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - ros2
+      - ros2-kilted
   schedule:
     # Run every week at 20:00 on Sunday
     - cron: "0 20 * * 0"
