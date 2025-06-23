@@ -142,7 +142,7 @@ class HDMonitor(Node):
         else:
             diag.level = DiagnosticStatus.ERROR
 
-        total_gb = total // (1024 ** 2)
+        total_gb = total // (1024 ** 3)
         diag.values.extend(
             [
                 KeyValue(key='Name', value=path),
