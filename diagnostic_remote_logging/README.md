@@ -2,7 +2,7 @@ General information about this repository, including legal information and known
 
 # The diagnostic_remote_logging package
 
-This package provides the `influx` node, which listens to diagnostic messages and integrates with InfluxDB v2 for monitoring and visualization. Specifically, it subscribes to the [`diagnostic_msgs/DiagnosticArray`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics_agg` topic and the [`diagnostic_msgs/DiagnosticStatus`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics_toplevel_state` topic. The node processes these messages, sending their statistics and levels to an [`InfluxDB`](http://influxdb.com) database, enabling use with tools like [`Grafana`](https://grafana.com).
+This package provides the `influxdb` node, which listens to diagnostic messages and integrates with InfluxDB v2 for monitoring and visualization. Specifically, it subscribes to the [`diagnostic_msgs/DiagnosticArray`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics_agg` topic and the [`diagnostic_msgs/DiagnosticStatus`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics_toplevel_state` topic. The node processes these messages, sending their statistics and levels to an [`InfluxDB`](http://influxdb.com) database, enabling use with tools like [`Grafana`](https://grafana.com).
 
 As of now we only support InfluxDB v2, for support with older versions please use a proxy like [`Telegraf`](https://www.influxdata.com/time-series-platform/telegraf/). See section [Telegraf](#using-a-telegraf-proxy) for an example on how to setup.
 
@@ -19,16 +19,16 @@ To use either method, ensure you have a running instance of InfluxDB. The simple
 
 ### Parameters
 
-The `influx` node supports several parameters. Below is an example configuration:
+The `influxdb` node supports several parameters. Below is an example configuration:
 
 ```yaml
-/influx:
+/influxdb:
   ros__parameters:
     connection:
       url: http://localhost:8086/api/v2/write
-      token:
-      bucket:
-      organization:
+      token: ""
+      bucket: ""
+      organization: ""
     send:
       agg: true
       top_level_state: true
@@ -63,12 +63,12 @@ To configure Telegraf as a proxy for InfluxDB:
 
     ```toml
     [[inputs.influxdb_v2_listener]]
-      service_address = ":8086"
+      service_address = ":8187" # different port than the default 8086
     ```
 
-3. Update the `influx` node configuration to point to the appropriate URL. For example, if Telegraf is running on the same host as the `influx` node, the default `http://localhost:8086/api/v2/write` should work.
+3. Update the `influxdb` node configuration to point to the appropriate URL. For example, if Telegraf is running on the same host as the `influxdb` node, then `http://localhost:8187/api/v2/write` should work.
 
-4. Leave the following parameters empty in the `influx` node configuration when using Telegraf as a proxy:
+4. Leave the following parameters empty in the `influxdb` node configuration when using Telegraf as a proxy:
 
     - `connection.token`
     - `connection.bucket`
