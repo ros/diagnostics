@@ -53,6 +53,10 @@ target_link_libraries(example
   rclcpp::rclcpp
 )
 
+target_compile_definitions(${PROJECT_NAME}
+  PRIVATE "DIAGNOSTIC_UPDATER_BUILDING_LIBRARY")
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
