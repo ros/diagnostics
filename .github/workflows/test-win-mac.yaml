@@ -22,7 +22,11 @@ jobs:
             self_test,
           ]
         distro: [rolling]
-        os: [macOS-latest, windows-latest]
+        # According to https://github.com/ros-tooling/action-ros-ci/blob/eed42df3e61c71e19310bcb06078bc63f629c59c/.github/workflows/test.yml#L70, only windows-2019 is supported.
+        os: [
+          # macOS-latest,
+          windows-2019
+        ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@master
