@@ -35,7 +35,7 @@ jobs:
       - uses: ros-tooling/setup-ros@main
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-lint@main
+      - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
           package-name: |
