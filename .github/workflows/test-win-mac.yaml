@@ -28,7 +28,7 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@main
+      - uses: ros-tooling/setup-ros@0.7.15
         with:
           required-ros-distributions: ${{ matrix.distro }}
       - uses: ros-tooling/action-ros-ci@main
