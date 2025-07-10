@@ -28,10 +28,10 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@master
+      - uses: ros-tooling/setup-ros@main
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@master
+      - uses: ros-tooling/action-ros-ci@main
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
