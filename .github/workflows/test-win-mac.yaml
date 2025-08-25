@@ -24,7 +24,7 @@ jobs:
         distro: [rolling]
         os: [
           # macOS-latest,
-          windows-2022
+          windows-latest
         ]
     runs-on: ${{ matrix.os }}
     steps:
