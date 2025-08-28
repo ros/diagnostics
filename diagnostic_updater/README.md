@@ -28,3 +28,12 @@ This class is used to collect the diagnostic messages and to publish them.
 A ROS publisher with included diagnostics. 
 It diagnoses the frequency of the published messages.
 
+## Parameters
+
+## Parameters
+
+- **`diagnostic_updater.period`** (double, default: `1.0`)  
+  Sets the publishing period (in seconds) for the diagnostic updater. This overrides the value set in the constructor of `diagnostic_updater`.
+
+- **`diagnostic_updater.use_fqn`** (bool, default: `false`)  
+  If `true`, diagnostics are published using the fully qualified ROS node name (e.g. `/ns/node_name`) instead of `node_name`.  
