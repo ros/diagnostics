@@ -168,20 +168,13 @@ void statusToInfluxLineProtocol(
   statusToInfluxLineProtocol(output, status, toInfluxTimestamp(time));
 }
 
-std::string diagnosticArrayToInfluxLineProtocol(
-  const diagnostic_msgs::msg::DiagnosticArray::SharedPtr & diag_msg)
+void diagnosticArrayToInfluxLineProtocol(
+  std::string & output, const diagnostic_msgs::msg::DiagnosticArray::SharedPtr & diag_msg)
 {
-  std::string output;
   std::string timestamp = toInfluxTimestamp(diag_msg->header.stamp);
-
   for (auto & status : diag_msg->status) {
-    // hardware_id is empty for analyzer groups, so skip them
-    if (!status.hardware_id.empty()) {
-      statusToInfluxLineProtocol(output, status, timestamp);
-    }
+    statusToInfluxLineProtocol(output, status, timestamp);
   }
-
-  return output;
 }
 
 #endif  // DIAGNOSTIC_REMOTE_LOGGING__INFLUX_LINE_PROTOCOL_HPP_

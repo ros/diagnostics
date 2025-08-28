@@ -158,16 +158,21 @@ TEST(DiagnosticArrayToInfluxLineProtocolTests, HandlesMultipleStatuses)
   status2.values.push_back(createKeyValue("keyB", "42"));
 
   diagnostic_msgs::msg::DiagnosticStatus status3;
-  status3.name = "Hardware ID empty so skipping";
+  status3.name = "node3: status";
+  status3.level = 3;
 
   diag_msg->status = {status1, status2, status3};
+
+  std::string output;
+  diagnosticArrayToInfluxLineProtocol(output, diag_msg);
 
   std::string expected =
     "node1,ns=ns1,name=diagnostic\\ description,hardware_id=Device-27-46 level=1,message=\"First "
     "status\",keyA=\"valueA\" 1672531200123456789\n"
-    "node2,hardware_id=12345 level=2,message=\"Second status\",keyB=42 1672531200123456789\n";
+    "node2,hardware_id=12345 level=2,message=\"Second status\",keyB=42 1672531200123456789\n"
+    "node3,name=status level=3 1672531200123456789\n";
 
-  EXPECT_EQ(diagnosticArrayToInfluxLineProtocol(diag_msg), expected);
+  EXPECT_EQ(output, expected);
 }
 
 // Test topLevelStatus
