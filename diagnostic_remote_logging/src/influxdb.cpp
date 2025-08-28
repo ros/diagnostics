@@ -172,17 +172,8 @@ bool InfluxDB::sendToInfluxDB(const std::string & data)
   curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_code);
 
   if (response_code != 204) {
-      << << << < HEAD
-      RCLCPP_ERROR(
+    RCLCPP_ERROR(
       this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code, data.c_str());
-    ==
-    ==
-    ==
-      =
-      RCLCPP_ERROR(
-      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code, data.c_str());
->> >> >> > ae5d7e4 (Removed the use of send.agg,
-      now aggregate all / diagnostics and send them on a timer)
     return false;
   }
 
