@@ -146,12 +146,13 @@ bool InfluxDB::sendToInfluxDB(const std::string & data)
     RCLCPP_ERROR(this->get_logger(), "cURL error: %s", curl_easy_strerror(res));
     return false;
   }
-  CURLcode response_code;
+  long response_code;
   curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_code);
 
   if (response_code != 204) {
-    RCLCPP_ERROR(
-      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code, data.c_str());
+    RCLCPP_ERROR(this->get_logger(),
+                 "Error (%ld) when sending to telegraf:\n%s", response_code,
+                 data.c_str());
     return false;
   }
 
