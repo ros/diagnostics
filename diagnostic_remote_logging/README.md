@@ -30,7 +30,8 @@ The `influx` node supports several parameters. Below is an example configuration
       bucket:
       organization:
     send:
-      agg: true
+      diagnostics: true
+      period: 1.0
       top_level_state: true
 ```
 
