@@ -34,9 +34,7 @@ jobs:
           required-ros-distributions: ${{ matrix.distro }}
       - name: Upgrade colcon-meson
       # Workaround for "Exception in package identification extension 'meson' in 'src\ohkszihoidm': __init__() missing 2 required positional arguments: 'subproject_dir' and 'env'"
-        run: |
-          python -m pip install -U \
-            colcon-meson==0.5.0  
+        run: python -m pip install -U colcon-meson==0.5.0  
       - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
