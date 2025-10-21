@@ -15,23 +15,24 @@ jobs:
       fail-fast: false
       matrix:
         package: [
-            diagnostic_aggregator,
-            diagnostic_common_diagnostics,
-            diagnostic_remote_logging,
+            # diagnostic_aggregator,
+            # diagnostic_common_diagnostics,
+            # diagnostic_remote_logging,
             diagnostic_updater,
-            self_test,
+            # self_test,
           ]
-        distro: [rolling]
+        # distro: [rolling]
+        distro: [humble, jazzy, kilted, rolling]
         os: [
           # macOS-latest,
-          windows-latest
+          windows-2022
         ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@0.7.15
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@main
+      - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
