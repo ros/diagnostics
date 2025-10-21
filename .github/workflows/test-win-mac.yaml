@@ -1,4 +1,4 @@
-name: Test diagnostics on windows and macos
+name: Test diagnostics (win)
 on:
   pull_request:
   push:
@@ -9,7 +9,7 @@ on:
     - cron: "0 20 * * 0"
 
 jobs:
-  build_and_test:
+  build_and_test_win:
     name: ${{ matrix.package }} on ${{ matrix.os }} under ${{ matrix.distro }}
     strategy:
       fail-fast: false
