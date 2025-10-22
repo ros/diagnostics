@@ -9,8 +9,31 @@ on:
     - cron: "0 20 * * 0"
 
 jobs:
+  ros_distro_from_branch_name:
+    runs-on: ubuntu-latest
+    outputs:
+      distro: ${{ steps.set-distro.outputs.distro }}
+    steps:
+      - name: Set ROS distro from branch name
+        id: set-distro
+        run: |
+          if [[ "${GITHUB_REF##*/}" == *"ros2"* ]]; then
+            distro="rolling"
+          elif [[ "${GITHUB_REF##*/}" == *"ros2-humble"* ]]; then
+            distro="humble"
+          elif [[ "${GITHUB_REF##*/}" == *"ros2-jazzy"* ]]; then
+            distro="jazzy"
+          elif [[ "${GITHUB_REF##*/}" == *"ros2-kilted"* ]]; then
+            distro="kilted"
+          else
+            echo "Unknown branch for determining ROS distro: ${GITHUB_REF##*/}"
+            exit 1
+          fi
+          echo "Determined ROS distro to be: ${distro} :)"
+          echo "distro=$distro" >> $GITHUB_OUTPUT
   build_and_test:
-    name: ${{ matrix.package }} on ${{ matrix.distro }}
+    name: ${{ matrix.package }} on under ${{ matrix.distro }}
+    needs: ros_distro_from_branch_name
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +45,7 @@ jobs:
             self_test,
           ]
         include:
-          - distro: rolling
+          - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
             os: 24.04
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
