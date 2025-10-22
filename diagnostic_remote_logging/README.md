@@ -30,11 +30,13 @@ The `influx` node supports several parameters. Below is an example configuration
       bucket:
       organization:
     send:
-      agg: true
+      diagnostics: true
+      period: 1.0
       top_level_state: true
 ```
 
-- `send.agg`: Enables or disables subscription to the `/diagnostics_agg` topic.
+- `send.diagnostics`: Enables or disables subscription to the `/diagnostics` topic.
+- `send.period`: Specifies the interval in seconds for sending diagnostic data to InfluxDB. During each period, all incoming `/diagnostics` messages are collected and transmitted as a batch to InfluxDB.
 - `send.top_level_state`: Enables or disables subscription to the `/diagnostics_toplevel_state` topic.
 
 #### InfluxDB Configuration

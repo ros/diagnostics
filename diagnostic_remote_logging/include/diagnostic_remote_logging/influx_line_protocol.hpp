@@ -40,11 +40,12 @@
 #define DIAGNOSTIC_REMOTE_LOGGING__INFLUX_LINE_PROTOCOL_HPP_
 
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
-#include "rclcpp/rclcpp.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 std::string toInfluxTimestamp(const rclcpp::Time & time)
 {
@@ -105,42 +106,54 @@ std::string formatValues(const std::vector<diagnostic_msgs::msg::KeyValue> & val
   return formatted;
 }
 
-std::pair<std::string, std::string> splitHardwareID(const std::string & input)
+std::tuple<std::string, std::string, std::string> splitName(const std::string & input)
 {
-  size_t first_slash_pos = input.find('/');
+  size_t colon_pos = input.find(':');
+  std::string ns_node = (colon_pos != std::string::npos) ? input.substr(0, colon_pos) : input;
+  std::string name = (colon_pos != std::string::npos) ? input.substr(colon_pos + 1) : "";
 
-  // If no slash is found, treat the entire input as the node_name
-  if (first_slash_pos == std::string::npos) {
-    return {"none", input};
+  // Trim leading whitespace from diagnostic name
+  if (!name.empty() && name[0] == ' ') {
+    name = name.substr(1);
   }
 
-  size_t second_slash_pos = input.find('/', first_slash_pos + 1);
-
-  // If the second slash is found, extract the "ns" and "node" parts
-  if (second_slash_pos != std::string::npos) {
-    std::string ns = input.substr(first_slash_pos + 1, second_slash_pos - first_slash_pos - 1);
-    std::string node = input.substr(second_slash_pos + 1);
-    return {ns, node};
+  // Handle use_fqn is false, only node name
+  if (ns_node.empty() || ns_node[0] != '/') {
+    // No leading slash - treat entire thing as node name
+    return {"", ns_node, name};
   }
 
-  // If no second slash is found, everything after the first slash is the node
-  std::string node = input.substr(first_slash_pos + 1);
-  return {"none", node};    // ns is empty, node is the remaining string
+  // Remove leading slash when we get a fully qualified name
+  ns_node = ns_node.substr(1);
+  size_t last_slash = ns_node.rfind('/');
+
+  std::string ns = ns_node.substr(0, last_slash);
+  std::string node = ns_node.substr(last_slash + 1);
+
+  return {ns, node, name};
 }
 
 void statusToInfluxLineProtocol(
-  std::string & output,
-  const diagnostic_msgs::msg::DiagnosticStatus & status,
+  std::string & output, const diagnostic_msgs::msg::DiagnosticStatus & status,
   const std::string & timestamp_str)
 {
-  // hardware_id is empty for analyzer groups, so skip them
-  if (status.hardware_id.empty()) {
-    return;
+  auto [ns, node, name] = splitName(status.name);
+  output += escapeSpace(node);
+  if (!ns.empty()) {
+    output += ",ns=" + escapeSpace(ns);
+  }
+  if (!name.empty()) {
+    output += ",name=" + escapeSpace(name);
+  }
+  if (!status.hardware_id.empty()) {
+    output += ",hardware_id=" + escapeSpace(status.hardware_id);
+  }
+  output += " level=" + std::to_string(status.level);
+
+  if (!status.message.empty()) {
+    output += ",message=\"" + status.message + "\"";
   }
 
-  auto [ns, identifier] = splitHardwareID(status.hardware_id);
-  output += escapeSpace(identifier) + ",ns=" + escapeSpace(ns) +
-    " level=" + std::to_string(status.level) + ",message=\"" + status.message + "\"";
   auto formatted_key_values = formatValues(status.values);
   if (!formatted_key_values.empty()) {
     output += "," + formatted_key_values;
@@ -148,25 +161,20 @@ void statusToInfluxLineProtocol(
   output += " " + timestamp_str + "\n";
 }
 
-std::string diagnosticStatusToInfluxLineProtocol(
-  const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr & msg, const rclcpp::Time & time)
+void statusToInfluxLineProtocol(
+  std::string & output, const diagnostic_msgs::msg::DiagnosticStatus & status,
+  const rclcpp::Time & time)
 {
-  std::string output =
-    msg->name + " level=" + std::to_string(msg->level) + " " + toInfluxTimestamp(time) + "\n";
-  return output;
+  statusToInfluxLineProtocol(output, status, toInfluxTimestamp(time));
 }
 
-std::string diagnosticArrayToInfluxLineProtocol(
-  const diagnostic_msgs::msg::DiagnosticArray::SharedPtr & diag_msg)
+void diagnosticArrayToInfluxLineProtocol(
+  std::string & output, const diagnostic_msgs::msg::DiagnosticArray::SharedPtr & diag_msg)
 {
-  std::string output;
   std::string timestamp = toInfluxTimestamp(diag_msg->header.stamp);
-
   for (auto & status : diag_msg->status) {
     statusToInfluxLineProtocol(output, status, timestamp);
   }
-
-  return output;
 }
 
 #endif  // DIAGNOSTIC_REMOTE_LOGGING__INFLUX_LINE_PROTOCOL_HPP_
