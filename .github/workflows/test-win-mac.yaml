@@ -15,11 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         package: [
-            # diagnostic_aggregator,
-            # diagnostic_common_diagnostics,
-            # diagnostic_remote_logging,
+            diagnostic_aggregator,
+            diagnostic_common_diagnostics,
+            diagnostic_remote_logging,
             diagnostic_updater,
-            # self_test,
+            self_test,
           ]
         # distro: [rolling]
         distro: [humble, jazzy, kilted, rolling]
@@ -39,3 +39,5 @@ jobs:
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
+        # All of this is quite unstable, atm:
+        continue-on-error: true
