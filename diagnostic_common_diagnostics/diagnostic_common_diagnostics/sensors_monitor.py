@@ -170,7 +170,7 @@ def parse_sensors_output(node: Node, output):
             try:
                 s = parse_sensor_line(line)
             except Exception as exc:
-                node.get_logger().warn(
+                node.get_logger().warning(
                     'Unable to parse line "%s", due to %s', line, exc
                 )
             if s is not None:
