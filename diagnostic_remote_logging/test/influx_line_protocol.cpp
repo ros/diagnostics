@@ -40,10 +40,11 @@
 
 #include <gtest/gtest.h>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 #include "diagnostic_msgs/msg/key_value.hpp"
-#include <rclcpp/rclcpp.hpp>
 
 diagnostic_msgs::msg::KeyValue createKeyValue(const std::string & key, const std::string & value)
 {
@@ -95,40 +96,40 @@ TEST(FormatValuesTests, FormatsKeyValuePairs)
   EXPECT_EQ(formatValues(values), expected);
 }
 
-// Test splitHardwareID
-TEST(SplitHardwareIDTests, SplitsCorrectly)
+// Test splitName
+TEST(SplitNameTests, SplitsCorrectly)
 {
+  EXPECT_EQ(splitName("diagnostic_name"), std::make_tuple("", "diagnostic_name", ""));
+
+  EXPECT_EQ(splitName("/ns/node_name"), std::make_tuple("ns", "node_name", ""));
+
+  EXPECT_EQ(splitName("/ns/prefix/node_name"), std::make_tuple("ns/prefix", "node_name", ""));
+
   EXPECT_EQ(
-    splitHardwareID("node_name"), std::make_pair(
-      std::string("none"), std::string(
-        "node_"
-        "name")));
+    splitName("/ns/ns2/ns3/node_name: diagnostic description"),
+    std::make_tuple("ns/ns2/ns3", "node_name", "diagnostic description"));
+
   EXPECT_EQ(
-    splitHardwareID("/ns/node_name"), std::make_pair(
-      std::string("ns"), std::string(
-        "node_"
-        "nam"
-        "e")));
-  EXPECT_EQ(
-    splitHardwareID("/ns/prefix/node_name"),
-    std::make_pair(
-      std::string("ns"), std::string(
-        "prefix/"
-        "node_name")));
+    splitName("/simple_ns/node: some long diagnostic name here"),
+    std::make_tuple("simple_ns", "node", "some long diagnostic name here"));
+
+  EXPECT_EQ(splitName("just_node: diag"), std::make_tuple("", "just_node", "diag"));
 }
 
 // Test statusToInfluxLineProtocol
 TEST(StatusToInfluxLineProtocolTests, FormatsCorrectly)
 {
   diagnostic_msgs::msg::DiagnosticStatus status;
-  status.hardware_id = "/ns/node_name";
+  status.name = "/test/test2/diagnostic_updater_example: topic1 topic status";
+  status.hardware_id = "Device-27-46";
   status.level = 2;
   status.message = "Test message";
   status.values.push_back(createKeyValue("key1", "value1"));
   status.values.push_back(createKeyValue("key2", "42"));
 
   std::string expected =
-    "node_name,ns=ns level=2,message=\"Test message\",key1=\"value1\",key2=42"
+    "diagnostic_updater_example,ns=test/test2,name=topic1\\ topic\\ "
+    "status,hardware_id=Device-27-46 level=2,message=\"Test message\",key1=\"value1\",key2=42"
     " 1672531200123456789\n";
   std::string output;
   statusToInfluxLineProtocol(output, status, "1672531200123456789");
@@ -143,36 +144,48 @@ TEST(DiagnosticArrayToInfluxLineProtocolTests, HandlesMultipleStatuses)
   diag_msg->header.stamp = rclcpp::Time(1672531200, 123456789);
 
   diagnostic_msgs::msg::DiagnosticStatus status1;
-  status1.hardware_id = "/ns1/node1";
+  status1.name = "/ns1/node1: diagnostic description";
+  status1.hardware_id = "Device-27-46";
   status1.level = 1;
   status1.message = "First status";
   status1.values.push_back(createKeyValue("keyA", "valueA"));
 
   diagnostic_msgs::msg::DiagnosticStatus status2;
-  status2.hardware_id = "node2";
+  status2.name = "node2";
+  status2.hardware_id = "12345";
   status2.level = 2;
   status2.message = "Second status";
   status2.values.push_back(createKeyValue("keyB", "42"));
 
-  diag_msg->status = {status1, status2};
+  diagnostic_msgs::msg::DiagnosticStatus status3;
+  status3.name = "node3: status";
+  status3.level = 3;
+
+  diag_msg->status = {status1, status2, status3};
+
+  std::string output;
+  diagnosticArrayToInfluxLineProtocol(output, diag_msg);
 
   std::string expected =
-    "node1,ns=ns1 level=1,message=\"First "
+    "node1,ns=ns1,name=diagnostic\\ description,hardware_id=Device-27-46 level=1,message=\"First "
     "status\",keyA=\"valueA\" 1672531200123456789\n"
-    "node2,ns=none level=2,message=\"Second "
-    "status\",keyB=42 1672531200123456789\n";
+    "node2,hardware_id=12345 level=2,message=\"Second status\",keyB=42 1672531200123456789\n"
+    "node3,name=status level=3 1672531200123456789\n";
 
-  EXPECT_EQ(diagnosticArrayToInfluxLineProtocol(diag_msg), expected);
+  EXPECT_EQ(output, expected);
 }
 
-// Test diagnosticStatusToInfluxLineProtocol
-TEST(DiagnosticStatusToInfluxLineProtocol, HandlesSingleStatus)
+// Test topLevelStatus
+TEST(TopLevelStatusTests, HandlesTopLevelStatus)
 {
   auto status = std::make_shared<diagnostic_msgs::msg::DiagnosticStatus>();
   status->level = 1;
   status->name = "toplevel_state";
   auto time = rclcpp::Time(1672531200, 123456789);
 
+  std::string output;
+  statusToInfluxLineProtocol(output, *status, time);
+
   std::string expected = "toplevel_state level=1 1672531200123456789\n";
-  EXPECT_EQ(diagnosticStatusToInfluxLineProtocol(status, time), expected);
+  EXPECT_EQ(output, expected);
 }

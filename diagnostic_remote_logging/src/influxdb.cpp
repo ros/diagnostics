@@ -57,8 +57,8 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
     // Ensure all parameters are set
     if (organization.empty() || bucket.empty() || influx_token_.empty()) {
       throw std::runtime_error(
-              "All parameters (connection.organization, connection.bucket, connection.token) "
-              "must be set, or when using a proxy like Telegraf none have to be set.");
+        "All parameters (connection.organization, connection.bucket, connection.token) "
+        "must be set, or when using a proxy like Telegraf none have to be set.");
     }
 
     // Construct the Telegraf URL
@@ -68,10 +68,27 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
 
   setupConnection(post_url_);
 
-  if (declare_parameter("send.agg", true)) {
+  double send_period = declare_parameter<double>("send.period", 1.0);
+  bool send_diagnostics = declare_parameter<bool>("send.diagnostics", true);
+
+  if (send_period <= 0.0 && send_diagnostics) {
+    throw std::runtime_error(
+      "Parameter send.period must be greater than 0.0 if send.diagnostics is set to true");
+  }
+
+  if (send_diagnostics) {
+    diagnostics_send_timer_ = this->create_wall_timer(
+      std::chrono::duration<double>(send_period), std::bind(&InfluxDB::sendTimerCallback, this));
+
     diag_sub_ = this->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
-      "/diagnostics_agg", rclcpp::SensorDataQoS(),
+      "/diagnostics", rclcpp::SensorDataQoS(),
       std::bind(&InfluxDB::diagnosticsCallback, this, std::placeholders::_1));
+  }
+
+  if (declare_parameter("send.agg", false)) {
+    throw std::runtime_error(
+      "The option send.agg is deprecated and will be removed in a future version. Use "
+      "send.diagnostics and send.period instead.");
   }
 
   if (declare_parameter<bool>("send.top_level_state", true)) {
@@ -83,18 +100,24 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
 
 void InfluxDB::diagnosticsCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg)
 {
-  std::string output = diagnosticArrayToInfluxLineProtocol(msg);
+  diagnosticArrayToInfluxLineProtocol(output_string_, msg);
+}
 
-  if (!sendToInfluxDB(output)) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to send /diagnostics_agg to telegraf");
+void InfluxDB::sendTimerCallback()
+{
+  if (!sendToInfluxDB(output_string_)) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to send /diagnostics to telegraf");
   }
 
-  RCLCPP_DEBUG(this->get_logger(), "%s", output.c_str());
+  RCLCPP_DEBUG(this->get_logger(), "%s", output_string_.c_str());
+
+  output_string_.clear();
 }
 
 void InfluxDB::topLevelCallback(const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr msg)
 {
-  std::string output = diagnosticStatusToInfluxLineProtocol(msg, this->get_clock()->now());
+  std::string output;
+  statusToInfluxLineProtocol(output, *msg, this->get_clock()->now());
 
   if (!sendToInfluxDB(output)) {
     RCLCPP_ERROR(this->get_logger(), "Failed to send /diagnostics_toplevel_state to telegraf");
@@ -145,13 +168,12 @@ bool InfluxDB::sendToInfluxDB(const std::string & data)
     RCLCPP_ERROR(this->get_logger(), "cURL error: %s", curl_easy_strerror(res));
     return false;
   }
-  CURLcode response_code;
+  int32_t response_code;
   curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &response_code);
 
   if (response_code != 204) {
     RCLCPP_ERROR(
-      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code,
-      data.c_str());
+      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code, data.c_str());
     return false;
   }
 
