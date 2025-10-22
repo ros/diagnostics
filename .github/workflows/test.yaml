@@ -94,7 +94,7 @@ jobs:
       - name: Install package dependencies
         run: |
           rosdep update
-          rosdep install --from-paths D:\a\diagnostics\diagnostics --ignore-src -r -y
+          rosdep install ${{ matrix.package }} -r -y
       - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
