@@ -39,5 +39,6 @@ jobs:
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
+          vcs-repo-file-url: https://raw.githubusercontent.com/ros2/ros2/${{ matrix.distro }}/ros2.repos
         # All of this is quite unstable, atm:
-        continue-on-error: true
+        # continue-on-error: true
