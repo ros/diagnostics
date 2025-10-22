@@ -18,11 +18,11 @@ jobs:
         id: set-distro
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "This is a PR. Getting branch name from head ref."
-            branch_name="${{ github.event.pull_request.head.ref }}"
+            echo "This is a PR. Getting branch name from base ref."
+            branch_name="${{ github.event.pull_request.base.ref }}"
           else
-            echo "This is a push. Getting branch name from GITHUB_REF."
-            branch_name="${GITHUB_REF##*/}"
+            echo "This is a push. Getting branch name from head ref."
+            branch_name="${{ github.head_ref }}"
           fi
           echo "> Branch name is: ${branch_name}"
 
