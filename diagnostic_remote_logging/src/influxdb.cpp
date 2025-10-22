@@ -57,8 +57,8 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
     // Ensure all parameters are set
     if (organization.empty() || bucket.empty() || influx_token_.empty()) {
       throw std::runtime_error(
-        "All parameters (connection.organization, connection.bucket, connection.token) "
-        "must be set, or when using a proxy like Telegraf none have to be set.");
+              "All parameters (connection.organization, connection.bucket, connection.token) "
+              "must be set, or when using a proxy like Telegraf none have to be set.");
     }
 
     // Construct the Telegraf URL
@@ -73,7 +73,7 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
 
   if (send_period <= 0.0 && send_diagnostics) {
     throw std::runtime_error(
-      "Parameter send.period must be greater than 0.0 if send.diagnostics is set to true");
+            "Parameter send.period must be greater than 0.0 if send.diagnostics is set to true");
   }
 
   if (send_diagnostics) {
@@ -87,8 +87,8 @@ InfluxDB::InfluxDB(const rclcpp::NodeOptions & opt)
 
   if (declare_parameter("send.agg", false)) {
     throw std::runtime_error(
-      "The option send.agg is deprecated and will be removed in a future version. Use "
-      "send.diagnostics and send.period instead.");
+            "The option send.agg is deprecated and will be removed in a future version. Use "
+            "send.diagnostics and send.period instead.");
   }
 
   if (declare_parameter<bool>("send.top_level_state", true)) {
