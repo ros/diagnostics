@@ -17,19 +17,28 @@ jobs:
       - name: Set ROS distro from branch name
         id: set-distro
         run: |
-          if [[ "${GITHUB_REF##*/}" == *"ros2"* ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "This is a PR. Getting branch name from head ref."
+            branch_name="${{ github.event.pull_request.head.ref }}"
+          else
+            echo "This is a push. Getting branch name from GITHUB_REF."
+            branch_name="${GITHUB_REF##*/}"
+          fi
+          echo "> Branch name is: ${branch_name}"
+
+          if [[ "${branch_name}" == *"ros2"* ]]; then
             distro="rolling"
-          elif [[ "${GITHUB_REF##*/}" == *"ros2-humble"* ]]; then
+          elif [[ "${branch_name}" == *"ros2-humble"* ]]; then
             distro="humble"
-          elif [[ "${GITHUB_REF##*/}" == *"ros2-jazzy"* ]]; then
+          elif [[ "${branch_name}" == *"ros2-jazzy"* ]]; then
             distro="jazzy"
-          elif [[ "${GITHUB_REF##*/}" == *"ros2-kilted"* ]]; then
+          elif [[ "${branch_name}" == *"ros2-kilted"* ]]; then
             distro="kilted"
           else
-            echo "Unknown branch for determining ROS distro: ${GITHUB_REF##*/}"
+            echo "! Unknown branch for determining ROS distro: ${GITHUB_REF##*/}"
             exit 1
           fi
-          echo "Determined ROS distro to be: ${distro} :)"
+          echo "> Determined ROS distro to be: ${distro}!"
           echo "distro=$distro" >> $GITHUB_OUTPUT
   build_and_test:
     name: ${{ matrix.package }} on under ${{ matrix.distro }}
