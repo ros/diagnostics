@@ -39,6 +39,10 @@
 #ifndef DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
 #define DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
 
+#if defined(_WIN32)
+#define NOMINMAX
+#endif
+
 #include <curl/curl.h>
 
 #include <string>
