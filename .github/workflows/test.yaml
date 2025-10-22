@@ -62,7 +62,7 @@ jobs:
       - uses: ros-tooling/setup-ros@0.7.15
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@main
+      - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: ${{ matrix.package }}
@@ -94,7 +94,7 @@ jobs:
       - name: Install package dependencies
         run: |
           rosdep update
-          rosdep install --from-paths src/diagnostics/${{ matrix.package }} --ignore-src -r -y  
+          rosdep install --from-paths src --ignore-src -r -y
       - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
