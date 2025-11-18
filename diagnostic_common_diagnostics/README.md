@@ -3,7 +3,7 @@ General information about this repository, including legal information, build in
 # The diagnostic_common_diagnostics package
 This package provides generic nodes to monitor a Linux host.
 
-Currently only the NTP monitor is ported to ROS2.
+Currently only the tf monitor is not ported to ROS2 yet.
 
 # Nodes
 
