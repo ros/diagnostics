@@ -7,6 +7,43 @@ on:
   schedule:
     # Run every week at 20:00 on Sunday
     - cron: "0 20 * * 0"
+  workflow_dispatch:
+    inputs:
+      pixi_dependencies:
+        description: "Space-separated list of additional pixi dependencies"
+        required: true
+        default: ""
+        type: string
+      windows_dependencies:
+        description: "Path to a repos file with additional windows dependencies"
+        required: true
+        default: ""
+        type: string
+      skip_dependencies:
+        description: "Space-separated list of packages to skip from rosinstall_generator dependency resolution"
+        default: "sdformat_urdf"
+        required: true
+        type: string
+      skip_packages:
+        description: "Space-separated list of packages to skip from build"
+        default: ""
+        required: true
+        type: string
+      ninja_packages:
+        description: "Space-separated list of packages to be built with Ninja generator (default is MSVC otherwise)"
+        default: ""
+        required: true
+        type: string
+      upstream_cmake_args:
+        description: "Additional arguments to pass to CMake for upstream workspace, e.g. -DBUILD_TESTING=OFF"
+        default: "-DBUILD_TESTING=OFF"
+        required: true
+        type: string
+      target_cmake_args:
+        description: "Additional arguments to pass to CMake for target workspace, e.g. -DBUILD_TESTING=OFF"
+        default: ""
+        required: true
+        type: string
 
 jobs:
   ros_distro_from_branch_name:
@@ -68,9 +105,16 @@ jobs:
           package-name: ${{ matrix.package }}
           # vcs-repo-file-url: |
           #   https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
-  build_and_test_win:
+  build_win:
     name: ${{ matrix.package }} under ${{ matrix.distro }} (windows)
     needs: ros_distro_from_branch_name
+    runs-on: windows-2022
+    # container: ${{ inputs.container }}
+    env:
+      ros_underlay_path: C:\dev
+      upstream_workspace: C:\upstream_ws
+      # this will be src/{repo-owner}/{repo-name}
+      repo_path: src/${{ github.repository }}
     strategy:
       fail-fast: false
       matrix:
@@ -83,22 +127,182 @@ jobs:
           ]
         include:
           - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
-    runs-on: windows-2022
     steps:
-      - uses: ros-tooling/setup-ros@0.7.15
+      - name: Restore pixi.lock
+        uses: actions/cache/restore@v4
+        id: cache
         with:
-          required-ros-distributions: ${{ matrix.distro }}
-      - name: Upgrade colcon-meson
-      # Workaround for "Exception in package identification extension 'meson' in 'src\ohkszihoidm': __init__() missing 2 required positional arguments: 'subproject_dir' and 'env'"
-        run: python -m pip install -U colcon-meson==0.5.0
-      - name: Install package dependencies
+          path: pixi.lock
+          key: pixi|${{ matrix.distro }}
+
+      - name: Bootstrap pixi and patch manifest file
+        # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
         run: |
-          rosdep update
-          rosdep install ${{ matrix.package }} -r -y
-      - uses: ros-tooling/action-ros-ci@0.4.5
+          $manifest = "pixi.toml"
+          irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/rolling/pixi.toml -OutFile $manifest
+
+          # patch pixi.toml to add extra dependencies
+          $deps = "${{ input.pixi_dependencies }} rosinstall_generator"
+          if (-not [string]::IsNullOrWhiteSpace($deps)) {
+            Write-Host "Extra dependencies specified: $deps"
+
+            # Read file into a string array
+            [string[]]$content = Get-Content $manifest
+
+            # Find [dependencies] section
+            $depIndex = $content.IndexOf("[dependencies]")
+
+            # If section not found, append it
+            if ($depIndex -eq -1) {
+                Add-Content $manifest "`n[dependencies]"
+                $content = Get-Content $manifest
+                $depIndex = $content.IndexOf("[dependencies]")
+            }
+
+            # Convert array to a List[string] explicitly
+            $contentList = New-Object 'System.Collections.Generic.List[string]'
+            $contentList.AddRange([string[]]$content)
+
+            # Insert each dependency after the [dependencies] section
+            $insertIndex = $depIndex + 1
+
+            foreach ($dep in $deps.Split(" ")) {
+                # Only insert if not already present
+                if (-not ($contentList -match "^\s*$dep\s*=")) {
+                    $contentList.Insert($insertIndex, "$dep = `"*`"")
+                    $insertIndex++
+                }
+            }
+
+            # Save updated manifest
+            $contentList | Set-Content $manifest
+          } else {
+              Write-Host "No additional dependencies specified."
+          }
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.3
+        # Cache pixi environment only on default branch to save disk space
         with:
-          target-ros2-distro: ${{ matrix.distro }}
-          package-name: ${{ matrix.package }}
-          # vcs-repo-file-url: https://raw.githubusercontent.com/ros2/ros2/${{ matrix.distro }}/ros2.repos
-        # All of this is quite unstable, atm:
-        # continue-on-error: true
+          cache: ${{ steps.cache.outputs.cache-hit == 'true' }} # only use cache if pixi.lock is present
+          cache-write: ${{ steps.cache.outputs.cache-hit == 'true' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }} # only write cache on push to default branch to save disk space, caches from PRs can't be accessed anyways; only allowed if pixi.lock is present
+          locked: false
+
+      - name: Cache pixi.lock
+        uses: actions/cache/save@v4
+        # independent of the success of the following steps, but only on default branch
+        # cache independent of the cache hit of the restore step, because pixi.toml could have changed
+        if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+        with:
+          path: pixi.lock
+          key: pixi|${{ matrix.distro }}
+
+      - name: Upload pixi lock file
+        uses: actions/upload-artifact@v5
+        with:
+          name: pixi.lock
+          path: pixi.lock
+
+      - name: Install ROS
+        # Download and extract ROS 2 package
+        # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
+        run: |
+          # TODO(christophfroehlich) remove with fix below
+          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
+
+          mkdir -p ${{ env.ros_underlay_path }}
+          Set-Location -Path ${{ env.ros_underlay_path }}
+          $url = "https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip"
+          $output = "ros2-package-windows-AMD64.zip"
+          Invoke-WebRequest -Uri $url -OutFile $output
+          Expand-Archive -Path $output -DestinationPath ros2_${{ matrix.distro }}
+
+          # python packages are broken: https://github.com/ros2/ros2/issues/1675
+          # TODO(christophfroehlich) remove once https://github.com/ros2/ci/pull/817 is released
+          cd ros2_${{ matrix.distro }}
+          irm https://gist.githubusercontent.com/knmcguire/fd5326de442289712539182f6257191c/raw/bcb4bf2a460af3a1d71bcfcdcefa065ebd5060d7/preinstall_setup_windows.py -OutFile preinstall_setup_windows.py
+          python preinstall_setup_windows.py
+
+      - name: Get package list
+        id: package_list_action
+        uses: ros-controls/ros2_control_ci/.github/actions/set-package-list-pixi@master
+        with:
+          path: ${{ env.repo_path }}
+          manifest-path: pixi.toml
+
+      - name: Clone dependencies
+        run: |
+          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
+          ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.ps1
+
+          # check for repos files, and pass them to vcstool
+          mkdir -p ${{ env.upstream_workspace }}/src
+          $repo_file = "${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
+          if (Test-Path "$repo_file") {
+            Write-Output "Local repos file found"
+            vcs import --input $repo_file ${{ env.upstream_workspace }}/src
+          }
+          if (![string]::IsNullOrWhiteSpace("${{ inputs.windows_dependencies }}")) {
+            $repo_file_win = "${{ env.repo_path }}\${{ inputs.windows_dependencies }}"
+            if (Test-Path "$repo_file_win") {
+              Write-Output "Windows repos file found"
+              vcs import --input $repo_file_win ${{ env.upstream_workspace }}/src
+            }
+          }
+
+          # use rosinstall_generator to get all dependencies which are not yet installed
+          $underlay_ws_pkgs=$(ros2 pkg list)
+          # Write-Host "Packages in ROS installation: $underlay_ws_pkgs"
+          rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude $underlay_ws_pkgs ${{inputs.skip_dependencies}} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
+          # rosinstall_generator skips excludes with are from a different repo (gbp instead of development repo)
+          vcs import --skip-existing --input deps.repos ${{ env.upstream_workspace }}/src
+
+      - name: Upload repos file
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.windows.repos
+          path: deps.repos
+
+      - name: Build upstream workspace
+        # use Ninja generator optionally for selected packages.
+        # This is needed for RSL, but doesn't work for msg packages
+        # https://github.com/search?q=repo%3APickNikRobotics%2FRSL%20ninja&type=code
+        # https://github.com/colcon/colcon-ros/issues/84#issuecomment-1862881299
+        shell: cmd
+        run: |
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat >nul 2>&1
+
+          call ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.bat
+          pushd ${{ env.upstream_workspace }}
+
+          @echo on
+
+          set skip_arg=
+          if not "${{ inputs.skip_packages }}"=="" (
+            set skip_arg=${{ inputs.skip_packages }}
+          )
+
+          if not "${{ inputs.ninja_packages }}"=="" (
+            colcon build --packages-up-to ${{ inputs.ninja_packages }} --cmake-args -G Ninja --event-handler console_cohesion+ --merge-install
+            set skip_arg=%skip_arg% ${{ inputs.ninja_packages }}
+          )
+
+          colcon build --packages-skip %skip_arg% --event-handler console_cohesion+ --cmake-args ${{ inputs.upstream_cmake_args }} --merge-install
+
+      - name: Build target workspace
+        shell: cmd
+        run: |
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat >nul 2>&1
+
+          call ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.bat
+          call ${{ env.upstream_workspace }}\install\setup.bat
+
+          @echo on
+
+          set skip_arg=
+          if not "${{ inputs.skip_packages }}"=="" (
+            set skip_arg=--packages-skip ${{ inputs.skip_packages }}
+          )
+          colcon build %skip_arg% --event-handler console_cohesion+ --cmake-args ${{ inputs.target_cmake_args }} --merge-install
