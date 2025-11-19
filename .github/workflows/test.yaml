@@ -12,7 +12,7 @@ on:
       pixi_dependencies:
         description: "Space-separated list of additional pixi dependencies"
         required: true
-        default: ""
+        default: "rosinstall_generator"
         type: string
       windows_dependencies:
         description: "Path to a repos file with additional windows dependencies"
@@ -142,7 +142,7 @@ jobs:
           irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/rolling/pixi.toml -OutFile $manifest
 
           # patch pixi.toml to add extra dependencies
-          $deps = "${{ inputs.pixi_dependencies }} rosinstall_generator"
+          $deps = "${{ inputs.pixi_dependencies }}"
           if (-not [string]::IsNullOrWhiteSpace($deps)) {
             Write-Host "Extra dependencies specified: $deps"
 
