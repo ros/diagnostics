@@ -142,7 +142,7 @@ jobs:
           irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/rolling/pixi.toml -OutFile $manifest
 
           # patch pixi.toml to add extra dependencies
-          $deps = "${{ input.pixi_dependencies }} rosinstall_generator"
+          $deps = "${{ inputs.pixi_dependencies }} rosinstall_generator"
           if (-not [string]::IsNullOrWhiteSpace($deps)) {
             Write-Host "Extra dependencies specified: $deps"
 
