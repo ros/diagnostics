@@ -181,6 +181,7 @@ jobs:
         with:
           name: pixi.lock
           path: pixi.lock
+          overwrite: true
 
       - name: Install ROS
         # Download and extract ROS 2 package
