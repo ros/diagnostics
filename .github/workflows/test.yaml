@@ -235,7 +235,7 @@ jobs:
 
           # use rosinstall_generator to get all dependencies which are not yet installed
           $underlay_ws_pkgs=$(ros2 pkg list)
-          # Write-Host "Packages in ROS installation: $underlay_ws_pkgs"
+          Write-Host "underlay_ws_pkgs = $underlay_ws_pkgs"
           rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude $underlay_ws_pkgs ${{ env.skip_dependencies }} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
           # rosinstall_generator skips excludes with are from a different repo (gbp instead of development repo)
           vcs import --skip-existing --input deps.repos ${{ env.upstream_workspace }}/src
