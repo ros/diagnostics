@@ -133,7 +133,7 @@ jobs:
         id: cache
         with:
           path: pixi.lock
-          key: pixi|${{ matrix.distro }}
+          key: pixi|${{ matrix.distro }}|${{ matrix.package }}
 
       - name: Bootstrap pixi and patch manifest file
         # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
@@ -195,7 +195,7 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
         with:
           path: pixi.lock
-          key: pixi|${{ matrix.distro }}
+          key: pixi|${{ matrix.distro }}|${{ matrix.package }}
 
       - name: Upload pixi lock file
         uses: actions/upload-artifact@v5
