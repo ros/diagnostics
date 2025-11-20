@@ -9,11 +9,12 @@ on:
     - cron: "0 20 * * 0"
   workflow_call:
     inputs:
-      pixi_dependencies:
-        description: "Space-separated list of additional pixi dependencies"
-        required: true
-        default: "rosinstall_generator"
-        type: string
+      # pixi_dependencies:
+      #   description: "Space-separated list of additional pixi dependencies"
+      #   required: true
+      #   default: "rosinstall_generator"
+      #   type: string
+      # TODO
       windows_dependencies:
         description: "Path to a repos file with additional windows dependencies"
         required: true
@@ -115,6 +116,10 @@ jobs:
       upstream_workspace: C:\upstream_ws
       # this will be src/{repo-owner}/{repo-name}
       repo_path: src/${{ github.repository }}
+
+      # INPUTS ...
+      # Space-separated list of additional pixi dependencies
+      pixi_dependencies: "rosinstall_generator"
     strategy:
       fail-fast: false
       matrix:
@@ -142,8 +147,8 @@ jobs:
           irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/rolling/pixi.toml -OutFile $manifest
 
           # patch pixi.toml to add extra dependencies
-          $deps = "${{ inputs.pixi_dependencies }}"
-          Write-Host "inputs.pixi_dependencies = $deps"
+          $deps = "${{ env.pixi_dependencies }}"
+          Write-Host "env.pixi_dependencies = $deps"
           if (-not [string]::IsNullOrWhiteSpace($deps)) {
             Write-Host "Extra dependencies specified: $deps"
 
