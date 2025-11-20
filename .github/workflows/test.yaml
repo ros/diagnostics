@@ -219,7 +219,7 @@ jobs:
           mkdir -p ${{ env.upstream_workspace }}/${{ env.repo_path }}
 
           # check for repos files, and pass them to vcstool
-          mkdir -p ${{ env.upstream_workspace }}/src
+          # mkdir -p ${{ env.upstream_workspace }}/src
           $repo_file = "${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
           if (Test-Path "$repo_file") {
             Write-Output "Local repos file found"
