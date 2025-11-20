@@ -143,6 +143,7 @@ jobs:
 
           # patch pixi.toml to add extra dependencies
           $deps = "${{ inputs.pixi_dependencies }}"
+          Write-Host "inputs.pixi_dependencies = $deps"
           if (-not [string]::IsNullOrWhiteSpace($deps)) {
             Write-Host "Extra dependencies specified: $deps"
 
