@@ -215,6 +215,9 @@ jobs:
           Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
           ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.ps1
 
+          # Workaround .. --from-path: 'src/ros/diagnostics' is not an existing directory
+          mkdir -p ${{ env.upstream_workspace }}/${{ env.repo_path }}
+
           # check for repos files, and pass them to vcstool
           mkdir -p ${{ env.upstream_workspace }}/src
           $repo_file = "${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
