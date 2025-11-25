@@ -28,12 +28,12 @@ jobs:
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: |
-              cppcheck,
-              cpplint,
-              flake8,
-              pep257,
-              uncrustify,
-              xmllint,
+              cppcheck
+              cpplint
+              flake8
+              pep257
+              uncrustify
+              xmllint
           package-name: |
             diagnostic_aggregator
             diagnostic_common_diagnostics
