@@ -36,3 +36,14 @@ pull_request_rules:
       - check-success ~= self_test on [a-z]+
     actions:
       merge:
+  - name: Backport to distro branches
+    conditions:
+      - label = backport
+    actions:
+      backport:
+        branches:
+          - ros2-humble
+          - ros2-jazzy
+          - ros2-kilted
+        assignees:
+          - "{{ author }}"
