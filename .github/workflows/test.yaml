@@ -68,7 +68,7 @@ jobs:
           # vcs-repo-file-url: |
           #   https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
   build_win:
-    name: ${{ matrix.package }} under ${{ matrix.distro }} (windows)
+    name: Building ${{ matrix.distro }} on windows
     needs: ros_distro_from_branch_name
     runs-on: windows-2022
     # container: ${{ inputs.container }}
@@ -96,13 +96,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [
-            diagnostic_aggregator,
-            diagnostic_common_diagnostics,
-            diagnostic_remote_logging,
-            diagnostic_updater,
-            self_test,
-          ]
         include:
           - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
     steps:
@@ -111,7 +104,7 @@ jobs:
         id: cache
         with:
           path: pixi.lock
-          key: pixi|${{ matrix.distro }}|${{ matrix.package }}
+          key: pixi|${{ matrix.distro }}
       - name: Checkout source
         uses: actions/checkout@v6
         with:
@@ -177,12 +170,12 @@ jobs:
         if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
         with:
           path: pixi.lock
-          key: pixi|${{ matrix.distro }}|${{ matrix.package }}
+          key: pixi|${{ matrix.distro }}
 
       - name: Upload pixi lock file
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ matrix.package }}_pixi.lock
+          name: pixi.lock
           path: pixi.lock
 
       - name: Install ROS
@@ -245,7 +238,7 @@ jobs:
       - name: Upload repos file
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ matrix.package }}_windows.repos
+          name: windows.repos
           path: deps.repos
 
       - name: Build upstream workspace
