@@ -35,6 +35,8 @@ jobs:
       - run: |
           apt update
           apt install -y python3-rosdep
+          apt install -y python3-colcon-installed-package-information
+          apt install -y python3-colcon-ros
           rosdep init
           rosdep update
       - uses: ros-tooling/action-ros-lint@master
