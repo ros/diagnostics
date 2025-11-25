@@ -32,9 +32,8 @@ jobs:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
-      # - uses: ros-tooling/setup-ros@0.7.15
-      #   with:
-      #     required-ros-distributions: ${{ matrix.distro }}
+      - run:
+          apt install python3-rosdep
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
