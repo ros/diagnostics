@@ -32,7 +32,7 @@ jobs:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
-      - uses: ros-tooling/setup-ros@master
+      - uses: ros-tooling/setup-ros@0.7.15
         with:
           required-ros-distributions: ${{ matrix.distro }}
       - uses: ros-tooling/action-ros-lint@master
