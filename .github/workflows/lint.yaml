@@ -10,7 +10,7 @@ on:
 
 jobs:
   ament_lint:
-    name: Linting
+    name: Ament linters
     strategy:
       fail-fast: false
       matrix:

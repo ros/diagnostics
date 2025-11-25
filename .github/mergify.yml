@@ -23,7 +23,7 @@ pull_request_rules:
       - label = automerge
       # we have to list all checks, apparently
       - check-success = Check licenses
-      - check-success = Linting
+      - check-success = Ament linters
       - check-success ~= Build [a-z]+ on ubuntu
       - check-success ~= Build [a-z]+ on windows
     actions:
