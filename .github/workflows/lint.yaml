@@ -32,7 +32,8 @@ jobs:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
-      - run:
+      - run: |
+          apt update
           apt install python3-rosdep
       - uses: ros-tooling/action-ros-lint@master
         with:
