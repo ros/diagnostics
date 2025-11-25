@@ -21,7 +21,7 @@ jobs:
             branch_name="${{ github.event.pull_request.base.ref }}"
           else
             echo "This is a push. Getting branch name from head ref."
-            branch_name="${{ github.head_ref }}"
+            branch_name="${GITHUB_REF}"
           fi
           echo "> Branch name is: ${branch_name}"
 
