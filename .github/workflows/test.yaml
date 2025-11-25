@@ -40,7 +40,7 @@ jobs:
           echo "> Determined ROS distro to be: ${distro}!"
           echo "distro=$distro" >> $GITHUB_OUTPUT
   build_and_test:
-    name: Build ${{ matrix.distro }} on ${{ matrix.os }}
+    name: Build ${{ matrix.distro }} on ubuntu
     needs: ros_distro_from_branch_name
     strategy:
       fail-fast: false
