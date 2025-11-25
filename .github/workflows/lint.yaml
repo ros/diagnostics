@@ -25,7 +25,9 @@ jobs:
             uncrustify,
             xmllint,
           ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: ros:rolling-ros-core
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
