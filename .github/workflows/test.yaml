@@ -112,7 +112,10 @@ jobs:
         with:
           path: pixi.lock
           key: pixi|${{ matrix.distro }}|${{ matrix.package }}
-
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          path: ${{ env.repo_path }}
       - name: Bootstrap pixi and patch manifest file
         # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
         run: |
