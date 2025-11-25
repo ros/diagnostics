@@ -80,7 +80,7 @@ jobs:
 
       # INPUTS ...
       # Space-separated list of additional pixi dependencies
-      pixi_dependencies: "rosinstall_generator"
+      pixi_dependencies: "rosinstall_generator typeguard jinja2 boost compilers"
       # Path to a repos file with additional windows dependencies
       windows_dependencies: ""
       # Space-separated list of packages to skip from
