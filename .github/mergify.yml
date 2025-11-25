@@ -23,11 +23,7 @@ pull_request_rules:
       - label = automerge
       # we have to list all checks, apparently
       - check-success = Check licenses
-      - check-success = Lint cppcheck
-      - check-success = Lint cpplint
-      - check-success = Lint flake8
-      - check-success = Lint uncrustify
-      - check-success = Lint xmllint
+      - check-success = Linting
       - check-success ~= Build [a-z]+ on ubuntu
       - check-success ~= Build [a-z]+ on windows
     actions:
