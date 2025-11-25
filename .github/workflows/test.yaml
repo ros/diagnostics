@@ -182,9 +182,8 @@ jobs:
       - name: Upload pixi lock file
         uses: actions/upload-artifact@v5
         with:
-          name: pixi.lock
+          name: ${{ matrix.package }}_pixi.lock
           path: pixi.lock
-          overwrite: true
 
       - name: Install ROS
         # Download and extract ROS 2 package
@@ -246,7 +245,7 @@ jobs:
       - name: Upload repos file
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.windows.repos
+          name: ${{ matrix.package }}_windows.repos
           path: deps.repos
 
       - name: Build upstream workspace
