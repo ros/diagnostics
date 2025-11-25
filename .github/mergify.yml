@@ -43,3 +43,5 @@ pull_request_rules:
           - ros2-kilted
         assignees:
           - "{{ author }}"
+        labels:
+          - automerge
