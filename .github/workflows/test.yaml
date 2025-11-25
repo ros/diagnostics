@@ -9,6 +9,7 @@ on:
     - cron: "0 20 * * 0"
 jobs:
   ros_distro_from_branch_name:
+    name: What is the distro?
     runs-on: ubuntu-latest
     outputs:
       distro: ${{ steps.set-distro.outputs.distro }}
