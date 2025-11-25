@@ -35,6 +35,7 @@ jobs:
       - run: |
           apt update
           apt install -y python3-rosdep
+          rosdep init
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
