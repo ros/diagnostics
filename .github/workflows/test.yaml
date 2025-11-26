@@ -9,6 +9,7 @@ on:
     - cron: "0 20 * * 0"
 jobs:
   ros_distro_from_branch_name:
+    name: What is the distro?
     runs-on: ubuntu-latest
     outputs:
       distro: ${{ steps.set-distro.outputs.distro }}
@@ -40,18 +41,11 @@ jobs:
           echo "> Determined ROS distro to be: ${distro}!"
           echo "distro=$distro" >> $GITHUB_OUTPUT
   build_and_test:
-    name: ${{ matrix.package }} under ${{ matrix.distro }}
+    name: Build ${{ matrix.distro }} on ubuntu
     needs: ros_distro_from_branch_name
     strategy:
       fail-fast: false
       matrix:
-        package: [
-            diagnostic_aggregator,
-            diagnostic_common_diagnostics,
-            diagnostic_remote_logging,
-            diagnostic_updater,
-            self_test,
-          ]
         include:
           - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
             os: 22.04
@@ -64,11 +58,14 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.4.5
         with:
           target-ros2-distro: ${{ matrix.distro }}
-          package-name: ${{ matrix.package }}
-          # vcs-repo-file-url: |
-          #   https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
+          package-name: |
+            diagnostic_aggregator
+            diagnostic_common_diagnostics
+            diagnostic_remote_logging
+            diagnostic_updater
+            self_test
   build_win:
-    name: Building ${{ matrix.distro }} on windows
+    name: Build ${{ matrix.distro }} on windows
     needs: ros_distro_from_branch_name
     runs-on: windows-2022
     # container: ${{ inputs.container }}

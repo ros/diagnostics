@@ -10,7 +10,7 @@ on:
 
 jobs:
   ament_lint:
-    name: Lint ${{ matrix.linter }}
+    name: Ament lint ${{ matrix.linter }}
     strategy:
       fail-fast: false
       matrix:
