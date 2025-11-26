@@ -13,7 +13,7 @@ pull_request_rules:
       - and:
         - base ~= ^ros2-[a-z]+$
         - not:
-            head ~= ^backport\/.+$
+            head ~= ^mergify\/bp\/.+$
     actions:
       close: 
         message: Please make all PRs against the `ros2` branch. They will be backported if possible.
