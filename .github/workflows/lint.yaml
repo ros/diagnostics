@@ -10,7 +10,7 @@ on:
 
 jobs:
   ament_lint:
-    name: Lint ${{ matrix.linter }}
+    name: Ament lint ${{ matrix.linter }}
     strategy:
       fail-fast: false
       matrix:
@@ -18,9 +18,7 @@ jobs:
             cppcheck,
             cpplint,
             flake8,
-            # pep257, TODO: enable when we fixed
-            # Error: diagnostic_common_diagnostics/diagnostic_common_diagnostics/ntp_monitor.py:113 in public method `ntp_diag`: D417: Missing argument descriptions in the docstring (argument(s) st are missing descriptions in 'ntp_diag' docstring)
-            # using ros-rolling-ament-pep257 amd64 0.18.0-1noble.20240426.150718
+            pep257,
             uncrustify,
             xmllint,
           ]
