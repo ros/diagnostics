@@ -14,9 +14,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - distro: rolling
-            os: ubuntu-24.04
         linter: [
             cppcheck,
             cpplint,
@@ -25,20 +22,17 @@ jobs:
             uncrustify,
             xmllint,
           ]
-    runs-on: ubuntu-latest
-    container:
-      image: ros:rolling-ros-core
+        include:
+          - distro: rolling
+            os: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
-      - run: |
-          apt update
-          apt install -y python3-rosdep
-          apt install -y python3-colcon-installed-package-information
-          apt install -y python3-colcon-ros
-          rosdep init
-          rosdep update
+      - uses: ros-tooling/setup-ros@0.7.15
+        with:
+          required-ros-distributions: ${{ matrix.distro }}
       - uses: ros-tooling/action-ros-lint@master
         with:
           linter: ${{ matrix.linter }}
