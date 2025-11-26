@@ -26,14 +26,14 @@ jobs:
           fi
           echo "> Branch name is: ${branch_name}"
 
-          if [[ "${branch_name}" == *"ros2"* ]]; then
-            distro="rolling"
-          elif [[ "${branch_name}" == *"ros2-humble"* ]]; then
+          if [[ "${branch_name}" == *"ros2-humble"* ]]; then
             distro="humble"
           elif [[ "${branch_name}" == *"ros2-jazzy"* ]]; then
             distro="jazzy"
           elif [[ "${branch_name}" == *"ros2-kilted"* ]]; then
             distro="kilted"
+          elif [[ "${branch_name}" == *"ros2"* ]]; then
+            distro="rolling"
           else
             echo "! Unknown branch for determining ROS distro: ${GITHUB_REF##*/}"
             exit 1
