@@ -48,6 +48,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace diagnostic_aggregator
 {
 /*

@@ -56,6 +56,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#ifdef ERROR
+#undef ERROR  //DiagnosticStatus::ERROR conflicts with Windows.h ERROR definition
+#endif
+
 namespace diagnostic_aggregator
 {
 /*!

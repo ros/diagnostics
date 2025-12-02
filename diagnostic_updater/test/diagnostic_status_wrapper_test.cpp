@@ -37,6 +37,10 @@
 #include "diagnostic_updater/diagnostic_status_wrapper.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperDefaultConstructor) {
   // A default constructed DiagnosticStatusWrapper should be empty.
   diagnostic_updater::DiagnosticStatusWrapper dsw;

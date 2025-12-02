@@ -36,6 +36,10 @@
 
 #include "self_test/test_runner.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 class MyNode : public rclcpp::Node
 {
 private:

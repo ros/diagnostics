@@ -38,6 +38,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 using namespace std::chrono_literals;
 
 double time_to_launch;

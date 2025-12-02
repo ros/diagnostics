@@ -46,6 +46,10 @@
 
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 using namespace std::chrono_literals;
 
 class TestClass

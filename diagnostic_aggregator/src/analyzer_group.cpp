@@ -44,6 +44,10 @@
 #include <vector>
 #include <regex>
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 PLUGINLIB_EXPORT_CLASS(diagnostic_aggregator::AnalyzerGroup, diagnostic_aggregator::Analyzer)
 
 namespace diagnostic_aggregator

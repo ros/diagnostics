@@ -44,6 +44,10 @@
 #include <string>
 #include <vector>
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace diagnostic_aggregator
 {
 using std::placeholders::_1;

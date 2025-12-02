@@ -35,6 +35,10 @@
 
 #include "self_test/test_runner.hpp"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 /*
  *\author Kevin Watts
  *\brief Returns nominal self-test values
