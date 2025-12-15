@@ -36,8 +36,8 @@
  * \author Daan Wijffels
  */
 
-#ifndef DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
-#define DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
+#ifndef DIAGNOSTIC_REMOTE_LOGGING__INFLUXDBCONNECTOR_HPP_
+#define DIAGNOSTIC_REMOTE_LOGGING__INFLUXDBCONNECTOR_HPP_
 
 #if defined(_WIN32)
 #define NOMINMAX
@@ -51,11 +51,11 @@
 #include "diagnostic_remote_logging/influx_line_protocol.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-class InfluxDB : public rclcpp::Node
+class InfluxDBConnector : public rclcpp::Node
 {
 public:
-  explicit InfluxDB(const rclcpp::NodeOptions & opt);
-  ~InfluxDB();
+  explicit InfluxDBConnector(const rclcpp::NodeOptions & opt);
+  ~InfluxDBConnector();
 
 private:
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
@@ -77,4 +77,4 @@ private:
   bool sendToInfluxDB(const std::string & data);
 };
 
-#endif  // DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
+#endif  // DIAGNOSTIC_REMOTE_LOGGING__INFLUXDBCONNECTOR_HPP_
