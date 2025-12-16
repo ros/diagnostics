@@ -38,8 +38,9 @@
 
 #include "diagnostic_remote_logging/influxdb_connector.hpp"
 
-InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions &opt)
-    : Node("influxdb_connector", opt) {
+InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions & opt)
+: Node("influxdb_connector", opt)
+{
   post_url_ =
     this->declare_parameter<std::string>("connection.url", "http://localhost:8086/api/v2/write");
 
@@ -81,7 +82,7 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions &opt)
         std::bind(&InfluxDBConnector::sendTimerCallback, this));
 
     diag_sub_ =
-        this->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
+      this->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
             "/diagnostics", rclcpp::SensorDataQoS(),
             std::bind(&InfluxDBConnector::diagnosticsCallback, this,
                       std::placeholders::_1));
@@ -95,7 +96,7 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions &opt)
 
   if (declare_parameter<bool>("send.top_level_state", true)) {
     top_level_sub_ =
-        this->create_subscription<diagnostic_msgs::msg::DiagnosticStatus>(
+      this->create_subscription<diagnostic_msgs::msg::DiagnosticStatus>(
             "/diagnostics_toplevel_state", rclcpp::SensorDataQoS(),
             std::bind(&InfluxDBConnector::topLevelCallback, this,
                       std::placeholders::_1));
@@ -103,11 +104,13 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions &opt)
 }
 
 void InfluxDBConnector::diagnosticsCallback(
-    const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg) {
+  const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg)
+{
   diagnosticArrayToInfluxLineProtocol(output_string_, msg);
 }
 
-void InfluxDBConnector::sendTimerCallback() {
+void InfluxDBConnector::sendTimerCallback()
+{
   if (!sendToInfluxDB(output_string_)) {
     RCLCPP_ERROR(this->get_logger(), "Failed to send /diagnostics to telegraf");
   }
@@ -118,7 +121,8 @@ void InfluxDBConnector::sendTimerCallback() {
 }
 
 void InfluxDBConnector::topLevelCallback(
-    const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr msg) {
+  const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr msg)
+{
   std::string output;
   statusToInfluxLineProtocol(output, *msg, this->get_clock()->now());
 
@@ -129,7 +133,8 @@ void InfluxDBConnector::topLevelCallback(
   RCLCPP_DEBUG(this->get_logger(), "%s", output.c_str());
 }
 
-void InfluxDBConnector::setupConnection(const std::string &url) {
+void InfluxDBConnector::setupConnection(const std::string & url)
+{
   curl_global_init(CURL_GLOBAL_ALL);
   curl_ = curl_easy_init();
   if (!curl_) {
@@ -153,7 +158,8 @@ void InfluxDBConnector::setupConnection(const std::string &url) {
   curl_easy_setopt(curl_, CURLOPT_POST, 1L);
 }
 
-bool InfluxDBConnector::sendToInfluxDB(const std::string &data) {
+bool InfluxDBConnector::sendToInfluxDB(const std::string & data)
+{
   if (!curl_) {
     RCLCPP_ERROR(this->get_logger(), "cURL not initialized.");
     return false;
@@ -181,7 +187,8 @@ bool InfluxDBConnector::sendToInfluxDB(const std::string &data) {
   return true;
 }
 
-InfluxDBConnector::~InfluxDBConnector() {
+InfluxDBConnector::~InfluxDBConnector()
+{
   if (curl_) {
     curl_easy_cleanup(curl_);
   }
