@@ -72,6 +72,9 @@ class CpuTask(DiagnosticTask):
 
         stat.add('CPU Load Average', f'{cpu_average:.2f}')
 
+        for idx, cpu_percentage in enumerate(cpu_percentages):
+            stat.add(f'CPU {idx} Load', f'{cpu_percentage:.2f}')
+
         if cpu_average > self._error_percentage:
             stat.summary(DiagnosticStatus.ERROR,
                          f'CPU Average exceeds {self._error_percentage} percent')
