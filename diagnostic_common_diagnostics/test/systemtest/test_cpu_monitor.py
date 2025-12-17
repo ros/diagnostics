@@ -85,7 +85,7 @@ class TestCPUMonitor(unittest.TestCase):
         print(f'Raw readings: {task._readings}')
         self.assertEqual(task.name, 'CPU Information')
         self.assertEqual(stat.level, DiagnosticStatus.WARN)
-        self.assertIn(str('At least one CPU exceeds'), stat.message)
+        self.assertIn(str('CPU Average exceeds'), stat.message)
 
         # Check for at least 1 CPU Load Average and 1 CPU Load
         self.assertGreaterEqual(len(stat.values), 2)
