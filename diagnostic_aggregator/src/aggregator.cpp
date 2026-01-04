@@ -149,7 +149,7 @@ void Aggregator::initAnalyzers()
 
   {  // lock the mutex while analyzer_group_ and other_analyzer_ are being updated
     std::lock_guard<std::mutex> lock(mutex_);
-    
+
     // Load analyzer_group as a plugin
     try {
       if (!analyzer_loader_) {
@@ -158,7 +158,7 @@ void Aggregator::initAnalyzers()
       }
       analyzer_group_ = analyzer_loader_->createSharedInstance(
         "diagnostic_aggregator/AnalyzerGroup");
-      
+
       if (!analyzer_group_->init(base_path_, "", n_)) {
         RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
       }

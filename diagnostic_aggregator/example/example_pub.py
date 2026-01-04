@@ -117,7 +117,7 @@ def main(args=None):
     try:
         node = DiagnosticTalker()
         rclpy.spin(node)
-    except KeyboardInterrupt:                                               
+    except KeyboardInterrupt:
         pass
 
     node.destroy_node()
