@@ -149,9 +149,21 @@ void Aggregator::initAnalyzers()
 
   {  // lock the mutex while analyzer_group_ and other_analyzer_ are being updated
     std::lock_guard<std::mutex> lock(mutex_);
-    analyzer_group_ = std::make_unique<AnalyzerGroup>();
-    if (!analyzer_group_->init(base_path_, "", n_)) {
-      RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
+    
+    // Load analyzer_group as a plugin
+    try {
+      if (!analyzer_loader_) {
+        analyzer_loader_ = std::make_shared<pluginlib::ClassLoader<Analyzer>>(
+          "diagnostic_aggregator", "diagnostic_aggregator::Analyzer");
+      }
+      analyzer_group_ = analyzer_loader_->createSharedInstance(
+        "diagnostic_aggregator/AnalyzerGroup");
+      
+      if (!analyzer_group_->init(base_path_, "", n_)) {
+        RCLCPP_ERROR(logger_, "Analyzer group for diagnostic aggregator failed to initialize!");
+      }
+    } catch (pluginlib::PluginlibException & e) {
+      RCLCPP_ERROR(logger_, "Failed to load AnalyzerGroup plugin: %s", e.what());
     }
 
     // Last analyzer handles remaining data
@@ -329,4 +341,13 @@ rclcpp::Node::SharedPtr Aggregator::get_node() const
   return this->n_;
 }
 
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr Aggregator::get_node_base_interface() const
+{
+  RCLCPP_DEBUG(logger_, "get_node_base_interface()");
+  return this->n_->get_node_base_interface();
+}
+
 }  // namespace diagnostic_aggregator
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(diagnostic_aggregator::Aggregator)

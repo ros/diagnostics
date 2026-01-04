@@ -114,8 +114,11 @@ class DiagnosticTalker(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    node = DiagnosticTalker()
-    rclpy.spin(node)
+    try:
+        node = DiagnosticTalker()
+        rclpy.spin(node)
+    except KeyboardInterrupt:                                               
+        pass
 
     node.destroy_node()
     rclpy.try_shutdown()
