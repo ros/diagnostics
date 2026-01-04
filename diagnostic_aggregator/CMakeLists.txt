@@ -72,11 +72,6 @@ rclcpp_components_register_node(
 # prevent pluginlib from using boost
 target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
-# # Aggregator node
-# add_executable(aggregator_node src/aggregator_node.cpp)
-# target_link_libraries(aggregator_node
-#   ${PROJECT_NAME})
-
 # Add analyzer
 add_executable(add_analyzer src/add_analyzer.cpp)
 target_link_libraries(add_analyzer PUBLIC ${rcl_interfaces_TARGETS} rclcpp::rclcpp)
@@ -179,11 +174,6 @@ if(BUILD_TESTING)
     TIMEOUT 60
   )
 endif()
-
-# install(
-#   TARGETS aggregator_node
-#   DESTINATION lib/${PROJECT_NAME}
-# )
 
 install(
   TARGETS add_analyzer
