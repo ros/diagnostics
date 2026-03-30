@@ -12,24 +12,27 @@ endif()
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_ros REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}
+  src/diagnostic_updater.cpp
+)
 target_include_directories(
   ${PROJECT_NAME}
-  INTERFACE
+  PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
+target_link_libraries(
   ${PROJECT_NAME}
-  INTERFACE
-  diagnostic_msgs
-  rclcpp
+  PUBLIC
+  ${diagnostic_msgs_TARGETS}
+  rclcpp::rclcpp
 )
 
 install(
@@ -42,13 +45,13 @@ install(
 )
 
 add_executable(example src/example.cpp)
-ament_target_dependencies(
-  example
-  "diagnostic_msgs"
-  "rclcpp"
-  "std_msgs"
+target_link_libraries(example
+  PUBLIC
+  ${PROJECT_NAME}
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  rclcpp::rclcpp
 )
-target_link_libraries(example ${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -118,6 +121,7 @@ install(
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(ament_cmake_python)
 ament_export_dependencies(diagnostic_msgs)
