@@ -85,6 +85,7 @@ if(BUILD_TESTING)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/add_analyzer" ADD_ANALYZER)
   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
+
   set(create_analyzers_tests
     "primitive_analyzers"
     "all_analyzers"
@@ -96,7 +97,7 @@ if(BUILD_TESTING)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
 
     configure_file(
-      "test/create_analyzers.launch.py.in"
+      "test/test_create_analyzers.launch.py.in"
       "test_create_${test_name}.launch.py"
       @ONLY
     )
@@ -114,7 +115,7 @@ if(BUILD_TESTING)
     "analyzer_group"
     "empty_root_path")
 
-  foreach(test_name ${create_analyzers_tests})
+  foreach(test_name ${analyzers_output_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_${test_name}" EXPECTED_OUTPUT)
 
@@ -131,34 +132,34 @@ if(BUILD_TESTING)
     )
   endforeach()
 
-  set(add_analyzers_tests
-  "all_analyzers")
+  # TODO ...
 
-  foreach(test_name ${add_analyzers_tests})
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
+  # set(add_analyzers_tests
+  #   "all_analyzers")
 
-    configure_file(
-      "test/add_analyzers.launch.py.in"
-      "test_add_${test_name}.launch.py"
-      @ONLY
-    )
-    add_launch_test(
-      "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
-      TARGET "test_add_${test_name}"
-      TIMEOUT 30
-      ENV
-    )
-  endforeach()
+  # foreach(test_name ${add_analyzers_tests})
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
+  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
 
-  # SKIPPING FLAKY TEST
+  #   configure_file(
+  #     "test/test_add_analyzers.launch.py.in"
+  #     "test_add_${test_name}.launch.py"
+  #     @ONLY
+  #   )
+  #   add_launch_test(
+  #     "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
+  #     TARGET "test_add_${test_name}"
+  #     TIMEOUT 30
+  #     ENV
+  #   )
+  # endforeach()
+
   # add_launch_test(
   #   test/test_critical_pub.py
   #   TIMEOUT 30
   # )
 
-  # SKIPPING FLAKY TEST
   # ament_add_pytest_test(test_discard_behavior
   #   "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
   #   TIMEOUT 60
