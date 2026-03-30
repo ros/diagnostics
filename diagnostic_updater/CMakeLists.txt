@@ -65,12 +65,11 @@ if(BUILD_TESTING)
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries(diagnostic_updater_test ${PROJECT_NAME})
-  target_link_libraries(
-    diagnostic_updater_test
-    diagnostic_msgs::diagnostic_msgs
+  target_link_libraries(diagnostic_updater_test
+    ${diagnostic_msgs_TARGETS}
+    ${std_msgs_TARGETS}
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
-    std_msgs::std_msgs
   )
 
   ament_add_gtest(diagnostic_status_wrapper_test test/diagnostic_status_wrapper_test.cpp)
