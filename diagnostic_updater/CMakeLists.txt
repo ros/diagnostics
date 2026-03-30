@@ -28,11 +28,11 @@ target_include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
+target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC
-  diagnostic_msgs
-  rclcpp
+  ${diagnostic_msgs_TARGETS}
+  rclcpp::rclcpp
 )
 
 install(
@@ -45,13 +45,13 @@ install(
 )
 
 add_executable(example src/example.cpp)
-ament_target_dependencies(
-  example
-  "diagnostic_msgs"
-  "rclcpp"
-  "std_msgs"
+target_link_libraries(example
+  PUBLIC
+  ${PROJECT_NAME}
+  ${diagnostic_msgs_TARGETS}
+  ${std_msgs_TARGETS}
+  rclcpp::rclcpp
 )
-target_link_libraries(example ${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
