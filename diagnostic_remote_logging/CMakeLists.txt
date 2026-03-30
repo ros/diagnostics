@@ -23,7 +23,7 @@ set(dependencies
 
 foreach(dep ${dependencies})
     find_package(${dep} REQUIRED)
-endforeach(dep)
+endforeach()
 
 include_directories(
     src/
