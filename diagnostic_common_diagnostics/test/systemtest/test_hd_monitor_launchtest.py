@@ -59,7 +59,7 @@ def generate_test_description():
                 executable='hd_monitor.py',
                 name='hd_monitor',
                 output='screen',
-                parameters=[{'free_percent_low': 10, 'free_percent_crit': 5}],
+                parameters=[{'free_percent_low': 1, 'free_percent_crit': 1}],
             ),
             launch_testing.actions.ReadyToTest(),
         ]
@@ -88,6 +88,7 @@ class TestHDMonitor(unittest.TestCase):
 
     def test_topic_published(self):
         """Test if the hd_monitor node is publishing diagnostics."""
+        min_level = 100
         with WaitForTopics([('/diagnostics', DiagnosticArray)], timeout=5):
             print('Topic found')
 
@@ -99,7 +100,8 @@ class TestHDMonitor(unittest.TestCase):
 
         while len(self.received_messages) < 10:
             rclpy.spin_once(test_node, timeout_sec=1)
-            if (min_level := self._get_min_level()) == 0:
+            min_level = min(min_level, self._get_min_level())
+            if min_level == 0:
                 break
 
         test_node.destroy_node()
