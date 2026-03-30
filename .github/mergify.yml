@@ -1,0 +1,43 @@
+pull_request_rules:
+  - name: add ros2 label
+    description: If targeting an ROS2 branch, add the label
+    conditions:
+      - base = ros2
+    actions:
+      label:
+        add:
+          - ros2
+  - name: no PRs against distro-specific branches
+    description: PRs against branches like ros-humble are closed automatically. Unless they are a backport.
+    conditions:
+      - and:
+        - base ~= ^ros2-[a-z]+$
+        - not:
+            head ~= ^mergify\/bp\/.+$
+    actions:
+      close: 
+        message: Please make all PRs against the `ros2` branch. They will be backported if possible.
+  - name: Automatic merge
+    description: Merge when PR passes all branch protection and has label automerge
+    conditions:
+      - label = automerge
+      # we have to list all checks, apparently
+      - check-success = Check licenses
+      - check-success ~= Ament lint [a-z0-9 ]+
+      - check-success ~= Build [a-z]+ on ubuntu
+      - check-success ~= Build [a-z]+ on windows
+    actions:
+      merge:
+  - name: Backport to distro branches
+    conditions:
+      - label = backport
+    actions:
+      backport:
+        branches:
+          - ros2-humble
+          - ros2-jazzy
+          - ros2-kilted
+        assignees:
+          - "{{ author }}"
+        labels:
+          - automerge

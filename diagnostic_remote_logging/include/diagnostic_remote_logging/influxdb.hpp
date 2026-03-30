@@ -39,13 +39,17 @@
 #ifndef DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
 #define DIAGNOSTIC_REMOTE_LOGGING__INFLUXDB_HPP_
 
+#if defined(_WIN32)
+#define NOMINMAX
+#endif
+
 #include <curl/curl.h>
+
 #include <string>
 
-#include "diagnostic_remote_logging/influx_line_protocol.hpp"
-
-#include "rclcpp/rclcpp.hpp"
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
+#include "diagnostic_remote_logging/influx_line_protocol.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 class InfluxDB : public rclcpp::Node
 {
@@ -60,10 +64,15 @@ private:
   std::string post_url_, influx_token_;
   CURL * curl_;
 
+  std::string output_string_;
+
+  rclcpp::TimerBase::SharedPtr diagnostics_send_timer_;
+
   void setupConnection(const std::string & telegraf_url);
 
   void diagnosticsCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr msg);
   void topLevelCallback(const diagnostic_msgs::msg::DiagnosticStatus::SharedPtr msg);
+  void sendTimerCallback();
 
   bool sendToInfluxDB(const std::string & data);
 };
