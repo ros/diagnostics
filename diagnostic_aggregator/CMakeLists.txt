@@ -85,20 +85,6 @@ if(BUILD_TESTING)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/aggregator_node" AGGREGATOR_NODE)
   file(TO_CMAKE_PATH "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/add_analyzer" ADD_ANALYZER)
   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/test_listener.py" TEST_LISTENER)
-<<<<<<< HEAD
-  set(create_analyzers_tests
-    "primitive_analyzers"
-    "all_analyzers"
-    "analyzer_group"
-    "empty_root_path")
-
-  foreach(test_name ${create_analyzers_tests})
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
-    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/create_${test_name}" EXPECTED_OUTPUT)
-
-    configure_file(
-      "test/create_analyzers.launch.py.in"
-=======
 
   set(create_analyzers_tests
     "primitive_analyzers"
@@ -112,7 +98,6 @@ if(BUILD_TESTING)
 
     configure_file(
       "test/test_create_analyzers.launch.py.in"
->>>>>>> fa226a4 (Adding aggregator tests again (#467))
       "test_create_${test_name}.launch.py"
       @ONLY
     )
