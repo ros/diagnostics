@@ -1,6 +1,5 @@
 /BASIC/Zeroth
-contain0a
-contain0b
+prefix0
 /BASIC/First
 prefix1
 /BASIC/Third

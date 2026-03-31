@@ -1,4 +1,6 @@
-/TEST/Group01/Primary
+/BASIC/Zeroth
+prefix0
+/BASIC/Group01/Primary
 primary.analyzers.primary
-/TEST/Group01/Secondary
+/BASIC/Group01/Secondary
 primary.analyzers.secondary
