@@ -31,7 +31,7 @@ include_directories(
 )
 add_library(influx_component SHARED src/influxdb.cpp)
 
-ament_target_dependencies(influx_component ${dependencies})
+target_link_libraries(influx_component ${dependencies})
 
 ament_export_dependencies(influx_component ${dependencies})
 
