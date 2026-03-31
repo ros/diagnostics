@@ -131,38 +131,39 @@ if(BUILD_TESTING)
     )
   endforeach()
 
-  # TODO ...
+  set(add_analyzers_tests
+    "primitive_analyzers"
+    "all_analyzers"
+    "analyzer_group"
+    "empty_root_path")
 
-  # set(add_analyzers_tests
-  #   "all_analyzers")
+  foreach(test_name ${add_analyzers_tests})
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
+    file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
 
-  # foreach(test_name ${add_analyzers_tests})
-  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/default.yaml" PARAMETER_FILE)
-  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" ADD_PARAMETER_FILE)
-  #   file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/add_${test_name}" EXPECTED_OUTPUT)
+    configure_file(
+      "test/test_add_analyzers.launch.py.in"
+      "test_add_${test_name}.launch.py"
+      @ONLY
+    )
+    add_launch_test(
+      "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
+      TARGET "test_add_${test_name}"
+      TIMEOUT 30
+      ENV
+    )
+  endforeach()
 
-  #   configure_file(
-  #     "test/test_add_analyzers.launch.py.in"
-  #     "test_add_${test_name}.launch.py"
-  #     @ONLY
-  #   )
-  #   add_launch_test(
-  #     "${CMAKE_CURRENT_BINARY_DIR}/test_add_${test_name}.launch.py"
-  #     TARGET "test_add_${test_name}"
-  #     TIMEOUT 30
-  #     ENV
-  #   )
-  # endforeach()
+  add_launch_test(
+    test/test_critical_pub.py
+    TIMEOUT 30
+  )
 
-  # add_launch_test(
-  #   test/test_critical_pub.py
-  #   TIMEOUT 30
-  # )
-
-  # ament_add_pytest_test(test_discard_behavior
-  #   "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
-  #   TIMEOUT 60
-  # )
+  ament_add_pytest_test(test_discard_behavior
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
+    TIMEOUT 60
+  )
 endif()
 
 install(
