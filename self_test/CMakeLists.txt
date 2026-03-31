@@ -38,13 +38,13 @@ target_include_directories(run_selftest
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
-  run_selftest
-  "builtin_interfaces"
-  "diagnostic_msgs"
-  "diagnostic_updater"
-  "rclcpp"
-  "rcutils"
+target_link_libraries(run_selftest
+  PUBLIC
+  ${builtin_interfaces_TARGETS}
+  ${diagnostic_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rcutils::rcutils
 )
 
 add_executable(selftest_example example/selftest_example.cpp)
@@ -53,13 +53,13 @@ target_include_directories(selftest_example
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(
-  selftest_example
-  "builtin_interfaces"
-  "diagnostic_msgs"
-  "diagnostic_updater"
-  "rclcpp"
-  "rcutils"
+target_link_libraries(selftest_example
+  PUBLIC
+  ${builtin_interfaces_TARGETS}
+  ${diagnostic_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rcutils::rcutils
 )
 
 if(BUILD_TESTING)

@@ -31,7 +31,12 @@ include_directories(
 )
 add_library(influx_component SHARED src/influxdb.cpp)
 
-ament_target_dependencies(influx_component ${dependencies})
+target_link_libraries(influx_component PUBLIC
+    ${diagnostic_msgs_TARGETS}
+    rclcpp::rclcpp
+    rclcpp_components::component
+    CURL::libcurl
+)
 
 ament_export_dependencies(influx_component ${dependencies})
 

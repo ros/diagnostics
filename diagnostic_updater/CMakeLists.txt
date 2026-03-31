@@ -69,9 +69,6 @@ if(BUILD_TESTING)
   )
   target_link_libraries(diagnostic_updater_test ${PROJECT_NAME})
   target_link_libraries(diagnostic_updater_test
-    ${diagnostic_msgs_TARGETS}
-    ${std_msgs_TARGETS}
-    rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
   )
 
