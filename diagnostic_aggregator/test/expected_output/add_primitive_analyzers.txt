@@ -1,0 +1,6 @@
+diagnostic_aggregator/GenericAnalyzer 'Zeroth'
+/BASIC/Zeroth
+diagnostic_aggregator/GenericAnalyzer 'Primary'
+/BASIC/Primary
+diagnostic_aggregator/GenericAnalyzer 'Secondary'
+/BASIC/Secondary
