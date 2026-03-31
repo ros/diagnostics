@@ -1,0 +1,4 @@
+/TEST/Group01/Primary
+primary.analyzers.primary
+/TEST/Group01/Secondary
+primary.analyzers.secondary
