@@ -193,10 +193,6 @@ void Updater::publish(std::vector<diagnostic_msgs::msg::DiagnosticStatus> & stat
 
 void Updater::addedTaskCallback(DiagnosticTaskInternal & task)
 {
-  if (starting_up_status_ < 0) {
-    return;
-  }
-
   DiagnosticStatusWrapper stat;
   stat.name = task.getName();
   stat.summary(starting_up_status_, "Node starting up");
