@@ -29,7 +29,7 @@ include_directories(
     src/
     include/
 )
-add_library(influx_component SHARED src/influxdb.cpp)
+add_library(influx_component SHARED src/influxdb_connector.cpp)
 
 target_link_libraries(influx_component PUBLIC
     ${diagnostic_msgs_TARGETS}
@@ -44,8 +44,8 @@ target_compile_features(influx_component PUBLIC c_std_99 cxx_std_17)
 
 rclcpp_components_register_node(
     influx_component
-    PLUGIN "InfluxDB"
-    EXECUTABLE influx
+    PLUGIN "InfluxDBConnector"
+    EXECUTABLE influxdb_connector
 )
 ament_export_targets(export_influx_component)
 install(TARGETS influx_component
