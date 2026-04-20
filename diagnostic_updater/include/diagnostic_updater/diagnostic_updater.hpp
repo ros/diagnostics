@@ -370,7 +370,7 @@ public:
   template<class NodeT>
   explicit Updater(
     NodeT node, double period = 1.0,
-    int starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK)
+    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK)
   : Updater(
       node->get_node_base_interface(),
       node->get_node_clock_interface(),
@@ -390,7 +390,7 @@ public:
     std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
     double period = 1.0,
-    int starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK);
+    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK);
 
   /**
    * \brief Returns the interval between updates.
@@ -483,7 +483,7 @@ private:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
   rclcpp::Logger logger_;
 
-  int starting_up_status_;
+  unsigned char starting_up_status_;
   std::string hwid_;
   std::string node_name_;
   bool warn_nohwid_done_;

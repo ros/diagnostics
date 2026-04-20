@@ -46,7 +46,7 @@ Updater::Updater(
   std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
   double period,
-  int starting_up_status)
+  unsigned char starting_up_status)
 : verbose_(false),
   base_interface_(base_interface),
   timers_interface_(timers_interface),
