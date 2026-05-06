@@ -8,7 +8,7 @@ It publishes a service for the node to call to perform the self test.
 This then performs multiple user-defined checks on the node and reports the results.
 
 # Example
-The file [selftest_example.cpp](src/selftest_example.cpp) contains an example of how to use the self_test package.
+The file [selftest_example.cpp](example/selftest_example.cpp) contains an example of how to use the self_test package.
 
 When we then call `$ ros2 run self_test run_selftest` we get the following output:
 ```
