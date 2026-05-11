@@ -98,7 +98,7 @@ inline DiagnosticLevel valToLevel(const int val)
     return Level_Stale;
   }
 
-  RCLCPP_ERROR(
+  RCLCPP_DEBUG(
     rclcpp::get_logger(
       "generic_analyzer_base"),
     R"(Attempting to convert %d into DiagnosticLevel.
