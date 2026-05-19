@@ -87,18 +87,25 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
     std::chrono::milliseconds(publish_rate_ms),
     std::bind(&Aggregator::publishData, this));
 
-  param_sub_ = n_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
-    "/parameter_events", 1, std::bind(&Aggregator::parameterCallback, this, _1));
+  param_cb_handle_ = n_->add_on_set_parameters_callback(
+    std::bind(&Aggregator::onParametersSet, this, _1));
 }
 
-void Aggregator::parameterCallback(const rcl_interfaces::msg::ParameterEvent::SharedPtr msg)
+rcl_interfaces::msg::SetParametersResult Aggregator::onParametersSet(
+  const std::vector<rclcpp::Parameter> & parameters)
 {
-  if (msg->node == "/" + std::string(n_->get_name())) {
-    if (msg->new_parameters.size() != 0) {
-      base_path_ = "";
-      initAnalyzers();
+  // Check if any of the incoming parameters are new. If so, flag for reinitialization.
+  // The method publishData() will pick it up on the next publish cycle and call initAnalyzers().
+  for (const auto & p : parameters) {
+    if (!n_->has_parameter(p.get_name())) {
+      reinit_needed_.store(true);
+      break;
     }
   }
+
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 void Aggregator::initAnalyzers()
@@ -211,6 +218,13 @@ Aggregator::~Aggregator()
 void Aggregator::publishData()
 {
   RCLCPP_DEBUG(logger_, "publishData()");
+
+  // Check if reinitialization is needed because new parameters have been set.
+  if (reinit_needed_.exchange(false)) {
+    base_path_ = "";
+    initAnalyzers();
+  }
+
   DiagnosticArray diag_array;
   DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
