@@ -10,38 +10,31 @@ on:
 
 jobs:
   ament_lint:
-    name: Ament lint ${{ matrix.linter }}
-    strategy:
-      fail-fast: false
-      matrix:
-        linter: [
-            cppcheck,
-            cpplint,
-            flake8,
-            pep257,
-            uncrustify,
-            xmllint,
-          ]
-        include:
-          - distro: rolling
-            os: ubuntu-24.04
-    runs-on: ${{ matrix.os }}
+    name: Ament lint
+    runs-on: ubuntu-24.04
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v1
       - uses: ros-tooling/setup-ros@0.7.15
         with:
-          required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-lint@master
-        with:
-          linter: ${{ matrix.linter }}
-          package-name: |
-            diagnostic_aggregator
-            diagnostic_common_diagnostics
-            diagnostic_remote_logging
-            diagnostic_updater
-            self_test
+          required-ros-distributions: rolling
+      - name: Run ament linters
+        run: |
+          source /opt/ros/rolling/setup.bash
+          linters=(cppcheck cpplint flake8 pep257 uncrustify xmllint)
+          packages=(
+            diagnostic_aggregator diagnostic_common_diagnostics
+            diagnostic_remote_logging diagnostic_updater self_test
+          )
+          sudo apt-get install -y "${linters[@]/#/ros-rolling-ament-}"
+          failed=()
+          for linter in "${linters[@]}"; do
+            echo "::group::ament_${linter}"
+            ament_"${linter}" "${packages[@]}" || failed+=("${linter}")
+            echo "::endgroup::"
+          done
+          [[ ${#failed[@]} -eq 0 ]] || { echo "Failed linters: ${failed[*]}"; exit 1; }
 
   check_licenses:
     name: Check licenses
