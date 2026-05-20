@@ -216,7 +216,7 @@ void Aggregator::publishData()
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = DiagnosticStatus::STALE;
   int max_level = -1;
-  int8_t max_level_without_stale = 0;
+  uint8_t max_level_without_stale = 0;
   int non_ok_status_depth = 0;
   std::shared_ptr<DiagnosticStatus> msg_to_report;
 
@@ -246,15 +246,7 @@ void Aggregator::publishData()
       max_level_without_stale = msg->level;
     }
   }
-  // When a non-ok item was found, copy the complete status message once
-  if (max_level > DiagnosticStatus::OK) {
-    diag_toplevel_state.name = msg_to_report->name;
-    diag_toplevel_state.message = msg_to_report->message;
-    diag_toplevel_state.hardware_id = msg_to_report->hardware_id;
-    diag_toplevel_state.values = msg_to_report->values;
-  }
 
-  non_ok_status_depth = 0;
   std::vector<std::shared_ptr<DiagnosticStatus>> processed_other =
     other_analyzer_->report();
   for (const auto & msg : processed_other) {
@@ -278,10 +270,11 @@ void Aggregator::publishData()
       max_level_without_stale = msg->level;
     }
   }
-  // When a non-ok item was found, copy the complete status message once
-  if (max_level > DiagnosticStatus::OK) {
-    diag_toplevel_state.name = msg_to_report->name;
-    diag_toplevel_state.message = msg_to_report->message;
+
+  // When a non-ok item was found, surface the offender via message/hardware_id/values
+  // but keep name stable as "toplevel_state" to avoid breaking downstream consumers
+  if (max_level > DiagnosticStatus::OK && msg_to_report) {
+    diag_toplevel_state.message = msg_to_report->name + ": " + msg_to_report->message;
     diag_toplevel_state.hardware_id = msg_to_report->hardware_id;
     diag_toplevel_state.values = msg_to_report->values;
   }
@@ -289,15 +282,15 @@ void Aggregator::publishData()
   diag_array.header.stamp = clock_->now();
   agg_pub_->publish(diag_array);
 
-  if (
-    max_level == diagnostic_msgs::msg::DiagnosticStatus::STALE &&
-    max_level_without_stale < diagnostic_msgs::msg::DiagnosticStatus::ERROR)
-  {
+  if (max_level_without_stale > DiagnosticStatus::OK) {
+    diag_toplevel_state.level = max_level_without_stale;
+  } else if (max_level == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
+    diag_toplevel_state.level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+  } else if (max_level < 0) {
     diag_toplevel_state.level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
   } else {
-    diag_toplevel_state.level = max_level_without_stale;
+    diag_toplevel_state.level = DiagnosticStatus::OK;
   }
-
 
   last_top_level_state_ = diag_toplevel_state.level;
 

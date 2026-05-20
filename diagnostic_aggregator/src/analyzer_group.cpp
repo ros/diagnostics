@@ -292,7 +292,7 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
     return output;
   }
 
-  unsigned char max_level_without_stale = 0;
+  uint8_t max_level_without_stale = 0;
 
   for (auto j = 0u; j < analyzers_.size(); ++j) {
     std::string path = analyzers_[j]->getPath();
@@ -326,14 +326,13 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
     }
   }
 
-  // If one STALE and no ERROR, report STALE
-  if (
-    header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE &&
-    max_level_without_stale < diagnostic_msgs::msg::DiagnosticStatus::ERROR)
-  {
+  // WARN/ERROR always beats STALE; if only STALE present, report STALE
+  if (max_level_without_stale > diagnostic_msgs::msg::DiagnosticStatus::OK) {
+    header_status->level = max_level_without_stale;
+  } else if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
     header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
   } else {
-    header_status->level = max_level_without_stale;
+    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::OK;
   }
 
   header_status->message = valToMsg(header_status->level);
