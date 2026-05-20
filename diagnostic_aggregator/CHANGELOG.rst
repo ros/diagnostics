@@ -2,6 +2,29 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.6 (2025-05-26)
+------------------
+* C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
+* Contributors: Christian Henkel
+
+4.4.5 (2025-05-26)
+------------------
+
+4.4.4 (2025-05-12)
+------------------
+* Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
+* Contributors: David V. Lu, Christian Henkel
+
+4.4.2 (2025-02-10)
+------------------
+* Checking licenses in CI (`#431 <https://github.com/ros/diagnostics/issues/431>`_)
+  * Checking licenses in ci
+* Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)
+* Support custom `rclcpp::NodeOptions` (`#417 <https://github.com/ros/diagnostics/issues/417>`_)
+* Skipping flaky tests (`#413 <https://github.com/ros/diagnostics/issues/413>`_)
+* Skipping flaky ntp test (`#409 <https://github.com/ros/diagnostics/issues/409>`_)
+* Contributors: Christian Henkel, Patrick Roncagliolo, Silvio Traversaro
+
 4.3.1 (2024-07-30)
 ------------------
 

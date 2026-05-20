@@ -219,7 +219,7 @@ TEST(DiagnosticUpdater, testDiagnosticStatusWrapperMergeSummary) {
   stat.mergeSummary(diagnostic_msgs::msg::DiagnosticStatus::OK, "New");
   EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::OK, stat.level) <<
     "Bad level, merging levels (OK,OK)";
-  EXPECT_STREQ("Old", stat.message.c_str()) <<
+  EXPECT_STREQ("Old; New", stat.message.c_str()) <<
     "Bad summary, merging levels (OK,OK)";
 
   stat.summary(diagnostic_msgs::msg::DiagnosticStatus::OK, "Old");

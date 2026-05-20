@@ -3,7 +3,7 @@ General information about this repository, including legal information, build in
 # The diagnostic_common_diagnostics package
 This package provides generic nodes to monitor a Linux host.
 
-Currently only the NTP monitor is ported to ROS2.
+Currently only the tf monitor is not ported to ROS2 yet.
 
 # Nodes
 
@@ -67,7 +67,7 @@ Computer name in diagnostics output (ex: 'c1')
 Disable self test.
 
 ## hd_monitor.py
-Runs 'shutil.disk_usage' to check if there is enough space left on a given device.
+Runs 'shutil.disk_usage' to check if there is enough space left on a given device. With default parameters, the following thresholds are used:
 * Above 5% of free space left, an `OK` status will be published.
 * Between 5% and 1%, a `WARN` status will be published,
 * Below 1%, an `ERROR` status will be published.
@@ -81,6 +81,14 @@ The diagnostics information.
 #### path
 (default: home directory "~")
 Path in which to check remaining space.
+
+#### free_percent_low
+(default: 5%)
+Warning threshold.
+
+#### free_percent_crit
+(default: 1%)
+Error threshold.
 
 ## ram_monitor.py
 The `ram_monitor` module allows users to monitor the RAM usage of their system in real-time.
