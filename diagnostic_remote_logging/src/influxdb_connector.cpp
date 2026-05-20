@@ -42,7 +42,9 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions & opt)
 : Node("influxdb_connector", opt)
 {
   post_url_ =
-    this->declare_parameter<std::string>("connection.url", "http://localhost:8086/api/v2/write");
+    this->declare_parameter<std::string>(
+    "connection.url",
+    "http://localhost:8086/api/v2/write");
 
   if (post_url_.empty()) {
     throw std::runtime_error("Parameter connection.url must be set");
@@ -57,8 +59,8 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions & opt)
     // Ensure all parameters are set
     if (organization.empty() || bucket.empty() || influx_token_.empty()) {
       throw std::runtime_error(
-        "All parameters (connection.organization, connection.bucket, connection.token) "
-        "must be set, or when using a proxy like Telegraf none have to be set.");
+              "All parameters (connection.organization, connection.bucket, connection.token) "
+              "must be set, or when using a proxy like Telegraf none have to be set.");
     }
 
     // Construct the Telegraf URL
@@ -73,33 +75,35 @@ InfluxDBConnector::InfluxDBConnector(const rclcpp::NodeOptions & opt)
 
   if (send_period <= 0.0 && send_diagnostics) {
     throw std::runtime_error(
-      "Parameter send.period must be greater than 0.0 if send.diagnostics is set to true");
+            "Parameter send.period must be greater than 0.0 if send.diagnostics is set to true");
   }
 
   if (send_diagnostics) {
     diagnostics_send_timer_ = this->create_wall_timer(
-        std::chrono::duration<double>(send_period),
-        std::bind(&InfluxDBConnector::sendTimerCallback, this));
+      std::chrono::duration<double>(send_period),
+      std::bind(&InfluxDBConnector::sendTimerCallback, this));
 
     diag_sub_ =
       this->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
-            "/diagnostics", rclcpp::SensorDataQoS(),
-            std::bind(&InfluxDBConnector::diagnosticsCallback, this,
-                      std::placeholders::_1));
+      "/diagnostics", rclcpp::SensorDataQoS(),
+      std::bind(
+        &InfluxDBConnector::diagnosticsCallback, this,
+        std::placeholders::_1));
   }
 
   if (declare_parameter("send.agg", false)) {
     throw std::runtime_error(
-      "The option send.agg is deprecated and will be removed in a future version. Use "
-      "send.diagnostics and send.period instead.");
+            "The option send.agg is deprecated and will be removed in a future version. Use "
+            "send.diagnostics and send.period instead.");
   }
 
   if (declare_parameter<bool>("send.top_level_state", true)) {
     top_level_sub_ =
       this->create_subscription<diagnostic_msgs::msg::DiagnosticStatus>(
-            "/diagnostics_toplevel_state", rclcpp::SensorDataQoS(),
-            std::bind(&InfluxDBConnector::topLevelCallback, this,
-                      std::placeholders::_1));
+      "/diagnostics_toplevel_state", rclcpp::SensorDataQoS(),
+      std::bind(
+        &InfluxDBConnector::topLevelCallback, this,
+        std::placeholders::_1));
   }
 }
 
@@ -127,7 +131,9 @@ void InfluxDBConnector::topLevelCallback(
   statusToInfluxLineProtocol(output, *msg, this->get_clock()->now());
 
   if (!sendToInfluxDB(output)) {
-    RCLCPP_ERROR(this->get_logger(), "Failed to send /diagnostics_toplevel_state to telegraf");
+    RCLCPP_ERROR(
+      this->get_logger(),
+      "Failed to send /diagnostics_toplevel_state to telegraf");
   }
 
   RCLCPP_DEBUG(this->get_logger(), "%s", output.c_str());
@@ -144,10 +150,14 @@ void InfluxDBConnector::setupConnection(const std::string & url)
   struct curl_slist * headers = nullptr;
 
   if (!influx_token_.empty()) {
-    headers = curl_slist_append(headers, ("Authorization: Token " + influx_token_).c_str());
+    headers =
+      curl_slist_append(
+      headers,
+      ("Authorization: Token " + influx_token_).c_str());
   }
 
-  headers = curl_slist_append(headers, "Content-Type: text/plain; charset=utf-8");
+  headers =
+    curl_slist_append(headers, "Content-Type: text/plain; charset=utf-8");
   headers = curl_slist_append(headers, "Accept: application/json");
 
   curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
@@ -180,7 +190,8 @@ bool InfluxDBConnector::sendToInfluxDB(const std::string & data)
 
   if (response_code != 204) {
     RCLCPP_ERROR(
-      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code, data.c_str());
+      this->get_logger(), "Error (%d) when sending to telegraf:\n%s", response_code,
+      data.c_str());
     return false;
   }
 
