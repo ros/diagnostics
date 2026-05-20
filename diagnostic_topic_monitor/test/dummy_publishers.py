@@ -9,6 +9,7 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from sensor_msgs.msg import CameraInfo
 
+
 class DummyPublisherNode(Node):
     def __init__(self):
         super().__init__('dummy_publisher_node')

@@ -29,8 +29,9 @@ from launch_ros.substitutions import FindPackageShare
 import rclpy
 from rclpy.time import Time, Duration
 
-# Helper functions to activate the lifecycle monitor nodes
+
 def create_change_state(target, target_state):
+    """Helper functions to activate the lifecycle monitor nodes."""
     return EmitEvent(
         event=ChangeState(
             lifecycle_node_matcher=launch.events.matches_action(target),
