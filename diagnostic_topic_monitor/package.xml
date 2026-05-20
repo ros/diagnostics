@@ -5,9 +5,12 @@
   <version>1.0.0</version>
   <description>Generic Topic Monitor</description>
   <maintainer email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</maintainer>
+  <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
+  
+  <license>BSD-3-Clause</license>
+
   <author email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</author>
   <author email="tejas.kumarshastha@de.bosch.com">Tejas Kumar Shastha</author>
-  <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
