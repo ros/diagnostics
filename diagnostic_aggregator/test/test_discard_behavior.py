@@ -179,9 +179,9 @@ TEST_METADATA = [
     ),
     TestMetadata(
         foo_discard=False,
-        foo_status=DiagnosticStatus.STALE,
+        foo_status=DiagnosticStatus.OK,
         bar_discard=True,
-        bar_status=None,
+        bar_status=DiagnosticStatus.STALE,
         agg_expected=DiagnosticStatus.OK,
     ),
     TestMetadata(
