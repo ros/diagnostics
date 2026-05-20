@@ -13,8 +13,6 @@ from diagnostic_updater import DiagnosticStatusWrapper
 class TestDiagnosticStatusWrapper(unittest.TestCase):
 
     def test_init_empty(self):
-        """breaking convnetions
-        """
         d = DiagnosticStatusWrapper()
         self.assertEqual(d.level, DiagnosticStatus.OK)
         self.assertEqual(d.message, '')
