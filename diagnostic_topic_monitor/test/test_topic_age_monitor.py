@@ -89,7 +89,7 @@ def generate_test_description():
         executable='topic_age_monitor',
         name=CONFIG_MONITOR_NAME,
         output='both',
-        namespace=',
+        namespace='',
         parameters=[
             PathJoinSubstitution(
                 [
