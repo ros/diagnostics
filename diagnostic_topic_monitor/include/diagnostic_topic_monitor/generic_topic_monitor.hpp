@@ -5,7 +5,11 @@
 #ifndef DIAGNOSTIC_TOPIC_MONITOR__GENERIC_TOPIC_MONITOR_HPP_
 #define DIAGNOSTIC_TOPIC_MONITOR__GENERIC_TOPIC_MONITOR_HPP_
 
+#ifdef _WIN32
+#include <winsock2.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <limits>
 #include <memory>
