@@ -52,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@0.7.15
+      - uses: ros-tooling/setup-ros@0.7.17
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@0.4.5
+      - uses: ros-tooling/action-ros-ci@0.4.8
         with:
           target-ros2-distro: ${{ matrix.distro }}
           package-name: |
