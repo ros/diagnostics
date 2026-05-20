@@ -483,10 +483,10 @@ private:
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr publisher_;
   rclcpp::Logger logger_;
 
-  unsigned char starting_up_status_;
   std::string hwid_;
   std::string node_name_;
   bool warn_nohwid_done_;
+  unsigned char starting_up_status_;
 };
 }   // namespace diagnostic_updater
 
