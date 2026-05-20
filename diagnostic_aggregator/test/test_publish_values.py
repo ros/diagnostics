@@ -71,7 +71,7 @@ TEST_METADATA = [
             values=[],
         ),
     ),
-    # CASE 2: publish_values = False, so we expect the values to be missing in the aggregated message
+    # CASE 2: publish_values = False, so we expect the values to be empty in the aggregated message
     TestMetadata(
         publish_values=False,
         diag_msg=DiagnosticStatus(
@@ -165,8 +165,8 @@ def yaml_file(test_metadata):
                 f"""
 diagnostic_aggregator:
     ros__parameters:
-        publish_values: {test_metadata.publish_values} 
-        robot:  
+        publish_values: {test_metadata.publish_values}
+        robot:
             type: 'diagnostic_aggregator/GenericAnalyzer'
             path: Agg
             startswith: [ 'foo' ]
