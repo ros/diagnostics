@@ -2,12 +2,15 @@
 //
 // See the top-level LICENSE file for licensing terms.
 
-#ifndef ACTIVITY_DIAGNOSTIC_TASK_HPP
-#define ACTIVITY_DIAGNOSTIC_TASK_HPP
+#ifndef DIAGNOSTIC_TOPIC_MONITOR__ACTIVITY_DIAGNOSTIC_TASK_HPP_
+#define DIAGNOSTIC_TOPIC_MONITOR__ACTIVITY_DIAGNOSTIC_TASK_HPP_
+
+#include <string>
+#include <limits>
 
 #include <diagnostic_updater/diagnostic_updater.hpp>  // NOLINT: upstream
 
-using namespace std::chrono_literals;
+using namespace std::chrono_literals;  // NOLINT: build/namespaces
 
 namespace diagnostic_topic_monitor
 {
@@ -59,4 +62,4 @@ private:
 
 }  // namespace diagnostic_topic_monitor
 
-#endif  // ACTIVITY_DIAGNOSTIC_TASK_HPP
+#endif  // DIAGNOSTIC_TOPIC_MONITOR__ACTIVITY_DIAGNOSTIC_TASK_HPP_
