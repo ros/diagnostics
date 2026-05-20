@@ -232,7 +232,7 @@ class Updater(DiagnosticTaskVector):
     interval.
     """
 
-    def __init__(self, node, period=1.0):
+    def __init__(self, node, period=1.0, starting_up_status=DiagnosticStatus.OK):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
@@ -242,6 +242,7 @@ class Updater(DiagnosticTaskVector):
         self.__period = self.node.declare_parameter(
             self.period_parameter, period).value
         self.timer = self.node.create_timer(self.__period, self.update)
+        self.__starting_up_status = starting_up_status
 
         self.verbose = False
         self.hwid = ''
@@ -377,7 +378,10 @@ class Updater(DiagnosticTaskVector):
 
     def addedTaskCallback(self, task):
         """Publish a task (called when added to the updater)."""
+        if self.__starting_up_status is None:
+            return
+
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
-        stat.summary(DiagnosticStatus.OK, 'Node starting up')
+        stat.summary(self.__starting_up_status, 'Node starting up')
         self.publish(stat)
