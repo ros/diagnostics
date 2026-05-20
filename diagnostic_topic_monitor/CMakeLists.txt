@@ -29,13 +29,14 @@ rclcpp_components_register_node(topic_frequency_monitor_component
   EXECUTABLE topic_frequency_monitor
 )
 target_include_directories(topic_frequency_monitor_component PRIVATE include)
-ament_target_dependencies(topic_frequency_monitor_component
-  "lifecycle_msgs"
-  "rclcpp"
-  "rclcpp_lifecycle"
-  "rclcpp_components"
-  "diagnostic_msgs"
-  "diagnostic_updater"
+target_link_libraries(topic_frequency_monitor_component PUBLIC
+  ${diagnostic_msgs_TARGETS}
+  ${lifecycle_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rclcpp_components::component
+  rclcpp_components::component_manager
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 ament_export_targets(export_topic_frequency_monitor_component)
 install(TARGETS topic_frequency_monitor_component
@@ -51,13 +52,14 @@ rclcpp_components_register_node(topic_age_monitor_component
   EXECUTABLE topic_age_monitor
 )
 target_include_directories(topic_age_monitor_component PRIVATE include)
-ament_target_dependencies(topic_age_monitor_component
-  "lifecycle_msgs"
-  "rclcpp"
-  "rclcpp_lifecycle"
-  "rclcpp_components"
-  "diagnostic_msgs"
-  "diagnostic_updater"
+target_link_libraries(topic_age_monitor_component PUBLIC
+  ${diagnostic_msgs_TARGETS}
+  ${lifecycle_msgs_TARGETS}
+  diagnostic_updater::diagnostic_updater
+  rclcpp::rclcpp
+  rclcpp_components::component
+  rclcpp_components::component_manager
+  rclcpp_lifecycle::rclcpp_lifecycle
 )
 ament_export_targets(export_topic_age_monitor_component)
 install(TARGETS topic_age_monitor_component
