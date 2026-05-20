@@ -31,7 +31,7 @@ from rclpy.time import Time, Duration
 
 
 def create_change_state(target, target_state):
-    """Helper functions to activate the lifecycle monitor nodes."""
+    """Activate the lifecycle monitor nodes."""
     return EmitEvent(
         event=ChangeState(
             lifecycle_node_matcher=launch.events.matches_action(target),
