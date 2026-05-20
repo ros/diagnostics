@@ -39,6 +39,7 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP_
 #define DIAGNOSTIC_AGGREGATOR__AGGREGATOR_HPP_
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <set>
@@ -140,8 +141,10 @@ private:
   rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
   /// DiagnosticArray, /diagnostics
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
-  /// ParameterEvent, /parameter_events
-  rclcpp::Subscription<rcl_interfaces::msg::ParameterEvent>::SharedPtr param_sub_;
+  /// On-set parameters callback (node-scoped, no filtering needed)
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_cb_handle_;
+  /// Flag set by onParametersSet, consumed by publishData on the next cycle
+  std::atomic<bool> reinit_needed_{false};
   /// DiagnosticArray, /diagnostics_agg
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
   /// DiagnosticStatus, /diagnostics_toplevel_state
@@ -167,6 +170,11 @@ private:
   bool critical_;
 
   /*!
+   *\brief If true, the aggregator will publish "values" for each DiagnosticStatus
+   */
+  bool publish_values_;
+
+  /*!
    *\brief Store the last top level value to publish the critical error only once.
    */
   std::uint8_t last_top_level_state_;
@@ -174,10 +182,12 @@ private:
   /// Records all ROS warnings. No warnings are repeated.
   std::set<std::string> ros_warnings_;
 
-  /*
-   *!\brief Checks for new parameters to trigger reinitialization of the AnalyzerGroup and OtherAnalyzer
+  /*!
+   *\brief Validates incoming parameter changes and schedules reinitialization
+   * when new parameters are detected. Only fires for this node's own parameters.
    */
-  void parameterCallback(const rcl_interfaces::msg::ParameterEvent::SharedPtr param_msg);
+  rcl_interfaces::msg::SetParametersResult onParametersSet(
+    const std::vector<rclcpp::Parameter> & parameters);
 
   /*
    *!\brief (re)initializes the AnalyzerGroup and OtherAnalyzer

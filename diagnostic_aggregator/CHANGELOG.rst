@@ -2,6 +2,14 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.6 (2025-05-26)
+------------------
+* C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
+* Contributors: Christian Henkel
+
+4.4.5 (2025-05-26)
+------------------
+
 4.4.4 (2025-05-12)
 ------------------
 * Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)

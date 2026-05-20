@@ -232,7 +232,7 @@ class Updater(DiagnosticTaskVector):
     interval.
     """
 
-    def __init__(self, node, period=1.0):
+    def __init__(self, node, period=1.0, starting_up_status=DiagnosticStatus.OK):
         """Construct an updater class."""
         DiagnosticTaskVector.__init__(self)
         self.node = node
@@ -242,6 +242,7 @@ class Updater(DiagnosticTaskVector):
         self.__period = self.node.declare_parameter(
             self.period_parameter, period).value
         self.timer = self.node.create_timer(self.__period, self.update)
+        self.__starting_up_status = starting_up_status
 
         self.verbose = False
         self.hwid = ''
@@ -288,13 +289,13 @@ class Updater(DiagnosticTaskVector):
                     warn_nohwid = False
 
                 if self.verbose and status.level != b'\x00':
-                    self.node.get_logger().warn(
+                    self.node.get_logger().warning(
                         'Non-zero diagnostic status. Name: %s, status\
                         %s: %s' % (status.name, str(status.level),
                                    status.message))
 
         if warn_nohwid and not self.warn_nohwid_done:
-            self.node.get_logger().warn(
+            self.node.get_logger().warning(
                 'diagnostic_updater: No HW_ID was set. This is probably\
                 a bug. Please report it. For devices that do not have a\
                 HW_ID, set this value to none. This warning only occurs\
@@ -377,7 +378,10 @@ class Updater(DiagnosticTaskVector):
 
     def addedTaskCallback(self, task):
         """Publish a task (called when added to the updater)."""
+        if self.__starting_up_status is None:
+            return
+
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
-        stat.summary(DiagnosticStatus.OK, 'Node starting up')
+        stat.summary(self.__starting_up_status, 'Node starting up')
         self.publish(stat)

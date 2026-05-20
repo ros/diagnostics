@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 # DESCRIPTION
-# This test ensures that a parent AnalyzerGroup does not roll up an ERROR state when a
+# This test ensures that a parent AnalyzerGroup does *not* roll up an ERROR state when a
 # GenericAnalyzer child block is marked with discard_stale: true and either of these
 # conditions are met:
 #
@@ -86,6 +86,7 @@ TestMetadata = namedtuple(
 # A status value of 'None' means that the state is never sent (it's missing).
 TEST_METADATA = [
     # CASE 1: both 'foo' and 'bar' are marked discard_stale := true
+    #  --> the aggregator should roll up to OK, because the stale statuses are discarded.
     TestMetadata(
         foo_discard=True,
         foo_status=None,
@@ -105,9 +106,18 @@ TEST_METADATA = [
         foo_status=None,
         bar_discard=True,
         bar_status=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.OK,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.STALE,
+        bar_discard=True,
+        bar_status=None,
         agg_expected=DiagnosticStatus.OK,
     ),
     # CASE 2: both 'foo' and 'bar' are marked discard_stale := false
+    #  --> the aggregator should roll up to STALE, as long as they aggregated are either
+    # missing or stale, because the stale statuses are *not* discarded.
     TestMetadata(
         foo_discard=False,
         foo_status=None,
@@ -129,31 +139,29 @@ TEST_METADATA = [
         bar_status=DiagnosticStatus.STALE,
         agg_expected=DiagnosticStatus.STALE,
     ),
-    # CASE 3: one of 'foo' or 'bar' are marked discard_stale := true
     TestMetadata(
-        foo_discard=True,
-        foo_status=None,
+        foo_discard=False,
+        foo_status=DiagnosticStatus.STALE,
         bar_discard=False,
         bar_status=None,
-        agg_expected=DiagnosticStatus.ERROR,  # <-- This is the case we are testing for.
-        # if one of the children is *not* marked discard_stale := true and
-        # there are no statuses, then the parent should roll up to ERROR.
+        agg_expected=DiagnosticStatus.STALE,
     ),
-    TestMetadata(
-        foo_discard=True,
-        foo_status=DiagnosticStatus.OK,
-        bar_discard=False,
-        bar_status=None,
-        agg_expected=DiagnosticStatus.ERROR,
-    ),
+    # CASE 3: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is missing or stale while the other is OK.
+    #  --> the aggregator should roll up to OK, because the stale status is discarded.
     TestMetadata(
         foo_discard=True,
         foo_status=None,
         bar_discard=False,
         bar_status=DiagnosticStatus.OK,
-        agg_expected=DiagnosticStatus.OK,  # <-- This is the case we are testing for.
-        # but if a child is marked discard_stale := true and there are no statuses,
-        # the parent should roll up to OK.
+        agg_expected=DiagnosticStatus.OK,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.STALE,
+        bar_discard=False,
+        bar_status=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
     ),
     TestMetadata(
         foo_discard=True,
@@ -161,6 +169,89 @@ TEST_METADATA = [
         bar_discard=False,
         bar_status=DiagnosticStatus.OK,
         agg_expected=DiagnosticStatus.OK,
+    ),
+    TestMetadata(
+        foo_discard=False,
+        foo_status=DiagnosticStatus.OK,
+        bar_discard=True,
+        bar_status=None,
+        agg_expected=DiagnosticStatus.OK,
+    ),
+    TestMetadata(
+        foo_discard=False,
+        foo_status=DiagnosticStatus.OK,
+        bar_discard=True,
+        bar_status=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.OK,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.OK,
+        bar_discard=False,
+        bar_status=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.OK,
+    ),
+    # CASE 4: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is missing or stale while the other is missing or stale.
+    #  --> the aggregator should roll up to STALE
+    TestMetadata(
+        foo_discard=True,
+        foo_status=None,
+        bar_discard=False,
+        bar_status=None,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.STALE,
+        bar_discard=False,
+        bar_status=None,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=None,
+        bar_discard=False,
+        bar_status=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.STALE,
+        bar_discard=False,
+        bar_status=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    # CASE 5: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is OK while the other is missing or stale.
+    #  --> the aggregator should roll up to STALE, because it has a higher severity than OK.
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.OK,
+        bar_discard=False,
+        bar_status=None,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=True,
+        foo_status=DiagnosticStatus.OK,
+        bar_discard=False,
+        bar_status=DiagnosticStatus.STALE,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=False,
+        foo_status=None,
+        bar_discard=True,
+        bar_status=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.STALE,
+    ),
+    TestMetadata(
+        foo_discard=False,
+        foo_status=DiagnosticStatus.STALE,
+        bar_discard=True,
+        bar_status=DiagnosticStatus.OK,
+        agg_expected=DiagnosticStatus.STALE,
     ),
 ]
 
