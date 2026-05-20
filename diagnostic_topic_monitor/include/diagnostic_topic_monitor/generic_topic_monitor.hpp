@@ -6,6 +6,9 @@
 #define DIAGNOSTIC_TOPIC_MONITOR__GENERIC_TOPIC_MONITOR_HPP_
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <winsock2.h>
 #else
 #include <unistd.h>
