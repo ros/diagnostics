@@ -229,7 +229,7 @@ jobs:
           vcs import --skip-existing --input deps.repos ${{ env.upstream_workspace }}/src
 
       - name: Upload repos file
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: windows.repos
           path: deps.repos
