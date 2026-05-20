@@ -160,20 +160,20 @@ class DiagnosticsTestNode(Node):
     def diagnostics_aggregated_callback(self, msg):
         """Call from a subscriber providing aggregated diagnostics."""
         for status in msg.status:
-            print(f"Received a status: {status}")
+            print(f'Received a status: {status}')
             if status.name == '/Agg/foo':
                 self.agg_received = status
                 self.counter += 1
                 self.future.set_result(self.counter)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def test_metadata(request):
     """Enable parameter indirection, so we can pass a parameterization into fixtures."""
     return request.param
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def yaml_file(test_metadata):
     """Generate a YAML file to test a specific configuration state."""
     with tempfile.NamedTemporaryFile(delete=False) as fp:
@@ -188,13 +188,13 @@ diagnostic_aggregator:
             path: Agg
             startswith: [ 'foo' ]
 """,
-                "utf-8",
+                'utf-8',
             )
         )
         return fp.name
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def diagnostic_aggregator_node():
     """Declare an aggregator that uses a global configuration set by the launch."""
     return launch_ros.actions.Node(
@@ -204,7 +204,7 @@ def diagnostic_aggregator_node():
     )
 
 
-@launch_pytest.fixture(scope="function")
+@launch_pytest.fixture(scope='function')
 def launch_description(yaml_file, diagnostic_aggregator_node):
     """Declare what should be launched in each test."""
     return launch.LaunchDescription(
@@ -216,7 +216,7 @@ def launch_description(yaml_file, diagnostic_aggregator_node):
     )
 
 
-@pytest.mark.parametrize("test_metadata", TEST_METADATA, indirect=True)
+@pytest.mark.parametrize('test_metadata', TEST_METADATA, indirect=True)
 @pytest.mark.launch(fixture=launch_description)
 def test_publish_values(test_metadata, launch_context):
     """Run a launch test for each test in our set of tests."""
@@ -243,11 +243,11 @@ def test_publish_values(test_metadata, launch_context):
             + Received aggregated message: {node.agg_received}
         """
         )
-        assert node.future.done(), "Launch timed out without producing aggregation"
+        assert node.future.done(), 'Launch timed out without producing aggregation'
         assert (
             node.agg_received == test_metadata.agg_expected
-        ), "Unexpected aggregated message received"
-        print(f"It took {node.future.result()} aggregations to find the correct status")
+        ), 'Unexpected aggregated message received'
+        print(f'It took {node.future.result()} aggregations to find the correct status')
 
     finally:
         rclpy.try_shutdown()
