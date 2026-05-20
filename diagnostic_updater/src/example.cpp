@@ -240,6 +240,8 @@ int main(int argc, char ** argv)
   }
 
   rclcpp::Rate r(500ms);
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
   while (rclcpp::ok()) {
     std_msgs::msg::Bool msg;
 
@@ -249,7 +251,7 @@ int main(int argc, char ** argv)
     pub1->publish(msg);
     pub1_freq.tick();
 
-    rclcpp::spin_some(node);
+    executor.spin_some();
     r.sleep();
   }
 
