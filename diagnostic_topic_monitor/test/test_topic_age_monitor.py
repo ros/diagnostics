@@ -6,28 +6,29 @@
 
 import time
 import unittest
-import pytest
 
+from diagnostic_msgs.msg import DiagnosticArray
+from diagnostic_msgs.msg import DiagnosticStatus
 import launch
-from launch.actions import EmitEvent, RegisterEventHandler, LogInfo, SetEnvironmentVariable
+from launch.actions import EmitEvent
+from launch.actions import LogInfo
+from launch.actions import RegisterEventHandler
+from launch.actions import SetEnvironmentVariable
 import launch.event_handlers.on_process_start
-
-from launch_ros.actions import LifecycleNode, Node
-from launch_ros.events.lifecycle import ChangeState
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.actions import LifecycleNode
+from launch_ros.actions import Node
 import launch_ros.events.lifecycle
-
+from launch_ros.events.lifecycle import ChangeState
+from launch_ros.substitutions import FindPackageShare
 import launch_testing
 import launch_testing.actions
 import launch_testing.asserts
-
 from lifecycle_msgs.msg import Transition
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-
-from launch.substitutions import PathJoinSubstitution
-from launch_ros.substitutions import FindPackageShare
-
+import pytest
 import rclpy
-from rclpy.time import Time, Duration
+from rclpy.time import Duration
+from rclpy.time import Time
 
 
 def create_change_state(target, target_state):
