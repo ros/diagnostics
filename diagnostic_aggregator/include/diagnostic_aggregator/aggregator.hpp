@@ -170,6 +170,11 @@ private:
   bool critical_;
 
   /*!
+   *\brief If true, the aggregator will publish "values" for each DiagnosticStatus
+   */
+  bool publish_values_;
+
+  /*!
    *\brief Store the last top level value to publish the critical error only once.
    */
   std::uint8_t last_top_level_state_;

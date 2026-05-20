@@ -164,6 +164,11 @@ if(BUILD_TESTING)
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
     TIMEOUT 60
   )
+
+  ament_add_pytest_test(test_publish_values
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_publish_values.py"
+    TIMEOUT 60
+  )
 endif()
 
 install(
