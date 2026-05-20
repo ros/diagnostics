@@ -41,3 +41,4 @@ pull_request_rules:
           - "{{ author }}"
         labels:
           - automerge
+        title: "{{ title }} (backport #{{ number }} to {{ destination_branch }})"
