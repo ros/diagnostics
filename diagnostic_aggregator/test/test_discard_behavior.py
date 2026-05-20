@@ -260,7 +260,7 @@ class DiagnosticsTestNode(Node):
     """Class that publishes raw diagnostics and listens for aggregated diagnostics."""
 
     def __init__(self, foo_status, bar_status, agg_expected):
-        super().__init__(node_name="diagnostics_listener_node")
+        super().__init__(node_name='diagnostics_listener_node')
         self.foo_status = foo_status
         self.bar_status = bar_status
         self.agg_expected = agg_expected
@@ -269,12 +269,12 @@ class DiagnosticsTestNode(Node):
         self.future = Future()
         self.subscriber = self.create_subscription(
             msg_type=DiagnosticArray,
-            topic="/diagnostics_agg",
+            topic='/diagnostics_agg',
             callback=self.diagnostics_aggregated_callback,
             qos_profile=10,
         )
         self.publisher = self.create_publisher(
-            msg_type=DiagnosticArray, topic="/diagnostics", qos_profile=10
+            msg_type=DiagnosticArray, topic='/diagnostics', qos_profile=10
         )
         self.timer = self.create_timer(0.1, self.timer_callback)
 
@@ -282,17 +282,17 @@ class DiagnosticsTestNode(Node):
         """Call from a timer to send off raw diagnostics."""
         msg = DiagnosticArray()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = "robot"
+        msg.header.frame_id = 'robot'
         if self.foo_status is not None:
             msg.status.append(
                 DiagnosticStatus(
-                    name="/foo", level=self.foo_status, message="Foo", hardware_id="foo"
+                    name='/foo', level=self.foo_status, message='Foo', hardware_id='foo'
                 )
             )
         if self.bar_status is not None:
             msg.status.append(
                 DiagnosticStatus(
-                    name="/bar", level=self.bar_status, message="Bar", hardware_id="bar"
+                    name='/bar', level=self.bar_status, message='Bar', hardware_id='bar'
                 )
             )
         self.publisher.publish(msg)
@@ -300,7 +300,7 @@ class DiagnosticsTestNode(Node):
     def diagnostics_aggregated_callback(self, msg):
         """Call from a subscriber providing aggregated diagnostics."""
         for status in msg.status:
-            if status.name == "/robot/agg":
+            if status.name == '/robot/agg':
                 self.agg_received = status.level
                 self.counter += 1
                 if self.agg_expected == status.level:
@@ -311,13 +311,13 @@ class DiagnosticsTestNode(Node):
                     self.future.set_result(self.counter)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def test_metadata(request):
     """Enable parameter indirection, so we can pass a parameterization into fixtures."""
     return request.param
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def yaml_file(test_metadata):
     """Generate a YAML file to test a specific configuration state."""
     with tempfile.NamedTemporaryFile(delete=False) as fp:
@@ -344,23 +344,23 @@ diagnostic_aggregator:
                     find_and_remove_prefix: ['/bar']
                     discard_stale: {test_metadata.bar_discard}
 """,
-                "utf-8",
+                'utf-8',
             )
         )
         return fp.name
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def diagnostic_aggregator_node():
     """Declare an aggregator that uses a global configuration set by the launch."""
     return launch_ros.actions.Node(
-        name="diagnostic_aggregator",
-        package="diagnostic_aggregator",
-        executable="aggregator_node",
+        name='diagnostic_aggregator',
+        package='diagnostic_aggregator',
+        executable='aggregator_node',
     )
 
 
-@launch_pytest.fixture(scope="function")
+@launch_pytest.fixture(scope='function')
 def launch_description(yaml_file, diagnostic_aggregator_node):
     """Declare what should be launched in each test."""
     return launch.LaunchDescription(
@@ -372,7 +372,7 @@ def launch_description(yaml_file, diagnostic_aggregator_node):
     )
 
 
-@pytest.mark.parametrize("test_metadata", TEST_METADATA, indirect=True)
+@pytest.mark.parametrize('test_metadata', TEST_METADATA, indirect=True)
 @pytest.mark.launch(fixture=launch_description)
 def test_discard_behavior(test_metadata, launch_context):
     """Run a launch test for each test in our set of tests."""
@@ -398,11 +398,11 @@ def test_discard_behavior(test_metadata, launch_context):
         Received level: {node.agg_received}
         """
         )
-        assert node.future.done(), "Launch timed out without producing aggregation"
+        assert node.future.done(), 'Launch timed out without producing aggregation'
         assert (
             node.agg_received == test_metadata.agg_expected
-        ), "Unexpected parent status level"
-        print(f"It took {node.future.result()} aggregations to find the correct status")
+        ), 'Unexpected parent status level'
+        print(f'It took {node.future.result()} aggregations to find the correct status')
 
     finally:
         rclpy.try_shutdown()
