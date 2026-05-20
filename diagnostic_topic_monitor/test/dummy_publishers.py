@@ -18,7 +18,7 @@ class DummyPublisherNode(Node):
         self.string_pub1 = self.create_publisher(String, '/dummy_string_topic1', 10)
         self.string_pub2 = self.create_publisher(String, '/dummy_string_topic2', 10)
         self.string_pub2 = self.create_publisher(String, '/dummy_string_topic3', 10)
-        self.header_pub = self.create_publisher(CameraInfo, "/dummy_header_topic", 10)
+        self.header_pub = self.create_publisher(CameraInfo, '/dummy_header_topic', 10)
 
         # Timer to publish at 10Hz
         self.timer = self.create_timer(0.1, self.publish_messages)
@@ -44,7 +44,7 @@ class DummyPublisherNode(Node):
         # Publish to /header_topic
         header_msg = CameraInfo()
         header_msg.header.stamp = self.get_clock().now().to_msg()
-        header_msg.header.frame_id = "dummy_frame"
+        header_msg.header.frame_id = 'dummy_frame'
         self.header_pub.publish(header_msg)
 
         self.get_logger().debug('Published dummy messages to all topics.')

@@ -58,10 +58,10 @@ def create_register_activate(target_action):
     return RegisterEventHandler(
         launch_ros.event_handlers.OnStateTransition(
             target_lifecycle_node=target_action,
-            start_state="configuring",
-            goal_state="inactive",
+            start_state='configuring',
+            goal_state='inactive',
             entities=[
-                        LogInfo(msg=f"Emitting activate event for {target_action}"),
+                        LogInfo(msg=f'Emitting activate event for {target_action}'),
                         create_change_state(
                             target_action, Transition.TRANSITION_ACTIVATE
                         )
@@ -70,52 +70,52 @@ def create_register_activate(target_action):
     )
 
 
-ALL_MONITOR_NAME = "monitor_all_topics_node"
-CONFIG_MONITOR_NAME = "monitor_configured_topics_node"
+ALL_MONITOR_NAME = 'monitor_all_topics_node'
+CONFIG_MONITOR_NAME = 'monitor_configured_topics_node'
 
 
 @pytest.mark.launch_test
 def generate_test_description():
     # Node that publishes the topics we want to monitor
     talker_node = Node(
-        package="diagnostic_topic_monitor",
-        executable="dummy_publishers.py",
-        output="log",
-        name="talker",
-        arguments=["--ros-args", "--log-level", "talker:=warn"],
+        package='diagnostic_topic_monitor',
+        executable='dummy_publishers.py',
+        output='log',
+        name='talker',
+        arguments=['--ros-args', '--log-level', 'talker:=warn'],
     )
     # Un-configured frequency monitor that checks all topics
     monitor_all_node = LifecycleNode(
-        package="diagnostic_topic_monitor",
-        executable="topic_frequency_monitor",
+        package='diagnostic_topic_monitor',
+        executable='topic_frequency_monitor',
         name=ALL_MONITOR_NAME,
-        output="both",
-        namespace="",
-        arguments=["--ros-args", "--log-level", "all_monitor:=INFO"],
+        output='both',
+        namespace='',
+        arguments=['--ros-args', '--log-level', 'all_monitor:=INFO'],
     )
     # Frequency monitor with configuration file
     monitor_config_node = LifecycleNode(
-        package="diagnostic_topic_monitor",
-        executable="topic_frequency_monitor",
+        package='diagnostic_topic_monitor',
+        executable='topic_frequency_monitor',
         name=CONFIG_MONITOR_NAME,
-        output="both",
-        namespace="",
+        output='both',
+        namespace='',
         parameters=[
             PathJoinSubstitution(
                 [
-                    FindPackageShare("diagnostic_topic_monitor"),
-                    "test",
-                    "config",
-                    "topic_frequency_monitor.yaml",
+                    FindPackageShare('diagnostic_topic_monitor'),
+                    'test',
+                    'config',
+                    'topic_frequency_monitor.yaml',
                 ]
             ),
         ],
-        arguments=["--ros-args", "--log-level", "monitor_configured_topics_node:=INFO"],
+        arguments=['--ros-args', '--log-level', 'monitor_configured_topics_node:=INFO'],
     )
 
     return launch.LaunchDescription(
         [
-            SetEnvironmentVariable("RCUTILS_LOGGING_BUFFERED_STREAM", "1"),
+            SetEnvironmentVariable('RCUTILS_LOGGING_BUFFERED_STREAM', '1'),
             talker_node,
             monitor_all_node,
             monitor_config_node,
@@ -129,10 +129,10 @@ def generate_test_description():
             RegisterEventHandler(
                 launch_ros.event_handlers.OnStateTransition(
                     target_lifecycle_node=monitor_all_node,
-                    start_state="activating",
-                    goal_state="active",
+                    start_state='activating',
+                    goal_state='active',
                     entities=[
-                        LogInfo(msg="Monitor reached active state"),
+                        LogInfo(msg='Monitor reached active state'),
                         launch_testing.actions.ReadyToTest(),
                     ],
                 )
@@ -153,14 +153,14 @@ class TestMonitor(unittest.TestCase):
         rclpy.shutdown()
 
     def setUp(self):
-        self.node = rclpy.create_node("test_topic_frequency_monitor_node")
+        self.node = rclpy.create_node('test_topic_frequency_monitor_node')
         self.log = self.node.get_logger()
         self.sub = self.node.create_subscription(
-            DiagnosticArray, "/diagnostics", self.stat_cb, 10
+            DiagnosticArray, '/diagnostics', self.stat_cb, 10
         )
-        self.pub_count = self.node.count_publishers("/diagnostics")
+        self.pub_count = self.node.count_publishers('/diagnostics')
         self.log.info(
-            f"Number of publishers for /diagnostics: {self.pub_count}. Listening for messages..."
+            f'Number of publishers for /diagnostics: {self.pub_count}. Listening for messages...'
         )
         self.messages = []
         self.freq_messages = []
@@ -168,10 +168,10 @@ class TestMonitor(unittest.TestCase):
         start_time = time.time()
         while len(self.messages) < 3 or len(self.freq_messages) < 3:
             rclpy.spin_once(self.node, timeout_sec=1.0)
-            self.log.debug(f"Got {len(self.messages)} and {len(self.freq_messages)}")
+            self.log.debug(f'Got {len(self.messages)} and {len(self.freq_messages)}')
             if (time.time() - start_time) > self.TIMEOUT:
-                self.fail("Timed out waiting for message in /diagnostics topic")
-        self.log.debug(f"Got {len(self.messages)} and {len(self.freq_messages)}")
+                self.fail('Timed out waiting for message in /diagnostics topic')
+        self.log.debug(f'Got {len(self.messages)} and {len(self.freq_messages)}')
 
     def tearDown(self):
         self.node.destroy_node()
@@ -197,16 +197,16 @@ class TestMonitor(unittest.TestCase):
         # status should be OK
         self.assertEqual(last_status.level, DiagnosticStatus.OK)
         keys = [value.key for value in last_status.values]
-        self.assertTrue("period" in keys)
+        self.assertTrue('period' in keys)
         names = [status.name for status in last_msg.status]
         # The all_topics monitor should have all topics
-        self.assertIn(f"{ALL_MONITOR_NAME}: /dummy_header_topic", names, f"{names}")
-        self.assertIn(f"{ALL_MONITOR_NAME}: /dummy_string_topic1", names, f"{names}")
+        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_header_topic', names, f'{names}')
+        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_string_topic1', names, f'{names}')
 
     def test_frequency_diag_msg(self):
         """Check that the frequency diagnostic works."""
         last_msg = self.freq_messages.pop()
-        self.log.debug(f"{last_msg}")
+        self.log.debug(f'{last_msg}')
         self.assertTrue(len(last_msg.status) > 0)
         status = last_msg.status[0]
         # check some fields for present/content
