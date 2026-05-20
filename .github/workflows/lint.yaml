@@ -15,8 +15,8 @@ jobs:
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
-      - uses: actions/checkout@v1
-      - uses: ros-tooling/setup-ros@0.7.15
+      - uses: actions/checkout@v6.0.2
+      - uses: ros-tooling/setup-ros@0.7.17
         with:
           required-ros-distributions: rolling
       - name: Run ament linters
@@ -40,5 +40,5 @@ jobs:
     name: Check licenses
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6.0.2
       - uses: boschresearch/ros_license_toolkit@2.0.2
