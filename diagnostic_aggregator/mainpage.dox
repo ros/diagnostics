@@ -50,6 +50,7 @@ Reads the following parameters from the parameter server
 - \b "~base_path" : \b double [optional] Prepended to all analyzed output
 - \b "~analyzers" : \b {} Configuration for loading analyzers
 - \b "~critical" : \b bool [optional] React immediately to a degradation in diagnostic state
+- \b "~publish_values: \b bool [optional] Publish the "values" for each diagnostic status. Default: "true"
 
 \subsection analyzer_loader analyzer_loader
 
