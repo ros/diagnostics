@@ -11,7 +11,7 @@ from std_msgs.msg import String
 
 
 class DummyPublisherNode(Node):
-    
+
     def __init__(self):
         super().__init__('dummy_publisher_node')
 
