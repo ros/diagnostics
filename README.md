@@ -36,7 +36,7 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 
 # Target Distribution
 
-- **Rolling Ridley** by the [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2)
+- **Rolling Ridley** and **Lyrical Luth** by the [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2)
 - **Humble Hawksbill** by the [`ros2-humble` branch](https://github.com/ros/diagnostics/tree/ros2-humble)
 - **Jazzy Jalisco** by the [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy)
 - **Kilted Kaiju** by the [`ros2-kilted` branch](https://github.com/ros/diagnostics/tree/ros2-kilted)
