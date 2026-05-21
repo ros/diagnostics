@@ -25,7 +25,7 @@ jobs:
           linters=(cppcheck cpplint flake8 pep257 uncrustify xmllint)
           packages=(
             diagnostic_aggregator diagnostic_common_diagnostics
-            diagnostic_remote_logging diagnostic_updater self_test
+            diagnostic_remote_logging diagnostic_topic_monitor diagnostic_updater self_test
           )
           sudo apt-get install -y "${linters[@]/#/ros-humble-ament-}"
           failed=()
