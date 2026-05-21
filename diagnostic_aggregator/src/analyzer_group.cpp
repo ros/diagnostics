@@ -175,7 +175,7 @@ bool AnalyzerGroup::init(
     init_ok = false;
     RCLCPP_ERROR(logger_, "No analyzers initialized in AnalyzerGroup '%s'", n->get_namespace());
   } else {
-    RCLCPP_DEBUG(
+    RCLCPP_INFO(
       logger_, "Initialized analyzer group '%s' with path '%s' and breadcrumb '%s'.",
       nice_name_.c_str(), path_.c_str(), breadcrumb_.c_str());
   }
