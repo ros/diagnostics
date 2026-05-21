@@ -167,7 +167,7 @@ class TestMonitor(unittest.TestCase):
         self.freq_messages = []
 
         start_time = time.time()
-        while len(self.messages) < 3 or len(self.freq_messages) < 3:
+        while len(self.messages) < 5 or len(self.freq_messages) < 5:
             rclpy.spin_once(self.node, timeout_sec=1.0)
             self.log.debug(f'Got {len(self.messages)} and {len(self.freq_messages)}')
             if (time.time() - start_time) > self.TIMEOUT:
@@ -218,4 +218,4 @@ class TestMonitor(unittest.TestCase):
     def test_ignore_unconfigured(self):
         """Check that we ignore the topic we don't monitor."""
         last_msg = self.freq_messages.pop()
-        self.assertEqual(len(last_msg.status), 2)  # We monitor 2 topics
+        self.assertEqual(len(last_msg.status), 4)  # We monitor 4 topics

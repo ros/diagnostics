@@ -4,9 +4,15 @@
       topics:
         - /dummy_string_topic1
         - /dummy_string_topic2
+        - /dummy_string_topic3
+        - /dummy_header_topic
       min_values:
-        - 5.0
-        - 5.0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
       max_values:
-        - 15.0
-        - 15.0
+        - 1.5
+        - 1.5
+        - 1.5
+        - 1.5
