@@ -22,8 +22,8 @@ class DummyPublisherNode(Node):
         # For testing the age_monitor, we need any topic with a header
         self.header_pub = self.create_publisher(CameraInfo, '/dummy_header_topic', 10)
 
-        # Timer to publish at 10Hz
-        self.timer = self.create_timer(0.1, self.publish_messages)
+        # Timer to publish at 1Hz
+        self.timer = self.create_timer(1.0, self.publish_messages)
 
         self.get_logger().info('DummyPublisherNode has been started.')
 

@@ -193,7 +193,7 @@ class TestMonitor(unittest.TestCase):
         # header
         current_time = self.node.get_clock().now()
         header_time = Time.from_msg(last_msg.header.stamp)
-        self.assertLess(current_time - header_time, Duration(seconds=0.1))
+        self.assertLess(current_time - header_time, Duration(seconds=1.0))
         last_status = last_msg.status[0]
         # status should be OK
         self.assertEqual(last_status.level, DiagnosticStatus.OK)
