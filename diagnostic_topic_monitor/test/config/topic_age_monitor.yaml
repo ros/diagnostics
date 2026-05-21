@@ -1,0 +1,9 @@
+/**:
+    ros__parameters:
+      monitor_configured_only: True
+      topics:
+        - /dummy_header_topic
+      min_values:
+        - -0.01
+      max_values:
+        - 0.2
