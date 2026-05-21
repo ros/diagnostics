@@ -1,6 +1,7 @@
 General information about this repository, including legal information and known issues/limitations, are given in [README.md](../README.md) in the repository root.
 
 # The diagnostic_aggregator package
+
 This package contains the `aggregator_node`.
 It listens to the [`diagnostic_msgs/DiagnosticArray`](https://index.ros.org/p/diagnostic_msgs) messages on the `/diagnostics` topic and aggregates and published them on the `/diagnostics_agg` topic.
 
@@ -9,6 +10,7 @@ Aggregation means that the diagnostics of the robot are grouped by various aspec
 This will allow you to easily see which part of the robot is causing problems.
 
 ## Example
+
 In our example, we are looking at a robot with arms and legs.
 The robot has two of each, one on each side.
 The robot also 4 camera sensors, one left and one right and one in the front and one in the back.
@@ -26,12 +28,14 @@ These are all the available diagnostic sources:
 ```
 
 We want to group the diagnostics by
+
 - all sensors
 - all motors
 - left side of the robot
 - right side of the robot
 
 We can achieve that by creating a configuration file that looks like this (see [example_analyzers.yaml](example/example_analyzers.yaml)):
+
 ``` yaml
 analyzers:
   ros__parameters:
@@ -73,6 +77,7 @@ Note that it will also display the highest state per group to allow you to see a
 For example in the above image, the left side of the robot is not working properly, because the left camera is in the `ERROR` state.
 
 # Analyzers
+
 The `aggregator_node` will load analyzers to process the diagnostics data.
 An analyzer is a plugin that inherits from the [`diagnostic_aggregator::Analyzer`](include/diagnostic_aggregator/analyzer.hpp) class.
 Analyzers must be implemented in packages that directly depend on [`pluginlib`](https://index.ros.org/p/pluginlib) and `diagnostic_aggregator`.
@@ -95,6 +100,7 @@ The analyzers are responsible for setting the name of each item in the output co
 ## Configuration
 
 The `aggregator_node` can be configured at launch time like in this example:
+
 ``` yaml
 pub_rate: 1.0 # Optional, defaults to 1.0
 base_path: 'PRE' # Optional, defaults to ""
@@ -123,7 +129,9 @@ The `critical` parameter makes the aggregator react immediately to a degradation
 This is useful if the toplevel state is parsed by a watchdog for example.
 
 ## Launching
+
 You can launch the `aggregator_node` like this (see [example.launch.py.in](example/example.launch.py.in)):
+
 ``` python
     aggregator = launch_ros.actions.Node(
         package='diagnostic_aggregator',
@@ -136,6 +144,7 @@ You can launch the `aggregator_node` like this (see [example.launch.py.in](examp
 ```
 
 You can add analyzers at runtime using the `add_analyzer` node like this (see [example.launch.py.in](example/example.launch.py.in)):
+
 ```
     add_analyzer = launch_ros.actions.Node(
         package='diagnostic_aggregator',
@@ -146,12 +155,14 @@ You can add analyzers at runtime using the `add_analyzer` node like this (see [e
         add_analyzer,
     ])
 ```
+
 This node updates the parameters of the `aggregator_node` by calling the service `/analyzers/set_parameters_atomically`.
 The `aggregator_node` will detect when a `parameter-event` has introduced new parameters to it.
 When this happens the `aggregator_node` will reload all analyzers based on its new set of parameters.
 Adding analyzers this way can be done at runtime and can be made conditional.
 
 In the example, `add_analyzer` will add an analyzer for diagnostics that are marked optional:
+
 ``` yaml
 /**:
   ros__parameters:
@@ -160,21 +171,26 @@ In the example, `add_analyzer` will add an analyzer for diagnostics that are mar
       path: Optional
       startswith: [ '/optional' ]
 ```
+
 This will move the `/optional/runtime/analyzer` diagnostic from the "Other" to  "Aggregation" where it will not go stale after 5 seconds and will be taken into account for the toplevel state.
 
 # Basic analyzers
+
 The `diagnostic_aggregator` package provides a few basic analyzers that you can use to aggregate your diagnostics.
 
 ## GenericAnalyzer
+
 The [`diagnostic_aggregator::GenericAnalyzer`](include/diagnostic_aggregator/generic_analyzer.hpp) class is a basic analyzer that can be configured to match diagnostics based on their name.
 By defining a `path` parameter, you can specify the prefix that will be added to the name of each item in the output.
 This way you can group diagnostics by their location or other aspects as demonstrated in the [example](#example).
 
 ## AnalyzerGroup
+
 The [`diagnostic_aggregator::AnalyzerGroup`](include/diagnostic_aggregator/analyzer_group.hpp) class is a basic analyzer that can be configured to group other analyzers.
 It has itself an `analyzers` parameter that can be filled with other analyzers to group them.
 
 An example of this is (see [example_analyzers.yaml](diagnostic_aggregator/example/example_analyzers.yaml)):
+
 ``` yaml
     topology:
       type: 'diagnostic_aggregator/AnalyzerGroup'
@@ -191,29 +207,40 @@ An example of this is (see [example_analyzers.yaml](diagnostic_aggregator/exampl
 ```
 
 ## DiscardAnalyzer
+
 The [`diagnostic_aggregator::DiscardAnalyzer`](include/diagnostic_aggregator/discard_analyzer.hpp) class is a basic analyzer that discards all diagnostics that match it.
 This can be useful if you want to ignore some diagnostics.
 
 ## IgnoreAnalyzer
+
 The [`diagnostic_aggregator::IgnoreAnalyzer`](include/diagnostic_aggregator/ignore_analyzer.hpp) will ignore all parameters in its namespace and not match anything.
 
 The difference between the `DiscardAnalyzer` and the `IgnoreAnalyzer` is that the `DiscardAnalyzer` will match diagnostics and discard them, while the `IgnoreAnalyzer` will not match anything.
 This means that things that are ignored by the `IgnoreAnalyzer` will still be published in the "Other" analyzer, while things that are discarded by the `DiscardAnalyzer` will not be published at all.
 
 # ROS API
- ## `aggregator_node`
+
+## `aggregator_node`
 
 ### Subscribed Topics
+
 - `diagnostics` ([diagnostic_msgs/DiagnosticArray](https://index.ros.org/p/diagnostic_msgs)) - The diagnostics to be aggregated
 
 ### Published Topics
+
 - `diagnostics_agg` ([diagnostic_msgs/DiagnosticArray](https://index.ros.org/p/diagnostic_msgs)) - The aggregated diagnostics
 - `diagnostics_toplevel_state` ([diagnostic_msgs/DiagnosticStatus](https://index.ros.org/p/diagnostic_msgs)) - The highest state of the aggregated diagnostics
 
 ### Parameters
+
+- `*` (map, default: {}) - The analyzers that will be used to aggregate the diagnostics
 - `pub_rate` (double, default: 1.0) - The rate at which the aggregated diagnostics will be published
-- `base_path` (string, default: "") - The prefix that will be added to the name of each item in the output
-- `analyzers` (map, default: {}) - The analyzers that will be used to aggregate the diagnostics
+- `path` (string, default: "") - The prefix that will be added to the name of each item in the output
+- `other_as_errors` (bool, default: false) - If the 'Other' aggregator (that matches all statuses not matched by any declared aggregator) should treat everything as ERROR.
+- `history_depth` (int, default: 1000) - QoS parameter 'keep_last'.
+- `critical` (bool, default: false) - Whether state degradations should be published immediately (instead of adhering to the `pub_rate`)
+- `publish_values` (bool, default: true) - Whether to fill the values dict in the status after aggregation (false saves bandwidth).
 
 # Tutorials
+
 TODO: Port tutorials #contributions-welcome

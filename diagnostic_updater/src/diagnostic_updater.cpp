@@ -44,7 +44,9 @@ Updater::Updater(
   std::shared_ptr<rclcpp::node_interfaces::NodeLoggingInterface> logging_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeParametersInterface> parameters_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
-  std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface, double period)
+  std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
+  double period,
+  unsigned char starting_up_status)
 : verbose_(false),
   base_interface_(base_interface),
   timers_interface_(timers_interface),
@@ -54,7 +56,8 @@ Updater::Updater(
       topics_interface, "/diagnostics", 1)),
   logger_(logging_interface->get_logger()),
   node_name_(base_interface->get_name()),
-  warn_nohwid_done_(false)
+  warn_nohwid_done_(false),
+  starting_up_status_(starting_up_status)
 {
   constexpr const char * period_param_name = "diagnostic_updater.period";
   rclcpp::ParameterValue period_param;
@@ -192,7 +195,7 @@ void Updater::addedTaskCallback(DiagnosticTaskInternal & task)
 {
   DiagnosticStatusWrapper stat;
   stat.name = task.getName();
-  stat.summary(0, "Node starting up");
+  stat.summary(starting_up_status_, "Node starting up");
   publish(stat);
 }
 }  // namespace diagnostic_updater

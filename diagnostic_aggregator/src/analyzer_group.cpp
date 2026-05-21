@@ -292,7 +292,7 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
     return output;
   }
 
-  bool all_stale = true;
+  uint8_t max_level_without_stale = 0;
 
   for (auto j = 0u; j < analyzers_.size(); ++j) {
     std::string path = analyzers_[j]->getPath();
@@ -317,17 +317,22 @@ std::vector<std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus>> AnalyzerGro
         kv.key = nice_name;
         kv.value = processed[i]->message;
 
-        all_stale = all_stale &&
-          (processed[i]->level == diagnostic_msgs::msg::DiagnosticStatus::STALE);
+        if (processed[i]->level != diagnostic_msgs::msg::DiagnosticStatus::STALE) {
+          max_level_without_stale = max(max_level_without_stale, processed[i]->level);
+        }
         header_status->level = max(header_status->level, processed[i]->level);
         header_status->values.push_back(kv);
       }
     }
   }
 
-  // Report stale as errors unless all stale
-  if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE && !all_stale) {
-    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::ERROR;
+  // WARN/ERROR always beats STALE; if only STALE present, report STALE
+  if (max_level_without_stale > diagnostic_msgs::msg::DiagnosticStatus::OK) {
+    header_status->level = max_level_without_stale;
+  } else if (header_status->level == diagnostic_msgs::msg::DiagnosticStatus::STALE) {
+    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
+  } else {
+    header_status->level = diagnostic_msgs::msg::DiagnosticStatus::OK;
   }
 
   header_status->message = valToMsg(header_status->level);

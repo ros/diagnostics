@@ -2,6 +2,21 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.4.6 (2025-05-26)
+------------------
+* C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
+* Contributors: Christian Henkel
+
+4.4.5 (2025-05-26)
+------------------
+* Use target_link_libraries instead of ament_target_dependencies (`#507 <https://github.com/ros/diagnostics/issues/507>`_)
+* Contributors: Christoph Fröhlich
+
+4.4.4 (2025-05-12)
+------------------
+* Kilted dep fix (`#474 <https://github.com/ros/diagnostics/issues/474>`_)
+* Contributors: David V. Lu, Christian Henkel
+
 4.4.2 (2025-02-10)
 ------------------
 * Add Windows support (`#426 <https://github.com/ros/diagnostics/issues/426>`_)

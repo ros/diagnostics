@@ -44,13 +44,13 @@ from typing import List
 
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 from diagnostic_updater import Updater
-from rcl_interfaces.msg import SetParametersResult
+from rcl_interfaces.msg import ParameterDescriptor, SetParametersResult
 import rclpy
 from rclpy.node import Node
 
 
-FREE_PERCENT_LOW = 0.05
-FREE_PERCENT_CRIT = 0.01
+FREE_PERCENT_LOW = 5
+FREE_PERCENT_CRIT = 1
 DICT_STATUS = {
     DiagnosticStatus.OK: 'OK',
     DiagnosticStatus.WARN: 'Warning',
@@ -82,13 +82,18 @@ class HDMonitor(Node):
         super().__init__(f'hd_monitor_{cleaned_hostname}')
 
         self._path = '~'
-        self._free_percent_low = 0.05
-        self._free_percent_crit = 0.01
+        self._free_percent_low = FREE_PERCENT_LOW
+        self._free_percent_crit = FREE_PERCENT_CRIT
 
         self.add_on_set_parameters_callback(self.callback_config)
-        self.declare_parameter('path', self._path)
-        self.declare_parameter('free_percent_low', self._free_percent_low)
-        self.declare_parameter('free_percent_crit', self._free_percent_crit)
+        self.declare_parameter('path', self._path,  ParameterDescriptor(
+            description='Path in which to check remaining space.'))
+        self.declare_parameter(
+            'free_percent_low', self._free_percent_low,  ParameterDescriptor(
+                description='Warning threshold.', type=int()))
+        self.declare_parameter(
+            'free_percent_crit', self._free_percent_crit,  ParameterDescriptor(
+                description='Error threshold.', type=int()))
 
         self._updater = Updater(self)
         self._updater.setHardwareID(hostname)
@@ -101,15 +106,14 @@ class HDMonitor(Node):
         see the class documentation for declared parameters.
         """
         for param in params:
-            match param.name:
-                case 'path':
-                    self._path = str(
-                        Path(param.value).expanduser().resolve(strict=True)
-                    )
-                case 'free_percent_low':
-                    self._free_percent_low = param.value
-                case 'free_percent_crit':
-                    self._free_percent_crit = param.value
+            if param.name == 'path':
+                self._path = str(
+                    Path(param.value).expanduser().resolve(strict=True)
+                )
+            elif param.name == 'free_percent_low':
+                self._free_percent_low = param.value
+            elif param.name == 'free_percent_crit':
+                self._free_percent_crit = param.value
 
         return SetParametersResult(successful=True)
 
@@ -122,7 +126,7 @@ class HDMonitor(Node):
         diag.level = DiagnosticStatus.OK
 
         total, _, free = disk_usage(self._path)
-        percent = free / total
+        percent = free / total * 100.0
 
         if percent > self._free_percent_low:
             diag.level = DiagnosticStatus.OK
@@ -137,7 +141,7 @@ class HDMonitor(Node):
                 KeyValue(key='Name', value=self._path),
                 KeyValue(key='Status', value=DICT_STATUS[diag.level]),
                 KeyValue(key='Total (Go)', value=str(total_go)),
-                KeyValue(key='Available (%)', value=str(round(percent, 2))),
+                KeyValue(key='Available (%)', value=str(round(percent, 1))),
             ]
         )
 
