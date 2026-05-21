@@ -192,7 +192,7 @@ bool GenericAnalyzer::match(const string & name)
   std::cmatch what;
   for (unsigned int i = 0; i < regex_.size(); ++i) {
     if (std::regex_match(name.c_str(), what, regex_[i])) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s' with regex.",
         nice_name_.c_str(), name.c_str());
       return true;
@@ -201,7 +201,7 @@ bool GenericAnalyzer::match(const string & name)
 
   for (unsigned int i = 0; i < expected_.size(); ++i) {
     if (name == expected_[i]) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
         name.c_str());
       return true;
@@ -210,7 +210,7 @@ bool GenericAnalyzer::match(const string & name)
 
   for (unsigned int i = 0; i < name_.size(); ++i) {
     if (name == name_[i]) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
         name.c_str());
       return true;
@@ -219,7 +219,7 @@ bool GenericAnalyzer::match(const string & name)
 
   for (unsigned int i = 0; i < startswith_.size(); ++i) {
     if (name.find(startswith_[i]) == 0) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
         name.c_str());
       return true;
@@ -228,7 +228,7 @@ bool GenericAnalyzer::match(const string & name)
 
   for (unsigned int i = 0; i < contains_.size(); ++i) {
     if (name.find(contains_[i]) != string::npos) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "Analyzer '%s' matches '%s'.", nice_name_.c_str(),
         name.c_str());
       return true;
