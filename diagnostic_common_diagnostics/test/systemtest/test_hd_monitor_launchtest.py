@@ -106,7 +106,7 @@ class TestHDMonitor(unittest.TestCase):
             rclpy.spin_once(test_node, timeout_sec=1)
             received_min_level = self._get_min_level()
             assert received_min_level is not None, 'The received message should have a level'
-            min_level = min(min_level, )
+            min_level = min(min_level, received_min_level)
             if min_level == 0:
                 break
 
