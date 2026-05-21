@@ -69,7 +69,7 @@ Try (unprotected):
 
 | Job | R | L | K | J | H |
 | --- | - | - | - | - | - |
-| `dev` | [![](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/badge/icon?style=ball-16x16)](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/badge/icon?style=ball-16x16)](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/badge/icon?style=ball-16x16)](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/badge/icon?style=ball-16x16)](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/badge/icon?style=ball-16x16)](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/) |
+| `dev` | [![](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/badge/icon)](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/) |
 
 # License
 
