@@ -10,6 +10,10 @@
 #define NOMINMAX
 #endif
 #include <winsock2.h>
+// Windows SDK defines ERROR as 0, which breaks scoped enum usage (e.g. CallbackReturn::ERROR)
+#ifdef ERROR
+#undef ERROR
+#endif
 #else
 #include <unistd.h>
 #endif
