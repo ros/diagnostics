@@ -3,11 +3,14 @@
 <package format="3">
   <name>diagnostic_topic_monitor</name>
   <version>1.0.0</version>
-  <description>Generic Topic Monitor</description>
+  <description>Generic functions to monitor the health of ROS topics.</description>
+
   <maintainer email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</maintainer>
   <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
   
   <license>BSD-3-Clause</license>
+
+  <url type="website">https://index.ros.org/p/diagnostic_topic_monitor/</url>
 
   <author email="ingo.luetkebohle@de.bosch.com">Ingo Lütkebohle</author>
   <author email="tejas.kumarshastha@de.bosch.com">Tejas Kumar Shastha</author>
