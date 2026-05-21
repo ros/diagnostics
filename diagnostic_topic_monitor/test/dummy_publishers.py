@@ -18,7 +18,7 @@ class DummyPublisherNode(Node):
         # Publishers
         self.string_pub1 = self.create_publisher(String, '/dummy_string_topic1', 10)
         self.string_pub2 = self.create_publisher(String, '/dummy_string_topic2', 10)
-        self.string_pub2 = self.create_publisher(String, '/dummy_string_topic3', 10)
+        self.string_pub3 = self.create_publisher(String, '/dummy_string_topic3', 10)
         # For testing the age_monitor, we need any topic with a header
         self.header_pub = self.create_publisher(CameraInfo, '/dummy_header_topic', 10)
 
@@ -41,7 +41,7 @@ class DummyPublisherNode(Node):
         # Publish to /dummy_string_topic3
         msg3 = String()
         msg3.data = 'Hello from dummy_string_topic3'
-        self.string_pub2.publish(msg3)
+        self.string_pub3.publish(msg3)
 
         # Publish to /dummy_header_topic
         header_msg = CameraInfo()
