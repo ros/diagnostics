@@ -7,12 +7,12 @@ import rclpy
 
 class TestProcessOutput(unittest.TestCase):
 
-    @ classmethod
+    @classmethod
     def setUpClass(cls):
         # Initialize the ROS context for the test node
         rclpy.init()
 
-    @ classmethod
+    @classmethod
     def tearDownClass(cls):
         # Shutdown the ROS context
         rclpy.shutdown()
