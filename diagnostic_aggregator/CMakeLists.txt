@@ -160,10 +160,73 @@ if(BUILD_TESTING)
     TIMEOUT 30
   )
 
-  ament_add_pytest_test(test_discard_behavior
-    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_discard_behavior.py"
-    TIMEOUT 60
+  # Each entry: "case_name|FOO_DISCARD|FOO_STATUS|BAR_DISCARD|BAR_STATUS|AGG_EXPECTED"
+  # Statuses use DiagnosticStatus integer values: OK=0, WARN=1, ERROR=2, STALE=3
+  # A status of "None" means the diagnostic is never published (missing).
+  set(discard_behavior_tests
+    # CASE 1: both 'foo' and 'bar' are marked discard_stale := true
+    #  --> the aggregator should roll up to OK=0, because the stale statuses are discarded.
+    "case_1_01|True|None|True|None|0"
+    "case_1_02|True|3|True|3|0"
+    "case_1_03|True|None|True|3|0"
+    "case_1_04|True|3|True|None|0"
+    # CASE 2: both 'foo' and 'bar' are marked discard_stale := false
+    #  --> the aggregator should roll up to STALE=3, as long as they aggregated are either
+    # missing or stale, because the stale statuses are *not* discarded.
+    "case_2_01|False|None|False|None|3"
+    "case_2_02|False|3|False|3|3"
+    "case_2_03|False|None|False|3|3"
+    "case_2_04|False|3|False|None|3"
+    # CASE 3: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is missing or stale while the other is OK.
+    #  --> the aggregator should roll up to OK, because the stale status is discarded.
+    "case_3_01|True|None|False|0|0"
+    "case_3_02|True|3|False|0|0"
+    "case_3_03|True|0|False|0|0"
+    "case_3_04|False|0|True|None|0"
+    "case_3_05|False|0|True|3|0"
+    "case_3_06|False|0|True|0|0"
+    # CASE 4: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is missing or stale while the other is also missing or stale.
+    #  --> the aggregator should roll up to STALE=3
+    "case_4_01|True|3|False|None|3"
+    "case_4_02|True|None|False|None|3"
+    "case_4_03|True|None|False|3|3"
+    "case_4_04|True|3|False|3|3"
+    "case_4_05|False|3|True|None|3"
+    "case_4_06|False|None|True|None|3"
+    "case_4_07|False|None|True|3|3"
+    "case_4_08|False|3|True|3|3"
+    # CASE 5: one of 'foo' or 'bar' are marked discard_stale := true and the corresponding status
+    # is OK while the other is missing or stale.
+    #  --> the aggregator should roll up to STALE, because it has a higher severity than OK.
+    "case_5_01|True|0|False|3|3"
+    "case_5_02|True|0|False|None|3"
+    "case_5_03|False|3|True|0|3"
+    "case_5_04|False|None|True|0|3"
   )
+
+  foreach(test_record IN LISTS discard_behavior_tests)
+    string(REPLACE "|" ";" test_parts "${test_record}")
+    list(GET test_parts 0 TEST_CASE_NAME)
+    list(GET test_parts 1 FOO_DISCARD)
+    list(GET test_parts 2 FOO_STATUS)
+    list(GET test_parts 3 BAR_DISCARD)
+    list(GET test_parts 4 BAR_STATUS)
+    list(GET test_parts 5 AGG_EXPECTED)
+
+    configure_file(
+      "test/test_discard_behavior.launch.py.in"
+      "test_discard_behavior_${TEST_CASE_NAME}.launch.py"
+      @ONLY
+    )
+    add_launch_test(
+      "${CMAKE_CURRENT_BINARY_DIR}/test_discard_behavior_${TEST_CASE_NAME}.launch.py"
+      TARGET "test_discard_behavior_${TEST_CASE_NAME}"
+      TIMEOUT 30
+      ENV
+    )
+  endforeach()
 
   ament_add_pytest_test(test_publish_values
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_publish_values.py"
