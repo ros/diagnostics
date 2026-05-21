@@ -63,7 +63,7 @@ class TestCPUMonitor(unittest.TestCase):
 
     def diagnostics_callback(self, msg):
         self.message_recieved = True
-        self.assertGreaterEqual(len(msg.status), 1)
+        self.assertEqual(len(msg.status), 1)
 
     def test_ok(self):
         warning_percentage = 100
