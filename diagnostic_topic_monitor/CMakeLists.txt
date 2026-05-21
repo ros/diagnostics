@@ -38,6 +38,9 @@ target_link_libraries(topic_frequency_monitor_component PUBLIC
   rclcpp_components::component_manager
   rclcpp_lifecycle::rclcpp_lifecycle
 )
+if(WIN32)
+  target_link_libraries(topic_frequency_monitor_component PRIVATE ws2_32)
+endif()
 ament_export_targets(export_topic_frequency_monitor_component)
 install(TARGETS topic_frequency_monitor_component
   EXPORT export_topic_frequency_monitor_component
@@ -61,6 +64,9 @@ target_link_libraries(topic_age_monitor_component PUBLIC
   rclcpp_components::component_manager
   rclcpp_lifecycle::rclcpp_lifecycle
 )
+if(WIN32)
+  target_link_libraries(topic_age_monitor_component PRIVATE ws2_32)
+endif()
 ament_export_targets(export_topic_age_monitor_component)
 install(TARGETS topic_age_monitor_component
   EXPORT export_topic_age_monitor_component

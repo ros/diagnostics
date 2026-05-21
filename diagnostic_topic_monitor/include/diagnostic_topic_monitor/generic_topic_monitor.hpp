@@ -236,7 +236,7 @@ diagnostic_topic_monitor::GenericTopicMonitor<StatusType,
   gethostname(HOSTNAME, 1000);
   updater_->setHardwareID(std::string(HOSTNAME));
   for (size_t i = 0; i < topics_.size(); ++i) {
-    auto param = parse_params(i);
+    auto param = parse_params(static_cast<int>(i));
     auto diag = std::make_shared<StatusType>(
       param, get_prefixed_name(
         topics_[i]), get_clock());
