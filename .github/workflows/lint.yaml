@@ -7,6 +7,10 @@ on:
   schedule:
     # Run every week at 20:00 on Sunday
     - cron: "0 20 * * 0"
+    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ament_lint:
