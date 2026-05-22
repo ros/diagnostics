@@ -6,6 +6,7 @@
 
 import time
 import unittest
+
 from diagnostic_msgs.msg import DiagnosticArray
 from diagnostic_msgs.msg import DiagnosticStatus
 import launch
