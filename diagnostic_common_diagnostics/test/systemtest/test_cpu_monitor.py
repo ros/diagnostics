@@ -62,7 +62,7 @@ class TestCPUMonitor(unittest.TestCase):
         time.sleep(0.1)
 
     def diagnostics_callback(self, msg):
-        if msg.status[0].message == "Node starting up":
+        if msg.status[0].message == 'Node starting up':
             # Ignore the task monitor runtime status message
             return
         if len(msg.status) > 0:

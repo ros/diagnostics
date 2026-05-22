@@ -168,7 +168,7 @@ class TestMonitor(unittest.TestCase):
         """Store message for future processing."""
         if len(msg.status) == 0:
             return
-        if msg.status[0].message == "Node starting up":
+        if msg.status[0].message == 'Node starting up':
             # Ignore the task monitor runtime status message
             return
         if CONFIG_MONITOR_NAME in msg.status[0].name:
