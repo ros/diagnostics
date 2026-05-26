@@ -16,7 +16,7 @@ jobs:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: ros-tooling/setup-ros@0.7.17
+      - uses: ros-tooling/setup-ros@0.7.18
         with:
           required-ros-distributions: rolling
       - name: Run ament linters
@@ -25,7 +25,7 @@ jobs:
           linters=(cppcheck cpplint flake8 pep257 uncrustify xmllint)
           packages=(
             diagnostic_aggregator diagnostic_common_diagnostics
-            diagnostic_remote_logging diagnostic_topic_monitor diagnostic_updater self_test
+            diagnostic_remote_logging diagnostic_updater self_test
           )
           sudo apt-get install -y "${linters[@]/#/ros-rolling-ament-}"
           failed=()
