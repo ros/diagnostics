@@ -3,15 +3,13 @@
 <package format="3">
   <name>diagnostics</name>
   <version>4.2.6</version>
-  <description>diagnostics</description>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <description>Diagnostics tools for monitoring and reporting system status.</description>
+
   <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
-  <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
 
   <license>BSD-3-Clause</license>
 
-  <url type="website">http://www.ros.org/wiki/diagnostics</url>
+  <url type="website">https://index.ros.org/p/diagnostics/</url>
 
   <author>Kevin Watts</author>
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
@@ -20,6 +18,8 @@
 
   <exec_depend>diagnostic_aggregator</exec_depend>
   <exec_depend>diagnostic_common_diagnostics</exec_depend>
+  <exec_depend>diagnostic_remote_logging</exec_depend>
+  <exec_depend>diagnostic_topic_monitor</exec_depend>
   <exec_depend>diagnostic_updater</exec_depend>
   <exec_depend>self_test</exec_depend>
 
