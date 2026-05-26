@@ -2,6 +2,11 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* Contributors: Christian Henkel
+
 4.2.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
@@ -60,6 +65,7 @@ Changelog for package self_test
 ------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 
