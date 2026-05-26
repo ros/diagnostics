@@ -9,7 +9,6 @@ Forthcoming
   Co-authored-by: Tim Clephas <tim.clephas@nobleo.nl>
 * Some fixes that came apparent when building for lyrical / resolute (`#609 <https://github.com/ros/diagnostics/issues/609>`_)
 * Option `publish_values` to control whether aggregated state should contain values (`#597 <https://github.com/ros/diagnostics/issues/597>`_)
-  ---------
   Co-authored-by: Denis Draca <denis.draca@greenroomrobotics.com>
   Co-authored-by: David Revay <daverevay@gmail.com>
   Co-authored-by: David Revay <MrBlenny@users.noreply.github.com>
@@ -111,6 +110,7 @@ Forthcoming
 * Restore alphabetical order. (`#148 <https://github.com/ros/diagnostics/issues/148>`_)
 * Aggregator bugfix, tests, and nicer example. (`#147 <https://github.com/ros/diagnostics/issues/147>`_)
 * Contributors: Arne Nordmann, Georg Bartels, Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 

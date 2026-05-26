@@ -75,6 +75,7 @@ Forthcoming
 ------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 

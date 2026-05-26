@@ -107,6 +107,7 @@ Forthcoming
 ------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 * Check if parameter is already declared to avoid re-declaring it. (#227)
