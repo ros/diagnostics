@@ -177,31 +177,31 @@ class TestMonitor(unittest.TestCase):
         # header
         current_time = self.node.get_clock().now()
         header_time = Time.from_msg(last_msg.header.stamp)
-        self.assertLess(current_time - header_time, Duration(seconds=0.1))
+        self.assertLess(current_time - header_time, Duration(seconds=0.1), f'{last_msg=}')
         last_status = last_msg.status[0]
         # status should be OK
-        self.assertEqual(last_status.level, DiagnosticStatus.OK)
+        self.assertEqual(last_status.level, DiagnosticStatus.OK, f'{last_status}')
 
     def test_age_diag_msg(self):
         """Check that the age diagnostic works."""
         last_msg = self.age_messages.pop()
-        self.assertTrue(len(last_msg.status) > 0)
+        self.assertTrue(len(last_msg.status) > 0, f'{last_msg=}')
         status = last_msg.status[0]
         # check some fields for present/content
-        self.assertTrue(CONFIG_MONITOR_NAME in status.name)
+        self.assertTrue(CONFIG_MONITOR_NAME in status.name, f'{last_msg=}')
         keys = [kv.key for kv in status.values]
-        self.assertTrue('Earliest timestamp delay:' in keys)
+        self.assertTrue('Earliest timestamp delay:' in keys, f'{last_msg=}')
 
     def test_ignore_unconfigured(self):
         """Check that we ignore the topic we don't monitor."""
         last_msg = self.age_messages.pop()
-        self.assertEqual(len(last_msg.status), 1)  # We monitor 1 topic only
+        self.assertEqual(len(last_msg.status), 1, f'{last_msg=}')  # We monitor 1 topic only
         names = [status.name for status in last_msg.status]
         #  This topic should be monitored
-        self.assertIn(f'{CONFIG_MONITOR_NAME}: /dummy_header_topic', names, f'{names}')
+        self.assertIn(f'{CONFIG_MONITOR_NAME}: /dummy_header_topic', names, f'{last_msg=}')
         # This topic should not be monitored
         self.assertNotIn(
             f'{CONFIG_MONITOR_NAME}: /dummy_string_topic1',
             names,
-            f'{names}',
+            f'{last_msg=}',
         )

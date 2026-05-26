@@ -4,6 +4,7 @@
 #
 # See the top-level LICENSE file for licensing terms.
 
+import pprint
 import time
 import unittest
 
@@ -182,6 +183,8 @@ class TestMonitor(unittest.TestCase):
         """Store message for future processing."""
         if len(msg.status) == 0:
             return
+        if msg.status[0].message == 'Node starting up':
+            return
         if CONFIG_MONITOR_NAME in msg.status[0].name:
             self.freq_messages.append(msg)
         else:
@@ -189,33 +192,34 @@ class TestMonitor(unittest.TestCase):
 
     def test_diag_msg(self):
         """Check that diagnostics messages contain the right content."""
+        pprint. pprint(self.messages)
         last_msg = self.messages.pop()
         # header
         current_time = self.node.get_clock().now()
         header_time = Time.from_msg(last_msg.header.stamp)
-        self.assertLess(current_time - header_time, Duration(seconds=1.0))
+        self.assertLess(current_time - header_time, Duration(seconds=1.0), f'{last_msg=}')
         last_status = last_msg.status[0]
         # status should be OK
-        self.assertEqual(last_status.level, DiagnosticStatus.OK)
+        self.assertEqual(last_status.level, DiagnosticStatus.OK, f'{last_status}')
         keys = [value.key for value in last_status.values]
-        self.assertTrue('period' in keys)
+        self.assertTrue('period' in keys, f'{last_status}')
         names = [status.name for status in last_msg.status]
         # The all_topics monitor should have all topics
-        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_header_topic', names, f'{names}')
-        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_string_topic1', names, f'{names}')
+        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_header_topic', names, f'{last_status}')
+        self.assertIn(f'{ALL_MONITOR_NAME}: /dummy_string_topic1', names, f'{last_status}')
 
     def test_frequency_diag_msg(self):
         """Check that the frequency diagnostic works."""
         last_msg = self.freq_messages.pop()
-        self.log.debug(f'{last_msg}')
-        self.assertTrue(len(last_msg.status) > 0)
+        self.log.debug(f'{last_msg=}')
+        self.assertTrue(len(last_msg.status) > 0, f'{last_msg=}')
         status = last_msg.status[0]
         # check some fields for present/content
-        self.assertTrue(CONFIG_MONITOR_NAME in status.name)
+        self.assertTrue(CONFIG_MONITOR_NAME in status.name, f'{last_msg=}')
         keys = [kv.key for kv in status.values]
-        self.assertIn('Actual frequency (Hz)', keys)
+        self.assertIn('Actual frequency (Hz)', keys, f'{last_msg=}')
 
     def test_ignore_unconfigured(self):
         """Check that we ignore the topic we don't monitor."""
         last_msg = self.freq_messages.pop()
-        self.assertEqual(len(last_msg.status), 4)  # We monitor 4 topics
+        self.assertEqual(len(last_msg.status), 4, f'{last_msg=}')  # We monitor 4 topics
