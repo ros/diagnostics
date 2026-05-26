@@ -1,4 +1,10 @@
-[![Test diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/test.yaml?label=test&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/test.yaml) [![Lint diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/lint.yaml?label=lint&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/lint.yaml) [![ROS2 Humble](https://img.shields.io/ros/v/humble/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#humble) [![ROS2 Jazzy](https://img.shields.io/ros/v/jazzy/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#jazzy) [![ROS2 Kilted](https://img.shields.io/ros/v/kilted/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#kilted) [![ROS2 Rolling](https://img.shields.io/ros/v/rolling/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#rolling) 
+[![Test diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/test.yaml?label=test&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/test.yaml) [![Lint diagnostics](https://img.shields.io/github/actions/workflow/status/ros/diagnostics/lint.yaml?label=lint&style=flat-square)](https://github.com/ros/diagnostics/actions/workflows/lint.yaml) ... [![ROS2 Humble](https://img.shields.io/ros/v/humble/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#humble) [![ROS2 Jazzy](https://img.shields.io/ros/v/jazzy/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#jazzy) [![ROS2 Kilted](https://img.shields.io/ros/v/kilted/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#kilted) [![ROS2 Lyrical](https://img.shields.io/ros/v/lyrical/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#lyrical) [![ROS2 Rolling](https://img.shields.io/ros/v/rolling/diagnostics.svg?style=flat-square)](https://index.ros.org/r/diagnostics/#rolling)
+
+__Build farm jobs:__
+
+|  | Rolling | Lyrical | Kilted | Jazzy | Humble |
+| --- | - | - | - | - | - |
+| `dev` | [![](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/badge/icon)](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/) |
 
 # Overview
 
@@ -11,7 +17,7 @@ It contains information about the device names, status, and values.
 It contains the following packages:
 
 - [`diagnostic_aggregator`](/diagnostic_aggregator/): Aggregates diagnostic messages from different sources into a single message.
-- [`diagnostic_analysis`](/diagnostics/): *Not ported to ROS2 yet* **#contributions-welcome**
+- [`diagnostic_analysis`](/diagnostics/): *Not ported to ROS2 yet* __#contributions-welcome__
 - [`diagnostic_common_diagnostics`](/diagnostic_common_diagnostics/): Predefined nodes for monitoring the Linux and ROS system.
 - [`diagnostic_updater`](/diagnostic_updater/): Base classes to publishing custom diagnostic messages for Python and C++.
 - [`self_test`](/self_test/): Tools to perform self tests on nodes.
@@ -34,10 +40,11 @@ Diagnostics messages that are not aggregated can be visualized by [`rqt_runtime_
 
 # Target Distribution
 
-- **Rolling Ridley** and **Lyrical Luth** by the [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2)
-- **Humble Hawksbill** by the [`ros2-humble` branch](https://github.com/ros/diagnostics/tree/ros2-humble)
-- **Jazzy Jalisco** by the [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy)
-- **Kilted Kaiju** by the [`ros2-kilted` branch](https://github.com/ros/diagnostics/tree/ros2-kilted)
+- __Rolling Ridley__ by the [`ros2` branch](https://github.com/ros/diagnostics/tree/ros2)
+- __Lyrical Luth__ by the [`ros2-lyrical` branch](https://github.com/ros/diagnostics/tree/ros2-lyrical)
+- __Humble Hawksbill__ by the [`ros2-humble` branch](https://github.com/ros/diagnostics/tree/ros2-humble)
+- __Jazzy Jalisco__ by the [`ros2-jazzy` branch](https://github.com/ros/diagnostics/tree/ros2-jazzy)
+- __Kilted Kaiju__ by the [`ros2-kilted` branch](https://github.com/ros/diagnostics/tree/ros2-kilted)
 
 ## Workflow
 
@@ -45,32 +52,17 @@ New features are to be developed in custom branches and then merged into the `ro
 
 From there, the changes are backported to the other branches.
 
-## Backport Tooling
-
-This tool has proven to be useful: [backport](https://www.npmjs.com/package/backport)
-
-Use this command to port a given PR of `PR_NUMBER` to the other branches:
-
-```bash
-backport --pr PR_NUMBER -b ros2-humble ros2-jazzy ros2-kilted
-```
-
 ## Versioning and Releases
 
-- (**X**.0.0) We use the major version number to indicate a breaking change.
-- (0.**Y**.0) The minor version number is used to differentiate between different ROS distributions:
-  - x.**0**.z: Humble Hawksbill
-  - x.**2**.z: Jazzy Jalisco
-  - x.**3**.z: Kilted Kaiju
-  - x.**4**.z: Rolling Ridley
-  - (Future releases will receive x.**4**.z and rolling will then be x.**5**.z)
-- (0.0.**Z**) The patch version number is used for changes in the current ROS distribution that do not affect the API.
-
-## Buildfarm Statuses
-
-|  | Rolling | Lyric | Kilted | Jazzy | Humble |
-| --- | - | - | - | - | - |
-| `dev` | [![](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Rdev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/badge/icon)](https://build.ros2.org/job/Ldev__diagnostics__ubuntu_resolute_amd64/) | [![](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Kdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/badge/icon)](https://build.ros2.org/job/Jdev__diagnostics__ubuntu_noble_amd64/) | [![](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/badge/icon)](https://build.ros2.org/job/Hdev__diagnostics__ubuntu_jammy_amd64/) |
+- (__X__.0.0) We use the major version number to indicate a breaking change.
+- (0.__Y__.0) The minor version number is used to differentiate between different ROS distributions:
+  - x.__0__.z: Humble Hawksbill
+  - x.__2__.z: Jazzy Jalisco
+  - x.__3__.z: Kilted Kaiju
+  - x.__4__.z: Lyrical Luth
+  - x.__5__.z: Rolling Ridley
+  - (Future releases will receive x.__4__.z and rolling will then be x.__5__.z)
+- (0.0.__Z__) The patch version number is used for changes in the current ROS distribution that do not affect the API.
 
 # License
 
