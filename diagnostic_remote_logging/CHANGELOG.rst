@@ -2,6 +2,20 @@
 Changelog for package diagnostic_remote_logging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.7 (2026-05-26)
+------------------
+* updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* Change node name from influxdb to influxdb_connector (`#547 <https://github.com/ros/diagnostics/issues/547>`_)
+  Co-authored-by: Christian Henkel <christian.henkel2@de.bosch.com>
+* Adding aggregator tests again (`#467 <https://github.com/ros/diagnostics/issues/467>`_)
+* Fix node name and port in diagnostic_remote_logging readme (`#515 <https://github.com/ros/diagnostics/issues/515>`_)
+* Remote name splitting (`#525 <https://github.com/ros/diagnostics/issues/525>`_)
+  Co-authored-by: Daan Wijffels <dwijffels@lely.com>
+  Co-authored-by: Christian Henkel <christian.henkel2@de.bosch.com>
+* Fix windows build of diagnostic_remote_logging (`#527 <https://github.com/ros/diagnostics/issues/527>`_)
+  Co-authored-by: Christoph Fröhlich
+* Contributors: Christian Henkel, Christoph Fröhlich, Daan Wijffels
+
 4.4.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)

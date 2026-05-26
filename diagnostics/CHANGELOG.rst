@@ -2,6 +2,11 @@
 Changelog for package diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.7 (2026-05-26)
+------------------
+* updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* Contributors: Christian Henkel
+
 4.4.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
