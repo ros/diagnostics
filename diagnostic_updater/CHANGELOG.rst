@@ -2,8 +2,8 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.7 (2026-05-26)
+------------------
 * updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
 * Some fixes that came apparent when building for lyrical / resolute (`#609 <https://github.com/ros/diagnostics/issues/609>`_)
 * Add starting_up_state parameter to Updater (`#354 <https://github.com/ros/diagnostics/issues/354>`_)
