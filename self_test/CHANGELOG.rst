@@ -2,8 +2,8 @@
 Changelog for package self_test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.5.7 (2026-05-26)
+------------------
 * updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
 * Fix example relative path (`#550 <https://github.com/ros/diagnostics/issues/550>`_)
 * Contributors: Christian Henkel, Noel Jiménez García
