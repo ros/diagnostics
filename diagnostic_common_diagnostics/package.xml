@@ -3,15 +3,13 @@
 <package format="3">
   <name>diagnostic_common_diagnostics</name>
   <version>4.4.6</version>
-  <description>diagnostic_common_diagnostics</description>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
+  <description>Common diagnostic functions for e.g. HD or CPU usage.</description>
+  
   <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
-  <maintainer email="ralph.lange@de.bosch.com">Ralph Lange</maintainer>
-
+  
   <license>BSD-3-Clause</license>
 
-  <url type="website">http://ros.org/wiki/diagnostic_common_diagnostics</url>
+  <url type="website">https://index.ros.org/p/diagnostic_common_diagnostics/</url>
 
   <author email="brice.rebsamen@gmail.com">Brice Rebsamen</author>
 
