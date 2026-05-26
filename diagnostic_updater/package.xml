@@ -2,16 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diagnostic_updater</name>
-<<<<<<< HEAD
   <version>4.2.6</version>
-  <description>diagnostic_updater contains tools for easily updating diagnostics. it is commonly used in device drivers to keep track of the status of output topics, device status, etc.</description>
-  <maintainer email="namniart@gmail.com">Austin Hendrix</maintainer>
-  <maintainer email="brice.rebsamen@gmail.com">Brice Rebsamen</maintainer>
-=======
-  <version>4.4.6</version>
   <description>Update and publish diagnostic information.</description>
 
->>>>>>> d777add (updating package.xml s (#616))
   <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
 
   <license>BSD-3-Clause</license>
