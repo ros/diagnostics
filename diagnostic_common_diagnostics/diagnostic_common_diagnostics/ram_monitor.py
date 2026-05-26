@@ -90,7 +90,7 @@ def main():
     updater.add(
         RamTask(
             node.declare_parameter('warning_percentage', 90).value,
-            node.declare_parameter('error_percentage', 100).value,
+            node.declare_parameter('error_percentage', 95).value,
             node.declare_parameter('window', 1).value,
         )
     )
