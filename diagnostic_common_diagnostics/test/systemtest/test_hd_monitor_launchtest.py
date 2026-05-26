@@ -104,6 +104,9 @@ class TestHDMonitor(unittest.TestCase):
 
         while len(self.received_messages) < 10:
             rclpy.spin_once(test_node, timeout_sec=1)
+            if len(self.received_messages) == 0:
+                print('No messages received yet...')
+                continue
             received_min_level = self._get_min_level()
             assert received_min_level is not None, 'The received message should have a level'
             min_level = min(min_level, received_min_level)
