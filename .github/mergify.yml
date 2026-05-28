@@ -37,6 +37,7 @@ pull_request_rules:
           - ros2-humble
           - ros2-jazzy
           - ros2-kilted
+          - ros2-lyrical
         assignees:
           - "{{ author }}"
         labels:
