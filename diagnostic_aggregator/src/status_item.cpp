@@ -36,8 +36,11 @@
 
 #include "diagnostic_aggregator/status_item.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace diagnostic_aggregator
 {
