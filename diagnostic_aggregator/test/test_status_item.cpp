@@ -61,6 +61,9 @@ TEST(StatusItem, constructorWithValuesInitializesAllFields)
   EXPECT_EQ(item.getLevel(), Level_OK);
   EXPECT_EQ(item.getValue("a"), "1");
   EXPECT_EQ(item.getValue("b"), "2");
+  EXPECT_TRUE(item.hasKey("a"));
+  EXPECT_TRUE(item.hasKey("b"));
+  EXPECT_FALSE(item.hasKey("c"));
 }
 
 TEST(StatusItem, addValueNewKeyAppendsEntry)
@@ -78,6 +81,8 @@ TEST(StatusItem, addValueExistingKeyUpdatesInPlace)
 {
   std::vector<KeyValue> values{kv("k", "old")};
   StatusItem item("sensor", values);
+
+  EXPECT_EQ(item.getValue("k"), "old");
 
   item.addValue("k", "new");
 
@@ -98,6 +103,18 @@ TEST(StatusItem, hasKey)
   EXPECT_FALSE(item.hasKey("nope"));
   EXPECT_TRUE(item.hasKey("a"));
   EXPECT_TRUE(item.hasKey("b"));
+}
+
+TEST(StatusItem, size)
+{
+    std::vector<KeyValue> values{kv("a", "1"), kv("b", "2")};
+    StatusItem item("sensor", values);
+
+    EXPECT_EQ(item.size(), 2u);
+    item.addValue("c", "3");
+    EXPECT_EQ(item.size(), 3u);
+    item.addValue("c", "4");
+    EXPECT_EQ(item.size(), 3u);
 }
 
 int main(int argc, char ** argv)

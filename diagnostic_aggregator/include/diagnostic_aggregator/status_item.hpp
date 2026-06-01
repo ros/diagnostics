@@ -291,6 +291,11 @@ public:
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   void addValue(const std::string & key, const std::string & value);
 
+  /*!
+   *\brief Returns the number of stored keyValues
+   */
+  std::size_t size() const {return values_.size();}
+
 private:
   /*!
   * \brief Returns index of key in values_ vector, values_.size() if not found
