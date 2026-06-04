@@ -159,6 +159,21 @@ if(BUILD_TESTING)
     )
   endforeach()
 
+  # Composable aggregator launch test
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/primitive_analyzers.yaml" COMPOSABLE_PARAMETER_FILE)
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_primitive_analyzers" COMPOSABLE_EXPECTED_OUTPUT)
+  configure_file(
+    "test/test_composable_analyzers_output.launch.py.in"
+    "test_composable_analyzers_output.launch.py"
+    @ONLY
+  )
+  add_launch_test(
+    "${CMAKE_CURRENT_BINARY_DIR}/test_composable_analyzers_output.launch.py"
+    TARGET "test_composable_analyzers_output"
+    TIMEOUT 30
+    ENV
+  )
+
   add_launch_test(
     test/test_critical_pub.py
     TIMEOUT 30
