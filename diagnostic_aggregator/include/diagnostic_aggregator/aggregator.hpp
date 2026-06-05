@@ -134,6 +134,7 @@ public:
 
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const;
+
 private:
   rclcpp::Node::SharedPtr n_;
 
