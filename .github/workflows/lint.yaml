@@ -16,7 +16,7 @@ jobs:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
       - uses: actions/checkout@v6.0.2
-      - uses: ros-tooling/setup-ros@0.7.18
+      - uses: ros-tooling/setup-ros@0.7.19
         with:
           required-ros-distributions: rolling
       - name: Run ament linters
