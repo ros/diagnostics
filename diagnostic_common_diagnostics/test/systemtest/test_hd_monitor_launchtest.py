@@ -67,7 +67,7 @@ def generate_test_description():
 
 
 class TestHDMonitor(unittest.TestCase):
-    """Test if the hd_monitor node is publishing diagnostics."""
+    """Test the hd_monitor node."""
 
     def __init__(self, methodName: str = 'runTest') -> None:
         super().__init__(methodName)
@@ -83,11 +83,11 @@ class TestHDMonitor(unittest.TestCase):
             for status in diag.status
         ]
         if len(levels) == 0:
-            return -1
+            return None
         return min(levels)
 
     def test_topic_published(self):
-        """Test if the hd_monitor node is publishing diagnostics."""
+        """Test if we receive diagnostics messages."""
         min_level = 100
         with WaitForTopics([('/diagnostics', DiagnosticArray)], timeout=5):
             print('Topic found')
@@ -98,9 +98,18 @@ class TestHDMonitor(unittest.TestCase):
             DiagnosticArray, '/diagnostics', self._received_message, 1
         )
 
+        while len(self.received_messages) == 0:
+            rclpy.spin_once(test_node, timeout_sec=1)
+            print('Waiting for first message...')
+
         while len(self.received_messages) < 10:
             rclpy.spin_once(test_node, timeout_sec=1)
-            min_level = min(min_level, self._get_min_level())
+            if len(self.received_messages) == 0:
+                print('No messages received yet...')
+                continue
+            received_min_level = self._get_min_level()
+            assert received_min_level is not None, 'The received message should have a level'
+            min_level = min(min_level, received_min_level)
             if min_level == 0:
                 break
 
