@@ -103,7 +103,7 @@ jobs:
           path: pixi.lock
           key: pixi|${{ matrix.distro }}
       - name: Checkout source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: ${{ env.repo_path }}
       - name: Bootstrap pixi and patch manifest file
