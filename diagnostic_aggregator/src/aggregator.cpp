@@ -84,7 +84,7 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
     n_->create_publisher<DiagnosticStatus>("/diagnostics_toplevel_state", 1);
 
   int publish_rate_ms = 1000 / pub_rate_;
-  publish_timer_ = n_->create_wall_timer(
+  publish_timer_ = n_->create_timer(
     std::chrono::milliseconds(publish_rate_ms),
     std::bind(&Aggregator::publishData, this));
 
