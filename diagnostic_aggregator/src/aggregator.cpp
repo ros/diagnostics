@@ -285,8 +285,20 @@ void Aggregator::publishData()
       non_ok_status_depth = depth;
       msg_to_report = msg;
     }
+    if (msg->level == max_level && depth > non_ok_status_depth) {
+      // On non okay diagnostics also copy the deepest message to toplevel state
+      non_ok_status_depth = depth;
+      msg_to_report = msg;
+    }
+    if (
+      msg->level > max_level_without_stale &&
+      msg->level != diagnostic_msgs::msg::DiagnosticStatus::STALE)
+    {
+      max_level_without_stale = msg->level;
+    }
+  }
 
-    // If "publish_values" is false, clear all values
+  // If "publish_values" is false, clear all values
   if (!publish_values_) {
     for (auto & status : diag_array.status) {
       status.values.clear();
