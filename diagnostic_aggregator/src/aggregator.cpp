@@ -70,6 +70,7 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
   clock_(n_->get_clock()),
   base_path_(""),
   critical_(false),
+  publish_values_(true),
   last_top_level_state_(DiagnosticStatus::STALE)
 {
   RCLCPP_DEBUG(logger_, "constructor");
@@ -87,18 +88,25 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
     std::chrono::milliseconds(publish_rate_ms),
     std::bind(&Aggregator::publishData, this));
 
-  param_sub_ = n_->create_subscription<rcl_interfaces::msg::ParameterEvent>(
-    "/parameter_events", 1, std::bind(&Aggregator::parameterCallback, this, _1));
+  param_cb_handle_ = n_->add_on_set_parameters_callback(
+    std::bind(&Aggregator::onParametersSet, this, _1));
 }
 
-void Aggregator::parameterCallback(const rcl_interfaces::msg::ParameterEvent::SharedPtr msg)
+rcl_interfaces::msg::SetParametersResult Aggregator::onParametersSet(
+  const std::vector<rclcpp::Parameter> & parameters)
 {
-  if (msg->node == "/" + std::string(n_->get_name())) {
-    if (msg->new_parameters.size() != 0) {
-      base_path_ = "";
-      initAnalyzers();
+  // Check if any of the incoming parameters are new. If so, flag for reinitialization.
+  // The method publishData() will pick it up on the next publish cycle and call initAnalyzers().
+  for (const auto & p : parameters) {
+    if (!n_->has_parameter(p.get_name())) {
+      reinit_needed_.store(true);
+      break;
     }
   }
+
+  rcl_interfaces::msg::SetParametersResult result;
+  result.successful = true;
+  return result;
 }
 
 void Aggregator::initAnalyzers()
@@ -126,6 +134,8 @@ void Aggregator::initAnalyzers()
       history_depth_ = param.second.as_int();
     } else if (param.first.compare("critical") == 0) {
       critical_ = param.second.as_bool();
+    } else if (param.first.compare("publish_values") == 0) {
+      publish_values_ = param.second.as_bool();
     }
   }
   RCLCPP_DEBUG(logger_, "Aggregator publication rate configured to: %f", pub_rate_);
@@ -134,6 +144,8 @@ void Aggregator::initAnalyzers()
     logger_, "Aggregator other_as_errors configured to: %s", (other_as_errors ? "true" : "false"));
   RCLCPP_DEBUG(
     logger_, "Aggregator critical publisher configured to: %s", (critical_ ? "true" : "false"));
+  RCLCPP_DEBUG(
+    logger_, "Aggregator publish_values configured to: %s", (publish_values_ ? "true" : "false"));
 
   {  // lock the mutex while analyzer_group_ and other_analyzer_ are being updated
     std::lock_guard<std::mutex> lock(mutex_);
@@ -211,12 +223,19 @@ Aggregator::~Aggregator()
 void Aggregator::publishData()
 {
   RCLCPP_DEBUG(logger_, "publishData()");
+
+  // Check if reinitialization is needed because new parameters have been set.
+  if (reinit_needed_.exchange(false)) {
+    base_path_ = "";
+    initAnalyzers();
+  }
+
   DiagnosticArray diag_array;
   DiagnosticStatus diag_toplevel_state;
   diag_toplevel_state.name = "toplevel_state";
   diag_toplevel_state.level = DiagnosticStatus::STALE;
   int max_level = -1;
-  int8_t max_level_without_stale = 0;
+  uint8_t max_level_without_stale = 0;
   int non_ok_status_depth = 0;
   std::shared_ptr<DiagnosticStatus> msg_to_report;
 
@@ -266,24 +285,12 @@ void Aggregator::publishData()
       non_ok_status_depth = depth;
       msg_to_report = msg;
     }
-    if (msg->level == max_level && depth > non_ok_status_depth) {
-      // On non okay diagnostics also copy the deepest message to toplevel state
-      non_ok_status_depth = depth;
-      msg_to_report = msg;
+
+    // If "publish_values" is false, clear all values
+  if (!publish_values_) {
+    for (auto & status : diag_array.status) {
+      status.values.clear();
     }
-    if (
-      msg->level > max_level_without_stale &&
-      msg->level != diagnostic_msgs::msg::DiagnosticStatus::STALE)
-    {
-      max_level_without_stale = msg->level;
-    }
-  }
-  // When a non-ok item was found, copy the complete status message once
-  if (max_level > DiagnosticStatus::OK) {
-    diag_toplevel_state.name = msg_to_report->name;
-    diag_toplevel_state.message = msg_to_report->message;
-    diag_toplevel_state.hardware_id = msg_to_report->hardware_id;
-    diag_toplevel_state.values = msg_to_report->values;
   }
 
   diag_array.header.stamp = clock_->now();
@@ -297,7 +304,6 @@ void Aggregator::publishData()
   } else {
     diag_toplevel_state.level = max_level_without_stale;
   }
-
 
   last_top_level_state_ = diag_toplevel_state.level;
 

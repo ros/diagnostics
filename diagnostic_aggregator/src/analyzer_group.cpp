@@ -112,7 +112,7 @@ bool AnalyzerGroup::init(
     }
 
     if (!ns.empty() && !an_type.empty() && !an_path.empty()) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         logger_, "Group '%s', creating %s '%s' (breadcrumb: %s) ...", nice_name_.c_str(),
         an_type.c_str(), an_path.c_str(), ns.c_str());
 
@@ -238,7 +238,7 @@ bool AnalyzerGroup::match(const std::string & name)
     match_name = mtch || match_name;
     matched_[name].at(i) = mtch;
     if (mtch) {
-      RCLCPP_INFO(
+      RCLCPP_DEBUG(
         logger_, "Group '%s' has a match with my analyzer '%s'.", nice_name_.c_str(),
         analyzers_[i]->getName().c_str());
     }

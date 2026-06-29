@@ -2,6 +2,16 @@
 Changelog for package diagnostic_common_diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.7 (2026-05-26)
+------------------
+* updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* CPU monitor fix (`#618 <https://github.com/ros/diagnostics/issues/618>`_)
+* Adding aggregator tests again (`#467 <https://github.com/ros/diagnostics/issues/467>`_)
+* All packages in one build job (`#532 <https://github.com/ros/diagnostics/issues/532>`_)
+* Correct porting status of diagnostic_common_diagnostics in README (`#530 <https://github.com/ros/diagnostics/issues/530>`_)
+* Fixing "AttributeError: 'RcutilsLogger' object has no attribute 'warn'" (`#521 <https://github.com/ros/diagnostics/issues/521>`_)
+* Contributors: Christian Henkel, Jasper van Brakel
+
 4.4.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)

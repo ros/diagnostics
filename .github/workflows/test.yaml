@@ -7,32 +7,273 @@ on:
   schedule:
     # Run every week at 20:00 on Sunday
     - cron: "0 20 * * 0"
-
 jobs:
+  ros_distro_from_branch_name:
+    name: What is the distro?
+    runs-on: ubuntu-latest
+    outputs:
+      distro: ${{ steps.set-distro.outputs.distro }}
+    steps:
+      - name: Set ROS distro from branch name
+        id: set-distro
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "This is a PR. Getting branch name from base ref."
+            branch_name="${{ github.event.pull_request.base.ref }}"
+          else
+            echo "This is a push. Getting branch name from head ref."
+            branch_name="${GITHUB_REF}"
+          fi
+          echo "> Branch name is: ${branch_name}"
+
+          if [[ "${branch_name}" == *"ros2-humble"* ]]; then
+            distro="humble"
+          elif [[ "${branch_name}" == *"ros2-jazzy"* ]]; then
+            distro="jazzy"
+          elif [[ "${branch_name}" == *"ros2-kilted"* ]]; then
+            distro="kilted"
+          elif [[ "${branch_name}" == *"ros2"* ]]; then
+            distro="rolling"
+          else
+            echo "! Unknown branch for determining ROS distro: ${GITHUB_REF##*/}"
+            exit 1
+          fi
+          echo "> Determined ROS distro to be: ${distro}!"
+          echo "distro=$distro" >> $GITHUB_OUTPUT
   build_and_test:
-    name: ${{ matrix.package }} on ${{ matrix.distro }}
+    name: Build ${{ matrix.distro }} on ubuntu
+    needs: ros_distro_from_branch_name
     strategy:
       fail-fast: false
       matrix:
-        package: [
-            diagnostic_aggregator,
-            diagnostic_common_diagnostics,
-            diagnostic_remote_logging,
-            diagnostic_updater,
-            self_test,
-          ]
         include:
-          - distro: rolling
+          - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
             os: 24.04
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@master
+      - uses: ros-tooling/setup-ros@0.7.19
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-ci@master
+      - uses: ros-tooling/action-ros-ci@0.4.8
         with:
           target-ros2-distro: ${{ matrix.distro }}
-          package-name: ${{ matrix.package }}
-          # vcs-repo-file-url: |
-          #   https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
+          package-name: |
+            diagnostic_aggregator
+            diagnostic_common_diagnostics
+            diagnostic_remote_logging
+            diagnostic_updater
+            self_test
+  build_win:
+    name: Build ${{ matrix.distro }} on windows
+    needs: ros_distro_from_branch_name
+    runs-on: windows-2022
+    # container: ${{ inputs.container }}
+    env:
+      ros_underlay_path: C:\dev
+      upstream_workspace: C:\upstream_ws
+      # this will be src/{repo-owner}/{repo-name}
+      repo_path: src/${{ github.repository }}
+
+      # INPUTS ...
+      # Space-separated list of additional pixi dependencies
+      pixi_dependencies: "rosinstall_generator typeguard jinja2 boost compilers"
+      # Path to a repos file with additional windows dependencies
+      windows_dependencies: ""
+      # Space-separated list of packages to skip from
+      skip_dependencies: "sdformat_urdf"
+      # Space-separated list of packages to skip from build
+      skip_packages: ""
+      # Space-separated list of packages to be built with Ninja generator (default is MSVC otherwise)
+      ninja_packages: ""
+      # Additional arguments to pass to CMake for upstream workspace, e.g. -DBUILD_TESTING=OFF
+      upstream_cmake_args: "-DBUILD_TESTING=OFF"
+      # Additional arguments to pass to CMake for target workspace, e.g. -DBUILD_TESTING=OFF
+      target_cmake_args: ""
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
+    steps:
+      - name: Restore pixi.lock
+        uses: actions/cache/restore@v5
+        id: cache
+        with:
+          path: pixi.lock
+          key: pixi|${{ matrix.distro }}
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          path: ${{ env.repo_path }}
+      - name: Bootstrap pixi and patch manifest file
+        # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
+        run: |
+          $manifest = "pixi.toml"
+          irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/rolling/pixi.toml -OutFile $manifest
+
+          # patch pixi.toml to add extra dependencies
+          $deps = "${{ env.pixi_dependencies }}"
+          Write-Host "env.pixi_dependencies = $deps"
+          if (-not [string]::IsNullOrWhiteSpace($deps)) {
+            Write-Host "Extra dependencies specified: $deps"
+
+            # Read file into a string array
+            [string[]]$content = Get-Content $manifest
+
+            # Find [dependencies] section
+            $depIndex = $content.IndexOf("[dependencies]")
+
+            # If section not found, append it
+            if ($depIndex -eq -1) {
+                Add-Content $manifest "`n[dependencies]"
+                $content = Get-Content $manifest
+                $depIndex = $content.IndexOf("[dependencies]")
+            }
+
+            # Convert array to a List[string] explicitly
+            $contentList = New-Object 'System.Collections.Generic.List[string]'
+            $contentList.AddRange([string[]]$content)
+
+            # Insert each dependency after the [dependencies] section
+            $insertIndex = $depIndex + 1
+
+            foreach ($dep in $deps.Split(" ")) {
+                # Only insert if not already present
+                if (-not ($contentList -match "^\s*$dep\s*=")) {
+                    $contentList.Insert($insertIndex, "$dep = `"*`"")
+                    $insertIndex++
+                }
+            }
+
+            # Save updated manifest
+            $contentList | Set-Content $manifest
+          } else {
+              Write-Host "No additional dependencies specified."
+          }
+
+      - name: Install pixi
+        uses: prefix-dev/setup-pixi@v0.9.6
+        # Cache pixi environment only on default branch to save disk space
+        with:
+          cache: ${{ steps.cache.outputs.cache-hit == 'true' }} # only use cache if pixi.lock is present
+          cache-write: ${{ steps.cache.outputs.cache-hit == 'true' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }} # only write cache on push to default branch to save disk space, caches from PRs can't be accessed anyways; only allowed if pixi.lock is present
+          locked: false
+
+      - name: Cache pixi.lock
+        uses: actions/cache/save@v5
+        # independent of the success of the following steps, but only on default branch
+        # cache independent of the cache hit of the restore step, because pixi.toml could have changed
+        if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+        with:
+          path: pixi.lock
+          key: pixi|${{ matrix.distro }}
+
+      - name: Upload pixi lock file
+        uses: actions/upload-artifact@v7
+        with:
+          name: pixi.lock
+          path: pixi.lock
+
+      - name: Install ROS
+        # Download and extract ROS 2 package
+        # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
+        run: |
+          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
+
+          New-Item -ItemType Directory -Force -Path ${{ env.ros_underlay_path }}
+          Set-Location -Path ${{ env.ros_underlay_path }}
+          $url = "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
+          $output = "ros2-package-windows-AMD64.zip"
+          Invoke-WebRequest -Uri $url -OutFile $output
+          Expand-Archive -Path $output -DestinationPath ros2_${{ matrix.distro }}
+          Remove-Item $output
+          Set-Location -Path ros2_${{ matrix.distro }}\ros2-windows
+          python preinstall_setup_windows.py
+
+      - name: Get package list
+        id: package_list_action
+        uses: ros-controls/ros2_control_ci/.github/actions/set-package-list-pixi@master
+        with:
+          path: ${{ env.repo_path }}
+          manifest-path: pixi.toml
+
+      - name: Clone dependencies
+        run: |
+          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
+          ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.ps1
+
+          # Workaround .. --from-path: 'src/ros/diagnostics' is not an existing directory
+          mkdir -p ${{ env.upstream_workspace }}/${{ env.repo_path }}
+
+          # check for repos files, and pass them to vcstool
+          # mkdir -p ${{ env.upstream_workspace }}/src
+          $repo_file = "${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
+          if (Test-Path "$repo_file") {
+            Write-Output "Local repos file found"
+            vcs import --input $repo_file ${{ env.upstream_workspace }}/src
+          }
+          if (![string]::IsNullOrWhiteSpace("${{ env.windows_dependencies }}")) {
+            $repo_file_win = "${{ env.repo_path }}\${{ env.windows_dependencies }}"
+            if (Test-Path "$repo_file_win") {
+              Write-Output "Windows repos file found"
+              vcs import --input $repo_file_win ${{ env.upstream_workspace }}/src
+            }
+          }
+
+          # use rosinstall_generator to get all dependencies which are not yet installed
+          $underlay_ws_pkgs=$(ros2 pkg list)
+          Write-Host "underlay_ws_pkgs = $underlay_ws_pkgs"
+          rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude $underlay_ws_pkgs ${{ env.skip_dependencies }} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
+          # rosinstall_generator skips excludes with are from a different repo (gbp instead of development repo)
+          vcs import --skip-existing --input deps.repos ${{ env.upstream_workspace }}/src
+
+      - name: Upload repos file
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows.repos
+          path: deps.repos
+
+      - name: Build upstream workspace
+        # use Ninja generator optionally for selected packages.
+        # This is needed for RSL, but doesn't work for msg packages
+        # https://github.com/search?q=repo%3APickNikRobotics%2FRSL%20ninja&type=code
+        # https://github.com/colcon/colcon-ros/issues/84#issuecomment-1862881299
+        shell: cmd
+        run: |
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat >nul 2>&1
+
+          call ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.bat
+          pushd ${{ env.upstream_workspace }}
+
+          @echo on
+
+          set skip_arg=
+          if not "${{ env.skip_packages }}"=="" (
+            set skip_arg=${{ env.skip_packages }}
+          )
+
+          if not "${{ env.ninja_packages }}"=="" (
+            colcon build --packages-up-to ${{ env.ninja_packages }} --cmake-args -G Ninja --event-handler console_cohesion+ --merge-install
+            set skip_arg=%skip_arg% ${{ env.ninja_packages }}
+          )
+
+          colcon build --packages-skip %skip_arg% --event-handler console_cohesion+ --cmake-args ${{ env.upstream_cmake_args }} --merge-install
+
+      - name: Build target workspace
+        shell: cmd
+        run: |
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat >nul 2>&1
+
+          call ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.bat
+          call ${{ env.upstream_workspace }}\install\setup.bat
+
+          @echo on
+
+          set skip_arg=
+          if not "${{ env.skip_packages }}"=="" (
+            set skip_arg=--packages-skip ${{ env.skip_packages }}
+          )
+          colcon build %skip_arg% --event-handler console_cohesion+ --cmake-args ${{ env.target_cmake_args }} --merge-install

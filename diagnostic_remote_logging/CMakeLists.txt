@@ -9,6 +9,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 set(dependencies
     ament_cmake
     rclcpp
@@ -19,13 +23,13 @@ set(dependencies
 
 foreach(dep ${dependencies})
     find_package(${dep} REQUIRED)
-endforeach(dep)
+endforeach()
 
 include_directories(
     src/
     include/
 )
-add_library(influx_component SHARED src/influxdb.cpp)
+add_library(influx_component SHARED src/influxdb_connector.cpp)
 
 target_link_libraries(influx_component PUBLIC
     ${diagnostic_msgs_TARGETS}
@@ -40,8 +44,8 @@ target_compile_features(influx_component PUBLIC c_std_99 cxx_std_17)
 
 rclcpp_components_register_node(
     influx_component
-    PLUGIN "InfluxDB"
-    EXECUTABLE influx
+    PLUGIN "InfluxDBConnector"
+    EXECUTABLE influxdb_connector
 )
 ament_export_targets(export_influx_component)
 install(TARGETS influx_component

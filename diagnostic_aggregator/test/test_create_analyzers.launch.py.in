@@ -23,26 +23,16 @@ def generate_test_description():
             "@AGGREGATOR_NODE@",
             "--ros-args",
             "--params-file",
-            "@PARAMETER_FILE@"
+            "@PARAMETER_FILE@",
+            "--log-level",
+            "DEBUG"
             ],
         name='aggregator_node',
         emulate_tty=True,
         output='screen')
 
-    add_analyzer = ExecuteProcess(
-        cmd=[
-            "@ADD_ANALYZER@",
-            "--ros-args",
-            "--params-file",
-            "@ADD_PARAMETER_FILE@"
-            ],
-        name='add_analyzer',
-        emulate_tty=True,
-        output='screen')
-
     launch_description = LaunchDescription()
     launch_description.add_action(aggregator_node)
-    launch_description.add_action(add_analyzer)
     launch_description.add_action(launch_testing.util.KeepAliveProc())
     launch_description.add_action(launch_testing.actions.ReadyToTest())
     return launch_description, locals()

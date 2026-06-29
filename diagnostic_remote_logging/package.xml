@@ -2,10 +2,17 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diagnostic_remote_logging</name>
-  <version>4.4.6</version>
-  <description>diagnostic_remote_logging</description>
+  <version>4.5.7</version>
+  <description>Tools for remotely logging diagnostics data.</description>
+
   <maintainer email="dwijffels@lely.com">Daan Wijffels</maintainer>
+  <maintainer email="Christian.Henkel2@de.bosch.com">Christian Henkel</maintainer>
+
   <license>BSD-3-Clause</license>
+
+  <url type="website">https://index.ros.org/p/diagnostic_remote_logging/</url>
+
+  <author email="dwijffels@lely.com">Daan Wijffels</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

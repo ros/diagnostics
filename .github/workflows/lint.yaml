@@ -10,44 +10,35 @@ on:
 
 jobs:
   ament_lint:
-    name: Lint ${{ matrix.linter }}
-    strategy:
-      fail-fast: false
-      matrix:
-        linter: [
-            cppcheck,
-            cpplint,
-            flake8,
-            # pep257, TODO: enable when we fixed
-            # Error: diagnostic_common_diagnostics/diagnostic_common_diagnostics/ntp_monitor.py:113 in public method `ntp_diag`: D417: Missing argument descriptions in the docstring (argument(s) st are missing descriptions in 'ntp_diag' docstring)
-            # using ros-rolling-ament-pep257 amd64 0.18.0-1noble.20240426.150718
-            uncrustify,
-            xmllint,
-          ]
-        include:
-          - distro: rolling
-            os: ubuntu-24.04
-    runs-on: ${{ matrix.os }}
+    name: Ament lint
+    runs-on: ubuntu-24.04
     env:
       AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: 1
     steps:
-      - uses: actions/checkout@v1
-      - uses: ros-tooling/setup-ros@master
+      - uses: actions/checkout@v7
+      - uses: ros-tooling/setup-ros@0.7.19
         with:
-          required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/action-ros-lint@master
-        with:
-          linter: ${{ matrix.linter }}
-          package-name: |
-            diagnostic_aggregator
-            diagnostic_common_diagnostics
-            diagnostic_remote_logging
-            diagnostic_updater
-            self_test
+          required-ros-distributions: rolling
+      - name: Run ament linters
+        run: |
+          source /opt/ros/rolling/setup.bash
+          linters=(cppcheck cpplint flake8 pep257 uncrustify xmllint)
+          packages=(
+            diagnostic_aggregator diagnostic_common_diagnostics
+            diagnostic_remote_logging diagnostic_updater self_test
+          )
+          sudo apt-get install -y "${linters[@]/#/ros-rolling-ament-}"
+          failed=()
+          for linter in "${linters[@]}"; do
+            echo "::group::ament_${linter}"
+            ament_"${linter}" "${packages[@]}" || failed+=("${linter}")
+            echo "::endgroup::"
+          done
+          [[ ${#failed[@]} -eq 0 ]] || { echo "Failed linters: ${failed[*]}"; exit 1; }
 
   check_licenses:
     name: Check licenses
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: boschresearch/ros_license_toolkit@2.0.2
+      - uses: actions/checkout@v7
+      - uses: boschresearch/ros_license_toolkit@2.0.3

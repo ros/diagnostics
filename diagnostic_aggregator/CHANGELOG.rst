@@ -2,6 +2,25 @@
 Changelog for package diagnostic_aggregator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.7 (2026-05-26)
+------------------
+* Updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* Stop flooding the terminal by default with matches of aggregators (`#364 <https://github.com/ros/diagnostics/issues/364>`_)
+  Co-authored-by: Tim Clephas <tim.clephas@nobleo.nl>
+* Some fixes that came apparent when building for lyrical / resolute (`#609 <https://github.com/ros/diagnostics/issues/609>`_)
+* Option `publish_values` to control whether aggregated state should contain values (`#597 <https://github.com/ros/diagnostics/issues/597>`_)
+  Co-authored-by: Denis Draca <denis.draca@greenroomrobotics.com>
+  Co-authored-by: David Revay <daverevay@gmail.com>
+  Co-authored-by: David Revay <MrBlenny@users.noreply.github.com>
+* Aggregate to stale if one underlying is stale (`#593 <https://github.com/ros/diagnostics/issues/593>`_)
+  Co-authored-by: Ferry Schoenmakers <ferry.schoenmakers@nobleo.nl>
+  Co-authored-by: Tim Clephas <tim.clephas@nobleo.nl>
+* Implement onParametersSet for handling only analyzers node parameters (`#551 <https://github.com/ros/diagnostics/issues/551>`_)
+  Co-authored-by: Christian Henkel <christian.henkel2@de.bosch.com>
+* Adding analyzer tests again (`#555 <https://github.com/ros/diagnostics/issues/555>`_)
+* Adding aggregator tests again (`#467 <https://github.com/ros/diagnostics/issues/467>`_)
+* Contributors: Christian Henkel, Ferry Schoenmakers, Noel Jiménez García
+
 4.4.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
@@ -91,6 +110,7 @@ Changelog for package diagnostic_aggregator
 * Restore alphabetical order. (`#148 <https://github.com/ros/diagnostics/issues/148>`_)
 * Aggregator bugfix, tests, and nicer example. (`#147 <https://github.com/ros/diagnostics/issues/147>`_)
 * Contributors: Arne Nordmann, Georg Bartels, Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 

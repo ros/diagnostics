@@ -2,6 +2,19 @@
 Changelog for package diagnostic_updater
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.7 (2026-05-26)
+------------------
+* updating package.xml s (`#616 <https://github.com/ros/diagnostics/issues/616>`_)
+* Some fixes that came apparent when building for lyrical / resolute (`#609 <https://github.com/ros/diagnostics/issues/609>`_)
+* Add starting_up_state parameter to Updater (`#354 <https://github.com/ros/diagnostics/issues/354>`_)
+  Co-authored-by: Noel Jiménez García <noel.jimenez.gar@gmail.com>
+  Co-authored-by: Christian Henkel <christian.henkel2@de.bosch.com>
+  Co-authored-by: Maurice Alexander Purnawan <mauricepurnawan@gmail.com>
+* Get rid of deprecated rclcpp::spin_some() (`#563 <https://github.com/ros/diagnostics/issues/563>`_)
+* Remote name splitting (`#525 <https://github.com/ros/diagnostics/issues/525>`_)
+* Fixing "AttributeError: 'RcutilsLogger' object has no attribute 'warn'" (`#521 <https://github.com/ros/diagnostics/issues/521>`_)
+* Contributors: Christian Henkel, Daan Wijffels, Maurice Alexander Purnawan, Vince Reda
+
 4.4.6 (2025-05-26)
 ------------------
 * C++17 and cmake 3.20 everywhere (`#510 <https://github.com/ros/diagnostics/issues/510>`_)
@@ -94,6 +107,7 @@ Changelog for package diagnostic_updater
 ------------------
 * Update to latest ros2 rolling. (`#177 <https://github.com/ros/diagnostics/issues/177>`_)
 * Contributors: Karsten Knese
+
 2.0.9 (2022-11-12)
 ------------------
 * Check if parameter is already declared to avoid re-declaring it. (#227)
