@@ -1,0 +1,2 @@
+diagnostic_aggregator/GenericAnalyzer 'ExpectedOnly'
+/ExpectedOnly
