@@ -113,7 +113,8 @@ bool GenericAnalyzer::init(
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found expected: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
-      for (auto exp : pvalue.as_string_array()) {
+      expected_ = pvalue.as_string_array();
+      for (const auto & exp : expected_) {
         auto item = std::make_shared<StatusItem>(exp);
         this->addItem(exp, item);
       }
