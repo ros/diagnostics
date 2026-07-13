@@ -36,8 +36,11 @@
 
 #include "diagnostic_aggregator/status_item.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
 
 namespace diagnostic_aggregator
 {
@@ -72,6 +75,14 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
 
   update_time_ = clock_->now();
   RCLCPP_DEBUG(rclcpp::get_logger("StatusItem"), "StatusItem constructor from string");
+}
+
+StatusItem::StatusItem(
+  const std::string item_name, const std::vector<diagnostic_msgs::msg::KeyValue> & values,
+  const std::string message, const DiagnosticLevel level)
+: StatusItem(item_name, message, level)
+{
+  values_ = values;
 }
 
 StatusItem::~StatusItem() {}
@@ -124,6 +135,38 @@ std::shared_ptr<diagnostic_msgs::msg::DiagnosticStatus> StatusItem::toStatusMsg(
   }
 
   return status;
+}
+
+bool StatusItem::hasKey(const std::string & key) const {return findKey(key) != values_.size();}
+
+void StatusItem::addValue(const std::string & key, const std::string & value)
+{
+  std::size_t index = findKey(key);
+  if (index != values_.size()) {
+    // the key already exists, update the value
+    values_[index].value = value;
+    return;
+  }
+
+  diagnostic_msgs::msg::KeyValue kv;
+  kv.key = key;
+  kv.value = value;
+  values_.push_back(kv);
+}
+
+std::size_t StatusItem::findKey(const std::string & key) const
+{
+  auto it = std::find_if(
+    values_.begin(), values_.end(),
+    [&key = std::as_const(key)](const diagnostic_msgs::msg::KeyValue & kv) {
+      return kv.key == key;
+    });
+
+  if (it != values_.end()) {
+    return std::distance(values_.begin(), it);
+  }
+
+  return values_.size();
 }
 
 }  // namespace diagnostic_aggregator
