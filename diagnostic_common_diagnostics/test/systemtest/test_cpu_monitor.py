@@ -69,7 +69,7 @@ class TestCPUMonitor(unittest.TestCase):
 
     def test_ok(self):
         warning_percentage = 100
-        task = CpuTask(warning_percentage)
+        task = CpuTask(warning_percentage=warning_percentage, error_percentage=100, window=1, use_average=False)
         stat = DiagnosticStatusWrapper()
         task.run(stat)
         self.assertEqual(task.name, 'CPU Information')
@@ -81,13 +81,13 @@ class TestCPUMonitor(unittest.TestCase):
 
     def test_warn(self):
         warning_percentage = -1
-        task = CpuTask(warning_percentage)
+        task = CpuTask(warning_percentage=warning_percentage, error_percentage=100, window=1, use_average=False)
         stat = DiagnosticStatusWrapper()
         task.run(stat)
         print(f'Raw readings: {task._readings}')
         self.assertEqual(task.name, 'CPU Information')
         self.assertEqual(stat.level, DiagnosticStatus.WARN)
-        self.assertIn(str('At least one CPU exceeds'), stat.message)
+        self.assertIn(str('CPU usage exceeds'), stat.message)
 
         # Check for at least 1 CPU Load Average and 1 CPU Load
         self.assertGreaterEqual(len(stat.values), 2)
@@ -98,7 +98,7 @@ class TestCPUMonitor(unittest.TestCase):
         node = Node('cpu_monitor_test')
         updater = Updater(node)
         updater.setHardwareID('test_id')
-        updater.add(CpuTask())
+        updater.add(CpuTask(warning_percentage=95, error_percentage=100, window=1, use_average=False))
 
         node.create_subscription(
             DiagnosticArray, '/diagnostics', self.diagnostics_callback, 10)

@@ -51,11 +51,13 @@ from rclpy.node import Node
 
 class CpuTask(DiagnosticTask):
 
-    def __init__(self, warning_percentage=90, window=1):
+    def __init__(self, warning_percentage, error_percentage, window, use_average):
         DiagnosticTask.__init__(self, 'CPU Information')
 
         self._warning_percentage = int(warning_percentage)
+        self._error_percentage = int(error_percentage)
         self._readings = deque(maxlen=window)
+        self._use_average = use_average
 
     def _get_average_reading(self):
         def avg(lst):
@@ -71,15 +73,20 @@ class CpuTask(DiagnosticTask):
 
         stat.add('CPU Load Average', f'{cpu_average:.2f}')
 
-        warn = False
         for idx, cpu_percentage in enumerate(cpu_percentages):
             stat.add(f'CPU {idx} Load', f'{cpu_percentage:.2f}')
-            if cpu_percentage > self._warning_percentage:
-                warn = True
 
-        if warn:
+        if self._use_average:
+            cpu_usage = cpu_average
+        else:
+            cpu_usage = max(cpu_percentages)
+
+        if cpu_usage > self._error_percentage:
+            stat.summary(DiagnosticStatus.ERROR,
+                         f'CPU usage exceeds {self._error_percentage} percent')
+        elif cpu_usage > self._warning_percentage:
             stat.summary(DiagnosticStatus.WARN,
-                         f'At least one CPU exceeds {self._warning_percentage} percent')
+                         f'CPU usage exceeds {self._warning_percentage} percent')
         else:
             stat.summary(DiagnosticStatus.OK,
                          f'CPU Average {cpu_average:.2f} percent')
@@ -100,16 +107,22 @@ def main(args=None):
 
     # Declare and get parameters
     node.declare_parameter('warning_percentage', 90)
+    node.declare_parameter('error_percentage', 95)
+    node.declare_parameter('use_average', False)
     node.declare_parameter('window', 1)
 
     warning_percentage = node.get_parameter(
         'warning_percentage').get_parameter_value().integer_value
+    error_percentage = node.get_parameter(
+        'error_percentage').get_parameter_value().integer_value
+    use_average = node.get_parameter('use_average').get_parameter_value().bool_value
     window = node.get_parameter('window').get_parameter_value().integer_value
 
     # Create diagnostic updater with default updater rate of 1 hz
     updater = Updater(node)
     updater.setHardwareID(hostname)
-    updater.add(CpuTask(warning_percentage=warning_percentage, window=window))
+    updater.add(CpuTask(warning_percentage=warning_percentage, error_percentage=error_percentage,
+                        window=window, use_average=use_average))
 
     rclpy.spin(node)
 

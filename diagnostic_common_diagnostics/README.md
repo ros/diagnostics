@@ -13,7 +13,9 @@ It publishes the usage percentage in a diagnostic message.
 
 * Name of the node is "cpu_monitor_" + hostname.
 * Uses the following args:
+  * use_average: If true, the average CPU usage over all cores will be used to determine the status. If false, the maximum CPU usage among all cores will be used.
   * warning_percentage: If the CPU usage is > warning_percentage, a WARN status will be publised.
+  * error_percentage: If the CPU usage is > error_percentage, an ERROR status will be published.
   * window: the maximum length of the used collections.deque for queuing CPU readings.
 
 ### Published Topics
@@ -97,6 +99,7 @@ It publishes the usage percentage in a diagnostic message.
 * Name of the node is "ram_monitor_" + hostname.
 * Uses the following args:
   * warning_percentage: If the RAM usage is > warning_percentage, a WARN status will be published.
+  * error_percentage: If the RAM usage is > error_percentage, an ERROR status will be published.
   * window: the maximum length of the used collections.deque for queuing RAM readings.
 
 ### Published Topics
