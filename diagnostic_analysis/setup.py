@@ -13,10 +13,12 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='root',
+    maintainer='wirthra',
     maintainer_email='wirthra@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='The diagnostic_analysis package can convert a log of diagnostics data \
+    into a series of CSV files. Robot logs are recorded with rosbag, and \
+    can be processed offline using the scripts in this package.',
+    license='BSD',
     extras_require={
         'test': [
             'pytest',
