@@ -334,6 +334,7 @@ class Updater(DiagnosticTaskVector):
         for task in self.tasks:
             status = DiagnosticStatusWrapper()
             status.name = task.name
+            status.hardware_id = self.hwid
             status.summary(lvl, msg)
             status_vec.append(status)
 
@@ -383,5 +384,6 @@ class Updater(DiagnosticTaskVector):
 
         stat = DiagnosticStatusWrapper()
         stat.name = task.name
+        stat.hardware_id = self.hwid
         stat.summary(self.__starting_up_status, 'Node starting up')
         self.publish(stat)
