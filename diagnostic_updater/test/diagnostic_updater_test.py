@@ -7,6 +7,7 @@ import pathlib
 import sys
 import time
 import unittest
+from unittest.mock import patch
 
 from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_updater import DiagnosticStatusWrapper
@@ -47,6 +48,29 @@ class TestClass:
 
 
 class TestDiagnosticStatusWrapper(unittest.TestCase):
+
+    def testHardwareIDOnStartupAndBroadcast(self):
+        context = rclpy.context.Context()
+        rclpy.init(context=context)
+        self.addCleanup(context.shutdown)
+        node = rclpy.create_node('test_hardware_id', context=context)
+        self.addCleanup(node.destroy_node)
+        updater = Updater(node)
+        updater.setHardwareID('Device-27-46')
+
+        with patch.object(updater.publisher, 'publish') as publish:
+            updater.add(ClassFunction())
+            msg = publish.call_args.args[0]
+            self.assertEqual(len(msg.status), 1)
+            self.assertEqual(msg.status[0].hardware_id, 'Device-27-46')
+            self.assertEqual(msg.status[0].message, 'Node starting up')
+
+            updater.broadcast(DiagnosticStatus.WARN, 'Shutting down')
+            msg = publish.call_args.args[0]
+            self.assertEqual(len(msg.status), 1)
+            self.assertEqual(msg.status[0].hardware_id, 'Device-27-46')
+            self.assertEqual(msg.status[0].message, 'Shutting down')
+            self.assertEqual(msg.status[0].level, DiagnosticStatus.WARN)
 
     def testDiagnosticUpdater(self):
         rclpy.init()
