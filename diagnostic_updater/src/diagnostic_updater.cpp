@@ -38,7 +38,7 @@
 
 namespace diagnostic_updater
 {
-Updater::Updater(
+DIAGNOSTIC_UPDATER_PUBLIC Updater::Updater(
   std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface> base_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeClockInterface> clock_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeLoggingInterface> logging_interface,
