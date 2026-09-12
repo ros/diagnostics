@@ -46,6 +46,7 @@
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
+#include "diagnostic_updater/visibility_control.hpp"
 #include "diagnostic_updater/diagnostic_status_wrapper.hpp"
 
 #include "rcl/time.h"
@@ -353,7 +354,7 @@ protected:
  * determined by the "~/diagnostic_updater.period" ros2 parameter.
  * The force_update function can always be triggered async to the period interval.
  */
-class Updater : public DiagnosticTaskVector
+class DIAGNOSTIC_UPDATER_PUBLIC Updater : public DiagnosticTaskVector
 {
 public:
   bool verbose_;

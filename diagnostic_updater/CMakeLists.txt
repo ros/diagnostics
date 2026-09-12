@@ -9,7 +9,6 @@ endif()
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
@@ -19,9 +18,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/diagnostic_updater.cpp
 )
+target_compile_definitions(${PROJECT_NAME} PRIVATE DIAGNOSTIC_UPDATER_BUILDING_DLL)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC
