@@ -228,10 +228,10 @@ class TimeStampStatus(DiagnosticTask):
                     stat.summary(DiagnosticStatus.ERROR,
                                  'Timestamps too far in past seen.')
                     self.late_count += 1
-                if self.zero_seen:
-                    stat.summary(DiagnosticStatus.ERROR,
-                                 'Zero timestamp seen.')
-                    self.zero_count += 1
+            if self.zero_seen:
+                stat.summary(DiagnosticStatus.ERROR,
+                             'Zero timestamp seen.')
+                self.zero_count += 1
 
             stat.add('Earliest timestamp delay:', '%f' % self.min_delta)
             stat.add('Latest timestamp delay:', '%f' % self.max_delta)
