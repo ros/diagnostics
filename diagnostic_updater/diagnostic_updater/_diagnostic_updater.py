@@ -313,7 +313,7 @@ class Updater(DiagnosticTaskVector):
     @period.setter
     def period(self, period):
         self.__period = period
-        self.timer.reset()
+        self.node.destroy_timer(self.timer)
         self.timer = self.node.create_timer(self.__period, self.update)
 
     def force_update(self):
