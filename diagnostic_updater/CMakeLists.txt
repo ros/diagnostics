@@ -96,6 +96,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
   ament_add_pytest_test(diagnostic_updater_test.py "test/diagnostic_updater_test.py")
   ament_add_pytest_test(test_DiagnosticStatusWrapper.py "test/test_diagnostic_status_wrapper.py")
+  ament_add_pytest_test(test_updater_period.py "test/test_updater_period.py")
   # ament_add_pytest_test(status_msg_test.py "test/status_msg_test.py")
 endif()
 
