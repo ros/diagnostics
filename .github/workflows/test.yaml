@@ -55,11 +55,15 @@ jobs:
     container: ubuntu:${{ matrix.os }}
     steps:
       - uses: ros-tooling/setup-ros@0.7.19
+        if: ${{ matrix.distro != 'rolling' }}
         with:
           required-ros-distributions: ${{ matrix.distro }}
+      - uses: ros-tooling/setup-ros@0.7.19
+        if: ${{ matrix.distro == 'rolling' }}
       - uses: ros-tooling/action-ros-ci@0.4.8
         with:
           target-ros2-distro: ${{ matrix.distro }}
+          vcs-repo-file-url: ${{ matrix.distro == 'rolling' && 'https://raw.githubusercontent.com/ros2/ros2/rolling/ros2.repos' || '' }}
           package-name: |
             diagnostic_aggregator
             diagnostic_common_diagnostics
