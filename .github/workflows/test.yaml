@@ -49,8 +49,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - distro: ${{ matrix.distro }}
-            os: ${{ matrix.distro == 'humble' && '22.04' || (matrix.distro == 'kilted' || matrix.distro == 'jazzy') && '24.04' || '26.04' }}
+          - distro: ${{ needs.ros_distro_from_branch_name.outputs.distro }}
+            os: ${{ needs.ros_distro_from_branch_name.outputs.distro == 'humble' && '22.04' || (needs.ros_distro_from_branch_name.outputs.distro == 'kilted' || needs.ros_distro_from_branch_name.outputs.distro == 'jazzy') && '24.04' || '26.04' }}
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
     steps:
