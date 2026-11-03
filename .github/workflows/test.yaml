@@ -132,8 +132,7 @@ jobs:
       - name: Install pixi
         uses: prefix-dev/setup-pixi@v0.10.2
         with:
-          cache: ${{ steps.cache.outputs.cache-hit == 'true' }}
-          cache-write: ${{ steps.cache.outputs.cache-hit == 'true' && github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+          cache: false
           locked: false
           run-install: false
 
