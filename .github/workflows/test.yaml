@@ -60,10 +60,30 @@ jobs:
           required-ros-distributions: ${{ matrix.distro }}
       - uses: ros-tooling/setup-ros@0.7.19
         if: ${{ matrix.distro == 'rolling' }}
+      - name: Install ccache
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends --yes ccache
+      - uses: actions/cache@v6
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-${{ matrix.distro }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.distro }}-
       - uses: ros-tooling/action-ros-ci@0.4.8
+        env:
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_MAXSIZE: 2G
         with:
           target-ros2-distro: ${{ matrix.distro }}
           vcs-repo-file-url: ${{ matrix.distro == 'rolling' && 'https://raw.githubusercontent.com/ros2/ros2/rolling/ros2.repos' || '' }}
+          colcon-defaults: |
+            {
+              "build": {
+                "cmake-args": [
+                  "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+                  "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+                ]
+              }
+            }
           package-name: |
             diagnostic_aggregator
             diagnostic_common_diagnostics
