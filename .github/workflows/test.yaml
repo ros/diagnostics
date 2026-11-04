@@ -151,6 +151,7 @@ jobs:
           }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
           pixi add --manifest-path $generatedManifest --no-install --pypi vcstool
+          pixi add --manifest-path $generatedManifest --no-install "setuptools<82"
 
           Copy-Item $generatedManifest "pixi.toml"
           Copy-Item (Join-Path "${{ env.repo_path }}" "pixi.lock") "pixi.lock"
