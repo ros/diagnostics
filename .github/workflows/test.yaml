@@ -150,6 +150,7 @@ jobs:
             $content | Set-Content $generatedManifest
           }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
+          pixi add --manifest-path $generatedManifest --no-install --pypi vcstool
 
           Copy-Item $generatedManifest "pixi.toml"
           Copy-Item (Join-Path "${{ env.repo_path }}" "pixi.lock") "pixi.lock"
