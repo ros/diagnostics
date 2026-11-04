@@ -370,11 +370,11 @@ public:
         stat.summary(2, "Timestamps too far in past seen.");
         late_count_++;
       }
+    }
 
-      if (zero_seen_) {
-        stat.summary(2, "Zero timestamp seen.");
-        zero_count_++;
-      }
+    if (zero_seen_) {
+      stat.summary(2, "Zero timestamp seen.");
+      zero_count_++;
     }
 
     stat.addf("Earliest timestamp delay:", "%f", min_delta_);

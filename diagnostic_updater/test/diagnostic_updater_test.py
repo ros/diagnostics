@@ -177,6 +177,20 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual('Timestamp Status', ts.getName(),
                          'Name should be Timestamp Status')
 
+    def testTimeStampStatusZeroOnly(self):
+        ts = TimeStampStatus()
+
+        ts.tick(0.0)
+        stat = ts.run(DiagnosticStatusWrapper())
+        self.assertEqual(DiagnosticStatus.ERROR, stat.level,
+                         'zero timestamps alone should be reported as an error')
+        self.assertEqual('Zero timestamp seen.', stat.message,
+                         'zero timestamps alone should not be reported as no data')
+
+        stat = ts.run(DiagnosticStatusWrapper())
+        self.assertEqual(DiagnosticStatus.WARN, stat.level,
+                         'no data after zero timestamps should return a warning')
+
 
 @pytest.mark.launch_test
 def generate_test_description():

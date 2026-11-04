@@ -307,3 +307,18 @@ TEST(DiagnosticUpdater, testTimeStampStatus) {
   EXPECT_STREQ("Timestamp Status", ts.getName().c_str()) <<
     "Name should be \"Timestamp Status\"";
 }
+
+TEST(DiagnosticUpdater, testTimeStampStatusZeroOnly) {
+  diagnostic_updater::TimeStampStatus ts(
+    diagnostic_updater::DefaultTimeStampStatusParam);
+
+  diagnostic_updater::DiagnosticStatusWrapper stat[2];
+  ts.tick(0.0);
+  ts.run(stat[0]);
+  ts.run(stat[1]);
+
+  EXPECT_EQ(2, stat[0].level) << "zero timestamps alone should be reported as an error";
+  EXPECT_STREQ("Zero timestamp seen.", stat[0].message.c_str()) <<
+    "zero timestamps alone should not be reported as no data";
+  EXPECT_EQ(1, stat[1].level) << "no data after zero timestamps should return a warning";
+}
