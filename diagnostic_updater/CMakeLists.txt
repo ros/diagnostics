@@ -19,9 +19,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/diagnostic_updater.cpp
 )
+target_compile_definitions(${PROJECT_NAME} PRIVATE DIAGNOSTIC_UPDATER_BUILDING_DLL)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC
