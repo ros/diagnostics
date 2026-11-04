@@ -143,11 +143,11 @@ jobs:
           Pop-Location
 
           $generatedManifest = Join-Path "${{ env.repo_path }}" "pixi.toml"
-          $manifest = Get-Content $generatedManifest -Raw
-          $manifest = [regex]::Replace($manifest, '(?m)^\[{1,2}(?:[^\]\r\n]+\.)?activation(?:\.[^\]\r\n]+)?\].*?(?=^\[|\z)', '', [System.Text.RegularExpressions.RegexOptions]::Singleline)
-          Set-Content -Path $generatedManifest -Value $manifest
-          if ($manifest -match 'local_setup\.ps1') {
-            throw "Generated Pixi manifest still references local_setup.ps1"
+          [string[]]$content = Get-Content $generatedManifest
+          $activationIndex = $content.IndexOf("[activation]")
+          if ($activationIndex -ge 0) {
+            $content = $content[0..($activationIndex - 1)]
+            $content | Set-Content $generatedManifest
           }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
 
@@ -175,18 +175,19 @@ jobs:
       - name: Install ROS
         # Download and extract ROS 2 package
         # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
+        shell: cmd
         run: |
-          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat
+          if errorlevel 1 exit /b 1
 
-          New-Item -ItemType Directory -Force -Path ${{ env.ros_underlay_path }}
-          Set-Location -Path ${{ env.ros_underlay_path }}
-          $url = "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
-          $output = "ros2-package-windows-AMD64.zip"
-          Invoke-WebRequest -Uri $url -OutFile $output
-          Expand-Archive -Path $output -DestinationPath ros2_${{ matrix.distro }}
-          Remove-Item $output
-          Set-Location -Path ros2_${{ matrix.distro }}\ros2-windows
+          if not exist "${{ env.ros_underlay_path }}" mkdir "${{ env.ros_underlay_path }}"
+          cd /d "${{ env.ros_underlay_path }}"
+          powershell -NoProfile -Command "$ErrorActionPreference = 'Stop'; Invoke-WebRequest -Uri 'https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip' -OutFile 'ros2-package-windows-AMD64.zip'; Expand-Archive -Path 'ros2-package-windows-AMD64.zip' -DestinationPath 'ros2_${{ matrix.distro }}'; Remove-Item 'ros2-package-windows-AMD64.zip'"
+          if errorlevel 1 exit /b 1
+          cd /d "ros2_${{ matrix.distro }}\ros2-windows"
           python preinstall_setup_windows.py
+          if errorlevel 1 exit /b 1
 
       - name: Get package list
         id: package_list_action
@@ -196,34 +197,40 @@ jobs:
           manifest-path: pixi.toml
 
       - name: Clone dependencies
+        shell: cmd
         run: |
-          Invoke-Expression ((& pixi shell-hook -s powershell) -join "`n")
-          ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.ps1
+          setlocal EnableDelayedExpansion
+          call pixi shell-hook -s cmd > pixi_env.bat
+          call pixi_env.bat
+          if errorlevel 1 exit /b 1
+          call ${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\setup.bat
+          if errorlevel 1 exit /b 1
 
-          # Workaround .. --from-path: 'src/ros/diagnostics' is not an existing directory
-          mkdir -p ${{ env.upstream_workspace }}/${{ env.repo_path }}
+          rem Workaround .. --from-path: 'src/ros/diagnostics' is not an existing directory
+          if not exist "${{ env.upstream_workspace }}\${{ env.repo_path }}" mkdir "${{ env.upstream_workspace }}\${{ env.repo_path }}"
 
-          # check for repos files, and pass them to vcstool
-          # mkdir -p ${{ env.upstream_workspace }}/src
-          $repo_file = "${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
-          if (Test-Path "$repo_file") {
-            Write-Output "Local repos file found"
-            vcs import --input $repo_file ${{ env.upstream_workspace }}/src
-          }
-          if (![string]::IsNullOrWhiteSpace("${{ env.windows_dependencies }}")) {
-            $repo_file_win = "${{ env.repo_path }}\${{ env.windows_dependencies }}"
-            if (Test-Path "$repo_file_win") {
-              Write-Output "Windows repos file found"
-              vcs import --input $repo_file_win ${{ env.upstream_workspace }}/src
-            }
-          }
+          rem Check for repos files and pass them to vcstool
+          set "repo_file=${{ env.repo_path }}\${{ steps.package_list_action.outputs.repo_name }}.${{ matrix.distro }}.repos"
+          if exist "!repo_file!" (
+            echo Local repos file found
+            vcs import --input "!repo_file!" "${{ env.upstream_workspace }}\src"
+            if errorlevel 1 exit /b 1
+          )
+          if not "${{ env.windows_dependencies }}"=="" if exist "${{ env.repo_path }}\${{ env.windows_dependencies }}" (
+            echo Windows repos file found
+            vcs import --input "${{ env.repo_path }}\${{ env.windows_dependencies }}" "${{ env.upstream_workspace }}\src"
+            if errorlevel 1 exit /b 1
+          )
 
-          # use rosinstall_generator to get all dependencies which are not yet installed
-          $underlay_ws_pkgs=$(ros2 pkg list)
-          Write-Host "underlay_ws_pkgs = $underlay_ws_pkgs"
-          rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude $underlay_ws_pkgs ${{ env.skip_dependencies }} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
-          # rosinstall_generator skips excludes with are from a different repo (gbp instead of development repo)
-          vcs import --skip-existing --input deps.repos ${{ env.upstream_workspace }}/src
+          rem Use rosinstall_generator to get dependencies not already installed
+          set "underlay_ws_pkgs="
+          for /f "delims=" %%p in ('ros2 pkg list') do set "underlay_ws_pkgs=!underlay_ws_pkgs! %%p"
+          echo underlay_ws_pkgs = !underlay_ws_pkgs!
+          rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude !underlay_ws_pkgs! ${{ env.skip_dependencies }} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
+          if errorlevel 1 exit /b 1
+          rem rosinstall_generator skips excludes from a different repository
+          vcs import --skip-existing --input deps.repos "${{ env.upstream_workspace }}\src"
+          if errorlevel 1 exit /b 1
 
       - name: Upload repos file
         uses: actions/upload-artifact@v7
