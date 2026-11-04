@@ -1,0 +1,7 @@
+lm-sensors:
+  pixi:
+    linux: [lm-sensors]
+    osx: []
+    win64: []
+python3-ntplib:
+  pixi: [ntplib]
