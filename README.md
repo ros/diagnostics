@@ -23,7 +23,7 @@ It contains the following packages:
 - [`diagnostic_common_diagnostics`](/diagnostic_common_diagnostics/): Predefined nodes for monitoring your system.
 - [`diagnostic_updater`](/diagnostic_updater/): Base classes to publishing custom diagnostic messages for Python and C++.
 - [`diagnostic_remote_logging`](/diagnostic_remote_logging/): Utilities for forwarding diagnostics to remote systems, e.g. influxdb.
-- [`diagnostic_topic_monitor`](/diagnostic_topic_monitor/): __coming soon ([#633](https://github.com/ros/diagnostics/pull/633))__ Components for monitoring topic health and publishing diagnostics.
+- [`diagnostic_topic_monitor`](/diagnostic_topic_monitor/): Components for monitoring topic health and publishing diagnostics.
 - [`self_test`](/self_test/): Tools to perform self tests on nodes.
 
 ## Quick start
