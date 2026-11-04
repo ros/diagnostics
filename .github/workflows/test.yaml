@@ -143,11 +143,11 @@ jobs:
           Pop-Location
 
           $generatedManifest = Join-Path "${{ env.repo_path }}" "pixi.toml"
-          [string[]]$content = Get-Content $generatedManifest
-          $activationIndex = $content.IndexOf("[activation]")
-          if ($activationIndex -ge 0) {
-            $content = $content[0..($activationIndex - 1)]
-            $content | Set-Content $generatedManifest
+          $manifest = Get-Content $generatedManifest -Raw
+          $manifest = [regex]::Replace($manifest, '(?m)^\[{1,2}(?:[^\]\r\n]+\.)?activation(?:\.[^\]\r\n]+)?\].*?(?=^\[|\z)', '', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+          Set-Content -Path $generatedManifest -Value $manifest
+          if ($manifest -match 'local_setup\.ps1') {
+            throw "Generated Pixi manifest still references local_setup.ps1"
           }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
 
