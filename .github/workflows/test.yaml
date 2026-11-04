@@ -174,20 +174,58 @@ jobs:
           name: pixi.lock
           path: pixi.lock
 
+      - name: Download Rolling ROS package
+        if: ${{ matrix.distro == 'rolling' }}
+        shell: pwsh
+        env:
+          ROS_DISTRO: ${{ matrix.distro }}
+          ROS_UNDERLAY_PATH: ${{ env.ros_underlay_path }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $distro = $env:ROS_DISTRO
+          $packageUrl = 'https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip'
+          New-Item -ItemType Directory -Force -Path $env:ROS_UNDERLAY_PATH | Out-Null
+          $archivePath = Join-Path $env:RUNNER_TEMP 'ros2-package-windows-AMD64.zip'
+          Invoke-WebRequest -Uri $packageUrl -OutFile $archivePath
+          Expand-Archive -Path $archivePath -DestinationPath (Join-Path $env:ROS_UNDERLAY_PATH "ros2_$distro") -Force
+          Remove-Item $archivePath
+
+      - name: Download stable ROS package
+        if: ${{ matrix.distro != 'rolling' }}
+        shell: pwsh
+        env:
+          ROS_DISTRO: ${{ matrix.distro }}
+          ROS_UNDERLAY_PATH: ${{ env.ros_underlay_path }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $distro = $env:ROS_DISTRO
+          $releases = Invoke-RestMethod -Uri 'https://api.github.com/repos/ros2/ros2/releases?per_page=100'
+          $release = $releases | Where-Object {
+            $_.tag_name -like ('release-' + $distro + '-*') -and
+            -not $_.prerelease -and
+            ($_.assets.name -match '(?i)windows.*amd64\.zip$')
+          } | Select-Object -First 1
+          if ($null -eq $release) {
+            throw "No ROS $distro Windows release archive was found"
+          }
+          $asset = $release.assets | Where-Object { $_.name -match '(?i)windows.*amd64\.zip$' } | Select-Object -First 1
+          $packageUrl = $asset.browser_download_url
+
+          Write-Host "Downloading ROS $distro from $packageUrl"
+          New-Item -ItemType Directory -Force -Path $env:ROS_UNDERLAY_PATH | Out-Null
+          $archivePath = Join-Path $env:RUNNER_TEMP 'ros2-package-windows-AMD64.zip'
+          Invoke-WebRequest -Uri $packageUrl -OutFile $archivePath
+          Expand-Archive -Path $archivePath -DestinationPath (Join-Path $env:ROS_UNDERLAY_PATH "ros2_$distro") -Force
+          Remove-Item $archivePath
+
       - name: Install ROS
-        # Download and extract ROS 2 package
-        # https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html
         shell: cmd
         run: |
           call pixi shell-hook -s cmd > pixi_env.bat
           call pixi_env.bat
           if errorlevel 1 exit /b 1
 
-          if not exist "${{ env.ros_underlay_path }}" mkdir "${{ env.ros_underlay_path }}"
-          cd /d "${{ env.ros_underlay_path }}"
-          powershell -NoProfile -Command "$ErrorActionPreference = 'Stop'; Invoke-WebRequest -Uri 'https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip' -OutFile 'ros2-package-windows-AMD64.zip'; Expand-Archive -Path 'ros2-package-windows-AMD64.zip' -DestinationPath 'ros2_${{ matrix.distro }}'; Remove-Item 'ros2-package-windows-AMD64.zip'"
-          if errorlevel 1 exit /b 1
-          cd /d "ros2_${{ matrix.distro }}\ros2-windows"
+          cd /d "${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows"
           python preinstall_setup_windows.py
           if errorlevel 1 exit /b 1
 
