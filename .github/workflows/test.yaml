@@ -271,10 +271,23 @@ jobs:
             if errorlevel 1 exit /b 1
           )
 
-          rem Use rosinstall_generator to get dependencies not already installed
+          rem Use rosinstall_generator to get dependencies not already installed.
+          rem Enumerate the underlay's "share" directory instead of calling "ros2 pkg list":
+          rem that CLI depends on the active PATH/python resolving correctly, which is
+          rem fragile once pixi's Python has also been activated, and silently returns
+          rem nothing on failure, causing the whole distro to be rebuilt from source.
           set "underlay_ws_pkgs="
-          for /f "delims=" %%p in ('ros2 pkg list') do set "underlay_ws_pkgs=!underlay_ws_pkgs! %%p"
+          set "underlay_ws_pkg_count=0"
+          for /d %%p in ("${{ env.ros_underlay_path }}\ros2_${{ matrix.distro }}\ros2-windows\share\*") do (
+            set "underlay_ws_pkgs=!underlay_ws_pkgs! %%~nxp"
+            set /a underlay_ws_pkg_count+=1
+          )
           echo underlay_ws_pkgs = !underlay_ws_pkgs!
+          echo Found !underlay_ws_pkg_count! packages already installed in the underlay.
+          if !underlay_ws_pkg_count! lss 50 (
+            echo ##[error] Only found !underlay_ws_pkg_count! packages in the underlay's share directory, expected at least 50. Refusing to continue, as this would rebuild the whole ROS distro from source.
+            exit /b 1
+          )
           rosinstall_generator --rosdistro ${{ matrix.distro }} --deps --deps-only --format repos --exclude !underlay_ws_pkgs! ${{ env.skip_dependencies }} --from-path ${{ env.upstream_workspace }} ${{ env.repo_path }} > deps.repos
           if errorlevel 1 exit /b 1
           rem rosinstall_generator skips excludes from a different repository
