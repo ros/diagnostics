@@ -153,8 +153,9 @@ jobs:
             $content = $content[0..($activationIndex - 1)]
             $content | Set-Content $generatedManifest
           }
+          $ErrorActionPreference = 'Stop'
           $pythonVersion = switch ('${{ matrix.distro }}') {
-            'humble' { '3.10.*' }
+            'humble' { '3.11.*' }
             'jazzy' { '3.12.*' }
             'kilted' { '3.12.*' }
             'lyrical' { '3.14.*' }
@@ -162,16 +163,22 @@ jobs:
             default { throw "No Python version configured for ROS distro ${{ matrix.distro }}" }
           }
           pixi add --manifest-path $generatedManifest --no-install "python==$pythonVersion"
+          if ($LASTEXITCODE -ne 0) { throw "pixi add python==$pythonVersion failed to solve (exit $LASTEXITCODE)" }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
+          if ($LASTEXITCODE -ne 0) { throw "pixi add rosinstall_generator failed to solve (exit $LASTEXITCODE)" }
           pixi add --manifest-path $generatedManifest --no-install --pypi vcstool
+          if ($LASTEXITCODE -ne 0) { throw "pixi add --pypi vcstool failed to solve (exit $LASTEXITCODE)" }
           pixi add --manifest-path $generatedManifest --no-install "setuptools<81"
+          if ($LASTEXITCODE -ne 0) { throw "pixi add setuptools<81 failed to solve (exit $LASTEXITCODE)" }
 
           New-Item -ItemType Directory -Force -Path "${{ env.pixi_workspace }}" | Out-Null
           Copy-Item $generatedManifest "${{ env.pixi_workspace }}\pixi.toml"
           Copy-Item (Join-Path "${{ env.repo_path }}" "pixi.lock") "${{ env.pixi_workspace }}\pixi.lock"
 
       - name: Install Pixi dependencies
-        run: pixi install --manifest-path "${{ env.pixi_workspace }}\pixi.toml"
+        # --locked: fail instead of silently re-solving if the lock doesn't match the
+        # manifest, so the python version pinned above is guaranteed to be what's installed.
+        run: pixi install --manifest-path "${{ env.pixi_workspace }}\pixi.toml" --locked
 
       - name: Cache pixi.lock
         uses: actions/cache/save@v6
