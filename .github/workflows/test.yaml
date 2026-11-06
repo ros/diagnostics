@@ -151,19 +151,40 @@ jobs:
           $activationIndex = $content.IndexOf("[activation]")
           if ($activationIndex -ge 0) {
             $content = $content[0..($activationIndex - 1)]
-            $content | Set-Content $generatedManifest
           }
+          # Drop the ros-<distro>-*/ros2-* conda packages pixi-ros adds: they're already
+          # provided by the downloaded official Windows binary (our actual underlay), and
+          # installing them here only risks pulling in a python/numpy ABI that the official
+          # binary's exported CMake configs (which hardcode an absolute build-time path)
+          # weren't built with.
+          $content = $content | Where-Object { $_ -notmatch '^ros-[a-z0-9]+-\S+\s*=' -and $_ -notmatch '^ros2-\S+\s*=' }
+          $content | Set-Content $generatedManifest
+
           $ErrorActionPreference = 'Stop'
+          # Must match the python ABI (and numpy major version, via its include-dir layout)
+          # that the official ROS Windows binary for this distro was actually built with,
+          # confirmed from real link/CMake errors against each binary (see repo memory).
           $pythonVersion = switch ('${{ matrix.distro }}') {
-            'humble' { '3.11.*' }
+            'humble' { '3.10.*' }
             'jazzy' { '3.12.*' }
             'kilted' { '3.12.*' }
             'lyrical' { '3.14.*' }
             'rolling' { '3.14.*' }
             default { throw "No Python version configured for ROS distro ${{ matrix.distro }}" }
           }
+          $numpyVersion = switch ('${{ matrix.distro }}') {
+            'humble' { '<2' }
+            default { $null }
+          }
+
+          pixi add --manifest-path $generatedManifest --no-install tinyxml2
+          if ($LASTEXITCODE -ne 0) { throw "pixi add tinyxml2 failed to solve (exit $LASTEXITCODE)" }
           pixi add --manifest-path $generatedManifest --no-install "python==$pythonVersion"
           if ($LASTEXITCODE -ne 0) { throw "pixi add python==$pythonVersion failed to solve (exit $LASTEXITCODE)" }
+          if ($numpyVersion) {
+            pixi add --manifest-path $generatedManifest --no-install "numpy$numpyVersion"
+            if ($LASTEXITCODE -ne 0) { throw "pixi add numpy$numpyVersion failed to solve (exit $LASTEXITCODE)" }
+          }
           pixi add --manifest-path $generatedManifest --no-install rosinstall_generator
           if ($LASTEXITCODE -ne 0) { throw "pixi add rosinstall_generator failed to solve (exit $LASTEXITCODE)" }
           pixi add --manifest-path $generatedManifest --no-install --pypi vcstool
