@@ -141,10 +141,16 @@ private:
   rclcpp::Service<diagnostic_msgs::srv::AddDiagnostics>::SharedPtr add_srv_;
   /// DiagnosticArray, /diagnostics
   rclcpp::Subscription<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr diag_sub_;
-  /// On-set parameters callback (node-scoped, no filtering needed)
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_cb_handle_;
-  /// Flag set by onParametersSet, consumed by publishData on the next cycle
+  /// Post-set parameters callback (node-scoped, no filtering needed)
+  rclcpp::node_interfaces::PostSetParametersCallbackHandle::SharedPtr param_cb_handle_;
+  /// Flag set by onParametersPostSet, consumed by publishData on the next cycle
   std::atomic<bool> reinit_needed_{false};
+  /// Names of the parameters that were present the last time initAnalyzers() ran.
+  /// Used by onParametersPostSet to detect parameters that were added at runtime.
+  std::set<std::string> known_parameters_;
+  /// Guards known_parameters_. Kept separate from mutex_ because the post-set
+  /// callback runs while the node's own parameter mutex is held.
+  std::mutex known_parameters_mutex_;
   /// DiagnosticArray, /diagnostics_agg
   rclcpp::Publisher<diagnostic_msgs::msg::DiagnosticArray>::SharedPtr agg_pub_;
   /// DiagnosticStatus, /diagnostics_toplevel_state
@@ -183,11 +189,12 @@ private:
   std::set<std::string> ros_warnings_;
 
   /*!
-   *\brief Validates incoming parameter changes and schedules reinitialization
-   * when new parameters are detected. Only fires for this node's own parameters.
+   *\brief Schedules reinitialization when parameters that were not known to
+   * initAnalyzers() have been set successfully. Runs after the parameters have
+   * been applied, so it never fires for rejected updates. Only fires for this
+   * node's own parameters.
    */
-  rcl_interfaces::msg::SetParametersResult onParametersSet(
-    const std::vector<rclcpp::Parameter> & parameters);
+  void onParametersPostSet(const std::vector<rclcpp::Parameter> & parameters);
 
   /*
    *!\brief (re)initializes the AnalyzerGroup and OtherAnalyzer

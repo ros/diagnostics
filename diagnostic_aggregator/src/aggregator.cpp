@@ -88,25 +88,27 @@ Aggregator::Aggregator(rclcpp::NodeOptions options)
     std::chrono::milliseconds(publish_rate_ms),
     std::bind(&Aggregator::publishData, this));
 
-  param_cb_handle_ = n_->add_on_set_parameters_callback(
-    std::bind(&Aggregator::onParametersSet, this, _1));
+  param_cb_handle_ = n_->add_post_set_parameters_callback(
+    std::bind(&Aggregator::onParametersPostSet, this, _1));
 }
 
-rcl_interfaces::msg::SetParametersResult Aggregator::onParametersSet(
-  const std::vector<rclcpp::Parameter> & parameters)
+void Aggregator::onParametersPostSet(const std::vector<rclcpp::Parameter> & parameters)
 {
-  // Check if any of the incoming parameters are new. If so, flag for reinitialization.
-  // The method publishData() will pick it up on the next publish cycle and call initAnalyzers().
+  // This runs after the parameters have been applied, so every incoming parameter is
+  // already declared and has_parameter() cannot tell new parameters apart. Instead,
+  // compare against the set of names that initAnalyzers() consumed last time.
+  // If any of them is new, flag for reinitialization. The method publishData() will
+  // pick it up on the next publish cycle and call initAnalyzers().
+  std::lock_guard<std::mutex> lock(known_parameters_mutex_);
   for (const auto & p : parameters) {
-    if (!n_->has_parameter(p.get_name())) {
+    if (known_parameters_.count(p.get_name()) == 0) {
+      RCLCPP_DEBUG(
+        logger_, "New parameter '%s' detected, scheduling analyzer reinitialization.",
+        p.get_name().c_str());
       reinit_needed_.store(true);
       break;
     }
   }
-
-  rcl_interfaces::msg::SetParametersResult result;
-  result.successful = true;
-  return result;
 }
 
 void Aggregator::initAnalyzers()
@@ -146,6 +148,15 @@ void Aggregator::initAnalyzers()
     logger_, "Aggregator critical publisher configured to: %s", (critical_ ? "true" : "false"));
   RCLCPP_DEBUG(
     logger_, "Aggregator publish_values configured to: %s", (publish_values_ ? "true" : "false"));
+
+  {  // remember which parameters this initialization consumed, so that the post-set
+    // parameters callback can detect parameters added later at runtime.
+    std::lock_guard<std::mutex> lock(known_parameters_mutex_);
+    known_parameters_.clear();
+    for (const auto & param : parameters) {
+      known_parameters_.insert(param.first);
+    }
+  }
 
   {  // lock the mutex while analyzer_group_ and other_analyzer_ are being updated
     std::lock_guard<std::mutex> lock(mutex_);
