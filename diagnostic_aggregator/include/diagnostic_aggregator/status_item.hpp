@@ -39,6 +39,8 @@
 #ifndef DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP_
 #define DIAGNOSTIC_AGGREGATOR__STATUS_ITEM_HPP_
 
+#include <algorithm>
+#include <cctype>
 #include <map>
 #include <memory>
 #include <string>
@@ -67,6 +69,35 @@ inline std::string getOutputName(const std::string & item_name)
   }
 
   return output_name;
+}
+
+/*!
+ *\brief Reserved key in DiagnosticStatus.values that marks a status as persistent.
+ *
+ * A persistent status keeps its last level and message in the aggregated output
+ * instead of being turned STALE or discarded once it stops being updated. The
+ * value is parsed case-insensitively; "true" and "1" enable it. The publisher
+ * restores the normal timeout behaviour simply by sending the status again
+ * without this key (or with any other value).
+ */
+inline constexpr const char * PERSISTENT_STATE_KEY = "persistent_state";
+
+/*!
+ *\brief Key appended to the values of a persistent status in the aggregated
+ * output, holding the seconds elapsed since the status was last updated.
+ */
+inline constexpr const char * LAST_UPDATE_AGE_KEY = "last_update_age";
+
+/*!
+ *\brief Returns true if the given value of PERSISTENT_STATE_KEY enables persistence.
+ */
+inline bool isPersistentStateValue(const std::string & value)
+{
+  std::string lower = value;
+  std::transform(
+    lower.begin(), lower.end(), lower.begin(),
+    [](unsigned char c) {return static_cast<char>(std::tolower(c));});
+  return lower == "true" || lower == "1";
 }
 
 /*!
@@ -249,6 +280,11 @@ public:
   const rclcpp::Time getLastUpdateTime() const {return update_time_;}
 
   /*!
+   *\brief True if the last update carried PERSISTENT_STATE_KEY set to true.
+   */
+  bool isPersistent() const {return persistent_;}
+
+  /*!
    *\brief Returns true if item has key in values KeyValues
    *
    *\return True if has key
@@ -290,6 +326,7 @@ private:
   std::string message_;
   std::string hw_id_;
   std::vector<diagnostic_msgs::msg::KeyValue> values_;
+  bool persistent_;
 };
 
 }  // namespace diagnostic_aggregator

@@ -38,12 +38,26 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace diagnostic_aggregator
 {
 using std::string;
 
 using rclcpp::get_logger;
+
+namespace
+{
+bool hasPersistentState(const std::vector<diagnostic_msgs::msg::KeyValue> & values)
+{
+  for (const auto & kv : values) {
+    if (kv.key == PERSISTENT_STATE_KEY) {
+      return isPersistentStateValue(kv.value);
+    }
+  }
+  return false;
+}
+}  // namespace
 
 StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
 : clock_(new rclcpp::Clock())
@@ -53,6 +67,7 @@ StatusItem::StatusItem(const diagnostic_msgs::msg::DiagnosticStatus * status)
   message_ = status->message;
   hw_id_ = status->hardware_id;
   values_ = status->values;
+  persistent_ = hasPersistentState(values_);
 
   output_name_ = getOutputName(name_);
 
@@ -67,6 +82,7 @@ StatusItem::StatusItem(const string item_name, const string message, const Diagn
   message_ = message;
   level_ = level;
   hw_id_ = "";
+  persistent_ = false;
 
   output_name_ = getOutputName(name_);
 
@@ -96,6 +112,7 @@ bool StatusItem::update(const diagnostic_msgs::msg::DiagnosticStatus * status)
   message_ = status->message;
   hw_id_ = status->hardware_id;
   values_ = status->values;
+  persistent_ = hasPersistentState(values_);
 
   update_time_ = clock_->now();
 

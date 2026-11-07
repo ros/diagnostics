@@ -141,6 +141,14 @@ inline bool getParamVals(rclcpp::Parameter param, std::vector<std::string> & out
  * The GenericAnalyzer can discard stale items. Use the "discard_stale" parameter to
  * remove any items that haven't updated within the timeout. This is "false" by default.
  *
+ * A publisher can opt an item out of the stale handling by adding the reserved
+ * key-value "persistent_state: True" to the status. Such an item keeps its last level
+ * and message (plus a "last_update_age" value) instead of going stale or being
+ * discarded, until it is published again without the key. This is meant for terminal
+ * or latched states, e.g. the final status a node publishes on shutdown. Use the
+ * "persistent_timeout" parameter to cap this in seconds; any value <= 0 (the default)
+ * means persistent items are honoured indefinitely.
+ *
  * Example configurations:
  *\verbatim
  * hokuyo:

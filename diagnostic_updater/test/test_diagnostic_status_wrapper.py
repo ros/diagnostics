@@ -72,6 +72,23 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
         self.assertEqual(d.values[0].key, 'key')
         self.assertEqual(d.values[0].value, 'val')
 
+    def test_set_persistent_state(self):
+        d = DiagnosticStatusWrapper()
+        d.add('other', '1')
+
+        d.setPersistentState()
+        self.assertEqual(len(d.values), 2)
+        self.assertEqual(d.values[1].key, 'persistent_state')
+        self.assertEqual(d.values[1].value, 'True')
+
+        # Marking again must replace, not duplicate, the key.
+        d.setPersistentState(True)
+        self.assertEqual(len(d.values), 2)
+
+        d.setPersistentState(False)
+        self.assertEqual(len(d.values), 1)
+        self.assertEqual(d.values[0].key, 'other')
+
 
 if __name__ == '__main__':
     unittest.main()

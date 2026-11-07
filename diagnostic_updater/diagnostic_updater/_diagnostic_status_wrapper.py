@@ -139,3 +139,23 @@ class DiagnosticStatusWrapper(DiagnosticStatus):
         key_.key = key
         key_.value = val
         self.values.append(key_)
+
+    # Reserved key understood by diagnostic_aggregator: a status carrying it with
+    # the value 'True' keeps its last level and message in the aggregated output
+    # instead of going STALE or being discarded once it stops being updated.
+    PERSISTENT_STATE_KEY = 'persistent_state'
+
+    def setPersistentState(self, persistent=True):
+        """
+        Mark (or unmark) this status as persistent for diagnostic_aggregator.
+
+        Intended for terminal or latched states, for example the final status
+        a node publishes on shutdown, not for ordinary operation. Any existing
+        PERSISTENT_STATE_KEY pair is replaced, so calling this repeatedly does
+        not accumulate entries.
+        @param persistent True adds 'persistent_state: True', False removes it.
+        """
+        self.values = [
+            kv for kv in self.values if kv.key != self.PERSISTENT_STATE_KEY]
+        if persistent:
+            self.add(self.PERSISTENT_STATE_KEY, 'True')

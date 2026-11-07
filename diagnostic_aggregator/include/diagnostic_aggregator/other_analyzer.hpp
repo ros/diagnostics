@@ -57,7 +57,9 @@ namespace diagnostic_aggregator
  * seperately. The aggregator will call analyze() on any message not handled by other
  * analyzers.
  *
- * Stale items will be discarded after 5 seconds of no updates.
+ * Stale items will be discarded after 5 seconds of no updates, unless they are marked
+ * persistent (see StatusItem::isPersistent()), in which case they are kept with their
+ * last level and message.
  *
  * OtherAnalyzer is designed to be used internally by the Aggregator only.
  *
