@@ -24,6 +24,24 @@ There is also the possibility to merge multiple DiagnosticStatusWrapper into one
 ### Updater
 This class is used to collect the diagnostic messages and to publish them.
 
+When a task is added, the updater immediately publishes a placeholder status
+("Node starting up", level `starting_up_status`, default `OK`).
+Symmetrically, the optional `shutting_down_status` constructor argument makes the
+updater publish a final status ("Node shutting down") for every task when the node
+goes away, so that consumers such as `diagnostic_aggregator` see an explicit message
+instead of waiting for a stale timeout.
+It is disabled by default.
+
+* C++: the final status is published automatically from a pre-shutdown callback on
+  the node's context, i.e. right before `rclcpp::shutdown()` tears the context down
+  (this also covers Ctrl-C). It can also be changed at runtime with
+  `setShuttingDownStatus()`.
+* Python: `rclpy` has no pre-shutdown hook, so `Updater.shutdown()` must be called
+  explicitly before `rclpy.shutdown()` or `node.destroy_node()`.
+
+Delivery of the final message is best effort, since the process usually exits
+right after it is published.
+
 ### DiagnosedPublisher
 A ROS publisher with included diagnostics. 
 It diagnoses the frequency of the published messages.

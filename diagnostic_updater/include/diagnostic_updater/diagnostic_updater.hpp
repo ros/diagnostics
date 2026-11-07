@@ -37,6 +37,7 @@
 
 #include <functional>  // for bind()
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -352,6 +353,12 @@ protected:
  * and publish the resulting diagnostics. The publication rate is
  * determined by the "~/diagnostic_updater.period" ros2 parameter.
  * The force_update function can always be triggered async to the period interval.
+ *
+ * When a task is added, a placeholder status ("Node starting up") is published
+ * immediately. Symmetrically, if a shutting_down_status is configured, a final
+ * status ("Node shutting down") is published for every task right before the
+ * node's context shuts down, so consumers do not have to rely on stale-timeout
+ * detection to learn that the node went away.
  */
 class Updater : public DiagnosticTaskVector
 {
@@ -364,13 +371,17 @@ public:
    * \param node Node pointer to set up diagnostics
    * \param period Value in seconds to set the update period
    * \param starting_up_status Diagnostic status to send as first message
+   * \param shutting_down_status Diagnostic status level to send as the final
+   * message for every task when the node's context is shut down.
+   * std::nullopt (the default) disables the final message.
    * \note The given period value not being used if the `diagnostic_updater.period`
    * ros2 parameter was set previously.
    */
   template<class NodeT>
   explicit Updater(
     NodeT node, double period = 1.0,
-    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK)
+    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK,
+    std::optional<unsigned char> shutting_down_status = std::nullopt)
   : Updater(
       node->get_node_base_interface(),
       node->get_node_clock_interface(),
@@ -379,7 +390,8 @@ public:
       node->get_node_timers_interface(),
       node->get_node_topics_interface(),
       period,
-      starting_up_status)
+      starting_up_status,
+      shutting_down_status)
   {}
 
   Updater(
@@ -390,7 +402,13 @@ public:
     std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
     std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
     double period = 1.0,
-    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK);
+    unsigned char starting_up_status = diagnostic_msgs::msg::DiagnosticStatus::OK,
+    std::optional<unsigned char> shutting_down_status = std::nullopt);
+
+  /**
+   * \brief Destructor. Unregisters the pre-shutdown callback.
+   */
+  virtual ~Updater();
 
   /**
    * \brief Returns the interval between updates.
@@ -438,8 +456,35 @@ public:
 
   void setHardwareID(const std::string & hwid) {hwid_ = hwid;}
 
+  /**
+   * \brief Sets (or clears) the level of the final status published on shutdown.
+   *
+   * \param shutting_down_status Level of the "Node shutting down" status that is
+   * published for every task when the node's context shuts down, or std::nullopt
+   * to publish nothing.
+   */
+  void setShuttingDownStatus(std::optional<unsigned char> shutting_down_status)
+  {
+    std::unique_lock<std::mutex> lock(lock_);
+    shutting_down_status_ = shutting_down_status;
+  }
+
+  /**
+   * \brief Returns the level of the final status published on shutdown, if any.
+   */
+  std::optional<unsigned char> getShuttingDownStatus() const {return shutting_down_status_;}
+
 private:
   void reset_timer();
+
+  /**
+   * \brief Publishes the "Node shutting down" status for all known tasks.
+   *
+   * Registered as a pre-shutdown callback on the node's context, so it runs
+   * before rcl_shutdown() while publishing still works. Does nothing unless a
+   * shutting_down_status was configured.
+   */
+  void publishShuttingDownStatus();
 
   /**
    * \brief Causes the diagnostics to update if the inter-update interval
@@ -487,6 +532,8 @@ private:
   std::string node_name_;
   bool warn_nohwid_done_;
   unsigned char starting_up_status_;
+  std::optional<unsigned char> shutting_down_status_;
+  rclcpp::PreShutdownCallbackHandle pre_shutdown_callback_handle_;
 };
 }   // namespace diagnostic_updater
 

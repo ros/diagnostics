@@ -38,6 +38,9 @@
 #include <memory>
 #include <thread>
 
+#include <string>
+#include <vector>
+
 #include "diagnostic_updater/diagnostic_status_wrapper.hpp"
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "diagnostic_updater/update_functions.hpp"
@@ -168,6 +171,89 @@ TEST(DiagnosticUpdater, testCustomContext) {
   updater.force_update();
   ASSERT_TRUE(save_if_called.has_been_called());
   context->shutdown("End test");
+}
+
+TEST(DiagnosticUpdater, testShuttingDownStatusDisabledByDefault) {
+  auto context = std::make_shared<rclcpp::Context>();
+  context->init(0, nullptr, rclcpp::InitOptions());
+
+  auto node = std::make_shared<rclcpp::Node>(
+    "NoShuttingDownStatusNode", rclcpp::NodeOptions().context(context));
+  diagnostic_updater::Updater updater(node);
+  EXPECT_FALSE(updater.getShuttingDownStatus().has_value());
+
+  updater.setShuttingDownStatus(diagnostic_msgs::msg::DiagnosticStatus::ERROR);
+  ASSERT_TRUE(updater.getShuttingDownStatus().has_value());
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::ERROR, *updater.getShuttingDownStatus());
+
+  updater.setShuttingDownStatus(std::nullopt);
+  EXPECT_FALSE(updater.getShuttingDownStatus().has_value());
+
+  context->shutdown("End test");
+}
+
+TEST(DiagnosticUpdater, testShuttingDownStatusPublishedOnShutdown) {
+  // Context under test: owns the node with the updater and will be shut down.
+  auto context = std::make_shared<rclcpp::Context>();
+  context->init(0, nullptr, rclcpp::InitOptions());
+  auto node = std::make_shared<rclcpp::Node>(
+    "ShuttingDownNode", rclcpp::NodeOptions().context(context));
+  diagnostic_updater::Updater updater(
+    node, 1.0, diagnostic_msgs::msg::DiagnosticStatus::OK,
+    diagnostic_msgs::msg::DiagnosticStatus::WARN);
+  updater.setHardwareID("test_hw");
+  SaveIfCalled save_if_called;
+  updater.add(save_if_called);
+
+  // Independent context that stays alive so we can still receive on /diagnostics
+  // after the context under test has been shut down.
+  auto listener_context = std::make_shared<rclcpp::Context>();
+  listener_context->init(0, nullptr, rclcpp::InitOptions());
+  auto listener = std::make_shared<rclcpp::Node>(
+    "ShuttingDownListener", rclcpp::NodeOptions().context(listener_context));
+  std::vector<diagnostic_msgs::msg::DiagnosticStatus> received;
+  auto sub = listener->create_subscription<diagnostic_msgs::msg::DiagnosticArray>(
+    "/diagnostics", rclcpp::QoS(10),
+    [&received](const diagnostic_msgs::msg::DiagnosticArray & msg) {
+      received.insert(received.end(), msg.status.begin(), msg.status.end());
+    });
+  rclcpp::ExecutorOptions executor_options;
+  executor_options.context = listener_context;
+  rclcpp::executors::SingleThreadedExecutor executor(executor_options);
+  executor.add_node(listener);
+
+  // Wait for the listener to discover the updater's publisher.
+  auto deadline = std::chrono::steady_clock::now() + 10s;
+  while (sub->get_publisher_count() == 0 && std::chrono::steady_clock::now() < deadline) {
+    executor.spin_some();
+    std::this_thread::sleep_for(10ms);
+  }
+  ASSERT_GT(sub->get_publisher_count(), 0u) << "listener never discovered the updater";
+
+  // Shutting down the context must trigger the final status via the pre-shutdown callback.
+  context->shutdown("End test");
+
+  auto is_final_status = [](const diagnostic_msgs::msg::DiagnosticStatus & status) {
+      return status.name == "ShuttingDownNode: SaveIfCalled" &&
+             status.level == diagnostic_msgs::msg::DiagnosticStatus::WARN &&
+             status.message == "Node shutting down" &&
+             status.hardware_id == "test_hw";
+    };
+  bool found = false;
+  deadline = std::chrono::steady_clock::now() + 5s;
+  while (!found && std::chrono::steady_clock::now() < deadline) {
+    executor.spin_some();
+    std::this_thread::sleep_for(10ms);
+    for (const auto & status : received) {
+      if (is_final_status(status)) {
+        found = true;
+        break;
+      }
+    }
+  }
+  EXPECT_TRUE(found) << "no 'Node shutting down' status received after context shutdown";
+
+  listener_context->shutdown("End test");
 }
 
 TEST(DiagnosticUpdater, testDiagnosticStatusWrapperKeyValuePairs) {
