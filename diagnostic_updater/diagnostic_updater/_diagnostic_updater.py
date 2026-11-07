@@ -230,10 +230,27 @@ class Updater(DiagnosticTaskVector):
     determined by the "~/diagnostic_updater.period" ros2 parameter.
     The force_update function can always be triggered async to the period
     interval.
+
+    When a task is added, a placeholder status ("Node starting up") is
+    published immediately. Symmetrically, if shutting_down_status is given,
+    shutdown() publishes a final status ("Node shutting down") for every task.
+    rclpy has no hook that runs before a context is shut down (on_shutdown
+    callbacks run after the nodes have been destroyed), so shutdown() has to
+    be called explicitly before rclpy.shutdown() or node.destroy_node().
     """
 
-    def __init__(self, node, period=1.0, starting_up_status=DiagnosticStatus.OK):
-        """Construct an updater class."""
+    def __init__(self, node, period=1.0, starting_up_status=DiagnosticStatus.OK,
+                 shutting_down_status=None):
+        """
+        Construct an updater class.
+
+        @param node Node to set up diagnostics
+        @param period Value in seconds to set the update period
+        @param starting_up_status Diagnostic status to send as first message
+        @param shutting_down_status Diagnostic status level to send as the
+        final message for every task from shutdown(). None (the default)
+        disables the final message.
+        """
         DiagnosticTaskVector.__init__(self)
         self.node = node
         self.publisher = self.node.create_publisher(
@@ -243,6 +260,7 @@ class Updater(DiagnosticTaskVector):
             self.period_parameter, period).value
         self.timer = self.node.create_timer(self.__period, self.update)
         self.__starting_up_status = starting_up_status
+        self.__shutting_down_status = shutting_down_status
 
         self.verbose = False
         self.hwid = ''
@@ -319,6 +337,39 @@ class Updater(DiagnosticTaskVector):
     def force_update(self):
         """Force sending out an update for all known DiagnosticStatus."""
         self.update()
+
+    @property
+    def shutting_down_status(self):
+        """Get the level of the final status published by shutdown(), or None."""
+        return self.__shutting_down_status
+
+    @shutting_down_status.setter
+    def shutting_down_status(self, shutting_down_status):
+        self.__shutting_down_status = shutting_down_status
+
+    def shutdown(self):
+        """
+        Publish the final status ("Node shutting down") for all known tasks.
+
+        Does nothing unless shutting_down_status was given. This must be called
+        while the node is still alive, i.e. before rclpy.shutdown() or
+        node.destroy_node(), because rclpy offers no pre-shutdown hook.
+        """
+        if self.__shutting_down_status is None:
+            return
+
+        status_vec = []
+        with self.lock:
+            for task in self.tasks:
+                status = DiagnosticStatusWrapper()
+                status.name = task.name
+                status.hardware_id = self.hwid
+                status.summary(self.__shutting_down_status, 'Node shutting down')
+                status_vec.append(status)
+
+        if not status_vec:
+            return
+        self.publish(status_vec)
 
     def broadcast(self, lvl, msg):
         """

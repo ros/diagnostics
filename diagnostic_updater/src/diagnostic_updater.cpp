@@ -46,7 +46,8 @@ Updater::Updater(
   std::shared_ptr<rclcpp::node_interfaces::NodeTimersInterface> timers_interface,
   std::shared_ptr<rclcpp::node_interfaces::NodeTopicsInterface> topics_interface,
   double period,
-  unsigned char starting_up_status)
+  unsigned char starting_up_status,
+  std::optional<unsigned char> shutting_down_status)
 : verbose_(false),
   base_interface_(base_interface),
   timers_interface_(timers_interface),
@@ -57,7 +58,8 @@ Updater::Updater(
   logger_(logging_interface->get_logger()),
   node_name_(base_interface->get_name()),
   warn_nohwid_done_(false),
-  starting_up_status_(starting_up_status)
+  starting_up_status_(starting_up_status),
+  shutting_down_status_(shutting_down_status)
 {
   constexpr const char * period_param_name = "diagnostic_updater.period";
   rclcpp::ParameterValue period_param;
@@ -82,6 +84,46 @@ Updater::Updater(
   }
   node_name_ = use_fqn_param.get<bool>() ? base_interface->get_fully_qualified_name() :
     base_interface->get_name();
+
+  // Publish the final status before the context is torn down. Pre-shutdown callbacks
+  // run before rcl_shutdown(), so rclcpp::ok() is still true and publishing works.
+  // On-shutdown callbacks and destructors run too late for that.
+  pre_shutdown_callback_handle_ = base_interface_->get_context()->add_pre_shutdown_callback(
+    [this]() {publishShuttingDownStatus();});
+}
+
+Updater::~Updater()
+{
+  auto context = base_interface_->get_context();
+  if (context) {
+    context->remove_pre_shutdown_callback(pre_shutdown_callback_handle_);
+  }
+}
+
+void Updater::publishShuttingDownStatus()
+{
+  std::vector<diagnostic_msgs::msg::DiagnosticStatus> status_vec;
+  {
+    std::unique_lock<std::mutex> lock(lock_);
+    if (!shutting_down_status_) {
+      return;
+    }
+    const std::vector<DiagnosticTaskInternal> & tasks = getTasks();
+    for (std::vector<DiagnosticTaskInternal>::const_iterator iter = tasks.begin();
+      iter != tasks.end(); iter++)
+    {
+      diagnostic_updater::DiagnosticStatusWrapper status;
+      status.name = iter->getName();
+      status.hardware_id = hwid_;
+      status.summary(*shutting_down_status_, "Node shutting down");
+      status_vec.push_back(status);
+    }
+  }
+
+  if (status_vec.empty()) {
+    return;
+  }
+  publish(status_vec);
 }
 
 void Updater::broadcast(unsigned char lvl, const std::string msg)

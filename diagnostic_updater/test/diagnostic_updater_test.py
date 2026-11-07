@@ -8,6 +8,7 @@ import sys
 import time
 import unittest
 
+from diagnostic_msgs.msg import DiagnosticArray
 from diagnostic_msgs.msg import DiagnosticStatus
 from diagnostic_updater import DiagnosticStatusWrapper
 from diagnostic_updater import DiagnosticTask
@@ -22,6 +23,8 @@ import pytest
 import rclpy
 from rclpy.clock import Clock
 from rclpy.clock import ClockType
+from rclpy.context import Context
+from rclpy.executors import SingleThreadedExecutor
 
 
 class ClassFunction(DiagnosticTask):
@@ -58,6 +61,58 @@ class TestDiagnosticStatusWrapper(unittest.TestCase):
 
         cf = ClassFunction()
         updater.add(cf)
+
+    def testShuttingDownStatus(self):
+        context = Context()
+        rclpy.init(context=context)
+        node = rclpy.create_node('test_shutting_down', context=context)
+        executor = SingleThreadedExecutor(context=context)
+        executor.add_node(node)
+        received = []
+        sub = node.create_subscription(
+            DiagnosticArray, '/diagnostics', lambda msg: received.extend(msg.status), 10)
+
+        updater = Updater(node, shutting_down_status=DiagnosticStatus.WARN)
+        self.assertEqual(DiagnosticStatus.WARN, updater.shutting_down_status)
+        updater.setHardwareID('test_hw')
+        updater.add(ClassFunction())
+
+        # Wait for the subscription to discover the updater's publisher.
+        deadline = time.time() + 10.0
+        while sub.get_publisher_count() == 0 and time.time() < deadline:
+            executor.spin_once(timeout_sec=0.1)
+        self.assertGreater(sub.get_publisher_count(), 0)
+
+        # rclpy has no pre-shutdown hook, so the final status is published explicitly.
+        updater.shutdown()
+
+        def is_final_status(status):
+            return (status.name == 'test_shutting_down: classFunction'
+                    and status.level == DiagnosticStatus.WARN
+                    and status.message == 'Node shutting down'
+                    and status.hardware_id == 'test_hw')
+
+        deadline = time.time() + 5.0
+        found = False
+        while not found and time.time() < deadline:
+            executor.spin_once(timeout_sec=0.1)
+            found = any(is_final_status(status) for status in received)
+        self.assertTrue(found, 'no "Node shutting down" status received')
+
+        node.destroy_node()
+        rclpy.shutdown(context=context)
+
+    def testShuttingDownStatusDisabledByDefault(self):
+        context = Context()
+        rclpy.init(context=context)
+        node = rclpy.create_node('test_no_shutting_down', context=context)
+        updater = Updater(node)
+        self.assertIsNone(updater.shutting_down_status)
+        updater.add(ClassFunction())
+        # Must be a no-op rather than raising.
+        updater.shutdown()
+        node.destroy_node()
+        rclpy.shutdown(context=context)
 
     def testDiagnosticStatusWrapper(self):
         stat = DiagnosticStatusWrapper()
