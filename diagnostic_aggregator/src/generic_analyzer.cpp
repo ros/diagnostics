@@ -136,7 +136,7 @@ bool GenericAnalyzer::init(
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found timeout: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
-      timeout = pvalue.as_double();
+      timeout = getDoubleParam(pvalue);
     } else if (pname.compare("num_items") == 0) {
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found num_items: %s",
