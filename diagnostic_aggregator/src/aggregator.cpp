@@ -121,7 +121,7 @@ void Aggregator::initAnalyzers()
 
   for (const auto & param : parameters) {
     if (param.first.compare("pub_rate") == 0) {
-      pub_rate_ = param.second.as_double();
+      pub_rate_ = getDoubleParam(param.second);
     } else if (param.first.compare("path") == 0) {
       // Leading slash when path is not empty
       if (!param.second.as_string().empty()) {

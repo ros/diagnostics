@@ -70,6 +70,21 @@ inline std::string getOutputName(const std::string & item_name)
 }
 
 /*!
+ *\brief Returns a floating point parameter, accepting integer-typed values too.
+ *
+ * A YAML value such as "timeout: 5" is typed as an integer parameter by rclcpp, and
+ * rclcpp::Parameter::as_double() throws for it. Analyzer timeouts and rates are
+ * conceptually floating point, so accept both representations.
+ */
+inline double getDoubleParam(const rclcpp::Parameter & param)
+{
+  if (param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER) {
+    return static_cast<double>(param.as_int());
+  }
+  return param.as_double();
+}
+
+/*!
  *\brief Level of StatusItem. OK, Warn, Error, Stale
  */
 enum DiagnosticLevel
