@@ -40,6 +40,7 @@
 #define DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_
 
 #include <stdarg.h>
+#include <algorithm>
 #include <cstdio>
 #include <sstream>
 #include <string>
@@ -241,6 +242,27 @@ public:
   void addf(const std::string & key, const char * format, ...);
 
   /**
+   * \brief Reserved key understood by diagnostic_aggregator.
+   *
+   * A status carrying this key with the value "True" keeps its last level and
+   * message in the aggregated output instead of going STALE or being discarded
+   * once it stops being updated.
+   */
+  static constexpr const char * PERSISTENT_STATE_KEY = "persistent_state";
+
+  /**
+   * \brief Marks (or unmarks) this status as persistent for diagnostic_aggregator.
+   *
+   * Intended for terminal or latched states, for example the final status a node
+   * publishes on shutdown, not for ordinary operation. Any existing
+   * PERSISTENT_STATE_KEY key-value pair is replaced, so calling this repeatedly
+   * does not accumulate entries.
+   *
+   * \param persistent true adds "persistent_state: True", false removes the key.
+   */
+  void setPersistentState(bool persistent = true);
+
+  /**
    * \brief Clear the key-value pairs.
    *
    * The values vector containing the key-value pairs is cleared.
@@ -294,6 +316,19 @@ DiagnosticStatusWrapper::addf(
   std::string value = std::string(buff);
   add(key, value);
   va_end(va);
+}
+
+// Placed after the add<bool> specialization for the same reason as addf.
+inline void DiagnosticStatusWrapper::setPersistentState(bool persistent)
+{
+  values.erase(
+    std::remove_if(
+      values.begin(), values.end(),
+      [](const diagnostic_msgs::msg::KeyValue & kv) {return kv.key == PERSISTENT_STATE_KEY;}),
+    values.end());
+  if (persistent) {
+    add(PERSISTENT_STATE_KEY, true);
+  }
 }
 }  // namespace diagnostic_updater
 #endif  // DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_

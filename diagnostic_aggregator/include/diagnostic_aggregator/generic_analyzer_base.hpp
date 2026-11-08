@@ -39,6 +39,7 @@
 #define DIAGNOSTIC_AGGREGATOR__GENERIC_ANALYZER_BASE_HPP_
 
 #include <algorithm>
+#include <iomanip>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -67,6 +68,11 @@ namespace diagnostic_aggregator
  *
  * The GenericAnalyzerBase holds the state of the analyzer, and tracks if items are stale, and
  * if the user has the correct number of items.
+ *
+ * Items whose last update carried the reserved "persistent_state" key set to true are
+ * never marked stale or discarded (see StatusItem::isPersistent()). They are reported
+ * with their last level and message plus a "last_update_age" value, until the publisher
+ * sends them again without the key, or until the optional persistent_timeout expires.
  */
 class GenericAnalyzerBase : public Analyzer
 {
@@ -76,6 +82,7 @@ public:
     path_(""),
     timeout_(-1.0),
     num_items_expected_(-1),
+    persistent_timeout_(-1.0),
     discard_stale_(false),
     has_initialized_(false),
     has_warned_(false)
@@ -102,10 +109,11 @@ public:
    */
   bool init(
     const std::string & path, const std::string & breadcrumb, double timeout = -1.0,
-    int num_items_expected = -1, bool discard_stale = false)
+    int num_items_expected = -1, bool discard_stale = false, double persistent_timeout = -1.0)
   {
     num_items_expected_ = num_items_expected;
     timeout_ = timeout;
+    persistent_timeout_ = persistent_timeout;
     path_ = path + "/" + nice_name_;
     discard_stale_ = discard_stale;
     breadcrumb_ = breadcrumb;
@@ -191,9 +199,14 @@ public:
       auto name = it->first;
       auto item = it->second;
 
+      const double age = (clock_->now() - item->getLastUpdateTime()).seconds();
+      // A persistent item keeps its last level and message no matter how old it is,
+      // unless this analyzer caps persistence with persistent_timeout.
+      const bool persistent = item->isPersistent() &&
+        (persistent_timeout_ <= 0 || age <= persistent_timeout_);
       bool stale = false;
-      if (timeout_ > 0) {
-        stale = (clock_->now() - item->getLastUpdateTime()).seconds() > timeout_;
+      if (timeout_ > 0 && !persistent) {
+        stale = age > timeout_;
       }
 
       // Erase item if its stale and we're discarding items
@@ -213,7 +226,18 @@ public:
 
       all_stale = all_stale && ((level == diagnostic_msgs::msg::DiagnosticStatus::STALE) || stale);
 
-      processed.push_back(item->toStatusMsg(path_, stale));
+      auto status = item->toStatusMsg(path_, stale);
+      if (persistent) {
+        // Keep the age visible, so a persistent item whose publisher is gone can be
+        // told apart from one that is still being refreshed.
+        std::ostringstream age_str;
+        age_str << std::fixed << std::setprecision(1) << age;
+        diagnostic_msgs::msg::KeyValue age_kv;
+        age_kv.key = LAST_UPDATE_AGE_KEY;
+        age_kv.value = age_str.str();
+        status->values.push_back(age_kv);
+      }
+      processed.push_back(status);
 
       if (stale) {
         header_status->level = diagnostic_msgs::msg::DiagnosticStatus::STALE;
@@ -288,6 +312,8 @@ protected:
 
   double timeout_;
   int num_items_expected_;
+  /// Upper bound in seconds for honouring persistent items; <= 0 means unlimited.
+  double persistent_timeout_;
 
   /*!
    *\brief Subclasses can add items to analyze

@@ -76,6 +76,7 @@ bool GenericAnalyzer::init(
   double timeout = 5.0;
   int num_items_expected = -1;
   bool discard_stale = false;
+  double persistent_timeout = -1.0;
 
   for (const auto & param : parameters) {
     string pname = param.first;
@@ -147,6 +148,13 @@ bool GenericAnalyzer::init(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found discard_stale: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
       discard_stale = pvalue.as_bool();
+    } else if (pname.compare("persistent_timeout") == 0) {
+      RCLCPP_DEBUG(
+        rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found persistent_timeout: %s",
+        nice_name_.c_str(), pvalue.value_to_string().c_str());
+      // Accept "persistent_timeout: 3600" (typed INTEGER by rclcpp) as well as "3600.0".
+      persistent_timeout = pvalue.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER ?
+        static_cast<double>(pvalue.as_int()) : pvalue.as_double();
     }
   }
 
@@ -178,7 +186,8 @@ bool GenericAnalyzer::init(
     my_path = "/" + my_path;
   }
 
-  return GenericAnalyzerBase::init(path_, breadcrumb_, timeout, num_items_expected, discard_stale);
+  return GenericAnalyzerBase::init(
+    path_, breadcrumb_, timeout, num_items_expected, discard_stale, persistent_timeout);
 }
 
 GenericAnalyzer::~GenericAnalyzer() {}

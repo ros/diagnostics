@@ -169,6 +169,11 @@ if(BUILD_TESTING)
     "${CMAKE_CURRENT_SOURCE_DIR}/test/test_publish_values.py"
     TIMEOUT 60
   )
+
+  ament_add_pytest_test(test_persistent_state
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_persistent_state.py"
+    TIMEOUT 180
+  )
 endif()
 
 install(

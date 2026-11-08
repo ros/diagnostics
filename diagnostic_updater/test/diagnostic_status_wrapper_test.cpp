@@ -185,3 +185,22 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddBool) {
   EXPECT_EQ(dsw.message, "");
   EXPECT_EQ(dsw.values.size(), 0u);
 }
+
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusSetPersistentState) {
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  dsw.add("other", 1);
+
+  dsw.setPersistentState();
+  ASSERT_EQ(dsw.values.size(), 2u);
+  EXPECT_EQ(dsw.values[1].key, "persistent_state");
+  EXPECT_EQ(dsw.values[1].value, "True");
+
+  // Marking again must replace, not duplicate, the key.
+  dsw.setPersistentState(true);
+  ASSERT_EQ(dsw.values.size(), 2u);
+  EXPECT_EQ(dsw.values[1].key, "persistent_state");
+
+  dsw.setPersistentState(false);
+  ASSERT_EQ(dsw.values.size(), 1u);
+  EXPECT_EQ(dsw.values[0].key, "other");
+}

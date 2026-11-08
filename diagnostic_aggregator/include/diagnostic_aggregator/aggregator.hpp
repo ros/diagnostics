@@ -88,6 +88,7 @@ Output:
 base_path: My Robot
 pub_rate: 1.0
 other_as_errors: false
+other_persistent_timeout: -1.0
 analyzers:
   sensors:
     type: GenericAnalyzer

@@ -57,7 +57,10 @@ namespace diagnostic_aggregator
  * seperately. The aggregator will call analyze() on any message not handled by other
  * analyzers.
  *
- * Stale items will be discarded after 5 seconds of no updates.
+ * Stale items will be discarded after 5 seconds of no updates, unless they are marked
+ * persistent (see StatusItem::isPersistent()), in which case they are kept with their
+ * last level and message for up to persistent_timeout seconds (unlimited by default,
+ * configured through the aggregator's "other_persistent_timeout" parameter).
  *
  * OtherAnalyzer is designed to be used internally by the Aggregator only.
  *
@@ -84,14 +87,18 @@ public:
    *
    *\param path Base path of Aggregator
    *\param breadcrumb Prefix for parameter getter.
+   *\param persistent_timeout Upper bound in seconds for honouring persistent items,
+   * <= 0 means unlimited (see GenericAnalyzerBase).
    */
-  bool init(const std::string & path, const std::string & breadcrumb = "")
+  bool init(
+    const std::string & path, const std::string & breadcrumb = "",
+    double persistent_timeout = -1.0)
   {
     (void)breadcrumb;
 
     nice_name_ = "Other";
     path_ = path;
-    return GenericAnalyzerBase::init(path_, "", 5.0, -1, true);
+    return GenericAnalyzerBase::init(path_, "", 5.0, -1, true, persistent_timeout);
   }
 
   /*

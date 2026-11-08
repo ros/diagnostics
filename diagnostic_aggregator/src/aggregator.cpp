@@ -112,6 +112,7 @@ rcl_interfaces::msg::SetParametersResult Aggregator::onParametersSet(
 void Aggregator::initAnalyzers()
 {
   bool other_as_errors = false;
+  double other_persistent_timeout = -1.0;
 
   std::map<std::string, rclcpp::Parameter> parameters;
   if (!n_->get_parameters("", parameters)) {
@@ -130,6 +131,11 @@ void Aggregator::initAnalyzers()
       base_path_.append(param.second.as_string());
     } else if (param.first.compare("other_as_errors") == 0) {
       other_as_errors = param.second.as_bool();
+    } else if (param.first.compare("other_persistent_timeout") == 0) {
+      // Accept "other_persistent_timeout: 3600" (typed INTEGER by rclcpp) as well as "3600.0".
+      other_persistent_timeout =
+        param.second.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER ?
+        static_cast<double>(param.second.as_int()) : param.second.as_double();
     } else if (param.first.compare("history_depth") == 0) {
       history_depth_ = param.second.as_int();
     } else if (param.first.compare("critical") == 0) {
@@ -142,6 +148,8 @@ void Aggregator::initAnalyzers()
   RCLCPP_DEBUG(logger_, "Aggregator base path configured to: %s", base_path_.c_str());
   RCLCPP_DEBUG(
     logger_, "Aggregator other_as_errors configured to: %s", (other_as_errors ? "true" : "false"));
+  RCLCPP_DEBUG(
+    logger_, "Aggregator other_persistent_timeout configured to: %f", other_persistent_timeout);
   RCLCPP_DEBUG(
     logger_, "Aggregator critical publisher configured to: %s", (critical_ ? "true" : "false"));
   RCLCPP_DEBUG(
@@ -156,7 +164,8 @@ void Aggregator::initAnalyzers()
 
     // Last analyzer handles remaining data
     other_analyzer_ = std::make_unique<OtherAnalyzer>(other_as_errors);
-    other_analyzer_->init(base_path_);  // This always returns true
+    // This always returns true
+    other_analyzer_->init(base_path_, "", other_persistent_timeout);
   }
 }
 

@@ -123,10 +123,40 @@ This must be the name of the class that implements the analyzer.
 Additional parameters depend on the type of the analyzer.
 
 Any diagnostic item that is not matched by any analyzer will be published by an "Other" analyzer.
-Items created by the "Other" analyzer will go stale after 5 seconds.
+Items created by the "Other" analyzer will go stale after 5 seconds, unless they are marked persistent (see below).
 
 The `critical` parameter makes the aggregator react immediately to a degradation in diagnostic state.
 This is useful if the toplevel state is parsed by a watchdog for example.
+
+## Persistent items
+
+By default an analyzer decides staleness purely from the age of the last received message: an item that has not been updated within `timeout` is reported as `STALE` (or dropped when `discard_stale` is set), and the "Other" analyzer drops items after 5 seconds.
+A publisher can opt out of this for a specific status by adding the reserved key-value pair `persistent_state: True` to `DiagnosticStatus.values` (`DiagnosticStatusWrapper::setPersistentState()` in `diagnostic_updater` does exactly that).
+
+A persistent item
+
+- keeps its last level and message in the aggregated output, so it is never turned `STALE` or discarded,
+- gets an extra `last_update_age` value (seconds since the last update), so operators can still tell an old persistent state from a fresh one,
+- goes back to the normal timeout behaviour as soon as the publisher sends it again without the key.
+
+This is intended for terminal or latched states, for example the final "Node shutting down" status a node publishes before it exits, or an emergency stop that stays latched.
+It is not meant for ordinary operation: a persistent item whose publisher died keeps showing its last level until the aggregator is restarted.
+Persistence only covers the lifetime of the aggregator, since `/diagnostics` is not published with transient-local durability.
+
+`GenericAnalyzer` accepts an optional `persistent_timeout` parameter (seconds, default unlimited) to cap how long a persistent item is honoured; after that it is treated like any other item.
+Persistent items that end up in the "Other" analyzer are capped by the aggregator-level `other_persistent_timeout` parameter (seconds, default unlimited) instead, since the "Other" analyzer has no configuration of its own.
+
+``` yaml
+analyzers:
+  ros__parameters:
+    other_persistent_timeout: 3600.0 # Optional, cap for persistent items in "Other"
+    motors:
+      type: diagnostic_aggregator/GenericAnalyzer
+      path: Motors
+      contains: [ 'motor_driver: ' ]
+      timeout: 5.0
+      persistent_timeout: 3600.0 # Optional, keep a persistent item for at most one hour
+```
 
 ## Launching
 
