@@ -152,7 +152,9 @@ bool GenericAnalyzer::init(
       RCLCPP_DEBUG(
         rclcpp::get_logger("GenericAnalyzer"), "GenericAnalyzer '%s' found persistent_timeout: %s",
         nice_name_.c_str(), pvalue.value_to_string().c_str());
-      persistent_timeout = pvalue.as_double();
+      // Accept "persistent_timeout: 3600" (typed INTEGER by rclcpp) as well as "3600.0".
+      persistent_timeout = pvalue.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER ?
+        static_cast<double>(pvalue.as_int()) : pvalue.as_double();
     }
   }
 

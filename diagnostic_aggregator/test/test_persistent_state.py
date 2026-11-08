@@ -67,6 +67,7 @@ TestMetadata = namedtuple(
         'plain_msgs',  # number of raw messages sent afterwards without the key
         'discard_stale',  # GenericAnalyzer discard_stale parameter
         'persistent_timeout',  # GenericAnalyzer persistent_timeout parameter
+        'other_persistent_timeout',  # aggregator-level cap for the Other analyzer
         'foo_expected',  # expected level of /robot/agg/foo, None if it must be absent
         'foo_has_age',  # whether /robot/agg/foo must carry last_update_age
         'agg_expected',  # expected level of the /robot/agg header
@@ -81,6 +82,7 @@ TEST_METADATA = [
         plain_msgs=5,
         discard_stale=False,
         persistent_timeout=-1.0,
+        other_persistent_timeout=-1.0,
         foo_expected=DiagnosticStatus.STALE,
         foo_has_age=False,
         agg_expected=DiagnosticStatus.STALE,
@@ -92,6 +94,7 @@ TEST_METADATA = [
         plain_msgs=0,
         discard_stale=False,
         persistent_timeout=-1.0,
+        other_persistent_timeout=-1.0,
         foo_expected=DiagnosticStatus.WARN,
         foo_has_age=True,
         agg_expected=DiagnosticStatus.WARN,
@@ -103,6 +106,7 @@ TEST_METADATA = [
         plain_msgs=0,
         discard_stale=True,
         persistent_timeout=-1.0,
+        other_persistent_timeout=-1.0,
         foo_expected=DiagnosticStatus.WARN,
         foo_has_age=True,
         agg_expected=DiagnosticStatus.WARN,
@@ -113,11 +117,24 @@ TEST_METADATA = [
         persistent_msgs=5,
         plain_msgs=0,
         discard_stale=False,
-        persistent_timeout=2.0,
+        persistent_timeout=2,  # integer on purpose: must be accepted like 2.0
+        other_persistent_timeout=-1.0,
         foo_expected=DiagnosticStatus.STALE,
         foo_has_age=False,
         agg_expected=DiagnosticStatus.STALE,
         other_expected=DiagnosticStatus.WARN,
+    ),
+    # other_persistent_timeout caps persistence in the Other analyzer only.
+    TestMetadata(
+        persistent_msgs=5,
+        plain_msgs=0,
+        discard_stale=False,
+        persistent_timeout=-1.0,
+        other_persistent_timeout=2,  # integer on purpose: must be accepted like 2.0
+        foo_expected=DiagnosticStatus.WARN,
+        foo_has_age=True,
+        agg_expected=DiagnosticStatus.WARN,
+        other_expected=None,
     ),
     # Sending the status again without the key restores the timeout behaviour.
     TestMetadata(
@@ -125,6 +142,7 @@ TEST_METADATA = [
         plain_msgs=2,
         discard_stale=False,
         persistent_timeout=-1.0,
+        other_persistent_timeout=-1.0,
         foo_expected=DiagnosticStatus.STALE,
         foo_has_age=False,
         agg_expected=DiagnosticStatus.STALE,
@@ -210,6 +228,7 @@ diagnostic_aggregator:
     ros__parameters:
         path: 'robot'
         pub_rate: 2.0
+        other_persistent_timeout: {test_metadata.other_persistent_timeout}
         analyzers:
             agg:
                 type: 'diagnostic_aggregator/GenericAnalyzer'

@@ -144,10 +144,12 @@ It is not meant for ordinary operation: a persistent item whose publisher died k
 Persistence only covers the lifetime of the aggregator, since `/diagnostics` is not published with transient-local durability.
 
 `GenericAnalyzer` accepts an optional `persistent_timeout` parameter (seconds, default unlimited) to cap how long a persistent item is honoured; after that it is treated like any other item.
+Persistent items that end up in the "Other" analyzer are capped by the aggregator-level `other_persistent_timeout` parameter (seconds, default unlimited) instead, since the "Other" analyzer has no configuration of its own.
 
 ``` yaml
 analyzers:
   ros__parameters:
+    other_persistent_timeout: 3600.0 # Optional, cap for persistent items in "Other"
     motors:
       type: diagnostic_aggregator/GenericAnalyzer
       path: Motors
