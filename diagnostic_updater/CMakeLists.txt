@@ -15,6 +15,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
+find_package(fmt REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -32,6 +33,7 @@ target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC
   ${diagnostic_msgs_TARGETS}
+  fmt::fmt
   rclcpp::rclcpp
 )
 
@@ -80,6 +82,7 @@ if(BUILD_TESTING)
   )
   target_link_libraries(diagnostic_status_wrapper_test
     ${diagnostic_msgs_TARGETS}
+    fmt::fmt
     ${std_msgs_TARGETS}
     rclcpp::rclcpp
     rclcpp_lifecycle::rclcpp_lifecycle
@@ -122,6 +125,7 @@ ament_export_libraries(${PROJECT_NAME})
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(ament_cmake_python)
 ament_export_dependencies(diagnostic_msgs)
+ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(rclpy)
 ament_export_dependencies(std_msgs)
