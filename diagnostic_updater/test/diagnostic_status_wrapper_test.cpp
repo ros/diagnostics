@@ -57,7 +57,7 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperSummary) {
 
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperSummaryf) {
   // A DiagnosticStatusWrapper constructed with a level should have that level and
-  // an formated message.
+  // an formatted message.
   diagnostic_updater::DiagnosticStatusWrapper dsw;
   dsw.summaryf(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Test %d", 42);
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::WARN);
@@ -118,7 +118,7 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperMergeFromInstance) {
 }
 
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusWrapperMergeSummaryf) {
-  // A DiagnosticStatusWrapper can also be merged with a formated message.
+  // A DiagnosticStatusWrapper can also be merged with a formatted message.
   diagnostic_updater::DiagnosticStatusWrapper dsw;
   dsw.summaryf(diagnostic_msgs::msg::DiagnosticStatus::OK, "Was %s", "ok");
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
@@ -148,7 +148,7 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddString) {
 }
 
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddf) {
-  // A DiagnosticStatusWrapper should accept a formated String key-value pair.
+  // A DiagnosticStatusWrapper should accept a formatted String key-value pair.
   diagnostic_updater::DiagnosticStatusWrapper dsw;
   dsw.addf("key", "value %d", 42);
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
@@ -161,6 +161,19 @@ TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddf) {
   EXPECT_EQ(dsw.level, diagnostic_msgs::msg::DiagnosticStatus::OK);
   EXPECT_EQ(dsw.message, "");
   EXPECT_EQ(dsw.values.size(), 0u);
+}
+
+TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddfmt) {
+  // A DiagnosticStatusWrapper should accept a fmt formatted key-value pair.
+  diagnostic_updater::DiagnosticStatusWrapper dsw;
+  const std::string unit = "m/s";
+  dsw.addfmt("plain", "{}", 42);
+  dsw.addfmt("formatted", "{:.2f} {}", 1.234, unit);
+  EXPECT_EQ(dsw.values.size(), 2u);
+  EXPECT_EQ(dsw.values[0].key, "plain");
+  EXPECT_EQ(dsw.values[0].value, "42");
+  EXPECT_EQ(dsw.values[1].key, "formatted");
+  EXPECT_EQ(dsw.values[1].value, "1.23 m/s");
 }
 
 TEST(DiagnosticStatusWrapper, testDiagnosticStatusAddBool) {

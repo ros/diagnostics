@@ -43,7 +43,10 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include "fmt/format.h"
 
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
 
@@ -241,6 +244,19 @@ public:
   void addf(const std::string & key, const char * format, ...);
 
   /**
+   * \brief Add a key-value pair using a {fmt} format string.
+   *
+   * Any type with a fmt::formatter specialization can be passed as an
+   * argument.
+   *
+   * \code
+   * stat.addfmt("velocity", "{:.2f} m/s", velocity);
+   * \endcode
+   */
+  template<class ... Args>
+  void addfmt(const std::string & key, fmt::format_string<Args...> format, Args && ... args);
+
+  /**
    * \brief Clear the key-value pairs.
    *
    * The values vector containing the key-value pairs is cleared.
@@ -294,6 +310,14 @@ DiagnosticStatusWrapper::addf(
   std::string value = std::string(buff);
   add(key, value);
   va_end(va);
+}
+
+template<class ... Args>
+inline void
+DiagnosticStatusWrapper::addfmt(
+  const std::string & key, fmt::format_string<Args...> format, Args && ... args)
+{
+  add(key, fmt::format(format, std::forward<Args>(args)...));
 }
 }  // namespace diagnostic_updater
 #endif  // DIAGNOSTIC_UPDATER__DIAGNOSTIC_STATUS_WRAPPER_HPP_
