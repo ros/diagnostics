@@ -95,6 +95,7 @@ void Updater::broadcast(unsigned char lvl, const std::string msg)
     diagnostic_updater::DiagnosticStatusWrapper status;
 
     status.name = iter->getName();
+    status.hardware_id = hwid_;
     status.summary(lvl, msg);
 
     status_vec.push_back(status);
@@ -195,6 +196,7 @@ void Updater::addedTaskCallback(DiagnosticTaskInternal & task)
 {
   DiagnosticStatusWrapper stat;
   stat.name = task.getName();
+  stat.hardware_id = hwid_;
   stat.summary(starting_up_status_, "Node starting up");
   publish(stat);
 }

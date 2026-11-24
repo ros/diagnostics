@@ -35,6 +35,7 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <future>
 #include <memory>
 #include <thread>
 
@@ -167,6 +168,45 @@ TEST(DiagnosticUpdater, testCustomContext) {
   updater.add(save_if_called);
   updater.force_update();
   ASSERT_TRUE(save_if_called.has_been_called());
+  context->shutdown("End test");
+}
+
+TEST(DiagnosticUpdater, testHardwareIDOnStartupAndBroadcast) {
+  auto context = std::make_shared<rclcpp::Context>();
+  context->init(0, nullptr, rclcpp::InitOptions());
+  auto node = std::make_shared<rclcpp::Node>(
+    "test_hardware_id", rclcpp::NodeOptions().context(context).use_intra_process_comms(true));
+  diagnostic_updater::Updater updater(node, 3600.0);
+  updater.setHardwareID("Device-27-46");
+
+  using DiagnosticArray = diagnostic_msgs::msg::DiagnosticArray;
+  std::promise<DiagnosticArray::ConstSharedPtr> received;
+  auto subscriber = node->create_subscription<DiagnosticArray>(
+    "/diagnostics", 10,
+    [&received](DiagnosticArray::ConstSharedPtr msg) {received.set_value(msg);});
+  rclcpp::ExecutorOptions options;
+  options.context = context;
+  rclcpp::executors::SingleThreadedExecutor executor(options);
+  executor.add_node(node);
+
+  auto future = received.get_future();
+  classFunction task;
+  updater.add(task);
+  ASSERT_EQ(rclcpp::FutureReturnCode::SUCCESS, executor.spin_until_future_complete(future, 2s));
+  auto msg = future.get();
+  ASSERT_EQ(1u, msg->status.size());
+  EXPECT_EQ("Device-27-46", msg->status[0].hardware_id);
+  EXPECT_EQ("Node starting up", msg->status[0].message);
+
+  received = std::promise<DiagnosticArray::ConstSharedPtr>();
+  future = received.get_future();
+  updater.broadcast(diagnostic_msgs::msg::DiagnosticStatus::WARN, "Shutting down");
+  ASSERT_EQ(rclcpp::FutureReturnCode::SUCCESS, executor.spin_until_future_complete(future, 2s));
+  msg = future.get();
+  ASSERT_EQ(1u, msg->status.size());
+  EXPECT_EQ("Device-27-46", msg->status[0].hardware_id);
+  EXPECT_EQ("Shutting down", msg->status[0].message);
+  EXPECT_EQ(diagnostic_msgs::msg::DiagnosticStatus::WARN, msg->status[0].level);
   context->shutdown("End test");
 }
 
