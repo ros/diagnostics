@@ -174,6 +174,24 @@ In the example, `add_analyzer` will add an analyzer for diagnostics that are mar
 
 This will move the `/optional/runtime/analyzer` diagnostic from the "Other" to  "Aggregation" where it will not go stale after 5 seconds and will be taken into account for the toplevel state.
 
+## Composable launch
+
+You can also launch the aggregator as a composable node (see [compose_example.launch.py.in](example/compose_example.launch.py.in)):
+
+``` python
+  container = launch_ros.actions.ComposableNodeContainer(
+    name='diagnostics_container',
+    package='rclcpp_components',
+    executable='component_container',
+    composable_node_descriptions=[
+      launch_ros.descriptions.ComposableNode(
+        package='diagnostic_aggregator',
+        plugin='diagnostic_aggregator::Aggregator',
+        name='analyzers',
+        parameters=[analyzer_params_filepath])
+    ])
+```
+
 # Basic analyzers
 
 The `diagnostic_aggregator` package provides a few basic analyzers that you can use to aggregate your diagnostics.

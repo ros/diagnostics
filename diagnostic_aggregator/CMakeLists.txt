@@ -15,12 +15,12 @@ find_package(ament_cmake REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
   src/status_item.cpp
-  src/analyzer_group.cpp
   src/aggregator.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -30,6 +30,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ${std_msgs_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
+  rclcpp_components::component
 )
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
@@ -46,7 +47,8 @@ set(ANALYZERS "${PROJECT_NAME}_analyzers")
 add_library(${ANALYZERS} SHARED
   src/generic_analyzer.cpp
   src/discard_analyzer.cpp
-  src/ignore_analyzer.cpp)
+  src/ignore_analyzer.cpp
+  src/analyzer_group.cpp)
 target_include_directories(${ANALYZERS} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -60,13 +62,15 @@ target_link_libraries(${ANALYZERS} PUBLIC
 target_compile_definitions(${ANALYZERS}
   PRIVATE "DIAGNOSTIC_AGGREGATOR_BUILDING_DLL")
 
+# Register the aggregator node as a component
+rclcpp_components_register_node(
+  ${PROJECT_NAME}
+  PLUGIN "diagnostic_aggregator::Aggregator"
+  EXECUTABLE aggregator_node
+)
+
 # prevent pluginlib from using boost
 target_compile_definitions(${ANALYZERS} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
-
-# Aggregator node
-add_executable(aggregator_node src/aggregator_node.cpp)
-target_link_libraries(aggregator_node
-  ${PROJECT_NAME})
 
 # Add analyzer
 add_executable(add_analyzer src/add_analyzer.cpp)
@@ -155,6 +159,21 @@ if(BUILD_TESTING)
     )
   endforeach()
 
+  # Composable aggregator launch test
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/primitive_analyzers.yaml" COMPOSABLE_PARAMETER_FILE)
+  file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/expected_output/output_primitive_analyzers" COMPOSABLE_EXPECTED_OUTPUT)
+  configure_file(
+    "test/test_composable_analyzers_output.launch.py.in"
+    "test_composable_analyzers_output.launch.py"
+    @ONLY
+  )
+  add_launch_test(
+    "${CMAKE_CURRENT_BINARY_DIR}/test_composable_analyzers_output.launch.py"
+    TARGET "test_composable_analyzers_output"
+    TIMEOUT 30
+    ENV
+  )
+
   add_launch_test(
     test/test_critical_pub.py
     TIMEOUT 30
@@ -170,11 +189,6 @@ if(BUILD_TESTING)
     TIMEOUT 60
   )
 endif()
-
-install(
-  TARGETS aggregator_node
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(
   TARGETS add_analyzer
@@ -200,8 +214,11 @@ ament_python_install_package(${PROJECT_NAME})
 set(ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_analyzers.yaml")
 set(ADD_ANALYZER_PARAMS_FILEPATH "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/example_add_analyzers.yaml")
 configure_file(example/example.launch.py.in example.launch.py @ONLY)
+configure_file(example/compose_example.launch.py.in compose_example.launch.py @ONLY)
 install( # launch descriptor
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/example.launch.py
+    ${CMAKE_CURRENT_BINARY_DIR}/compose_example.launch.py
   DESTINATION share/${PROJECT_NAME}
 )
 install( # example publisher

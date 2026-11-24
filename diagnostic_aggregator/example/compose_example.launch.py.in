@@ -1,0 +1,35 @@
+"""Launch analyzer loader with parameters from yaml."""
+
+import launch
+from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.descriptions import ComposableNode
+
+analyzer_params_filepath = "@ANALYZER_PARAMS_FILEPATH@"
+add_analyzer_params_filepath = "@ADD_ANALYZER_PARAMS_FILEPATH@"
+
+
+def generate_launch_description():
+    container = ComposableNodeContainer(
+        name="diagnostics_container",
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container',
+        composable_node_descriptions=[
+            ComposableNode(
+                package='diagnostic_aggregator',
+                plugin='diagnostic_aggregator::Aggregator',
+                name='analyzers',
+                parameters=[analyzer_params_filepath]
+            )
+        ]
+    )
+
+    diag_publisher = Node(
+        package='diagnostic_aggregator',
+        executable='example_pub.py'
+    )
+    return launch.LaunchDescription([
+        container,
+        # add_analyzer,
+        diag_publisher,
+    ])

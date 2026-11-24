@@ -47,10 +47,11 @@
 #include <vector>
 
 #include "diagnostic_aggregator/analyzer.hpp"
-#include "diagnostic_aggregator/analyzer_group.hpp"
 #include "diagnostic_aggregator/other_analyzer.hpp"
 #include "diagnostic_aggregator/status_item.hpp"
 #include "diagnostic_aggregator/visibility_control.hpp"
+
+#include "pluginlib/class_loader.hpp"
 
 #include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "diagnostic_msgs/msg/diagnostic_status.hpp"
@@ -131,6 +132,9 @@ public:
   DIAGNOSTIC_AGGREGATOR_PUBLIC
   rclcpp::Node::SharedPtr get_node() const;
 
+  DIAGNOSTIC_AGGREGATOR_PUBLIC
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface() const;
+
 private:
   rclcpp::Node::SharedPtr n_;
 
@@ -159,7 +163,8 @@ private:
    */
   void diagCallback(const diagnostic_msgs::msg::DiagnosticArray::SharedPtr diag_msg);
 
-  std::unique_ptr<AnalyzerGroup> analyzer_group_;
+  std::shared_ptr<pluginlib::ClassLoader<Analyzer>> analyzer_loader_;
+  std::shared_ptr<Analyzer> analyzer_group_;
   std::unique_ptr<OtherAnalyzer> other_analyzer_;
 
   std::string base_path_; /**< \brief Prepended to all status names of aggregator. */
