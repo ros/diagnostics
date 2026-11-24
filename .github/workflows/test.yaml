@@ -54,11 +54,11 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:${{ matrix.os }}
     steps:
-      - uses: ros-tooling/setup-ros@0.7.19
+      - uses: ros-tooling/setup-ros@0.7.22
         if: ${{ matrix.distro != 'rolling' }}
         with:
           required-ros-distributions: ${{ matrix.distro }}
-      - uses: ros-tooling/setup-ros@0.7.19
+      - uses: ros-tooling/setup-ros@0.7.22
         if: ${{ matrix.distro == 'rolling' }}
       - name: Install ccache
         run: sudo apt-get update && sudo apt-get install --no-install-recommends --yes ccache
