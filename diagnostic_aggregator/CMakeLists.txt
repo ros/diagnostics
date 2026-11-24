@@ -89,7 +89,8 @@ if(BUILD_TESTING)
     "primitive_analyzers"
     "all_analyzers"
     "analyzer_group"
-    "empty_root_path")
+    "empty_root_path"
+    "expected_only_analyzer")
 
   foreach(test_name ${create_analyzers_tests})
     file(TO_CMAKE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/test/${test_name}.yaml" PARAMETER_FILE)
